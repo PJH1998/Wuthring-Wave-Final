@@ -162,6 +162,11 @@ HRESULT CLoader_Test::Load_Object()
 	//if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"), CMonsterTest::Create(m_pDevice, m_pContext))))
 	//	return E_FAIL;
 
+	// Prototype_GameObject_AttackVolume
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_AttackVolume"),
+		CAttackVolume::Create(m_pDevice, m_pContext))))
+		CRASH("AttackVolume Create Failed");
+
 	cout << "Object" << endl;
 
     return S_OK;
@@ -169,12 +174,7 @@ HRESULT CLoader_Test::Load_Object()
 
 HRESULT CLoader_Test::Load_MonsterTest()
 {
-    cout << "MonsterTest" << endl;
-	// Prototype_GameObject_AttackVolume
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_AttackVolume"),
-		CAttackVolume::Create(m_pDevice, m_pContext))))
-		CRASH("AttackVolume Create Failed");
-
+	cout << "MonsterTest" << endl;
 	// Prototype_GameObject_Projectile
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Projectile"),
 		CProjectile::Create(m_pDevice, m_pContext))))
