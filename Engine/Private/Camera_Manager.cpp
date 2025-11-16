@@ -48,6 +48,8 @@ HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCa
     m_pMainCamera = pCamera;
     Safe_AddRef(m_pMainCamera);
 
+	m_pGameInstance->SetUp_CameraNF();
+
     return S_OK;
 }
 
@@ -61,6 +63,8 @@ HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCa
 	m_pMainCamera = pCamera;
 	m_pMainCamera->Reset(XMMatrixIdentity(), pArg);
 	Safe_AddRef(m_pMainCamera);
+
+	m_pGameInstance->SetUp_CameraNF();
 
 	return S_OK;
 }

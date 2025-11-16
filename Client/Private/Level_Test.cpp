@@ -23,22 +23,12 @@
 #include "Spawner.h"
 #include"Trigger_Box.h"
 #include "UI_Text_Damage.h"
-
-
-
-
+#include "SceneCamera.h"
 
 #define KSTA_UITEST_ONLEVEL
-
-
-
 #ifdef KSTA_UITEST_ONLEVEL
 #include "UI_Text.h"
 #endif // KSTA_UITEST_ONLEVEL
-
-
-
-
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -103,8 +93,8 @@ HRESULT CLevel_Test::Initialize()
 	Tri.WorldMatrix = &TT;
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
+	Ready_Scene();
 	Ready_Skybox();
-
 	Ready_UI();
 
     return S_OK;
@@ -120,8 +110,10 @@ void CLevel_Test::Update(_float fTimeDelta)
 
 	Toggle_HUD();
 
+	//Testing_UI(fTimeDelta);
 
-	Testing_UI(fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
+		m_pGameInstance->Play_Sequence(TEXT("Test"));
 }
 
 void CLevel_Test::Render()
@@ -474,6 +466,22 @@ void CLevel_Test::Ready_UI()
 		CRASH("Failed Ready Button_Interact");
 
 	// _UI
+}
+
+void CLevel_Test::Ready_Scene()
+{
+	// Camera
+	CCamera::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 1000.f;
+	CameraDesc.vEye = _float4(-1.019107, 5.458634, -15.936163, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
+	CameraDesc.fSpeedPerSec = 10.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fMouseSensor = 0.004f;
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::TEST), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+		CRASH("SceneCamera");
 }
 
 void CLevel_Test::Testing_UI(_float fTimeDelta)

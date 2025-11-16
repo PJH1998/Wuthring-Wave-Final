@@ -154,14 +154,13 @@ CSonoro_Manager* CSonoro_Manager::Create()
 
 void CSonoro_Manager::Free()
 {
+	for (auto& pObject : m_SonoroObjects)
+		Safe_Release(pObject);
+	m_SonoroObjects.clear();
 
-	//for (auto& pObject : m_SonoroObjects)
-	//	Safe_Release(pObject);
-	//m_SonoroObjects.clear();
-
-	//for (auto& pObject : m_NonSonoroObjects)
-	//	Safe_Release(pObject);
-	//m_NonSonoroObjects.clear();
+	for (auto& pObject : m_NonSonoroObjects)
+		Safe_Release(pObject);
+	m_NonSonoroObjects.clear();
 
 	Safe_Release(m_pGameInstance);
 }
