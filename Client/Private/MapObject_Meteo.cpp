@@ -91,9 +91,11 @@ void CMapObject_Meteo::Render()
 
 void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 {
+	PREFAB_INFO Info{};
+	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	if (m_iEffectFrame >= 3)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), m_pTransformCom->Get_WorldMatrix());
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		m_iEffectFrame = 0;
 	}
 	m_iEffectFrame++;
@@ -107,7 +109,7 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 	m_pTransformCom->Set_State(STATE::POSITION, CurrentPos);
 	if (Time >= 1.f)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix());
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		//이펙트들 터트리기.
 		m_IsTriggerd = false;
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));

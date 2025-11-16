@@ -69,6 +69,7 @@ void CDecal_Controller::Load_DecalData_FromJson(const _string& strFilePath)
 
 	_wstring DecalDataTag = {};
 	_int iTextureCount = {};
+	_float3 EmissiveLuminance = {};
 
 	if (DecalDataJson.contains("DecalTag"))
 		DecalDataTag = StringToWString(DecalDataJson["DecalTag"].get<_string>());
@@ -76,7 +77,15 @@ void CDecal_Controller::Load_DecalData_FromJson(const _string& strFilePath)
 	if (DecalDataJson.contains("TextureCount"))
 		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
 
-	const _tchar* DecalTexturePath[3] = {};
+	if (DecalDataJson.contains("EmissiveLuminance") && DecalDataJson["EmissiveLuminance"].is_array())
+	{
+		json Emissive = DecalDataJson["EmissiveLuminance"];
+		EmissiveLuminance.x = Emissive[0].get<_float>();
+		EmissiveLuminance.y = Emissive[1].get<_float>();
+		EmissiveLuminance.z = Emissive[2].get<_float>();
+	}
+
+	const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 
 	if (DecalDataJson.contains("Textures") && DecalDataJson["Textures"].is_array())
 	{
@@ -107,7 +116,7 @@ void CDecal_Controller::Load_DecalData_FromJson(const _string& strFilePath)
 		}
 	}
 
-	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath);
+	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath, EmissiveLuminance);
 
 	m_DecalData.push_back(WStringToString(DecalDataTag));
 }
@@ -366,6 +375,16 @@ void CDecal_Controller::DecalData_Base_Tab()
 		if (ImGui::InputText("DecalData", m_DecalDataTag, IM_ARRAYSIZE(m_DecalDataTag), ImGuiInputTextFlags_EnterReturnsTrue))
 			m_bDataTagFlag = true;
 
+		ImGui::Text("EmissiveLuminance");
+		ImGui::PushItemWidth(60);
+		ImGui::InputFloat("##EmissiveLuminanceX", &(m_EmissiveLuminance.x));
+		ImGui::SameLine();
+		ImGui::InputFloat("##EmissiveLuminancY", &(m_EmissiveLuminance.y));
+		ImGui::SameLine();
+		ImGui::InputFloat("##EmissiveLuminanceZ", &(m_EmissiveLuminance.z));
+		ImGui::PopItemWidth();
+	
+
 		//디퓨즈 텍스처
         if (ImGui::BeginCombo("Diffuse", "")) {
             for (size_t i = 0; i < m_DiffuseTextures.size(); i++)
@@ -433,11 +452,12 @@ void CDecal_Controller::DecalData_Base_Tab()
 				_tchar szDiffuse[MAX_PATH] = {};
 				_tchar szMask[MAX_PATH] = {};
 				_tchar szNormal[MAX_PATH] = {};
-				const _tchar* DecalTexturePath[3] = {};
+				const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 				DECAL_DATADESC DataDesc = {};
 
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_DecalDataTag, strlen(m_DecalDataTag), DecalDataTag, MAX_PATH);
 
+				DataDesc.vEmissiveLuminance = m_EmissiveLuminance;
 
 				if (m_iSelectedDiffuseTexture >= 0)
 				{
@@ -481,7 +501,7 @@ void CDecal_Controller::DecalData_Base_Tab()
 					DecalTexturePath[ENUM_CLASS(TEXTURETYPE::NORMAL)] = szNormal;
 				}
 
-				m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath);
+				m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath, m_EmissiveLuminance);
 
 				DataDesc.wstrDecalDataTag = DecalDataTag;
 
@@ -496,6 +516,8 @@ void CDecal_Controller::DecalData_Base_Tab()
 				m_bDataTagFlag = false;
 
 				m_IsDecalDataFlag = false;
+
+				m_EmissiveLuminance = _float3(0.f, 0.f, 0.f);
             }
         }
         ImGui::End();
@@ -587,6 +609,12 @@ void CDecal_Controller::DecalData_To_Json(DECAL_DATADESC* pDesc)
 	DecalDataJson["DecalTag"] = strDacalDataTag;
 
 	DecalDataJson["TextureCount"] = pDesc->TextureDesc.size();
+
+	json EmissiveLuminanceJson = json::array();
+	EmissiveLuminanceJson.push_back(m_EmissiveLuminance.x);
+	EmissiveLuminanceJson.push_back(m_EmissiveLuminance.y);
+	EmissiveLuminanceJson.push_back(m_EmissiveLuminance.z);
+	DecalDataJson["EmissiveLuminance"] = EmissiveLuminanceJson;
 
 	json TextureDataJson = json::array();
 

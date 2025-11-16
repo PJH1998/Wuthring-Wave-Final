@@ -9,9 +9,6 @@ CMotionBlur::CMotionBlur(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 {
-	if (FAILED(__super::Initialize()))
-		return E_FAIL;
-
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 
