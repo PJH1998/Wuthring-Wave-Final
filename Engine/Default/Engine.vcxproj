@@ -87,6 +87,7 @@
     <ClInclude Include="..\Public\Mesh.h" />
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
+    <ClInclude Include="..\Public\ModelAnim_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="..\Private\Mesh.cpp" />
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
+    <ClCompile Include="..\Private\ModelAnim_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
