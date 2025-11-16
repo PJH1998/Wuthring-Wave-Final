@@ -5,7 +5,7 @@
 #include "Mesh.h"
 #include "MeshMaterial.h"
 #include "Bone.h"
-#include "Animation.h"
+#include "Animation_Inst.h"
 #include "Channel.h"
 #include "ComputeShader.h"
 
@@ -224,7 +224,7 @@ void CModelAnim_Instance::Register_AllNotifies(const _string& strNotifyFolderPat
 	for (auto& pair : m_Animations)
 	{
 		const _string& animName = pair.first;
-		CAnimation* pAnimation = pair.second;
+		CAnimation_Inst* pAnimation = pair.second;
 
 		_string filePath = strNotifyFolderPath + "/" + animName + ".json";
 
@@ -947,7 +947,7 @@ HRESULT CModelAnim_Instance::Ready_Animation(const _char* pFilePath)
 
 	for (size_t i = 0; i < m_iNumAnimations; ++i)
 	{
-		CAnimation* pAnimation = CAnimation::Create(AnimationFile, m_Bones);
+		CAnimation_Inst* pAnimation = CAnimation_Inst::Create(AnimationFile, m_Bones);
 		if (nullptr == pAnimation)
 			return E_FAIL;
 		m_Animations.emplace(pAnimation->Get_Name(), pAnimation);
@@ -995,7 +995,7 @@ HRESULT CModelAnim_Instance::Ready_Shared_Buffers()
 	// Depth1에 대한 설정.
 	for (const auto& Pair : m_Animations)
 	{
-		CAnimation* pAnimation = Pair.second;
+		CAnimation_Inst* pAnimation = Pair.second;
 		ANIMINFO animInfo = {};
 
 		// 시작 인덱스, 개수, 지속시간.
