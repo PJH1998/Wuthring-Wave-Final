@@ -372,8 +372,8 @@ void CMap_Interface::Load_Map_GUI()
 			_string FilePath;
 			//FilePath= "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 			//FilePath= "../../Client/Bin/Resource/Map/Test/";
-			//FilePath= "../../Client/Bin/Resource/Map/Logo/";
-			FilePath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+			FilePath= "../../Client/Bin/Resource/Map/Logo/";
+			//FilePath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 			//FilePath= "../../Client/Bin/Resource/Map/";
 
 			Ready_Map_Prototype(FilePath.c_str());
