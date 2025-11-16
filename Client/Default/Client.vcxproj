@@ -212,11 +212,13 @@
     <ClInclude Include="..\Public\GalbrenaAirFly.h" />
     <ClInclude Include="..\Public\GalbrenaAirJump.h" />
     <ClInclude Include="..\public\GalbrenaFactory.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundAttack.h" />
     <ClInclude Include="..\Public\GalbrenaGroundDash.h" />
     <ClInclude Include="..\Public\GalbrenaGroundDodge.h" />
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
     <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
     <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
@@ -289,6 +291,7 @@
     <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverGroundSkill.h" />
     <ClInclude Include="..\Public\RoverGroundSpecial.h" />
+    <ClInclude Include="..\Public\RoverGroundSprint.h" />
     <ClInclude Include="..\Public\RoverHit.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
@@ -400,11 +403,13 @@
     <ClCompile Include="..\Private\GalbrenaAirFly.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />
     <ClCompile Include="..\Private\GalbrenaFactory.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundDash.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
@@ -457,6 +462,7 @@
     <ClCompile Include="..\Private\RoverGroundQTE.cpp" />
     <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
+    <ClCompile Include="..\Private\RoverGroundSprint.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />
@@ -527,6 +533,7 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshNonRib.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_FXMeshUpdate_CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>

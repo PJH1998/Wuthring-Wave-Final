@@ -60,10 +60,10 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
+	Ready_CoroSaurus();
+	//sReady_Spawner();
 
     Ready_Effect();
     LIGHT_DESC LightDesc{};
@@ -379,7 +379,8 @@ void CLevel_Test::Ready_CoroSaurus()
 	CCorosaurus::CORROSAURUS_DESC CoroDesc{};
 	CoroDesc.eCurLevel = m_eCurLevel;
 	CoroDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	CoroDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	//CoroDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	CoroDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	CoroDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_CoroSaurus"));
 	CoroDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	CoroDesc.fRotationPerSec = XMConvertToRadians(90.f);
@@ -392,7 +393,7 @@ void CLevel_Test::Ready_CoroSaurus()
 	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
 	CoroDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &CoroDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &CoroDesc)))
 		CRASH("Failed Ready Monster");
 }
 

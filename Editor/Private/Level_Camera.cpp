@@ -30,7 +30,7 @@ HRESULT CLevel_Camera::Initialize()
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);
 	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::CAMERA);
-	
+	m_pMapInterface->SetPrototypes(m_pGameInstance->Get_CurrentLevel());
 	m_pSequencer = CSequencer::Create();
 
     return S_OK;
@@ -39,6 +39,7 @@ HRESULT CLevel_Camera::Initialize()
 void CLevel_Camera::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Camera"));
+	m_pMapInterface->Load_Map_GUI();
 
 	ImGui::Begin("Camera Edit");
 

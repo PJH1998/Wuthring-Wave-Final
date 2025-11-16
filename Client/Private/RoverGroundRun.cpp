@@ -34,10 +34,9 @@ void CRoverGroundRun::OnEnter(void* pArg)
     // 4. 현재 상태 초기화
     State_Reset();
 
+	// 5. 중력 설정.
     m_pRover->Set_Gravity(true);
 
-	// 5. SFX Motion 시작.
-	m_pRover->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CRoverGroundRun::OnUpdate(_float fTimeDelta)
@@ -67,8 +66,6 @@ void CRoverGroundRun::OnExit()
     CGroundState::OnExit();
     m_pRover->Set_Gravity(true);
 	m_fFallTime = 0.f;
-
-	m_pRover->End_SFX();
 }
 
 void CRoverGroundRun::Handle_Input()
@@ -105,13 +102,14 @@ void CRoverGroundRun::Handle_Input()
 
 
     // DASH보다 우선순위 높음.
-    m_States[SPRINT_F] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+    m_States[SPRINT] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
     // 공격 상태가 아니라 공격 판정 상태로 전달.
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+    //m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+    m_fSpeed = 0.7f;
 
 	// Burst인지 체크
 	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
@@ -135,13 +133,7 @@ void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
     ERoverRunType eRunType = static_cast<ERoverRunType>(m_iCurrentAnimIdx);
     // 1. 회전 및 이동.
     if (m_pRover->Is_LockOn())
-    {
-        if (eRunType == ERoverRunType::SPRINT_F || eRunType == ERoverRunType::STOP_SPRINT_L)
-            m_pRover->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
-        else 
-            // 1. WASD 입력에 따른 8방향 이동
-            m_pRover->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
-    }
+        m_pRover->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
     else 
         m_pRover->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
 
@@ -283,11 +275,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 	}
 
     // Dash 보다 우선순위 높음.
-    if (m_States[SPRINT_F])
-    {
-        m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::SPRINT_F);
-        return;
-    }
+	if (m_States[SPRINT])
+	{
+		m_pRover->GetStateContextForWrite().m_eSprintType = ERoverSprintType::SPRINT_F;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SPRINT)); // 상위, 하위 상태
+		return;
+	}
 
    
 
@@ -321,28 +314,26 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
             return;
         }
-        // 이동 값이 들어왔는데 Stop Run 상태라면?
-        if (eRunType == ERoverRunType::STOP_RUN_L || eRunType == ERoverRunType::SPRINT_F)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::RUN_F);
-            return;
-        }
-		else
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::RUN_F);
-			return;
-		}
+
+		// 이동 값이 들어왔는데 Stop Run 상태라면?
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::RUN_F);
+		return;
+        //if (eRunType == ERoverRunType::STOP_RUN_L)
+        //{
+		//	m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::RUN_F);
+		//	return;
+        //}
     }
 
     // 이동 입력 값이 안들어왔다면?
     if (!m_States[MOVE])
     {
-        // 현재 상태가 Sprint 였다면?
-        if (eRunType == ERoverRunType::SPRINT_F)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::STOP_SPRINT_L);
-            return;
-        }
+        //// 현재 상태가 Sprint 였다면?
+        //if (eRunType == ERoverRunType::SPRINT_F)
+        //{
+        //    m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::STOP_SPRINT_L);
+        //    return;
+        //}
 
         // 현재 상태가 STOP_RUN이 아니라면? => STOP RUN
         if (eRunType != ERoverRunType::STOP_RUN_L)
@@ -351,14 +342,22 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
             m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::STOP_RUN_L);
             return;
         }
+		// Stop Run 이면서 애니메이션 재생이 끝났다면?
+		if ((eRunType == ERoverRunType::STOP_RUN_L) && m_IsAnimationEnd)
+		{
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+			return;
+		}
+
         // Stop Run 이면서 애니메이션 재생이 끝났다면?.
-        if ((eRunType == ERoverRunType::STOP_RUN_L || eRunType == ERoverRunType::STOP_SPRINT_L) && m_IsAnimationEnd)
+    /*    if ((eRunType == ERoverRunType::STOP_RUN_L || eRunType == ERoverRunType::STOP_SPRINT_L) && m_IsAnimationEnd)
         {
 			
             m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
             m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
             return;
-        }
+        }*/
     }
 
     

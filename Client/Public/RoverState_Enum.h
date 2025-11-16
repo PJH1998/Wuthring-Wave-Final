@@ -11,7 +11,8 @@ enum class ERoverGroundState : _uint
 {
 	IDLE = 0,		
 	WALK,			
-	RUN,			
+	RUN,
+	SPRINT,
 	DASH,			
 	DODGE,
 	ATTACK,			
@@ -87,6 +88,16 @@ enum class ERoverRunType : _uint
 	RUN_POSE_R,
 	RUN_TURNBACK,
 	SPRINT_F,
+	STOP_RUN_L,
+	STOP_RUN_R,
+	STOP_SPRINT_L,
+	STOP_SPRINT_R,
+	END
+};
+
+enum class ERoverSprintType : _uint
+{
+	SPRINT_F = 0,
 	STOP_RUN_L,
 	STOP_RUN_R,
 	STOP_SPRINT_L,

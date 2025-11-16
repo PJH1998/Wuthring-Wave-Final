@@ -2,6 +2,10 @@
 #include "Map_Interface.h"
 #include"Edit_PreViewModel.h"
 #include"Edit_MapObject.h"
+#include"Edit_MapObject_Destruction.h"
+#include"Edit_Meteo.h"
+#include"Edit_MapObject_Instance.h"
+#include"Edit_TriggerBox.h"
 
 CMap_Interface::CMap_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CInterface_Edit(pDevice,pContext)
@@ -208,14 +212,6 @@ _bool CMap_Interface::Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMa
             _string LastVersionPath;
             vector<_wstring> m_PrototypeNames;
 
-            m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
-                CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
-
-
-            if (FAILED(m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_GameObject_MapObject"),
-                CEdit_MapObject::Create(m_pDevice, m_pContext))))
-                CRASH("Prototype Create Failed");
-
             m_pPreView = CEdit_PreViewModel::Create(m_pDevice, m_pContext, iLevel);
 
             _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
@@ -356,21 +352,375 @@ void CMap_Interface::Add_MapObject(_fvector vPos)
     }
     ImGui::EndChildFrame();
 
-
     ImGui::End();
+}
+
+void CMap_Interface::Load_Map_GUI()
+{
+	ImGui::Begin("Map Load");
+
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Map/MapData/";
+	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+	ImGuiFileDialog::Instance()->OpenDialog("Map File Load", "Import File", ".dat", config);
+
+	if (ImGuiFileDialog::Instance()->Display("Map File Load")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string DatFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
+			_string FilePath;
+			//FilePath= "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+			//FilePath= "../../Client/Bin/Resource/Map/Test/";
+			FilePath= "../../Client/Bin/Resource/Map/Logo/";
+			//FilePath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+			//FilePath= "../../Client/Bin/Resource/Map/";
+
+			Ready_Map_Prototype(FilePath.c_str());
+
+			for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
+				if (entry.is_regular_file())
+				{
+					_uint NameLength = {};
+
+					_string strFilePath = entry.path().string();
+					if (strFilePath.find("Prototype") != std::string::npos)
+						continue;
+					if (strFilePath.find(".txt") != std::string::npos)
+						continue;
+					ifstream File(strFilePath, ios::binary);
+
+					if (!File.is_open())
+					{
+						MSG_BOX("Load Failed");
+					}
+					if (strFilePath.find("Meteo") != std::string::npos)
+					{
+						CEdit_Meteo::MAP_LOAD Desc{};
+
+						while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+						{
+							memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+							File.read(Desc.ModelName, NameLength);
+							_string Name = Desc.ModelName;
+
+
+							File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+							_float4x4 Matrix = {};
+							File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
+							File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
+							File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
+
+							File.read(reinterpret_cast<char*>(&Desc.fDuration), sizeof(_float));
+							File.read(reinterpret_cast<char*>(&Desc.fArchY), sizeof(_float));
+							File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
+							_vector Pos = XMLoadFloat4(&Desc.vSourPos);
+							//_matrix Mat = XMMatrixTranslationFromVector();
+							XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(Pos));
+							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo")
+								, m_iLevel, TEXT("Layer_Meteo"), &Desc);
+						}
+					}
+					else if (strFilePath.find("Instance") != std::string::npos)
+					{
+						continue;
+						_matrix PreTransformMatrix = XMMatrixIdentity();
+						_float fSize = 0.01f;
+						PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+						CEdit_MapObject_Instance::MAP_LOAD Desc{};
+
+						while (File.read(reinterpret_cast<char*>(&Desc.iSaveIndex), sizeof(_uint)))
+						{
+							File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+							memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+							File.read(Desc.ModelName, NameLength);
+
+							File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+							if (Desc.iShaderPassIndex == 2)
+								File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
+
+							File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint));
+
+							_float4x4* InstanceMatrix = new _float4x4[Desc.iNumInstance];
+
+							File.read(reinterpret_cast<char*>(InstanceMatrix), sizeof(_float4x4) * Desc.iNumInstance);
+							Desc.InstanceWorldMatrix = InstanceMatrix;
+
+							File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
+							_float3 vBoundingPos;
+							_float3 vBoundingExtends;
+							File.read(reinterpret_cast<char*>(&vBoundingPos), sizeof(_float3));
+							File.read(reinterpret_cast<char*>(&vBoundingExtends), sizeof(_float3));
+							Desc.IsLoaded = true;
+
+							//이거를 프로토타입으로 만든 이후 바로 클론하기.
+
+							CMesh_Instance::MESH_INST_DESC MeshDesc{};
+							MeshDesc.iNumInstance = Desc.iNumInstance;
+							MeshDesc.pTransformMatrix = InstanceMatrix;
+							//파일시스템으로 해당 모델 찾기.
+							_string ModelPath = Desc.ModelName;
+							ModelPath.pop_back();
+							_string m_FolderPath;
+							for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
+								if (entry.is_regular_file()) {
+									if (entry.path().string().find("Foliage") == std::string::npos)
+										continue;
+
+									if (entry.path().string().find(ModelPath) == std::string::npos)
+										continue;
+
+									if (entry.path().extension() != ".dat")
+										continue;
+
+									_char FileDrive[MAX_PATH] = {};
+									_char FileDir[MAX_PATH] = {};
+									_char FileName[MAX_PATH] = {};
+									_char FileExt[MAX_PATH] = {};
+									_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+
+									_wstring PrototypeName = L"Prototype_Component_Model_Instance_";
+									_wstring ModelName = StringToWString(FileName) + to_wstring(Desc.iSaveIndex);
+									PrototypeName += ModelName;
+
+									_string VersionPath = FileDir;
+									VersionPath += FileName;
+									VersionPath += ".dat";
+									if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+										CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, VersionPath.c_str(), false, &MeshDesc))))
+										CRASH("Prototype Create Failed");
+
+									memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+									strcpy_s(Desc.ModelName, WStringToString(ModelName).c_str());
+								}
+							}
+							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance")
+								, m_iLevel, TEXT("Layer_Instance"), &Desc);
+							Safe_Delete_Array(InstanceMatrix);
+						}
+					}
+					else if (entry.path().string().find("Spawn") != std::string::npos)
+						continue;
+
+					else if (strFilePath.find("Destruction") != std::string::npos)
+					{
+						//continue;
+
+						_matrix PreTransformMatrix = XMMatrixIdentity();
+						_float fSize = 0.01f;
+						PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+						CEdit_MapObject_Destruction::MAP_LOAD Desc{};
+
+						while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+						{
+							memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+							File.read(Desc.ModelName, NameLength);
+							_string Name = Desc.ModelName;
+
+							File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+							_float4x4 Matrix = {};
+							File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+							Desc.WorldMatrix = &Matrix;
+							Desc.iLevel = m_iLevel;
+
+							File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+							File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+
+							File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
+							File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
+
+							File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
+							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+								, m_iLevel, TEXT("Layer_Test"), &Desc);
+						}
+					}
+					else if (strFilePath.find("TriggerBox") != std::string::npos)
+					{
+						_uint iTriggerIndex;
+						CEdit_TriggerBox::TRIGGER Desc{};
+						while (File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint)))
+						{
+							File.read(reinterpret_cast<char*>(&Desc.vExtends), sizeof(_float3));
+							_float4x4 Matrix = {};
+							File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+							Desc.WorldMatrix = &Matrix;
+							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox")
+								, m_iLevel, TEXT("Layer_Test"), &Desc);
+						}
+					}
+					else
+					{
+
+						CEdit_MapObject::MAP_LOAD Desc{};
+
+						while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+						{
+							memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+							File.read(Desc.ModelName, NameLength);
+							_string Name = Desc.ModelName;
+
+							File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+							_float4x4 Matrix = {};
+							File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+							Desc.WorldMatrix = &Matrix;
+							File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+							File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+
+
+							m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+								CEdit_MapObject::MAP_LOAD pDesc{};
+								strcpy_s(pDesc.ModelName, ModelName.c_str());
+								pDesc.iShaderPassIndex = ShaderPass;
+								pDesc.eObjectType = eObjectType;
+								pDesc.WorldMatrix = &Matrix;
+								pDesc.iLevel = m_iLevel;
+
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+									, m_iLevel, TEXT("Layer_Test"), &pDesc);
+								});
+
+						}
+					}
+					m_pGameInstance->Wait_Thread_End();
+					File.close();
+
+				}
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
+		else
+		{
+			ImGuiFileDialog::Instance()->Close();
+		}
+	}
+	ImGui::End();
+}
+
+void CMap_Interface::Load_Map(const _char* pFilePath)
+{
+}
+
+void CMap_Interface::Ready_Map_Prototype(const _char* pFilePath)
+{
+	_matrix PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.01f;
+	//_float fSize = 0.02f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	for (const auto& entry : filesystem::recursive_directory_iterator(pFilePath)) {
+		if (entry.is_regular_file()) {
+			if (entry.path().string().find("MapData") != std::string::npos)
+				continue;
+
+			if (entry.path().string().find("Anim") != std::string::npos)
+				continue;
+
+			if (entry.path().extension() == ".dat") {
+
+				_char FileDrive[MAX_PATH] = {};
+				_char FileDir[MAX_PATH] = {};
+				_char FileName[MAX_PATH] = {};
+				_char FileExt[MAX_PATH] = {};
+				_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+				_wstring PrototypeName = L"Prototype_Component_Model_";
+				PrototypeName += StringToWString(FileName);
+
+				_string VersionPath = FileDir;
+				VersionPath += FileName;
+				VersionPath += ".dat";
+
+				if (entry.path().string().find("_Bone") != std::string::npos)
+				{
+					m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+							CModel::Create(m_pDevice, m_pContext, MODELTYPE::ECO, PreTransformMatrix, Path.c_str()))))
+							CRASH("Prototype Create Failed");
+						});
+					continue;
+				}
+
+				_wstring baseName = StringToWString(FileName);
+
+				// LOD 마지막에 붙은 숫자 추출
+				size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
+				_wstring namePart = baseName.substr(0, pos + 1);
+
+				_wstring numberPart = baseName.substr(pos + 1);
+
+				_wstring key = L"Prototype_Component_Model_" + namePart;
+
+
+
+
+				m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+						CRASH("Prototype Create Failed");
+					});
+
+				if (entry.path().string().find("Foliage") != std::string::npos)
+				{
+					_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
+					ProtoName += StringToWString(FileName);
+
+					m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str(), true))))
+							CRASH("Prototype Create Failed");
+						});
+				}
+			}
+		}
+	}
+	m_pGameInstance->Wait_Thread_End();
+}
+
+void CMap_Interface::SetPrototypes(_uint iLevel)
+{
+	m_iLevel = iLevel;
+	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+
+	if (FAILED(m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_GameObject_MapObject"),
+		CEdit_MapObject::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance"),
+		CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo"),
+		CEdit_Meteo::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
+		CEdit_MapObject_Destruction::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
+		CEdit_MapObject_Destruction::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"),
+		CEdit_TriggerBox::Create(m_pDevice, m_pContext));
 }
 
 CMap_Interface* CMap_Interface::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CMap_Interface* pInstance = new CMap_Interface(pDevice, pContext);
+	CMap_Interface* pInstance = new CMap_Interface(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize()))
-    {
-        MSG_BOX("Failed to Create : Map_Insterface");
-        Safe_Release(pInstance);
-    }
+	if (FAILED(pInstance->Initialize()))
+	{
+		MSG_BOX("Failed to Create : Map_Insterface");
+		Safe_Release(pInstance);
+	}
 
-    return pInstance;
+	return pInstance;
 }
 
 

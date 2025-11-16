@@ -281,6 +281,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute FlyAnimMesh Shader");
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshNonRib.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute NonRibAnimMesh Shader");
+
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))
