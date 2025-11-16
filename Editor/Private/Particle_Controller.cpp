@@ -238,6 +238,8 @@ void CParticle_Controller::Particle_Tab()
                 {
                     ImGui::Checkbox("Root", &(m_pSelectedParticleDesc->IsRootOn));
 
+					ImGui::Checkbox("Pivot", &(m_pSelectedParticleDesc->IsPivot));
+
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
                     ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass), 1.f, 0, 6);

@@ -1040,6 +1040,7 @@ void CEffect_Controller::Particle_OB_To_Json(json& ParticleJson, CParticle::PART
     ParticleJson["MyTag"] = WStringToString(pParticleDesc->strMyTag);
     ParticleJson["MyType"] = pParticleDesc->eMyType;
     ParticleJson["Root"] = pParticleDesc->IsRootOn;
+	ParticleJson["Pivot"] = pParticleDesc->IsPivot;
 
     ParticleJson["TextureTag"] = WStringToString(pParticleDesc->strTextureTag);
     ParticleJson["VIBufferTag"] = WStringToString(pParticleDesc->strVIBufferTag);

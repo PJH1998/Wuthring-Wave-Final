@@ -43,6 +43,7 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
 	m_IsSprite = m_tDesc.IsSprite;
 	m_iRow = m_tDesc.iRows;
 	m_iCol = m_tDesc.iCols;
+	m_IsRoot = m_tDesc.IsRootOn;
 
     _vector Pos = XMVectorSet(m_tDesc.vPos.x, m_tDesc.vPos.y, m_tDesc.vPos.z, 1.f);
 
@@ -67,6 +68,9 @@ void CEffect_Rect::Update(_float fTimeDelta)
 
    if (m_IsSprite)
 	   Sprite_Update(fTimeDelta);
+
+   if (m_IsRoot)
+	   Update_Root_Transform();
 
    if (m_vLifeTime.x >= m_vLifeTime.y)
    {
@@ -99,17 +103,32 @@ void CEffect_Rect::Render()
 
 void CEffect_Rect::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if(_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
 
-     m_vLifeTime.x = 0.f;
-	 m_fSweep = 0.f;
-	 m_fPhase = 0.f;
-     Root_Transform(WorldMatrix);
+	m_isActivate = pDesc->IsActive;
+
+	//기본 초기화
+	m_vLifeTime.x = 0.f;
+	m_fSweep = 0.f;
+	m_fPhase = 0.f;
+
+	if (m_isActivate && !m_IsRoot)
+	{
+		//뼈에 안붙을 얘면 프리팹이 계산해서 던져준 월드매트릭스 그대로 사용해도 됨.
+		Default_Transform(WorldMatrix);
+	}
+	else if (m_isActivate && m_IsRoot)
+	{
+		//뼈에 붙을 얘면 프리팹이 넘겨준 정보 토대로 업데이트에서 갱신해주는 작업이 필요.
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+		m_OffsetMatrix = WorldMatrix;
+	}
 }
 
-void CEffect_Rect::Root_Transform(_fmatrix WorldMatrix)
+void CEffect_Rect::Default_Transform(_fmatrix WorldMatrix)
 {
+	//오프셋 회전은 먹일까..?
     _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
 
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -119,6 +138,31 @@ void CEffect_Rect::Sprite_Update(_float fTimeDelta)
 {
 	m_fPhase += fTimeDelta * m_fSweepSpeed;
 
+}
+
+void CEffect_Rect::Update_Root_Transform()
+{
+	if (m_pBoneMatrixPtr == nullptr)
+		return;
+
+	_matrix OffsetMatrix = m_OffsetMatrix;
+
+	_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+	_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
+
+	_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
+
+	_vector vScale = {};
+	_vector vPos = {};
+	_vector vRot = {};
+	XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+	//렉트는 뼈 회전 안먹어도 될거 같음.
+	_matrix OffsetSpawnMatrix =/* XMMatrixRotationQuaternion(vRot) * */XMMatrixTranslationFromVector(vPos);	
+
+	XMStoreFloat4x4(&m_ComBindMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		OffsetMatrix * OffsetSpawnMatrix);
 }
 
 HRESULT CEffect_Rect::Ready_Components(FXRECT_DESC& Desc)
@@ -140,21 +184,28 @@ HRESULT CEffect_Rect::Ready_Components(FXRECT_DESC& Desc)
 
 HRESULT CEffect_Rect::Bind_ShaderResources()
 {
+	if (!m_IsRoot)
+	{
+		if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+			return E_FAIL;
+	}
+	else
+	{
+		if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+			return E_FAIL;
+	}
 
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+		return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
-        return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+		return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
-        return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+		return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-        return E_FAIL;
-
-    if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
-        return E_FAIL;
+	if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
+		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
 		return E_FAIL;
@@ -172,6 +223,9 @@ HRESULT CEffect_Rect::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_vLifeTime", &m_vLifeTime, sizeof(_float2))))
 		return E_FAIL;
 
 	if (m_IsSprite)

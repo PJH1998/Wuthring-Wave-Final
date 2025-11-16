@@ -27,6 +27,8 @@ public:
 
 		_int	iMaskFlag = 0;
 
+		_bool	IsPivot = false;
+
 		_bool	IsSprite = false;
 		_int    iRows = 0;
 		_int	iCols = 0;
@@ -49,8 +51,9 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform(_fmatrix WorldMatrix);
+	void Default_Transform(_fmatrix WorldMatrix);
 	void Bind_CS_SpriteInfo();
+	void Update_Root_Transform();
 	
 
 private:
@@ -75,7 +78,14 @@ private:
 	_int						m_iRow = {};
 	_int						m_iCol = {};
 
+	_bool						m_IsPivot = false;
 	_bool						m_IsRoot = false;
+	_float4x4					m_ComBindMatrix = {  };
+
+	const _float4x4*			m_pBoneMatrixPtr = nullptr;
+	const _float4x4*			m_pObjectMatrixPtr = nullptr;
+	_matrix						m_OffsetMatrix = {};
+
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);
