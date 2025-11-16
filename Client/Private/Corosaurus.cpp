@@ -24,6 +24,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	CORROSAURUS_DESC* pDesc = static_cast<CORROSAURUS_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
@@ -44,6 +45,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
 	m_fHitStopRatio = 1.f;
+	m_fParalysisAcc = 5.f;
 	return S_OK;
 }
 
@@ -58,7 +60,8 @@ void CCorosaurus::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio);
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 
 	if(m_isDist_Interp_Enable)
@@ -80,6 +83,10 @@ void CCorosaurus::Update(_float fTimeDelta)
 void CCorosaurus::Late_Update(_float fTimeDelta)
 {
 	m_pColliderCom->Sync_Position(m_pTransformCom);
+
+	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
+		m_isParalysis = true;
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
@@ -333,7 +340,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pParryVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pParryVolume)
 		CRASH(m_pParryVolume);
-	m_pParryVolume->TriggerActivate(true);
+	m_pParryVolume->TriggerActivate(false);
 }
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
@@ -392,7 +399,23 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
 
+#pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+#pragma endregion
+
+	if (m_isParalysis)
+	{
+		m_fParalysisAcc -= fTimeDelta;
+		if (m_fParalysisAcc <= 0.f)
+		{
+			//그로기 유지시간 정의하기
+			m_fParalysisAcc = 5.f;
+			m_isParalysis = false;
+			m_fStamina = m_fMaxStamina;
+		}
+	}
+	else
+		m_isKnockDown = m_isParalysis;
 }
 
 void CCorosaurus::After_Condition(_float fTimeDelta)
@@ -411,19 +434,19 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
 	if (m_beHit)
 		m_beHit = false;
-	if (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS))
+	if (m_isParalysis)
 	{
-		if (m_fParalysisAcc >= 0.f)
+		if (m_isKnockDown)
+			m_iState = ENUM_CLASS(TEST_STATE::PARALYSIS);
+		else
 		{
-			//그로기 유지시간 정의하기
-			m_fParalysisAcc -= fTimeDelta;
-			
+			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_isKnockDown = true;
 		}
 	}
-#pragma region UI_BIND
+	else
+		m_isKnockDown = m_isParalysis;
 
-	m_isParalysis = (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS));
-#pragma endregion
 }
 
 void CCorosaurus::Calculate_PosAndDir()
@@ -553,38 +576,43 @@ void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& 
 
 _bool CCorosaurus::isKnockDown()
 {
-	_bool isKnockDown{};
-	if (m_fStamina <= 0.f)
-	{
-		if (m_fParalysisAcc <= 0.f)
-		{
-			m_fStamina = m_fMaxStamina;
-			m_fParalysisAcc = 5.f;
-			isKnockDown = false;
-		}
-		else
-		{
-			if (m_isKnockDown)
-			{
-				m_iState |= ENUM_CLASS(TEST_STATE::PARALYSIS);
-				isKnockDown = true;
-			}
-			else
-			{
-				m_iState |= (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
-				m_isKnockDown = true;
-				isKnockDown = true;
-			}
-		}
-	}
-	else if (m_isBlocked)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
-		isKnockDown = true;
-		m_isBlocked = false;
-	}
+	//_bool isKnockDown{};
+	//if (m_fStamina <= 0.f)
+	//{
+	//	if (m_fParalysisAcc <= 0.f)
+	//	{
+	//		m_fStamina = m_fMaxStamina;
+	//		m_fParalysisAcc = 5.f;
+	//		isKnockDown = false;
+	//	}
+	//	else
+	//	{
+	//		//if (m_isKnockDown)
+	//		//{
+	//		//	m_iState |= ENUM_CLASS(TEST_STATE::PARALYSIS);
+	//		//	isKnockDown = true;
+	//		//}
+	//		//else
+	//		//{
+	//		//	m_iState |= (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+	//		//	m_isKnockDown = true;
+	//		//	isKnockDown = true;
+	//		//}
+	//	}
+	//}
+	//else if (m_isBlocked)
+	//{
+	//	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
+	//	isKnockDown = true;
+	//	m_isBlocked = false;
+	//}
+	//
+	//return isKnockDown;
 
-	return isKnockDown;
+	if (m_isParalysis)
+		return true;
+
+	return m_iState & (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::BLOCK) | ENUM_CLASS(TEST_STATE::BEHIT));
 }
 
 _bool CCorosaurus::isAttackEnable()
@@ -774,7 +802,7 @@ void CCorosaurus::Free()
 	{
 		Safe_Release(m_pAtkVolumes[i]);
 	}
-	
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);

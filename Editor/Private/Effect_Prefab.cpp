@@ -49,8 +49,6 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 
     m_fCurrentTime += fTimeDelta;
 
-
-
 	for (auto& Frame : m_vFrames)
 	{
 		if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
@@ -119,10 +117,12 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	PREFAB_INFO* pDesc = static_cast<PREFAB_INFO*>(pArg);
 
-	if (pDesc->pMatrixPtr == nullptr && pDesc->pModelPtr != nullptr)
+	if (pDesc->pModelPtr != nullptr)
 	{
-		//null이라는건 뼈에 완전히 붙일 얘가 아니라는 것.
-		//기존 처리방식과 동일하게 세팅해주면 될거 같음.
+		//프리팹 안에 뼈에 붙어야 할 자식과 안붙어야 할 자식이 같이 있을 수 있음.
+		//그러니 프리팹에 기존 처리 + 만약 뼈에 붙어야할 얘가 있다면 추가적인 정보를 필요로 함 (BonePtr과 ObjectPtr필요)
+		//기존 처리 할 얘들을 위한 정보 + PTR이 필요하니 기존 처리도 해주고 뼈 정보도 저장해주는게 맞는거 같음. 일단은 그렇게 생각중.
+
 		Reset_SpawnMatrix();
 		Reset_Prefab_Info();
 
@@ -140,13 +140,12 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		//위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
 		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
 
-		m_isActivate = true;
-	}
-	else if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
-	{
-		//null이 아니라는건 뼈에 완전히 붙여야한다는 것.
-		m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
-		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+		if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
+		{
+			//null이 아니라는건 뼈에 완전히 붙여야한다는 것.
+			m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+			m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+		}
 
 		m_isActivate = true;
 	}
@@ -352,13 +351,6 @@ void CEffect_Prefab::Reset_Prefab_Info()
 #ifdef _DEBUG
     OutPutDebugMatrix(TEXT("Spawn Matrix : "), m_SpawnMatrix);
 #endif // DEBUG
-
-    _matrix DefaultMat = XMLoadFloat4x4(&m_SpawnMatrix);
-
-    //초기설정으로 되돌리기 처리만
-    _bool Activate = false;
-    for (auto& Children : m_EffectChildren)
-        Children.second->Reset(DefaultMat, &Activate);
 }
 
 void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info)

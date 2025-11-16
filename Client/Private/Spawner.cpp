@@ -22,6 +22,8 @@ HRESULT CSpawner::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	SPAWNERDESC* pDesc = static_cast<SPAWNERDESC*>(pArg);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat4(&pDesc->vPosition), 1.f));
 
@@ -70,10 +72,10 @@ void CSpawner::Update(_float fTimeDelta)
 	{
 		_vector vLook = XMVector3Normalize(XMVectorSetY(XMLoadFloat4(&m_vPlayerPos) - m_pTransformCom->Get_State(STATE::POSITION), 0.f));
 
-		CGameSystem* pSystem = CGameSystem::GetInstance();
+		
 		for (_uint i = 0; i < m_iNumSpawnObjects; ++i)
 		{
-			MONSTER_INFO* const pDesc = pSystem->Get_MonsterInfo(m_strMonsterKey[i].c_str());
+			MONSTER_INFO* const pDesc = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey[i].c_str());
 			_matrix WorldMatrix = XMLoadFloat4x4(&m_SpawnMatrix[i]);
 			_vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
 			_vector vUp = XMVector3Cross(vLook, vRight);
@@ -178,5 +180,6 @@ void CSpawner::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidBodyCom);
 }

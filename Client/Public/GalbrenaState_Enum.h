@@ -11,7 +11,8 @@ enum class EGalbrenaGroundState : _uint
 {
 	IDLE = 0,		
 	WALK,			
-	RUN,			
+	RUN,	
+	SPRINT,
 	DASH,			
 	DODGE,
 	ATTACK,			
@@ -94,6 +95,17 @@ enum class EGalbrenaRunType : _uint
 	END
 };
 
+enum class EGalbrenaSprintType : _uint
+{
+	SPRINT_F = 0,
+	STOP_RUN_L,
+	STOP_RUN_R,
+	STOP_SPRINT_L,
+	STOP_SPRINT_R,
+	END
+};
+
+
 enum class EGalbrenaLandType : _uint
 {
 	LAND_LIGHT = 0,     
@@ -132,7 +144,6 @@ enum class EGalbrenaAttackType : _uint
 	ATTACK01 = 0,
 	ATTACK02,
 	ATTACK03,
-	ATTACK05,
 	ATTACK04,
 	END
 };

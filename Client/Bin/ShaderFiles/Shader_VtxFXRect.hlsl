@@ -209,20 +209,27 @@ PS_OUT PS_TESTA(PS_IN In)
     
     //Å×½ºÆ®
     
-    Out.vDiffuse *= g_vColor;
+    Out.vDiffuse.rgb *= g_vColor;
     
+    float2 LifeTime = g_vLifeTime;
+    
+    float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
+    
+    Out.vDiffuse.a *= Alpha;
     //Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
     
    //if (Out.vDiffuse.a < 0.1f)
    //    discard;
     if (Out.vDiffuse.a <= 0.0f)
         discard;
-    
+   
+    if(Out.vDiffuse.a > 0.15f)
+    {
         float fWeight = Luminance(Out.vDiffuse.xyz);
-    
+   
         if (fWeight >= g_fEmissiveThreshold)
             Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-   
+    }
     //Out.vDiffuse.rgb = pow(saturate(Out.vDiffuse.rgb), 2.2f);
     
     return Out;

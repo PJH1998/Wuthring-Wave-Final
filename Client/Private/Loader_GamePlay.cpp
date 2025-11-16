@@ -76,7 +76,7 @@ CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLoader_GamePlay::Initialize()
 {
-	m_iNumLoadingThread = 12;
+	m_iNumLoadingThread = 13;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
@@ -428,6 +428,13 @@ HRESULT CLoader_GamePlay::Load_Galbrena()
 
 	// 2. 객체 초기화.
 	_wstring wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_FirstGun");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	// 3. 객체 초기화.
+	wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_SecondGun");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wstrObjectTag
 		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))

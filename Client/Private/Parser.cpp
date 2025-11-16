@@ -893,6 +893,9 @@ void CParser::Load_Particle_OB_FromJson(const _string& strFilePath, const _strin
     if (ParticleJson.contains("Root"))
         Desc.IsRootOn = ParticleJson["Root"].get<_bool>();
 
+	if (ParticleJson.contains("Pivot"))
+		Desc.IsPivot = ParticleJson["Pivot"].get<_bool>();
+
     if (ParticleJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(ParticleJson["TextureTag"].get<_string>());
 
@@ -982,7 +985,6 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 
 	if (TrailMeshJson.contains("Root"))
 		Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
-
 
 	if (TrailMeshJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());
@@ -1397,42 +1399,53 @@ void CParser::Load_Sequence(const _char* pFolderPath)
 
 			for (auto& ItemJson : SequeceJson["Item"])
 			{
+				// Info
 				SEQUENCE_ITEM_INFO Info = {};
+				Info.fStartFrame = ItemJson["FrameStart"];
+				Info.fEndFrame = ItemJson["FrameEnd"];
+				Info.strItemTag = StringToWString(ItemJson["Tag"]);
+
+				// Data
+				_string strItemType = ItemJson["Type"];
+				if ("Actor" == strItemType)
+				{
+
+				}
+				else if ("Scene" == strItemType)
+				{
+					Info.eType = ITEM_TYPE::SCENE;
+					Load_Scene(ItemJson, ItemDatas);
+				}
+
+				ItemInfos.push_back(Info);
 			}
 
-			//for (size_t i = 0; i < m_Items.size(); ++i)
-			//{
-			//	SEQUENCE_ITEM_INFO Info = {};
-			//	Info.fStartFrame = static_cast<_float>(m_Items[i].iFrameStart);
-			//	Info.fEndFrame = static_cast<_float>(m_Items[i].iFrameEnd);
-			//	Info.strItemTag = StringToWString(m_Items[i].szItemLabel);
-			//	Info.eType = m_Items[i].eType;
-			//	ItemInfos.push_back(Info);
-			//
-			//	switch (m_Items[i].eType)
-			//	{
-			//	case ITEM_TYPE::SCENE:
-			//	{
-			//		SQ_CAMERA_DATA* SceneData = new SQ_CAMERA_DATA(Info.fStartFrame, Info.fEndFrame, m_fTrackPerSec, m_Items[i].mRampEdit.mSQCameraDatas);
-			//		ItemDatas.push_back(SceneData);
-			//	}
-			//	break;
-			//	case ITEM_TYPE::ACTOR:
-			//		break;
-			//	case ITEM_TYPE::SFX:
-			//		break;
-			//	case ITEM_TYPE::EFFECT:
-			//		break;
-			//	case ITEM_TYPE::SOUND:
-			//		break;
-			//	}
-			//}
-			//
-			//m_pGameInstance->Register_Sequence(StringToWString(m_szSequenceTag), ItemInfos, ItemDatas, &SequenceDesc);
+			m_pGameInstance->Register_Sequence(StringToWString(fileName), ItemInfos, ItemDatas, &SequenceDesc);
 
 			InputFile.close();
 		}
 	}
+}
+
+void CParser::Load_Scene(json& ItemJson, vector<SEQUENCE_ITEM_DATA*>& ItemDatas)
+{
+	vector<SCENE_CAMERA_FRAME> Frames;
+
+	for (auto& FrameJson : ItemJson["Frame"])
+	{
+		SCENE_CAMERA_FRAME Frame = {};
+		Frame.fStartFrame = FrameJson["Start"];
+		Frame.fFovy = FrameJson["FOV"];
+		Frame.isLerp = FrameJson["Lerp"];
+
+		Frame.vQuaternion = _float4(FrameJson["Quaternion"][0], FrameJson["Quaternion"][1], FrameJson["Quaternion"][2], FrameJson["Quaternion"][3]);
+		Frame.vPosition = _float3(FrameJson["Position"][0], FrameJson["Position"][1], FrameJson["Position"][2]);
+
+		Frames.push_back(Frame);
+	}
+
+	SQ_CAMERA_DATA* SceneData = new SQ_CAMERA_DATA(ItemJson["FrameStart"], ItemJson["FrameEnd"], ItemJson["TrackPerSec"], Frames);
+	ItemDatas.push_back(SceneData);
 }
 
 HRESULT CParser::Initialize()

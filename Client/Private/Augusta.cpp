@@ -622,8 +622,12 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
     if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
         return;
 
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-    m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+    m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &effecInfo);
 }
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {

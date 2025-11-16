@@ -17,8 +17,10 @@ public:
 
 	enum VOLUME
 	{
-		VOLUME_KNOCKBACK = 0,
-		VOLUME_SKILL = 1,
+		VOLUME_ARROUND = 0,
+		VOLUME_ARROUND_SLASH = 1,
+		VOLUME_KNOCKBACK = 2,
+		VOLUME_SKILL = 3,
 		VOLUME_END
 	};
 
@@ -30,6 +32,7 @@ private:
 		EGalbrenaDashType m_eDashType = EGalbrenaDashType::END;
 		EGalbrenaIdleType  m_eIdleType = EGalbrenaIdleType::END;
 		EGalbrenaRunType m_eRunType = EGalbrenaRunType::END;
+		EGalbrenaSprintType m_eSprintType = EGalbrenaSprintType::END;
 		EGalbrenaLandType m_eLandType = EGalbrenaLandType::END;
 		EGalbrenaDodgeType m_eDodgeType = EGalbrenaDodgeType::END;
 
@@ -62,6 +65,7 @@ private:
 			// Land
 			m_eIdleType = EGalbrenaIdleType::END;
 			m_eRunType = EGalbrenaRunType::END;
+			m_eSprintType = EGalbrenaSprintType::END;
 			m_eDashType = EGalbrenaDashType::END;
 			m_eLandType = EGalbrenaLandType::END;
 			m_eDodgeType = EGalbrenaDodgeType::END;
