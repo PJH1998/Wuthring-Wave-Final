@@ -27,6 +27,15 @@ float Luminance(float3 vColor)
     return fWeight;
 }
 
+float CustomLuminance(float3 vColor, float3 vLuminance)
+{
+    float fWeight;
+    
+    fWeight = (vColor.r * vLuminance.r) + (vColor.g * vLuminance.g) + (vColor.b * vLuminance.b);
+    
+    return fWeight;
+}
+
 bool IsInNDC(float4 vProjPos)
 {
     if (vProjPos.x > 1.f || vProjPos.x < -1.f)

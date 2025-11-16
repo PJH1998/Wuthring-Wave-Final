@@ -67,13 +67,13 @@ struct PS_OUT
 
 PS_OUT PS_MAIN(PS_IN In)
 {
-    PS_OUT Out = (PS_OUT)0;
+    PS_OUT Out = (PS_OUT) 0;
     
     float2 vUV = Compute_Texcoord(In.vProjPos.xy / In.vProjPos.w);
     
     float4 vWorldPos = Compute_WorldPos(vUV, g_DepthTexture);
     
-    if(false == all(vWorldPos))
+    if (false == all(vWorldPos))
         discard;
         
     float4 vLocalPos = mul(vWorldPos, In.WorldInv);
@@ -81,15 +81,16 @@ PS_OUT PS_MAIN(PS_IN In)
     float3 vLocalVolume = abs(vLocalPos.xyz);
 
     if (any(vLocalVolume > 0.5f))
-        discard;    
+        discard;
     
     float2 vDecalUV = clamp((vLocalPos.xz) + 0.5f, 0.f, 1.f); // Decal 범위 -0.5~0.5;
     
     float4 vDifffuse = 0.f;
     float4 vNormal = 0.f;
     float4 vMask = 0.f;
+    float4 vEmissive = 0.f;
     
-    if(g_HasDiffuse)
+    if (g_HasDiffuse)
     {
         vDifffuse = g_DiffuseTexture.Sample(DefaultSampler, vDecalUV);
         if (any(vDifffuse.xyz))
@@ -98,9 +99,27 @@ PS_OUT PS_MAIN(PS_IN In)
             discard;
     }
     
+    if (g_HasEmissive)
+    {
+        vEmissive = g_EmissiveTexture.Sample(DefaultSampler, vDecalUV);
+        if (CustomLuminance(vEmissive.xyz, g_EmissiveLuminance) > g_fEmissiveThreshold)
+        {
+            Out.vEmissive = float4(vEmissive.xyz, 1.f);
+        }
+        
+        if (false == g_HasDiffuse)
+        {
+            vDifffuse = vEmissive;
+            
+            if (any(vDifffuse.xyz))
+                vDifffuse.a = max(max(vDifffuse.r, vDifffuse.b), vDifffuse.g);
+            else
+                discard;
+        }
+    }
+    
     if (g_HasNormal)
         vNormal = g_NormalTexture.Sample(DefaultSampler, vDecalUV);
-    
     
     if (g_HasMask)
     {
@@ -116,15 +135,69 @@ PS_OUT PS_MAIN(PS_IN In)
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
     Out.vDiffuse.a -= fAlpha;
-    
-    if (Luminance(Out.vDiffuse.xyz) >= g_fEmissiveThreshold)
-    {
-        Out.vEmissive.xyz = Out.vDiffuse.xyz;
-        Out.vEmissive.a = Out.vDiffuse.a;
-    }
+    Out.vEmissive.a -= fAlpha;
+    Out.vEmissive.xyz *= Out.vEmissive.a;
     
     Out.vNormal = vNormal;
     return Out;
+    //PS_OUT Out = (PS_OUT)0;
+    
+    //float2 vUV = Compute_Texcoord(In.vProjPos.xy / In.vProjPos.w);
+    
+    //float4 vWorldPos = Compute_WorldPos(vUV, g_DepthTexture);
+    
+    //if(false == all(vWorldPos))
+    //    discard;
+        
+    //float4 vLocalPos = mul(vWorldPos, In.WorldInv);
+    
+    //float3 vLocalVolume = abs(vLocalPos.xyz);
+
+    //if (any(vLocalVolume > 0.5f))
+    //    discard;    
+    
+    //float2 vDecalUV = clamp((vLocalPos.xz) + 0.5f, 0.f, 1.f); // Decal 범위 -0.5~0.5;
+    
+    //float4 vDifffuse = 0.f;
+    //float4 vNormal = 0.f;
+    //float4 vMask = 0.f;
+    
+    //if(g_HasDiffuse)
+    //{
+    //    vDifffuse = g_DiffuseTexture.Sample(DefaultSampler, vDecalUV);
+    //    if (any(vDifffuse.xyz))
+    //        vDifffuse.a = max(max(vDifffuse.r, vDifffuse.b), vDifffuse.g);
+    //    else
+    //        discard;
+    //}
+    
+    //if (g_HasNormal)
+    //    vNormal = g_NormalTexture.Sample(DefaultSampler, vDecalUV);
+    
+    
+    //if (g_HasMask)
+    //{
+    //    vMask = g_MaskTexture.Sample(DefaultSampler, vDecalUV);
+    //    if (any(vMask.xyz))
+    //        vMask.a = max(max(vMask.r, vMask.b), vMask.g);
+    //    else
+    //        discard;
+    //}
+    
+    //float fAlpha = saturate((In.vLifeTime.x / In.vLifeTime.y));
+    //float4 vColor = any(vDifffuse) ? vDifffuse : In.vColor;
+        
+    //Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
+    //Out.vDiffuse.a -= fAlpha;
+    
+    //if (Luminance(Out.vDiffuse.xyz) >= g_fEmissiveThreshold)
+    //{
+    //    Out.vEmissive.xyz = Out.vDiffuse.xyz;
+    //    Out.vEmissive.a = Out.vDiffuse.a;
+    //}
+    
+    //Out.vNormal = vNormal;
+    //return Out;
 }
 
 
