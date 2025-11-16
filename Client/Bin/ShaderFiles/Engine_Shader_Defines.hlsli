@@ -15,7 +15,7 @@ float g_fGlobalDynamicMetallic = 0.f;  // PBR.x
 float g_fGlobalDynamicRoughness = 0.35; // PBR.y
 
 float g_fGlobalStaticMetallic = 0.f;
-float g_fGlobalStaticRoughness = 0.3f;
+float g_fGlobalStaticRoughness = 0.75f;
 
 
 float Luminance(float3 vColor)
@@ -23,6 +23,15 @@ float Luminance(float3 vColor)
     float fWeight;
     
     fWeight = (vColor.r * g_fLuminence[0]) + (vColor.g * g_fLuminence[1]) + (vColor.b * g_fLuminence[2]);
+    
+    return fWeight;
+}
+
+float CustomLuminance(float3 vColor, float3 vLuminance)
+{
+    float fWeight;
+    
+    fWeight = (vColor.r * vLuminance.r) + (vColor.g * vLuminance.g) + (vColor.b * vLuminance.b);
     
     return fWeight;
 }

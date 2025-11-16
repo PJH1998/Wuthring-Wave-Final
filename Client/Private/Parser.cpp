@@ -579,27 +579,27 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 		}
 	}
 
-	//strEffectPath = strDefaultPath;
-	//strEffectPath += "/FXDecal/";
-	//for (const auto& entry : filesystem::directory_iterator(strEffectPath))
-	//{
-	//	if (entry.is_regular_file())
-	//	{
-	//		//파일 경로
-	//		_string filePath = entry.path().string();
-	//		//파일 이름
-	//		_string fileName = entry.path().filename().string();
-	//		//파일 정보
-	//		_string extension = entry.path().extension().string();
-
-	//		if (extension == ".json")
-	//		{
-	//			_string strRectTag = entry.path().stem().string();
-
-	//			Load_FXDecal_FromJson(filePath, strRectTag, eLevel);
-	//		}
-	//	}
-	//}
+	strEffectPath = strDefaultPath;
+	strEffectPath += "/FXDecal/";
+	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+	
+			if (extension == ".json")
+			{
+				_string strRectTag = entry.path().stem().string();
+	
+				Load_FXDecal_FromJson(filePath, strRectTag, eLevel);
+			}
+		}
+	}
 
 
     //추후 추가 될 이펙트들 더 있음. 나머진 추후 추가 예정.
@@ -1237,7 +1237,7 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 	if (DecalDataJson.contains("TextureCount"))
 		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
 
-	const _tchar* DecalTexturePath[3] = {};
+	const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 
 	if (DecalDataJson.contains("Textures") && DecalDataJson["Textures"].is_array())
 	{
@@ -1259,7 +1259,6 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 			wcscpy_s(TextPath, strTexturePath.c_str());
 
 			DecalTexturePath[iType] = TextPath;
-
 		}
 	}
 

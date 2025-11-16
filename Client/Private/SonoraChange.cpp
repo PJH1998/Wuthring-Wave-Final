@@ -52,13 +52,12 @@ void CSonoraChange::Update(_float fTimeDelta)
 	_float fFadeRatio = SmoothStep(m_fFadeTime, m_fEffectTime, m_fCurrentTime);
 
 	m_pGameInstance->Setting_Radial(m_vRadialCenter, _float2(0.f, fRadialDistance), fRadialIntensity);
-
+	
 	if (m_fCurrentTime >= m_fEffectTime)
 	{
 		m_isActivate = false;
 		m_pGameInstance->End_SFX();
 	}
-
 }
 
 void CSonoraChange::Late_Update(_float fTimeDelta)

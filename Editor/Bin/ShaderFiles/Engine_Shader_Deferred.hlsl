@@ -188,14 +188,13 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
-    //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    //vector vLook = normalize(vViewPos * -1.f);
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    
     float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
     
     float4 vAmbient = 0.f;
@@ -576,6 +575,31 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_SFX(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float2 vTexcoord;
+    float2 vWeight;
+    vector vNormal;
+    vector vNormalData;
+    
+    vNormalData = g_DistortionTexture.Sample(PointSampler, In.vTexcoord);
+    
+    vNormalData = vector((vNormalData.xy * 2.f) - 1.f, vNormalData.z, vNormalData.a);
+    vWeight = (vNormalData.xy * vNormalData.z) * vNormalData.a;
+    
+    vWeight *= 0.12f;
+
+    vTexcoord = In.vTexcoord + vWeight;
+    
+    vector vFinalColor = g_BackBufferTexture.Sample(ClampSampler, vTexcoord);
+    
+    Out.vColor = vFinalColor;
+    
+    return Out;
+}
+
 
 PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
 {
@@ -819,4 +843,17 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MOTION_BLUR();
     }
+    
+    pass SFX
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SFX();
+
+    }
+
 }

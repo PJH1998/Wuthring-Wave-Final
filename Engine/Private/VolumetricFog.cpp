@@ -412,7 +412,7 @@ void CVolumetricFog::Free()
 
 	for (_uint i = 0; i < ENUM_CLASS(CS::END); ++i)
 		Safe_Release(m_pCS[i]);
-
+	
 	for (_uint i = 0; i < ENUM_CLASS(UAV::END); ++i)
 		Safe_Release(m_pUAVs[i]);
 	

@@ -1,7 +1,7 @@
 ﻿#include "EditorPch.h"
 #include "Level_SFX.h"
-
 #include "SFX_Interface.h"
+#include "EditDummy_Map.h"
 
 CLevel_SFX::CLevel_SFX(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel{ pDevice, pContext }
@@ -10,11 +10,29 @@ CLevel_SFX::CLevel_SFX(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_SFX::Initialize()
 {
+	if (FAILED(Ready_Light()))
+		return E_FAIL;
+
+	if (FAILED(Ready_Interface()))
+		return E_FAIL;
+
+	m_pGameInstance->SettingFog(false);
+
+	CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
+	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.001f, 0.001f, 0.001f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
+		* XMMatrixTranslationFromVector(XMVectorSet(0.f, -10.f, 0.f, 1.f));
+	MapDesc.PreTransformMatrix = PreTransformationMatrix;
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
+		ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
+		CRASH("Failed Clone Dummy Wolf");
+
 	return S_OK;
 }
 
 void CLevel_SFX::Update(_float fTimeDelta)
 {
+	m_pSFX_Interface->Late_Update(fTimeDelta);
 }
 
 void CLevel_SFX::Render()
@@ -39,12 +57,15 @@ HRESULT CLevel_SFX::Ready_Light()
 
 HRESULT CLevel_SFX::Ready_Interface()
 {
-	return E_NOTIMPL;
+	m_pSFX_Interface = CSFX_Interface::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pSFX_Interface);
+
+	return S_OK;
 }
 
 HRESULT CLevel_SFX::Ready_TestObjects()
 {
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 CLevel_SFX* CLevel_SFX::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -45,6 +45,8 @@ public:
 	typedef struct DecalData {
 		_wstring wstrDecalDataTag = {};
 		_int	iTextureCount = {};
+		_bool	Emissive = false;
+		_float3	vEmissiveLuminance;
 		vector<TEXTURE_DESC> TextureDesc;
 	}DECAL_DATADESC;
 
@@ -133,6 +135,10 @@ private:
 	CEffect_Decal::DECAL_DESC*									m_pSelectedDecalDesc = { nullptr };
 
 	_float														m_fColor[4] = {1.f, 1.f, 1.f, 1.f};		
+
+	//Decal 베이스 정보
+	_bool														m_bEmissive = false;
+	_float3														m_EmissiveLuminance = {};
 
 public:
 	static CDecal_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
