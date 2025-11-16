@@ -24,6 +24,7 @@ CMainApp::CMainApp()
 	m_pGameSystem{ CGameSystem::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMainApp::Initialize()
@@ -277,6 +278,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute FlyAnimMesh Shader");
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshNonRib.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute NonRibAnimMesh Shader");
+
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))
@@ -381,10 +387,11 @@ void CMainApp::Free()
 {
 	__super::Free();
 
+	m_pGameSystem->Release_System();
+	Safe_Release(m_pGameSystem);
+
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
 	m_pGameInstance->Release_Engine();
 	Safe_Release(m_pGameInstance);
-
-	Safe_Release(m_pGameSystem);
 }
