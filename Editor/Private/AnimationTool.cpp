@@ -1140,11 +1140,13 @@ void CAnimationTool::Render_EditModel()
 	if (m_wSelected_AnimActorTag.empty())
 		return;
 
+	m_AnimationActors.at(m_wSelected_AnimActorTag)->Set_PlayAnimation(false);
+
 	ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
 
 	static float fPosition[3] = { 0.f, 0.f, 0.f };
 	ImGui::InputFloat3("Position", fPosition);
-
+	
 	CTransform* pTransformCom = m_AnimationActors.at(m_wSelected_AnimActorTag)->Get_Transform();
 	m_pGameInstance->Use_Gizmo(pTransformCom);
 
