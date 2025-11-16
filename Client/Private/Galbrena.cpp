@@ -284,8 +284,10 @@ void CGalbrena::Play_PartAnimation(_uint iPartType, const _string& strAnimName, 
     switch (iPartType)
     {
 	case PART_FIRSTGUN:
+		m_pGalbrenaFirstShotGun->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
 		break;
 	case PART_SECONDGUN:
+		m_pGalbrenaSecondShotGun->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
 		break;
 	case PART_LION:
 		break;
@@ -306,6 +308,7 @@ void CGalbrena::PartActivate(_uint iPartType, _bool IsActive)
 		m_pGalbrenaFirstShotGun->Activate(IsActive);
 		break;
 	case PART_SECONDGUN:
+		m_pGalbrenaSecondShotGun->Activate(IsActive);
 		break;
 	case PART_LION:
 		break;
@@ -322,8 +325,10 @@ void CGalbrena::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	switch (iPartType)
 	{
 	case PART_FIRSTGUN:
+		m_pGalbrenaFirstShotGun->Change_Volume(iVolumeIdx);
 		break;
 	case PART_SECONDGUN:
+		m_pGalbrenaSecondShotGun->Change_Volume(iVolumeIdx);
 		break;
 	case PART_LION:
 		break;
@@ -335,8 +340,10 @@ void CGalbrena::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 	switch (iPartType)
 	{
 	case PART_FIRSTGUN:
+		m_pGalbrenaFirstShotGun->Volume_Activate(IsActive);
 		break;
 	case PART_SECONDGUN:
+		m_pGalbrenaSecondShotGun->Volume_Activate(IsActive);
 		break;
 	case PART_LION:
 		break;
@@ -348,8 +355,10 @@ void CGalbrena::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
     switch (iPartType)
     {
 	case PART_FIRSTGUN:
+		m_pGalbrenaFirstShotGun->Clear_Animation(strAnimName);
 		break;
 	case PART_SECONDGUN:
+		m_pGalbrenaSecondShotGun->Clear_Animation(strAnimName);
 		break;
 	case PART_LION:
 		break;
@@ -475,21 +484,35 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	_uint iVolumeIdx = {  };
 
-    if (var1 == TEXT("FirstGun"))
-    {
-		/*if (var2 == TEXT("ATK"))
-			iVolumeIdx = CGalbrenaSword::VOLUME::VOLUME_ATTACK;
 
+	if (var1 == TEXT("Galbrena"))
+	{
+		// 1. Attack Volume Index 설정.
+		if (var2 == TEXT("ARROUND"))
+			iVolumeIdx = VOLUME::VOLUME_ARROUND; // 주변 공격.
+		else if (var2 == TEXT("ARROUND_SLASH"))
+			iVolumeIdx = VOLUME::VOLUME_ARROUND_SLASH;
+		else if (var2 == TEXT("KNOCKBACK"))
+			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
+		else if (var2 == TEXT("SKILL"))
+			iVolumeIdx = VOLUME::VOLUME_SKILL;
+
+		// 2. Main Attack Volume 교체.
+		m_pMainAttackVolume->TriggerActivate(false);
+		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+
+		// 3. Layer 설정.
 		if (var3 == TEXT("ATTACK"))
-			m_pGalbrenaSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
 		else if (var3 == TEXT("KNOCKBACK"))
-			m_pGalbrenaSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 		else if (var3 == TEXT("SKILL"))
-			m_pGalbrenaSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
 
-		m_pGalbrenaSword->Volume_Activate(IsActive);*/
-    }
-	else if (var1 == TEXT("SecondGun"))
+		// 4. 활성화.
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
+	else if (var1 == TEXT("SecondAttack"))
 	{
 
 	}
@@ -507,34 +530,20 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pGalbrenaDarkScythe->Volume_Activate(IsActive);*/
 	}
-	else if (var1 == TEXT("Galbrena"))
-	{
-		if (var2 == TEXT("KNOCKBACK"))
-			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
-		else if (var2 == TEXT("SKILL"))
-			iVolumeIdx = VOLUME::VOLUME_SKILL;
-
-		m_pMainAttackVolume->TriggerActivate(false); // 교체.
-		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-
-		if (var3 == TEXT("ATTACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
-		else if (var3 == TEXT("KNOCKBACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
-		else if (var3 == TEXT("SKILL"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
-
-		m_pMainAttackVolume->TriggerActivate(IsActive);
-	}
+	
 }
 
 void CGalbrena::Effect_Active(const _wstring& wStrEffectTag)
 {
-    if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
-        return;
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
 
-    _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-    m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &effecInfo);
 }
 
 void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
@@ -548,8 +557,24 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 
+
+	// 1. Type Tag
+	if (var1 == TEXT("FirstShotGun"))
+	{
+
+		// 2. Action Tag
+		if (var2 == TEXT("Dissolve"))
+		{
+			// 3. Dissolve On / Off
+			if (var3 == TEXT("On"))
+			{
+
+			}
+		}
+	}
+
 	// GalbrenaWing|Bone
-	// 자르는거야.
+
 }
 void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
@@ -726,6 +751,21 @@ void CGalbrena::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 			Safe_AddRef(m_pGalbrenaFirstShotGun);
 			break;
 		case PARTTYPE::PART_SECONDGUN:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetGalbrenaSecondShotGunCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("PART_SECONDSHOTGUN");
+
+			m_pGalbrenaSecondShotGun = dynamic_cast<CGalbrenaShotGun*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pGalbrenaSecondShotGun);
+			Safe_AddRef(m_pGalbrenaSecondShotGun);
 			break;
 
 		case PARTTYPE::PART_LION:
@@ -763,15 +803,28 @@ void CGalbrena::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::KNOCKBACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(1.f, 1.f, 1.f); // x, z 크게 y작게
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 400.f;
-	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::DARK;
+	TriggerDesc.fAttackDmg = 250.f;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::FUSI;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
+	m_AttackVolumes[VOLUME_ARROUND] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND]);
+	m_AttackVolumes[VOLUME_ARROUND]->TriggerActivate(false);
+
+	m_AttackVolumes[VOLUME_ARROUND_SLASH] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND_SLASH]);
+	m_AttackVolumes[VOLUME_ARROUND_SLASH]->TriggerActivate(false);
 
 	m_AttackVolumes[VOLUME_KNOCKBACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")

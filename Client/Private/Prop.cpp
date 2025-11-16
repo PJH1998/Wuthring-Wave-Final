@@ -62,12 +62,19 @@ void CProp::Activate(_bool IsActive)
 	
 	if (!IsActive)
 	{
-		m_fTrackPosition = 0.f;
+		Prop_Reset();
 	}
 
     if (nullptr == m_pRigidbodyCom)
         return;
         
+}
+
+void CProp::Prop_Reset()
+{
+	m_fTrackPosition = 0.f; // TrackPosition 초기화
+	m_fDissolveTimer = 0.f; // Dissolve Time 초기화
+	Remove_AllCondition(); // Conidition 초기화;
 }
 
 void CProp::Volume_Activate(_bool IsActive)
@@ -122,8 +129,37 @@ void CProp::Collider_Active(_bool isActive)
     else 
         m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
 }
+
+
 #pragma endregion
 
+#pragma region CONDITION
+void CProp::Add_Condition(_uint iConditionFlag)
+{
+	m_iCondition |= iConditionFlag;
+}
+_bool CProp::Check_AnyCondition(_uint iConditionFlag)
+{
+	return (m_iCondition & iConditionFlag) != 0;
+}
+_bool CProp::Check_AllCondition(_uint iConditionFlag)
+{
+	return (m_iCondition & iConditionFlag) == iConditionFlag;
+}
+void CProp::Remove_Condition(_uint iConditionFlag)
+{
+	m_iCondition &= ~iConditionFlag;
+}
+void CProp::Remove_AllCondition()
+{
+	m_iCondition = 0;
+}
+void CProp::Bind_DissolveTimer()
+{
+	Add_Condition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	m_fDissolveTimer = 0.f;
+}
+#pragma endregion
 
 
 
