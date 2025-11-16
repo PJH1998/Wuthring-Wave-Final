@@ -70,10 +70,10 @@ HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, con
 	if (0 == m_PoolingObjects[strPoolingTag].size())
 		return S_OK;
 
-	//   CGameObject* pObject = m_PoolingObjects[strPoolingTag].front();
-	   //m_PoolingObjects[strPoolingTag].pop();
-	//   pObject->Reset(WorldMatrix, pArg);
-	   //m_ActiveObjects[strPoolingTag].push_back(pObject);
+	CGameObject* pObject = m_PoolingObjects[strPoolingTag].front();
+	m_PoolingObjects[strPoolingTag].pop();
+	pObject->Reset(WorldMatrix, pArg);
+	m_ActiveObjects[strPoolingTag].push_back(pObject);
 
 	return S_OK;
 }

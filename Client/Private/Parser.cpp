@@ -1384,7 +1384,8 @@ void CParser::Load_Sequence(const _char* pFolderPath)
 		if (entry.is_regular_file())
 		{
 			_string filePath = entry.path().string();
-			_string fileName = entry.path().filename().string();
+			_string fileName = entry.path().stem().string();
+			
 
 			ifstream InputFile(filePath);
 			json SequeceJson;

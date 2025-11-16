@@ -28,6 +28,7 @@ HRESULT CAoEDoT::Initialize_Clone(void* pArg)
 	m_vOffset = pDesc->vOffset;
 	m_iTargetLayers = pDesc->iTargetLayers;
 	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_isActivate = false;
     return S_OK;
 }
 
@@ -88,7 +89,11 @@ void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fDelayAcc = m_fDelayTime;
 	m_fLifeTimeAcc = 0.f;
 	m_isActivate = true;
-	m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), nullptr);
+
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = nullptr;
+	EffectDesc.pModelPtr = nullptr;
+	m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
 }
 
 void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
