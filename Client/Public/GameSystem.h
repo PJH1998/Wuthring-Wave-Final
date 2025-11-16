@@ -130,7 +130,10 @@ private:
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
+
 public:
+	void				Release_System();
+
 	virtual		void	Free() override;
 
 };

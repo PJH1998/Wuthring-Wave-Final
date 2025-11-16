@@ -24,6 +24,7 @@ CMainApp::CMainApp()
 	m_pGameSystem{ CGameSystem::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMainApp::Initialize()
@@ -378,10 +379,11 @@ void CMainApp::Free()
 {
 	__super::Free();
 
+	m_pGameSystem->Release_System();
+	Safe_Release(m_pGameSystem);
+
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
 	m_pGameInstance->Release_Engine();
 	Safe_Release(m_pGameInstance);
-
-	Safe_Release(m_pGameSystem);
 }

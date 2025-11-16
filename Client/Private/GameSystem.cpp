@@ -295,10 +295,8 @@ MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
 }
 #pragma endregion
 
-void CGameSystem::Free()
+void CGameSystem::Release_System()
 {
-	__super::Free();
-
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
 
@@ -309,4 +307,11 @@ void CGameSystem::Free()
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
 	Safe_Release(m_pMonsterTable);
+
+	Release();
+}
+
+void CGameSystem::Free()
+{
+	__super::Free();
 }
