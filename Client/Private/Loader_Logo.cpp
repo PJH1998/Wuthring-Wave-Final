@@ -37,6 +37,8 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_LogoFeMaleRover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
 
+	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
+
     return S_OK;
 }
 
