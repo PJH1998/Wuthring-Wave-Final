@@ -9,16 +9,17 @@
 #include "GalbrenaGroundLand.h"
 #include "GalbrenaGroundDash.h"
 #include "GalbrenaGroundAttack.h"
+#include "GalbrenaGroundSkill.h"
 //#include "GalbrenaGroundBurst.h"
 //#include "GalbrenaGroundSpecial.h"
-//#include "GalbrenaGroundSkill.h"
+
 //#include "GalbrenaGroundQTE.h"
 #include "GalbrenaGroundDodge.h"
 
 // Air 카테고리 State들
 #include "GalbrenaAirFall.h"
 #include "GalbrenaAirJump.h"
-//#include "GalbrenaAirAttack.h"
+#include "GalbrenaAirAttack.h"
 #include "GalbrenaAirFly.h"
 
 // Hit 카테고리 State
@@ -37,12 +38,14 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH), CGalbrenaGroundDash::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE), CGalbrenaGroundDodge::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK), CGalbrenaGroundAttack::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL), CGalbrenaGroundSkill::Create(pCharacter));
 
 
 	// Air 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP), CGalbrenaAirJump::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL), CGalbrenaAirFall::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY), CGalbrenaAirFly::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK), CGalbrenaAirAttack::Create(pCharacter));
 
 	// Hit 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT), CGalbrenaHit::Create(pCharacter));

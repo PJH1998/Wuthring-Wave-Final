@@ -806,6 +806,9 @@
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1272,6 +1275,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

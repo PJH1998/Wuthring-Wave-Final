@@ -54,6 +54,8 @@ public:
 	void Change_DIR(ATTACKVOULME_DIR eType);
 	void Change_Desc(CALLBACK_CLIENT* pDesc);
 
+	void Bind_SocketMatrix(const _float4x4* pMatrix) { m_pSocketMatrix = pMatrix; }
+
 private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
 	const _float4x4*	m_pSocketMatrix = { nullptr };

@@ -129,12 +129,12 @@ void CGalbrenaAirJump::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-	//if (m_States[AIR_ATTACK] && IsEscapePossible)
-	//{
-	//	m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_START;
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
-	//	return;
-	//}
+	if (m_States[AIR_ATTACK] && IsEscapePossible)
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_START;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+		return;
+	}
 
     // 2. 점프 애니메이션이 끝났는데도 안닿았을경우?
     if (m_IsAnimationEnd && !m_States[LAND])

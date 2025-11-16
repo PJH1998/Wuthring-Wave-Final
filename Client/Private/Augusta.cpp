@@ -596,14 +596,14 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	else if (var1 == TEXT("Augusta"))
 	{
 		if (var2 == TEXT("RISE_ZERO"))
-			iVolumeIdx = VOLUME::VOULME_RISE_ZERO;
+			m_iVolumeIdx = VOLUME::VOULME_RISE_ZERO;
 		else if (var2 == TEXT("RISE"))
-			iVolumeIdx = VOLUME::VOLUME_RISE;
+			m_iVolumeIdx = VOLUME::VOLUME_RISE;
 		else if (var2 == TEXT("HACKDOWN"))
-			iVolumeIdx = VOLUME::VOLUME_HACKDOWN;
+			m_iVolumeIdx = VOLUME::VOLUME_HACKDOWN;
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
-		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+		m_pMainAttackVolume = m_AttackVolumes[m_iVolumeIdx];
 
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
 		if (var3 == TEXT("ATTACK"))

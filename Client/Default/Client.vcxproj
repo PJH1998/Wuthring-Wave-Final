@@ -209,6 +209,7 @@
     <ClInclude Include="..\Public\Event_Camera.h" />
     <ClInclude Include="..\Public\FS_Scythe.h" />
     <ClInclude Include="..\Public\Galbrena.h" />
+    <ClInclude Include="..\Public\GalbrenaAirAttack.h" />
     <ClInclude Include="..\Public\GalbrenaAirFall.h" />
     <ClInclude Include="..\Public\GalbrenaAirFly.h" />
     <ClInclude Include="..\Public\GalbrenaAirJump.h" />
@@ -401,6 +402,7 @@
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\FS_Scythe.cpp" />
     <ClCompile Include="..\Private\Galbrena.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirFall.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirFly.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />

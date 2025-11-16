@@ -152,7 +152,9 @@ enum class EGalbrenaSkillType : _uint
 {
 	SKILL01 = 0,
 	SKILL02,
-	ATTACK11,
+	ATTACK_JUMP,
+	ATTACK_JUMP_END02,
+	ATTACK_JUMP_START,
 	END
 };
 
@@ -212,9 +214,11 @@ enum class EGalbrenaFallType : _uint
 
 enum class EGalbrenaAirAttackType : _uint
 {
-	AIRATTACK_START = 0,
-	AIRATTACK_LOOP,
-	AIRATTACK_END,
+	AIRATTACK_END = 0,
+	AIRATTACK_LOOP_1,
+	AIRATTACK_LOOP_2,
+	AIRATTACK_START,
+	AIRATTACK_START02,
 	END
 };
 
