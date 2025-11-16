@@ -91,9 +91,6 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     
-
-    m_pGameInstance->Wait_Thread_End();
-
 	Load_Action();
 
     return S_OK;
@@ -611,7 +608,6 @@ HRESULT CLoader_Test::Load_Galbrena()
 HRESULT CLoader_Test::Load_Action()
 {
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
-
 	return S_OK;
 }
 

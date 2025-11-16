@@ -36,12 +36,19 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->SettingFog(true);
 	m_pGameInstance->Set_LUT_Index(1);
+
     return S_OK;
 }
 
 void CLevel_Logo::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Logo"));
+
+	if (false == m_isCutScene)
+	{
+		m_isCutScene = true;
+		m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
+	}
 
     if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
     {
@@ -77,11 +84,11 @@ void CLevel_Logo::Ready_Camera()
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CameraDesc.fMouseSensor = 0.004f;
 	
-	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"), ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::LOGO), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
 		CRASH("Add Camera");
 
-	if (FAILED(m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"))))
-		CRASH("Change Camera");
+	//if (FAILED(m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"))))
+	//	CRASH("Change Camera");
 }
 
 void CLevel_Logo::Ready_Layer_LogoMaleRover()
