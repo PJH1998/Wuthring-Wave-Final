@@ -452,6 +452,9 @@ void CLoad_Controller::Load_Particle_OB_FromJson(const _string& strFilePath, con
     if (ParticleJson.contains("Root"))
         Desc.IsRootOn = ParticleJson["Root"].get<_bool>();
 
+	if (ParticleJson.contains("Pivot"))
+		Desc.IsPivot = ParticleJson["Pivot"].get<_bool>();
+
     if (ParticleJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(ParticleJson["TextureTag"].get<_string>());
 

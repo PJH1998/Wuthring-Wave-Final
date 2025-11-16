@@ -62,7 +62,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 
 
     XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
-    Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
+	Default_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
 
     return S_OK;
 }
@@ -76,14 +76,14 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
+    //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함. 
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
 	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
     m_vLifeTime.x += fTimeDelta;
 
-	//if (m_IsRoot)
-	//	Update_Transform();
+	if (m_IsRoot)
+		Update_Transform();
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {
@@ -137,41 +137,63 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
     m_vLifeTime.x = 0.f;
     Root_Transform(WorldMatrix);*/
 
+	//EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	//m_isActivate = pDesc->IsActive;
+
+	//if (m_isActivate)
+	//{
+	//	if (pDesc->pBoneMatrixPtr != nullptr)
+	//	{
+	//		//뼈에 붙여야한다는 것. 근데 파티클은 뼈에 안붙여도 될듯?
+	//		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+	//		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+	//		m_IsRoot = true;
+	//		m_OffsetMatrix = WorldMatrix;
+	//		m_fSweep = 0.f;
+	//		m_fColorSweep = 0.f;
+	//		m_vLifeTime.x = 0.f;
+	//		m_fMaskSweep = 0.f;
+	//	}
+	//	else if (pDesc->pBoneMatrixPtr == nullptr)
+	//	{
+	//		//기존처리
+	//		m_vLifeTime.x = 0.f;
+	//		Root_Transform(WorldMatrix);
+	//		m_IsRoot = false;
+	//		m_fSweep = 0.f;
+	//		m_fColorSweep = 0.f;
+	//		m_vLifeTime.x = 0.f;
+	//		m_fMaskSweep = 0.f;
+	//	}
+	//}
+
 	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
 
 	m_isActivate = pDesc->IsActive;
 
-	if (m_isActivate)
+	//기본 초기화
+	m_fSweep = 0.f;
+	m_fColorSweep = 0.f;
+	m_fMaskSweep = 0.f;
+	m_vLifeTime.x = 0.f;
+
+	if (m_isActivate && !m_IsRoot)
 	{
-		if (pDesc->pBoneMatrixPtr != nullptr)
-		{
-			//뼈에 붙여야한다는 것. 근데 파티클은 뼈에 안붙여도 될듯?
-			m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
-			m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
-			m_IsRoot = true;
-			m_OffsetMatrix = WorldMatrix;
-			m_fSweep = 0.f;
-			m_fColorSweep = 0.f;
-			m_vLifeTime.x = 0.f;
-			m_fMaskSweep = 0.f;
-		}
-		else if (pDesc->pBoneMatrixPtr == nullptr)
-		{
-			//기존처리
-			m_vLifeTime.x = 0.f;
-			Root_Transform(WorldMatrix);
-			m_IsRoot = false;
-			m_fSweep = 0.f;
-			m_fColorSweep = 0.f;
-			m_vLifeTime.x = 0.f;
-			m_fMaskSweep = 0.f;
-		}
+		//뼈에 안붙을 얘면 프리팹이 계산해서 던져준 월드매트릭스 그대로 사용해도 됨.
+		Default_Transform(WorldMatrix);
+	}
+	else if (m_isActivate && m_IsRoot)
+	{
+		//뼈에 붙을 얘면 프리팹이 넘겨준 정보 토대로 업데이트에서 갱신해주는 작업이 필요.
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+		m_OffsetMatrix = WorldMatrix;
 	}
 }
 
-void CTrail_Mesh::Root_Transform(_fmatrix WorldMatrix)
+void CTrail_Mesh::Default_Transform(_fmatrix WorldMatrix)
 {
-
     XMStoreFloat4x4(&m_ComBindMatrix,
         m_pTransformCom->Get_WorldMatrix()
         * WorldMatrix);

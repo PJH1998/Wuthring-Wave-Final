@@ -361,6 +361,9 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CAbility::Create(m_pDevice, m_pContext))))
 		CRASH("Ability");
 
+	//Decal
+	m_pGameSystem->Load_EffectDecalData_FromFolder("../Bin/Resource/Effect/Prefabs/Common/Decal");
+
 }
 
 void CMainApp::Start_Level()
