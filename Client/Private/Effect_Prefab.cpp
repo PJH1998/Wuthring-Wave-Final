@@ -149,6 +149,8 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
 		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+
+		m_isActivate = true;
 	}
 	else if (pDesc->pModelPtr == nullptr)
 	{
@@ -163,6 +165,8 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
 
 		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+				m_isActivate = true;
 	}
 }
 
