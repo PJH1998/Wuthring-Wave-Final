@@ -62,7 +62,7 @@ void CRoverGroundSkill::OnEnter(void* pArg)
     }
 
 	m_pRover->Set_Gravity(true);
-	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName;
+	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
 }
 
 void CRoverGroundSkill::OnUpdate(_float fTimeDelta)
