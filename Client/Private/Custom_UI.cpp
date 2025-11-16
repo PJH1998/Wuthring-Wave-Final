@@ -55,6 +55,11 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
+#ifdef _DEBUG
+	if (m_tUIDesc.strUIName == L"SectorA_LockOn")
+		int i = 10;
+#endif // _DEBUG
+
     if (m_pAnimator_UICom)
         m_pAnimator_UICom->Update(fTimeDelta);
 
@@ -513,11 +518,6 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 
 void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 {
-
-	if (Get_UIDesc().strUIName == L"Interact_Normal")	// Button Interact 의 경우 변수와 한번 비교. 그래도 이상하면 render 직전도
-		int i = 10;
-
-
 	if (m_pAnimator_UICom)
 	{
 		if (!pParentAnimatorCom)

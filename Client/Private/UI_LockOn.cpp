@@ -19,6 +19,7 @@ CUI_LockOn::CUI_LockOn(const CUI_LockOn& Prototype)
 	: CUI_Image(Prototype)
 	//, m_pGameSystem (CGameSystem::GetInstance())
 {
+	//Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_LockOn::Initialize_Prototype()
@@ -46,6 +47,7 @@ HRESULT CUI_LockOn::Initialize_Clone(void* pArg)
 	Load_Animations(vecAnimFilePaths);
 
 	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
+	static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 	static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
 
 	Reset(_fmatrix(), nullptr);
@@ -53,6 +55,7 @@ HRESULT CUI_LockOn::Initialize_Clone(void* pArg)
 
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_LockOn", this);
+
 
 	return S_OK;
 }
@@ -69,11 +72,49 @@ void CUI_LockOn::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+	
+
+	// 타겟 위치 반영
+	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
+
+
+	_matrix matCamView = m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW);
+	_matrix matCamProj = m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ);
+
+	const _float2 vScreenSize = { g_iWinSizeX, g_iWinSizeY };
+	_vector vTargetWorldPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	vTargetWorldPos = XMVectorSetW(vTargetWorldPos, 1.f);
+
+	_matrix matViewProj = matCamView * matCamProj;
+	_vector vTargetClipRaw = XMVector3Transform(vTargetWorldPos, matViewProj);
+
+	_float fTargetW = XMVectorGetW(vTargetClipRaw);
+	bool isBehindCamera = (fTargetW <= 0.0f);
+
+	_float2 vScreenPos = {};
+
+	if (!isBehindCamera)
+	{
+		_vector vTargetNDC = XMVector3TransformCoord(vTargetWorldPos, matViewProj);
+
+		vScreenPos.x = (XMVectorGetX(vTargetNDC) + 1.0f) * 0.5f * vScreenSize.x - vScreenSize.x * 0.5f;
+		vScreenPos.y = (1.0f - XMVectorGetY(vTargetNDC)) * 0.5f * vScreenSize.y - vScreenSize.y * 0.5f;
+	}
+	else
+		vScreenPos = { -2000.f, -2000.f };
+
+	_vector vPos = XMVectorSet(vScreenPos.x, -vScreenPos.y, 0.f, 1.f);
+	static_cast<CTransform*>(pLockOnUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
+
 
 	__super::Update(fTimeDelta);
 
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
+	
+
+
+
 }
 
 void CUI_LockOn::Late_Update(_float fTimeDelta)
@@ -89,21 +130,7 @@ void CUI_LockOn::Render()
 	if (!m_isActivate)
 		return;
 
-	// 따로 추가적으로 할당해주도록 만들어야 할 듯? 타겟Pos같은거
-	
-	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
-	CShader* pTargetShader = dynamic_cast<CShader*>(pLockOnUI->Get_Component(L"Com_Shader"));
-	
-	_bool isTargetExist = true;
-	if (FAILED(pTargetShader->Bind_Value("g_isTargetExist", &isTargetExist, sizeof(isTargetExist))))
-		CRASH("Binding_Value_Failed");
-	
-	_float4 vTargetPos = { 0.f ,0.f ,0.f, 1.f };
-	//XMStoreFloat4(&vTargetPos, m_pTargetTransform->Get_State(STATE::POSITION));	// ksta : Edit
-	if (FAILED(pTargetShader->Bind_Value("g_vTargetWorldPos", &vTargetPos, sizeof(vTargetPos))))
-		CRASH("Binding_Value_Failed");
 
-	//pLockOnUI->Render();
 }
 
 void CUI_LockOn::Reset(const _fmatrix& WorldMatrix, void* pArg)

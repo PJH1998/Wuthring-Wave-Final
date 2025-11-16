@@ -15,6 +15,7 @@ CUI_Loading::CUI_Loading(const CUI_Loading& Prototype)
 	:CCustom_UI(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_Loading::Initialize_Prototype()
@@ -167,6 +168,8 @@ CGameObject* CUI_Loading::Clone(void* pArg)
 
 void CUI_Loading::Free()
 {
+	Safe_Release(m_pGameSystem);
+
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
 

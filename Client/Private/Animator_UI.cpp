@@ -240,42 +240,23 @@ void CAnimator_UI::Update_Animation_Calculate()
 {
     // if target doesnt have selected animation, binds default value to shader.
     // if not, it will be affected by pre-played animations.
-	if (m_pOwner->Get_UIDesc().strUIName == L"Interact_Normal")
+#ifdef _DEBUG
+	if (m_pOwner->Get_UIDesc().strUIName == L"SectorA_LockOn")
 		int i = 10;
+
+#endif // _DEBUG
 
 
     if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))		// rootUI doesnt need animator.
         return;
 
-	// Get Parent Animator, Get Combined KeyframeDesc.
-
-	// 부모 오브젝트 찾아서 해당 오브젝트로부터 combineddesc 가져와서 계산에 사용.
-	// 만약 부모 오브젝트에게 애니메이터가 없거나 부모오브젝트가 없으면 그 경우는 예외처리
-
 	UI_ANIM_KEYFRAME_DESC tDesc = {};
-
-	//CAnimator_UI* pParentAnimator = nullptr;
-	//UI_ANIM_KEYFRAME_DESC* pParentCombinedDesc = nullptr;
-	//CCustom_UI* pParentUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(m_pOwner->Get_UIDesc().strParentName));
-	//if (pParentUI)
-	//	pParentAnimator = dynamic_cast<CAnimator_UI*>(pParentUI->Get_Component(L"Com_Animator_UI"));
-	//if (pParentAnimator)
-	//	pParentCombinedDesc = pParentAnimator->Get_CurCombinedAnimKeyframeDesc();
-
     CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
 
     if (m_pCurAnimDesc == nullptr)
     {
-		//_float fCombinedAlpha = (pParentAnimator)? pParentCombinedDesc->fAlpha * tDesc.fAlpha : tDesc.fAlpha;
-
-		//_float fCombinedAlpha = m_tCombinedKeyFrameDesc.fAlpha;
-        //pTargetShader->Bind_Value("g_AlphaStrength", &fCombinedAlpha, sizeof(fCombinedAlpha));
-        //pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
-        //pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
-        //pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
-
 		m_tCalcedKeyFrameDesc = UI_ANIM_KEYFRAME_DESC{};
-		return; // 셰이더 바인딩 코드 제거
+		return;
     }
 
 
@@ -339,7 +320,7 @@ void CAnimator_UI::Update_Animation_Calculate()
         fFixedLerpRatio
     );
 
-    _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
+	_float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
 
     _float3 vResultRot = {};
     XMStoreFloat3(&vResultRot, XMVectorLerp(
@@ -384,10 +365,38 @@ void CAnimator_UI::Update_Animation_Calculate()
 
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
 
+
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
     _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
 
+	// 만약 비활성화된 요소가 있다면 해당하는 것은 반영X
+	if (m_iDisableFlag)
+	{
+		_vector vPos, vRot, vSca;
+
+		_float4x4 matOwner = {}; XMStoreFloat4x4(&matOwner, pOwnerTransformCom->Get_WorldMatrix());
+		XMMatrixDecompose(&vSca, &vRot, &vPos, XMLoadFloat4x4(&matOwner));
+
+		if (m_iDisableFlag & ENUM_CLASS(UI_ANIM_DISABLE::POS))
+		{
+			XMStoreFloat3(&vResultPos, vPos);
+			matPos = XMMatrixTranslationFromVector(vPos);
+		}
+		if (m_iDisableFlag & ENUM_CLASS(UI_ANIM_DISABLE::ROT))
+		{
+			_float4x4 tmpMat = {}; XMStoreFloat4x4(&tmpMat, XMMatrixRotationQuaternion(vRot)) ;
+			_float3 tmpRotRad = _float3{ RadiansToDegrees(asin(-tmpMat._32)), RadiansToDegrees(atan2(tmpMat._31, tmpMat._33)), RadiansToDegrees(atan2(tmpMat._12, tmpMat._22)) };
+			vResultRotRad = tmpRotRad;
+			matRot = XMMatrixRotationQuaternion(vRot);
+		}
+		if (m_iDisableFlag & ENUM_CLASS(UI_ANIM_DISABLE::SCA))
+		{
+			XMStoreFloat3(&vResultSca, vSca);
+			matSca = XMMatrixScalingFromVector(vSca);
+		}
+	}
+		
     _matrix matTransform = matSca * matRot * matPos;
 
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
@@ -405,10 +414,6 @@ void CAnimator_UI::Update_Animation_Calculate()
 	
 	//if (pParentCombinedDesc)
 	//	m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha * pParentCombinedDesc->fAlpha;		// 알파값만 부모 키프레임값을 가져와 계산
-
-	if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
-		int i = 10;
-
 
 	//pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));	//
 	//pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));

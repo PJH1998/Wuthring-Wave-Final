@@ -24,6 +24,7 @@ CUI_HUD::CUI_HUD(const CUI_HUD& Prototype)
     :CCustom_UI(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_HUD::Initialize_Prototype()
@@ -2068,6 +2069,8 @@ CGameObject* CUI_HUD::Clone(void* pArg)
 
 void CUI_HUD::Free()
 {
+	Safe_Release(m_pGameSystem);
+
 	if (m_isClone)
 		m_pGameInstance->Remove_RootUI(L"UI_HUD");
 

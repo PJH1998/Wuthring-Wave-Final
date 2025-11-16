@@ -20,7 +20,6 @@ public: // 생성/복제
 	virtual void    Late_Update(_float fTimeDelta)					override;
 	virtual void    Render()										override;
 
-
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
 

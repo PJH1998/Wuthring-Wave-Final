@@ -15,6 +15,7 @@ CUI_Button_Interact::CUI_Button_Interact(const CUI_Button_Interact& Prototype)
 	: CUI_Button(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 
@@ -256,6 +257,7 @@ CGameObject* CUI_Button_Interact::Clone(void* pArg)
 
 void CUI_Button_Interact::Free()
 {
+	Safe_Release(m_pGameSystem);
 
 	__super::Free();
 
