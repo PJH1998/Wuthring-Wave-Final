@@ -49,6 +49,8 @@ public:
 
 	//버퍼를 바인딩하고 해당 LOD인덱스를 가진 놈들 그리기 요청?
 	void RenderBufferPool(_uint iLODIndex);
+
+	void LoadLastLOD();
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };

@@ -29,6 +29,7 @@
 #include "Decal_Manager.h"
 #include "VolumetricFog.h"
 #include "HZB.h"
+#include"Model_Manager.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -129,6 +130,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pVF = CVolumetricFog::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pVF);
 
+	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pModel_Manager);
 	return S_OK;
 }
 
@@ -179,6 +182,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 
 	m_pVF->Update_VF(fTimeDelta);
+	m_pModel_Manager->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -1028,6 +1032,25 @@ HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureN
 	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
 }
 #pragma endregion
+HRESULT CGameInstance::RegisterPrototype(const _char* pFilePath, CModel_Streaming* pModel)
+{
+	return m_pModel_Manager->RegisterPrototype(pFilePath, pModel);
+}
+
+void CGameInstance::RequestData(CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex)
+{
+	m_pModel_Manager->RequestData(pModel, pFilePath, iLODIndex);
+}
+
+void CGameInstance::RenderBufferPool(_uint iLODIndex)
+{
+	m_pModel_Manager->RenderBufferPool(iLODIndex);
+}
+
+void CGameInstance::LoadLastLOD()
+{
+	m_pModel_Manager->LoadLastLOD();
+}
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {

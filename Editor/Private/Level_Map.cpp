@@ -16,6 +16,7 @@
 #include"Edit_MonsterSpawnor.h"
 #include"Edit_Meteo.h"
 #include"Model_Streaming.h"
+#include"Edit_MapObject_Test.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -117,7 +118,26 @@ HRESULT CLevel_Map::Initialize()
 	//Tri.WorldMatrix = &TT;
 	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
 
-	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL");
+	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test"),
+		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL"))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test2"),
+		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01OL"))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test_Object"),
+		CEdit_MapObject_Test::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	m_pGameInstance->LoadLastLOD();
+	CEdit_MapObject_Test::BUFFER_TEST TT{};
+	strcpy_s(TT.ModelName, "Prototype_Test");
+	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"),&TT);
+	strcpy_s(TT.ModelName, "Prototype_Test2");
+	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+	//CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL");
+
 	return S_OK;
 }
 

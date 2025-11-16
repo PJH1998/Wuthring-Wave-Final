@@ -39,8 +39,8 @@ HRESULT CBufferPool::Initialize(_uint iVertexSize, _uint iIndexSize)
 	if (FAILED(m_pDevice->CreateBuffer(&IBDesc, nullptr, &m_pIndexBufferPool)))
 		CRASH("Failed");
 
-	m_pIndexFreeList = CFreeList::Create();
-	m_pVertexFreeList = CFreeList::Create();
+	m_pVertexFreeList = CFreeList::Create(iVertexSize);
+	m_pIndexFreeList = CFreeList::Create(iIndexSize);
 
     return S_OK;
 }

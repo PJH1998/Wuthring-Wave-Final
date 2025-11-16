@@ -32,6 +32,7 @@ HRESULT CMesh_Streaming::Initialize_Clone(void* pArg)
 HRESULT CMesh_Streaming::Render(_uint iNumMeshIndex)
 {
 	//Model_Manager에서 바인딩 된 놈들만 한 번에 Draw. 디퍼드 컨텍스트 이용할 거면 나중에 따로 생성.
+	//LOD3번은 로딩 다 될 때까지 기다려야함. 
 	if (m_Desc->empty())
 		CRASH("Failed");
 
@@ -43,6 +44,19 @@ HRESULT CMesh_Streaming::Render(_uint iNumMeshIndex)
 	//임시 하드코딩
 	m_pContext->DrawIndexed(RenderDesc.NumIndices, RenderDesc.IndexOffset / 4, RenderDesc.VertexOffset / sizeof(VTXMESH));
 	return S_OK;
+}
+
+void CMesh_Streaming::Load_LastLODIndex(_string LastModelPath)
+{
+
+}
+
+void CMesh_Streaming::Set_Buffers(ID3D11Buffer* pSharedVB, ID3D11Buffer* pSharedIB)
+{
+	m_pSharedVB = pSharedVB;
+	m_pSharedIB = pSharedIB;
+	Safe_AddRef(m_pSharedVB);
+	Safe_AddRef(m_pSharedIB);
 }
 
 CMesh_Streaming* CMesh_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumMeshes)

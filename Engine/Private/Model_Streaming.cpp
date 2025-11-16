@@ -1,15 +1,24 @@
 ﻿#include"EnginePch.h"
 #include"Model_Streaming.h"
 #include"MeshMaterial.h"
+#include"GameInstance.h"
 
 CModel_Streaming::CModel_Streaming(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CComponent(pDevice, pContext)
 {
+
 }
 
 CModel_Streaming::CModel_Streaming(const CModel_Streaming& Prototype)
-	:CComponent(Prototype)
+	:CComponent(Prototype),
+	m_iNumMaterials{ Prototype.m_iNumMaterials }
+	, m_iMaxLOD{ Prototype.m_iMaxLOD },
+	//m_LodState{ Prototype.m_LodState },
+	m_ModelPath{ Prototype.m_ModelPath },
+	m_Materials{ Prototype.m_Materials }
 {
+	for (_uint i = 0; i < 4; ++i)
+		m_iNumMeshes[i] = Prototype.m_iNumMeshes[i];
 
 	for (_uint i = 0; i < 4; ++i)
 		m_Meshes[i] = dynamic_cast<CMesh_Streaming*>(Prototype.m_Meshes[i]->Clone(nullptr));
@@ -17,10 +26,14 @@ CModel_Streaming::CModel_Streaming(const CModel_Streaming& Prototype)
 	for (_uint i = 0; i < 4; ++i)
 		if (m_Meshes[i])
 			Safe_AddRef(m_Meshes[i]);
+
+	for (auto& pMaterial : m_Materials)
+		Safe_AddRef(pMaterial);
 }
 
 HRESULT CModel_Streaming::Initialize_Prototype(const _char* pFilePath)
 {
+	m_pGameInstance->RegisterPrototype(pFilePath, this);
 	Ready_Mesh(pFilePath);
 	Ready_Material(pFilePath);
 	return S_OK;
@@ -44,7 +57,6 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 {
-
 	if (m_Meshes[iLODIndex]->IsLoaded() == LOADSTATE::LOADED)
 	{
 		m_Meshes[iLODIndex]->Render(iMeshIndex);
@@ -74,6 +86,12 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 
 HRESULT CModel_Streaming::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
+	m_pGameInstance->RequestData(this, m_ModelPath, 0);
+
+	if (m_Meshes[0]->IsLoaded() == LOADSTATE::LOADED)
+		m_Meshes[0]->Render(iMeshIndex);
+	else
+		m_Meshes[m_iMaxLOD]->Render(iMeshIndex);
 	return S_OK;
 }
 
@@ -84,16 +102,22 @@ void CModel_Streaming::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 
 atomic<LOADSTATE>& CModel_Streaming::Get_MeshState(_uint iLODIndex)
 {
-	if (iLODIndex >= m_iMaxLOD)
+	if (iLODIndex > m_iMaxLOD)
 		CRASH("Failed");
 
 	return m_Meshes[iLODIndex]->IsLoaded();
+}
+
+void CModel_Streaming::RequestLastLODModel()
+{
+	m_pGameInstance->RequestData(this, m_ModelPath, m_iMaxLOD);
 }
 
 HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 {
 	//Dat 파일을 읽는 게 아니라 경로를 읽고 내부 데이터를 읽어야함.
 	_bool IsNameSave = { true };
+	_string LastModelPath;
 	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
 		if (m_iMaxLOD >= 4)
 			CRASH("??");
@@ -115,19 +139,44 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 
 		if (!m_Meshes[m_iMaxLOD++])
 			CRASH("Failed");
-
+		
 		if (IsNameSave)
-			m_ModelPath = entry.path().stem().string();
+			LastModelPath = m_ModelPath = entry.path().string();
 	}
+	--m_iMaxLOD;
 
+	size_t lastDotPos = m_ModelPath.find_last_of('.');
+
+	// 2. '.'을 찾았는지, 그리고 '.'이 경로의 맨 앞이 아닌지 확인합니다.
+	// (e.g., ".config" 같은 숨김 파일을 방지)
+	if (lastDotPos != std::string::npos && lastDotPos > 0)
+	{
+		// 3. '.' 위치 "앞까지"의 문자열만 잘라서(substr) 다시 저장합니다.
+		m_ModelPath = m_ModelPath.substr(0, lastDotPos);
+	}
 	m_ModelPath.pop_back();
-	
+
+
 	return S_OK;
 }
 
 HRESULT CModel_Streaming::Ready_Material(const _char* pFilePath)
 {
 	//LOD 0번만 하게 합시다.
+	return S_OK;
+}
+
+void CModel_Streaming::PlusRenderdTime(_float fTimeDelta)
+{
+	m_fRenderTime[0] += fTimeDelta;
+	m_fRenderTime[1] += fTimeDelta;
+	m_fRenderTime[2] += fTimeDelta;
+	m_fRenderTime[3] += fTimeDelta;
+}
+
+HRESULT CModel_Streaming::Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVertex, ID3D11Buffer* pIndex)
+{
+	m_Meshes[iLODIndex]->Set_Buffers(pVertex, pIndex);
 	return S_OK;
 }
 

@@ -4,10 +4,11 @@
 #include"Model_Streaming.h"
 
 CModel_Manager::CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	:m_pDevice(pDevice), m_pContext(pContext)
+	:m_pDevice(pDevice), m_pContext(pContext),m_pGameInstance(CGameInstance::GetInstance())
 {
 	Safe_AddRef(m_pDevice);
-	Safe_AddRef(m_pContext);
+	Safe_AddRef(m_pContext); 
+		Safe_AddRef(m_pGameInstance);
 }
 
 HRESULT CModel_Manager::Initialize()
@@ -35,6 +36,9 @@ void CModel_Manager::Update(_float fTimeDelta)
 {
 	//말이 업데이트지 사실 데이터 로드된 거 버퍼에 올리는 곳.
 	//여기 데이터에 있는 거를 스테이징에 올려야됨.
+	for (auto& pModel : m_ModelPrototypes)
+		pModel.second->PlusRenderdTime(fTimeDelta);
+
 	if (m_StagingData.empty())
 		return;
 
@@ -85,7 +89,7 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 			pData->push_back(Desc);
 		}
-		Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
+ 		Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
 	}
 
 	m_StagingData.clear();
@@ -120,13 +124,14 @@ void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFileP
 			LoadData(lModel, lFilePath, liLODIndex);
 			});
 	}
-	// TODO: 여기에 return 문을 삽입합니다.
+
+	//게임이니셜라이즈 하기 전에 LOD3번은 전부 미리 만들어두라고 요청하는 함수 만들기.(내부에는 Wait걸고)
 }
 
 void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath, _uint iLODIndex)
 {
 	//pFilePath는 파일 경로 말고 _LOD까지 붙은거. 
-	ifstream File(pFilePath + to_string(iLODIndex) + ".dat", ios::binary);
+	ifstream File(pFilePath  + to_string(iLODIndex) + ".dat", ios::binary);
 	if (!File.is_open())
 		CRASH("Failed");
 
@@ -136,7 +141,7 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 	MOEDL_DATA Datas;
 	Datas.pModel = pModel;
 	Datas.LoadData.resize(iNumMeshes);
-	
+	Datas.iLODIndex = iLODIndex;
 	for (_uint i = 0; i < iNumMeshes; ++i)
 	{
 		_uint iNumVertices = {};
@@ -182,6 +187,72 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 
 }
 
+void CModel_Manager::RenderBufferPool(_uint iLODIndex)
+{
+}
+
+void CModel_Manager::LoadLastLOD()
+{
+	for (auto& pModel : m_ModelPrototypes)
+	{
+		pModel.second->RequestLastLODModel();
+		for (_uint i = 0; i < 4; ++i)
+			pModel.second->Get_SharedBuffers(i, m_pBufferPool[i]->Get_VertexBuffer(), m_pBufferPool[i]->Get_IndexBuffer());
+	}
+
+	m_pGameInstance->Wait_Thread_End();
+	for (auto& Data : m_StagingData)
+	{
+		Data.pModel;
+		//Data의 Data.LoadData 개수가 메쉬의 개수.
+		vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
+		pData->clear();
+		for (_uint i = 0; i < Data.LoadData.size(); ++i)
+		{
+			_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
+			_uint VertexOffset = m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
+
+			if (VertexOffset == -1)
+				CRASH("Failed");
+
+			D3D11_MAPPED_SUBRESOURCE StagingDesc{};
+			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+			memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
+			m_pContext->Unmap(m_pStagingBuffer, 0);
+
+			D3D11_BOX PoolBox = { 0,0,0,VertexSize,1,1 };
+			m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
+				0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+
+
+			_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
+			_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
+
+			if (IndexOffSet == -1)
+				CRASH("Failed");
+
+			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+			memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
+			m_pContext->Unmap(m_pStagingBuffer, 0);
+
+			PoolBox = { 0,0,0,IndexSize,1,1 };
+			m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
+				0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+
+			SHARED_DATA_DESC Desc{};
+			Desc.IndexOffset = IndexOffSet;
+			Desc.IndexSize = IndexSize;
+			Desc.NumIndices = Data.LoadData[i].iNumIndices;
+			Desc.VertexOffset = VertexOffset;
+			Desc.VertexSize = VertexSize;
+
+			pData->push_back(Desc);
+		}
+		Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
+	}
+	m_StagingData.clear();
+}
+
 CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CModel_Manager* pInstance = new CModel_Manager(pDevice, pContext);
@@ -210,5 +281,6 @@ void CModel_Manager::Free()
 	for(auto& pPair: m_ModelPrototypes)
 		Safe_Release(pPair.second);
 
+	Safe_Release(m_pGameInstance);
 	m_ModelPrototypes.clear();
 }

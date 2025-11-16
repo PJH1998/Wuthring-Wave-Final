@@ -9,7 +9,7 @@ private:
 
 public:
 
-	void Initialize(_uint iMemorySize);
+	HRESULT Initialize(_uint iMemorySize);
 	_uint Allocate(_uint iMemorySize);
 	void Free(_uint iMemoryOffset, _uint iMemorySize);
 
@@ -18,7 +18,7 @@ private:
 
 public:
 
-	static CFreeList* Create();
+	static CFreeList* Create(_uint iMemorySize);
 	virtual void Free()override;
 };
 

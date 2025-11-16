@@ -29,11 +29,12 @@ public:
 	atomic<LOADSTATE>& 					Get_MeshState(_uint iLODIndex);
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc(_uint iLODIndex) { return m_Meshes[iLODIndex]->Get_MeshDesc(); }
-
+	void									  RequestLastLODModel();
 public:
 	HRESULT							Ready_Mesh(const _char* pFilePath);
 	HRESULT							Ready_Material(const _char* pFilePath);
-
+	void							PlusRenderdTime(_float fTimeDelta);
+	HRESULT							Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVertex, ID3D11Buffer* pIndex);
 private:
 	_uint									m_iNumMeshes[4] = { 0,0,0,0 };
 	class CMesh_Streaming*					m_Meshes[4] = { nullptr,nullptr,nullptr,nullptr };
@@ -42,6 +43,7 @@ private:
 	vector<class CMeshMaterial*>	m_Materials;
 	LOADSTATE								m_LodState[4] = { LOADSTATE::NOTLOADED,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED };
 
+	_float									m_fRenderTime[4] = { 0.f,0.f,0.f,0.f };
 	_string m_ModelPath;
 	_uint m_iMaxLOD = { 0 };
 	//메쉬를 최대 4개만 가지게 한 뒤에

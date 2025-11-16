@@ -6,17 +6,18 @@ CFreeList::CFreeList()
 
 }
 
-void CFreeList::Initialize(_uint iMemorySize)
+HRESULT CFreeList::Initialize(_uint iMemorySize)
 {
 	m_FreeBlocks.clear();
-	m_FreeBlocks.emplace(0, iMemorySize);
+	m_FreeBlocks.emplace(0, iMemorySize * 1024 * 1024);
+	return S_OK;
 }
 
 _uint CFreeList::Allocate(_uint iMemorySize)
 {
 	//Best-fit 알고리즘
 	_uint BestFitOffset = -1;
-	_uint BestFitSize = 0;
+	_uint BestFitSize = (_uint)-1;
 	auto BestFitIter = m_FreeBlocks.end();
 
 	for (auto iter = m_FreeBlocks.begin(); iter != m_FreeBlocks.end(); ++iter)
@@ -79,9 +80,17 @@ void CFreeList::Free(_uint iMemoryOffset, _uint iMemorySize)
 	m_FreeBlocks.emplace(iMemoryOffset, iMemorySize);
 }
 
-CFreeList* CFreeList::Create()
+CFreeList* CFreeList::Create(_uint iMemorySize)
 {
-	return new CFreeList();
+	CFreeList* pInstance = new CFreeList;
+
+	if (FAILED(pInstance->Initialize(iMemorySize)))
+	{
+		MSG_BOX("Failed to Create : Model_Manager");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
 }
 
 void CFreeList::Free()
