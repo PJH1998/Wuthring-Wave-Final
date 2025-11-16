@@ -14,6 +14,11 @@ CMap_Interface::CMap_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CMap_Interface::Initialize()
 {
+	m_FilePaths.push_back("../../Client/Bin/Resource/Map/Asphodel_Barrens/");
+	m_FilePaths.push_back("../../Client/Bin/Resource/Map/Test/");
+	m_FilePaths.push_back("../../Client/Bin/Resource/Map/Logo/");
+	m_FilePaths.push_back("../../Client/Bin/Resource/Map/The_False_Sovereign/");
+	m_FilePaths.push_back("../../Client/Bin/Resource/Map/");
 
     return S_OK;
 }
@@ -357,6 +362,9 @@ void CMap_Interface::Add_MapObject(_fvector vPos)
 
 void CMap_Interface::Load_Map_GUI()
 {
+	if (m_IsCreateMap)
+		return;
+
 	ImGui::Begin("Map Load");
 
 	IGFD::FileDialogConfig config;
@@ -365,18 +373,22 @@ void CMap_Interface::Load_Map_GUI()
 	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
 	ImGuiFileDialog::Instance()->OpenDialog("Map File Load", "Import File", ".dat", config);
+	ImGui::Begin("Select Map");
+	
+	ImGui::Text(m_szFilePath.c_str());
+	for (auto& pFilePath : m_FilePaths)
+	{
+		if (ImGui::Button(pFilePath))
+			m_szFilePath = pFilePath;
+	}
+	ImGui::End();
 
 	if (ImGuiFileDialog::Instance()->Display("Map File Load")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
-			_string DatFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
-			_string FilePath;
-			//FilePath= "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
-			//FilePath= "../../Client/Bin/Resource/Map/Test/";
-			FilePath= "../../Client/Bin/Resource/Map/Logo/";
-			//FilePath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
-			//FilePath= "../../Client/Bin/Resource/Map/";
 
-			Ready_Map_Prototype(FilePath.c_str());
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			m_IsCreateMap = true;
+			_string DatFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
+			Ready_Map_Prototype(m_szFilePath.c_str());
 
 			for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
 				if (entry.is_regular_file())
