@@ -80,7 +80,7 @@ void CSceneCamera::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		return;
 	m_isActivate = true;
 
-	m_iFrameIndex = 0;
+	m_iFrameIndex = -1;
 	m_Frames = pData->Frames;
 	m_fStartFrame = pData->fStartFrame;
 	m_fEndFrame = pData->fEndFrame;

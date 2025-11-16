@@ -15,7 +15,7 @@
 #include "SkyBox.h"
 #include "Effect_Prefab.h"
 #include "Ability.h"
-
+#include "SceneCamera.h"
 
 #include "CustomFont.h"
 
@@ -56,6 +56,8 @@ HRESULT CMainApp::Initialize()
 	m_pGameSystem->Ready_GameSystem(m_pDevice, m_pContext);
 
 	Ready_Prototype_ForStatic();
+	Ready_Sequence();
+	Ready_Sequence_Item();
 	Ready_Event();
 	Start_Level();
 
@@ -364,6 +366,19 @@ void CMainApp::Ready_Prototype_ForStatic()
 	//Decal
 	m_pGameSystem->Load_EffectDecalData_FromFolder("../Bin/Resource/Effect/Prefabs/Common/Decal");
 
+}
+
+void CMainApp::Ready_Sequence_Item()
+{
+	// Sequence Item
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		CRASH("Camera");
+}
+
+void CMainApp::Ready_Sequence()
+{
+	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
 }
 
 void CMainApp::Start_Level()

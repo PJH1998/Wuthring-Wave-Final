@@ -37,8 +37,6 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_LogoFeMaleRover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
 
-	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
-
     return S_OK;
 }
 
@@ -67,10 +65,6 @@ HRESULT CLoader_Logo::Load_Shader()
 
 HRESULT CLoader_Logo::Load_Object()
 {
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_SceneCamera"),
-		CSceneCamera::Create(m_pDevice, m_pContext))))
-		CRASH("SceneCamera Prototype");
-
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
 
