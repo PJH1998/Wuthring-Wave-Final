@@ -24,7 +24,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pGameSystem = CGameSystem::GetInstance();
-	Safe_AddRef(m_pGameSystem);
+	//Safe_AddRef(m_pGameSystem);
 	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
@@ -745,7 +745,7 @@ void CHavocWarrior::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pGameSystem);
+	//Safe_Release(m_pGameSystem);
 	Safe_Release(m_pAtkVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
