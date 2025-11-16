@@ -17,8 +17,10 @@ HRESULT CEdit_MapObject_Test::Initialize_Prototype()
 
 HRESULT CEdit_MapObject_Test::Initialize_Clone(void* pArg)
 {
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
 	Ready_Component(pArg);
-    return S_OK;
+	return S_OK;
 }
 
 void CEdit_MapObject_Test::Priority_Update(_float fTimeDelta)
@@ -27,16 +29,68 @@ void CEdit_MapObject_Test::Priority_Update(_float fTimeDelta)
 
 void CEdit_MapObject_Test::Update(_float fTimeDelta)
 {
+
 }
 
 void CEdit_MapObject_Test::Late_Update(_float fTimeDelta)
 {
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::BLEND, this);
-	m_pModelCom->Render(0, nullptr);
+	if (m_pGameInstance->Get_DIKeyState(DIK_L) == KEYSTATE::DOWN)
+		m_iIndex = 1;
+	if (m_pGameInstance->Get_DIKeyState(DIK_P) == KEYSTATE::DOWN)
+		m_iIndex = 2;
+	if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
+		m_iIndex = 3;
+	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+		m_iIndex = 0;
+	m_pGameInstance->Add_To_RenderTest(m_iIndex, this);
+	//m_pModelCom->Render(0, 0);
 }
 
 void CEdit_MapObject_Test::Render()
 {
+}
+
+void CEdit_MapObject_Test::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
+{
+	//ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	_bool HasNormal = { true };
+	_bool HasMask = { true };
+	for (_uint i = 0; i<m_pModelCom->Get_NumMesh(iIndex); ++i)
+	{
+		if (m_pModelCom->Is_Overed(iIndex, i))
+			return;
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		{
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			HasMask = false;
+		}
+
+
+		if (HasMask)
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+				HasNormal = false;
+		}
+		else
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = false;
+		}
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+
+		m_pShaderCom->Begin(m_iShaderPassIndex);
+
+		m_pModelCom->Render(iIndex, i);
+	}
 }
 
 void CEdit_MapObject_Test::Render_Shadow()
@@ -50,10 +104,14 @@ void CEdit_MapObject_Test::Set_ImGuiOption()
 HRESULT CEdit_MapObject_Test::Ready_Component(void* pArg)
 {
 	BUFFER_TEST* pDesc = static_cast<BUFFER_TEST*>(pArg);
+
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
 
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		return E_FAIL;
 	return S_OK;
 }
 

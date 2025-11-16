@@ -1042,14 +1042,19 @@ void CGameInstance::RequestData(CModel_Streaming* pModel, const _string& pFilePa
 	m_pModel_Manager->RequestData(pModel, pFilePath, iLODIndex);
 }
 
-void CGameInstance::RenderBufferPool(_uint iLODIndex)
-{
-	m_pModel_Manager->RenderBufferPool(iLODIndex);
-}
-
 void CGameInstance::LoadLastLOD()
 {
 	m_pModel_Manager->LoadLastLOD();
+}
+
+void CGameInstance::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
+{
+	m_pModel_Manager->Add_To_RenderTest(iLODIndex, pObject);
+}
+
+void CGameInstance::RenderBufferPool(_uint iLODIndex)
+{
+	m_pModel_Manager->RenderBufferPool(iLODIndex);
 }
 
 HRESULT CGameInstance::SetUp_CameraNF()
@@ -1128,6 +1133,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
 	Safe_Release(m_pGraphic_Device);
+	Safe_Release(m_pModel_Manager);
 
 	Release();
 }

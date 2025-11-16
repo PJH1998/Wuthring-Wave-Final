@@ -65,6 +65,26 @@ void CBufferPool::FreeMemory_Index(_uint iIndexOffSet, _uint iIndexSize)
 	m_pIndexFreeList->Free(iIndexOffSet, iIndexSize);
 }
 
+HRESULT CBufferPool::Bind_BufferPool()
+{
+	ID3D11Buffer* Buffers[] = {
+m_pVertexBufferPool,
+	};
+
+	_uint Strides[] = {
+		m_iVertexStride,
+	};
+
+	_uint Offsets[] = {
+		0,
+	};
+	m_pContext->IASetVertexBuffers(0, 1, Buffers, Strides, Offsets);
+	m_pContext->IASetIndexBuffer(m_pIndexBufferPool, m_eIndexFormat, 0);
+	m_pContext->IASetPrimitiveTopology(m_ePrimitiveType);
+
+	return S_OK;
+}
+
 
 CBufferPool* CBufferPool::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iVertexSize, _uint iIndexSize)
 {

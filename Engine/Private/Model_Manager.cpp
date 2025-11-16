@@ -2,6 +2,7 @@
 #include "Model_Manager.h"
 #include"GameInstance.h"
 #include"Model_Streaming.h"
+#include"StaticObject.h"
 
 CModel_Manager::CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:m_pDevice(pDevice), m_pContext(pContext),m_pGameInstance(CGameInstance::GetInstance())
@@ -34,65 +35,93 @@ HRESULT CModel_Manager::Initialize()
 
 void CModel_Manager::Update(_float fTimeDelta)
 {
-	//말이 업데이트지 사실 데이터 로드된 거 버퍼에 올리는 곳.
-	//여기 데이터에 있는 거를 스테이징에 올려야됨.
-	for (auto& pModel : m_ModelPrototypes)
-		pModel.second->PlusRenderdTime(fTimeDelta);
-
-	if (m_StagingData.empty())
-		return;
-
-	for (auto& Data : m_StagingData)
+	m_fTotalPlayTime += fTimeDelta;
+	if (!m_StagingData.empty())
 	{
-		Data.pModel;
-		//Data의 Data.LoadData 개수가 메쉬의 개수.
-		vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
-		pData->clear();
-		for (_uint i = 0; i < Data.LoadData.size(); ++i)
+		auto pTempVector = move(m_StagingData);
+		m_StagingData.clear();
+
+		for (auto& Data : pTempVector)
 		{
-			_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
-			_uint VertexOffset= m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
-			
-			if (VertexOffset == -1)
-				CRASH("Failed");
+			Data.pModel;
+			//Data의 Data.LoadData 개수가 메쉬의 개수.
+			vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
+			pData->clear();
+			for (_uint i = 0; i < Data.LoadData.size(); ++i)
+			{
+				_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
+				_uint VertexOffset = m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
 
-			D3D11_MAPPED_SUBRESOURCE StagingDesc{};
-			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-			memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
-			m_pContext->Unmap(m_pStagingBuffer, 0);
+				if (VertexOffset == -1)
+					CRASH("Failed");
 
-			D3D11_BOX PoolBox = { 0,0,0,VertexSize,1,1 };
-			m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 
-				0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+				D3D11_MAPPED_SUBRESOURCE StagingDesc{};
+				m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+				memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
+				m_pContext->Unmap(m_pStagingBuffer, 0);
+
+				D3D11_BOX PoolBox = { 0,0,0,VertexSize,1,1 };
+				m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
+					0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 
-			_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
-			_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
+				_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
+				_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
-			if (IndexOffSet == -1)
-				CRASH("Failed");
+				if (IndexOffSet == -1)
+					CRASH("Failed");
 
-			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-			memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
-			m_pContext->Unmap(m_pStagingBuffer, 0);
+				m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+				memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
+				m_pContext->Unmap(m_pStagingBuffer, 0);
 
-			PoolBox = { 0,0,0,IndexSize,1,1 };
-			m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
-				0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+				PoolBox = { 0,0,0,IndexSize,1,1 };
+				m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
+					0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
-			SHARED_DATA_DESC Desc{};
-			Desc.IndexOffset = IndexOffSet;
-			Desc.IndexSize = IndexSize;
-			Desc.NumIndices = Data.LoadData[i].iNumIndices;
-			Desc.VertexOffset = VertexOffset;
-			Desc.VertexSize = VertexSize;
+				SHARED_DATA_DESC Desc{};
+				Desc.IndexOffset = IndexOffSet;
+				Desc.IndexSize = IndexSize;
+				Desc.NumIndices = Data.LoadData[i].iNumIndices;
+				Desc.VertexOffset = VertexOffset;
+				Desc.VertexSize = VertexSize;
 
-			pData->push_back(Desc);
+				pData->push_back(Desc);
+			}
+			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
 		}
- 		Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
+		pTempVector.clear();
 	}
 
-	m_StagingData.clear();
+	//지연 해제 하면 좋다고 함? 어떻게 하는지 몰라서 아직 내비두는 중 + 옥토트리 및 디퍼드 컨텍스트 적용 전.
+	auto iter = m_ModelPrototypes.begin();
+
+	//이터레이터를 이동.
+	if (m_iSearchIndex >= m_ModelPrototypes.size())
+		m_iSearchIndex -= m_ModelPrototypes.size();
+	advance(iter, m_iSearchIndex);
+	_uint iCheckCount = { 0 };
+	while (iCheckCount < m_iCheckPerFrame && iter != m_ModelPrototypes.end())
+	{
+		CModel_Streaming* pModel = iter->second;
+		for (_uint i = 0; i < 3; ++i)
+		{
+			if (pModel->Is_RenderTimeOver(i))
+			{
+				if (pModel->Get_MeshState(i) != LOADSTATE::LOADED)
+					continue;
+				for (auto& pDesc : pModel->Get_MeshDesc(0)[i])
+				{
+					m_pBufferPool[i]->FreeMemory_Vertex(pDesc.VertexOffset, pDesc.VertexSize);
+					m_pBufferPool[i]->FreeMemory_Index(pDesc.IndexOffset, pDesc.IndexSize);
+				}
+				pModel->Get_MeshDesc(0)[i].clear();
+				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
+			}
+		}
+		iCheckCount++;
+	}
+	m_iSearchIndex += iCheckCount;
 }
 
 HRESULT CModel_Manager::RegisterPrototype(const _char* pFilePath, CModel_Streaming* pModel)
@@ -108,13 +137,8 @@ HRESULT CModel_Manager::RegisterPrototype(const _char* pFilePath, CModel_Streami
 
 void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex)
 {
-	//CModel_Streaming* pModel = { nullptr };
-	//_string FilePath;
-	//{
-	//	lock_guard<mutex> lock(m_Mutex);
-	//	auto iter = m_ModelPrototypes.find(pFilePath);
-	//	pModel = iter->second;
-	//}
+	//여기에는 LOD가 안붙어있고 모델에는 붙어있음.
+
 	atomic<LOADSTATE>& LoadState = pModel->Get_MeshState(iLODIndex);
 	LOADSTATE ExpectedState = LOADSTATE::NOTLOADED;
 	if (LoadState.compare_exchange_strong(ExpectedState, LOADSTATE::LOADING))
@@ -189,6 +213,15 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 
 void CModel_Manager::RenderBufferPool(_uint iLODIndex)
 {
+	m_pBufferPool[iLODIndex]->Bind_BufferPool();
+	for (auto& pObject : m_RenderObjects[iLODIndex])
+	{
+		pObject->Render(m_pContext, iLODIndex);
+		//호출된 시간을 밑으로 체크해야하는데 StaticObject에는 저 함수가 없어서 보류.
+		//pObject->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
+		Safe_Release(pObject);
+	}
+	m_RenderObjects[iLODIndex].clear();
 }
 
 void CModel_Manager::LoadLastLOD()
@@ -253,6 +286,12 @@ void CModel_Manager::LoadLastLOD()
 	m_StagingData.clear();
 }
 
+void CModel_Manager::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
+{
+	m_RenderObjects[iLODIndex].push_back(pObject);
+	Safe_AddRef(pObject);
+}
+
 CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CModel_Manager* pInstance = new CModel_Manager(pDevice, pContext);
@@ -269,18 +308,20 @@ CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 void CModel_Manager::Free()
 {
 	__super::Free();
-	/*Safe_Release(m_pBufferPool_LOD0);
-	Safe_Release(m_pBufferPool_LOD1);
-	Safe_Release(m_pBufferPool_LOD2);
-	Safe_Release(m_pBufferPool_LOD3);*/
-
+	Safe_Release(m_pDevice);
+	Safe_Release(m_pContext);
 	for (_uint i = 0; i < 4; ++i)
 		Safe_Release(m_pBufferPool[i]);
 	Safe_Release(m_pStagingBuffer);
-	
+
 	for(auto& pPair: m_ModelPrototypes)
 		Safe_Release(pPair.second);
+	m_ModelPrototypes.clear();
 
 	Safe_Release(m_pGameInstance);
-	m_ModelPrototypes.clear();
+
+	for (auto& Pair: m_RenderObjects)
+		for (auto& pObject : Pair.second)
+			Safe_Release(pObject);
+	m_RenderObjects.clear();
 }

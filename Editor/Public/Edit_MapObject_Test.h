@@ -34,6 +34,7 @@ public:
 	virtual		void			Update(_float fTimeDelta);
 	virtual		void			Late_Update(_float fTimeDelta);
 	virtual		void			Render();
+	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)override;
 	virtual		void			Render_Shadow();
 
 	virtual void Set_ImGuiOption();
@@ -53,7 +54,7 @@ private:
 
 	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};
-
+	_uint m_iIndex = {};
 	_float4x4 m_DefaultMat = {};
 private:
 

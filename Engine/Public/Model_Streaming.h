@@ -26,26 +26,31 @@ public:
 
 	void							Ready_BoundingBox(_float* pMinPos, _float* pMaxPos);
 
-	atomic<LOADSTATE>& 					Get_MeshState(_uint iLODIndex);
+	atomic<LOADSTATE>& Get_MeshState(_uint iLODIndex) { return m_pModelPrototype->m_LodState[iLODIndex]; }
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc(_uint iLODIndex) { return m_Meshes[iLODIndex]->Get_MeshDesc(); }
 	void									  RequestLastLODModel();
+	void									  Set_RenderTime(_uint iLODIndex, _float fTimeDelta) { m_fRenderTime[iLODIndex] = fTimeDelta; }
+	_bool									  Is_RenderTimeOver(_uint iLODIndex);
 public:
 	HRESULT							Ready_Mesh(const _char* pFilePath);
-	HRESULT							Ready_Material(const _char* pFilePath);
+	HRESULT							Ready_Material();
 	void							PlusRenderdTime(_float fTimeDelta);
 	HRESULT							Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVertex, ID3D11Buffer* pIndex);
+	_bool							Is_Overed(_uint iLODIndex, _uint iMeshIndex);
+	const _string&					Find_ModelPrototype() { return m_ModelPath; }
 private:
 	_uint									m_iNumMeshes[4] = { 0,0,0,0 };
 	class CMesh_Streaming*					m_Meshes[4] = { nullptr,nullptr,nullptr,nullptr };
 
 	_uint									m_iNumMaterials = {};
 	vector<class CMeshMaterial*>	m_Materials;
-	LOADSTATE								m_LodState[4] = { LOADSTATE::NOTLOADED,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED };
+	atomic<LOADSTATE>						m_LodState[4] = { LOADSTATE::NOTLOADED,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED };
 
 	_float									m_fRenderTime[4] = { 0.f,0.f,0.f,0.f };
 	_string m_ModelPath;
 	_uint m_iMaxLOD = { 0 };
+	CModel_Streaming* m_pModelPrototype = { nullptr };
 	//메쉬를 최대 4개만 가지게 한 뒤에
 	//LOD데이터를 로드할 때 메쉬 맨 처음 데이터가 메쉬 수. 각 데이터 읽을 때마다 그 데이터 크기만큼 FreeList에 할당, 각 메쉬별주소도 저장.
 	//각 메쉬별 데이터를 메쉬 안에 전달 그 수만큼 할당? 할당과 파괴를 도중에 하는건 안됨. 벡터 전달??

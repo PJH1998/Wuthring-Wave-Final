@@ -62,7 +62,7 @@ void CFreeList::Free(_uint iMemoryOffset, _uint iMemorySize)
 
 	//내 메모리 바로 앞에 블럭이 있나 확인. lower_bound는 해당 이터레이터와 가장 가까운 뒷 블록 반환.
 	auto it = m_FreeBlocks.lower_bound(iMemoryOffset);
-	if (it != m_FreeBlocks.end())
+	if (it != m_FreeBlocks.begin())
 	{
 		auto PrevBlockIter = prev(it);
 

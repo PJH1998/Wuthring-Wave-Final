@@ -136,6 +136,15 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+		CRASH("Render Fail");
+
+	m_pGameInstance->RenderBufferPool(0);
+	m_pGameInstance->RenderBufferPool(1);
+	m_pGameInstance->RenderBufferPool(2);
+	m_pGameInstance->RenderBufferPool(3);
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
+	m_pGameInstance->End_MRT();
 	Render_Decal();
 	Render_SSAO();			
 	Render_Dynamic();

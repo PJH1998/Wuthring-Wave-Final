@@ -29,7 +29,7 @@ public:
 	_uint Allocate_Index(_uint iIndexSize);
 	void FreeMemory_Vertex(_uint iVertexOffset, _uint iVertexSize);
 	void FreeMemory_Index(_uint iIndexOffSet, _uint iIndexSize);
-
+	HRESULT Bind_BufferPool();
 	ID3D11Buffer* Get_VertexBuffer() { return m_pVertexBufferPool; }
 	ID3D11Buffer* Get_IndexBuffer() { return m_pIndexBufferPool; }
 private:
@@ -44,6 +44,9 @@ private:
 	ID3D11Buffer* m_pIndexBufferPool = { nullptr };
 	
 	_uint m_iVertexStride = sizeof(VTXMESH);
+	DXGI_FORMAT m_eIndexFormat = DXGI_FORMAT_R32_UINT;
+	D3D11_PRIMITIVE_TOPOLOGY m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
 public:
 	static CBufferPool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,_uint iVertexSize,_uint iIndexSize);
 	virtual void				Free() override;

@@ -10,7 +10,7 @@ CMesh_Streaming::CMesh_Streaming(const CMesh_Streaming& Prototype)
 	:CComponent(Prototype), m_iNumMeshes{Prototype.m_iNumMeshes },
 	m_pSharedVB{Prototype.m_pSharedVB},
 	m_pSharedIB{Prototype.m_pSharedIB},
-	m_Desc{Prototype.m_Desc }
+	m_Desc{ Prototype.m_Desc }
 {
 	Safe_AddRef(m_pSharedVB);
 	Safe_AddRef(m_pSharedIB);
@@ -42,7 +42,9 @@ HRESULT CMesh_Streaming::Render(_uint iMeshIndex)
 	const CModel_Manager::SHARED_DATA_DESC& RenderDesc = (*m_Desc)[iMeshIndex];
 
 	//임시 하드코딩
+	//나중에 방식을 오프셋을 건드리기 vs 바인딩을 버퍼 하나에서 오프셋을 바꾸기에서 선택할것.
 	m_pContext->DrawIndexed(RenderDesc.NumIndices, RenderDesc.IndexOffset / 4, RenderDesc.VertexOffset / sizeof(VTXMESH));
+	//m_pContext->DrawIndexed(RenderDesc.NumIndices, 0, 0);
 	return S_OK;
 }
 
@@ -52,6 +54,26 @@ void CMesh_Streaming::Set_Buffers(ID3D11Buffer* pSharedVB, ID3D11Buffer* pShared
 	m_pSharedIB = pSharedIB;
 	Safe_AddRef(m_pSharedVB);
 	Safe_AddRef(m_pSharedIB);
+}
+
+HRESULT CMesh_Streaming::Bind_Resources(_uint iMeshIndex)
+{
+	ID3D11Buffer* Buffers[] = {
+		m_pSharedVB,
+	};
+
+	_uint Strides[] = {
+		m_iVertexStride,
+	};
+
+	_uint Offsets[] = {
+		0,
+	};
+	m_pContext->IASetVertexBuffers(0, 1, Buffers, Strides, Offsets);
+	m_pContext->IASetIndexBuffer(m_pSharedIB, m_eIndexFormat, 0);
+	m_pContext->IASetPrimitiveTopology(m_ePrimitiveType);
+
+	return S_OK;
 }
 
 HRESULT CMesh_Streaming::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)

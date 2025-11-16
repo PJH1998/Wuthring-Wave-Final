@@ -341,7 +341,7 @@ public:
 	void RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void RenderBufferPool(_uint iLODIndex);
 	void LoadLastLOD();
-
+	void Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
 #pragma endregion
 
 

@@ -48,9 +48,10 @@ public:
 	//m_pModel->Update를 만들어서 각 LOD 단계가 쓰이는지 안쓰이는지 확인하기?
 
 	//버퍼를 바인딩하고 해당 LOD인덱스를 가진 놈들 그리기 요청?
-	void RenderBufferPool(_uint iLODIndex);
 
 	void LoadLastLOD();
+	void Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
+	void RenderBufferPool(_uint iLODIndex);
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
@@ -70,9 +71,12 @@ private:
 	vector<SHARED_DATA_DESC> m_Data;
 	vector<MOEDL_DATA> m_StagingData;
 	_float4x4 m_PreTransformMatrix = {};
+	map<_uint, vector<class CStaticObject*>> m_RenderObjects;
 	mutex m_Mutex;
+	_uint m_iSearchIndex = {};
 	//벡터로 데이터 넣는 곳 필요.
-
+	const _uint m_iCheckPerFrame = { 10 };
+	_float m_fTotalPlayTime = {};
 public:
 	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void				Free() override;

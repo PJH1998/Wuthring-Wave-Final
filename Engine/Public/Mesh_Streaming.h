@@ -18,11 +18,14 @@ public:
 
 	void Load_LastLODIndex(_string LastModelPath);
 	void Set_Buffers(ID3D11Buffer* pSharedVB, ID3D11Buffer* pSharedIB);
+	HRESULT Bind_Resources(_uint iMeshIndex);
 	HRESULT Render(_uint iMeshIndex);
 	HRESULT Render(_uint iMeshIndex, ID3D11DeviceContext* pDC);
+
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc() { return m_Desc; }
-
+	_uint									  Get_MeshNum() { return m_iNumMeshes; }
+	_bool									  Is_Overed(_uint iMeshIndex) { return iMeshIndex >= m_iNumMeshes; }
 private:
 	//애매함.
 	vector<CModel_Manager::SHARED_DATA_DESC>* m_Desc;
@@ -30,6 +33,10 @@ private:
 	_uint m_iNumMeshes = {};
 	ID3D11Buffer* m_pSharedVB = { nullptr };
 	ID3D11Buffer* m_pSharedIB = { nullptr };
+
+	_uint m_iVertexStride = sizeof(VTXMESH);
+	DXGI_FORMAT m_eIndexFormat = DXGI_FORMAT_R32_UINT;
+	D3D11_PRIMITIVE_TOPOLOGY m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 public:
 	static CMesh_Streaming* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumMeshes);
 	virtual void Free()override;
