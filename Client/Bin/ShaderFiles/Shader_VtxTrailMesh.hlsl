@@ -108,7 +108,7 @@ PS_OUT PS_MAIN(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDistortion.a = 0;
+    Out.vDistortion.a = 0; //?
 
     return Out;
 }
@@ -217,6 +217,8 @@ PS_OUT PS_TrailDefault(PS_IN In)
 
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
     return Out;
 }
@@ -264,6 +266,8 @@ PS_OUT PS_TraillTest(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
     Out.vDiffuse *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
 //float4 vMask = g_MaskTexture.Sample(ClampSampler, In.vTexcoord);
 
@@ -342,6 +346,8 @@ PS_OUT PS_Y_OUT(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
     Out.vDiffuse *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
     return Out;
 }
@@ -389,6 +395,8 @@ PS_OUT PS_Y_IN(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
     Out.vDiffuse *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
     return Out;
 }
@@ -463,6 +471,8 @@ PS_OUT PS_TraillTestA(PS_IN In)
 //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
     Out.vDiffuse *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
     return Out;
 }
@@ -677,13 +687,13 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
     Out.vDiffuse = float4(vColor.rgb, fAge);
     Out.vDiffuse.a *= g_Alpha;
 
-    if (fAge > 0.15f)
-    {
-        float fWeight = Luminance(Out.vDiffuse.xyz);
 
-        if (fWeight >= g_fEmissiveThreshold)
-            Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    }
+   float fWeight = Luminance(Out.vDiffuse.xyz);
+
+   if (fWeight >= g_fEmissiveThreshold)
+       Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+  
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
     return Out;
 }
@@ -721,13 +731,13 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
     Out.vDiffuse = float4(vColor.rgb, fAge);
     Out.vDiffuse.a *= g_Alpha;
     
-    if (fAge > 0.15f)
-    {
-        float fWeight = Luminance(Out.vDiffuse.xyz);
 
-        if (fWeight >= g_fEmissiveThreshold)
-            Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    }
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+   
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
 
     return Out;
 }

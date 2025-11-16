@@ -976,9 +976,9 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #pragma endregion
 
 #pragma region DECAL_MANAGER
-HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
+HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
 {
-	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath);
+	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath, vEmissiveLuminance);
 }
 HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
 {

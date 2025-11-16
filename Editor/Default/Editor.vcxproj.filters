@@ -199,6 +199,12 @@
     <Filter Include="96. Interface\SFX">
       <UniqueIdentifier>{091e099d-8ebc-4cbc-8569-af0394daa544}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SFX">
+      <UniqueIdentifier>{b6acf729-2fb1-47d8-9f35-6fc9c8778acf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\SFX\Augusta">
+      <UniqueIdentifier>{a57d6569-499a-4271-92bc-c4aa3f903e44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -430,6 +436,13 @@
     <ClInclude Include="..\public\SFX_Interface.h">
       <Filter>96. Interface\SFX</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Level_SFX.h">
+      <Filter>01. Level\ScreenEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_ScreenEffect.h">
+      <Filter>03. GameObject\SFX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Augusta_SFX.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -634,6 +647,13 @@
     <ClCompile Include="..\private\SFX_Interface.cpp">
       <Filter>96. Interface\SFX</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Level_SFX.cpp">
+      <Filter>01. Level\ScreenEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_ScreenEffect.cpp">
+      <Filter>03. GameObject\SFX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Augusta_SFX.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
