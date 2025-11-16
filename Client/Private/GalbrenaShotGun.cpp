@@ -46,6 +46,18 @@ void CGalbrenaShotGun::Priority_Update(_float fTimeDelta)
 	// 1. Attack Volume 갱신
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+
+	// 2. Dissolve 체크.
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+			Activate(false);
+	}
 }
 
 void CGalbrenaShotGun::Update(_float fTimeDelta)
@@ -83,6 +95,19 @@ void CGalbrenaShotGun::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
+	}
+
+	// 2. Render
     for (_uint i = 0; i < iNumMeshes; i++)
     {
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
@@ -90,10 +115,13 @@ void CGalbrenaShotGun::Render()
 
         m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
 
+		// 3. Mask Texture
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
+		
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -107,7 +135,21 @@ void CGalbrenaShotGun::Render()
 
 void CGalbrenaShotGun::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActivate);
+	//CProp::Activate(IsActivate);
+	
+	if (true == IsActivate)
+	{
+		m_isActivate = IsActivate;
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	}
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, nullptr);
+		Bind_DissolveTimer();
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
+	}
 }
 
 void CGalbrenaShotGun::Change_Volume(_uint iVolumeIdx)
@@ -168,7 +210,9 @@ void CGalbrenaShotGun::Ready_Variables(const PROP_DESC* pDesc)
     m_pParentTransform = pDesc->pParentTransform;
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
 void CGalbrenaShotGun::Ready_Positions(const PROP_DESC* pDesc)
@@ -219,6 +263,9 @@ void CGalbrenaShotGun::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
+
+	
+		
 }
 
 CGalbrenaShotGun* CGalbrenaShotGun::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

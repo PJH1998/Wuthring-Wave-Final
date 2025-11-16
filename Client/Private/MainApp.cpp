@@ -234,9 +234,15 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CRASH("DeferredShader_Map");
 
 	// Shader_VtxAnimMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPropAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPropAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+		CRASH("Shader_VtxAnimMesh");
+
+
+	// Shader_VtxPropAnimMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
-		CRASH("Shader_VtxAnimMesh");
+		CRASH("Shader_VtxPropAnimMesh");
 
 	// Shader_UI_VtxPosTex ..Shader for UI
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPosTex"),

@@ -126,11 +126,21 @@ void CAugustaGriffon::Render()
 #endif // _DEBUG
 }
 
-void CAugustaGriffon::Activate(_bool IsActive)
+void CAugustaGriffon::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActive);
+	CProp::Activate(IsActivate);
 	// 한번 실행시킨다. => 1Frame 위에서 놀고있게
-	CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+	//CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+	}
   
 }
 
@@ -187,8 +197,8 @@ void CAugustaGriffon::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-    for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
 void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)

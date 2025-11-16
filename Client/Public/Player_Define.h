@@ -13,8 +13,11 @@ typedef struct tagPartSpec
 {
     _wstring strPartName;
     LEVEL eLevel;
-    _wstring strPartPrototypeName;
 }PART_SPEC;
+
+
+
+
 
 namespace PlayerData
 {
@@ -57,7 +60,8 @@ namespace PlayerData
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; // Augusta
         Desc.pParentTransform = { nullptr }; // Augusta
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Bayonet"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -78,7 +82,8 @@ namespace PlayerData
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; // Augusta
         Desc.pParentTransform = { nullptr }; // Augusta
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_SkillWeapon"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -97,7 +102,8 @@ namespace PlayerData
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; 
         Desc.pParentTransform = { nullptr };
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Griffon"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -146,7 +152,8 @@ namespace PlayerData
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; 
         Desc.pParentTransform = { nullptr };
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover_Sword"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -166,7 +173,8 @@ namespace PlayerData
 		Desc.fSpeedPerSec = 10.f;
 		Desc.pSocketMatrix = { nullptr };
 		Desc.pParentTransform = { nullptr };
-		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover_DarkWing"));
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -186,7 +194,8 @@ namespace PlayerData
 		Desc.fSpeedPerSec = 10.f;
 		Desc.pSocketMatrix = { nullptr };
 		Desc.pParentTransform = { nullptr };
-		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover_DarkScythe"));
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -258,7 +267,8 @@ namespace PlayerData
 		Desc.fSpeedPerSec = 10.f;
 		Desc.pSocketMatrix = { nullptr }; // Augusta
 		Desc.pParentTransform = { nullptr }; // Augusta
-		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Galbrena_ShotGun"));
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -278,7 +288,8 @@ namespace PlayerData
 		Desc.fSpeedPerSec = 10.f;
 		Desc.pSocketMatrix = { nullptr }; // Augusta
 		Desc.pParentTransform = { nullptr }; // Augusta
-		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Galbrena_ShotGun"));
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -315,7 +326,7 @@ namespace PlayerData
 
 		return Desc;
 	}
-
+	
 	static CCharacter::CHARACTER_DESC GetLogoFemaleRoverCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
 	{
 		CCharacter::CHARACTER_DESC Desc;

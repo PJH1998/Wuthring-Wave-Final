@@ -185,7 +185,6 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pParenTransform;
 	m_CallBack.fAttack = pDesc->fAttackDmg;
-	//m_CallBack.pCondition = pDesc->pCondition;
 	m_CallBack.strEffectTag = pDesc->strEffectTag;
 	m_CallBack.eType = pDesc->eDamageType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
