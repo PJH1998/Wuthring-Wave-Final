@@ -24,7 +24,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pGameSystem = CGameSystem::GetInstance();
-	//Safe_AddRef(m_pGameSystem);
+	Safe_AddRef(m_pGameSystem);
 	CORROSAURUS_DESC* pDesc = static_cast<CORROSAURUS_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
@@ -802,7 +802,7 @@ void CCorosaurus::Free()
 	{
 		Safe_Release(m_pAtkVolumes[i]);
 	}
-	//Safe_Release(m_pGameSystem);
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);

@@ -26,6 +26,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	MONSTERTEST_DESC* pDesc = static_cast<MONSTERTEST_DESC*>(pArg);
 
 	//m_pTransformCom->Scale({ 1.f, 1.f, 1.f});
@@ -88,8 +89,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	//_float temp{};
 	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
@@ -931,6 +932,7 @@ void CMonsterTest::Free()
 	for(_uint i = 0; i < ATK_SOCKET::END; ++i)
 		Safe_Release(m_pAtkVolumes[i]);
 
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
