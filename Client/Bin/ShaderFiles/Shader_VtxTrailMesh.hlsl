@@ -675,6 +675,7 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
     vColor.rgb *= g_ColorGain;
 
     Out.vDiffuse = float4(vColor.rgb, fAge);
+    Out.vDiffuse.a *= g_Alpha;
 
     if (fAge > 0.15f)
     {
@@ -718,7 +719,8 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
     vColor.rgb *= g_ColorGain;
 
     Out.vDiffuse = float4(vColor.rgb, fAge);
-
+    Out.vDiffuse.a *= g_Alpha;
+    
     if (fAge > 0.15f)
     {
         float fWeight = Luminance(Out.vDiffuse.xyz);

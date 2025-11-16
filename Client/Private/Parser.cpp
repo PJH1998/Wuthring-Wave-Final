@@ -893,6 +893,9 @@ void CParser::Load_Particle_OB_FromJson(const _string& strFilePath, const _strin
     if (ParticleJson.contains("Root"))
         Desc.IsRootOn = ParticleJson["Root"].get<_bool>();
 
+	if (ParticleJson.contains("Pivot"))
+		Desc.IsPivot = ParticleJson["Pivot"].get<_bool>();
+
     if (ParticleJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(ParticleJson["TextureTag"].get<_string>());
 
@@ -982,7 +985,6 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 
 	if (TrailMeshJson.contains("Root"))
 		Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
-
 
 	if (TrailMeshJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());
