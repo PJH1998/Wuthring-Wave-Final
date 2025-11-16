@@ -63,7 +63,8 @@ private:
 	CBufferPool* m_pBufferPool_LOD2 = { nullptr };
 	CBufferPool* m_pBufferPool_LOD3 = { nullptr };*/
 
-
+	_uint iTestFrame = 300;
+	_uint iFrame = {};
 	ID3D11Buffer* m_pStagingBuffer = { nullptr };
 
 	//모델을 갖고있기 vs 메쉬를 갖고있기
@@ -73,7 +74,7 @@ private:
 	_float4x4 m_PreTransformMatrix = {};
 	map<_uint, vector<class CStaticObject*>> m_RenderObjects;
 	mutex m_Mutex;
-	_uint m_iSearchIndex = {};
+	unordered_map<_string, class CModel_Streaming*>::iterator m_iSearchIndex = {};
 	//벡터로 데이터 넣는 곳 필요.
 	const _uint m_iCheckPerFrame = { 10 };
 	_float m_fTotalPlayTime = {};

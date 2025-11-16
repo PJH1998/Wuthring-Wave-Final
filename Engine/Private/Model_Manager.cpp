@@ -29,7 +29,7 @@ HRESULT CModel_Manager::Initialize()
 
 	if (FAILED(m_pDevice->CreateBuffer(&StagingDesc, nullptr, &m_pStagingBuffer)))
 		CRASH("Failed");
-
+	m_iSearchIndex = m_ModelPrototypes.begin();
 	return S_OK;
 }
 
@@ -38,12 +38,15 @@ void CModel_Manager::Update(_float fTimeDelta)
 	m_fTotalPlayTime += fTimeDelta;
 	if (!m_StagingData.empty())
 	{
-		auto pTempVector = move(m_StagingData);
-		m_StagingData.clear();
+		//auto pTempVector = move(m_StagingData);
+		//m_StagingData.clear();
 
-		for (auto& Data : pTempVector)
+		iFrame++;
+		if(iFrame>=iTestFrame)
 		{
-			Data.pModel;
+			iFrame = 0;
+		//for (auto& Data : pTempVector)
+			auto& Data = m_StagingData[m_StagingData.size()-1];
 			//Data의 Data.LoadData 개수가 메쉬의 개수.
 			vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
 			pData->clear();
@@ -89,28 +92,30 @@ void CModel_Manager::Update(_float fTimeDelta)
 				pData->push_back(Desc);
 			}
 			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
+		m_StagingData.pop_back();
 		}
-		pTempVector.clear();
+		//pTempVector.clear();
 	}
 
 	//지연 해제 하면 좋다고 함? 어떻게 하는지 몰라서 아직 내비두는 중 + 옥토트리 및 디퍼드 컨텍스트 적용 전.
-	auto iter = m_ModelPrototypes.begin();
 
 	//이터레이터를 이동.
-	if (m_iSearchIndex >= m_ModelPrototypes.size())
-		m_iSearchIndex -= m_ModelPrototypes.size();
-	advance(iter, m_iSearchIndex);
+	if (m_ModelPrototypes.empty())
+		return;
+
+	if (m_iSearchIndex == m_ModelPrototypes.end())
+		m_iSearchIndex = m_ModelPrototypes.begin();
 	_uint iCheckCount = { 0 };
-	while (iCheckCount < m_iCheckPerFrame && iter != m_ModelPrototypes.end())
+	while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes.end())
 	{
-		CModel_Streaming* pModel = iter->second;
+		CModel_Streaming* pModel = m_iSearchIndex->second;
 		for (_uint i = 0; i < 3; ++i)
 		{
-			if (pModel->Is_RenderTimeOver(i))
+			if (pModel->Is_RenderTimeOver(i)&& pModel->Get_MeshState(i) == LOADSTATE::LOADED)
 			{
-				if (pModel->Get_MeshState(i) != LOADSTATE::LOADED)
-					continue;
-				for (auto& pDesc : pModel->Get_MeshDesc(0)[i])
+				auto& MeshVector = pModel->Get_MeshDesc(0)[i];
+
+				for (auto& pDesc : MeshVector)
 				{
 					m_pBufferPool[i]->FreeMemory_Vertex(pDesc.VertexOffset, pDesc.VertexSize);
 					m_pBufferPool[i]->FreeMemory_Index(pDesc.IndexOffset, pDesc.IndexSize);
@@ -119,9 +124,9 @@ void CModel_Manager::Update(_float fTimeDelta)
 				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
 			}
 		}
+		m_iSearchIndex++;
 		iCheckCount++;
 	}
-	m_iSearchIndex += iCheckCount;
 }
 
 HRESULT CModel_Manager::RegisterPrototype(const _char* pFilePath, CModel_Streaming* pModel)
@@ -177,13 +182,6 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 
 		File.read(reinterpret_cast<_char*>(&Datas.LoadData[i].iNumIndices), sizeof(_uint));
 		Datas.LoadData[i].iNumIndices = Datas.LoadData[i].iNumIndices * 3;
-		//pIndices = new _uint[Datas.LoadData[i].iNumIndices];
-
-		//File.read(reinterpret_cast<_char*>(&iNumMaterialIndex), sizeof(_uint));
-		//pVertices.resize(iNumVertices);
-		//File.read(reinterpret_cast<_char*>(pVertices.data()), sizeof(VTXMESH) * iNumVertices);
-		//pIndices.resize(Datas.LoadData[i].iNumIndices);
-		//File.read(reinterpret_cast<_char*>(pIndices.data()), sizeof(_uint) * Datas.LoadData[i].iNumIndices);
 
 		File.read(reinterpret_cast<_char*>(&iNumMaterialIndex), sizeof(_uint));
 
