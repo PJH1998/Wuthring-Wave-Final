@@ -38,15 +38,15 @@ void CModel_Manager::Update(_float fTimeDelta)
 	m_fTotalPlayTime += fTimeDelta;
 	if (!m_StagingData.empty())
 	{
-		//auto pTempVector = move(m_StagingData);
-		//m_StagingData.clear();
+		auto pTempVector = move(m_StagingData);
+		m_StagingData.clear();
 
-		iFrame++;
+		/*iFrame++;
 		if(iFrame>=iTestFrame)
+			iFrame = 0;*/
+		for (auto& Data : pTempVector)
 		{
-			iFrame = 0;
-		//for (auto& Data : pTempVector)
-			auto& Data = m_StagingData[m_StagingData.size()-1];
+			//auto& Data = m_StagingData[m_StagingData.size()-1];
 			//Data의 Data.LoadData 개수가 메쉬의 개수.
 			vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
 			pData->clear();
@@ -92,9 +92,9 @@ void CModel_Manager::Update(_float fTimeDelta)
 				pData->push_back(Desc);
 			}
 			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
-		m_StagingData.pop_back();
+		//m_StagingData.pop_back();
 		}
-		//pTempVector.clear();
+		pTempVector.clear();
 	}
 
 	//지연 해제 하면 좋다고 함? 어떻게 하는지 몰라서 아직 내비두는 중 + 옥토트리 및 디퍼드 컨텍스트 적용 전.

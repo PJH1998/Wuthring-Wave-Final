@@ -143,6 +143,7 @@ void CRenderer::Render()
 	m_pGameInstance->RenderBufferPool(1);
 	m_pGameInstance->RenderBufferPool(2);
 	m_pGameInstance->RenderBufferPool(3);
+	//모델 내부에서 LOD단계가 없을 때 다시 바인딩해야하기 때문에 Real_Late_Render같은 거로 내보낸 뒤 해당 LOD단계 렌더에서 다시 렌더시킬것.
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 	m_pGameInstance->End_MRT();
 	Render_Decal();
