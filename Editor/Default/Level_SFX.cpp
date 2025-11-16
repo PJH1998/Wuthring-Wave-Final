@@ -62,5 +62,5 @@ void CLevel_SFX::Free()
 {
 	__super::Free();
 
-	//Safe_Release(m_pSFX_Interface);
+	Safe_Release(m_pSFX_Interface);
 }

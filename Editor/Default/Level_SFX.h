@@ -3,7 +3,7 @@
 
 NS_BEGIN(Editor)
 
-//class CSFX_Interface;
+class CSFX_Interface;
 
 class CLevel_SFX final : public CLevel
 {
@@ -22,7 +22,7 @@ private:
 	HRESULT					Ready_TestObjects();
 
 private:
-	//CSFX_Interface* m_pSFX_Interface = { nullptr };
+	CSFX_Interface* m_pSFX_Interface = { nullptr };
 
 public:
 	static		CLevel_SFX* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
