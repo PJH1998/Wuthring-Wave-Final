@@ -87,7 +87,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if (m_isPushed)
 	{
-		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.5f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
 		m_isPushed = false;
 		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));

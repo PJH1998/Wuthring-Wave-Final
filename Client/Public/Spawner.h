@@ -6,6 +6,8 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CSpawner final : public CGameObject
 {
 public:
@@ -36,6 +38,7 @@ public:
 
 private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
+	CGameSystem*		m_pGameSystem = { nullptr };
 	vector<_string>		m_strMonsterKey;
 	vector<_float4x4>	m_SpawnMatrix;
 	_uint				m_iNumSpawnObjects{};
