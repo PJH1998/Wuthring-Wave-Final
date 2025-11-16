@@ -84,9 +84,9 @@ public:
 	// 상호작용 UI가 마우스를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
-	// (미구현) 락온 UI를 생성합니다. / pTargetTransform : 락온 대상의 Transform 컴포넌트.
+	// 락온 UI를 생성합니다. / pTargetTransform : 락온 대상의 Transform 컴포넌트.
 	void		Show_LockOnUI(CTransform* pTargetTransform);
-	// (미구현) 락온 UI를 해제합니다.
+	// 락온 UI를 해제합니다.
 	void		Hide_LockOnUI();
 	
 #pragma endregion
