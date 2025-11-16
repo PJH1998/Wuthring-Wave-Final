@@ -23,22 +23,12 @@
 #include "Spawner.h"
 #include"Trigger_Box.h"
 #include "UI_Text_Damage.h"
-
-
-
-
+#include "SceneCamera.h"
 
 #define KSTA_UITEST_ONLEVEL
-
-
-
 #ifdef KSTA_UITEST_ONLEVEL
 #include "UI_Text.h"
 #endif // KSTA_UITEST_ONLEVEL
-
-
-
-
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -70,10 +60,10 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
-	//sReady_Spawner();
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
+	//Ready_CoroSaurus();
+	Ready_Spawner();
 
     Ready_Effect();
     LIGHT_DESC LightDesc{};
@@ -103,8 +93,8 @@ HRESULT CLevel_Test::Initialize()
 	Tri.WorldMatrix = &TT;
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
+	Ready_Scene();
 	Ready_Skybox();
-
 	Ready_UI();
 
     return S_OK;
@@ -120,8 +110,10 @@ void CLevel_Test::Update(_float fTimeDelta)
 
 	Toggle_HUD();
 
+	//Testing_UI(fTimeDelta);
 
-	Testing_UI(fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
+		m_pGameInstance->Play_Sequence(TEXT("Test"));
 }
 
 void CLevel_Test::Render()
@@ -185,6 +177,7 @@ void CLevel_Test::Ready_Dummy()
 	//DummyDesc.strInitAnimTag = "SAttack01_1";
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
@@ -194,7 +187,7 @@ void CLevel_Test::Ready_Dummy()
 	CGgobul::GGOBUL_DESC Ggobul{};
 	Ggobul.eCurLevel = m_eCurLevel;
 	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -210,7 +203,7 @@ void CLevel_Test::Ready_Dummy()
 	CFS_Scythe::SCYTHE_DESC Tantacle{};
 	Tantacle.eCurLevel = m_eCurLevel;
 	Tantacle.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -230,7 +223,7 @@ void CLevel_Test::Ready_MonsterTest()
     CMonsterTest::MONSTERTEST_DESC MobDesc{};
     MobDesc.eCurLevel = m_eCurLevel;
     MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
     MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
     MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
     MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
@@ -250,7 +243,7 @@ void CLevel_Test::Ready_MonsterTest()
 	CGgobul::GGOBUL_DESC Ggobul{};
 	Ggobul.eCurLevel = m_eCurLevel;
 	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -266,7 +259,7 @@ void CLevel_Test::Ready_MonsterTest()
 	CFS_Scythe::SCYTHE_DESC Tantacle{};
 	Tantacle.eCurLevel = m_eCurLevel;
 	Tantacle.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -310,7 +303,7 @@ void CLevel_Test::Ready_HavocWarrior()
 	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
 	tDesc.eCurLevel = m_eCurLevel;
 	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
 	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
@@ -336,7 +329,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
 	ADesc.eCurLevel = m_eCurLevel;
 	ADesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
 	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
@@ -409,8 +402,6 @@ void CLevel_Test::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 15);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
-
-	m_pGameSystem->Load_EffectDecalData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Decal");
 }
 
 void CLevel_Test::Ready_Skybox()
@@ -479,6 +470,22 @@ void CLevel_Test::Ready_UI()
 		CRASH("Failed Ready LockOn");
 
 	// _UI
+}
+
+void CLevel_Test::Ready_Scene()
+{
+	// Camera
+	CCamera::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 1000.f;
+	CameraDesc.vEye = _float4(-1.019107, 5.458634, -15.936163, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
+	CameraDesc.fSpeedPerSec = 10.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fMouseSensor = 0.004f;
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::TEST), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+		CRASH("SceneCamera");
 }
 
 void CLevel_Test::Testing_UI(_float fTimeDelta)

@@ -15,7 +15,7 @@
 #include "SkyBox.h"
 #include "Effect_Prefab.h"
 #include "Ability.h"
-
+#include "SceneCamera.h"
 
 #include "CustomFont.h"
 
@@ -56,6 +56,8 @@ HRESULT CMainApp::Initialize()
 	m_pGameSystem->Ready_GameSystem(m_pDevice, m_pContext);
 
 	Ready_Prototype_ForStatic();
+	Ready_Sequence();
+	Ready_Sequence_Item();
 	Ready_Event();
 	Start_Level();
 
@@ -234,9 +236,15 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CRASH("DeferredShader_Map");
 
 	// Shader_VtxAnimMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPropAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPropAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+		CRASH("Shader_VtxAnimMesh");
+
+
+	// Shader_VtxPropAnimMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
-		CRASH("Shader_VtxAnimMesh");
+		CRASH("Shader_VtxPropAnimMesh");
 
 	// Shader_UI_VtxPosTex ..Shader for UI
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPosTex"),
@@ -355,6 +363,22 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CAbility::Create(m_pDevice, m_pContext))))
 		CRASH("Ability");
 
+	//Decal
+	m_pGameSystem->Load_EffectDecalData_FromFolder("../Bin/Resource/Effect/Prefabs/Common/Decal");
+
+}
+
+void CMainApp::Ready_Sequence_Item()
+{
+	// Sequence Item
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		CRASH("Camera");
+}
+
+void CMainApp::Ready_Sequence()
+{
+	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
 }
 
 void CMainApp::Start_Level()

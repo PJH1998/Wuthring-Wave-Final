@@ -40,17 +40,43 @@ void CGalbrenaGroundAttack::OnEnter(void* pArg)
 	m_iPartType = CGalbrena::PARTTYPE::PART_FIRSTGUN;	// 추후 애니메이션에 따른. 분기문 필요.
 	m_iSubPartType = CGalbrena::PARTTYPE::PART_SECONDGUN; 
 
-	// 6. 첫번째 총 세팅.
-	_string strBoneName = "WeaponProp01";
-	m_pGalbrena->PartActivate(m_iPartType, true); // 파츠 변경. 
-	m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
-	m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	_string strMainBoneName = "WeaponProp01";
+	_string strSubBoneName = "WeaponProp02";
+
+	switch (eAttackType)
+	{
+	case EGalbrenaAttackType::ATTACK01:
+		m_pGalbrena->PartActivate(m_iPartType, true); // 파츠 변경. 
+		m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strMainBoneName);
+		m_pGalbrena->PartActivate(m_iSubPartType, true);
+		m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strSubBoneName);
+		break;
+	case EGalbrenaAttackType::ATTACK02:
+		m_pGalbrena->PartActivate(m_iPartType, true); // 파츠 변경. 
+		m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strMainBoneName);
+		m_pGalbrena->PartActivate(m_iSubPartType, true);
+		m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strSubBoneName);
+		break;
+	case EGalbrenaAttackType::ATTACK03:
+		m_pGalbrena->PartActivate(m_iPartType, true); // 파츠 변경. 
+		m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strMainBoneName);
+		m_pGalbrena->PartActivate(m_iSubPartType, true);
+		m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strSubBoneName);
+		break;
+	case EGalbrenaAttackType::ATTACK04:
+		m_pGalbrena->PartActivate(m_iPartType, true); // 파츠 변경. 
+		m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strMainBoneName);
+		break;
+	}
+
 	
-	// 7. 두번째 총 세팅
-	strBoneName = "WeaponProp02";
-	m_pGalbrena->PartActivate(m_iSubPartType, true);
-	m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
-	m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strBoneName);
 
 	// 8. 중력 활성화 및 Target 회전.
 	m_pGalbrena->Set_Gravity(true);
@@ -85,6 +111,7 @@ void CGalbrenaGroundAttack::OnExit()
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
     m_pGalbrena->PartActivate(m_iPartType, false); 
+    m_pGalbrena->PartActivate(m_iSubPartType, false); 
 }
 
 _bool CGalbrenaGroundAttack::Hit_Judge()
@@ -220,19 +247,40 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 			return;
 		}*/
 
+		//if (m_IsNextAttackInput && IsEscapePossible)
+		//{
+		//	m_iComboCount++;
+		//	m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName); // 애니메이션 초기화
+
+		//	m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAttackType::ATTACK01) + m_iComboCount;
+
+		//	
+		//	m_IsNextAttackInput = false;
+		//	m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
+		//	m_pGalbrena->Rotate_Target();
+		//	return;
+		//}
+
 		if (m_IsNextAttackInput && IsEscapePossible)
 		{
-			m_iComboCount++;
-			m_pGalbrena->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName); // 애니메이션 초기화
-			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAttackType::ATTACK01) + m_iComboCount;
+			switch (eAttackType)
+			{
+			case EGalbrenaAttackType::ATTACK01:
+				m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK02;
+				break;
+			case EGalbrenaAttackType::ATTACK02:
+				m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK03;
+				break;
+			case EGalbrenaAttackType::ATTACK03:
+				m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK04;
+				break;
+			}
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK));
 
-			
 			m_IsNextAttackInput = false;
-			m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
+			m_fAttackPressTime = 0.f;
 			m_pGalbrena->Rotate_Target();
-			return;
 		}
-
 	}
 
 	// 위 상태에서 안걸렸으면 무조건 초기화
@@ -305,12 +353,10 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 void CGalbrenaGroundAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK01),"Attack01", 1.3f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK02),"Attack02", 1.3f, 30.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK03),"Attack03", 1.3f, 20.f); // 이때 공격하면 전환
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK04),"Attack04", 1.3f, 10.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK05), "Attack05", 1.f, 19.f); // 이때 공격하면 전환.
-    
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK01),"Attack01", 1.f, 9.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK02),"Attack02", 1.f, 25.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK03),"Attack03", 1.f, 25.f); // 이때 공격하면 전환
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAttackType::ATTACK04),"Attack04", 1.f, 10.f);
 }
 
 void CGalbrenaGroundAttack::State_Reset()

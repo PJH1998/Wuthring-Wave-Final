@@ -1,6 +1,5 @@
 ﻿#include "EditorPch.h"
 #include "Level_SFX.h"
-
 #include "SFX_Interface.h"
 
 CLevel_SFX::CLevel_SFX(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -10,6 +9,9 @@ CLevel_SFX::CLevel_SFX(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_SFX::Initialize()
 {
+	if (FAILED(Ready_Light()))
+		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -39,12 +41,15 @@ HRESULT CLevel_SFX::Ready_Light()
 
 HRESULT CLevel_SFX::Ready_Interface()
 {
-	return E_NOTIMPL;
+	m_pSFX_Interface = CSFX_Interface::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pSFX_Interface);
+
+	return S_OK;
 }
 
 HRESULT CLevel_SFX::Ready_TestObjects()
 {
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 CLevel_SFX* CLevel_SFX::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

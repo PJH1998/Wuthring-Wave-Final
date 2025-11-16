@@ -310,6 +310,9 @@
     <Filter Include="03. GameObject\UI\Props\LockOn">
       <UniqueIdentifier>{22797b79-8c21-4ea5-9d22-9a9802b9e0f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\AugustaSFX">
+      <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -809,6 +812,15 @@
     <ClInclude Include="..\Public\GalbrenaGroundAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Client_CharacterEnum.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\AugustaSFX.h">
+      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
+          </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSkill.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1276,6 +1288,12 @@
     <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\AugustaSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
+          </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1338,6 +1356,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshNonRib.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

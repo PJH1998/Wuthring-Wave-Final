@@ -188,14 +188,13 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
-    //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    //vector vLook = normalize(vViewPos * -1.f);
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    
     float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
     
     float4 vAmbient = 0.f;

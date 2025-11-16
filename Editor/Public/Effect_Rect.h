@@ -54,9 +54,9 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform(_fmatrix WorldMatrix);
+	void Default_Transform(_fmatrix WorldMatrix);
 	void Sprite_Update(_float fTimeDelta);
-
+	void Update_Root_Transform();
 
 
 private:
@@ -85,6 +85,12 @@ private:
 	_int						m_iCol = {};
 	_float						m_fPhase = 0.f;
 
+	_bool						m_IsRoot = false;
+	_float4x4					m_ComBindMatrix = {  };
+
+	const _float4x4*			m_pBoneMatrixPtr = nullptr;
+	const _float4x4*			m_pObjectMatrixPtr = nullptr;
+	_matrix						m_OffsetMatrix = {};
 
 
 private:

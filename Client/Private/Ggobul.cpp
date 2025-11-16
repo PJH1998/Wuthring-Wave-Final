@@ -234,6 +234,15 @@ void CGgobul::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 
 void CGgobul::Effect_Active(const _wstring& wStrEffectTag)
 {
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
 }
 
 void CGgobul::Object_Func(const _wstring& wStrObjectTag)

@@ -34,6 +34,7 @@ public:
 
 public:
 	virtual void Activate(_bool IsActive);
+	virtual void Prop_Reset();  // 상태를 초기화합니다.
 	virtual void Change_Volume(_uint iVolumeIdx) {};
 	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) {};
 	virtual void Volume_Activate(_bool IsActive);
@@ -51,8 +52,20 @@ public:
 	void		Collider_Active(_bool isActive);
 #pragma endregion
 
+#pragma region CONDITION
+public:
+	void Add_Condition(_uint iConditionFlag);
+	_bool Check_AnyCondition(_uint iConditionFlag);
+	_bool Check_AllCondition(_uint iConditionFlag);
+	void Remove_Condition(_uint iConditionFlag);
+	void Remove_AllCondition();
+
+	void Bind_DissolveTimer();
+#pragma endregion
+
 
 protected:
+	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 	class CModel* m_pModelCom = { nullptr };
@@ -61,21 +74,24 @@ protected:
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	class CGameObject* m_pOwner = { nullptr };
 
-	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
-	
-	_float3 m_vRotationOffset = {};
-
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	_float m_fTrackPosition = {};
 	_string m_strCurrentAnimName = {};
 	_bool m_IsAnimationEnd = { false };
 	
-
-	_bool m_IsShaking = { false };
-
 	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
-	
+
+
+#pragma region Condition 관리
+protected:
+	_uint m_iCondition = {}; // Condition;
+	_float m_fMaxDissolveTime = { 0.5f };
+	_float m_fDissolveTimer = {};
+
+#pragma endregion
+
+
 
 protected:
 	void Bind_Resources();

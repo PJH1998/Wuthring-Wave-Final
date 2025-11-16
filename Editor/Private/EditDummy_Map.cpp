@@ -57,15 +57,16 @@ void CEditDummy_Map::Render()
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
+			return;
 
-		_bool HasNormal = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-			HasNormal = true;
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			return;
 
-		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-
-		m_pShaderCom->Begin(0);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			return;
+	
+		m_pShaderCom->Begin(9);
 		m_pModelCom->Render(i);
 	}
 }
@@ -76,7 +77,7 @@ void CEditDummy_Map::Render_Shadow()
 
 HRESULT CEditDummy_Map::Ready_Component(_fmatrix PreTransformMatrix)
 {
-	m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Rock/Common_QiQue/SM_Sev_Roc_01AL/SM_Sev_Roc_01AL_LOD0.dat");
+	m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/SM_Tab_Roc_13BH/SM_Tab_Roc_13BH_LOD0.dat");
 	ASSERT_CRASH(m_pModelCom);
 
 	m_pShaderCom = CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements);

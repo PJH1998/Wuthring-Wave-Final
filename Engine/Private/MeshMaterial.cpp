@@ -39,6 +39,12 @@ HRESULT CMeshMaterial::Initialize(const _char* pFilePath, const json& MaterialDa
 			return E_FAIL;
 	}
 
+	if (true == MaterialData.contains("Emissive"))
+	{
+		if (FAILED(Load_File(szBasePath, MaterialData, "Emissive", TEXTURETYPE::EMISSIVE)))
+			return E_FAIL;
+	}
+
 	return S_OK;
 }
 

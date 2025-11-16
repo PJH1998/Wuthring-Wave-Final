@@ -24,6 +24,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
@@ -71,7 +72,8 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //gpu
 
 	//공격이 성공했을 때 상태 유지 시간 정의
 	if(m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
@@ -243,7 +245,10 @@ void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 		return;
 	
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
 }
 
 void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
@@ -740,6 +745,7 @@ void CHavocWarrior::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pAtkVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);

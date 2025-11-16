@@ -25,6 +25,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	ELECTROPREDATOR_DESC* pDesc = static_cast<ELECTROPREDATOR_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
@@ -77,7 +78,8 @@ void CElectroPredator::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //gpu
 	//_float temp;
 	//m_pModelCom->Play_Animation_CPU("Stand2", fTimeDelta, &temp, false, true, false, true, 1.f);
 	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
@@ -85,7 +87,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if (m_isPushed)
 	{
-		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.5f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
 		m_isPushed = false;
 		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
@@ -682,6 +684,7 @@ void CElectroPredator::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
 }

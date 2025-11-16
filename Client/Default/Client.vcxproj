@@ -190,12 +190,14 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
     <ClInclude Include="..\Public\AugustaHit.h" />
+    <ClInclude Include="..\public\AugustaSFX.h" />
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\Client_CharacterEnum.h" />
     <ClInclude Include="..\Public\Client_Debug.h" />
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
@@ -218,6 +220,7 @@
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
     <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
     <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
@@ -377,6 +380,7 @@
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaHit.cpp" />
+    <ClCompile Include="..\private\AugustaSFX.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
@@ -410,6 +414,7 @@
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
@@ -564,6 +569,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>

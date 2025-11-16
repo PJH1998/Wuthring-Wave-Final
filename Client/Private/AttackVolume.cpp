@@ -160,6 +160,12 @@ void CAttackVolume::Change_DIR(ATTACKVOULME_DIR eType)
 	m_eDirType = eType;
 }
 
+void CAttackVolume::Change_Desc(CALLBACK_CLIENT* pDesc)
+{
+	m_CallBack = *pDesc;
+	m_pRigidBodyCom->Set_Desc(&m_CallBack);
+}
+
 
 void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 {
@@ -185,7 +191,6 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pParenTransform;
 	m_CallBack.fAttack = pDesc->fAttackDmg;
-	//m_CallBack.pCondition = pDesc->pCondition;
 	m_CallBack.strEffectTag = pDesc->strEffectTag;
 	m_CallBack.eType = pDesc->eDamageType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
