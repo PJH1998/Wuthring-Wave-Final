@@ -41,7 +41,10 @@ public:
 #pragma endregion
 
 #pragma region SEQUENCE
+public:
 	void							Load_Sequence(const _char* pFolderPath);
+private:
+	void							Load_Scene(json& ItemJson, vector<SEQUENCE_ITEM_DATA*>& ItemDatas);
 #pragma endregion
 
 
