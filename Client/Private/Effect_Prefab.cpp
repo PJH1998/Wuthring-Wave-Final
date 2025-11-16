@@ -125,6 +125,9 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	PREFAB_INFO* pDesc = static_cast<PREFAB_INFO*>(pArg);
 
+	_float4x4 PlayerMatrix = {};
+	_float4x4 BoneMatrix = {};
+
 	if (pDesc->pModelPtr != nullptr)
 	{
 		//프리팹 안에 뼈에 붙어야 할 자식과 안붙어야 할 자식이 같이 있을 수 있음.
@@ -134,11 +137,7 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		Reset_SpawnMatrix();
 		Reset_Prefab_Info();
 
-		_float4x4 PlayerMatrix = {};
 		XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
-
-		//프리팹이 뼈에 붙을 이름을 알고 있게 해줘야함.
-		_float4x4 BoneMatrix;
 
 		if (m_strBoneTag == "")
 			XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
@@ -148,14 +147,22 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		//위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
 		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
 
-		if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
-		{
-			//null이 아니라는건 뼈에 완전히 붙여야한다는 것.
-			m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
-			m_pObjectMatrixPtr = pDesc->pMatrixPtr;
-		}
+		m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+	}
+	else if (pDesc->pModelPtr == nullptr)
+	{
+		//단순 오브젝트가 호출할경우 모델주소 비어있음.
 
-		m_isActivate = true;
+		Reset_SpawnMatrix();
+		Reset_Prefab_Info();
+
+		_float4x4 PlayerMatrix = {};
+		XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+		XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+
+		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
 	}
 }
 
