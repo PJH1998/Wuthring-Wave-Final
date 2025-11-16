@@ -8,6 +8,7 @@ CEffect_Decal::CEffect_Decal(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 CEffect_Decal::CEffect_Decal(const CEffect_Decal& Prototype)
     : CGameObject{ Prototype }
+	 , m_tDesc{ Prototype.m_tDesc }
 {
 }
 
@@ -63,13 +64,15 @@ void CEffect_Decal::Late_Update(_float fTimeDelta)
 
 void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if(_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
 
-     Root_Transform(WorldMatrix);
+	m_isActivate = pDesc->IsActive;
+
+	if(m_isActivate)
+		Default_Transform(WorldMatrix);
 }
 
-void CEffect_Decal::Root_Transform(_fmatrix WorldMatrix)
+void CEffect_Decal::Default_Transform(_fmatrix WorldMatrix)
 {
 	//_vector vScale = {};
 	//_vector vPos = {};
