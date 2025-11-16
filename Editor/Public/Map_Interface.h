@@ -25,12 +25,23 @@ public:
 
 	_bool						Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMatrix);
 	void						Add_MapObject(_fvector vPos = XMVectorSet(0.f, 0.f, 0.f, 0.f));
+	void						Load_Map_GUI();
+
+	//주의. 기존 폴더나 맵을 고를 시 프로토타입 초기화 문제로 터짐.
+	void						Load_Another_Map() { m_IsCreateMap = !m_IsCreateMap; }
+
+	void						Load_Map(const _char* pFilePath);
+	void						Ready_Map_Prototype(const _char* pFilePath);
+
+	void						SetPrototypes(_uint iLevel);
 private:
 	_bool m_IsCreateProto = { false };
+	_bool m_IsCreateMap = { false };
 	vector<_string> m_ModelPaths;
 	class CEdit_PreViewModel* m_pPreView = { nullptr };
 	_uint m_iLevel = { ENUM_CLASS(LEVEL::MAP) };
-	
+	vector<const _char*> m_FilePaths;
+	_string m_szFilePath;
 public:
 	static CMap_Interface* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;
