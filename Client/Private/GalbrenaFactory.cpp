@@ -8,7 +8,7 @@
 #include "GalbrenaGroundSprint.h"
 #include "GalbrenaGroundLand.h"
 #include "GalbrenaGroundDash.h"
-//#include "GalbrenaGroundAttack.h"
+#include "GalbrenaGroundAttack.h"
 //#include "GalbrenaGroundBurst.h"
 //#include "GalbrenaGroundSpecial.h"
 //#include "GalbrenaGroundSkill.h"
@@ -36,6 +36,7 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND), CGalbrenaGroundLand::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH), CGalbrenaGroundDash::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE), CGalbrenaGroundDodge::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK), CGalbrenaGroundAttack::Create(pCharacter));
 
 
 	// Air 카테고리 하위 State들

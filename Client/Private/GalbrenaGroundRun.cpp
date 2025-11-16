@@ -214,6 +214,15 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
+	// 뛰다가 공격 상태 전환.
+	if (m_States[ATTACK])
+	{
+		// Burst 상태라면 Special 상태로?
+		m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK)); // 상위, 하위 상태
+		return;
+	}
+
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{

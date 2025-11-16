@@ -188,6 +188,32 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
+	//if (m_States[ATTACK])
+	//{
+	//	// Burst 상태라면 Special 상태로?
+	//	if (m_States[BURST])
+	//	{
+	//		m_pGalbrena->GetStateContextForWrite().m_eSpecialType = EGalbrenaSpecialType::EX_ATTACK01;
+	//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIAL)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//	else
+	//	{
+	//		m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
+	//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK)); // 상위, 하위 상태
+	//		return;
+	//	}
+
+	//}
+
+	if (m_States[ATTACK])
+	{
+		// Burst 상태라면 Special 상태로?
+		m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK)); // 상위, 하위 상태
+		return;
+	}
+
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{

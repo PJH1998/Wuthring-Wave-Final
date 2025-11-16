@@ -110,7 +110,7 @@ void CGalbrenaGroundSprint::Handle_Input()
 	m_States[SPRINT] = m_States[MOVE] && m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
 	// 공격 상태가 아니라 공격 판정 상태로 전달.
-	//m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
 	// 상태에 따라 속도 다르게.
 	m_fSpeed = 1.2f;
@@ -211,6 +211,15 @@ void CGalbrenaGroundSprint::Check_StateTransition(_float fTimeDelta)
         m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+
+	if (m_States[ATTACK])
+	{
+		// Burst 상태라면 Special 상태로?
+		m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK)); // 상위, 하위 상태
+		return;
+	}
 
 	// 뛰다가 Dash
 	if (m_States[DASH])
