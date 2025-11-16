@@ -20,7 +20,7 @@ CUI_Button_Interact::CUI_Button_Interact(const CUI_Button_Interact& Prototype)
 
 HRESULT CUI_Button_Interact::Initialize_Prototype()
 {
-	return __super::Initialize_Prototype();
+	return S_OK;
 }
 
 HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
@@ -137,6 +137,7 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iAnimOrder = 0;
 
 	m_isActivate = true;
+	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Interact", this);
 
 	//if ( FAILED (static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Focused_Default")))

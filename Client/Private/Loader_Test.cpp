@@ -55,6 +55,7 @@
 #include "Animator_UI.h"
 #include "UI_HUD.h"
 #include "UI_Button_Interact.h"
+#include "UI_LockOn.h"
 #pragma endregion
 
 
@@ -635,6 +636,9 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
+	_string strFilePath_UI_LockOn = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_LockOn));
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -719,7 +723,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
-	
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
+		CUI_LockOn::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
 
 	// ==============================
 	cout << "[Loader_Test][UI Custom] Prototype" << endl;

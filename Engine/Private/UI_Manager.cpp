@@ -68,6 +68,9 @@ HRESULT CUI_Manager::Add_RootUI(const _wstring& strName_UI, CUIObject* pRootUI)
 
 HRESULT CUI_Manager::Remove_RootUI(const _wstring& strName_UI)
 {
+	if (L"UI_LockOn" == strName_UI)
+		int i = 10;
+
 	auto iter = m_RootUIs.find(strName_UI);
 
 	if (iter == m_RootUIs.end())

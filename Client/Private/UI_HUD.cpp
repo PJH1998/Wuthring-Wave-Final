@@ -72,6 +72,9 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 	// 보스 UI용 텍스트 객체 생성 및 부모연결
 	Ready_BossUINameText();
 	
+	m_isClone = true;
+	m_pGameInstance->Add_RootUI(L"UI_HUD", this);
+
     return S_OK;
 }
 
@@ -1320,7 +1323,6 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     static _float fElementAmounts[CH_END] = { 0.f, 0.f ,0.f };
     static _float fMaxElementAmounts[CH_END] = {100.f, 100.f, 100.f};
 
-    // ksta : test 
 
 	fElementAmounts[m_iSelectedCHIndex] = m_pAbility->Get_Harmony();
     //fElementAmounts[0] = (fElementAmounts[0] >= 100)? 0 : fElementAmounts[0] + 2.f  * 30.f * fTimeDelta;
@@ -2066,6 +2068,9 @@ CGameObject* CUI_HUD::Clone(void* pArg)
 
 void CUI_HUD::Free()
 {
+	if (m_isClone)
+		m_pGameInstance->Remove_RootUI(L"UI_HUD");
+
     for (auto& child : m_vecChildObjects)
         Safe_Release(child);
 

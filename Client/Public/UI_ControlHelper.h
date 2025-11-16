@@ -33,6 +33,11 @@ public:
 
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
+
+	void				Show_LockOnUI(CTransform* pTargetTransform);
+	void				Hide_LockOnUI();
+
+
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };

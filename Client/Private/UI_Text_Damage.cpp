@@ -109,7 +109,7 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 	auto& vecInstDescs = textUIDesc.vecInstanceDescs;
 	_float fStartScale = 2.5f;
 
-	// ksta : 각종 인스턴스 갱신용 정보들 (위치용 행렬, 커스텀 변수용 행렬 등등)
+	//        각종 인스턴스 갱신용 정보들 (위치용 행렬, 커스텀 변수용 행렬 등등)
 	//		  꺼내와서 가공하고 다시 재할당해주는 식으로 사용하면 됨
 
 	// 6~10프레임 (약 0.1~0.17초) 중으로 인스턴스 하나의 시작 애니메이션이 끝나야 함 

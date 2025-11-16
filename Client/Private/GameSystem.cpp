@@ -36,8 +36,8 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pUI_ControlHelper = CUI_ControlHelper::Create();
 	ASSERT_CRASH(m_pUI_ControlHelper);
 
-	m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
-	ASSERT_CRASH(m_pUI_ControlHelper);
+	//m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
+	//ASSERT_CRASH(m_pUI_ControlHelper);
 
 	m_pDirector = CDirector::Create();
 	ASSERT_CRASH(m_pDirector);
@@ -213,6 +213,16 @@ _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
 	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
 }
 
+void CGameSystem::Show_LockOnUI(CTransform* pTargetTransform)
+{
+	m_pUI_ControlHelper->Show_LockOnUI(pTargetTransform);
+}
+
+void CGameSystem::Hide_LockOnUI()
+{
+	m_pUI_ControlHelper->Hide_LockOnUI();
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
@@ -299,7 +309,7 @@ void CGameSystem::Free()
 
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);
-	Safe_Release(m_pUI_StatusSyncer);
+	//Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);

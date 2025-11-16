@@ -12,6 +12,7 @@
 #include "UI_Text.h"
 #include "UI_Button_Interact.h"
 //#include "UI_Interact.h"
+#include "UI_LockOn.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -159,6 +160,27 @@ _bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractTyp
 		return false; // 없는데!
 
 	return pRootUI->Check_OnInteract(L"Interact_Normal", ENUM_CLASS(eEventInteractType), 0);
+}
+
+void CUI_ControlHelper::Show_LockOnUI(CTransform* pTargetTransform)
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
+
+	if (!pRootUI)
+		return; 
+
+	// 풀링으로부터 꺼내기
+	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetTransform };
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
+}
+void CUI_ControlHelper::Hide_LockOnUI()
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->SetActivate(false);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

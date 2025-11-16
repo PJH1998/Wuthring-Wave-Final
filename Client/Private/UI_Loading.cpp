@@ -132,6 +132,7 @@ HRESULT CUI_Loading::Ready_Texts()
 	CUI_Text* pDescriptionText = m_pGameSystem->Create_FontToScreen(_float2{ 150.f, 920.f }, strDescriptionText, TEXT_COLOR_TYPE::TT_NORMAL, 0.3f, L"UI_Text_DescriptionTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pDescriptionText);
 
+	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Text_TitleTest", pTitleText);
 	m_pGameInstance->Add_RootUI(L"UI_Text_DescriptionTest", pDescriptionText);
 
@@ -169,8 +170,11 @@ void CUI_Loading::Free()
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
 
-	m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
-	m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	if (m_isClone)
+	{
+		m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
+		m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	}
 
 	__super::Free();
 }

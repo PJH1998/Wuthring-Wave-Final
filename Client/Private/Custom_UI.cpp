@@ -104,8 +104,15 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
-	if (Get_UIDesc().strUIName == L"Interact_Normal")	// Button Interact 의 경우 변수와 한번 비교. 그래도 이상하면 render 직전도
+	//if (m_tUIDesc.strFileName == L"EmptyCanvuspng")							// 계층 나누기용 무의미 투명 텍스쳐면 렌더 스킵
+	//	return;
+
+
+
+	if (m_tUIDesc.strUIName == L"LockOn")							// Debug
 		int i = 10;
+
+
 
     if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
         for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
@@ -350,14 +357,9 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     const _wstring	    strFileName = pDesc->strFileName;
     const _uint         iNumFiles = pDesc->iNumFiles;
 
-    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
-    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
     const   _bool       isInstance = pDesc->isInstance;
 
-
-    // ksta : 텍스쳐 등 안쓰는 최상위 컨테이너가 호출될 시 여기서 E_FAIL 걸림
-    // VIBuffer_Rect 도 그렇고 desc로 조정 가능해야 할 듯 rootdesc 이런식으로 customuidesc 상속받게 해서?
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Texture_Custom_" + strFileName),
         TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;

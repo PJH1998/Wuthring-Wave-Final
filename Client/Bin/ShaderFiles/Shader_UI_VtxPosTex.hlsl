@@ -30,6 +30,11 @@ float2 g_SectorBorder = { 0.f, 0.f }; // based on local texcoord.     for 9secto
 float g_UIScale = 1.f; // UI Scaler
 
 
+// for LockOn, 3D-Based UI Variables
+bool g_isTargetExist = false;
+float4 g_vTargetWorldPos;
+
+
 
 
 
@@ -174,12 +179,50 @@ VS_OUT VS_MAIN(VS_IN In)
     
     /* 정점의 로컬위치 * 월드 * 뷰 * 투영 */ 
         
-    float4x4 matWV, matWVP;
+    float4 vFinalPos;
     
-    matWV = mul(g_WorldMatrix, g_ViewMatrix);
-    matWVP = mul(matWV, g_ProjMatrix);
+    if (!g_isTargetExist)
+    {
+        float4x4 matWV, matWVP;
     
-    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+        matWV = mul(g_WorldMatrix, g_ViewMatrix);
+        matWVP = mul(matWV, g_ProjMatrix);
+        
+        //matFinalPos = matWVP;
+        
+        vFinalPos = mul(float4(In.vPosition, 1.f), matWVP);
+
+    }
+    else
+    {
+        // 타겟 위치의 정점 변환 (월드 -> 뷰 -> 투영 -> NDC -> 스크린)
+        float3 worldCenter = g_vTargetWorldPos.xyz;
+        float4 targetView = mul(float4(worldCenter, 1.0f), g_ViewMatrix);
+        float4 targetProj = mul(targetView, g_ProjMatrix);
+        if (targetProj.w <= 0.0f)
+        {
+            Out.vPosition = float4(-2, -2, 0, 1);
+            return Out;
+        } // 카메라 뒤면 버림
+        float3 targetNDC = targetProj.xyz / targetProj.w;
+        float2 targetScreenPos;
+        targetScreenPos.x = (targetNDC.x + 1.0f) * 0.5f * g_ScreenSize.x;
+        targetScreenPos.y = (1.0f - targetNDC.y) * 0.5f * g_ScreenSize.y;
+
+		// 변환 완료 이후 스크린 공간..
+		// 이 차례에 스크린 기준으로 제공된 Transform 행렬 반영. 이상한데서 계산하면 안됨.
+        //float2 advancePx = In.vSInstTrans.xy;
+        //pixelPos = targetScreenPos + float2(advancePx.x + quadLocalPx.x,
+        //                                    advancePx.y - quadLocalPx.y);
+        float2 pixelPos = targetScreenPos;
+        vFinalPos = float4(pixelPos.xy, 0.f, 1.f);
+        
+        // 깊이 버퍼용? 잘 모르겠음
+        //z_ndc = targetNDC.z;
+    }
+    
+    
+    Out.vPosition = vFinalPos;
     Out.vTexcoord = In.vTexcoord;
     Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = Out.vPosition;
