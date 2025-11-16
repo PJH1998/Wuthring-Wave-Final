@@ -86,7 +86,7 @@ protected:
 #pragma region Condition 관리
 protected:
 	_uint m_iCondition = {}; // Condition;
-	_float m_fMaxDissolveTime = { 0.2f };
+	_float m_fMaxDissolveTime = { 0.5f };
 	_float m_fDissolveTimer = {};
 
 #pragma endregion

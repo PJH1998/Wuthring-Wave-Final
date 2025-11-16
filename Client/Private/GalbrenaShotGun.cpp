@@ -56,7 +56,14 @@ void CGalbrenaShotGun::Priority_Update(_float fTimeDelta)
 		if (m_fDissolveTimer <= m_fMaxDissolveTime)
 			m_fDissolveTimer += fTimeDelta;
 		else
-			Activate(false);
+		{
+			m_isActivate = false;
+			Prop_Reset();
+			_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+
+			
+		}
+			
 	}
 }
 
@@ -104,7 +111,6 @@ void CGalbrenaShotGun::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
 			CRASH("Failed Bind Dissolve Rate");
 
-		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
 	}
 
 	// 2. Render
@@ -139,6 +145,7 @@ void CGalbrenaShotGun::Activate(_bool IsActivate)
 	
 	if (true == IsActivate)
 	{
+		Prop_Reset();
 		m_isActivate = IsActivate;
 		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 	}
