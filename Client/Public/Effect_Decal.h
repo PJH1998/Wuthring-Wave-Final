@@ -31,7 +31,7 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform(_fmatrix WorldMatrix);
+	void Default_Transform(_fmatrix WorldMatrix);
 	
 
 private:

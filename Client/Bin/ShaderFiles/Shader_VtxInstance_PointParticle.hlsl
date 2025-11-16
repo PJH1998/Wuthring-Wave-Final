@@ -225,13 +225,12 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse.a *= Alpha;
     
-    if (Out.vDiffuse.a < 0.2f)
-        discard;
-    
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
     
     return Out;
 }
@@ -275,9 +274,6 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse.a *= Alpha;
     
-    if (Out.vDiffuse.a < 0.2f)
-        discard;
-    
    // Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
     
     //if (Out.vDiffuse.a < 0.4f)
@@ -289,6 +285,8 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
     
     return Out;
 }
