@@ -46,12 +46,6 @@ void CLevel_Logo::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Logo"));
 
-	if (false == m_isCutScene)
-	{
-		m_isCutScene = true;
-		//m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
-	}
-
     if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
     {
         CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };

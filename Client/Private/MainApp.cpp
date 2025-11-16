@@ -17,7 +17,6 @@
 #include "Ability.h"
 #include "SceneCamera.h"
 
-
 #include "CustomFont.h"
 
 CMainApp::CMainApp()
