@@ -52,6 +52,7 @@ public:
 	void TriggerActivate(_bool isActivate);
 	void Change_Layer(COLLISIONLAYER eLayer);
 	void Change_DIR(ATTACKVOULME_DIR eType);
+	void Change_Desc(CALLBACK_CLIENT* pDesc);
 
 private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
