@@ -83,7 +83,7 @@ HRESULT CLoader_Test::Initialize()
 	
 	
 	
-    //m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 
 	
     m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });

@@ -25,6 +25,8 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	m_iTargetLayers = pDesc->iTargetLayers;
 	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_fDelay = 0.2f;
+	m_isActivate = false;
     return S_OK;
 }
 
@@ -46,7 +48,7 @@ void CProjectile::Update(_float fTimeDelta)
 		PREFAB_INFO EffectDesc{};
 		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 		EffectDesc.pModelPtr = nullptr;
-		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), nullptr);
+		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
 		m_fDelay = 1.f;
 	}
 	else

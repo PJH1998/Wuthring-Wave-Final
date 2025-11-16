@@ -70,10 +70,10 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
 	//Ready_CoroSaurus();
-	//Ready_Spawner();
+	Ready_Spawner();
 
     Ready_Effect();
     LIGHT_DESC LightDesc{};

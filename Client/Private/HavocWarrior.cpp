@@ -245,7 +245,10 @@ void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 		return;
 	
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
 }
 
 void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
