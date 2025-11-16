@@ -144,7 +144,6 @@ enum class EGalbrenaAttackType : _uint
 	ATTACK01 = 0,
 	ATTACK02,
 	ATTACK03,
-	ATTACK05,
 	ATTACK04,
 	END
 };

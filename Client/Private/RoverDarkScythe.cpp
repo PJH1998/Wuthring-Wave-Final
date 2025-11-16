@@ -114,6 +114,16 @@ void CRoverDarkScythe::Render()
 void CRoverDarkScythe::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+	}
 }
 
 void CRoverDarkScythe::Change_Volume(_uint iVolumeIdx)

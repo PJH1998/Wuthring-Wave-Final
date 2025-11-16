@@ -601,6 +601,14 @@ HRESULT CLoader_Test::Load_Galbrena()
 		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
+
+	// 3. 객체 초기화.
+	wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_SecondGun");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 #pragma endregion
 	return S_OK;
 }
