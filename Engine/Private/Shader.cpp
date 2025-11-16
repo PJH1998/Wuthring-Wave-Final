@@ -8,17 +8,12 @@ CShader::CShader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CShader::CShader(const CShader& Prototype)
     : CComponent { Prototype },
-	//m_pEffect { Prototype.m_pEffect },
+	m_pEffect { Prototype.m_pEffect },
     m_InputLayouts { Prototype.m_InputLayouts },
     m_iNumPasses { Prototype.m_iNumPasses }
 {
-	{
-		lock_guard<mutex> lock(m_Mutex);
-		m_pEffect = Prototype.m_pEffect;
-	}
-
-    for (auto& pInputLayOut : m_InputLayouts)
-        Safe_AddRef(pInputLayOut);
+	for (auto& pInputLayOut : m_InputLayouts)
+	    Safe_AddRef(pInputLayOut);
 }
 
 HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT_ELEMENT_DESC* Elements, _uint iNumElements)
@@ -188,6 +183,7 @@ CShader* CShader::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, c
 
 CComponent* CShader::Clone(void* pArg)
 {
+	lock_guard<mutex> lock(m_Mutex);
     CShader* pClone = new CShader(*this);
 
     if (FAILED(pClone->Initialize_Clone(pArg)))

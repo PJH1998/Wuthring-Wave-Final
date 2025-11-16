@@ -37,6 +37,8 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SettingFog(true);
 	m_pGameInstance->Set_LUT_Index(1);
 
+	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
+
     return S_OK;
 }
 
@@ -47,7 +49,7 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	if (false == m_isCutScene)
 	{
 		m_isCutScene = true;
-		m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
+		//m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
 	}
 
     if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
