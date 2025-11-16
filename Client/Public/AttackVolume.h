@@ -53,15 +53,16 @@ public:
 	void Change_Layer(COLLISIONLAYER eLayer);
 	void Change_DIR(ATTACKVOULME_DIR eType);
 	void Change_Desc(CALLBACK_CLIENT* pDesc);
+	void Change_Socket(const _float4x4* pSocketMatrix);
 
 private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
 	const _float4x4*	m_pSocketMatrix = { nullptr };
-	const _float4x4*	m_pCombinedMatrix = { nullptr };
+	//const _float4x4*	m_pCombinedMatrix = { nullptr };
 	CTransform*			m_pParenTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
-	ATTACKVOULME_DIR	m_eDirType = {};
+	//ATTACKVOULME_DIR	m_eDirType = {};
 #ifdef _DEBUG
 	_float3			m_vOffsetPos{};
 	_float3			m_vOffsetRot{};

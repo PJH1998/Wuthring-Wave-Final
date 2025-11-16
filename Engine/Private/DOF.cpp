@@ -78,6 +78,9 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 		CRASH("Failed RCS_UPSAMPLE");
 
 	//Combined
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+		CRASH("Failed Begin MRT_BackBuffer");
+
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), pShader, "g_BackBufferTexture")))
 		CRASH("Failed Bind BackBuffer");
 
@@ -94,6 +97,8 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 
 	pVIBuffer->Bind_Resources();
 	pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
 
 	return S_OK;
 }
