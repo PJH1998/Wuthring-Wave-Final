@@ -44,7 +44,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_fIdleAcc = 10.f;
 	m_fImpluseRate = pDesc->fImpluseRate;
 	m_pRigidBodyCom->IsActivate(false);
-	//m_pColliderCom->IsActivate(false);
+	m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	return S_OK;
@@ -224,6 +224,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
+	m_pColliderCom->IsActivate(true);
 	m_isDeadTrigger = false;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
@@ -286,6 +287,7 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -309,6 +311,7 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
+	m_pColliderCom->IsActivate(false);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
