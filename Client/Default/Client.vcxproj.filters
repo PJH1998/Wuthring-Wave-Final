@@ -304,6 +304,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
       <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\AugustaSFX">
+      <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -803,6 +806,9 @@
     <ClInclude Include="..\Public\Client_CharacterEnum.h">
       <Filter>99. Define</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\AugustaSFX.h">
+      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
+          </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
@@ -1270,6 +1276,9 @@
     <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\AugustaSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
+          </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>

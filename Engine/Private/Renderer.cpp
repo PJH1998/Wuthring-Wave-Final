@@ -610,9 +610,6 @@ void CRenderer::Render_Fog()
 	
 	m_pGameInstance->Bind_VF_Resource(m_pShader, "g_VoulmetricTexture", "g_vFogRange");
 
-	/*if (FAILED(m_pSubResource->Bind_Fog_Resources(m_pShader)))
-		return;*/
-
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
 
 	m_pVIBuffer->Bind_Resources();
@@ -832,6 +829,8 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Diffuse"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Normal"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
