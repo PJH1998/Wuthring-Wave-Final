@@ -1,6 +1,11 @@
 ﻿#pragma once
 #include "GameObject.h"
 
+NS_BEGIN(Engine)
+class CVIBuffer_Rect;
+class CShader;
+NS_END
+
 NS_BEGIN(Editor)
 
 class CEdit_ScreenEffect abstract : public CGameObject
@@ -17,6 +22,10 @@ public:
 	virtual		void		Update(_float fTimeDelta) override;
 	virtual		void		Late_Update(_float fTimeDelta) override;
 	virtual		void		Render() override;
+
+	virtual		void		Play() {};
+	virtual		void		Stop() {};
+	virtual		void		Reset() {}
 
 protected:
 	_float4x4				m_ViewMatrix = {};
