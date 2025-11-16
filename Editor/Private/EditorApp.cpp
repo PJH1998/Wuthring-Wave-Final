@@ -11,7 +11,7 @@
 #include "Level_UI.h"
 #include "Level_ASM.h"
 #include "Level_Camera.h"
-
+#include "Level_SFX.h"
 //Dummy
 #include "EditDummy_Wolf.h"
 #include "EditDummy_Augusta.h"
@@ -99,6 +99,9 @@ void CEditorApp::Post_Update()
 			break;
 		case LEVEL::STATEMACHINE:
 			pLevel = CLevel_ASM::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::SFX:
+			pLevel = CLevel_SFX::Create(m_pDevice, m_pContext);
 			break;
 		}
 

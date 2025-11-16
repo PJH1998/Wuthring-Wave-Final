@@ -123,6 +123,7 @@ void CEffect_Prefab::Render()
 
 void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	
 	PREFAB_INFO* pDesc = static_cast<PREFAB_INFO*>(pArg);
 
 	_float4x4 PlayerMatrix = {};

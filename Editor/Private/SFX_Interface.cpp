@@ -8,12 +8,18 @@ CSFX_Interface::CSFX_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CSFX_Interface::Initialize()
 {
-    return E_NOTIMPL;
+    return S_OK;
 }
 
 CSFX_Interface* CSFX_Interface::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    return nullptr;
+	CSFX_Interface* pInstance = new CSFX_Interface(pDevice, pContext);
+	if (FAILED(pInstance->Initialize()))
+	{
+		MSG_BOX("Failed to Created : CSFX_Interface");
+		Safe_Release(pInstance);
+	}
+    return pInstance;
 }
 
 void CSFX_Interface::Free()

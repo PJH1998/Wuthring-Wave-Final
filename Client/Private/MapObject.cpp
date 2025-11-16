@@ -37,10 +37,6 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 	Sync_Sectors();
 
-	//m_pGameInstance->Begin_ShadowMap();
-	//Render_Shadow();
-	//m_pGameInstance->End_ShadowMap();
-
 	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;
 

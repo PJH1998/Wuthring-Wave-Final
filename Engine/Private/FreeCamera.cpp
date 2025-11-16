@@ -23,7 +23,7 @@ HRESULT CFreeCamera::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	m_fSpeed = 100.f; // Default Speed
+	m_fSpeed = 200.f; // Default Speed
 
 	return S_OK;
 }

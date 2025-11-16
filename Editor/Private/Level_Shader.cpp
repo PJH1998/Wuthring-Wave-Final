@@ -49,8 +49,8 @@ HRESULT CLevel_Shader::Ready_Light()
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
     LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-    LightDesc.vDiffuse = _float4(0.8f, 0.7f, 0.12f, 1.f);
-	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);//_float4(0.8f, 0.7f, 0.12f, 1.f);
+	LightDesc.vDirection = _float4(0.f, -0.5f, 0.5f, 0.f);
     LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);

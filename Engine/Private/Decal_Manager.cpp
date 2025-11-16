@@ -30,19 +30,18 @@ void CDecal_Manager::Update(_float fTimeDelta)
 		Pair.second->Update(fTimeDelta);
 }
 
-HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
+HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
 {
-	CDecal* pDecal = Find_Decal(strDecalTag);
-	if (nullptr == pDecal)
-	{
-		pDecal = CDecal::Create(m_pDevice, m_pContext);
-		ASSERT_CRASH(pDecal);
+	if (nullptr != Find_Decal(strDecalTag))
+		CRASH("Failed to Add Decal Duplication");
 
-		m_Decals.emplace(strDecalTag, pDecal);
-	}
+	CDecal* pDecal = CDecal::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pDecal);
 
-	if (FAILED(pDecal->Add_DecalTexture(pFilePath)))
+	if (FAILED(pDecal->Add_DecalTexture(pFilePath, vEmissiveLuminance)))
 		CRASH("Failed Add DecalTexture");
+
+	m_Decals.emplace(strDecalTag, pDecal);
 
 	return S_OK;
 }

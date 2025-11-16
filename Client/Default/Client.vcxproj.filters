@@ -806,7 +806,8 @@
     <ClInclude Include="..\Public\Client_CharacterEnum.h">
       <Filter>99. Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\AugustaSFX.h" />
+    <ClInclude Include="..\public\AugustaSFX.h">
+      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1272,8 +1273,9 @@
     <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\AugustaSFX.cpp" />
-        </ClCompile>
+    <ClCompile Include="..\private\AugustaSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

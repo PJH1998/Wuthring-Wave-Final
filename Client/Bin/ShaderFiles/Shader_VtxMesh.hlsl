@@ -2,6 +2,8 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
+float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
+
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
 Texture2D   g_MaskDiffuseTexture;
@@ -458,24 +460,21 @@ PS_OUT_LIGHT PS_TEST(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    float4 vGrasDiffuse = g_DiffuseTexture[0].SampleLevel(DefaultSampler, (In.vTexcoord * 3.f), 0.f);
-    float4 vRockDiffuse = g_DiffuseTexture[1].SampleLevel(DefaultSampler, (In.vTexcoord * 10.f), 0.f);
-    float4 vRockSecDiffuse = g_DiffuseTexture[2].SampleLevel(DefaultSampler, (In.vTexcoord * 10.f), 0.f);
+    float4 vGrassDiffuse = g_DiffuseTexture[0].SampleLevel(DefaultSampler, (In.vTexcoord * 10.f), 0.f);
+    float4 vRockDiffuse = g_DiffuseTexture[1].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    float4 vMainNomral = g_NormalTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
-    float4 vGrasNoraml = g_NormalTexture[1].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vMainNormal = g_NormalTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vGrasNormal = g_NormalTexture[1].SampleLevel(DefaultSampler, In.vTexcoord * 10.f, 0.f);
     float4 vDetailNormal = g_NormalTexture[2].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
-    float4 vDetailSecNormal = g_NormalTexture[3].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    float4 vNormalMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
-    float4 vDetailMask = g_MaskTexture[1].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vAlphaMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vMask = g_MaskTexture[1].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    vDetailMask.xyz = normalize(vDetailMask.xyz);
+    float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
     
-    float4 vDiffuse = (vGrasDiffuse * vDetailMask.r) + (vRockSecDiffuse * vDetailMask.g) + (vRockDiffuse * vDetailMask.b);
-    float4 vNormalDesc = (vGrasNoraml * vDetailMask.r) + (vDetailSecNormal * vDetailMask.g) + (vDetailNormal * vDetailMask.b) + (vMainNomral * (1.f - vDetailMask.a));
+    float3 vNormalDesc = lerp(lerp(vDetailNormal, vMainNormal, vAlphaMask.a), vGrasNormal, vMask.r);
     
-    float4 vNormal;
+    float3 vNormal;
 	        
     vNormal = vNormalDesc * 2.f - 1.f;
     
@@ -488,13 +487,13 @@ PS_OUT_LIGHT PS_TEST(PS_IN In)
     float3x3 WorldMatrix;
     WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         
-    vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-    vNormal.xyz = vNormal.xyz * 0.5f + 0.5f;
+    vNormal = normalize(mul(vNormal, WorldMatrix));
+    vNormal = vNormal * 0.5f + 0.5f;
     
     Out.vDiffuse.xyz = vDiffuse.xyz;
     Out.vDiffuse.w = 1.f;
     
-    Out.vNormal = float4(vNormal.xyz, 1.f);
+    Out.vNormal = float4(vNormal, 1.f);
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;

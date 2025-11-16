@@ -73,7 +73,7 @@ void CDecal::Render(CShader* pShader)
 	m_pVIBuffer_Decal->Render();
 }
 
-HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
+HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
 {
 	for (_uint i = 0; i < ENUM_CLASS(TEXTURETYPE::END); ++i)
 	{
@@ -88,6 +88,8 @@ HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE:
 
 		m_pDecalTexture[i] = pTexture;
 	}
+
+	m_vEmiisiveLuminance = vEmissiveLuminance;
 
     return S_OK;
 }
@@ -148,8 +150,11 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 			strTextureConstantName = "g_MaskTexture";
 			strBoolConstantName = "g_HasMask";
 			break;
+		case ENUM_CLASS(TEXTURETYPE::EMISSIVE):
+			strTextureConstantName = "g_EmissiveTexture";
+			strBoolConstantName = "g_HasEmissive";
+			break;
 		}
-
 
 		_bool HasTexture = false;
 		if (SUCCEEDED(m_pDecalTexture[i]->Bind_Shader_Resource(pShader, strTextureConstantName.c_str())))
@@ -170,6 +175,8 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 		CRASH("Failed Bind ViewMatrixInv");
 	if (FAILED(pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
 		CRASH("Failed Bind ProjMatrixInv");
+	if (FAILED(pShader->Bind_Value("g_EmissiveLuminance", &m_vEmiisiveLuminance, sizeof(_float3))))
+		CRASH("Failed Bind EmissiveLuminance");
 
 	return S_OK;
 }
