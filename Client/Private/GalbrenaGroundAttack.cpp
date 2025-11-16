@@ -112,6 +112,8 @@ void CGalbrenaGroundAttack::OnExit()
     m_fAttackPressTime = 0.f; // 시간 초기화
     m_pGalbrena->PartActivate(m_iPartType, false); 
     m_pGalbrena->PartActivate(m_iSubPartType, false); 
+
+	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 _bool CGalbrenaGroundAttack::Hit_Judge()
@@ -187,11 +189,26 @@ void CGalbrenaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
         m_fAttackPressTime += fTimeDelta;
 
     // Attack State에 해당하는 경우 모두 Animation이 존재.
-    m_pGalbrena->Play_PartAnimation(
-        m_iPartType,
-        m_Animations.at(m_iCurrentAnimIdx).strAnimName,
-        fTimeDelta, nullptr
-    );
+
+	if (m_iPartType != CGalbrena::PARTTYPE::TYPE_END)
+	{
+		m_pGalbrena->Play_PartAnimation(
+			m_iPartType,
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			fTimeDelta, nullptr
+		);
+	}
+    
+	if (m_iSubPartType != CGalbrena::PARTTYPE::TYPE_END)
+	{
+		m_pGalbrena->Play_PartAnimation(
+			m_iSubPartType,
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			fTimeDelta, nullptr
+		);
+	}
+
+	
 }
 
 void CGalbrenaGroundAttack::Check_Physics(_float fTimeDelta)

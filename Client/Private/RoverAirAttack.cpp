@@ -83,6 +83,9 @@ void CRoverAirAttack::OnExit()
 
     m_pRover->Set_Gravity(true);
     m_fSpeed = 0.f;
+
+	// 공격 콜라이더 비활성화
+	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 void CRoverAirAttack::Handle_Input()

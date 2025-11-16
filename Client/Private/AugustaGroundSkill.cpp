@@ -179,6 +179,9 @@ void CAugustaGroundSkill::OnExit()
 
 	/* 컨디션 제거*/
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	// Collider 제거.
+	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 void CAugustaGroundSkill::Handle_Input()

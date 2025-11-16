@@ -541,6 +541,9 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	_uint iVolumeIdx = {  };
 
+	if (var1 == TEXT("Main"))
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+
 	// Main Attack Volume의 TriggerActivate
 	if (var1 == TEXT("Bayonet"))
 	{

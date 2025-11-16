@@ -37,22 +37,42 @@ void CGalbrenaAirAttack::OnEnter(void* pArg)
     // 4. Attack 상태 초기화
     State_Reset();
 
+	// 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
+	m_iPartType = CGalbrena::PARTTYPE::TYPE_END; // 추후 애니메이션에 따른. 분기문 필요.
+
+
+	// 6. 무기에 Bone 붙이기. + Offset 추가.
+	_string strMainBoneName = "";
+	_string strSubBoneName = "";
+
+	m_pGalbrena->Set_Gravity(true);
+
 	switch (eAirAttackType)
 	{
 	case EGalbrenaAirAttackType::AIRATTACK_START:
 		m_pGalbrena->Set_Gravity(false);
 		break;
+	case EGalbrenaAirAttackType::AIRATTACK_LOOP_1:
+		strMainBoneName = "WeaponProp01";
+		strSubBoneName = "WeaponProp02";
+		m_iPartType = CGalbrena::PARTTYPE::PART_FIRSTGUN;
+		m_iSubPartType = CGalbrena::PARTTYPE::PART_SECONDGUN;
+		m_pGalbrena->Set_Gravity(false);
+		m_pGalbrena->PartActivate(m_iPartType, true); // 파츠 변경. 
+		m_pGalbrena->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
+		m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strMainBoneName);
+		m_pGalbrena->PartActivate(m_iSubPartType, true);
+		m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
+		m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strSubBoneName);
+		break;
 	}
 
-    // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
-    m_iPartType = CGalbrena::PARTTYPE::TYPE_END; // 추후 애니메이션에 따른. 분기문 필요.
+   
 
-    // 6. 무기에 Bone 붙이기. + Offset 추가.
-    _string strBoneName = "";
   
 	m_fSpeed = 2.f;
 
-	m_pGalbrena->Set_Gravity(true);
+	
 
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
@@ -93,7 +113,11 @@ void CGalbrenaAirAttack::OnExit()
     m_pGalbrena->Set_Gravity(true);
     m_fSpeed = 0.f;
 
+	m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
+	m_iSubPartType = CGalbrena::PARTTYPE::TYPE_END;
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 void CGalbrenaAirAttack::Handle_Input()
@@ -129,6 +153,25 @@ void CGalbrenaAirAttack::Update_AttackAnimations(_float fTimeDelta)
     {
         m_pGalbrena->Move_Fall(fTimeDelta, m_fSpeed);
     }
+
+	
+	if (m_iPartType != CGalbrena::PARTTYPE::TYPE_END)
+	{
+		m_pGalbrena->Play_PartAnimation(
+			m_iPartType,
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			fTimeDelta, nullptr
+		);
+	}
+
+	if (m_iSubPartType != CGalbrena::PARTTYPE::TYPE_END)
+	{
+		m_pGalbrena->Play_PartAnimation(
+			m_iSubPartType,
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			fTimeDelta, nullptr
+		);
+	}
     
 }
 
@@ -144,6 +187,27 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
+		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_1)
+		{
+			if (m_States[ATTACK])
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+				return;
+			}
+		}
+
+		// 0. Loop 도중에 공격키 한번 더누르면?
+		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2)
+		{
+			if (m_States[ATTACK])
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+				return;
+			}
+		}
+
 		// 0. End면 Move로 전환 가능.
 		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_END)
 		{
@@ -223,6 +287,8 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
         // 땅에 닿으면.
         if (m_States[LAND])
         {
+			
+
 			if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_END)
 			{
 				if (m_States[MOVE])
@@ -263,7 +329,7 @@ void CGalbrenaAirAttack::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.0f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START02),"AirAttack_Start02", 1.0f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1),"AirAttack_Loop_1", 1.0f, 0.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1),"AirAttack_Loop_1", 1.0f, 5.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2),"AirAttack_Loop_2", 1.0f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 45.f, 1.f);
 
