@@ -76,14 +76,14 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
+    //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함. 
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
 	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
     m_vLifeTime.x += fTimeDelta;
 
-	//if (m_IsRoot)
-	//	Update_Transform();
+	if (m_IsRoot)
+		Update_Transform();
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {

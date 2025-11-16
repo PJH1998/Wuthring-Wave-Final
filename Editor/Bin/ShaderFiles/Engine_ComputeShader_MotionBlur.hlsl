@@ -197,13 +197,11 @@ void Motion_Blur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
     for (int i = 0; i < 4; i++)
     {   
         int2 OutIndex = DTID.xy * 2;
- //       float2 vTexcoord = float2(GTID.xy);
-        
+ 
         int2 Offset = int2(i % 2, clamp(i - 1, 0, 1));
         
         OutIndex += Offset;
-        
-//        vTexcoord += Offset;
+       
         float2 vLowPos = (OutIndex + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
         
         int2 iLowID = (int2) floor(vLowPos);

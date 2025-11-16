@@ -49,8 +49,6 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 
     m_fCurrentTime += fTimeDelta;
 
-
-
 	for (auto& Frame : m_vFrames)
 	{
 		if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
@@ -144,6 +142,9 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	}
 	else if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
 	{
+		Reset_SpawnMatrix();
+		Reset_Prefab_Info();
+
 		//null이 아니라는건 뼈에 완전히 붙여야한다는 것.
 		m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
 		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
@@ -352,13 +353,6 @@ void CEffect_Prefab::Reset_Prefab_Info()
 #ifdef _DEBUG
     OutPutDebugMatrix(TEXT("Spawn Matrix : "), m_SpawnMatrix);
 #endif // DEBUG
-
-    _matrix DefaultMat = XMLoadFloat4x4(&m_SpawnMatrix);
-
-    //초기설정으로 되돌리기 처리만
-    _bool Activate = false;
-    for (auto& Children : m_EffectChildren)
-        Children.second->Reset(DefaultMat, &Activate);
 }
 
 void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info)
