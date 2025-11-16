@@ -4,7 +4,7 @@
 NS_BEGIN(Client)
 
 // Run State - Run 관련 모든 애니메이션 관리
-class CAugustaGroundSprint final : public CGroundState
+class CGalbrenaGroundSprint final : public CGroundState
 {
 private:
     enum RUNSTATE // Transition에 사용하는 상태들을 정의 해두기.
@@ -32,6 +32,12 @@ private:
         SKILL_Q,
         SKILL_R,
 
+		SPRINT_F,
+		BURST,
+		BURST_E,
+		DEFAULT_E,
+		ULTI,
+
 		// 소모값 없음 => 쿨타임 존재.
 		NORMAL_E,
 
@@ -45,8 +51,8 @@ private:
     };
 
 private:
-    explicit CAugustaGroundSprint() = default;
-    virtual ~CAugustaGroundSprint() = default;
+    explicit CGalbrenaGroundSprint() = default;
+    virtual ~CGalbrenaGroundSprint() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -55,7 +61,7 @@ public:
     virtual void OnExit() override;
 
 private:
-    class CAugusta* m_pAugusta = { nullptr };
+    class CGalbrena* m_pGalbrena = { nullptr };
 
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
@@ -76,7 +82,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundSprint* Create(class CGameObject* pOwner);
+    static CGalbrenaGroundSprint* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

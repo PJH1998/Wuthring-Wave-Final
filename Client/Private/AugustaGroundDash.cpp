@@ -79,6 +79,7 @@ void CAugustaGroundDash::Handle_Input()
 
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+	m_States[SPRINT] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
 	
@@ -141,6 +142,13 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
                 return;
             }
 
+			if (m_States[SPRINT])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eSprintType = EAugustaSprintType::SPRINT_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT)); // 상위, 하위 상태
+				return;
+			}
+
             if (m_States[MOVE])
             {
                 m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
@@ -155,7 +163,7 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 애니메이션 끝나면?
 	if (m_IsAnimationEnd)
 	{
-		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
 		return;
 	}

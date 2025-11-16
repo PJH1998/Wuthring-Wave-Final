@@ -23,7 +23,7 @@ private:
 		RUN_D,
 		RUN_L,
 		RUN_R,
-		SPRINT_F,
+		SPRINT,
 		HIT,
 
 		BURST,

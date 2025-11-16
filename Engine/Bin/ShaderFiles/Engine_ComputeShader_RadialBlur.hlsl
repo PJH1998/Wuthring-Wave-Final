@@ -156,14 +156,11 @@ void RadialBlur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     for (int i = 0; i < 4; i++)
     {
         int2 OutIndex = DTID.xy * 2;
-        float2 vTexcoord = float2(GTID.xy);
         
         int2 Offset = int2(i % 2, clamp(i - 1, 0, 1));
         
         OutIndex += Offset;
         
-        vTexcoord += Offset;
-    
         float2 vLowPos = (OutIndex + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
     
         int2 iLowID = (int2) floor(vLowPos);
@@ -171,11 +168,13 @@ void RadialBlur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
         
         float4 vColor = 0.f;
        
-        int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X); 
-        int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X);
+        int2 vTexcoord = iLowID - (GroupID.xy * int2(THREAD_X, THREAD_Y));
+        
+        int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X + 1);
+        int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X + 1);
     
-        int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y); 
-        int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y); 
+        int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y + 1);
+        int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y + 1);
        
         float4 vLT = vSharedRadialColor[iSampleY0][iSampleX0];
         float4 vRT = vSharedRadialColor[iSampleY0][iSampleX1];

@@ -18,7 +18,7 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_fWinSizeX = static_cast<_float>(iWinSizeX);
 	m_fWinSizeY = static_cast<_float>(iWinSizeY);
 
-	m_MotionBlurData.fLimitVelocity = 5.f;
+	m_MotionBlurData.fLimitVelocity = 1.f;
 	m_MotionBlurData.fLimitDepth = 150.f;
 	m_MotionBlurData.fLengthScale = 0.5f;
 	m_MotionBlurData.fSampleDepthBias = 10.f;
