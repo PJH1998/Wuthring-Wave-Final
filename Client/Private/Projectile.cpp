@@ -46,7 +46,7 @@ void CProjectile::Update(_float fTimeDelta)
 	if (m_fDelay <= 0.f)
 	{
 		PREFAB_INFO EffectDesc{};
-		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		EffectDesc.pMatrixPtr = nullptr;
 		EffectDesc.pModelPtr = nullptr;
 		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
 		m_fDelay = 1.f;
