@@ -46,6 +46,7 @@ private:
 	// 2 Depth Menu
 	void RenderUI_ConvertFbx();
 	void RenderUI_CreateActor();
+	void RenderUI_EditActor();
 	void RenderUI_EditAnimation();
 
 	void RenderUI_FromState();
@@ -59,11 +60,13 @@ private:
 	// 3 Depth Menu
 	void LoadDat();
 	void RenderUI_ModelPrototype();
+	void RenderUI_EditModel();
 	void RenderUI_AnimationList();
 
 private:
 	// 4 Depth Menu
 	void Render_Model_Detail();
+	void Render_EditModel();
 	void Render_Animation_Detail();
 
 	

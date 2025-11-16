@@ -178,6 +178,14 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::CREATE_ACTOR;
         }
 
+		if (ImGui::BeginTabItem("EditActor"))
+		{
+			RenderUI_EditActor();
+			ImGui::EndTabItem();
+
+			m_eMode = MODE::CREATE_ACTOR;
+		}
+
         if (ImGui::BeginTabItem("EditAnimation"))
         {
             RenderUI_EditAnimation();
@@ -216,6 +224,20 @@ void CAnimationTool::RenderUI_CreateActor()
         ImGui::EndTabBar();
     }
     
+}
+
+void CAnimationTool::RenderUI_EditActor()
+{
+	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+	if (ImGui::BeginTabBar("Prototype", tab_bar_flags))
+	{
+		if (ImGui::BeginTabItem("Model Edit"))
+		{
+			RenderUI_EditModel();
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
 }
 
 void CAnimationTool::RenderUI_EditAnimation()
@@ -690,7 +712,6 @@ void CAnimationTool::RenderUI_EditState()
     ImGui::SameLine();
     RenderUI_OptionState();
 
-
   
     RenderUI_TransitionInfo();
 
@@ -845,10 +866,36 @@ void CAnimationTool::RenderUI_ModelPrototype()
 	if (iSelectedIndex >= 0 && iSelectedIndex < m_ModelNames.size())
 		Render_Model_Detail();
 #endif // _DEBUG
-
-
-
     
+}
+
+void CAnimationTool::RenderUI_EditModel()
+{
+	_wstring objTag = {};
+	_wstring modelTag = {};
+
+	ImGui::BeginChild("left pane", ImVec2(500, 0), true);
+
+	static int iSelectedIndex = -1;
+	_uint id = 0;
+
+	for (auto& actorName : m_ActorNames)
+	{
+		if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
+		{
+			iSelectedIndex = id;
+			m_Selected_AnimActorTag = actorName;
+			m_wSelected_AnimActorTag = StringToWString(actorName);
+		}
+	}
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+
+#ifdef _DEBUG
+	if (iSelectedIndex >= 0 && iSelectedIndex < m_ActorNames.size())
+		Render_EditModel();
+#endif
 }
 
 void CAnimationTool::RenderUI_AnimationList()
@@ -1085,6 +1132,44 @@ void CAnimationTool::Render_Model_Detail()
 
 
     ImGui::EndChild();
+}
+
+void CAnimationTool::Render_EditModel()
+{
+
+	if (m_wSelected_AnimActorTag.empty())
+		return;
+
+	ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
+
+	static float fPosition[3] = { 0.f, 0.f, 0.f };
+	ImGui::InputFloat3("Position", fPosition);
+
+	CTransform* pTransformCom = m_AnimationActors.at(m_wSelected_AnimActorTag)->Get_Transform();
+	m_pGameInstance->Use_Gizmo(pTransformCom);
+
+
+	if (ImGui::Button("Apply Position"))
+	{
+		_float3 vP = { };
+		memcpy(&vP, fPosition, sizeof(_float3));
+
+		_vector vPos = XMVectorSetW(XMLoadFloat3(&vP), 1.f);
+		pTransformCom->Set_State(STATE::POSITION, vPos);
+	}
+	
+
+	_float4 vDebugPos = {};
+	XMStoreFloat4(&vDebugPos, pTransformCom->Get_State(STATE::POSITION));
+	_string strPos = {};
+	strPos = "Transform (x, y, z, w) : " + to_string(vDebugPos.x) + ", " 
+		+ to_string(vDebugPos.y) + ", " 
+		+ to_string(vDebugPos.z) + ", " 
+		+ to_string(vDebugPos.w);
+
+	ImGui::Text(strPos.c_str());
+
+	ImGui::EndChild();
 }
 
 #endif // _DEBUG
