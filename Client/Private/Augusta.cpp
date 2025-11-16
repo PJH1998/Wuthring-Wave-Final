@@ -722,7 +722,13 @@ void CAugusta::Calc_ChangeTimer(_float fTimeDelta)
 
 void CAugusta::Bind_ChangeEffect()
 {
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), m_pTransformCom->Get_WorldMatrix(), m_pModelCom);
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), matWorld, &effecInfo);
 }
 void CAugusta::Render_Damage(const HIT_DESC* pDesc)
 {

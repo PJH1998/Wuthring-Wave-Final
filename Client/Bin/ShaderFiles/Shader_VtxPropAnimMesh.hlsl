@@ -168,12 +168,13 @@ PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
     float fDissolveMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
 
     // 2. 마스크 값이 g_fDissolveRate보다 작으면 픽셀을 그리지 않고 버립니다.
-    if (fDissolveMask < g_fDissolveRate)
-    {
-        discard;
-    }
+    //if (fDissolveMask < g_fDissolveRate)
+    //{
+    //    discard;
+    //}
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    clip(fDissolveMask.r - g_fDissolveRate);
     
     vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
@@ -186,6 +187,8 @@ PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
     Out.vDepth.y = In.vProjPos.w;
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
+    
+    
     
     return Out;
 }

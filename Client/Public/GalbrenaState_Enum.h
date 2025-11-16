@@ -150,8 +150,9 @@ enum class EGalbrenaAttackType : _uint
 
 enum class EGalbrenaSkillType : _uint
 {
-	SKILL02 = 0,
-	EX_SKILL02,
+	SKILL01 = 0,
+	SKILL02,
+	ATTACK11,
 	END
 };
 

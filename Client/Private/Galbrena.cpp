@@ -561,14 +561,14 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 	// 1. Type Tag
 	if (var1 == TEXT("FirstShotGun"))
 	{
-
 		// 2. Action Tag
 		if (var2 == TEXT("Dissolve"))
 		{
 			// 3. Dissolve On / Off
 			if (var3 == TEXT("On"))
 			{
-
+				m_pGalbrenaFirstShotGun->Activate(false);
+				return;
 			}
 		}
 	}
@@ -646,7 +646,13 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 }
 void CGalbrena::Bind_ChangeEffect()
 {
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), m_pTransformCom->Get_WorldMatrix(), m_pModelCom);
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), matWorld, &effecInfo);
 }
 #pragma endregion
 

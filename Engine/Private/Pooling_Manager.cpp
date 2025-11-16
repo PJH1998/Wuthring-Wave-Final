@@ -44,11 +44,28 @@ HRESULT CPooling_Manager::Add_PoolingObject(_uint iPrototypeLevelID, const _wstr
     return S_OK;
 }
 
+//HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+//{
+//    auto iter = m_PoolingObjects.find(strPoolingTag);
+//    if (iter == m_PoolingObjects.end())
+//        return E_FAIL;
+//
+//	if (0 == m_PoolingObjects[strPoolingTag].size())
+//		return S_OK;
+//
+//    CGameObject* pObject = m_PoolingObjects[strPoolingTag].front();
+//	m_PoolingObjects[strPoolingTag].pop();
+//    pObject->Reset(WorldMatrix, pArg);
+//	m_ActiveObjects[strPoolingTag].push_back(pObject);
+//
+//    return S_OK;
+//}
+
 HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
-    auto iter = m_PoolingObjects.find(strPoolingTag);
-    if (iter == m_PoolingObjects.end())
-        return E_FAIL;
+	auto iter = m_PoolingObjects.find(strPoolingTag);
+	if (iter == m_PoolingObjects.end())
+		return E_FAIL;
 
 	if (0 == m_PoolingObjects[strPoolingTag].size())
 		return S_OK;
@@ -58,7 +75,7 @@ HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, con
 	pObject->Reset(WorldMatrix, pArg);
 	m_ActiveObjects[strPoolingTag].push_back(pObject);
 
-    return S_OK;
+	return S_OK;
 }
 
 HRESULT CPooling_Manager::Clear_Resource()

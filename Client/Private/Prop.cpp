@@ -91,7 +91,12 @@ void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float
 {
     ASSERT_CRASH(m_pModelCom);
 
-    //m_IsAnimationEnd = m_pModelCom->Play_Animation_GPU(
+	// 1. Dissolve 면 return;
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+		return;
+
+    //m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(
     //    m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(
         strAnimName, fTimeDelta, &m_fTrackPosition, false, IsRootMotion, fRootMotionRate);

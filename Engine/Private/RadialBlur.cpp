@@ -9,9 +9,6 @@ CRadialBlur::CRadialBlur(ID3D11Device* pDevice, ID3D11DeviceContext* pContrext)
 
 HRESULT CRadialBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 {
-	if (FAILED(__super::Initialize()))
-		return E_FAIL;
-
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 	

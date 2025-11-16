@@ -119,7 +119,7 @@ float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
     
     fRimPower = max(0.2f, fRimPower);
     
-    fRimPower = pow(fRimPower, 5.f);
+    fRimPower = pow(fRimPower, 2.f);
     
     return fRimPower;
 }

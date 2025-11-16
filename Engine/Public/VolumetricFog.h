@@ -85,7 +85,7 @@ private:
 
 	ID3D11UnorderedAccessView*	m_pUAVs[ENUM_CLASS(UAV::END)] = { nullptr };
 
-	ID3D11ShaderResourceView*	m_pSRVs[ENUM_CLASS(SRV::END)];
+	ID3D11ShaderResourceView*	m_pSRVs[ENUM_CLASS(SRV::END)] = { nullptr };
 
 	ID3D11Buffer*				m_pBuffers[ENUM_CLASS(BUFFER::END)] = {nullptr};
 

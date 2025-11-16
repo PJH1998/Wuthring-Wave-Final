@@ -22,7 +22,7 @@ public:
 	void						Update(_float fTimeDelta);
 	void						Render(CShader* pShader);
 	
-	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
+	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance);
 	HRESULT						Add_DecalData(const DECAL_DATA& Decal);
 	ID3D11ShaderResourceView*	Get_DecalSRV(TEXTURETYPE eTextureType);
 	
@@ -36,7 +36,9 @@ private:
 	_uint						m_iNumDecals = {};
 
 	CTexture*					m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::END)] = { nullptr };
+	_float3						m_vEmiisiveLuminance = {};
 	CVIBuffer_Decal*			m_pVIBuffer_Decal = { nullptr };
+
 
 private:
 	HRESULT						Bind_Resources(CShader* pShader);
