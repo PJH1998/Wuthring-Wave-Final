@@ -105,16 +105,16 @@ void CGalbrenaGroundRun::Handle_Input()
 
 
     // DASH보다 우선순위 높음.
-    m_States[SPRINT_F] = m_States[MOVE] && m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+    m_States[SPRINT] = m_States[MOVE] && m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
     // 공격 상태가 아니라 공격 판정 상태로 전달.
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+    m_fSpeed = m_States[SPRINT] ? 1.2f : 0.7f;
 
 	// Burst인지 체크
-	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+	//m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
 
 	/*if (m_States[BURST])
 		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Ex_Skill02"));
@@ -122,7 +122,7 @@ void CGalbrenaGroundRun::Handle_Input()
 		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Skill02"));*/
 
 	// 궁 상태 확인하기.
-	m_States[ULTI] = m_States[SKILL_R] && (m_pGalbrena->Get_Cost(COST_TYPE::COST2) >= m_pGalbrena->Get_MaxCost());
+	//m_States[ULTI] = m_States[SKILL_R] && (m_pGalbrena->Get_Cost(COST_TYPE::COST2) >= m_pGalbrena->Get_MaxCost());
 }
 
 
@@ -231,13 +231,13 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		}
 	}
 
-    if (m_States[SPRINT_F])
+    if (m_States[SPRINT])
     {
-        m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::SPRINT_F);
-        return;
+		m_pGalbrena->GetStateContextForWrite().m_eSprintType = EGalbrenaSprintType::SPRINT_F;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPRINT)); // 상위, 하위 상태
+		return;
     }
 
-   
 
     if (m_States[MOVE])
     {
@@ -269,29 +269,15 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 
             return;
         }
-        // 이동 값이 들어왔는데 Stop Run 상태라면?
-        if (eRunType == EGalbrenaRunType::STOP_RUN_L || eRunType == EGalbrenaRunType::SPRINT_F)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_F);
-            return;
-        }
-		else
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_F);
-			return;
-		}
+
+        // 이동 값이 들어왔으면?
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_F);
+		return;
     }
 
     // 이동 입력 값이 안들어왔다면?
     if (!m_States[MOVE])
     {
-        // 현재 상태가 Sprint 였다면?
-        if (eRunType == EGalbrenaRunType::SPRINT_F)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::STOP_SPRINT_L);
-            return;
-        }
-
         // 현재 상태가 STOP_RUN이 아니라면? => STOP RUN
         if (eRunType != EGalbrenaRunType::STOP_RUN_L)
         {
@@ -300,7 +286,7 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
             return;
         }
         // Stop Run 이면서 애니메이션 재생이 끝났다면?.
-        if ((eRunType == EGalbrenaRunType::STOP_RUN_L || eRunType == EGalbrenaRunType::STOP_SPRINT_L) && m_IsAnimationEnd)
+        if ((eRunType == EGalbrenaRunType::STOP_RUN_L) && m_IsAnimationEnd)
         {
 			
             m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;

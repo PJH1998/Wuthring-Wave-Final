@@ -791,6 +791,12 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundSprint.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSprint.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1245,6 +1251,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundSprint.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

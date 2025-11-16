@@ -208,11 +208,10 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 	// Sprint => 빠르게 달리기.
 	if (m_States[SPRINT])
 	{
-		m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::SPRINT_F;
-		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN)); // 상위, 하위 상태
+		m_pGalbrena->GetStateContextForWrite().m_eSprintType = EGalbrenaSprintType::SPRINT_F;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPRINT)); // 상위, 하위 상태
 		return;
 	}
-
     
     // 이동은 Run State에서 조절.
     if (m_States[MOVE])

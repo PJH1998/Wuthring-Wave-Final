@@ -5,6 +5,7 @@
 // HSM Ground 카테고리 State들
 #include "GalbrenaGroundIdle.h"
 #include "GalbrenaGroundRun.h"
+#include "GalbrenaGroundSprint.h"
 #include "GalbrenaGroundLand.h"
 #include "GalbrenaGroundDash.h"
 //#include "GalbrenaGroundAttack.h"
@@ -31,6 +32,7 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
    // Ground 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE), CGalbrenaGroundIdle::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN), CGalbrenaGroundRun::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPRINT), CGalbrenaGroundSprint::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND), CGalbrenaGroundLand::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH), CGalbrenaGroundDash::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE), CGalbrenaGroundDodge::Create(pCharacter));

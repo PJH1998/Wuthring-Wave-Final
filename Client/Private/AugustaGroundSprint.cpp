@@ -69,6 +69,8 @@ void CAugustaGroundSprint::OnExit()
     m_pAugusta->Set_Gravity(true);
 
 	m_fFallTime = 0.f;
+
+	// 1. SFX 모션 끄기
 	m_pAugusta->End_SFX();
 }
 
@@ -145,8 +147,8 @@ void CAugustaGroundSprint::Update_RunAnimation(_float fTimeDelta)
 	
 
     EAugustaSprintType eSprintType = static_cast<EAugustaSprintType>(m_iCurrentAnimIdx);
-    // 1. 회전 및 이동.
-
+    
+	// 1. 회전 및 이동.
 	m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
 }
 
@@ -344,8 +346,6 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 			return;
 		}
 	}
-  
-    
 }
 
 

@@ -6,7 +6,9 @@
 #include "RoverGroundIdle.h"
 #include "RoverGroundRun.h"
 #include "RoverGroundLand.h"
+#include "RoverGroundSprint.h"
 #include "RoverGroundDash.h"
+
 #include "RoverGroundAttack.h"
 #include "RoverGroundBurst.h"
 #include "RoverGroundSpecial.h"
@@ -33,6 +35,7 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
    // Ground 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE), CRoverGroundIdle::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN), CRoverGroundRun::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SPRINT), CRoverGroundSprint::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND), CRoverGroundLand::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH), CRoverGroundDash::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE), CRoverGroundDodge::Create(pCharacter));
