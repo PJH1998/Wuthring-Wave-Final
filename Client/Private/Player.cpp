@@ -541,7 +541,6 @@ void CPlayer::Sorting_Target()
 
 void CPlayer::Toggle_LockOn()
 {
-	
 
 	// 1. 락온 키 입력 (상태 전환)
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
@@ -606,6 +605,8 @@ void CPlayer::Toggle_LockOn()
 	// 6. 카메라 업데이트.
 	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
 
+	// 7. LockOn 초기화?
+	m_pTargetTransform = nullptr;
 	/* if (nullptr == m_pTargetTransform)
 	 {
 		 if (m_IsLockOn)
@@ -730,7 +731,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
     RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-    RigidbodyDesc.vExtent = _float3(200.f, 100.f, 200.f);
+    RigidbodyDesc.vExtent = _float3(30.f, 10.f, 30.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
     if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

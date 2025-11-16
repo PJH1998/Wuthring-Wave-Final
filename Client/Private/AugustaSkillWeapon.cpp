@@ -127,9 +127,19 @@ void CAugustaSkillWeapon::Render()
 #endif // _DEBUG
 }
 
-void CAugustaSkillWeapon::Activate(_bool IsActive)
+void CAugustaSkillWeapon::Activate(_bool IsActivate)
 {
-    SetActivate(IsActive);
+    SetActivate(IsActivate);
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+	}
 }
 
 void CAugustaSkillWeapon::Change_Volume(_uint iVolumeIdx)
@@ -194,8 +204,8 @@ void CAugustaSkillWeapon::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-    for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
 void CAugustaSkillWeapon::Ready_Positions(const PROP_DESC* pDesc)
