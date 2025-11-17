@@ -156,6 +156,19 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 			break;
 		}
 
+		if (nullptr == m_pDecalTexture[i])
+		{
+			if (FAILED(pShader->Bind_Texture(strTextureConstantName.c_str(), nullptr)))
+				return S_OK;
+
+			_bool HasTexture = false;
+
+			if (FAILED(pShader->Bind_Value(strBoolConstantName.c_str(), &HasTexture, sizeof(_bool))))
+				CRASH("Failed Bind Value");
+
+			continue;
+		}
+
 		_bool HasTexture = false;
 		if (SUCCEEDED(m_pDecalTexture[i]->Bind_Shader_Resource(pShader, strTextureConstantName.c_str())))
 			HasTexture = true;
