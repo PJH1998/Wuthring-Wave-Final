@@ -1237,7 +1237,7 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 	if (DecalDataJson.contains("TextureCount"))
 		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
 
-	const _tchar* DecalTexturePath[3] = {};
+	const _tchar* DecalTexturePath[4] = {};
 
 	if (DecalDataJson.contains("Textures") && DecalDataJson["Textures"].is_array())
 	{
