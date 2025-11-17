@@ -31,6 +31,8 @@ HRESULT CGalbrenaShotGun::Initialize_Clone(void* pArg)
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	m_isActivate = false;
+
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
