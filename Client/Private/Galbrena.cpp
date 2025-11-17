@@ -5,6 +5,7 @@
 #include "SpringCamera.h"
 #include "Wing.h"
 #include "GalbrenaShotGun.h"
+#include "GalbrenaDarkWing.h"
 #include "Collider.h"
 #include "AttackVolume.h"
 #include "GameSystem.h"
@@ -52,6 +53,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	//PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);
+	PartActivate(PART_DARKWING, false);
 	PartActivate(PART_LION, false);
 	PartActivate(PART_WING, false);
 	
@@ -71,7 +73,6 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -292,6 +293,9 @@ void CGalbrena::Play_PartAnimation(_uint iPartType, const _string& strAnimName, 
 		break;
 	case PART_LION:
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
 	case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
 		break;
@@ -313,6 +317,9 @@ void CGalbrena::PartActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_LION:
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Activate(IsActive);
+		break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
 		break;
@@ -331,6 +338,9 @@ void CGalbrena::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	case PART_SECONDGUN:
 		m_pGalbrenaSecondShotGun->Change_Volume(iVolumeIdx);
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Change_Volume(iVolumeIdx);
+		break;
 	case PART_LION:
 		break;
 	}
@@ -345,6 +355,9 @@ void CGalbrena::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_SECONDGUN:
 		m_pGalbrenaSecondShotGun->Volume_Activate(IsActive);
+		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Volume_Activate(IsActive);
 		break;
 	case PART_LION:
 		break;
@@ -362,6 +375,9 @@ void CGalbrena::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 		m_pGalbrenaSecondShotGun->Clear_Animation(strAnimName);
 		break;
 	case PART_LION:
+		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Clear_Animation(strAnimName);
 		break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
@@ -385,6 +401,8 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 	case PART_FIRSTGUN:
 		break;
 	case PART_SECONDGUN:
+		break;
+	case PART_DARKWING:
 		break;
 	case PART_LION:
 		break;
@@ -587,6 +605,19 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 			if (var3 == TEXT("On"))
 			{
 				m_pGalbrenaSecondShotGun->Activate(false);
+				return;
+			}
+		}
+	}
+	else if (var1 == TEXT("DarkWing"))
+	{
+		// 2. Action Tag
+		if (var2 == TEXT("Dissolve"))
+		{
+			// 3. Dissolve On / Off
+			if (var3 == TEXT("On"))
+			{
+				m_pGalbrenaDarkWing->Activate(false);
 				return;
 			}
 		}
@@ -854,6 +885,23 @@ void CGalbrena::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 
 		case PARTTYPE::PART_LION:
 			break;
+		case PARTTYPE::PART_DARKWING:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetGalbrenaDarkWingCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("PART_DARKWING");
+
+			m_pGalbrenaDarkWing = dynamic_cast<CGalbrenaDarkWing*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pGalbrenaDarkWing);
+			Safe_AddRef(m_pGalbrenaDarkWing);
+			break;
 
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
@@ -1022,4 +1070,5 @@ void CGalbrena::Free()
 	Safe_Release(m_pWing);
 	Safe_Release(m_pGalbrenaFirstShotGun);
 	Safe_Release(m_pGalbrenaSecondShotGun);
+	Safe_Release(m_pGalbrenaDarkWing);
 }

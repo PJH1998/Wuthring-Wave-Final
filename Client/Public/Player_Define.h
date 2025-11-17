@@ -254,6 +254,7 @@ namespace PlayerData
 			make_pair(L"FirstGun", L"Prototype_GameObject_Galbrena_FirstGun"),
 			make_pair(L"SecondGun", L"Prototype_GameObject_Galbrena_SecondGun"),
 			make_pair(L"Lion", L"Prototype_GameObject_Galbrena_Lion"),
+			make_pair(L"DarkWing", L"Prototype_GameObject_Galbrena_DarkWing"),
 			make_pair(L"Wing", L"Prototype_GameObject_Wing")
 		};
 
@@ -295,6 +296,27 @@ namespace PlayerData
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
 		Desc.strFolderPath = "../Bin/Resource/Model/Player/Galbrena/Weapon/ShotGun/Notify/";
 		Desc.strBoneName = "WeaponProp02";
+		Desc.eWeaponType = WEAPONTYPE::ANIM;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+		return Desc;
+	}
+
+	static CProp::PROP_DESC GetGalbrenaDarkWingCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CProp::PROP_DESC Desc{};
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.fSpeedPerSec = 10.f;
+		Desc.pSocketMatrix = { nullptr }; // Augusta
+		Desc.pParentTransform = { nullptr }; // Augusta
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Galbrena_DarkWing"));
+		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+		Desc.strFolderPath = "../Bin/Resource/Model/Player/Galbrena/Weapon/DarkWing/Notify/";
+		Desc.strBoneName = "WingCase";
 		Desc.eWeaponType = WEAPONTYPE::ANIM;
 		Desc.vScale = vScale;
 		Desc.vRotation = vRotation;

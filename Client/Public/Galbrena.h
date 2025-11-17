@@ -121,6 +121,7 @@ public:
 		PART_FIRSTGUN = 0,		// 기본 무기.?
 		PART_SECONDGUN,		// 기본 무기.?
 		PART_LION,
+		PART_DARKWING,
 		PART_WING,
 		TYPE_END
 	};
@@ -179,6 +180,7 @@ public:
 private:
 	class CGalbrenaShotGun* m_pGalbrenaFirstShotGun = { nullptr };
 	class CGalbrenaShotGun* m_pGalbrenaSecondShotGun = { nullptr };
+	class CGalbrenaDarkWing* m_pGalbrenaDarkWing = { nullptr };
 	class CWing* m_pWing = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
