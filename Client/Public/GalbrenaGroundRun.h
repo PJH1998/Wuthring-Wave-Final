@@ -26,14 +26,17 @@ private:
 		SPRINT,
 		HIT,
 
-		BURST,
-		ULTI,
-		ATTACK,
 		SKILL_E,
 		SKILL_Q,
 		SKILL_R,
 		DEFAULT_E,
 		BURST_E,
+
+		BURST,
+		BURST_ATTACK, // Burst 상태인경우? Burst 공격.
+		ULTI,
+		ATTACK,
+		
 		END
 	};
 

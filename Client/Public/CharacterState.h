@@ -21,6 +21,8 @@ protected:
     _bool Play_AnimationFly(class CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate = 1.f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 protected:
+	vector<_uint> m_ActivePartTypes; // 활성화할 PartType 들.
+
     _uint m_iMoveKey = {};  // 입력 키 ( State 마다 사용할 변수)
     ACTORDIR m_eDir = {};   // 방향 변수
 

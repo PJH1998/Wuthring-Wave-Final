@@ -96,6 +96,9 @@ void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float
 	if (IsDissolve)
 		return;
 
+	// 2. 현재 Animation 기록.
+	m_strCurrentAnimName = strAnimName;
+
     //m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(
     //    m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(
@@ -163,6 +166,7 @@ void CProp::Bind_DissolveTimer()
 {
 	Add_Condition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 	m_fDissolveTimer = 0.f;
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
 }
 #pragma endregion
 

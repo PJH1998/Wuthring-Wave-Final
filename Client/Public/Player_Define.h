@@ -107,7 +107,7 @@ namespace PlayerData
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Griffon"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-        Desc.strBoneName = "WeaponProp02";
+        Desc.strBoneName = "Root";
         Desc.eWeaponType = WEAPONTYPE::ANIM;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;

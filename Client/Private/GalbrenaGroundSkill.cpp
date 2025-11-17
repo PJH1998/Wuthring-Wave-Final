@@ -32,6 +32,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 
     // 4. 상태 초기화
     State_Reset();
+	m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
 
 	m_pGalbrena->Set_Gravity(true);
 
@@ -50,8 +51,22 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 			m_pGalbrena->Set_Gravity(false);
 			break;
 		}
-    }
 
+		case EGalbrenaSkillType::BURST01:
+		{
+			_string strBoneName = "WeaponProp01";
+			m_iPartType = CGalbrena::PARTTYPE::PART_FIRSTGUN;
+			m_pGalbrena->PartActivate(m_iPartType, true);
+			m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+			m_pGalbrena->Set_Gravity(true);
+			m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+			m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+			m_pGalbrena->Rotate_Target(); // 한번 회전.
+
+			// CutScene 실행?
+			break;
+		}
+    }
 	
 	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
 
@@ -86,18 +101,20 @@ void CGalbrenaGroundSkill::OnExit()
     m_pGalbrena->Set_Gravity(true);
 
 
+	// 활성화된 Parts Activate 끄기. => Dissolve 시작.
 	if (m_iPartType != CGalbrena::PARTTYPE::TYPE_END)
-	{
 		m_pGalbrena->PartActivate(m_iPartType, false);
-	}
     m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
 
 	// 기본 E 스킬에 적중 시 반동 E 스킬 발동을 위한 Condition
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
 
-	m_pGalbrena->Collider_Active(TEXT("Galbrena|DEFAULT_E|SKILL"), false);
-
+	// 궁극기 썼을 때 캐릭터에 부여된 상태 제거.
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+
+	// 활성화된 메인 콜라이더 끄기
+	m_pGalbrena->Collider_Active(TEXT("Galbrena|DEFAULT_E|SKILL"), false);
 }
 
 void CGalbrenaGroundSkill::Handle_Input()
@@ -105,7 +122,10 @@ void CGalbrenaGroundSkill::Handle_Input()
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
     m_States[SKILL_E] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
+	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
+	m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Skill01")); // 연계 기
 }
 
 void CGalbrenaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
@@ -121,15 +141,14 @@ void CGalbrenaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
 
     // Target이 존재한다면? => Auto Target
-    
-	//if (m_iPartType == CGalbrena::PARTTYPE::PART_DARKSCYTHE || CGalbrena::PART_DARKWING)
-    //{
-    //    m_pGalbrena->Play_PartAnimation(
-    //        m_iPartType,
-    //        m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
-    //        fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
-    //    );
-    //}
+    if (m_iPartType != CGalbrena::PARTTYPE::TYPE_END)
+	{
+		m_pGalbrena->Play_PartAnimation(
+			    m_iPartType,
+			    m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+			    fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr
+			);
+	}
 }
 
 void CGalbrenaGroundSkill::Check_Physcis(_float fTimeDelta)
@@ -175,6 +194,31 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				return;
 			}
 		}
+
+		if (m_States[DEFAULT_E])
+		{
+			if (eSkillType == EGalbrenaSkillType::BURST01)
+			{
+				if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+					return;
+
+				m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL)); // 상위, 하위 상태
+				return;
+			}
+		}
+
+		if (m_States[ATTACK])
+		{
+			if (eSkillType == EGalbrenaSkillType::BURST01)
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK));
+				return;
+			}
+		}
+
+		
     }
 
 
@@ -183,9 +227,9 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
     {
         if (m_States[LAND])
         {
-            m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
-            m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-            return;
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+			return;
         }
 
         if (!m_States[LAND])
@@ -194,22 +238,22 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
             m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL));
             return;
         }
-
-		
     }
     
 }
 void CGalbrenaGroundSkill::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::SKILL01), "Skill01", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::SKILL02), "Skill02", 1.f, 20.f);
+    //CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::SKILL01), "Skill01", 1.f, 20.f);
+    //CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::SKILL02), "Skill02", 1.f, 20.f); => Burst?
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP_START), "Attack_Jump_Start", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP), "Attack_Jump", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP_END02), "Attack_Jump_End02", 1.3f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::BURST01), "Burst01", 1.2f, 130.f);
 
     //m_PartsAnimations.emplace("Ex_Skill02", "Scythe_Ex_Attack03");
     //m_PartsAnimations.emplace("Skill02", "G_Skill02");
 
+	m_PartsAnimations.emplace("Burst01", "Gun01");
 
 }
 

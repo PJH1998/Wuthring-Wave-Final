@@ -21,6 +21,7 @@ public:
 		VOLUME_ARROUND_SLASH,
 		VOLUME_AIR_LOOP, // 공중에서 공격.
 		VOLUME_TARGET,
+		VOLUME_TARGET_BURST,
 		VOLUME_KNOCKBACK,
 		VOLUME_DEFAULT_E,
 		VOLUME_SKILL,
@@ -189,6 +190,10 @@ private:
 	vector<class CAttackVolume*> m_AttackVolumes;
 
 	_bool m_PendingConditions[CONDITION_END] = {};
+
+private:
+	void Bind_TargetToVolumes();
+	void Update_TargetDistance();
 
 private:
 	void Bind_Resources();

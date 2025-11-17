@@ -813,7 +813,13 @@
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\RoverAirJump.h">
-      <Filter>03. GameObject\Actor\Player\State\Air</Filter>
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundBurst.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecial.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1287,6 +1293,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundBurst.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

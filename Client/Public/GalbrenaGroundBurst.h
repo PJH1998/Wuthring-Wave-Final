@@ -3,33 +3,24 @@
 
 NS_BEGIN(Client)
 
-// Galbrena Skill State - Skill_Hack, Skill_Rise, Skill_Strike, SkillQTE, Burst01 처리
+// Galbrena Skill State - , Burst01 처리
 // Default Skill State
-class CGalbrenaGroundSkill final : public CGroundState
+class CGalbrenaGroundBurst final : public CGroundState
 {
 private:
-    enum SKILLSTATE
+    enum BURSTSTATE
     {
-       HACK = 0,
-       RISE_ZERO,
-       QTE,
-       IDLE,
-       MOVE,
-       JUMP, 
-       LAND,
-	   ATTACK,
-       SKILL_E,
-       SKILL_R,
-
-	   DEFAULT_E,
-	   BURST_E,
-       FALL,
+	   ATTACK = 0,
+	   MOVE,
+	   JUMP,
+	   LAND,
+	   NEXT_SKILL,
        END
     };
 
 private:
-    explicit CGalbrenaGroundSkill() = default;
-    virtual ~CGalbrenaGroundSkill() = default;
+    explicit CGalbrenaGroundBurst() = default;
+    virtual ~CGalbrenaGroundBurst() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -40,22 +31,19 @@ public:
 
 private:
     class CGalbrena* m_pGalbrena = { nullptr };
-    _bool m_States[SKILLSTATE::END] = {};
-    map<_string, _string> m_PartsAnimations = {};
+    _bool m_States[BURSTSTATE::END] = {};
 
 private:
     virtual void Handle_Input() override;
     void Update_SkillAnimations(_float fTimeDelta);
     void Check_Physcis(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta) ;
+    
     void SetUp_Animations();
     void State_Reset();
 
-	void Handle_Animation_SpecialState();
-
-
 public:
-    static CGalbrenaGroundSkill* Create(class CGameObject* pOwner);
+    static CGalbrenaGroundBurst* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

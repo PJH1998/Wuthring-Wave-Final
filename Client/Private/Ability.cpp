@@ -82,8 +82,8 @@ void CAbility::Update_CostCondition(_float fTimeDelta)
 	{
 		COST_TYPE eCostType = static_cast<COST_TYPE>(iter->first);
 
-		// 초당 10.f 감소.
-		Add_Cost(eCostType, -fTimeDelta * 10.f);
+		// 초당 8.f 감소.
+		Add_Cost(eCostType, -fTimeDelta * 8.f);
 
 		// Cost가 0.f 라면? 제거.
 		if (m_Costs[iter->first] <= 0.f)

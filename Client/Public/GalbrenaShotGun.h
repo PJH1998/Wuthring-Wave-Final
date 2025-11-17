@@ -36,7 +36,6 @@ public:
 
 private:
 	vector<_uint> m_ShaderPaths = {};
-	_uint m_iShaderPath = {};
 
 
 

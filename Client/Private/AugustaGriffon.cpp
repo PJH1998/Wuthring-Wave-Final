@@ -129,8 +129,7 @@ void CAugustaGriffon::Render()
 void CAugustaGriffon::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
-	// 한번 실행시킨다. => 1Frame 위에서 놀고있게
-	//CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
@@ -141,6 +140,8 @@ void CAugustaGriffon::Activate(_bool IsActivate)
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
+
+		
 	}
   
 }
