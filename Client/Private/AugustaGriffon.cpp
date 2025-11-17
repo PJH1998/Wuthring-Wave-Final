@@ -42,9 +42,6 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
-	if (m_IsAnimationEnd)
-		m_isActivate = false;
-
 	// MainAttackVolume 설정
 	//if (nullptr != m_pMainAttackVolume)
 	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
@@ -107,18 +104,21 @@ void CAugustaGriffon::Render()
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
             CRASH("Ready Diffuse Texture Failed");
 
-		_bool HasNormal = { false };
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		/*_bool HasNormal = { false };
 
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
 
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
+			CRASH("Ready g_HasNormal Failed");*/
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //    CRASH("Ready Shader Begin Failed");
+        if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::NORMAL_TEX))))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -134,7 +134,7 @@ void CAugustaGriffon::Render()
 
 void CAugustaGriffon::Activate(_bool IsActivate)
 {
-	//CProp::Activate(IsActivate);
+	CProp::Activate(IsActivate);
 	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	PREFAB_INFO effecInfo{};
