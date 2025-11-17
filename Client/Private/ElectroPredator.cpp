@@ -507,8 +507,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 
 #ifdef _DEBUG
@@ -529,8 +531,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 
 #ifdef _DEBUG
