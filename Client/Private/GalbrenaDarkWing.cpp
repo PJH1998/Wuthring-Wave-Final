@@ -136,8 +136,6 @@ void CGalbrenaDarkWing::Render()
 
         if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
-        /*if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_NORMAL))))
-            CRASH("Ready Shader Begin Failed");*/
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
@@ -170,7 +168,7 @@ void CGalbrenaDarkWing::Activate(_bool IsActivate)
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		Bind_DissolveTimer();
-		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_DEFAULT_NORMAL);
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 		
 	}
