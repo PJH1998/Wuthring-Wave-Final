@@ -32,7 +32,7 @@ HRESULT CGalbrenaShotGun::Initialize_Clone(void* pArg)
         return E_FAIL;
 
 	m_isActivate = false;
-
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
