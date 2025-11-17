@@ -39,7 +39,7 @@ public:
 
 	//_bool				Blend_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float fTrackLength);
 
-	_bool				Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
+	_bool				Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _matrix* Out = nullptr);
 private:
 	_char									m_szName[MAX_PATH] = {};
 	_float									m_fDuration = {};
@@ -50,7 +50,7 @@ private:
 	vector<class CChannel*>				m_Channels;
 	vector<_uint>						m_CurrentFrameIndices;
 
-	vector<NOTIFY>					m_Notifies; // ?명솚?깆쓣 ?꾪빐 ?대젮??
+	vector<NOTIFY>					m_Notifies;
 
 	_uint							m_iNotifyIndex = {};
 	
