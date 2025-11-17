@@ -84,6 +84,9 @@ void CAugustaGroundAttack::OnExit()
 
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능 상태 제거
+
+
+	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 _bool CAugustaGroundAttack::Hit_Judge()

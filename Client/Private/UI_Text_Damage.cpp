@@ -82,7 +82,7 @@ void CUI_Text_Damage::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_tTextDesc = *static_cast<TEXT_UI_DESC*>(pArg);
 	m_isActivate = true;
 
- 	for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
+ 	for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++) // 종종 터짐.
 		m_tUIDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
 }
 

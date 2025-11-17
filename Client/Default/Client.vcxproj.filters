@@ -316,6 +316,9 @@
     <Filter Include="03. GameObject\UI\Props\Interact">
       <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\NPC">
+      <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -570,9 +573,6 @@
     <ClInclude Include="..\public\UI_StatusSyncer.h">
       <Filter>03. GameObject\UI\UIHelper</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\RoverAirJump.h">
-      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\RoverGroundLand.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
@@ -826,6 +826,21 @@
     </ClInclude>
     <ClInclude Include="..\public\UI_Parry.h">
       <Filter>03. GameObject\UI\Props\Parry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundBurst.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecial.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\DummyNPC.h">
+      <Filter>03. GameObject\Actor\NPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1302,6 +1317,18 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_Parry.cpp">
       <Filter>03. GameObject\UI\Props\Parry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundBurst.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\DummyNPC.cpp">
+      <Filter>03. GameObject\Actor\NPC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

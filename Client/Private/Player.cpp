@@ -275,10 +275,6 @@ void CPlayer::Player_KeyInput()
 			}
 		}
 	}
-		
-
-	
-
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
@@ -561,7 +557,8 @@ void CPlayer::Toggle_LockOn()
 	// 2. 매프레임 검증
 	if (m_IsLockOn)
 	{
-		if (nullptr == m_pLockOnTargetTransform || !Is_TargetValid(m_pLockOnTargetTransform))
+		// TargetTransform이 없거나.. LockOnTargetTransform이 현재 검색된 Transform 중에 없다면?
+		if (nullptr == m_pTargetTransform || !Is_TargetValid(m_pLockOnTargetTransform)) 
 		{
 			m_IsLockOn = false;
 			m_pLockOnTargetTransform = nullptr;
@@ -731,7 +728,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
     RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-    RigidbodyDesc.vExtent = _float3(30.f, 10.f, 30.f);
+    RigidbodyDesc.vExtent = _float3(10.f, 5.f, 10.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
     if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

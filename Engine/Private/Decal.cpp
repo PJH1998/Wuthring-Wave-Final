@@ -62,7 +62,7 @@ void CDecal::Update(_float fTimeDelta)
 
 void CDecal::Render(CShader* pShader)
 {
-	if (m_iNumDecals < 0 || m_iNumDecals >= g_iMaxDecal)
+	if (m_iNumDecals <= 0 || m_iNumDecals >= g_iMaxDecal)
 		return;
 
 	Bind_Resources(pShader);
@@ -131,9 +131,6 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 	
 	for (_uint i = 0; i < ENUM_CLASS(TEXTURETYPE::END); ++i)
 	{
-		if (nullptr == m_pDecalTexture[i])
-			continue;
-
 		string strTextureConstantName = {};
 		string strBoolConstantName = {};
 		switch (i)
@@ -154,6 +151,19 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 			strTextureConstantName = "g_EmissiveTexture";
 			strBoolConstantName = "g_HasEmissive";
 			break;
+		}
+
+		if (nullptr == m_pDecalTexture[i])
+		{
+			if (FAILED(pShader->Bind_Texture(strTextureConstantName.c_str(), nullptr)))
+				return S_OK;
+
+			_bool HasTexture = false;
+
+			if (FAILED(pShader->Bind_Value(strBoolConstantName.c_str(), &HasTexture, sizeof(_bool))))
+				CRASH("Failed Bind Value");
+
+			continue;
 		}
 
 		_bool HasTexture = false;

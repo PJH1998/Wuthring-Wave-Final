@@ -516,6 +516,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 		}
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
 		//cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -537,6 +543,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 		}
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
 #endif // _DEBUG
@@ -557,6 +569,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 		}
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Knock Back! (Corro)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;

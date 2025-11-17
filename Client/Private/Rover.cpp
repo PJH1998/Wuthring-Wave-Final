@@ -87,8 +87,6 @@ void CRover::Priority_Update(_float fTimeDelta)
 			pPart.second->Priority_Update(fTimeDelta);
 	}
 
-
-
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
@@ -99,11 +97,6 @@ void CRover::Priority_Update(_float fTimeDelta)
 		vDistance = XMVectorSetY(vDistance, 0.f);
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 	}
-
-	// 4. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
-  
 }
 
 void CRover::Update(_float fTimeDelta)
@@ -492,6 +485,10 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	_uint iVolumeIdx = {  };
+
+	if (var1 == TEXT("Main"))
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+
 
     if (var1 == TEXT("Sword"))
     {

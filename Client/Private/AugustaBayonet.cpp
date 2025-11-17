@@ -116,6 +116,7 @@ void CAugustaBayonet::Render()
 void CAugustaBayonet::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName);
 
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
@@ -125,6 +126,7 @@ void CAugustaBayonet::Activate(_bool IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 	}
 }
 
@@ -222,6 +224,8 @@ void CAugustaBayonet::Ready_Variables(const PROP_DESC* pDesc)
 
 	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
 		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
 void CAugustaBayonet::Ready_Positions(const PROP_DESC* pDesc)

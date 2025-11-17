@@ -48,7 +48,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	//m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
 	//m_PatrolPoints.push(pDesc->vInitPosition);
 	m_pRigidBodyCom->IsActivate(false);
-	//m_pColliderCom->IsActivate(false);
+	m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	return S_OK;
@@ -185,7 +185,7 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
-	//m_pColliderCom->IsActivate(true);
+	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -486,8 +486,9 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+			* XMMatrixTranslation(0.f, 1.5f, 0.f), &EffectDesc);
 #pragma endregion
 
 #ifdef _DEBUG
@@ -506,8 +507,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 
 #ifdef _DEBUG
@@ -528,8 +531,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 
 #ifdef _DEBUG

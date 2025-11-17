@@ -4,7 +4,7 @@
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
-float g_fLutLerpIntensity = 0.25f;
+float g_fLutLerpIntensity = 0.f;
 
 float g_fLightFar;
 
@@ -379,7 +379,7 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     float fViewZ = vViewPos.z == 0.f ? g_vFogRange.y : clamp(vViewPos.z, 0.1f, g_vFogRange.y);;
     
-    vector vOriginColor = g_LutResultTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
     if (fViewZ < g_vFogRange.x)
     {
@@ -574,7 +574,6 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     
     return Out;
 }
-
 
 PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
 {

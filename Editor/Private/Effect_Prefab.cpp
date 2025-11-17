@@ -115,7 +115,50 @@ void CEffect_Prefab::Render()
 
 void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	/*PREFAB_INFO* pDesc = static_cast<PREFAB_INFO*>(pArg);
+
+	if (pDesc->pModelPtr != nullptr)
+	{
+		프리팹 안에 뼈에 붙어야 할 자식과 안붙어야 할 자식이 같이 있을 수 있음.
+		그러니 프리팹에 기존 처리 + 만약 뼈에 붙어야할 얘가 있다면 추가적인 정보를 필요로 함 (BonePtr과 ObjectPtr필요)
+		기존 처리 할 얘들을 위한 정보 + PTR이 필요하니 기존 처리도 해주고 뼈 정보도 저장해주는게 맞는거 같음. 일단은 그렇게 생각중.
+
+		Reset_SpawnMatrix();
+		Reset_Prefab_Info();
+
+		_float4x4 PlayerMatrix = {};
+		XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+		프리팹이 뼈에 붙을 이름을 알고 있게 해줘야함.
+		_float4x4 BoneMatrix;
+
+		if (m_strBoneTag == "")
+			XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+		else
+			BoneMatrix = *pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+
+		위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
+		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+		if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
+		{
+			null이 아니라는건 뼈에 완전히 붙여야한다는 것.
+			m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+			m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+		}
+
+		m_isActivate = true;
+	}
+	else
+	{
+		툴용 초기화?
+
+	}*/
+
 	PREFAB_INFO* pDesc = static_cast<PREFAB_INFO*>(pArg);
+
+	_float4x4 PlayerMatrix = {};
+	_float4x4 BoneMatrix = {};
 
 	if (pDesc->pModelPtr != nullptr)
 	{
@@ -126,11 +169,7 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		Reset_SpawnMatrix();
 		Reset_Prefab_Info();
 
-		_float4x4 PlayerMatrix = {};
 		XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
-
-		//프리팹이 뼈에 붙을 이름을 알고 있게 해줘야함.
-		_float4x4 BoneMatrix;
 
 		if (m_strBoneTag == "")
 			XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
@@ -140,19 +179,26 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		//위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
 		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
 
-		if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
-		{
-			//null이 아니라는건 뼈에 완전히 붙여야한다는 것.
-			m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
-			m_pObjectMatrixPtr = pDesc->pMatrixPtr;
-		}
+		m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
 
 		m_isActivate = true;
 	}
-	else
+	else if (pDesc->pModelPtr == nullptr)
 	{
-		//툴용 초기화?
+		//단순 오브젝트가 호출할경우 모델주소 비어있음.
 
+		Reset_SpawnMatrix();
+		Reset_Prefab_Info();
+
+		_float4x4 PlayerMatrix = {};
+		XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+		XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+
+		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+		m_isActivate = true;
 	}
 }
 

@@ -38,7 +38,6 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 		m_eTargetLayer = pDesc->eTargetLayers;
 	m_eLayer = pDesc->eLayer;
 	m_eCurrentLayer = m_eLayer;
-	m_eDirType = pDesc->eDir;
 	m_CollisionCallback = pDesc->CollisionCallback;
 	m_test = pDesc->test;
 #ifdef _DEBUG
@@ -139,15 +138,6 @@ void CAttackVolume::TriggerActivate(_bool isActivate)
 		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_eCurrentLayer = COLLISIONLAYER::NONE;
 	}*/
-
-	
-
-	if (!isActivate)
-	{
-
-	}
-
-	
 }
 
 void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)
@@ -157,13 +147,24 @@ void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)
 
 void CAttackVolume::Change_DIR(ATTACKVOULME_DIR eType)
 {
-	m_eDirType = eType;
+	m_CallBack.eDir = eType;
+	//m_eDirType = eType;
+}
+
+void CAttackVolume::Cange_EffectTag(const _wstring& strEffectTag)
+{
+	m_CallBack.strEffectTag = strEffectTag;
 }
 
 void CAttackVolume::Change_Desc(CALLBACK_CLIENT* pDesc)
 {
 	m_CallBack = *pDesc;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
+}
+
+void CAttackVolume::Change_Socket(const _float4x4* pSocketMatrix)
+{
+	m_pSocketMatrix = pSocketMatrix;
 }
 
 
@@ -193,6 +194,7 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_CallBack.fAttack = pDesc->fAttackDmg;
 	m_CallBack.strEffectTag = pDesc->strEffectTag;
 	m_CallBack.eType = pDesc->eDamageType;
+	m_CallBack.eDir = pDesc->eDir;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 

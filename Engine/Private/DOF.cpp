@@ -38,7 +38,7 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	_uint iDownSizeY = m_iWinSizeY >> 1;
 
 	//DOWNSAMPLE
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture",  m_pGameInstance->Get_CurrentSceneSRV())))//m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY)))
@@ -78,8 +78,13 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 		CRASH("Failed RCS_UPSAMPLE");
 
 	//Combined
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), pShader, "g_BackBufferTexture")))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+		CRASH("Failed Begin MRT_BackBuffer");
+
+	if(FAILED(pShader->Bind_Texture("g_BackBufferTexture", m_pGameInstance->Get_CurrentSceneSRV())))
 		CRASH("Failed Bind BackBuffer");
+	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), pShader, "g_BackBufferTexture")))
+	//	CRASH("Failed Bind BackBuffer");
 
 	if (FAILED(pShader->Bind_Texture("g_DofTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Dof")))))
 		CRASH("Failed Bind Blur Texture");
@@ -94,6 +99,8 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 
 	pVIBuffer->Bind_Resources();
 	pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
 
 	return S_OK;
 }

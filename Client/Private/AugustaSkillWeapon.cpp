@@ -131,6 +131,8 @@ void CAugustaSkillWeapon::Activate(_bool IsActivate)
 {
     SetActivate(IsActivate);
 
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	effecInfo.pModelPtr = m_pModelCom;
@@ -139,6 +141,7 @@ void CAugustaSkillWeapon::Activate(_bool IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 	}
 }
 

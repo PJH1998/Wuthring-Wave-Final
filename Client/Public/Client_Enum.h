@@ -106,9 +106,9 @@ namespace Client
 		, SHADOW // 3
 		, OUNTLINE // 4
 		, ROVER // 5
-		, NORMAL_YELLOW // 6
-		, LOGOROVER // 7
-		, GALBRENA // 8
+		, GALBRENA // 6
+		, NORMAL_YELLOW // 7
+		, LOGOROVER // 8
 		, DISSOLVE_NORMAL // 9
 		, END };
 

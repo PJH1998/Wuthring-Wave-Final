@@ -593,29 +593,29 @@ void CEffect_Controller::Selected_Prefab_Info()
 
             ImGui::Text("Offset Pos");
             ImGui::PushItemWidth(60);
-            ImGui::InputFloat("##Offset Pos.x", &(m_pSelectedPrefabFrame->vOffsetPos.x));
+            ImGui::InputFloat("##ChildrenOffset Pos.x", &(m_pSelectedPrefabFrame->vOffsetPos.x));
             ImGui::SameLine();
-            ImGui::InputFloat("##Offset Pos.y", &(m_pSelectedPrefabFrame->vOffsetPos.y));
+            ImGui::InputFloat("##ChildrenOffset Pos.y", &(m_pSelectedPrefabFrame->vOffsetPos.y));
             ImGui::SameLine();
-            ImGui::InputFloat("##Offset Pos.z", &(m_pSelectedPrefabFrame->vOffsetPos.z));
+            ImGui::InputFloat("##ChildrenOffset Pos.z", &(m_pSelectedPrefabFrame->vOffsetPos.z));
             ImGui::PopItemWidth();
 
             ImGui::Text("Offset Size");
             ImGui::PushItemWidth(60);
-            ImGui::InputFloat("##Offset Size.x", &(m_pSelectedPrefabFrame->vOffsetSize.x));
+            ImGui::InputFloat("##ChildrenOffset Size.x", &(m_pSelectedPrefabFrame->vOffsetSize.x));
             ImGui::SameLine();
-            ImGui::InputFloat("##Offset Size.y", &(m_pSelectedPrefabFrame->vOffsetSize.y));
+            ImGui::InputFloat("##ChildrenOffset Size.y", &(m_pSelectedPrefabFrame->vOffsetSize.y));
             ImGui::SameLine();
-            ImGui::InputFloat("##Offset Size.z", &(m_pSelectedPrefabFrame->vOffsetSize.z));
+            ImGui::InputFloat("##ChildrenOffset Size.z", &(m_pSelectedPrefabFrame->vOffsetSize.z));
             ImGui::PopItemWidth();
 
             ImGui::Text("Offset Rot");
             ImGui::PushItemWidth(60);
-            ImGui::InputFloat("##Offset Rot.x", &(m_pSelectedPrefabFrame->vOffsetRot.x));
+            ImGui::InputFloat("##ChildrenOffset Rot.x", &(m_pSelectedPrefabFrame->vOffsetRot.x));
             ImGui::SameLine();
-            ImGui::InputFloat("##Offset Rot.y", &(m_pSelectedPrefabFrame->vOffsetRot.y));
+            ImGui::InputFloat("##ChildrenOffset Rot.y", &(m_pSelectedPrefabFrame->vOffsetRot.y));
             ImGui::SameLine();
-            ImGui::InputFloat("##Offset Rot.z", &(m_pSelectedPrefabFrame->vOffsetRot.z));
+            ImGui::InputFloat("##ChildrenOffset Rot.z", &(m_pSelectedPrefabFrame->vOffsetRot.z));
             ImGui::PopItemWidth();
 
 			m_pGameInstance->Use_Gizmo_Offset(&m_pSelectedPrefabFrame->vOffsetSize, &m_pSelectedPrefabFrame->vOffsetRot,
@@ -1781,13 +1781,10 @@ void CEffect_Controller::PrefabBinding_Tab()
 
 		if (ImGui::DragFloat("TrackPosition", &m_fTrackPosition, 0.1f, 0.f, m_AnimActorDesc.fDuration));
 
-		if (ImGui::Checkbox("Basic", &m_IsBone));
-
 		if (m_bBoneFlag)
 		{
 			if (ImGui::Button("Binding"))
 			{
-				;
 				_string BoneName = m_BoneName;
 				m_pSelectedPrefabDesc->strBoneTag = m_BoneName;
 				m_AnimActorDesc.pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
@@ -1829,39 +1826,15 @@ void CEffect_Controller::PrefabBinding_Tab()
 					_float4x4 SpawnMatrix = {};
 					PREFAB_INFO Info = {};
 					_float4x4 Defualt = {};
-					if (!m_IsBone)
-					{
+				
+					SpawnMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
 
-						if (m_AnimActorDesc.pBoneMatrix == nullptr)
-						{
-							SpawnMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
+					Info.pModelPtr = m_AnimActorDesc.pModelCom;
+					Info.pMatrixPtr = m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
 
-							XMStoreFloat4x4(&Defualt, XMMatrixIdentity());
-
-							m_pSelectedPrefab->Set_SpawnMatrix(SpawnMatrix, Defualt);
-
-						}
-						else
-						{
-							_float4x4 BoneMatrix = *m_AnimActorDesc.pBoneMatrix;
-							_float4x4 PlayerMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
-
-
-							m_pSelectedPrefab->Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
-						}
-
-						m_pSelectedPrefab->Reset_Prefab_Info();
-						m_pSelectedPrefab->SetActivate(true);
-					}
-					else
-					{
-						Info.pModelPtr = m_AnimActorDesc.pModelCom;
-						Info.pMatrixPtr = m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
-
-						m_pSelectedPrefab->Reset_Prefab_Info();
-						m_pSelectedPrefab->Reset(XMLoadFloat4x4(&Defualt), &Info);
-						m_pSelectedPrefab->Reset(XMLoadFloat4x4(&Defualt), &Info);
-					}
+					m_pSelectedPrefab->Reset_Prefab_Info();
+					m_pSelectedPrefab->Reset(XMLoadFloat4x4(&SpawnMatrix), &Info);
+					
 
 					m_bTest = false;
 				}

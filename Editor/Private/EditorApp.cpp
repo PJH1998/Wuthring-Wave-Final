@@ -155,7 +155,11 @@ void CEditorApp::Update(_float fTimeDelta)
 		CHANGE_LEVEL_EVENT event{LEVEL::STATEMACHINE, true};
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
-
+	if (ImGui::Button("SFX", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::SFX, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 	
 	ImGui::End();
 
@@ -225,6 +229,15 @@ void CEditorApp::Ready_Event()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		CCollider::Create(m_pDevice, m_pContext))))
 		CRASH("Collider");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
+		CRASH("VIBuffer_Rect");
+
+	// Shader_SFX
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ScreenEffect"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ScreenEffect.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_ScreenEffect");
 }
 
 void CEditorApp::Ready_Dummies()

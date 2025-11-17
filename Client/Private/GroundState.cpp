@@ -40,6 +40,7 @@ void CGroundState::OnExit()
 	m_iNotLandFrames = 0;
 
     // 지상 상태 탈출 시 공통 처리
+
 }
 
 void CGroundState::Apply_Gravity(_float fTimeDelta)

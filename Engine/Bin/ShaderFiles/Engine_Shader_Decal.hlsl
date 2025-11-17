@@ -104,17 +104,10 @@ PS_OUT PS_MAIN(PS_IN In)
         vEmissive = g_EmissiveTexture.Sample(DefaultSampler, vDecalUV);
         if (CustomLuminance(vEmissive.xyz, g_EmissiveLuminance) > g_fEmissiveThreshold)
         {
-            Out.vEmissive = float4(vEmissive.xyz, 1.f);
-        }
-        
-        if (false == g_HasDiffuse)
-        {
-            vDifffuse = vEmissive;
-            
-            if (any(vDifffuse.xyz))
-                vDifffuse.a = max(max(vDifffuse.r, vDifffuse.b), vDifffuse.g);
+            if (false == g_HasDiffuse)
+                Out.vEmissive = In.vColor;
             else
-                discard;
+                Out.vEmissive = vDifffuse;
         }
     }
     
@@ -135,8 +128,12 @@ PS_OUT PS_MAIN(PS_IN In)
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
     Out.vDiffuse.a -= fAlpha;
-    Out.vEmissive.a -= fAlpha;
-    Out.vEmissive.xyz *= Out.vEmissive.a;
+    
+    if(any(vEmissive.xyz))
+    {
+        Out.vEmissive.a -= fAlpha;
+        Out.vEmissive.xyz *= Out.vEmissive.a;
+    }
     
     Out.vNormal = vNormal;
     return Out;

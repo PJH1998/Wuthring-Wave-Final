@@ -91,6 +91,9 @@ void CAugustaGroundSpecial::OnExit()
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
+	// 공격 콜라이더 비활성화
+	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
+
 }
 
 void CAugustaGroundSpecial::Handle_Input()

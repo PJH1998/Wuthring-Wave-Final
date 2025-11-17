@@ -42,6 +42,7 @@ HRESULT CRoverDarkWing::Initialize_Clone(void* pArg)
 void CRoverDarkWing::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	if (m_IsAnimationEnd) // 애니메이션 끝나면 자동으로 비활성화
 		m_isActivate = false;
