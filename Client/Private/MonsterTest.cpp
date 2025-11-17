@@ -699,6 +699,12 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 		}
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -718,6 +724,12 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 		}
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -737,6 +749,12 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 		}
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
 #endif // _DEBUG

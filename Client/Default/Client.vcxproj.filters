@@ -307,6 +307,9 @@
     <Filter Include="03. GameObject\ScreenEffect\AugustaSFX">
       <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\NPC">
+      <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -821,6 +824,9 @@
     <ClInclude Include="..\Public\GalbrenaGroundSpecial.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\DummyNPC.h">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1299,6 +1305,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\DummyNPC.cpp">
+      <Filter>03. GameObject\Actor\NPC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
