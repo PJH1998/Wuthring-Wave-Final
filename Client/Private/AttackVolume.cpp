@@ -138,15 +138,6 @@ void CAttackVolume::TriggerActivate(_bool isActivate)
 		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_eCurrentLayer = COLLISIONLAYER::NONE;
 	}*/
-
-	
-
-	if (!isActivate)
-	{
-
-	}
-
-	
 }
 
 void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)
@@ -158,6 +149,11 @@ void CAttackVolume::Change_DIR(ATTACKVOULME_DIR eType)
 {
 	m_CallBack.eDir = eType;
 	//m_eDirType = eType;
+}
+
+void CAttackVolume::Cange_EffectTag(const _wstring& strEffectTag)
+{
+	m_CallBack.strEffectTag = strEffectTag;
 }
 
 void CAttackVolume::Change_Desc(CALLBACK_CLIENT* pDesc)

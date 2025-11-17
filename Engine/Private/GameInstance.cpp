@@ -391,7 +391,7 @@ HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
 }
-HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+ HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
@@ -516,6 +516,10 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
+ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
+{
+	return m_pRenderer->Get_CurrentSceneSRV();
+}
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
@@ -615,6 +619,10 @@ void CGameInstance::Play_Sequence(const _wstring& strSequenceTag)
 _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 {
 	return m_pTimer_Manager->Get_TimeDelta(strTimerTag);
+}
+_double CGameInstance::Get_PlayTime()
+{
+	return m_pTimer_Manager->Get_PlayTime();
 }
 void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate)
 {

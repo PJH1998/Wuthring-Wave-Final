@@ -80,6 +80,7 @@ protected:
 	_bool m_IsAnimationEnd = { false };
 	
 	_uint m_iVolumeIdx = {};
+	_uint m_iShaderPath = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
 
 

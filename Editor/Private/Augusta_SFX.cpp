@@ -19,6 +19,12 @@ HRESULT CAugusta_SFX::Initialize_Prototype()
 	if (FAILED(Ready_Textures()))
 		return E_FAIL;
 
+	m_pTransformCom->Scaling(_float3(1.5f, 1.f, 1.f));
+	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, 0.f, XMConvertToRadians(30.f)));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 150.f, 0.f, 1.f));
+
+	m_pGameInstance->Setting_Radial(_float2(0.5f, 0.3f), _float2(0.f, 0.0f), -1.5f);
+
 	return S_OK;
 }
 
@@ -41,6 +47,23 @@ void CAugusta_SFX::Update(_float fTimeDelta)
 
 void CAugusta_SFX::Late_Update(_float fTimeDelta)
 {
+	 
+	if (m_pGameInstance->Get_DIKeyState(DIK_F10) == KEYSTATE::DOWN)
+	{
+		test != test;
+
+		//if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SFX, this)))
+		//	return;
+		//if (FAILED(m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL)))
+		//	return;
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_F11) == KEYSTATE::DOWN)
+	{
+		//if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::POST_SFX, this)))
+	//		return;
+	}
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SFX, this)))
 		return;
 }
@@ -56,6 +79,9 @@ void CAugusta_SFX::Render()
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		CRASH("Failed to Bind ProjMatrix");
 
+	if (FAILED(m_pShader->Bind_Texture("g_SceneTexture", m_pGameInstance->Get_CurrentSceneSRV())))
+		CRASH("Failed to Bind CurrentScene");
+	
 	if (FAILED(m_pBaseTexture->Bind_Shader_Resource(m_pShader, "g_DiffuseTexture")))
 		CRASH("Failed to Bind BaseTexture");
 
@@ -65,7 +91,7 @@ void CAugusta_SFX::Render()
 	if (FAILED(m_pSecondTexture->Bind_Shader_Resource(m_pShader, "g_NormalTexture")))
 		CRASH("Failed to Bind BaseTexture");
 
-	if (FAILED(m_pNoiseTexture->Bind_Shader_Resource(m_pShader, "g_NoiseTexture")))
+	if (FAILED(m_pNoiseTexture->Bind_Shader_Resource(m_pShader,  "g_NoiseTexture")))
 		CRASH("Failed to Bind BaseTexture");
 
 	m_pShader->Begin(0);
@@ -88,8 +114,11 @@ void CAugusta_SFX::Reset()
 
 HRESULT CAugusta_SFX::Ready_Textures()
 {
-	m_pBaseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Tile_262.png"), 1);
+	m_pBaseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Normal_002.png"), 1);
 	ASSERT_CRASH(m_pBaseTexture);
+
+	//m_pBaseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Tile_262.png"), 1);
+	//ASSERT_CRASH(m_pBaseTexture);
 
 	m_pMaskTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_300156.png"), 1);
 	ASSERT_CRASH(m_pMaskTexture);
@@ -97,7 +126,7 @@ HRESULT CAugusta_SFX::Ready_Textures()
 	m_pNoiseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Tile_30010.png"), 1);
 	ASSERT_CRASH(m_pNoiseTexture);
 
-	m_pSecondTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Tile_530002.png"), 1);
+	m_pSecondTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Normal_020.png"), 1);
 	ASSERT_CRASH(m_pSecondTexture);
 
 	return S_OK;

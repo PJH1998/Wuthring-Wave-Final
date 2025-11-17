@@ -16,6 +16,7 @@ private:
 		DODGE,
 		DODGEABLE,
         ATTACK,
+		DEFAULT_E,
         WALL,
         LAND,
 		FALL,

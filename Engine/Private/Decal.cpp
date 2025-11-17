@@ -131,9 +131,6 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 	
 	for (_uint i = 0; i < ENUM_CLASS(TEXTURETYPE::END); ++i)
 	{
-		/*if (nullptr == m_pDecalTexture[i])
-			continue;*/
-
 		string strTextureConstantName = {};
 		string strBoolConstantName = {};
 		switch (i)

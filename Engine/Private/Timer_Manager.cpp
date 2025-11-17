@@ -36,6 +36,8 @@ void CTimer_Manager::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRa
 
 void CTimer_Manager::Update(_float fTimeDelta)
 {
+	m_fPlayTime += fTimeDelta;
+
 	for (auto& Pair : m_Timers)
 		Pair.second->Update(fTimeDelta);
 }

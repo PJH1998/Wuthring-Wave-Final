@@ -82,8 +82,8 @@ void CAbility::Update_CostCondition(_float fTimeDelta)
 	{
 		COST_TYPE eCostType = static_cast<COST_TYPE>(iter->first);
 
-		// 초당 10.f 감소.
-		Add_Cost(eCostType, -fTimeDelta * 10.f);
+		// 초당 8.f 감소.
+		Add_Cost(eCostType, -fTimeDelta * 8.f);
 
 		// Cost가 0.f 라면? 제거.
 		if (m_Costs[iter->first] <= 0.f)
@@ -618,15 +618,51 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 		}
 	}
 
-
-
-
 	return skillSlot;
 }
 
 UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _string& strKey)
 {
 	UISKILL_SLOT skillSlot{};
+
+	skillSlot.strKeyInput = strKey;
+	skillSlot.iCharacterType = iCharacterIdx;
+	skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::DEFAULT);
+	skillSlot.fMaxCoolTime = 0.f;
+
+	// E 공격. => 말고 슬롯 안바뀜.
+	if (strKey == "E")
+	{
+		if (m_Costs[ENUM_CLASS(COST_TYPE::COST1)] >= m_fCostMax) // 기본 공명 게이지가 가득 찼다면?
+		{
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill01");
+			if (nullptr != pSkillInfo)
+			{
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill01");
+				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+				skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::E_BURST_READY);
+			}
+		}
+		else
+		{
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Attack_Jump_Start");
+			if (nullptr != pSkillInfo)
+			{
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Attack_Jump_Start");
+				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_DEFAULT_READY);
+			}
+		}
+	}
+	else if (strKey == "R")
+	{
+		// 궁극기..
+		skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Burst01");
+		const SKILL_INFO* pSkillInfo = Get_SkillInfo("Burst01");
+		if (nullptr != pSkillInfo)
+			skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+		skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::R_ULTI_READY);
+	}
 
 	return skillSlot;
 }

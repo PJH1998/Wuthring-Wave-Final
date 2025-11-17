@@ -175,6 +175,9 @@ void CAugustaAirAttack::OnExit()
 	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	// 메인 공격 콜라이더 비활성화
+	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 void CAugustaAirAttack::Handle_Input()
@@ -233,7 +236,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 		
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
-			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
+			m_PartsAnimations.at(m_Animations[m_iCurrentAnimIdx].strAnimName),
 			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true,false
 		);
 	}

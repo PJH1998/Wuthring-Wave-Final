@@ -541,6 +541,9 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	_uint iVolumeIdx = {  };
 
+	if (var1 == TEXT("Main"))
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+
 	// Main Attack Volume의 TriggerActivate
 	if (var1 == TEXT("Bayonet"))
 	{
@@ -596,14 +599,14 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	else if (var1 == TEXT("Augusta"))
 	{
 		if (var2 == TEXT("RISE_ZERO"))
-			iVolumeIdx = VOLUME::VOULME_RISE_ZERO;
+			m_iVolumeIdx = VOLUME::VOULME_RISE_ZERO;
 		else if (var2 == TEXT("RISE"))
-			iVolumeIdx = VOLUME::VOLUME_RISE;
+			m_iVolumeIdx = VOLUME::VOLUME_RISE;
 		else if (var2 == TEXT("HACKDOWN"))
-			iVolumeIdx = VOLUME::VOLUME_HACKDOWN;
+			m_iVolumeIdx = VOLUME::VOLUME_HACKDOWN;
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
-		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+		m_pMainAttackVolume = m_AttackVolumes[m_iVolumeIdx];
 
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
 		if (var3 == TEXT("ATTACK"))
@@ -1098,6 +1101,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(6.f, 6.f, 2.f); // y작게? x, z 평면 크게.
+	TriggerDesc.eDir = ATTACKVOULME_DIR::UPPER;
 	m_AttackVolumes[VOLUME_HACKDOWN] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

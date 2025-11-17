@@ -28,7 +28,7 @@ public:
 		function<void(_uint, void*, const ContactManifold&, COLLISIONLAYER)> test;
 		TEXT_COLOR_TYPE		eDamageType;
 		ATTACKVOULME_DIR	eDir{};
-		_string				strEffectTag{};
+		_wstring				strEffectTag{};
 	}ATKVOLUME_DESC;
 
 private:
@@ -52,8 +52,11 @@ public:
 	void TriggerActivate(_bool isActivate);
 	void Change_Layer(COLLISIONLAYER eLayer);
 	void Change_DIR(ATTACKVOULME_DIR eType);
+	void Cange_EffectTag(const _wstring& strEffectTag);
 	void Change_Desc(CALLBACK_CLIENT* pDesc);
 	void Change_Socket(const _float4x4* pSocketMatrix);
+
+	void Bind_SocketMatrix(const _float4x4* pMatrix) { m_pSocketMatrix = pMatrix; }
 
 private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };

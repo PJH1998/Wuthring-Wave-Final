@@ -59,9 +59,6 @@ void CGalbrenaShotGun::Priority_Update(_float fTimeDelta)
 		{
 			m_isActivate = false;
 			Prop_Reset();
-			_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-
-			
 		}
 			
 	}
@@ -142,7 +139,13 @@ void CGalbrenaShotGun::Render()
 void CGalbrenaShotGun::Activate(_bool IsActivate)
 {
 	//CProp::Activate(IsActivate);
-	
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // Animation 클리어.
+
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
 	if (true == IsActivate)
 	{
 		Prop_Reset();
@@ -153,9 +156,11 @@ void CGalbrenaShotGun::Activate(_bool IsActivate)
 	if (false == IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, nullptr);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		Bind_DissolveTimer();
-		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
+
+		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
+		
 	}
 }
 

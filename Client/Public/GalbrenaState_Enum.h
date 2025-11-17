@@ -150,26 +150,27 @@ enum class EGalbrenaAttackType : _uint
 
 enum class EGalbrenaSkillType : _uint
 {
-	SKILL01 = 0,
-	SKILL02,
-	ATTACK11,
+	ATTACK_JUMP = 0,
+	ATTACK_JUMP_END02,
+	ATTACK_JUMP_START,
+	BURST01,
 	END
 };
 
 enum class EGalbrenaSpecialType : _uint
 {
-	EX_ATTACK01 = 0,
-	EX_ATTACK02,
-	EX_ATTACK03,
-	EX_ATTACK04,
-	EX_ATTACK05,
-	EX_ATTACK05_UP,
+	ATTACK05 = 0,
+	ATTACK06,
+	ATTACK07,
+	ATTACK08,
+	ATTACK08_H,
 	END
 };
 
 enum class EGalbrenaBurstType : _uint // 강공.
 {
-	BURST01 = 0,
+	SKILL01 = 0,
+	SKILL02,
 	END
 };
 
@@ -212,9 +213,11 @@ enum class EGalbrenaFallType : _uint
 
 enum class EGalbrenaAirAttackType : _uint
 {
-	AIRATTACK_START = 0,
-	AIRATTACK_LOOP,
-	AIRATTACK_END,
+	AIRATTACK_END = 0,
+	AIRATTACK_LOOP_1,
+	AIRATTACK_LOOP_2,
+	AIRATTACK_START,
+	AIRATTACK_START02,
 	END
 };
 

@@ -493,6 +493,10 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	_uint iVolumeIdx = {  };
 
+	if (var1 == TEXT("Main"))
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+
+
     if (var1 == TEXT("Sword"))
     {
 		if (var2 == TEXT("ATK"))

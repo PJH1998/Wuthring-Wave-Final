@@ -133,6 +133,8 @@ void CAugustaGroundSprint::Handle_Input()
     m_fSpeed = 1.2f;
 
 	m_States[LOCKON] = m_pAugusta->Is_LockOn();
+
+
 }
 
 

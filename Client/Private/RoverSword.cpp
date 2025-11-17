@@ -108,6 +108,10 @@ void CRoverSword::Render()
 void CRoverSword::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+
+	if (false == IsActivate)
+		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 }
 
 void CRoverSword::Change_Volume(_uint iVolumeIdx)

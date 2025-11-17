@@ -1,2 +1,5 @@
 Name,PrevName,KeyInput,KeyType,SkillType,CostStatType,Cost,CoolDown,Damage,Description
-Skill_Strike,None,E,CHAIN,AUGUSTA_POINT,2,-100,0,200,POINT 100 E키
+Attack_Jump_Start,None,E,CHAIN,NONE,0,0,5,200,DEFAULT E키
+Burst01,None,R,DEFAULT,GALBRENA_ULTI,5,-100,25,600,ULTI R키
+Skill01,None,E,CHAIN,NONE,0,0,0,400,강화 E키
+Skill02,Skill01,E,CHAIN,NONE,0,0,0,0,강화 E키
