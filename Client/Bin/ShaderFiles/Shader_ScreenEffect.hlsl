@@ -2,6 +2,8 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
+Texture2D g_SceneTexture;
+
 Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
 Texture2D g_MaskTexture;
@@ -39,28 +41,38 @@ struct PS_IN
     float2 vTexcoord : TEXCOORD0;
 };
 
-struct PS_OUT
+struct PS_OUT_SFX
 {
     float4 vColor : SV_TARGET0;
-    float4 vDistortion : SV_TARGET1;
+    float3 vEmissive : SV_TARGET1;
+    float4 vDistortion : SV_TARGET2;
 };
 
-PS_OUT PS_MAIN(PS_IN In)
+struct PS_OUT_POST_SFX
 {
-    PS_OUT Out = (PS_OUT)0;
+    float4 vColor : SV_TARGET0;
+};
 
-    float4 vBase = g_DiffuseTexture.Sample(DefaultSampler, float2(In.vTexcoord.x, In.vTexcoord.y * 0.2f));
+PS_OUT_SFX PS_MAIN(PS_IN In)
+{
+    PS_OUT_SFX Out = (PS_OUT_SFX) 0;
+
+    float4 vBase = g_DiffuseTexture.Sample(DefaultSampler, float2(In.vTexcoord.x, In.vTexcoord.y));
     float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
     float4 vNoise = g_NoiseTexture.Sample(DefaultSampler, float2(In.vTexcoord.x * 20.f, In.vTexcoord.y));
     float4 vSecond = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = vMask;
-    Out.vColor.a = min(min(vMask.r, vMask.g), vMask.b);
     
-        
-    Out.vDistortion = ((vSecond * float4(0.618775, 5.f, 0.152381f, 0.f)) + vBase) * vNoise.r;
+    float4 vSFXColor = vMask;
+    vSFXColor.a = max(max(vMask.r, vMask.g), vMask.b);
     
-    Out.vDistortion.a = 0.5f;
+    Out.vColor = vSFXColor;
+    
+    //Out.vEmissive = Out.vColor;
+    
+    Out.vDistortion = (1.f - vBase);
+    
+    Out.vDistortion.a = 1.f;
     
     return Out;
 }
