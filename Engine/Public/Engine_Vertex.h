@@ -124,6 +124,15 @@ namespace Engine
 		_float2		vLifeTime;
 	}VTXINSTACNE_FXMESH;
 
+	typedef struct tagVertexInstanceAnimMesh
+	{
+		_float4		vRight;
+		_float4		vUp;
+		_float4		vLook;
+		_float4		vTranslation;
+		_uint		iBaseIndex;
+	}VTXINSTANCE_ANIMMESH;
+
 	typedef struct tagVertexInstanceParticle
 	{
 		_float4		vRight;
