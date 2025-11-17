@@ -331,7 +331,6 @@ public:
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 #pragma endregion
 
-<<<<<<< HEAD
 #pragma region MODEL_STREAMING
 public:
 	HRESULT RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
@@ -342,7 +341,6 @@ public:
 #pragma endregion
 
 
-=======
 #pragma region SFX_HUB
 	HRESULT						Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	HRESULT						End_SFX();
@@ -359,7 +357,6 @@ public:
 #endif
 #pragma endregion
 
->>>>>>> dev
 public:
 	HRESULT					SetUp_CameraNF();
 	HRESULT					Clear_Resource(_uint iLevelID);
@@ -395,12 +392,9 @@ private:
 	class CShadowMap*			m_pShadowMap = { nullptr };
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 	class CVolumetricFog*		m_pVF = { nullptr };
-<<<<<<< HEAD
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
-=======
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
 
->>>>>>> dev
 	_uint						m_iNumLevel = {};
 
 public:

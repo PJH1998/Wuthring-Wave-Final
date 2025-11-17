@@ -70,8 +70,8 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 	{
 		// LOD SetUp
 		// Low Depth (Cell 단위)
-		if(m_iDepth >= 3)
-			Compute_Cell_LOD(vCamPos);
+		//if(m_iDepth >= 3)
+		//	Compute_Cell_LOD(vCamPos);
 
 		for (auto& pObject : m_Objects)
 		{
@@ -79,13 +79,15 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 				continue;
 			if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
 			{
-				if (m_iDepth <= 3)
+				//if (m_iDepth <= 3)
 					m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
-				pObject->Set_LOD(0);
+				//pObject->Set_LOD(0);
+				pObject->Set_LOD(m_iLODIndex);
 				// Root는 각 객체 Push
 				if (0 == m_iDepth)
 				{
-					m_pGameInstance->Add_Render_StaticObject(pObject);
+					m_pGameInstance->Add_To_RenderTest(m_iLODIndex, pObject);
+					//m_pGameInstance->Add_Render_StaticObject(pObject);
 				}
 				// Leaf는 Local Container에 담은 후 병합
 				else

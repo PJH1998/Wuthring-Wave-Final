@@ -43,7 +43,7 @@ HRESULT CMesh_Streaming::Render(_uint iMeshIndex)
 
 	//임시 하드코딩
 	//나중에 방식을 오프셋을 건드리기 vs 바인딩을 버퍼 하나에서 오프셋을 바꾸기에서 선택할것.
-	m_pContext->DrawIndexed(RenderDesc.NumIndices, RenderDesc.IndexOffset / 4, RenderDesc.VertexOffset / sizeof(VTXMESH));
+	m_pContext->DrawIndexed(RenderDesc.NumIndices, RenderDesc.IndexOffset / sizeof(_uint), RenderDesc.VertexOffset / m_iVertexStride);
 	//m_pContext->DrawIndexed(RenderDesc.NumIndices, 0, 0);
 	return S_OK;
 }
@@ -76,6 +76,26 @@ HRESULT CMesh_Streaming::Bind_Resources(_uint iMeshIndex)
 	return S_OK;
 }
 
+HRESULT CMesh_Streaming::Bind_Resources(_uint iMeshIndex, ID3D11DeviceContext* pDC)
+{
+	ID3D11Buffer* Buffers[] = {
+		m_pSharedVB,
+	};
+
+	_uint Strides[] = {
+		m_iVertexStride,
+	};
+
+	_uint Offsets[] = {
+		0,
+	};
+	pDC->IASetVertexBuffers(0, 1, Buffers, Strides, Offsets);
+	pDC->IASetIndexBuffer(m_pSharedIB, m_eIndexFormat, 0);
+	pDC->IASetPrimitiveTopology(m_ePrimitiveType);
+
+	return S_OK;
+}
+
 HRESULT CMesh_Streaming::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
 	if (m_Desc->empty())
@@ -87,7 +107,7 @@ HRESULT CMesh_Streaming::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 	const CModel_Manager::SHARED_DATA_DESC& RenderDesc = (*m_Desc)[iMeshIndex];
 
 	//임시 하드코딩
-	pDC->DrawIndexed(RenderDesc.NumIndices, RenderDesc.IndexOffset / 4, RenderDesc.VertexOffset / sizeof(VTXMESH));
+	pDC->DrawIndexed(RenderDesc.NumIndices, RenderDesc.IndexOffset / sizeof(_uint), RenderDesc.VertexOffset / m_iVertexStride);
 	return S_OK;
 }
 

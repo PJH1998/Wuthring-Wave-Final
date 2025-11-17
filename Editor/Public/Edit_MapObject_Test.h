@@ -49,13 +49,13 @@ private:
 	void About_Texture();
 
 private:
-	class CShader* m_pShaderCom = { nullptr };
+	class CDeferredShader* m_pShaderCom = { nullptr };
 	CModel_Streaming* m_pModelCom = { nullptr };
 
 	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};
 	_uint m_iIndex = {};
-	_float4x4 m_DefaultMat = {};
+	_float4x4 m_DefaultMat = {}; 
 private:
 
 	_char m_ModelName[MAX_PATH];

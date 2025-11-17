@@ -19,6 +19,7 @@ public:
 	void Load_LastLODIndex(_string LastModelPath);
 	void Set_Buffers(ID3D11Buffer* pSharedVB, ID3D11Buffer* pSharedIB);
 	HRESULT Bind_Resources(_uint iMeshIndex);
+	HRESULT Bind_Resources(_uint iMeshIndex, ID3D11DeviceContext* pDC);
 	HRESULT Render(_uint iMeshIndex);
 	HRESULT Render(_uint iMeshIndex, ID3D11DeviceContext* pDC);
 

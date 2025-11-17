@@ -39,10 +39,10 @@ HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
 
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(2000, 2000, 2000));
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
 
-	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
 	//ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
@@ -364,16 +364,16 @@ void CLevel_Map::Menu_Model_Load()
 				}
 				else
 				{
-					//CEdit_MapObject::MAP_LOAD Desc{};
-					//_float4x4 DefaultMatrix{};
-					//XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
-					//Desc.WorldMatrix = &DefaultMatrix;
-					//strcpy_s(Desc.ModelName, FileName);
-					//Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
-					//Desc.iLevel = m_iLevel;
+					CEdit_MapObject::MAP_LOAD Desc{};
+					_float4x4 DefaultMatrix{};
+					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					Desc.WorldMatrix = &DefaultMatrix;
+					strcpy_s(Desc.ModelName, FileName);
+					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
+					Desc.iLevel = m_iLevel;
 
-					//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-					//	, m_iLevel, TEXT("Layer_MapObject"), &Desc);
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+						, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 				}
 			}
 
@@ -1030,6 +1030,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
 
+	// DeferredShader_Map
+	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_DeferredShader_Map"),
+		CDeferredShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements, TEXT("Shader_Map")))))
+		CRASH("DeferredShader_Map");
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements));
 
@@ -1058,6 +1063,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
         , m_iLevel, TEXT("Layer_Light"));
 
 
+
 	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test"),
 		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL"))))
 		CRASH("Prototype Create Failed");
@@ -1084,7 +1090,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 	m_pGameInstance->LoadLastLOD();
 	CEdit_MapObject_Test::BUFFER_TEST TT{};
-	for (_uint i = 0; i < 50; ++i)
+	//for (_uint i = 0; i < 50; ++i)
 	{
 		strcpy_s(TT.ModelName, "Prototype_Test");
 		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);

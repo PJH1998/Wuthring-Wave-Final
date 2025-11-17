@@ -94,44 +94,48 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 	return S_OK;
 }
 
-HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
+HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
 {
-	//if (iMeshIndex >= m_Meshes.size())
-	//	return E_FAIL;
+	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+		return E_FAIL;
 
-	//return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
-
-	return S_OK;
+	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
 }
 
-HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
 {
-	//if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size)
-	//	return S_OK;
+	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+		return S_OK;
 
-	//return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
-
-	return S_OK;
+	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
 }
+
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
-	iLODIndex = 0;
-	m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
-
-	if (m_Meshes[iLODIndex]->IsLoaded() == LOADSTATE::LOADED)
+	if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::LOADED)
 	{
+		m_fRenderTime[iLODIndex] = m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
 		m_Meshes[iLODIndex]->Render(iMeshIndex, pDC);
 		return S_OK;
 	}
-	else if (m_Meshes[iLODIndex]->IsLoaded() == LOADSTATE::LOADING)
-	{
-		//m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
-		//요청
-	}
-	//모델 매니저에 해당하는 LOD단계 요청할것.
-	//m_pGameInstance
-	//제일 높은 LOD 단계 렌더시키기.
+	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
+		m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
 
+	_uint RenderLOD = m_iMaxLOD;
+	for (_uint i = 0; i < m_iMaxLOD - 1; ++i)
+	{
+		if (m_pModelPrototype->m_Meshes[i]->IsLoaded() == LOADSTATE::LOADED)
+		{
+			RenderLOD = i;
+			break;
+		}
+	}
+
+	if (m_pModelPrototype->m_Meshes[RenderLOD]->Is_Overed(iMeshIndex))
+		return S_OK;
+
+	m_fRenderTime[RenderLOD] = m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
+	m_pModelPrototype->m_Meshes[RenderLOD]->Bind_Resources(iMeshIndex, pDC);
 	m_Meshes[m_iMaxLOD]->Render(iMeshIndex, pDC);
 	return S_OK;
 }
@@ -140,19 +144,6 @@ void CModel_Streaming::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 {
 
 }
-
-//atomic<LOADSTATE>& CModel_Streaming::Get_MeshState(_uint iLODIndex)
-//{
-//	//if (iLODIndex > m_iMaxLOD)
-//	//	CRASH("Failed");
-//
-//	//return m_Meshes[iLODIndex]->IsLoaded();
-//
-//	if (iLODIndex > m_iMaxLOD)
-//		CRASH("Failed");
-//
-//	return m_pModelPrototype->Get_MeshState(iLODIndex);
-//}
 
 void CModel_Streaming::RequestLastLODModel()
 {

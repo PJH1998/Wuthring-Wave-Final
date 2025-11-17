@@ -189,11 +189,8 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 
 	m_pVF->Update_VF(fTimeDelta);
-<<<<<<< HEAD
 	m_pModel_Manager->Update(fTimeDelta);
-=======
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
->>>>>>> dev
 }
 
 _float CGameInstance::Rand_Normal()
