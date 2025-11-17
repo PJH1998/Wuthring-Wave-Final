@@ -275,10 +275,6 @@ void CPlayer::Player_KeyInput()
 			}
 		}
 	}
-		
-
-	
-
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{

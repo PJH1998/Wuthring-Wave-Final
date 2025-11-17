@@ -214,7 +214,8 @@ private:
 #pragma endregion
 
 
-
+private:
+	void Update_TargetDistance();
 
 
 private:
