@@ -207,23 +207,22 @@ _bool CAnimation_Inst::Update_TransformationMatrices_All(_float fTimeDelta, cons
 //	return false;
 //}
 
-_bool CAnimation_Inst::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition)
+_bool CAnimation_Inst::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _matrix* Out)
 {
 	if(nullptr == pTrackPosition)
 		CRASH("pTrackPosition is nullptr");
-	_float fCurrentTrackPosition = *pTrackPosition;
 
-	if (fCurrentTrackPosition > m_fDuration)
+	if (*pTrackPosition > m_fDuration)
 	{
-		fCurrentTrackPosition = 0.f;
+		*pTrackPosition = 0.f;
 		m_iNotifyIndex = 0;
 		return true;
 	}
 
-	while (m_iNotifyIndex < m_AnimNotifies.size() && fCurrentTrackPosition >= m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
-		m_AnimNotifies[m_iNotifyIndex++]->Execute();
+	//while (m_iNotifyIndex < m_AnimNotifies.size() && (*pTrackPosition) >= m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
+	//	m_AnimNotifies[m_iNotifyIndex++]->Execute();
 
-	fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
+	*pTrackPosition += m_fTickPerSecond * fTimeDelta;
 
 	return false;
 }
