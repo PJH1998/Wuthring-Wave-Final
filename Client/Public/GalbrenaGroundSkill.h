@@ -59,6 +59,8 @@ private:
     void SetUp_Animations();
     void State_Reset();
 
+	void Handle_Animation_SpecialState();
+
 
 public:
     static CGalbrenaGroundSkill* Create(class CGameObject* pOwner);

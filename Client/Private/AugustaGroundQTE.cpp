@@ -71,7 +71,8 @@ void CAugustaGroundQTE::OnExit()
     CGroundState::OnExit();
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->Set_QTEEnd(true);
-	
+	// 공격 콜라이더 비활성화
+	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 

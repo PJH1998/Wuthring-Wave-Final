@@ -442,7 +442,9 @@
     <ClInclude Include="..\Public\Edit_ScreenEffect.h">
       <Filter>03. GameObject\SFX</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Augusta_SFX.h" />
+    <ClInclude Include="..\public\Augusta_SFX.h">
+      <Filter>03. GameObject\SFX\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -653,7 +655,9 @@
     <ClCompile Include="..\Private\Edit_ScreenEffect.cpp">
       <Filter>03. GameObject\SFX</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Augusta_SFX.cpp" />
+    <ClCompile Include="..\private\Augusta_SFX.cpp">
+      <Filter>03. GameObject\SFX\Augusta</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

@@ -651,8 +651,14 @@ void CRenderer::Render_Distortion()
 
 void CRenderer::Render_ScreenEffect()
 {
+	
 	if(FAILED(m_pGameInstance->Render_SFX_Toggle(m_pVIBuffer, m_pShader)))
 	{
+		//Combined
+		if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+			CRASH("Failed Begin MRT_BackBuffer");
+
+	
 		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 			CRASH("Failed RT_BackBuffer");
 
@@ -660,7 +666,29 @@ void CRenderer::Render_ScreenEffect()
 
 		m_pVIBuffer->Bind_Resources();
 		m_pVIBuffer->Render();
+
+		m_pGameInstance->End_MRT();
 	}
+
+
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SFX"), nullptr, false)))
+		CRASH("Failed Begin MRT_SFX");
+
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::SFX));
+
+	m_pGameInstance->End_MRT();
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
+		CRASH("Failed Bind RT_Backbuffer");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Distortion"), m_pShader, "g_DistortionTexture")))
+		CRASH("Failed Bind RT_Backbuffer");
+
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SFX));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
 }
 
 void CRenderer::Render_UI()
@@ -897,6 +925,13 @@ HRESULT CRenderer::Ready_MRT()
 
 #pragma region MRT_VELOCITY_MAP
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_VELOCITY_MAP"), TEXT("RT_VelocityMap"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_SFX
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_SFX"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_SFX"), TEXT("RT_Distortion"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

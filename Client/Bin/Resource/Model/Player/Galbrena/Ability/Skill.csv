@@ -1,2 +1,2 @@
 Name,PrevName,KeyInput,KeyType,SkillType,CostStatType,Cost,CoolDown,Damage,Description
-Skill_Strike,None,E,CHAIN,AUGUSTA_POINT,2,-100,0,200,POINT 100 E키
+Attack_Jump_Start,None,E,CHAIN,NONE,0,0,5,200,DEFAULT E키

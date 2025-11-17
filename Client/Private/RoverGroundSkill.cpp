@@ -97,6 +97,9 @@ void CRoverGroundSkill::OnExit()
 		m_pRover->PartActivate(m_iPartType, false);
 	}
     m_iPartType = CRover::PARTTYPE::TYPE_END;
+
+	// 공격 콜라이더 비활성화
+	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 void CRoverGroundSkill::Handle_Input()

@@ -3,6 +3,7 @@
 
 NS_BEGIN(Editor)
 
+class CEdit_ScreenEffect;
 
 class CSFX_Interface final : public CInterface_Edit
 {
@@ -11,7 +12,16 @@ private:
 	virtual ~CSFX_Interface() = default;
 
 public:
-	virtual	HRESULT			Initialize();
+	virtual	HRESULT		Initialize();
+	void				Priority_Update(_float fTimeDelta);
+	void				Update(_float fTimeDelta);
+	void				Late_Update(_float fTimeDelta);
+	void				Render();
+
+
+
+private:
+	CEdit_ScreenEffect*		m_pCurrentSFX = { nullptr };
 
 public:
 	static CSFX_Interface*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

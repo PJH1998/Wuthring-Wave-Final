@@ -359,6 +359,9 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\Radial">
       <UniqueIdentifier>{1e87911a-3589-47d7-a32e-c21a8abffee6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\ModelAnim_Instance">
+      <UniqueIdentifier>{26ac64fc-251f-436e-b528-877d70a68300}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -733,6 +736,9 @@
     <ClInclude Include="..\public\RadialBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\ModelAnim_Instance.h">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1082,6 +1088,9 @@
     <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\private\RadialBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ModelAnim_Instance.cpp">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

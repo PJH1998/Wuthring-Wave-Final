@@ -199,6 +199,7 @@ private:
 	_bool m_IsPlayAnimation = { true };
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
 
+	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
 	_bool m_PendingConditions[CONDITION_END] = {};
 

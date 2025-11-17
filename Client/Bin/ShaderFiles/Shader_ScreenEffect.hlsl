@@ -5,6 +5,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
 Texture2D g_MaskTexture;
+Texture2D g_NoiseTexture;
 
 struct VS_IN
 {
@@ -41,13 +42,25 @@ struct PS_IN
 struct PS_OUT
 {
     float4 vColor : SV_TARGET0;
+    float4 vDistortion : SV_TARGET1;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT)0;
 
-    Out.vColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vBase = g_DiffuseTexture.Sample(DefaultSampler, float2(In.vTexcoord.x, In.vTexcoord.y * 0.2f));
+    float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vNoise = g_NoiseTexture.Sample(DefaultSampler, float2(In.vTexcoord.x * 20.f, In.vTexcoord.y));
+    float4 vSecond = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vColor = vMask;
+    Out.vColor.a = min(min(vMask.r, vMask.g), vMask.b);
+    
+        
+    Out.vDistortion = ((vSecond * float4(0.618775, 5.f, 0.152381f, 0.f)) + vBase) * vNoise.r;
+    
+    Out.vDistortion.a = 0.5f;
     
     return Out;
 }
