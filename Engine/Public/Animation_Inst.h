@@ -2,7 +2,7 @@
 #include "Base.h"
 
 NS_BEGIN(Engine)
-
+// 애니메이션에 대한 정보로만 갖고있는 클래스, 각 인스턴스의 TrackPosition과 index는 개개의 객체에서 관리
 class CAnimation_Inst final : public CBase
 {
 private:
@@ -39,7 +39,7 @@ public:
 
 	//_bool				Blend_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float fTrackLength);
 
-	_bool Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
+	_bool				Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
 private:
 	_char									m_szName[MAX_PATH] = {};
 	_float									m_fDuration = {};

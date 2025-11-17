@@ -170,14 +170,14 @@ void CLevel_Test::Ready_Dummy()
 	DummyDesc.eLevel = m_eCurLevel;
 	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
 	DummyDesc.strInitAnimTag = "Stand1";
-	DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로사우로스?
 	//DummyDesc.strInitAnimTag = "Stand";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Ggobul");						//꼬불이
 	//DummyDesc.strInitAnimTag = "SAttack01_1";
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
@@ -191,7 +191,7 @@ void CLevel_Test::Ready_Dummy()
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
 	Ggobul.fAttackDmg =0.f;
@@ -207,7 +207,7 @@ void CLevel_Test::Ready_Dummy()
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	Tantacle.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
 	Tantacle.fSpeedPerSec = 10.f;
 	Tantacle.fAttackDamage = 0.f;
@@ -230,7 +230,7 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.fSpeedPerSec = 10.f;
     MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     MobDesc.pAnimationTag = "Born1";
-	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
@@ -247,7 +247,7 @@ void CLevel_Test::Ready_MonsterTest()
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
 	Ggobul.fAttackDmg = MobDesc.fAttackDmg;
@@ -263,7 +263,7 @@ void CLevel_Test::Ready_MonsterTest()
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	Tantacle.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
 	Tantacle.fSpeedPerSec = 10.f;
 	Tantacle.fAttackDamage = MobDesc.fAttackDmg;
@@ -306,7 +306,7 @@ void CLevel_Test::Ready_HavocWarrior()
 	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
 	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
+	tDesc.strFolderPath = "../Bin/Resource/Model/Monster/HavocWarrior/Notify";
 	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	tDesc.fSpeedPerSec = 10.f;
 	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
@@ -332,7 +332,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
 	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
+	ADesc.strFolderPath = "../Bin/Resource/Model/Monster/ElectroPredator/Notify";
 	ADesc.fRotationPerSec = XMConvertToRadians(100.f);
 	ADesc.fSpeedPerSec = 10.f;
 	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
@@ -388,7 +388,7 @@ void CLevel_Test::Ready_CoroSaurus()
 	CoroDesc.fSpeedPerSec = 10.f;
 	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
 	CoroDesc.pAnimationTag = "Idle1";
-	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
+	CoroDesc.strFolderPath = "../Bin/Resource/Model/Monster/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
 	CoroDesc.fAttackDmg = pInfo->fAttack;
 	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
