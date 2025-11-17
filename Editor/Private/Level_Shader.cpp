@@ -25,10 +25,10 @@ HRESULT CLevel_Shader::Initialize()
     if(FAILED(Ready_TestObjects()))
         CRASH("Failed TestObject");
 
-	const _tchar* pFilePath[4] = { nullptr, nullptr , nullptr, TEXT("../../Client/Bin/Resource/Decal/T_Decal_160002.png")};
+	//const _tchar* pFilePath[4] = { nullptr, nullptr , TEXT("../../Client/Bin/Resource/Decal/T_Decal_24001.png"), TEXT("../../Client/Bin/Resource/Decal/T_Decal_24001.png")};
 
-	if (FAILED(m_pGameInstance->Add_Decal(TEXT("Decal_Test"), pFilePath, _float3(0.8f, 0.8f, 0.8f))))
-		CRASH("Failed Add DecalTexture");
+	//if (FAILED(m_pGameInstance->Add_Decal(TEXT("Decal_Test"), pFilePath, _float3(0.8f, 0.8f, 0.8f))))
+	//	CRASH("Failed Add DecalTexture");
 
     return S_OK;
 }

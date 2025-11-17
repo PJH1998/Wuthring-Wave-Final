@@ -32,6 +32,7 @@ private:
 	CTexture*				m_pNoiseTexture = { nullptr };	//Tile_30010
 	CTexture*				m_pSecondTexture = { nullptr };	//Tile_530002
 
+	_bool	test = {};
 private:
 	HRESULT					Ready_Textures();
 

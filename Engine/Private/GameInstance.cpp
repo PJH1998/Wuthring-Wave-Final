@@ -516,6 +516,10 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
+ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
+{
+	return m_pRenderer->Get_CurrentSceneSRV();
+}
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
