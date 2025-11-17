@@ -84,6 +84,9 @@ void CAugustaGroundBurst::OnExit()
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+
+	// 공격 콜라이더 비활성화
+	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 void CAugustaGroundBurst::Handle_Input()

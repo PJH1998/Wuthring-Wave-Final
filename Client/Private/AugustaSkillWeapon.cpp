@@ -139,6 +139,7 @@ void CAugustaSkillWeapon::Activate(_bool IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 	}
 }
 

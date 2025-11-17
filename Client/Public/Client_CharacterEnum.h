@@ -17,6 +17,7 @@ namespace Client
 		INVINCIBLE = 1 << 4,
 		CHANGE = 1 << 5,
 		CUTSCENE = 1 << 6,
+		SKILLHIT = 1 << 7, // Skill에 맞았단 판정이 필요한 경우.(Galbrena Default E)
 		END
 	};
 
@@ -70,8 +71,10 @@ namespace Client
 		END
 	};
 
-	enum class UI_GABRENA_STATE : unsigned int {
-		ROVER_READY = 1,
+	enum class UI_GALBRENA_STATE : unsigned int {
+		DEFAULT = 0,
+		E_BURST_READY = 1,		// 강화 E 사용 가능.
+		E_DEFAULT_READY = 2,	// 기본 E 사용가능
 		END
 	};
 

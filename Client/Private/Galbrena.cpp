@@ -86,14 +86,22 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
 	// 3. 몬스터가 있다면?
+	const _float4x4* pTargetMatrix = nullptr;
 	if (nullptr != m_pTargetTransform)
 	{
 		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
 		vDistance = XMVectorSetY(vDistance, 0.f);
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+	
+		if (nullptr != m_pLockOnTargetTransform)
+			pTargetMatrix = m_pLockOnTargetTransform->Get_WorldMatrixPtr();
+		else
+			pTargetMatrix = m_pTargetTransform->Get_WorldMatrixPtr();
 	}
+	// 4. 매프레임 계속 전달.
+	m_AttackVolumes[VOLUME_TARGET]->Bind_SocketMatrix(pTargetMatrix);
 
-	// 4. MainAttackVolume 설정
+	// 5. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
   
@@ -482,24 +490,30 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var1, L'|');
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
-	_uint iVolumeIdx = {  };
 
+	if (var1 == TEXT("Main"))
+		m_pMainAttackVolume->TriggerActivate(IsActive);
 
 	if (var1 == TEXT("Galbrena"))
 	{
 		// 1. Attack Volume Index 설정.
 		if (var2 == TEXT("ARROUND"))
-			iVolumeIdx = VOLUME::VOLUME_ARROUND; // 주변 공격.
+			m_iVolumeIdx = VOLUME::VOLUME_ARROUND; // 주변 공격.
 		else if (var2 == TEXT("ARROUND_SLASH"))
-			iVolumeIdx = VOLUME::VOLUME_ARROUND_SLASH;
+			m_iVolumeIdx = VOLUME::VOLUME_ARROUND_SLASH;
 		else if (var2 == TEXT("KNOCKBACK"))
-			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
+			m_iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
+		else if (var2 == TEXT("TARGET"))
+			m_iVolumeIdx = VOLUME::VOLUME_TARGET;
+			
 		else if (var2 == TEXT("SKILL"))
-			iVolumeIdx = VOLUME::VOLUME_SKILL;
+			m_iVolumeIdx = VOLUME::VOLUME_SKILL;
+		else if (var2 == TEXT("DEFAULT_E"))
+			m_iVolumeIdx = VOLUME::VOLUME_DEFAULT_E;
 
 		// 2. Main Attack Volume 교체.
 		m_pMainAttackVolume->TriggerActivate(false);
-		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+		m_pMainAttackVolume = m_AttackVolumes[m_iVolumeIdx];
 
 		// 3. Layer 설정.
 		if (var3 == TEXT("ATTACK"))
@@ -572,6 +586,19 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 			}
 		}
 	}
+	else if (var1 == TEXT("SecondShotGun"))
+	{
+		// 2. Action Tag
+		if (var2 == TEXT("Dissolve"))
+		{
+			// 3. Dissolve On / Off
+			if (var3 == TEXT("On"))
+			{
+				m_pGalbrenaSecondShotGun->Activate(false);
+				return;
+			}
+		}
+	}
 
 	// GalbrenaWing|Bone
 
@@ -585,8 +612,13 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 	if (nullptr == pAbility)
 		return;
 
+	// 2. 맞았을때만.. State가 변하니까 Condition을 바꿔주어야함.
 	switch (m_iVolumeIdx)
 	{
+	case VOLUME::VOLUME_DEFAULT_E:
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
+		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
+		break;
 	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
 		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
@@ -832,10 +864,23 @@ void CGalbrena::Ready_AttackVolumes()
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND_SLASH]);
 	m_AttackVolumes[VOLUME_ARROUND_SLASH]->TriggerActivate(false);
 
-	m_AttackVolumes[VOLUME_KNOCKBACK] = dynamic_cast<CAttackVolume*>(
+
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001_R_Knee_B");
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 600.f;
+	m_AttackVolumes[VOLUME_DEFAULT_E] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_DEFAULT_E]);
+	m_AttackVolumes[VOLUME_DEFAULT_E]->TriggerActivate(false);
+
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 0.5f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 400.f;
+	m_AttackVolumes[VOLUME_KNOCKBACK] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_KNOCKBACK]);
 	m_AttackVolumes[VOLUME_KNOCKBACK]->TriggerActivate(false);
@@ -848,11 +893,22 @@ void CGalbrena::Ready_AttackVolumes()
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
-
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SKILL]);
 	m_AttackVolumes[VOLUME_SKILL]->TriggerActivate(false);
+	
 
-	m_pMainAttackVolume = m_AttackVolumes[VOLUME_KNOCKBACK];
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비.
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 250.f;
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root"); // 기본은 Root?
+	m_AttackVolumes[VOLUME_TARGET] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_TARGET]);
+	m_AttackVolumes[VOLUME_TARGET]->TriggerActivate(false);
+
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ARROUND];
 	m_pMainAttackVolume->TriggerActivate(false);
 }
 

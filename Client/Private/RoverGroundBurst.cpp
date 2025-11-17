@@ -92,6 +92,8 @@ void CRoverGroundBurst::OnExit()
 		m_pRover->Bind_CostCondition_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
 	}
 
+	// 공격 콜라이더 비활성화
+	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 	
 }
 

@@ -59,9 +59,6 @@ void CGalbrenaShotGun::Priority_Update(_float fTimeDelta)
 		{
 			m_isActivate = false;
 			Prop_Reset();
-			_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-
-			
 		}
 			
 	}

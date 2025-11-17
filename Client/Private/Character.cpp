@@ -471,6 +471,7 @@ void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
 	// 1. TargetTransform은 항상 가져옵니다.
 	m_pTargetTransform = pTargetTransform;
+	m_pLockOnTargetTransform = nullptr; // 들어왔다는건 하드 락온이 풀렸다는것.
 
 	if (nullptr == pTargetTransform)
 	{
@@ -495,6 +496,7 @@ void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
 	{
 		// 2. LockOn은 상황따라
 		m_IsLockOn = IsLockOn;
+		
 	}
 
 

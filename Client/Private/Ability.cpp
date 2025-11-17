@@ -628,6 +628,40 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 {
 	UISKILL_SLOT skillSlot{};
 
+	skillSlot.strKeyInput = strKey;
+	skillSlot.iCharacterType = iCharacterIdx;
+	skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::DEFAULT);
+	skillSlot.fMaxCoolTime = 0.f;
+
+	// E 공격. => 말고 슬롯 안바뀜.
+	if (strKey == "E")
+	{
+		if (m_iCondition & ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE))
+		{
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Ex_Skill02");
+			if (nullptr != pSkillInfo)
+			{
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Ex_Skill02");
+				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+				skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::E_BURST_READY);
+			}
+		}
+		else
+		{
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Attack_Jump_Start");
+			if (nullptr != pSkillInfo)
+			{
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Attack_Jump_Start");
+				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_DEFAULT_READY);
+			}
+		}
+	}
+	else if (strKey == "R")
+	{
+	
+	}
+
 	return skillSlot;
 }
 

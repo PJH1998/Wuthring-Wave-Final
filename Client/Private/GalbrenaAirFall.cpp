@@ -111,12 +111,12 @@ void CGalbrenaAirFall::Check_StateTransition(_float fTimeDelta)
 	}
 
 
-	//if (m_States[AIR_ATTACK])
-	//{
-	//	m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_START;
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
-	//	return;
-	//}
+	if (m_States[AIR_ATTACK])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_START;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+		return;
+	}
 
 
     if (m_States[LAND])
