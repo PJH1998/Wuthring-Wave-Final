@@ -616,6 +616,10 @@ _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 {
 	return m_pTimer_Manager->Get_TimeDelta(strTimerTag);
 }
+_double CGameInstance::Get_PlayTime()
+{
+	return m_pTimer_Manager->Get_PlayTime();
+}
 void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate)
 {
 	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate);

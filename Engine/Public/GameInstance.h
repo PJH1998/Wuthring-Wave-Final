@@ -180,6 +180,7 @@ public:
 #pragma region TIMER_MANAGER
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
+	_double		Get_PlayTime();
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 	HRESULT		Add_Timer(const _wstring& strTimerTag);
