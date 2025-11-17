@@ -1101,6 +1101,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(6.f, 6.f, 2.f); // y작게? x, z 평면 크게.
+	TriggerDesc.eDir = ATTACKVOULME_DIR::UPPER;
 	m_AttackVolumes[VOLUME_HACKDOWN] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

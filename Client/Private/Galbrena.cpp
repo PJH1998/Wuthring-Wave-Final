@@ -217,6 +217,8 @@ void CGalbrena::Render()
 
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
+
+	m_AttackVolumes[VOLUME_AIR_LOOP]->Render();
 #endif // _DEBUG
 
 }
@@ -501,6 +503,8 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			m_iVolumeIdx = VOLUME::VOLUME_ARROUND; // 주변 공격.
 		else if (var2 == TEXT("ARROUND_SLASH"))
 			m_iVolumeIdx = VOLUME::VOLUME_ARROUND_SLASH;
+		else if (var2 == TEXT("AIR_LOOP"))
+			m_iVolumeIdx = VOLUME::VOLUME_AIR_LOOP;
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
 		else if (var2 == TEXT("TARGET"))
@@ -836,6 +840,7 @@ void CGalbrena::Ready_AttackVolumes()
 
 	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
+	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
@@ -848,7 +853,7 @@ void CGalbrena::Ready_AttackVolumes()
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::FUSI;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
-		};
+	};
 
 	m_AttackVolumes[VOLUME_ARROUND] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
@@ -857,12 +862,25 @@ void CGalbrena::Ready_AttackVolumes()
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND]);
 	m_AttackVolumes[VOLUME_ARROUND]->TriggerActivate(false);
 
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
 	m_AttackVolumes[VOLUME_ARROUND_SLASH] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND_SLASH]);
 	m_AttackVolumes[VOLUME_ARROUND_SLASH]->TriggerActivate(false);
+
+	_wstring strEffectTag = TEXT("GALBRENA_SLASH_EFFECT"); // 임시.
+	m_AttackVolumes[VOLUME_ARROUND_SLASH]->Cange_EffectTag(strEffectTag);
+
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 6.f); // (x, z, y)
+	m_AttackVolumes[VOLUME_AIR_LOOP] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_AIR_LOOP]);
+	m_AttackVolumes[VOLUME_AIR_LOOP]->TriggerActivate(false);
 
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001_R_Knee_B");

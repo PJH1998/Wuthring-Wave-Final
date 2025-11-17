@@ -329,7 +329,7 @@ void CGalbrenaAirAttack::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.0f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START02),"AirAttack_Start02", 1.0f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1),"AirAttack_Loop_1", 1.0f, 5.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1),"AirAttack_Loop_1", 1.5f, 5.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2),"AirAttack_Loop_2", 1.0f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 45.f, 1.f);
 
