@@ -62,7 +62,7 @@ void CDecal::Update(_float fTimeDelta)
 
 void CDecal::Render(CShader* pShader)
 {
-	if (m_iNumDecals < 0 || m_iNumDecals >= g_iMaxDecal)
+	if (m_iNumDecals <= 0 || m_iNumDecals >= g_iMaxDecal)
 		return;
 
 	Bind_Resources(pShader);
