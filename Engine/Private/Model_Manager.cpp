@@ -30,12 +30,30 @@ HRESULT CModel_Manager::Initialize()
 	if (FAILED(m_pDevice->CreateBuffer(&StagingDesc, nullptr, &m_pStagingBuffer)))
 		CRASH("Failed");
 	m_iSearchIndex = m_ModelPrototypes.begin();
+	m_RenderObjects[0].reserve(500);
+	m_RenderObjects[1].reserve(500);
+	m_RenderObjects[2].reserve(500);
+	m_RenderObjects[3].reserve(500);
 	return S_OK;
 }
 
 void CModel_Manager::Update(_float fTimeDelta)
 {
 	m_fTotalPlayTime += fTimeDelta;
+	auto DeleteIter = m_DeleteList.begin();
+	while (DeleteIter != m_DeleteList.end())
+	{
+		DeleteIter->iLifeCount--;
+		if (DeleteIter->iLifeCount <= 0)
+		{
+			m_pBufferPool[DeleteIter->iLODIndex]->FreeMemory_Vertex(DeleteIter->VertexOffset, DeleteIter->VertexSize);
+			m_pBufferPool[DeleteIter->iLODIndex]->FreeMemory_Index(DeleteIter->IndexOffset, DeleteIter->IndexSize);
+			DeleteIter = m_DeleteList.erase(DeleteIter);
+		}
+		else
+			DeleteIter++;
+	}
+
 	if (!m_StagingData.empty())
 	{
 		auto pTempVector = move(m_StagingData);
@@ -83,10 +101,10 @@ void CModel_Manager::Update(_float fTimeDelta)
 					0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 				SHARED_DATA_DESC Desc{};
-				Desc.IndexOffset = IndexOffSet;
+				Desc.IndexOffset = IndexOffSet / sizeof(_uint);
 				Desc.IndexSize = IndexSize;
 				Desc.NumIndices = Data.LoadData[i].iNumIndices;
-				Desc.VertexOffset = VertexOffset;
+				Desc.VertexOffset = VertexOffset / sizeof(VTXMESH);
 				Desc.VertexSize = VertexSize;
 
 				pData->push_back(Desc);
@@ -117,8 +135,17 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 				for (auto& pDesc : MeshVector)
 				{
-					m_pBufferPool[i]->FreeMemory_Vertex(pDesc.VertexOffset, pDesc.VertexSize);
-					m_pBufferPool[i]->FreeMemory_Index(pDesc.IndexOffset, pDesc.IndexSize);
+					DELETE_DATA Data{};
+					Data.iLifeCount = 3;
+					Data.iLODIndex = i;
+					Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
+					Data.IndexSize = pDesc.IndexSize;
+					Data.VertexOffset = pDesc.VertexOffset* sizeof(VTXMESH);
+					Data.VertexSize = pDesc.VertexSize;
+
+					m_DeleteList.push_back(Data);
+					//m_pBufferPool[i]->FreeMemory_Vertex(pDesc.VertexOffset, pDesc.VertexSize);
+					//m_pBufferPool[i]->FreeMemory_Index(pDesc.IndexOffset, pDesc.IndexSize);
 				}
 				pModel->Get_MeshDesc(0)[i].clear();
 				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
@@ -216,7 +243,20 @@ void CModel_Manager::RenderBufferPool(_uint iLODIndex)
 	{
 		pObject->Render(m_pContext, iLODIndex);
 		//호출된 시간을 밑으로 체크해야하는데 StaticObject에는 저 함수가 없어서 보류.
-		//pObject->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
+		pObject->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
+		Safe_Release(pObject);
+	}
+	m_RenderObjects[iLODIndex].clear();
+}
+
+void CModel_Manager::RenderBufferPool(_uint iLODIndex, ID3D11DeviceContext* pContext)
+{
+	m_pBufferPool[iLODIndex]->Bind_BufferPool(pContext);
+	for (auto& pObject : m_RenderObjects[iLODIndex])
+	{
+		pObject->Render(pContext, iLODIndex);
+		//호출된 시간을 밑으로 체크해야하는데 StaticObject에는 저 함수가 없어서 보류.
+		pObject->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
 		Safe_Release(pObject);
 	}
 	m_RenderObjects[iLODIndex].clear();
@@ -288,6 +328,34 @@ void CModel_Manager::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
 {
 	m_RenderObjects[iLODIndex].push_back(pObject);
 	Safe_AddRef(pObject);
+}
+
+void CModel_Manager::Add_To_RenderTest(vector<class CStaticObject*>* Container)
+{
+	{
+		lock_guard<mutex> lock(m_Mutex);
+
+		for (_uint i = 0; i < 4; ++i)
+		{
+			if (Container[i].empty())
+				continue;
+			for (auto& pObject : Container[i])
+			{
+				if (!pObject) continue;
+				m_RenderObjects[i].push_back(pObject);
+				Safe_AddRef(pObject);
+			}
+			//m_RenderObjects[i].insert(m_RenderObjects[i].end(), Container[i].begin(), Container[i].end());
+
+			Container[i].clear();
+		}
+	}
+	/*vector<class CStaticObject*> pTemp = move(Container);
+	for (auto& pObject : pTemp)
+	{
+		m_RenderObjects[pObject->Get_LOD()].push_back(pObject);
+		Safe_AddRef(pObject);
+	}*/
 }
 
 CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

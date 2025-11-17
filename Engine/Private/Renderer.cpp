@@ -126,14 +126,14 @@ HRESULT CRenderer::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 
 void CRenderer::Render()
 {
-	//m_pGameInstance->Wait_Thread_End();
+	m_pGameInstance->Wait_Thread_End();
 
 	m_iCurTime = (++m_iCurTime) % m_iInterval;
-
+	
 	Render_Priority();
 	Render_Shadow();
 	Render_NonBlend();
-	Render_Static();
+	//Render_Static();
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 		CRASH("Render Fail");
 
@@ -352,6 +352,7 @@ void CRenderer::Render_Static()
 				m_pDeferredContext[i]->ClearState();
 				Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
 				m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
+				//m_pGameInstance->RenderBufferPool(0, m_pDeferredContext[i]);
 				for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
 					m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
 				
@@ -365,6 +366,7 @@ void CRenderer::Render_Static()
 			}
 			m_CV.notify_one();
 		});
+
 	}
 	{
 		unique_lock<mutex> lock(m_RenderAddMutex);

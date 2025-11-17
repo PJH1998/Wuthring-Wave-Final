@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Base.h"
 
-#define MAX_LOD 10
+#define MAX_LOD 100
 
 NS_BEGIN(Engine)
 

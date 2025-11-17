@@ -36,8 +36,7 @@ public:
 	virtual		void			Render();
 	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)override;
 	virtual		void			Render_Shadow();
-
-	virtual void Set_ImGuiOption();
+	virtual		void					Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime);
 
 	HRESULT Ready_Component(void* pArg = nullptr);
 

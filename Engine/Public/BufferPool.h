@@ -30,6 +30,8 @@ public:
 	void FreeMemory_Vertex(_uint iVertexOffset, _uint iVertexSize);
 	void FreeMemory_Index(_uint iIndexOffSet, _uint iIndexSize);
 	HRESULT Bind_BufferPool();
+	HRESULT Bind_BufferPool(ID3D11DeviceContext* pDC);
+	
 	ID3D11Buffer* Get_VertexBuffer() { return m_pVertexBufferPool; }
 	ID3D11Buffer* Get_IndexBuffer() { return m_pIndexBufferPool; }
 private:

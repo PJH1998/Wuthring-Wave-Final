@@ -12,6 +12,7 @@ protected:
 
 public:
 	void						Set_LOD(_uint iLOD = 0) { m_iLODIndex = iLOD; }
+	_uint						Get_LOD() { return m_iLODIndex; }
 	_float						Compute_Distance(const _fvector& vCamPos);
 
 public:
@@ -23,7 +24,8 @@ public:
 	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) {};
 	virtual		void			Render_Shadow() {};
 	virtual		BoundingBox* Get_BoundingBox() { return m_pBoundingBox; }
-
+	_uint					IsMaxLOD(_uint iLODIndex);
+	virtual		void					Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime) {};
 protected:
 	// LOD 개수
 	_uint							m_iNumLOD = {};

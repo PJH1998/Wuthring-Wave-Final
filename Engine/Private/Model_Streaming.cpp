@@ -168,7 +168,7 @@ _bool CModel_Streaming::Is_RenderTimeOver(_uint iLODIndex)
 	if (iLODIndex >= m_iMaxLOD)
 		return false;
 
-	return  m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default")) - m_fRenderTime[iLODIndex] >= 5.f;
+	return  m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default")) - m_pModelPrototype->m_fRenderTime[iLODIndex] >= 5.f;
 }
 
 HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
@@ -262,6 +262,16 @@ HRESULT CModel_Streaming::Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVert
 _bool CModel_Streaming::Is_Overed(_uint iLODIndex, _uint iMeshIndex)
 {
 	return m_Meshes[iLODIndex]->Is_Overed(iMeshIndex);
+}
+
+_uint CModel_Streaming::Get_LastLODIndex()
+{
+	for (_uint i = 0; i < 4; ++i)
+	{
+		if (!m_Meshes[i])
+			return i - 1;
+	}
+	return m_iMaxLOD;
 }
 
 CModel_Streaming* CModel_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath)

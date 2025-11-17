@@ -30,7 +30,7 @@ public:
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc(_uint iLODIndex) { return m_Meshes[iLODIndex]->Get_MeshDesc(); }
 	void									  RequestLastLODModel();
-	void									  Set_RenderTime(_uint iLODIndex, _float fTimeDelta) { m_fRenderTime[iLODIndex] = fTimeDelta; }
+	void									  Set_RenderTime(_uint iLODIndex, _float fTimeDelta) { m_pModelPrototype->m_fRenderTime[iLODIndex] = fTimeDelta; }
 	_bool									  Is_RenderTimeOver(_uint iLODIndex);
 public:
 	HRESULT							Ready_Mesh(const _char* pFilePath);
@@ -39,6 +39,7 @@ public:
 	HRESULT							Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVertex, ID3D11Buffer* pIndex);
 	_bool							Is_Overed(_uint iLODIndex, _uint iMeshIndex);
 	const _string&					Find_ModelPrototype() { return m_ModelPath; }
+	_uint							Get_LastLODIndex();
 private:
 	_uint									m_iNumMeshes[4] = { 0,0,0,0 };
 	class CMesh_Streaming*					m_Meshes[4] = { nullptr,nullptr,nullptr,nullptr };

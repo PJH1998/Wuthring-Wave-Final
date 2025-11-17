@@ -1025,9 +1025,19 @@ void CGameInstance::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
 	m_pModel_Manager->Add_To_RenderTest(iLODIndex, pObject);
 }
 
+void CGameInstance::Add_To_RenderTest(vector<class CStaticObject*>* Container)
+{
+	m_pModel_Manager->Add_To_RenderTest(Container);
+}
+
 void CGameInstance::RenderBufferPool(_uint iLODIndex)
 {
 	m_pModel_Manager->RenderBufferPool(iLODIndex);
+}
+
+void CGameInstance::RenderBufferPool(_uint iLODIndex, ID3D11DeviceContext* pContext)
+{
+	m_pModel_Manager->RenderBufferPool(iLODIndex, pContext);
 }
 
 #pragma region SFX_HUB

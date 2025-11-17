@@ -1090,11 +1090,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 	m_pGameInstance->LoadLastLOD();
 	CEdit_MapObject_Test::BUFFER_TEST TT{};
-	//for (_uint i = 0; i < 50; ++i)
+	for (_uint i = 0; i < 500; ++i)
 	{
 		strcpy_s(TT.ModelName, "Prototype_Test");
 		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
-		strcpy_s(TT.ModelName, "Prototype_Test2");
+	/*	strcpy_s(TT.ModelName, "Prototype_Test2");
 		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
 
 		strcpy_s(TT.ModelName, "Prototype_Test3");
@@ -1105,7 +1105,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 		strcpy_s(TT.ModelName, "Prototype_Test5");
 		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
-	}
+	*/}
     //Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
 

@@ -336,8 +336,11 @@ public:
 	HRESULT RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
 	void RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void RenderBufferPool(_uint iLODIndex);
+	void RenderBufferPool(_uint iLODIndex, ID3D11DeviceContext* pContext);
 	void LoadLastLOD();
 	void Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
+	void Add_To_RenderTest(vector<class CStaticObject*>* Container);
+	
 #pragma endregion
 
 

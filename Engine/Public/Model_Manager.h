@@ -31,6 +31,17 @@ public:
 		_uint iLODIndex;
 		vector<LOADED_DATA >LoadData;
 	}MOEDL_DATA;
+	typedef struct tagDeleteData {
+		_uint iLODIndex = {};
+		_uint VertexOffset = {};
+		_uint IndexOffset = {};
+
+		_uint VertexSize = {};
+		_uint IndexSize = {};
+
+		_uint iLifeCount = {};
+	}DELETE_DATA;
+
 
 private:
 	CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -47,11 +58,12 @@ public:
 	void LoadData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	//m_pModel->Update를 만들어서 각 LOD 단계가 쓰이는지 안쓰이는지 확인하기?
 
-	//버퍼를 바인딩하고 해당 LOD인덱스를 가진 놈들 그리기 요청?
 
 	void LoadLastLOD();
 	void Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
+	void Add_To_RenderTest(vector<class CStaticObject*>* Container);
 	void RenderBufferPool(_uint iLODIndex);
+	void RenderBufferPool(_uint iLODIndex, ID3D11DeviceContext* pContext);
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
@@ -78,6 +90,7 @@ private:
 	//벡터로 데이터 넣는 곳 필요.
 	const _uint m_iCheckPerFrame = { 10 };
 	_float m_fTotalPlayTime = {};
+	list<DELETE_DATA> m_DeleteList;
 public:
 	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void				Free() override;

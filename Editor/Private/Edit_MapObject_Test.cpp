@@ -20,12 +20,12 @@ HRESULT CEdit_MapObject_Test::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 	Ready_Component(pArg);
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_pGameInstance->Rand(-200.f, 200.f), m_pGameInstance->Rand(-200.f, 200.f), m_pGameInstance->Rand(-200.f, 200.f), 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_pGameInstance->Rand(-1800, 1800), m_pGameInstance->Rand(-1800, 1800), m_pGameInstance->Rand(-1800, 1800), 1.f));
 	_float3 vPos;
 	XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	m_pTransformCom->Get_State(STATE::POSITION);
 	m_pBoundingBox = new BoundingBox(vPos, _float3(300.f, 300.f, 300.f));
-	m_iNumLOD = 2;
+	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	AddRef();
 	return S_OK;
@@ -62,7 +62,7 @@ void CEdit_MapObject_Test::Render()
 
 void CEdit_MapObject_Test::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
-	if (m_pModelCom->Get_MeshState(iIndex) != LOADSTATE::LOADED)
+	if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
 	{
 		//여기서 Late Render같은 곳에 추가해버리는 코드 추가?.
 		//return;
@@ -75,30 +75,30 @@ void CEdit_MapObject_Test::Render(ID3D11DeviceContext* pDeferredContext, _uint i
 	_bool HasNormal = { true };
 	_bool HasMask = { true };
 
-	for (_uint i = 0; i < m_pModelCom->Get_NumMesh(iIndex); ++i)
+	for (_uint i = 0; i < m_pModelCom->Get_NumMesh(m_iLODIndex); ++i)
 	{
 
-		if (m_pModelCom->Is_Overed(iIndex, i))
+		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
 			return;
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iIndex, i, TEXTURETYPE::MASK,pEffect)))
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
 		{
-			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr,pEffect);
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
 			HasMask = false;
 		}
 
 
 		if (HasMask)
 		{
-			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
 
-			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iIndex, i, TEXTURETYPE::NORMAL, pEffect)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
 
-			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
 				HasNormal = false;
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
@@ -106,7 +106,7 @@ void CEdit_MapObject_Test::Render(ID3D11DeviceContext* pDeferredContext, _uint i
 
 		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
 
-		m_pModelCom->Render(iIndex, i, pDeferredContext);
+		m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
 	}
 }
 
@@ -114,8 +114,9 @@ void CEdit_MapObject_Test::Render_Shadow()
 {
 }
 
-void CEdit_MapObject_Test::Set_ImGuiOption()
+void CEdit_MapObject_Test::Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)
 {
+	m_pModelCom->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
 }
 
 HRESULT CEdit_MapObject_Test::Ready_Component(void* pArg)
