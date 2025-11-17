@@ -120,7 +120,7 @@ private:
 
 	_uint									m_iNumAnimations = {};
 	_string								m_strPreAnimation;
-	map<_string, class CAnimation*>		m_Animations;
+	map<_string, class CAnimation_Inst*>		m_Animations;
 	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
 
 	_bool									m_isBlend = { false };
