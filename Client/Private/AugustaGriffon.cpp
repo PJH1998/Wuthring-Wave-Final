@@ -134,7 +134,7 @@ void CAugustaGriffon::Render()
 
 void CAugustaGriffon::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActivate);
+	//CProp::Activate(IsActivate);
 	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	PREFAB_INFO effecInfo{};
@@ -204,7 +204,7 @@ void CAugustaGriffon::Ready_Variables(const PROP_DESC* pDesc)
     m_pParentTransform = pDesc->pParentTransform;
 
 	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::NORMAL_TEX);
 }
 
 void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)
