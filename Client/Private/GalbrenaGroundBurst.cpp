@@ -98,8 +98,7 @@ void CGalbrenaGroundBurst::Handle_Input()
 	m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
 	m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 	m_States[LAND] = m_pGalbrena->Is_LandCollider(&m_vLandNormal);
-
-	//m_States[NEXT_SKILL] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::E)) && (eBurstType == EGalbrenaBurstType::SKILL01);
+	
 }
 
 void CGalbrenaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
@@ -120,12 +119,6 @@ void CGalbrenaGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 	if (IsEscapePossible && m_strPrevInfo.empty())
 	{
-		/*if (m_States[NEXT_SKILL])
-		{
-			m_pGalbrena->GetStateContextForWrite().m_eBurstType = EGalbrenaBurstType::SKILL02;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::BURST));
-			return;
-		}*/
 
 		if (m_States[LAND])
 		{
@@ -190,8 +183,7 @@ void CGalbrenaGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundBurst::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL01), "Skill01", 1.f, 100.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL02), "Skill02", 1.f, 60.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL01), "Skill01", 1.5f, 100.f);
 }
 
 void CGalbrenaGroundBurst::State_Reset()

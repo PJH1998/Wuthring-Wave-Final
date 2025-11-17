@@ -618,9 +618,6 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 		}
 	}
 
-
-
-
 	return skillSlot;
 }
 
@@ -636,12 +633,12 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 	// E 공격. => 말고 슬롯 안바뀜.
 	if (strKey == "E")
 	{
-		if (m_iCondition & ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE))
+		if (m_Costs[ENUM_CLASS(COST_TYPE::COST1)] >= m_fCostMax) // 기본 공명 게이지가 가득 찼다면?
 		{
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Ex_Skill02");
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill01");
 			if (nullptr != pSkillInfo)
 			{
-				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Ex_Skill02");
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill01");
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
 				skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::E_BURST_READY);
 			}
@@ -659,7 +656,12 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 	}
 	else if (strKey == "R")
 	{
-	
+		// 궁극기..
+		skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Burst01");
+		const SKILL_INFO* pSkillInfo = Get_SkillInfo("Burst01");
+		if (nullptr != pSkillInfo)
+			skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+		skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::R_ULTI_READY);
 	}
 
 	return skillSlot;

@@ -130,6 +130,7 @@ void CAugustaSkillWeapon::Render()
 void CAugustaSkillWeapon::Activate(_bool IsActivate)
 {
     SetActivate(IsActivate);
+
 	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	PREFAB_INFO effecInfo{};

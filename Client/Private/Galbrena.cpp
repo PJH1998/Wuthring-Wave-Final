@@ -883,12 +883,12 @@ void CGalbrena::Ready_AttackVolumes()
 	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
 	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
-	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001");
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::KNOCKBACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 250.f;

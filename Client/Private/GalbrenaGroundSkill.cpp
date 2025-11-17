@@ -14,6 +14,9 @@ HRESULT CGalbrenaGroundSkill::Initialize(class CGameObject* pOwner)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
+	// 미리 사용할 공간 선언.
+	m_ActivePartTypes.reserve(CGalbrena::PARTTYPE::TYPE_END);
+
     return S_OK;
 }
 
@@ -36,6 +39,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 
 	m_pGalbrena->Set_Gravity(true);
 
+	m_ActivePartTypes.clear(); // 파츠 목록 초기화
     // 5. 애니메이션 타입에 맞는 파츠 설정.
     switch(eSkillType)
     {
@@ -54,11 +58,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 
 		case EGalbrenaSkillType::BURST01:
 		{
-			_string strBoneName = "WeaponProp01";
-			m_iPartType = CGalbrena::PARTTYPE::PART_FIRSTGUN;
-			m_pGalbrena->PartActivate(m_iPartType, true);
-			m_pGalbrena->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-			m_pGalbrena->Set_Gravity(true);
+			m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_FIRSTGUN);
 			m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 			m_pGalbrena->Rotate_Target(); // 한번 회전.
@@ -68,6 +68,11 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 		}
     }
 	
+	// 사용하는 PartType이 있다면?
+	for (auto& PartType : m_ActivePartTypes)
+		m_pGalbrena->PartActivate(PartType, true);
+
+
 	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
 
 	// 6. 무적 상태 부여
@@ -102,9 +107,9 @@ void CGalbrenaGroundSkill::OnExit()
 
 
 	// 활성화된 Parts Activate 끄기. => Dissolve 시작.
-	if (m_iPartType != CGalbrena::PARTTYPE::TYPE_END)
-		m_pGalbrena->PartActivate(m_iPartType, false);
-    m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
+	for (auto& PartType : m_ActivePartTypes)
+		m_pGalbrena->PartActivate(PartType, false);
+
 
 	// 기본 E 스킬에 적중 시 반동 E 스킬 발동을 위한 Condition
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
@@ -140,15 +145,16 @@ void CGalbrenaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 
     CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
 
-    // Target이 존재한다면? => Auto Target
-    if (m_iPartType != CGalbrena::PARTTYPE::TYPE_END)
+	// 2. 파츠 실행.
+	for (auto& iPartType : m_ActivePartTypes)
 	{
 		m_pGalbrena->Play_PartAnimation(
-			    m_iPartType,
-			    m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
-			    fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr
-			);
+			iPartType,
+			m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+		);
 	}
+
 }
 
 void CGalbrenaGroundSkill::Check_Physcis(_float fTimeDelta)
@@ -217,10 +223,7 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				return;
 			}
 		}
-
-		
     }
-
 
     // 가장 우선순위 낮음.
     if (m_IsAnimationEnd)
@@ -268,10 +271,9 @@ void CGalbrenaGroundSkill::Handle_Animation_SpecialState()
 	EGalbrenaSkillType eSkillType = static_cast<EGalbrenaSkillType>(m_iCurrentAnimIdx);
 
 	// 해당 동작은 온전한 이동량 보장.
-	if (eSkillType == EGalbrenaSkillType::ATTACK_JUMP_END02)
+	if (eSkillType == EGalbrenaSkillType::ATTACK_JUMP_END02 || eSkillType == EGalbrenaSkillType::BURST01)
 		m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
 }
-
 
 
 CGalbrenaGroundSkill* CGalbrenaGroundSkill::Create(class CGameObject* pOwner)
