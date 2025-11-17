@@ -15,6 +15,8 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
     SetUp_Animations();
 
 	// 매핑.
+	m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
     return S_OK;
 }
@@ -39,6 +41,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 
     // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "";

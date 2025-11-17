@@ -92,18 +92,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	m_pTransformCom->Save_PreviousPosition();
 
 	// 4. 몬스터가 있다면?
-	if (nullptr != m_pTargetTransform)
-	{
-		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
-		vDistance = XMVectorSetY(vDistance, 0.f);
-		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
-	}
+	Update_TargetDistance();
 	
-	// 5. MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
-
-	// 6. Change Timer 계산. => Dissolve에 사용
+	// 5. Change Timer 계산. => Dissolve에 사용
 	Calc_ChangeTimer(fTimeDelta);
 
 	
@@ -877,6 +868,25 @@ void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 	}
+}
+
+void CAugusta::Update_TargetDistance()
+{
+	const _float4x4* pTargetMatrix = nullptr;
+
+	_vector vTargetPos = {};
+
+	// LockOn Target 우선
+	if (nullptr != m_pLockOnTargetTransform)
+		vTargetPos = m_pLockOnTargetTransform->Get_State(STATE::POSITION);
+	// 없으면 Target Transform.
+	else if (nullptr != m_pTargetTransform)
+		vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION);
+
+	// 거리 계산. Y제외.
+	_vector vDistance = m_pTransformCom->Get_State(STATE::POSITION) - vTargetPos;
+	vDistance = XMVectorSetY(vDistance, 0.f);
+	m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 }
 #pragma endregion
 
