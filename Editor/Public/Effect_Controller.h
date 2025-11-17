@@ -132,7 +132,6 @@ private:
 	ANIMACTOR_DSEC												m_AnimActorDesc = {};
 	_char														m_BoneName[MAX_PATH];
 	_bool														m_bBoneFlag = false;
-	_bool														m_IsBone = false;
 	_float														m_fTrackPosition = -1.f;
 	_bool														m_bTest = false;
 

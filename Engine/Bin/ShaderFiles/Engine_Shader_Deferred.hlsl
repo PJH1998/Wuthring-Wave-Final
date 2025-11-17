@@ -4,7 +4,7 @@
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
-float g_fLutLerpIntensity = 0.25f;
+float g_fLutLerpIntensity = 0.f;
 
 float g_fLightFar;
 

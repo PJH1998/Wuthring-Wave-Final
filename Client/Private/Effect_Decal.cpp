@@ -68,24 +68,24 @@ void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	m_isActivate = pDesc->IsActive;
 
-	if(m_isActivate)
-		Default_Transform(WorldMatrix);
+	if (pDesc->pObjectMatrixPtr != nullptr && m_isActivate)
+	{
+		_fmatrix SpawnMatrix = XMLoadFloat4x4(pDesc->pObjectMatrixPtr);
+		Default_Transform(SpawnMatrix, pDesc->OffsetMatrix);
+	}
 }
 
-void CEffect_Decal::Default_Transform(_fmatrix WorldMatrix)
+void CEffect_Decal::Default_Transform(_fmatrix SpawnMatrix, _fmatrix OffsetMatrix)
 {
 	//_vector vScale = {};
 	//_vector vPos = {};
 	//_vector vRot = {};
-	//XMMatrixDecompose(&vScale, &vRot, &vPos, WorldMatrix);
+	//XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
 
-	//_float3 vfScale = {};
-	//XMStoreFloat3(&vfScale, vScale);
+	//_matrix PositionMatrix = XMMatrixTranslationFromVector(vPos);
 
-	//m_pTransformCom->Scale(vfScale);
- //   m_pTransformCom->Set_State(STATE::POSITION, vPos);
 
-	m_ComBindMatrix = WorldMatrix;
+	m_ComBindMatrix = OffsetMatrix * SpawnMatrix;
 }
 
 

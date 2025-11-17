@@ -1230,12 +1230,21 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 
 	_wstring DecalDataTag = {};
 	_int iTextureCount = {};
+	_float3 EmissiveLuminance = {};
 
 	if (DecalDataJson.contains("DecalTag"))
 		DecalDataTag = StringToWString(DecalDataJson["DecalTag"].get<_string>());
 
 	if (DecalDataJson.contains("TextureCount"))
 		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
+
+	if (DecalDataJson.contains("EmissiveLuminance") && DecalDataJson["EmissiveLuminance"].is_array())
+	{
+		json Emissive = DecalDataJson["EmissiveLuminance"];
+		EmissiveLuminance.x = Emissive[0].get<_float>();
+		EmissiveLuminance.y = Emissive[1].get<_float>();
+		EmissiveLuminance.z = Emissive[2].get<_float>();
+	}
 
 	const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 
@@ -1262,7 +1271,7 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 		}
 	}
 
-	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath);
+	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath, EmissiveLuminance);
 }
 
 void CParser::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
