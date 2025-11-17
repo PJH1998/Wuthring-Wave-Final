@@ -128,25 +128,21 @@ public:
 
 #pragma region RENDERER
 public:
-	HRESULT				Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
-	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
-	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
-	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
-	void				Begin_ScreenEffect(SFX_TOGGLE eType);
-	void				End_ScreenEffect();
-	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
-	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
-	void				Set_LUT_Index(_uint iIndex);
-	void				Render_ShadowMap();
-	void				SettingFog(_bool IsOn);
+	HRESULT						Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
+	HRESULT						Add_Render_StaticObject(class CStaticObject* pObject);
+	HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
+	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	void						Set_LUT_Index(_uint iIndex);
+	void						Render_ShadowMap();
+	void						SettingFog(_bool IsOn);
+	ID3D11ShaderResourceView* Get_CurrentSceneSRV();
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);
 	void		IsSSAO_Blur(_bool IsBlur);
-	void		SetPBR(_bool IsStylized);
-	void		Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic);
-	void		Set_Roughness(_float fRoughness, _float fStaticRoughness);
 #endif
 #pragma endregion
 
@@ -180,6 +176,7 @@ public:
 #pragma region TIMER_MANAGER
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
+	_double		Get_PlayTime();
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 	HRESULT		Add_Timer(const _wstring& strTimerTag);

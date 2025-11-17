@@ -522,6 +522,10 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
+ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
+{
+	return m_pRenderer->Get_CurrentSceneSRV();
+}
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
@@ -621,6 +625,10 @@ void CGameInstance::Play_Sequence(const _wstring& strSequenceTag)
 _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 {
 	return m_pTimer_Manager->Get_TimeDelta(strTimerTag);
+}
+_double CGameInstance::Get_PlayTime()
+{
+	return m_pTimer_Manager->Get_PlayTime();
 }
 void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate)
 {
