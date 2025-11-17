@@ -4,12 +4,13 @@
 
 
 // ==============================
-// * Global Variables
+// * Global Variabless
 // ==============================
 
 // Basic Variables
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
+Texture2D g_TextureFX;
 float g_AlphaStrength;
 
 

@@ -16,10 +16,11 @@ public:
 
 	enum class UI_ANIM_DISABLE
 	{
-		POS = 1 << 0, 
-		ROT = 1 << 1, 
-		SCA = 1 << 2, 
-		END = 1 << 3
+		POS				= 1 << 0, 
+		ROT				= 1 << 1, 
+		SCA				= 1 << 2, 
+		SCA_BLEND		= 1 << 3,
+		END				= 1 << 4
 	};
 
 	typedef struct tagAnimatorUIDesc

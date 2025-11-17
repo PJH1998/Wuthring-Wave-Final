@@ -142,6 +142,7 @@ namespace Client
 	};
 
 	enum class SHADER_SCREENEFFECT { SONORA_CHANGE};
+
 	enum class TEXT_ALIGN_TYPE {
 		LEFT, 
 		CENTER, 

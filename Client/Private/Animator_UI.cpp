@@ -371,6 +371,10 @@ void CAnimator_UI::Update_Animation_Calculate()
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
 
 	// 만약 비활성화된 요소가 있다면 해당하는 것은 반영X
+
+
+
+
 	if (m_iDisableFlag)
 	{
 		_vector vPos, vRot, vSca;
@@ -394,6 +398,14 @@ void CAnimator_UI::Update_Animation_Calculate()
 		{
 			XMStoreFloat3(&vResultSca, vSca);
 			matSca = XMMatrixScalingFromVector(vSca);
+		}
+		else if (m_iDisableFlag & ENUM_CLASS(UI_ANIM_DISABLE::SCA_BLEND))
+		{
+			// Anim 크기/원본 크기 * 카메라 거리따른 크기 적용된 현재 크기
+			_float3 vScaBlended = { XMVectorGetX(vSca) * vResultSca.x, XMVectorGetY(vSca) * vResultSca.y, XMVectorGetZ(vSca) * vResultSca.z };
+			//XMStoreFloat3(&vResultSca, vSca);
+			vResultSca = vScaBlended;
+			matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vScaBlended));
 		}
 	}
 		

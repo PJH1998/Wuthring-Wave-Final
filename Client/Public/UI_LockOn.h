@@ -31,9 +31,6 @@ public: // 생성/복제
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
-public:
-	HRESULT			Bind_TargetTransform(CTransform* pTargetTransform) {m_pTargetTransform = pTargetTransform;}
-
 private:
 	void			Ready_Presets();
 

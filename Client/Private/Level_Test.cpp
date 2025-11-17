@@ -24,11 +24,12 @@
 #include"Trigger_Box.h"
 #include "UI_Text_Damage.h"
 #include "SceneCamera.h"
+#include "UI_Parry.h"
 
-#define KSTA_UITEST_ONLEVEL
-#ifdef KSTA_UITEST_ONLEVEL
+//#define KSTA_UITEST_OLD
+#ifdef KSTA_UITEST_OLD
 #include "UI_Text.h"
-#endif // KSTA_UITEST_ONLEVEL
+#endif // KSTA_UITEST_OLD
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -469,6 +470,10 @@ void CLevel_Test::Ready_UI()
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
 		CRASH("Failed Ready LockOn");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+		CRASH("Failed Ready Parry");
+
 	// _UI
 }
 
@@ -490,7 +495,7 @@ void CLevel_Test::Ready_Scene()
 
 void CLevel_Test::Testing_UI(_float fTimeDelta)
 {
-#ifdef KSTA_UITEST_ONLEVEL
+#ifdef KSTA_UITEST_OLD
 
 	_uint iDestLevel = ENUM_CLASS(m_eCurLevel);
 	static _bool isInitialized = false;
@@ -606,10 +611,20 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 
+
+
+
+#endif // KSTA_UITEST_OLD
+
+
+
+
+
 	// interact
+#pragma region KSTA_UITEST_INTERACT
 
 	static _uint iInteractIndex = 0;
-	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND};
+	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
 
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
@@ -643,19 +658,39 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
 		cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
+#pragma endregion
 
 
+
+#pragma region KSTA_UITEST_LOCKON
 	CCustom_UI* pRootUI = m_pGameSystem->Find_RootUI(L"UI_LockOn");
 
-	if		(m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-			!pRootUI->IsActivate())
+	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		!pRootUI->IsActivate())
 		m_pGameSystem->Attach_LockOnUI(nullptr);
 	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-			pRootUI->IsActivate())
+		pRootUI->IsActivate())
 		m_pGameSystem->Detach_LockOnUI();
+#pragma endregion
 
 
-#endif // KSTA_UITEST_ONLEVEL
+
+#pragma region KSTA_UITEST_PARRY
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
+	{
+		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
+			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
+
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
+	}
+
+			
+	
+
+
+#pragma endregion
+
+
 
 }
 
@@ -686,11 +721,11 @@ void CLevel_Test::Toggle_HUD()
 	}
 
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
-	{
-		isToggled_BOSSHP = !isToggled_BOSSHP;
-		CGameSystem::GetInstance()->HUD_Toggle_BossStatusUI(isToggled_BOSSHP);
-	}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
+	//{
+	//	isToggled_BOSSHP = !isToggled_BOSSHP;
+	//	CGameSystem::GetInstance()->HUD_Toggle_BossStatusUI(isToggled_BOSSHP);
+	//}
 }
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)

@@ -1,8 +1,13 @@
-﻿#include "ClientPch.h"
+﻿// Single LockOn 
+
+#include "ClientPch.h"
 #include "UI_LockOn.h"
 
 #include "GameSystem.h"
 #include "Animator_UI.h"
+
+#define KSTA_UITEST_LOCKON_TOZERO
+
 
 // 락온UI 생성 자체는 그냥  데미지나 상호작용 만들듯이 만들고 (pooling으로 관리), 
 // 보이는 위치를 항시 전달받아온 포인터의 좌표를 기반으로 (transformCom을 받아오든 등) 셰이더에 계속 갱신 
@@ -82,16 +87,18 @@ void CUI_LockOn::Update(_float fTimeDelta)
 	_matrix matCamProj = m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ);
 
 	const _float2 vScreenSize = { g_iWinSizeX, g_iWinSizeY };
-	_vector vTargetWorldPos = (m_pTargetTransform)? 
-		m_pTargetTransform->Get_State(STATE::POSITION) : 
-		//XMVectorSet(0.f, 0.f, 0.f, 1.f);
-		XMVectorSet(-2000.f, -2000.f, 0.f, 1.f);
+	_vector vTargetWorldPos = (m_pTargetTransform) ?
+		m_pTargetTransform->Get_State(STATE::POSITION) : _vector();
+#ifdef KSTA_UITEST_LOCKON_TOZERO
+	vTargetWorldPos = XMVectorSet(0.f, -10.f, 0.f, 1.f);
+#endif // KSTA_UITEST_LOCKON_TOZERO
+
 
 	_matrix matViewProj = matCamView * matCamProj;
 	_vector vTargetClipRaw = XMVector3Transform(vTargetWorldPos, matViewProj);
 
 	_float fTargetW = XMVectorGetW(vTargetClipRaw);
-	bool isBehindCamera = (fTargetW <= 0.0f);
+	_bool isBehindCamera = (fTargetW <= 0.0f);
 
 	_float2 vScreenPos = {};
 
@@ -103,8 +110,13 @@ void CUI_LockOn::Update(_float fTimeDelta)
 		vScreenPos.y = (1.0f - XMVectorGetY(vTargetNDC)) * 0.5f * vScreenSize.y - vScreenSize.y * 0.5f;
 	}
 	else
-		vScreenPos = { -2000.f, -2000.f }; // 밖으로 쫒아냄
+		vScreenPos = { -2000.f, -2000.f }; // 카메라 뒤면 밖으로 쫒아냄
 
+#ifndef KSTA_UITEST_LOCKON_TOZERO
+	if (!m_pTargetTransform)
+		vScreenPos = { -2000.f, -2000.f }; // 타겟 없으면 밖으로 쫒아냄
+#endif
+	
 	_vector vPos = XMVectorSet(vScreenPos.x, -vScreenPos.y, 0.f, 1.f);
 	static_cast<CTransform*>(pLockOnUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
 

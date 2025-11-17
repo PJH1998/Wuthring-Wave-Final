@@ -271,9 +271,6 @@
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\_Parents\_SubParents\Button">
-      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\Child_Containers\Logo">
       <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
     </Filter>
@@ -312,6 +309,12 @@
     </Filter>
     <Filter Include="03. GameObject\ScreenEffect\AugustaSFX">
       <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Props\Parry">
+      <UniqueIdentifier>{90653342-d458-4ed1-884c-ffa807da4208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Props\Interact">
+      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -731,7 +734,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Button_Interact.h">
-      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+      <Filter>03. GameObject\UI\Props\Interact</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
@@ -817,9 +820,12 @@
     </ClInclude>
     <ClInclude Include="..\public\AugustaSFX.h">
       <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
-          </ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Parry.h">
+      <Filter>03. GameObject\UI\Props\Parry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1210,7 +1216,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Button_Interact.cpp">
-      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+      <Filter>03. GameObject\UI\Props\Interact</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
@@ -1290,9 +1296,12 @@
     </ClCompile>
     <ClCompile Include="..\private\AugustaSFX.cpp">
       <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
-          </ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Parry.cpp">
+      <Filter>03. GameObject\UI\Props\Parry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
