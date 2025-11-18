@@ -846,6 +846,9 @@
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_MobHPBar.h" />
+    <ClInclude Include="..\Public\GalbrenaDarkWing.h">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1335,6 +1338,9 @@
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_MobHPBar.cpp" />
+    <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

@@ -1,21 +1,21 @@
 ﻿#include "ClientPch.h"
-#include "AugustaGriffon.h"
+#include "GalbrenaDarkWing.h"
 #include "AttackVolume.h"
 #include "GameSystem.h"
 #include "PlayerStatus.h"
 #include "Ability.h"
 
-CAugustaGriffon::CAugustaGriffon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CGalbrenaDarkWing::CGalbrenaDarkWing(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CProp{ pDevice, pContext }
 {
 }
 
-CAugustaGriffon::CAugustaGriffon(const CPartObject& Prototype)
+CGalbrenaDarkWing::CGalbrenaDarkWing(const CPartObject& Prototype)
     : CProp(Prototype )
 {
 }
 
-HRESULT CAugustaGriffon::Initialize_Prototype()
+HRESULT CGalbrenaDarkWing::Initialize_Prototype()
 {
     if (FAILED(CProp::Initialize_Prototype()))
         return E_FAIL;
@@ -23,7 +23,7 @@ HRESULT CAugustaGriffon::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
+HRESULT CGalbrenaDarkWing::Initialize_Clone(void* pArg)
 {
     PROP_DESC* pDesc = static_cast<PROP_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
@@ -31,126 +31,150 @@ HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	m_isActivate = false;
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
+
     return S_OK;
 }
 
-void CAugustaGriffon::Priority_Update(_float fTimeDelta)
+void CGalbrenaDarkWing::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
-	// MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
-	for (auto& pAttackVolume : m_AttackVolumes)
+	// 1. Attack Volume 갱신
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+
+	// 2. Dissolve 체크.
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (IsDissolve)
 	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Priority_Update(fTimeDelta);
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Prop_Reset();
+		}
+			
 	}
 }
 
-
-void CAugustaGriffon::Update(_float fTimeDelta)
+void CGalbrenaDarkWing::Update(_float fTimeDelta)
 {
     CProp::Update(fTimeDelta);
 
+    // 1. Combine 행렬 계산
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
 
-	// MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Update(fTimeDelta);
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Update(fTimeDelta);
-	}
+	// 2. 어택 볼륨 업데이트
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
+    
 }
 
-void CAugustaGriffon::Late_Update(_float fTimeDelta)
+void CGalbrenaDarkWing::Late_Update(_float fTimeDelta)
 {
+
     CProp::Late_Update(fTimeDelta);
 
-	// MainAttackVolume 설정
-	/*if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);*/
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Late_Update(fTimeDelta);
-	}
-    //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
+	// Attack Volume 갱신.
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
-    /*if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
-        return;*/
+
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }
 
-void CAugustaGriffon::Render()
+void CGalbrenaDarkWing::Render()
 {
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
 
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
 
+	}
+
+	// 2. Render
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-            CRASH("Ready Diffuse Texture Failed");
+		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+		//	continue;
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			continue;
 
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
-		/*_bool HasNormal = { false };
+		_bool HasNormal = { false };
 
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
 
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");*/
+			CRASH("Ready g_HasNormal Failed");
 
+		// 3. Mask Texture
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
+		
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
-        //    CRASH("Ready Shader Begin Failed");
-        if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::NORMAL_TEX))))
+        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
     }
-
 #ifdef _DEBUG
-    //m_pRigidbodyCom->Render();
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
-void CAugustaGriffon::Activate(_bool IsActivate)
+void CGalbrenaDarkWing::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActivate);
-	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+	//CProp::Activate(IsActivate);
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // Animation 클리어.
+
 
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	effecInfo.pModelPtr = m_pModelCom;
 
+	if (true == IsActivate)
+	{
+		Prop_Reset();
+		m_isActivate = IsActivate;
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	}
+
 	if (false == IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		Bind_DissolveTimer();
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
+		
 	}
-  
 }
 
-void CAugustaGriffon::Change_Volume(_uint iVolumeIdx)
+void CGalbrenaDarkWing::Change_Volume(_uint iVolumeIdx)
 {
 	if ((m_AttackVolumes[iVolumeIdx] == nullptr) || (m_pMainAttackVolume == nullptr))
 		return;
@@ -159,28 +183,33 @@ void CAugustaGriffon::Change_Volume(_uint iVolumeIdx)
 	m_pMainAttackVolume->TriggerActivate(false);
 	m_iVolumeIdx = iVolumeIdx;
 	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-	
 }
 
-void CAugustaGriffon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
+void CGalbrenaDarkWing::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
 {
 	if (m_AttackVolumes[iVolumeIdx] != nullptr)
 		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
 }
 
-void CAugustaGriffon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+void CGalbrenaDarkWing::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-	// 2. 타격감을 위한. Shake
-	CAMERA_SHAKE ShakeDesc{};
-	ShakeDesc.fDuration = 0.12f;
-	ShakeDesc.fFrequency = 12.f;
-	ShakeDesc.fAmplitude = 1.f;
-	ShakeDesc.fFovKick = XMConvertToRadians(0.5f);
-	ShakeDesc.vRotation = _float3(0.0f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
-	m_pGameInstance->OnShake(ShakeDesc);
+	// 1. 게이지 올리기?
+	CAbility* pAbility = CGameSystem::GetInstance()
+		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::GALBRENA));
+
+	if (nullptr == pAbility)
+		return;
+
+	switch (m_iVolumeIdx)
+	{
+	case VOLUME::VOLUME_ATTACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
+		pAbility->Add_HarmonyGauge(4.f); // 공명 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST1, 3.f); // 궁 ULTI
+		break;
+	}
 }
 
-void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)
+void CGalbrenaDarkWing::Ready_Components(const PROP_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -194,27 +223,28 @@ void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
-
 }
 
-void CAugustaGriffon::Ready_Variables(const PROP_DESC* pDesc)
+void CGalbrenaDarkWing::Ready_Variables(const PROP_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::NORMAL_TEX);
+    for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
-void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)
+void CGalbrenaDarkWing::Ready_Positions(const PROP_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 }
 
-void CAugustaGriffon::Ready_AttackVolumes()
+void CGalbrenaDarkWing::Ready_AttackVolumes()
 {
 	// size 설정
 	m_AttackVolumes.resize(VOLUME_END);
@@ -224,28 +254,28 @@ void CAugustaGriffon::Ready_AttackVolumes()
 	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f); // x, z 평면 크게 , y축 작게 나오는 범위 찾기.
-	TriggerDesc.vOffsetPos = _float3(0.5f, -1.5f, 0.f); // 조금 앞으로?
+	TriggerDesc.vExtent = _float3(1.2f, 1.2f, 0.5f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 300.f;
-	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
-	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
+	TriggerDesc.fAttackDmg = 150.f;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::DARK;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
-	// Attack용 만들기.
-	m_AttackVolumes[VOLUME_STRIKE] = dynamic_cast<CAttackVolume*>(
+	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	ASSERT_CRASH(m_AttackVolumes[VOLUME_STRIKE])
-	m_pMainAttackVolume = m_AttackVolumes[VOLUME_STRIKE];
-	m_pMainAttackVolume->TriggerActivate(false);
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ATTACK])
+	m_AttackVolumes[VOLUME_ATTACK]->TriggerActivate(false);
+
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ATTACK]; // 기본.
 }
 
-void CAugustaGriffon::Bind_Resources()
+void CGalbrenaDarkWing::Bind_Resources()
 {
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
         CRASH("Failed Bind Matrix");
@@ -255,31 +285,34 @@ void CAugustaGriffon::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
+
+	
+		
 }
 
-CAugustaGriffon* CAugustaGriffon::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CGalbrenaDarkWing* CGalbrenaDarkWing::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CAugustaGriffon* pInstance = new CAugustaGriffon(pDevice, pContext);
+    CGalbrenaDarkWing* pInstance = new CGalbrenaDarkWing(pDevice, pContext);
     if (FAILED(pInstance->Initialize_Prototype()))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Create Failed CAugustaGriffon");
+        MSG_BOX("Create Failed CGalbrenaDarkWing");
     }
     return pInstance;
 }
 
-CGameObject* CAugustaGriffon::Clone(void* pArg)
+CGameObject* CGalbrenaDarkWing::Clone(void* pArg)
 {
-    CAugustaGriffon* pInstance = new CAugustaGriffon(*this);
+    CGalbrenaDarkWing* pInstance = new CGalbrenaDarkWing(*this);
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Clone Failed CAugustaGriffon");
+        MSG_BOX("Clone Failed CGalbrenaDarkWing");
     }
     return pInstance;
 }
 
-void CAugustaGriffon::Free()
+void CGalbrenaDarkWing::Free()
 {
     CProp::Free();
 }

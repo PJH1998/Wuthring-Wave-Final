@@ -215,6 +215,7 @@
     <ClInclude Include="..\Public\GalbrenaAirFall.h" />
     <ClInclude Include="..\Public\GalbrenaAirFly.h" />
     <ClInclude Include="..\Public\GalbrenaAirJump.h" />
+    <ClInclude Include="..\Public\GalbrenaDarkWing.h" />
     <ClInclude Include="..\public\GalbrenaFactory.h" />
     <ClInclude Include="..\Public\GalbrenaGroundAttack.h" />
     <ClInclude Include="..\Public\GalbrenaGroundBurst.h" />
@@ -415,6 +416,7 @@
     <ClCompile Include="..\Private\GalbrenaAirFall.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirFly.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />
+    <ClCompile Include="..\Private\GalbrenaDarkWing.cpp" />
     <ClCompile Include="..\Private\GalbrenaFactory.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundBurst.cpp" />

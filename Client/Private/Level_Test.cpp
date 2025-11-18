@@ -113,8 +113,7 @@ void CLevel_Test::Update(_float fTimeDelta)
 
 	Testing_UI(fTimeDelta);
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-		m_pGameInstance->Play_Sequence(TEXT("Test"));
+	
 }
 
 void CLevel_Test::Render()

@@ -61,6 +61,7 @@
 // Galbrena
 #include "Galbrena.h"
 #include "GalbrenaShotGun.h"
+#include "GalbrenaDarkWing.h"
 
 // Player
 #include "Player.h"
@@ -423,8 +424,16 @@ HRESULT CLoader_GamePlay::Load_Galbrena()
 	strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Weapon/ShotGun/ShotGun.dat";
 	fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
 	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// DarkWing
+	wStrModelTag = L"Prototype_Component_Model_Galbrena_DarkWing";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Weapon/DarkWing/DarkWing.dat";
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
@@ -436,11 +445,18 @@ HRESULT CLoader_GamePlay::Load_Galbrena()
 		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
-	// 3. 객체 초기화.
+
 	wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_SecondGun");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wstrObjectTag
 		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+	wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_DarkWing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CGalbrenaDarkWing::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 #pragma endregion

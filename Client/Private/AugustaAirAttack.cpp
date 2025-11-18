@@ -62,7 +62,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			{
 				m_iSubPartType = CAugusta::PARTTYPE::PART_GRIFFON;
 				m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Root");
-				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+				//m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
