@@ -61,6 +61,9 @@ public:
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
+	// UI 꺼내쓰기용. 혹 수정 필요시 말해주세요.
+
+	// 기존 GameInstance 에서는 번거롭게 캐스팅 필요하던 걸, 편하게 가져오도록 캐스팅 내장시켜서 재정의.
 	class CCustom_UI*	Find_RootUI(_wstring strName);
 	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
 	
@@ -72,28 +75,28 @@ public:
 
 	// 보스 체력바에 필요한 정보를 할당합니다.
 	void		HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
-	// 보스 체력바를 토글합니다.
+	// 보스 체력바를 토글합니다. 정보 할당 없이 On 시도 시 Crash.
 	void		HUD_Toggle_BossStatusUI(_bool isOn);
 
-	// 상호작용 UI를 토글합니다. 인자는 On 시 들어갈 글자.
-	//void		Toggle_InteractUI(_bool isOn, _wstring strText = L"");
 	// 상호작용 UI를 켭니다. / strText : 출력될 글자.
 	void		Show_InteractUI(_wstring strText);
-	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 때처럼 사라질 것인지 여부
+	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 때처럼, 피드백 애니메이션 재생 후 사라질 것인지 여부
+	// (해당 함수 호출 없이 마우스 클릭으로도 끌 수 있습니다,)
 	void		Hide_InteractUI(_bool isPressedAs = false);
-	// 상호작용 UI가 마우스를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
+	// 상호작용 UI가 "마우스"를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
-	// 락온 UI를 생성합니다. / pTargetTransform : 락온 대상의 Transform 컴포넌트.
+
+	// 락온 UI를 생성합니다. / pTargetPos : 락온 대상의 위치 포인터.
 	void		Attach_LockOnUI(_float3* pTargetPos);
 	// 락온 UI를 해제합니다.
 	void		Detach_LockOnUI();
 
-	// 패리 UI를 생성합니다. (생성 후 0.35초를 원이 겹치는 시점으로 잡았음.)
+	// 패리 UI를 생성합니다. / pTargetPos : 락온 대상의 위치 포인터.
+	// (일단은 생성 후 약 0.35초 = 21프레임 를 원이 겹치는 시점으로 잡았습니다.)
 	void		Attach_Parry(_float3* pTargetPos);
 	// 패리 UI가 살아있는 도중, 패리에 성공했음을 보냅니다. (원 즉시제거, 이펙트 이미지 출력)
 	void		Enable_Parried();
-	
 #pragma endregion
 
 #pragma region PLAYER STATUS

@@ -304,7 +304,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		// 스킬 ui 인스턴스 갯수는 캐릭터마다 다름. 이에 따라 인스턴스 갯수만큼 리사이징 및 할당 
 		vector<_float4x4> vecVariantMat = {/* _float4x4() , _float4x4() */};	
 
-		_uint iTargetNumInstance = targetUI->Get_UIDesc().vecInstanceDescs.size();
+		_uint iTargetNumInstance = static_cast<_uint>(targetUI->Get_UIDesc().vecInstanceDescs.size());
 		vecVariantMat.resize(iTargetNumInstance);
 
         vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
@@ -736,7 +736,7 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
     
     if (uiInstDescs.size() > vecLifeTimeElapsed.size())
     {
-        _uint iAddLoopTime = uiInstDescs.size() - vecLifeTimeElapsed.size();
+		_uint iAddLoopTime = static_cast<_uint>(uiInstDescs.size() - vecLifeTimeElapsed.size());
         for (_uint i = 0; i < iAddLoopTime; i++)
             vecLifeTimeElapsed.push_back(0.f);
     }
@@ -2022,6 +2022,7 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 	// R Button Ctrl..
 	switch (eState_Galbrena_R)
 	{
+	case Client::UI_GALBRENA_STATE::DEFAULT:
 	default:
 		galbrenaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_R"][0];
 		galbrenaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_R"][1];

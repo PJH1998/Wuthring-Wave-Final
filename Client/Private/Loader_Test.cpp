@@ -58,6 +58,7 @@
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
+#include "UI_MobHPBar.h"
 #pragma endregion
 
 
@@ -662,6 +663,9 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Parry));
 
+	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHP.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -752,6 +756,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
 		CUI_Parry::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
+		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
 
 	// ==============================
 	cout << "[Loader_Test][UI Custom] Prototype" << endl;

@@ -52,8 +52,6 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if (m_tUIDesc.isInstance)
-        dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
 #ifdef _DEBUG
 	if (m_tUIDesc.strUIName == L"SectorA_LockOn")
@@ -100,6 +98,13 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
 
+	if (m_tUIDesc.strUIName == L"InstHPBar")
+		int i = 10;
+
+
+	if (m_tUIDesc.isInstance)
+		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
+
     for (auto& child : m_vecChildObjects)
         child->Late_Update(fTimeDelta);
 }
@@ -114,8 +119,20 @@ void CCustom_UI::Render()
 
 
 
-	if (m_tUIDesc.strUIName == L"SectorA_Parry")
-		int i = 10;
+	if (m_tUIDesc.strUIName == L"InstHPBar")
+	{
+		_float4x4 matDist = {};
+
+		*reinterpret_cast<_float4*>(&matDist._11) = m_tUIDesc.vecInstanceDescs[0].vSInstRight;
+		*reinterpret_cast<_float4*>(&matDist._21) = m_tUIDesc.vecInstanceDescs[0].vSInstUp;
+		*reinterpret_cast<_float4*>(&matDist._31) = m_tUIDesc.vecInstanceDescs[0].vSInstLook;
+		*reinterpret_cast<_float4*>(&matDist._41) = m_tUIDesc.vecInstanceDescs[0].vSInstTrans;
+
+
+		OutPutDebugMatrix(L"InstHPBar", matDist);
+
+
+	}
 
 
 

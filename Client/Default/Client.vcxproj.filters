@@ -845,12 +845,14 @@
     <ClInclude Include="..\public\DummyNPC.h">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\UI_MobHPBar.h" />
     <ClInclude Include="..\Public\GalbrenaDarkWing.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_MobHPBar.h">
+      <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1340,12 +1342,14 @@
     <ClCompile Include="..\private\DummyNPC.cpp">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\UI_MobHPBar.cpp" />
     <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_MobHPBar.cpp">
+      <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

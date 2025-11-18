@@ -10,6 +10,20 @@ public:
 
 	} UI_MOBHP_DESC;
 
+	typedef struct tUIMobsInfoDesc
+	{
+		_uint iMobLvl = 10;
+		//_wstring strMobName = L"Test Mob";
+		
+		_float fMobCurHP = 500.f;
+		_float fMobMaxHP = 500.f;
+
+		_float fMobCurSA = 300.f;
+		_float fMobMaxSA = 300.f;
+
+		_float3 vMobPos = { 0.f, -10.f, 0.f };
+	} UI_MOBINFO_DESC;
+
 public:
 	explicit CUI_MobHPBar(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CUI_MobHPBar(const CUI_MobHPBar& Prototype);
@@ -27,11 +41,13 @@ public:
 
 private:
 	void			Ready_Presets();
-	void			Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos);
-	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
+	void			Update_Instances();
+
+	void			Calc_ApplyTargetPos(CCustom_UI* pTargetUI);
+	void			Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
 
 private:
-
+	vector<UI_MOBINFO_DESC>		m_vecMobInfo = {};
 
 public:
 	static CUI_MobHPBar*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

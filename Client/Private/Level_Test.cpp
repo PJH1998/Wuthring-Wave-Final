@@ -25,6 +25,7 @@
 #include "UI_Text_Damage.h"
 #include "SceneCamera.h"
 #include "UI_Parry.h"
+#include "UI_MobHPBar.h"
 
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
@@ -473,6 +474,10 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
 		CRASH("Failed Ready Parry");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_MobHPBar"),
+		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
+		CRASH("Failed Ready MobHPBar");
+
 	// _UI
 }
 
@@ -682,9 +687,15 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
 	}
+#pragma endregion
 
-			
-	
+
+#pragma region KSTA_UITEST_MOBHPBAR
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+	}
+
 
 
 #pragma endregion
