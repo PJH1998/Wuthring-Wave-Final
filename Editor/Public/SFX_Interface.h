@@ -21,7 +21,7 @@ public:
 
 
 private:
-	CEdit_ScreenEffect*		m_pCurrentSFX = { nullptr };
+	vector<CEdit_ScreenEffect*>		m_pCurrentSFXs;
 
 public:
 	static CSFX_Interface*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

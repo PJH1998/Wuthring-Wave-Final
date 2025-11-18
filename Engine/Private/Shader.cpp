@@ -143,7 +143,6 @@ HRESULT CShader::Bind_Value(const _char* pConstantName, const void* pValue, _uin
     if (nullptr == pVariable)
         return E_FAIL;
     return pVariable->SetRawValue(pValue, 0, iLength);
-
 }
 
 #ifdef _DEBUG

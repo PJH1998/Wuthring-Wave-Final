@@ -32,11 +32,14 @@ HRESULT CLevel_SFX::Initialize()
 
 void CLevel_SFX::Update(_float fTimeDelta)
 {
+	m_pSFX_Interface->Priority_Update(fTimeDelta);
+	m_pSFX_Interface->Update(fTimeDelta);
 	m_pSFX_Interface->Late_Update(fTimeDelta);
 }
 
 void CLevel_SFX::Render()
 {
+	m_pSFX_Interface->Render();
 }
 
 HRESULT CLevel_SFX::Ready_Light()

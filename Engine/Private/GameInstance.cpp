@@ -520,9 +520,13 @@ ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
 	return m_pRenderer->Get_CurrentSceneSRV();
 }
-void CGameInstance::Set_LUT_Index(_uint iIndex)
+void CGameInstance::Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut)
 {
-	m_pRenderer->Set_LUT_Index(iIndex);
+	m_pRenderer->Get_Current_LutSetting(pOutIndex, pOutIntensity, pOutIsDnyamicLut);
+}
+void CGameInstance::Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut)
+{
+	m_pRenderer->Setting_LUT(iIndex, fLutLerpIntensity, IsDynamicLut);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)

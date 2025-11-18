@@ -65,7 +65,7 @@ HRESULT CVolumetricFog::SetUp_FogNF()
 {
 	_float fFar = m_pGameInstance->Get_CurrentCamera_Far();
 
-	m_vFogRange.x = 1.f; // m_pGameInstance->Get_CurrentCamera_Near(); //fFar * 0.3f; //
+	m_vFogRange.x = 0.1f; // m_pGameInstance->Get_CurrentCamera_Near(); //fFar * 0.3f; //
 	m_vFogRange.y = 2000.f;
 
 	m_VF_Data.fNear = m_vFogRange.x;

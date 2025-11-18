@@ -115,7 +115,7 @@ float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
     
     fRimPower = 1.f - abs(dot(vNormal, vLook));
     
-    fRimPower *= smoothstep(0.5f, 1.f, NdotL);
+    fRimPower *= saturate(NdotL);
     
     fRimPower = max(0.2f, fRimPower);
     
