@@ -105,7 +105,7 @@ struct PS_OUT
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-
+ 
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
     
@@ -145,17 +145,45 @@ PS_OUT PS_DEFAULT_WEAPON(PS_IN In) // Dissolve 추가.
 
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-    float3 vNormal = NormalDesc.xyz;
+    float4 vNormal = 0.f;
     
-    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
     
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+    //Test
+    Out.vPBR.a = 1.f;
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    Out.vPBR.y = 0.2f;
-    Out.vPBR.z = 1.f;
+    Out.vDepth.z = 1.f;
     
     return Out;
 }
@@ -166,32 +194,54 @@ PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
 
     // 1. 디졸브 텍스처(g_MaskTexture[0])에서 마스크 값을 샘플링.
     float fDissolveMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
-
-    // 2. 마스크 값이 g_fDissolveRate보다 작으면 픽셀을 그리지 않고 버립니다.
-    //if (fDissolveMask < g_fDissolveRate)
-    //{
-    //    discard;
-    //}
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     clip(fDissolveMask.r - g_fDissolveRate);
     
-    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-    float3 vNormal = NormalDesc.xyz;
+    float4 vNormal = 0.f;
     
-    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
     
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+    //Test
+    Out.vPBR.a = 1.f;
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    Out.vPBR.y = 0.2f;
-    Out.vPBR.z = 1.f;
-    
-    
+    Out.vDepth.z = 1.f;
     
     return Out;
 }
+
 
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
@@ -415,5 +465,6 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_DISSOLVE_WEAPON();
     }
+
 
 }

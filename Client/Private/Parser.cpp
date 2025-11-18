@@ -17,6 +17,7 @@
 #include<unordered_set>
 
 #include "Sequence.h"
+#include "Effect_Radial.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -457,18 +458,18 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 					switch (pDesc.eObjectType)
 					{
 					case OBJECTTYPE::SONORA:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA_FLOOR:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					default:
@@ -594,9 +595,31 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 	
 			if (extension == ".json")
 			{
-				_string strRectTag = entry.path().stem().string();
+				_string strDecalTag = entry.path().stem().string();
 	
-				Load_FXDecal_FromJson(filePath, strRectTag, eLevel);
+				Load_FXDecal_FromJson(filePath, strDecalTag, eLevel);
+			}
+		}
+	}
+
+	strEffectPath = strDefaultPath;
+	strEffectPath += "/FXRadial/";
+	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strRadialTag = entry.path().stem().string();
+
+				Load_FXRadial_FromJson(filePath, strRadialTag, eLevel);
 			}
 		}
 	}
@@ -1230,12 +1253,21 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 
 	_wstring DecalDataTag = {};
 	_int iTextureCount = {};
+	_float3 EmissiveLuminance = {};
 
 	if (DecalDataJson.contains("DecalTag"))
 		DecalDataTag = StringToWString(DecalDataJson["DecalTag"].get<_string>());
 
 	if (DecalDataJson.contains("TextureCount"))
 		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
+
+	if (DecalDataJson.contains("EmissiveLuminance") && DecalDataJson["EmissiveLuminance"].is_array())
+	{
+		json Emissive = DecalDataJson["EmissiveLuminance"];
+		EmissiveLuminance.x = Emissive[0].get<_float>();
+		EmissiveLuminance.y = Emissive[1].get<_float>();
+		EmissiveLuminance.z = Emissive[2].get<_float>();
+	}
 
 	const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 
@@ -1262,7 +1294,61 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 		}
 	}
 
-	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath);
+	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath, EmissiveLuminance);
+}
+
+void CParser::Load_FXRadial_FromJson(const _string& strFilePath, const _string& RadialTag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_GameObject_FXRadial_";
+	strProtoTag += RadialTag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json RadialJson;
+	JsonStream >> RadialJson;
+	JsonStream.close();
+
+	CEffect_Radial::RADIAL_DESC Desc = {};
+
+	if (RadialJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(RadialJson["MyTag"].get<_string>());
+
+	if (RadialJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(RadialJson["MyType"].get<double>());
+
+	if (RadialJson.contains("LifeTime"))
+		Desc.fLifeTime = RadialJson["LifeTime"].get<_float>();
+
+	if (RadialJson.contains("IntensityRange"))
+		Desc.IntensityRange = RadialJson["IntensityRange"].get<_float>();
+
+	if (RadialJson.contains("Center") && RadialJson["Center"].is_array())
+	{
+		json CenterJson = RadialJson["Center"];
+		Desc.Center.x = CenterJson[0].get<_float>();
+		Desc.Center.y = CenterJson[1].get<_float>();
+	}
+
+	if (RadialJson.contains("DistanceRange") && RadialJson["DistanceRange"].is_array())
+	{
+		json DistanceRangeJson = RadialJson["DistanceRange"];
+		Desc.DistanceRange.x = DistanceRangeJson[0].get<_float>();
+		Desc.DistanceRange.y = DistanceRangeJson[1].get<_float>();
+	}
+
+	Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CEffect_Radial::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("Effect_Rect Load Fail");
+		return;
+	}
 }
 
 void CParser::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)

@@ -5,6 +5,7 @@
 #include "SpringCamera.h"
 #include "Wing.h"
 #include "GalbrenaShotGun.h"
+#include "GalbrenaDarkWing.h"
 #include "Collider.h"
 #include "AttackVolume.h"
 #include "GameSystem.h"
@@ -52,6 +53,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	//PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);
+	PartActivate(PART_DARKWING, false);
 	PartActivate(PART_LION, false);
 	PartActivate(PART_WING, false);
 	
@@ -64,6 +66,9 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	m_pQTEColliderCom->Set_Position(vPos);
 
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
+	m_fCameraOriginOffset = 1.2f;
+	m_fCameraOffset = 1.2f;
     return S_OK;
 }
 
@@ -71,7 +76,6 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -85,21 +89,11 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-	// 3. 몬스터가 있다면?
-	const _float4x4* pTargetMatrix = nullptr;
-	if (nullptr != m_pTargetTransform)
-	{
-		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
-		vDistance = XMVectorSetY(vDistance, 0.f);
-		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
-	
-		if (nullptr != m_pLockOnTargetTransform)
-			pTargetMatrix = m_pLockOnTargetTransform->Get_WorldMatrixPtr();
-		else
-			pTargetMatrix = m_pTargetTransform->Get_WorldMatrixPtr();
-	}
-	// 4. 매프레임 계속 전달.
-	m_AttackVolumes[VOLUME_TARGET]->Bind_SocketMatrix(pTargetMatrix);
+	// 3. 몬스터와 타겟간의 거리 계산하기.
+	Update_TargetDistance();
+
+	// 4. AttackVolume 바인딩.
+	Bind_TargetToVolumes();
 
 	// 5. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -125,14 +119,16 @@ void CGalbrena::Update(_float fTimeDelta)
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
+
+	_bool IsSelect = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
 	if (!m_IsQTE)
 	{
 		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
 		// 6. Camera 갱신 => 위치 따라오게
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
 	}
 	else
 	{
@@ -215,8 +211,11 @@ void CGalbrena::Render()
 	else
 		m_pQTEColliderCom->Render();
 
-	if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();
+	/*if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();*/
+
+	m_pMainAttackVolume->Render();
+
 #endif // _DEBUG
 
 }
@@ -277,6 +276,15 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
+			break;
+		}
+
 	}
 
 	// 상태 변수 초기화
@@ -299,6 +307,9 @@ void CGalbrena::Play_PartAnimation(_uint iPartType, const _string& strAnimName, 
 		break;
 	case PART_LION:
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
 	case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
 		break;
@@ -320,6 +331,9 @@ void CGalbrena::PartActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_LION:
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Activate(IsActive);
+		break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
 		break;
@@ -338,6 +352,9 @@ void CGalbrena::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	case PART_SECONDGUN:
 		m_pGalbrenaSecondShotGun->Change_Volume(iVolumeIdx);
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Change_Volume(iVolumeIdx);
+		break;
 	case PART_LION:
 		break;
 	}
@@ -352,6 +369,9 @@ void CGalbrena::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_SECONDGUN:
 		m_pGalbrenaSecondShotGun->Volume_Activate(IsActive);
+		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Volume_Activate(IsActive);
 		break;
 	case PART_LION:
 		break;
@@ -369,6 +389,9 @@ void CGalbrena::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 		m_pGalbrenaSecondShotGun->Clear_Animation(strAnimName);
 		break;
 	case PART_LION:
+		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Clear_Animation(strAnimName);
 		break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
@@ -393,6 +416,8 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 		break;
 	case PART_SECONDGUN:
 		break;
+	case PART_DARKWING:
+		break;
 	case PART_LION:
 		break;
 	case PART_WING:
@@ -404,7 +429,7 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 // Hit 판정.
 void CGalbrena::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit)
+	if (nullptr == pArg || m_IsHit || m_IsQTE)
 		return;
 
 	_uint iFlag = {};
@@ -475,16 +500,22 @@ void CGalbrena::Bind_QTE(_bool IsQTE)
 	}
 }
 
+void CGalbrena::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CGalbrena::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
+}
+
 
 
 #pragma region NOTIFY
 void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-  /*  if (wStrColliderTag == TEXT("Body"))
-    {
-		m_pColliderCom->IsActivate(IsActive);
-    }*/
-
 	_wstring var1, var2, var3;
 	wstringstream wss(wStrColliderTag);
 	getline(wss, var1, L'|');
@@ -501,10 +532,14 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			m_iVolumeIdx = VOLUME::VOLUME_ARROUND; // 주변 공격.
 		else if (var2 == TEXT("ARROUND_SLASH"))
 			m_iVolumeIdx = VOLUME::VOLUME_ARROUND_SLASH;
+		else if (var2 == TEXT("AIR_LOOP"))
+			m_iVolumeIdx = VOLUME::VOLUME_AIR_LOOP;
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
 		else if (var2 == TEXT("TARGET"))
 			m_iVolumeIdx = VOLUME::VOLUME_TARGET;
+		else if (var2 == TEXT("TARGET_BURST"))
+			m_iVolumeIdx = VOLUME::VOLUME_TARGET_BURST;
 			
 		else if (var2 == TEXT("SKILL"))
 			m_iVolumeIdx = VOLUME::VOLUME_SKILL;
@@ -599,6 +634,19 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 			}
 		}
 	}
+	else if (var1 == TEXT("DarkWing"))
+	{
+		// 2. Action Tag
+		if (var2 == TEXT("Dissolve"))
+		{
+			// 3. Dissolve On / Off
+			if (var3 == TEXT("On"))
+			{
+				m_pGalbrenaDarkWing->Activate(false);
+				return;
+			}
+		}
+	}
 
 	// GalbrenaWing|Bone
 
@@ -612,16 +660,35 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 	if (nullptr == pAbility)
 		return;
 
-	// 2. 맞았을때만.. State가 변하니까 Condition을 바꿔주어야함.
+	// 2. Burst 상태인지 확인.
+	_bool IsBurst = Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	
 	switch (m_iVolumeIdx)
 	{
 	case VOLUME::VOLUME_DEFAULT_E:
+		// 기본 E로 타격 시 State가 변하니까 Condition을 바꿔주어야함.
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
-		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
+		pAbility->Add_HarmonyGauge(7.f); // 협주 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST5, 10.f); // 기본 궁극기 게이지
+
+		if(!IsBurst)
+			pAbility->Add_Cost(COST_TYPE::COST1, 10.f); // 공명 게이지
 		break;
-	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
-		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
-		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
+	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 협주 게이지와 공명 게이지 채우기
+		pAbility->Add_HarmonyGauge(7.f); // 협주 게이지 채우기.
+		if (!IsBurst)
+			pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 공명 게이지
+		pAbility->Add_Cost(COST_TYPE::COST5, 7.f); // 기본 궁극기 게이지
+		break;
+	case VOLUME::VOLUME_TARGET_BURST: // 궁극기 사용 시 ?
+		pAbility->Add_HarmonyGauge(5.f); // 협주 게이지 채우기.
+		if (!IsBurst)
+			pAbility->Add_Cost(COST_TYPE::COST1, 30.f); // 공명 게이지(강공격 게이지)
+		break;
+	default:
+		pAbility->Add_Cost(COST_TYPE::COST5, 4.f); // 기본 궁극기 게이지
+		if (!IsBurst)
+			pAbility->Add_Cost(COST_TYPE::COST1, 3.f); // 공명 게이지(강공격 게이지)
 		break;
 	}
 }
@@ -689,6 +756,41 @@ void CGalbrena::Bind_ChangeEffect()
 #pragma endregion
 
 
+// 매 프레임 볼륨 타겟 매트릭스 전달.
+void CGalbrena::Bind_TargetToVolumes()
+{
+	// 전달할 TargetMatrix
+	const _float4x4* pTargetMatrix = nullptr;
+
+	// LockOn Target 우선.
+	if (nullptr != m_pLockOnTargetTransform)
+		pTargetMatrix = m_pLockOnTargetTransform->Get_WorldMatrixPtr();
+	else if (nullptr != m_pTargetTransform)
+		pTargetMatrix = m_pTargetTransform->Get_WorldMatrixPtr();
+
+	// 매프레임 계속 전달.
+	m_AttackVolumes[VOLUME_TARGET]->Bind_SocketMatrix(pTargetMatrix);
+	m_AttackVolumes[VOLUME_TARGET_BURST]->Bind_SocketMatrix(pTargetMatrix);
+}
+
+void CGalbrena::Update_TargetDistance()
+{
+	const _float4x4* pTargetMatrix = nullptr;
+
+	_vector vTargetPos = {};
+
+	// LockOn Target 우선
+	if (nullptr != m_pLockOnTargetTransform)
+		vTargetPos = m_pLockOnTargetTransform->Get_State(STATE::POSITION);
+	// 없으면 Target Transform.
+	else if (nullptr != m_pTargetTransform) 
+		vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION);
+
+	// 거리 계산. Y제외.
+	_vector vDistance = m_pTransformCom->Get_State(STATE::POSITION) - vTargetPos;
+	vDistance = XMVectorSetY(vDistance, 0.f);
+	m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+}
 
 void CGalbrena::Bind_Resources()
 {
@@ -808,6 +910,23 @@ void CGalbrena::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 
 		case PARTTYPE::PART_LION:
 			break;
+		case PARTTYPE::PART_DARKWING:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetGalbrenaDarkWingCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("PART_DARKWING");
+
+			m_pGalbrenaDarkWing = dynamic_cast<CGalbrenaDarkWing*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pGalbrenaDarkWing);
+			Safe_AddRef(m_pGalbrenaDarkWing);
+			break;
 
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
@@ -836,19 +955,20 @@ void CGalbrena::Ready_AttackVolumes()
 
 	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
-	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001");
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::KNOCKBACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 250.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::FUSI;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
-		};
+	};
 
 	m_AttackVolumes[VOLUME_ARROUND] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
@@ -857,12 +977,25 @@ void CGalbrena::Ready_AttackVolumes()
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND]);
 	m_AttackVolumes[VOLUME_ARROUND]->TriggerActivate(false);
 
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
 	m_AttackVolumes[VOLUME_ARROUND_SLASH] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_ARROUND_SLASH]);
 	m_AttackVolumes[VOLUME_ARROUND_SLASH]->TriggerActivate(false);
+
+	_wstring strEffectTag = TEXT("GALBRENA_SLASH_EFFECT"); // 임시.
+	m_AttackVolumes[VOLUME_ARROUND_SLASH]->Cange_EffectTag(strEffectTag);
+
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 6.f); // (x, z, y)
+	m_AttackVolumes[VOLUME_AIR_LOOP] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_AIR_LOOP]);
+	m_AttackVolumes[VOLUME_AIR_LOOP]->TriggerActivate(false);
 
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001_R_Knee_B");
@@ -908,6 +1041,18 @@ void CGalbrena::Ready_AttackVolumes()
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_TARGET]);
 	m_AttackVolumes[VOLUME_TARGET]->TriggerActivate(false);
 
+
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비.
+	TriggerDesc.vExtent = _float3(8.f, 8.f, 5.f); // 궁극기 => 타겟 주위 강력한 범위형 장판 데미지
+	TriggerDesc.fAttackDmg = 1570.f;
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root"); // 기본은 Root?
+	m_AttackVolumes[VOLUME_TARGET_BURST] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_TARGET_BURST]);
+	m_AttackVolumes[VOLUME_TARGET_BURST]->TriggerActivate(false);
+
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ARROUND];
 	m_pMainAttackVolume->TriggerActivate(false);
 }
@@ -950,4 +1095,5 @@ void CGalbrena::Free()
 	Safe_Release(m_pWing);
 	Safe_Release(m_pGalbrenaFirstShotGun);
 	Safe_Release(m_pGalbrenaSecondShotGun);
+	Safe_Release(m_pGalbrenaDarkWing);
 }

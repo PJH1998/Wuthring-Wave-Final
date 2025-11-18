@@ -205,6 +205,12 @@
     <Filter Include="03. GameObject\SFX\Augusta">
       <UniqueIdentifier>{a57d6569-499a-4271-92bc-c4aa3f903e44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Radial_Controller">
+      <UniqueIdentifier>{ad4a7415-e98d-4f47-996d-36267f17b585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Radial_Controller\Radial">
+      <UniqueIdentifier>{606c33d5-720d-4502-82fe-1a443a9678bc}</UniqueIdentifier>
+    </Filter>  
     <Filter Include="03. GameObject\SFX\Augusta\Slash">
       <UniqueIdentifier>{c319f2a6-687e-46aa-8a56-e1e6c61087c2}</UniqueIdentifier>
     </Filter>
@@ -450,6 +456,12 @@
     <ClInclude Include="..\public\AugustaBlur.h">
       <Filter>03. GameObject\SFX\Augusta\Blur</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Radial_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Radial.h">
+      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -661,6 +673,12 @@
     </ClCompile>
     <ClCompile Include="..\private\AugustaBlur.cpp">
       <Filter>03. GameObject\SFX\Augusta\Blur</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Radial_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Radial.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

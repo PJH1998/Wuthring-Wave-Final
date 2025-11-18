@@ -141,12 +141,12 @@ void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPo
 #ifdef _DEBUG
 _float* CModel::Get_TrackPositionPtr(const _string& strAnimName)
 {
-	return m_Animations[strAnimName]->Get_TrackPositionPtr();
+	return m_Animations.at(strAnimName)->Get_TrackPositionPtr();
 }
 
 _float CModel::Get_Duration(const _string& strAnimName)
 {
-	return m_Animations[strAnimName]->Get_Duration();
+	return m_Animations.at(strAnimName)->Get_Duration();
 }
 
 HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
@@ -212,7 +212,7 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		auto iter = m_Animations.find(strAnimName);
 		if (iter == m_Animations.end())
 			return;
-		m_Animations[strAnimName]->Register_Notify({ fTrackPosition, Functions[iEventID] });
+		m_Animations.at(strAnimName)->Register_Notify({ fTrackPosition, Functions[iEventID] });
 	}
 
 	for (auto& Pair : m_Animations)
@@ -673,7 +673,7 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	if (iter == m_Animations.end())
 		return;
 
-	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
+	m_Animations.at(strAnimationName)->Set_CurrentTrackPosition(fTrackPosition);
 }
 
 void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)

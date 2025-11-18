@@ -313,6 +313,12 @@
     <Filter Include="03. GameObject\ScreenEffect\SFX\AugustaUltiBegin">
       <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\NPC">
+      <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Radial">
+      <UniqueIdentifier>{8d374cac-4c3e-4492-8daa-51e35e3449b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -567,9 +573,6 @@
     <ClInclude Include="..\public\UI_StatusSyncer.h">
       <Filter>03. GameObject\UI\UIHelper</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\RoverAirJump.h">
-      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\RoverGroundLand.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
@@ -823,6 +826,27 @@
     </ClInclude>
     <ClInclude Include="..\Public\Augusta_UltiSFX.h">
       <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
+    </ClInclude>  
+    <ClInclude Include="..\Public\RoverAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundBurst.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecial.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\DummyNPC.h">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Radial.h">
+      <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+	</ClInclude>
+    <ClInclude Include="..\Public\GalbrenaDarkWing.h">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundQTE.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1291,6 +1315,24 @@
     <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundBurst.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\DummyNPC.cpp">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Radial.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+	</ClCompile>
+    <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>  
     <ClCompile Include="..\private\ScreenEffect.cpp">
       <Filter>03. GameObject\ScreenEffect\SFX</Filter>
     </ClCompile>

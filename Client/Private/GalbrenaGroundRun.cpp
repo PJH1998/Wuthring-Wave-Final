@@ -111,20 +111,19 @@ void CGalbrenaGroundRun::Handle_Input()
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    m_fSpeed = m_States[SPRINT] ? 1.2f : 0.7f;
+	m_fSpeed = 0.7f;
 
-	// Burst인지 체크
-	//m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
-
-	/*if (m_States[BURST])
-		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Ex_Skill02"));
-	else
-		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Skill02"));*/
-
+	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)); // Burst 상태 인지 체크
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
 
+	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.
+	m_States[BURST_E] = m_States[SKILL_E] && (m_pGalbrena->Get_Cost(COST_TYPE::COST1) >= m_pGalbrena->Get_MaxCost())
+		&& (!m_States[BURST]); // 이미 Burst 상태인데 사용할 수는 없음.
+	
+	m_States[BURST_ATTACK] = m_States[BURST] && m_States[ATTACK]; // 강화 공격 상태인지 체크.
+
 	// 궁 상태 확인하기.
-	//m_States[ULTI] = m_States[SKILL_R] && (m_pGalbrena->Get_Cost(COST_TYPE::COST2) >= m_pGalbrena->Get_MaxCost());
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Burst01")); // 기본 궁극기
 }
 
 
@@ -138,11 +137,8 @@ void CGalbrenaGroundRun::Update_RunAnimation(_float fTimeDelta)
     // 1. 회전 및 이동.
     if (m_pGalbrena->Is_LockOn())
     {
-        if (eRunType == EGalbrenaRunType::SPRINT_F || eRunType == EGalbrenaRunType::STOP_SPRINT_L)
-            m_pGalbrena->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
-        else 
-            // 1. WASD 입력에 따른 8방향 이동
-            m_pGalbrena->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
+        // WASD 입력에 따른 8방향 이동
+        m_pGalbrena->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
     }
     else 
         m_pGalbrena->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
@@ -216,6 +212,23 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
+	if (m_States[ULTI])
+	{
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Burst01"))
+			return;
+
+		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::BURST01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL)); // 상위, 하위 상태
+		return;
+	}
+
+	if (m_States[BURST_E])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eBurstType = EGalbrenaBurstType::SKILL01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::BURST)); // 상위, 하위 상태
+		return;
+	}
+
 	if (m_States[DEFAULT_E])
 	{
 		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
@@ -226,10 +239,18 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
+	if (m_States[BURST_ATTACK])
+	{
+		// Burst 상태라면 Special 상태로?
+		m_pGalbrena->GetStateContextForWrite().m_eSpecialType = EGalbrenaSpecialType::ATTACK05;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIAL)); // 상위, 하위 상태
+		return;
+	}
+
 	// 뛰다가 공격 상태 전환.
 	if (m_States[ATTACK])
 	{
-		// Burst 상태라면 Special 상태로?
+		
 		m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK)); // 상위, 하위 상태
 		return;

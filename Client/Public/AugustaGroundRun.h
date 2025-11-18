@@ -38,7 +38,7 @@ private:
 		// 소모값 있는 얘들 => Cost가 있을때만
 		
 		POINT_E,  // 중앙 Point가 가득찬 상태.
-		ECHO_R,  // 중앙 Echo가 가득 찬 상태. 
+		ULTI,     // 궁극기 가득찬 상태.
 		SWORD_R, // Sword R 상태 => Skill 검으로 바뀜. (Sword UI가 가득 찼을때)
         
         END

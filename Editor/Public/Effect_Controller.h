@@ -9,6 +9,7 @@
 #include "Rect_Controller.h"
 
 #include "Decal_Controller.h"
+#include "Radial_Controller.h"
 
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
@@ -63,6 +64,8 @@ public:
 
 	void Decal_To_Json(json& Decal, CEffect_Decal::DECAL_DESC* pDecalDesc);
 
+	void Radial_To_Json(json& Radial, CEffect_Radial::RADIAL_DESC* pRadialDesc);
+
 public:
 	void Load_Prefab();
 
@@ -75,6 +78,8 @@ public:
 	void Load_FXRect(const _wstring& RectTag);
 
 	void Load_FXDecal(const _wstring& DecalTag);
+
+	void Load_FXRadial(const _wstring& RadialTag);
 
 public:
 	void Save_SelectedChildren_To_Json();
@@ -99,6 +104,7 @@ private:
 	class CLoad_Controller*										m_pLoad_Controller = { nullptr };
 	class CRect_Controller*										m_pRect_Controller = { nullptr };
 	class CDecal_Controller*									m_pDecal_Controller = { nullptr };
+	class CRadial_Controller*									m_pRadial_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -122,6 +128,7 @@ private:
 	_bool														m_IsTrailMesh = false;
 	_bool														m_IsRectEffect = false;
 	_bool														m_IsDecalEffect = false;
+	_bool														m_IsRadialEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
@@ -132,7 +139,6 @@ private:
 	ANIMACTOR_DSEC												m_AnimActorDesc = {};
 	_char														m_BoneName[MAX_PATH];
 	_bool														m_bBoneFlag = false;
-	_bool														m_IsBone = false;
 	_float														m_fTrackPosition = -1.f;
 	_bool														m_bTest = false;
 
