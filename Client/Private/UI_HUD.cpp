@@ -164,7 +164,7 @@ HRESULT CUI_HUD::Ready_Presets()
 
 	array<_uint, 2> iImgSize_Rover = { 14, 1 };
 	array<_uint, 2> iImgSize_Augusta = { 7, 2 };
-	array<_uint, 2> iImgSize_Galbrena = { 14, 1 };
+	array<_uint, 2> iImgSize_Galbrena = { 10, 1 };
 
 	m_mapSkillTexIndices.emplace(L"Rover_E",					Calc_SpriteSpace(0, 0, iImgSize_Rover));
 	m_mapSkillTexIndices.emplace(L"Rover_R",					Calc_SpriteSpace(2, 0, iImgSize_Rover));
@@ -357,45 +357,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			// * [SK Icon Update] Galbrena
 			// ==============================
 		case UI_CHARACTERTYPE::GALBRENA:
-			auto galbrenaUIDesc = pSkillUI[CH_GALBRENA]->Get_UIDesc();
-
-			switch (m_iPlayerEnhancedMode)
-			{
-			case 0:			// Galbrena Normal
-				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
-				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
-
-				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-
-				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
-				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
-				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 0.f };
-				break;
-			case 1:			// Galbrena Normal - Burst Ready
-				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][0];
-				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][1];
-
-				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-
-				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
-				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
-				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 0.f };
-				break;
-			case 2:			// Galbrena Burst
-				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
-				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
-
-				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-
-				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
-				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
-				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 1.f };
-				break;
-			}
-			pSkillUI[CH_GALBRENA]->Set_UIDesc(galbrenaUIDesc);
+			Update_Icon_Galbrena(UISlots);
 			break;
 
 		}
@@ -1900,7 +1862,6 @@ void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 
 void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 {
-
 	auto augustaUIDesc = Find_ChildObject(L"Skill_Augusta")->Get_UIDesc();
 
 	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
@@ -2024,6 +1985,110 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 
 	Find_ChildObject(L"Skill_Augusta")->Set_UIDesc(augustaUIDesc);
 
+}
+
+void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
+{
+	auto galbrenaUIDesc = Find_ChildObject(L"Skill_Galbrena")->Get_UIDesc();
+
+	UI_GALBRENA_STATE eState_Galbrena_E = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
+	UI_GALBRENA_STATE eState_Galbrena_R = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	UI_GALBRENA_STATE eState_Galbrena_LB = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
+
+
+
+	// ==============================
+	// [Get] [E] Button Slot State
+	// ==============================
+
+	switch (eState_Galbrena_E)
+	{
+	case Client::UI_GALBRENA_STATE::E_DEFAULT_READY:
+	case Client::UI_GALBRENA_STATE::DEFAULT:
+	default:
+		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
+		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
+		break;
+	case Client::UI_GALBRENA_STATE::E_BURST_READY:
+		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][0];
+		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][1];
+		break;
+	}
+
+	// ==============================
+	// [Get] [R] Button Slot State
+	// ==============================
+
+	// R Button Ctrl..
+	switch (eState_Galbrena_R)
+	{
+	default:
+		galbrenaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_R"][0];
+		galbrenaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_R"][1];
+		break;
+	}
+
+	// ==============================
+	// [Get] [LB] Button Slot State
+	// ==============================
+	
+	// 버스트모드인지를 확인 가능한 무언가가 있어야 할 듯
+	switch (eState_Galbrena_LB)
+	{
+	case Client::UI_GALBRENA_STATE::DEFAULT:
+		break;
+	case Client::UI_GALBRENA_STATE::E_BURST_READY:
+		break;
+	case Client::UI_GALBRENA_STATE::E_DEFAULT_READY:
+		break;
+	case Client::UI_GALBRENA_STATE::END:
+		break;
+	default:
+		break;
+	}
+
+
+
+	/*
+	switch (m_iPlayerEnhancedMode)
+	{
+	case 0:			// Galbrena Normal
+		galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
+		galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
+
+		galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_R"][0];
+		galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_R"][1];
+
+		galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+		galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+		galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 0.f };
+		break;
+	case 1:			// Galbrena Normal - Burst Ready
+		galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][0];
+		galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][1];
+
+		galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_R"][0];
+		galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_R"][1];
+
+		galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+		galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+		galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 0.f };
+		break;
+	case 2:			// Galbrena Burst
+		galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
+		galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
+
+		galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_R"][0];
+		galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_R"][1];
+
+		galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+		galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+		galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 1.f };
+		break;
+	}
+	*/
+
+	Find_ChildObject(L"Skill_Galbrena")->Set_UIDesc(galbrenaUIDesc);
 }
 
 
