@@ -60,7 +60,7 @@ public:
 	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback);
 
 public:
-	virtual		HRESULT					Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath);
+	virtual		HRESULT					Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath, vector<_string>* strMeshTypes);
 	virtual		HRESULT					Initialize_Clone(void* pArg);
 	HRESULT								Render(_uint iMeshIndex);
 	HRESULT								Render(_uint iMeshIndex, ID3D11DeviceContext* pDC);
@@ -75,9 +75,10 @@ public:
 	HRESULT								Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	HRESULT								Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
 	HRESULT								Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
-	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
+	//_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	_bool								Update_RootMotion(const _string& strAnimationName, class CTransform* pTransform, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
-	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition);
+	//충돌 상호작용 이후 최종 매트릭스 업데이트
+	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices);
 	// Compute Shader
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
@@ -96,7 +97,7 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(_uint iBoneIndex);
 	void								Update_BoneMatrix_Map();
 private:
-	MODELTYPE								m_eType = { MODELTYPE::NONANIM };
+	MODELTYPE								m_eType = { MODELTYPE::ANIM };
 
 	_uint									m_iNumMeshes = {};
 	vector<class CMeshAnim_Instance*>		m_Meshes;
@@ -126,9 +127,6 @@ private:
 
 	BoundingBox*						m_pBoundingBox = { nullptr };
 
-	_float* pMin = { nullptr };
-	_float* pMax = { nullptr };
-
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
 	_uint m_iSelectIndex = { 0 };
@@ -140,7 +138,7 @@ private:
 private:
 	void ApplyComputeResults_ToBones();
 	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
-	void FetchLocalMatrices_FromComputeNonRib(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
+	void FetchLocalMatrices_FromComputeNonRib(class CComputeShader* pComputeShaderCom);
 
 private:
 	vector<ID3D11Buffer*> m_Buffers = {};
@@ -148,9 +146,12 @@ private:
 	vector<ID3D11UnorderedAccessView*> m_UAVs = {};
 	vector<ANIMATION_CBINFO> m_AnimCBInfos = {};
 
-	vector<VTXINSTANCE_ANIMMESH>	m_VtxInstanceDatas = {};
-	_uint							m_iNumMeshType = {};
-	list<VTXINSTANCE_ANIMMESH>*		m_pVtxInstanceDatas = { nullptr };
+	vector<VTXINSTANCE_ANIMMESH>			m_VtxInstanceDatas = {};
+	//인스턴스에 사용되는 매쉬 부위 개수
+	_uint									m_iNumMeshType = {};
+	//메쉬 종류에 따른 패딩 위치
+	vector<_uint>							m_MeshTypeCounts;
+	vector<vector<VTXINSTANCE_ANIMMESH>>		m_pVtxInstanceDatas;
 	_bool m_isRibAnimation = { false };
 
 #pragma endregion
@@ -169,7 +170,7 @@ private:
 
 
 public:
-	static		CModelAnim_Instance*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath);
+	static		CModelAnim_Instance*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath, vector<_string>* strMeshTypes = nullptr);
 	virtual		CComponent*				Clone(void* pArg);
 	virtual		void					Free() override;
 };
