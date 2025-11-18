@@ -365,6 +365,9 @@
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance\Animation_Inst">
       <UniqueIdentifier>{5c49a93a-c744-4a48-a72f-9eb9a1b57be2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance">
+      <UniqueIdentifier>{ea694176-fb29-4956-86f4-868581b42cfe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -740,6 +743,9 @@
     <ClInclude Include="..\Public\Animation_Inst.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MeshAnim_Instance.h">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1090,6 +1096,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Animation_Inst.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MeshAnim_Instance.cpp">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -130,7 +130,7 @@ namespace Engine
 		_float4		vUp;
 		_float4		vLook;
 		_float4		vTranslation;
-		_uint		iBaseIndex;
+		_uint		iBaseIndex;		//인스턴스의 뼈 팔레트 시작 패딩 인덱스
 	}VTXINSTANCE_ANIMMESH;
 
 	typedef struct tagVertexInstanceParticle
