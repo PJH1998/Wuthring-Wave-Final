@@ -310,6 +310,9 @@
     <Filter Include="03. GameObject\Actor\NPC">
       <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Radial">
+      <UniqueIdentifier>{8d374cac-4c3e-4492-8daa-51e35e3449b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -827,6 +830,9 @@
     <ClInclude Include="..\public\DummyNPC.h">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Effect_Radial.h">
+      <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1308,6 +1314,9 @@
     </ClCompile>
     <ClCompile Include="..\private\DummyNPC.cpp">
       <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Radial.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

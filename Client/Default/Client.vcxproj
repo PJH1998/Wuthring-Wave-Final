@@ -206,6 +206,7 @@
     <ClInclude Include="..\Public\Effect_Decal.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Director.h" />
+    <ClInclude Include="..\Public\Effect_Radial.h" />
     <ClInclude Include="..\Public\Effect_Rect.h" />
     <ClInclude Include="..\Public\ElectroPredator.h" />
     <ClInclude Include="..\Public\Event_Camera.h" />
@@ -403,6 +404,7 @@
     <ClCompile Include="..\private\DummyNPC.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
+    <ClCompile Include="..\Private\Effect_Radial.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp" />
     <ClCompile Include="..\Private\ElectroPredator.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
