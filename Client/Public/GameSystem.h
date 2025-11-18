@@ -85,9 +85,14 @@ public:
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 	// 락온 UI를 생성합니다. / pTargetTransform : 락온 대상의 Transform 컴포넌트.
-	void		Attach_LockOnUI(CTransform* pTargetTransform);
+	void		Attach_LockOnUI(_float3* pTargetPos);
 	// 락온 UI를 해제합니다.
 	void		Detach_LockOnUI();
+
+	// 패리 UI를 생성합니다. (생성 후 0.35초를 원이 겹치는 시점으로 잡았음.)
+	void		Attach_Parry(_float3* pTargetPos);
+	// 패리 UI가 살아있는 도중, 패리에 성공했음을 보냅니다. (원 즉시제거, 이펙트 이미지 출력)
+	void		Enable_Parried();
 	
 #pragma endregion
 

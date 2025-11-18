@@ -6,6 +6,9 @@
 #include "UI_Parry.h"
 #include "Animator_UI.h"
 
+
+#define KSTA_UITEST_PARRY_TOZERO
+
 CUI_Parry::CUI_Parry(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Image(pDevice, pContext)
 {
@@ -70,6 +73,7 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 	//m_vOriginScale = m_pTransformCom->Get_Scaled();
 	Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
+	m_pTargetPos = nullptr;
 
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Parry", this);
@@ -83,7 +87,11 @@ void CUI_Parry::Priority_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_PARRY_TOZERO
+		
 	__super::Priority_Update(fTimeDelta);
 }
 
@@ -91,6 +99,11 @@ void CUI_Parry::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_PARRY_TOZERO
 
 	// UI를 타겟 위치로.
 	// 단일 UI까지는 CPU로 돌려도 될듯
@@ -100,8 +113,13 @@ void CUI_Parry::Update(_float fTimeDelta)
 	CCustom_UI* pSectorA = Find_ChildObject(L"SectorA_Parry");
 	CCustom_UI* pSectorAEff = Find_ChildObject(L"SectorA_ParryEffect");
 
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	_float3 vTargetPos = *m_pTargetPos; // _float3(0.f, -10.f, 0.f); // ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
+#endif // KSTA_UITEST_PARRY_TOZERO
 
-	_float3 vTargetPos = m_vTargetPos; // ksta : 나중에 수정. 받아온 타겟 좌표로.
+#ifdef KSTA_UITEST_PARRY_TOZERO
+	_float3 vTargetPos = _float3(0.f, -10.f, 0.f);
+#endif // KSTA_UITEST_PARRY_TOZERO
 
 	Update_ApplyTargetPos(pSectorA, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
 	Update_ApplyTargetPos(pSectorAEff, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
@@ -120,6 +138,7 @@ void CUI_Parry::Update(_float fTimeDelta)
 	{
 		m_fElapsedTime = 0.f;
 		m_isActivate = false;
+		m_pTargetPos = nullptr;
 	}
 	
 	if (m_isParried &&
@@ -128,6 +147,7 @@ void CUI_Parry::Update(_float fTimeDelta)
 		m_isParried = false;
 		m_fElapsedTime = 0.f;
 		m_isActivate = false;
+		m_pTargetPos = nullptr;
 	}
 
 	__super::Update(fTimeDelta);
@@ -137,6 +157,11 @@ void CUI_Parry::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_PARRY_TOZERO
 
 
 	CCustom_UI* pSectorAMain = Find_ChildObject(L"SectorA_Parry");
@@ -158,6 +183,11 @@ void CUI_Parry::Render()
 {
 	if (!m_isActivate)
 		return;
+
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_PARRY_TOZERO
 }
 
 void CUI_Parry::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -179,6 +209,10 @@ void CUI_Parry::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_fElapsedTime = 0.f;
 	m_isParried = false;
+
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	m_pTargetPos = static_cast<UI_PARRY_DESC*>(pArg)->pTargetPos;
+#endif // KSTA_UITEST_PARRY_TOZERO
 }
 
 void CUI_Parry::Enable_Parried()
@@ -240,7 +274,12 @@ void CUI_Parry::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance
 
 	_float3 vScale =/* (pTargetUI == this)? m_vOriginSca :*/ pTargetTransform->Get_Scaled();
 
-	_float3 vTargetPos = m_vTargetPos;
+#ifndef KSTA_UITEST_PARRY_TOZERO
+	_float3 vTargetPos = *m_pTargetPos; // _float3(0.f, -10.f, 0.f); // ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
+#endif // KSTA_UITEST_PARRY_TOZERO
+#ifdef KSTA_UITEST_PARRY_TOZERO
+	_float3 vTargetPos = _float3(0.f, -10.f, 0.f);
+#endif // KSTA_UITEST_PARRY_TOZERO
 	_float fDist = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat3(&vTargetPos)));
 	_float fScaleMultiple = fPivotDistance / fDist;
 

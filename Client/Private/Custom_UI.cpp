@@ -109,8 +109,8 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
-	//if (m_tUIDesc.strFileName == L"EmptyCanvuspng")							// 계층 나누기용 무의미 투명 텍스쳐면 렌더 스킵
-	//	return;
+	if (m_tUIDesc.strFileName == L"EmptyCanvuspng")							// 계층 나누기용 무의미 투명 텍스쳐면 렌더 스킵
+		return;
 
 
 

@@ -5,9 +5,9 @@ NS_BEGIN(Client)
 class CUI_Parry final : public CUI_Image
 {
 public:
-	typedef struct tUILockOnDesc {	// 나중에 Transform 은 아닌, 뼈 위치 등 기준으로 변경. matrix, float3 등
-		CTransform* pTargetTransform = nullptr;
-	} UI_Parry_DESC;
+	typedef struct tUIParryDesc {	// 나중에 Transform 은 아닌, 뼈 위치 등 기준으로 변경. matrix, float3 등
+		_float3* pTargetPos = nullptr;
+	} UI_PARRY_DESC;
 
 public:
 	explicit CUI_Parry(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -39,7 +39,7 @@ private:
 	_float			m_fElapsedTime = 0.f;
 	_bool			m_isParried = false;
 
-	_float3			m_vTargetPos = _float3(0.f, -10.f, 0.f);
+	_float3*		m_pTargetPos = nullptr;
 
 	//_float3			m_vOriginSca = {};
 

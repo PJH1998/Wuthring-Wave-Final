@@ -70,6 +70,11 @@ void CUI_LockOn::Priority_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+#ifndef KSTA_UITEST_LOCKON_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_LOCKON_TOZERO
+
 	__super::Priority_Update(fTimeDelta);
 }
 
@@ -77,8 +82,12 @@ void CUI_LockOn::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
-	
-	
+
+#ifndef KSTA_UITEST_LOCKON_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_LOCKON_TOZERO
+
 	// 타겟 위치 반영
 	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
 
@@ -87,8 +96,8 @@ void CUI_LockOn::Update(_float fTimeDelta)
 	_matrix matCamProj = m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ);
 
 	const _float2 vScreenSize = { g_iWinSizeX, g_iWinSizeY };
-	_vector vTargetWorldPos = (m_pTargetTransform) ?
-		m_pTargetTransform->Get_State(STATE::POSITION) : _vector();
+	_vector vTargetWorldPos = (m_pTargetPos) ?
+		XMVectorSetW(XMLoadFloat3(m_pTargetPos), 1.f) : _vector();
 #ifdef KSTA_UITEST_LOCKON_TOZERO
 	vTargetWorldPos = XMVectorSet(0.f, -10.f, 0.f, 1.f);
 #endif // KSTA_UITEST_LOCKON_TOZERO
@@ -129,6 +138,11 @@ void CUI_LockOn::Late_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+#ifndef KSTA_UITEST_LOCKON_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_LOCKON_TOZERO
+
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
 
@@ -139,6 +153,12 @@ void CUI_LockOn::Render()
 {
 	if (!m_isActivate)
 		return;
+
+#ifndef KSTA_UITEST_LOCKON_TOZERO
+	if (!m_pTargetPos)
+		return;
+#endif // KSTA_UITEST_LOCKON_TOZERO
+
 }
 
 void CUI_LockOn::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -149,7 +169,7 @@ void CUI_LockOn::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Show", true);
 
 	if (pArg != nullptr)
-		m_pTargetTransform = static_cast<UI_LOCKON_DESC*>(pArg)->pTargetTransform;
+		m_pTargetPos = static_cast<UI_LOCKON_DESC*>(pArg)->pTargetPos;
 	
 	m_isActivate = true;
 }

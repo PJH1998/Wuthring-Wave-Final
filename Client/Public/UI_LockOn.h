@@ -13,7 +13,7 @@ class CUI_LockOn final : public CUI_Image
 {
 public:
 	typedef struct tUILockOnDesc {
-		CTransform* pTargetTransform = nullptr;
+		_float3* pTargetPos = nullptr;
 	} UI_LOCKON_DESC;
 
 public:
@@ -36,7 +36,8 @@ private:
 
 private:
 	//class CGameSystem*		m_pGameSystem = { nullptr };
-	CTransform*		m_pTargetTransform = { nullptr };
+	//CTransform*		m_pTargetTransform = { nullptr };
+	_float3*				m_pTargetPos = { nullptr };
 
 public:
 	static CUI_LockOn*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

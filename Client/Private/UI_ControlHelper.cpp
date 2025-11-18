@@ -13,6 +13,7 @@
 #include "UI_Button_Interact.h"
 //#include "UI_Interact.h"
 #include "UI_LockOn.h"
+#include "UI_Parry.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -162,7 +163,7 @@ _bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractTyp
 	return pRootUI->Check_OnInteract(L"Interact_Normal", ENUM_CLASS(eEventInteractType), 0);
 }
 
-void CUI_ControlHelper::Attach_LockOnUI(CTransform* pTargetTransform)
+void CUI_ControlHelper::Attach_LockOnUI(_float3* pTargetPos)
 {
 	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
 
@@ -170,7 +171,7 @@ void CUI_ControlHelper::Attach_LockOnUI(CTransform* pTargetTransform)
 		return; 
 
 	// 풀링으로부터 꺼내기
-	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetTransform };
+	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetPos };
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
 }
 void CUI_ControlHelper::Detach_LockOnUI()
@@ -181,6 +182,28 @@ void CUI_ControlHelper::Detach_LockOnUI()
 		return;
 
 	pRootUI->SetActivate(false);
+}
+
+void CUI_ControlHelper::Attach_Parry(_float3* pTargetPos)
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_Parry");
+
+	if (!pRootUI)
+		return;
+
+	CUI_Parry::UI_PARRY_DESC tDesc = { pTargetPos };
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Enable_Parried()
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_Parry");
+
+	if (!pRootUI)
+		return;
+
+	static_cast<CUI_Parry*>(pRootUI)->Enable_Parried();
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

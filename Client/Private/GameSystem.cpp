@@ -196,7 +196,7 @@ void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMon
 void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
 {
 	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
-}
+}	
 
 //void CGameSystem::Toggle_InteractUI(_bool isOn, _wstring strText)
 //{
@@ -218,14 +218,24 @@ _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
 	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
 }
 
-void CGameSystem::Attach_LockOnUI(CTransform* pTargetTransform)
+void CGameSystem::Attach_LockOnUI(_float3* pTargetPos)
 {
-	m_pUI_ControlHelper->Attach_LockOnUI(pTargetTransform);
+	m_pUI_ControlHelper->Attach_LockOnUI(pTargetPos);
 }
 
 void CGameSystem::Detach_LockOnUI()
 {
 	m_pUI_ControlHelper->Detach_LockOnUI();
+}
+
+void CGameSystem::Attach_Parry(_float3* pTargetPos)
+{
+	m_pUI_ControlHelper->Attach_Parry(pTargetPos);
+}
+
+void CGameSystem::Enable_Parried()
+{
+	m_pUI_ControlHelper->Enable_Parried();
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
