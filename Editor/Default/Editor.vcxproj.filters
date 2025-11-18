@@ -205,6 +205,12 @@
     <Filter Include="03. GameObject\SFX\Augusta">
       <UniqueIdentifier>{a57d6569-499a-4271-92bc-c4aa3f903e44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SFX\Augusta\Slash">
+      <UniqueIdentifier>{c319f2a6-687e-46aa-8a56-e1e6c61087c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\SFX\Augusta\Blur">
+      <UniqueIdentifier>{c3ce7c20-a584-4462-b6ad-20fe10d384d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -439,7 +445,10 @@
       <Filter>03. GameObject\SFX</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Augusta_SFX.h">
-      <Filter>03. GameObject\SFX\Augusta</Filter>
+      <Filter>03. GameObject\SFX\Augusta\Slash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\AugustaBlur.h">
+      <Filter>03. GameObject\SFX\Augusta\Blur</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -644,11 +653,14 @@
     <ClCompile Include="..\Private\Level_SFX.cpp">
       <Filter>01. Level\ScreenEffect</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Augusta_SFX.cpp">
+      <Filter>03. GameObject\SFX\Augusta\Slash</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Edit_ScreenEffect.cpp">
       <Filter>03. GameObject\SFX</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Augusta_SFX.cpp">
-      <Filter>03. GameObject\SFX\Augusta</Filter>
+    <ClCompile Include="..\private\AugustaBlur.cpp">
+      <Filter>03. GameObject\SFX\Augusta\Blur</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

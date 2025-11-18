@@ -30,6 +30,8 @@ HRESULT CSonoraChange::Initialize_Clone(void* pArg)
 
 	m_vRadialIntensityRange = _float2(0.f, -0.2f);
 
+	m_vFadeColor = _float3(1.f, 1.f, 1.f);
+	
 	return S_OK;
 }
 
@@ -49,7 +51,7 @@ void CSonoraChange::Update(_float fTimeDelta)
 	_float fRadialDistance = lerp(m_vRadialDistanceRange.x, m_vRadialDistanceRange.y, fRadialRatio);
 	_float fRadialIntensity = lerp(m_vRadialIntensityRange.x, m_vRadialIntensityRange.y, fRadialRatio);
 
-	_float fFadeRatio = SmoothStep(m_fFadeTime, m_fEffectTime, m_fCurrentTime);
+	m_fFadeIntensity = SmoothStep(m_fFadeTime, m_fEffectTime, m_fCurrentTime);
 
 	m_pGameInstance->Setting_Radial(m_vRadialCenter, _float2(0.f, fRadialDistance), fRadialIntensity);
 	
@@ -62,7 +64,8 @@ void CSonoraChange::Update(_float fTimeDelta)
 
 void CSonoraChange::Late_Update(_float fTimeDelta)
 {
-
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SFX, this)))
+		return;
 }
 
 void CSonoraChange::Render()
@@ -85,8 +88,6 @@ void CSonoraChange::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fEffectTime = pDesc->fEffectTime;
 	m_fRadialTime = pDesc->fRadialTime;
 	m_fFadeTime = pDesc->fFadeTime;
-
-//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 }
 
 HRESULT CSonoraChange::Bind_ShaderResources()
@@ -99,8 +100,11 @@ HRESULT CSonoraChange::Bind_ShaderResources()
 
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		CRASH("Failed to Bind ProjMatrix");
-
-	if (FAILED(m_pShader->Bind_Value("g_vColor", &m_vFadeColor, sizeof(_float4))))
+	
+	if (FAILED(m_pShader->Bind_Value("g_fIntensity", &m_fFadeIntensity, sizeof(_float))))
+		CRASH("Failed to Bind Color");
+	
+	if (FAILED(m_pShader->Bind_Value("g_vColor", &m_vFadeColor, sizeof(_float3))))
 		CRASH("Failed to Bind Color");
 
 	return S_OK;

@@ -77,7 +77,7 @@ void CEditDummy_Map::Render_Shadow()
 
 HRESULT CEditDummy_Map::Ready_Component(_fmatrix PreTransformMatrix)
 {
-	m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/SM_Tab_Roc_13BH/SM_Tab_Roc_13BH_LOD0.dat");
+	m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/SM_Tab_APD_Roc_09AH/SM_Tab_APD_Roc_09AH_LOD0.dat");
 	ASSERT_CRASH(m_pModelCom);
 
 	m_pShaderCom = CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements);

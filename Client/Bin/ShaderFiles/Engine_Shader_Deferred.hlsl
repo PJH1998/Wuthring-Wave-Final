@@ -1,10 +1,11 @@
-#include "Engine_Shader_Defines.hlsli"
 #include "Engine_Shader_Shadow.hlsli"
 
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
 float g_fLutLerpIntensity = 0.25f;
+bool g_IsDynamicLUT = false;
+
 
 float g_fLightFar;
 
@@ -86,7 +87,9 @@ Texture2DArray<float> g_Cascade : register(t2);
 
 float4 g_vShadowLightDirection;
 
-float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
+//RIM_RIGHT
+bool g_IsCustomRimColor = false;
+float4 g_vRimColor = 0.f;
 float4 g_fRimIntensity = 0.8f;
 
 //SFX
@@ -196,6 +199,8 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
     
     float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+
+    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
     
     float4 vAmbient = 0.f;
     
@@ -204,7 +209,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
         
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade) + fRimPower);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade)) + (fRimPower * vRimColor);
         vAmbient = g_vDynamicMtrlAmbient;
     }
     else
@@ -275,10 +280,12 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
     float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
  
+    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
+ 
     if (vPBRDesc.z)
     {
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, normalize(vLightDir), vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fToonShade + fRimPower);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade)) + (fRimPower * vRimColor);
         Out.vLightAcc.xyz *= fAtt;
     }
     else
@@ -341,12 +348,15 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
     
     vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
-    if(IsDynamic)
+    if (false == g_IsDynamicLUT)
     {
-        Out.vColor = vOriginColor;
+        bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
+        if(IsDynamic)
+        {
+            Out.vColor = vOriginColor;
 
-        return Out;
+            return Out;
+        }
     }
     
     float2 vUV;
@@ -381,7 +391,7 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (fViewZ < g_vFogRange.x)
+    if (fViewZ <= g_vFogRange.x)
     {
         Out.vColor = vOriginColor;
         return Out;
@@ -400,26 +410,6 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor, fAlpha);
     Out.vColor.a = 1.f;
-    
-    //float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-    
-    //float2 vTexScale = float2(1.f / g_fWidth, 1.f / g_fHeight);
-    
-    //float2 vTexcoord = fmod(vWorldPos.xy, float2(g_fWidth, g_fHeight)) * vTexScale;
-    
-    //float2 vNoseTexcoord = float2(vTexcoord.x + (g_fFogTime * vTexScale.x), vTexcoord.y); //vTexcoord + (g_fFogTime * vTexScale);
-    
-    //float fNoise = g_FogNoiseTexture.Sample(DefaultSampler, vNoseTexcoord).r;
-    
-    //float fFogDepthWeight = clamp((smoothstep(g_vFogDepthDistance.x, g_vFogDepthDistance.y, fViewDepth)), 0.f, 1.f);
-    
-    //vector vOriginColor = g_LutResultTexture.Sample(DefaultSampler, In.vTexcoord);
-    //vOriginColor.xyz *= (1.f - min(fFogDepthWeight, 0.8f));
-    
-    //float fFogWeight = fFogDepthWeight;// * lerp(0.2f, 1.f, fFogHeightWeight);
-    //fFogWeight *= fNoise;
-    
-    //Out.vColor = lerp(vOriginColor, g_vFogColor, fFogWeight);
     
     return Out;
 }

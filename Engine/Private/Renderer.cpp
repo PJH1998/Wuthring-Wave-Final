@@ -235,6 +235,18 @@ void CRenderer::Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex)
 	m_CommandLists[iIndex] = pCL;
 }
 
+void CRenderer::Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut)
+{
+	if(nullptr != pOutIndex)
+		*pOutIndex = m_iLUT_Index;
+	
+	if(nullptr != pOutIntensity)
+		*pOutIntensity = m_fLutLerpIntensity;
+
+	if (nullptr != pOutIsDynamicLut)
+		*pOutIsDynamicLut = m_IsDynamicLUT;
+}
+
 void CRenderer::Render_ShadowMap()
 {
 	if (m_ShadowMapObjects.empty())
@@ -523,11 +535,15 @@ void CRenderer::Render_LUT()
 
 	if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
 		CRASH("Failed Bind CurrentScene");
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
-	//	CRASH("Failed Bind RT_Backbuffer");
-
+	
 	if (FAILED(m_pSubResource->Bind_LUT_Texture(m_pShader, m_iLUT_Index)))
 		return;
+
+	if (FAILED(m_pShader->Bind_Value("g_fLutLerpIntensity", &m_fLutLerpIntensity, sizeof(_float))))
+		CRASH("Failed to Bind LutIntensity");
+
+	if(FAILED(m_pShader->Bind_Value("g_IsDynamicLUT", &m_IsDynamicLUT, sizeof(_bool))))
+		CRASH("Failed to Bind IsDynamicLUT");
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::LUT));
 
@@ -676,7 +692,7 @@ void CRenderer::Render_ScreenEffect()
 	if(SUCCEEDED(m_pGameInstance->Render_SFX_Toggle(m_pVIBuffer, m_pShader)))
 		m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 		
-	if (m_RenderObjects[ENUM_CLASS(RENDERGROUP::POST_SFX)].empty())
+	if (m_RenderObjects[ENUM_CLASS(RENDERGROUP::POST_SFX)].empty())		// 없을 시 그냥 Draw
 	{
 		//Combined
 		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pCurrentSceneSRV)))
@@ -689,7 +705,7 @@ void CRenderer::Render_ScreenEffect()
 	}
 	else
 	{
-		Render_ObjectList(ENUM_CLASS(RENDERGROUP::POST_SFX));
+		Render_ObjectList(ENUM_CLASS(RENDERGROUP::POST_SFX));			// 반 드 시 CurrentSceneSRV 받아서 그릴것..!
 	}
 }
 
