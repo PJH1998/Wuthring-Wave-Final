@@ -457,18 +457,18 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 					switch (pDesc.eObjectType)
 					{
 					case OBJECTTYPE::SONORA:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA_FLOOR:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					default:

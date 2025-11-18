@@ -15,22 +15,55 @@ CMeshAnim_Instance::CMeshAnim_Instance(const CMeshAnim_Instance& Prototype)
     : CVIBuffer_Instance{ Prototype }
     , m_VertexPositions { Prototype.m_VertexPositions }
     , m_Indices { Prototype.m_Indices }
+	, m_iNumMaxInstance{ Prototype.m_iNumMaxInstance }
 {
 }
 
 HRESULT CMeshAnim_Instance::Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance)
 {
-	m_iNumInstance = iNumInstance;
+	m_iNumInstance = m_iNumMaxInstance = iNumInstance;
+	m_iNumVertexBuffers = 2;
     if (FAILED(Ready_Mesh_Anim(Bones, PreTransformMatrix, InputFile)))
         return E_FAIL;
     
+#pragma region INSTANCE
+	m_iInstanceVertexStride = sizeof(VTXINSTANCE_ANIMMESH);
+	m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
+	m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
+	m_VBInstanceDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	m_VBInstanceDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	m_VBInstanceDesc.MiscFlags = 0;
+	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
+
+	m_pVBInstanceVertices = new VTXINSTANCE_ANIMMESH[m_iNumInstance];
+	VTXINSTANCE_ANIMMESH* pVBInstanceVertices = static_cast<VTXINSTANCE_ANIMMESH*>(m_pVBInstanceVertices);
+	//memcpy(pVBInstanceVertices, pDesc->pTransformMatrix, sizeof(_float4x4) * m_iNumInstance);
+	ZeroMemory(pVBInstanceVertices, sizeof(VTXINSTANCE_ANIMMESH) * m_iNumInstance);
+#pragma endregion
 
     return S_OK;
 }
 
 HRESULT CMeshAnim_Instance::Initialize_Clone(void* pArg)
 {
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
     return S_OK;
+}
+
+HRESULT CMeshAnim_Instance::Render()
+{
+	if (m_iNumInstance > 0)
+	{
+		m_pContext->DrawIndexedInstanced(m_iNumIndexPerInstance, m_iNumInstance, 0, 0, 0);
+	}
+
+	return S_OK;
+}
+
+HRESULT CMeshAnim_Instance::Render(ID3D11DeviceContext* pDC)
+{
+	return __super::Render(pDC);
 }
 
 #ifdef _DEBUG
@@ -75,14 +108,28 @@ HRESULT CMeshAnim_Instance::Bind_BoneMatrices(CShader* pShader, const _char* pCo
     return pShader->Bind_Matrices(pConstantName, m_BoneMatrices, m_iNumBones);
 }
 
-HRESULT CMeshAnim_Instance::Update_InstanceData(VTXINSTANCE_ANIMMESH* pInstanceDatas)
+HRESULT CMeshAnim_Instance::Update_InstanceData(VTXINSTANCE_ANIMMESH* pInstanceDatas, _uint iNumRenderCount)
 {
+	if (iNumRenderCount > m_iNumMaxInstance)
+	{
+		CRASH("Instance Count Exceeding Max Number");
+		return E_FAIL;
+	}
+	m_iNumInstance = iNumRenderCount;
+	if (nullptr == pInstanceDatas)
+	{
+		//iNumRenderCount = 0
+		//해당 매쉬는 렌더링하지 않음
+		return S_OK;
+	}
 	D3D11_MAPPED_SUBRESOURCE SubResource{};
 	//VTXINSTANCE_ANIMMESH* pInstanceVertices = static_cast<VTXINSTANCE_ANIMMESH*>(m_pVBInstanceVertices);
 	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-	VTXINSTANCE_MESH* pVertices = static_cast<VTXINSTANCE_MESH*>(SubResource.pData);
-	memcpy(pVertices, pInstanceDatas, sizeof(VTXINSTANCE_ANIMMESH) * m_iNumInstance);
+	VTXINSTANCE_ANIMMESH* pVertices = static_cast<VTXINSTANCE_ANIMMESH*>(SubResource.pData);
+	memcpy(pVertices, pInstanceDatas, sizeof(VTXINSTANCE_ANIMMESH) * iNumRenderCount);
 	m_pContext->Unmap(m_pVBInstance, 0);
+
+	
 	return S_OK;
 }
 
@@ -99,6 +146,7 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
     pIndices = new _uint[m_iNumIndices];
     InputFile.read(reinterpret_cast<_char*>(&m_iMaterialIndex), sizeof(_uint));
     InputFile.read(reinterpret_cast<_char*>(&m_iNumBones), sizeof(_uint));
+
     for (size_t i = 0; i < m_iNumBones; ++i)
     {
         _uint iLength = {};
@@ -134,8 +182,8 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
     InputFile.read(reinterpret_cast<_char*>(pVertices), sizeof(VTXANIMMESH) * m_iNumVertices);
     InputFile.read(reinterpret_cast<_char*>(pIndices), sizeof(_uint) * m_iNumIndices);
 
+#pragma region VERTEX
     m_iVertexStride = sizeof(VTXANIMMESH);
-    m_iNumVertexBuffers = 1;
 
     D3D11_BUFFER_DESC   VBDesc = {};
     VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
@@ -175,10 +223,7 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
 
     Safe_Delete_Array(pIndices);
 #pragma endregion
-	m_pVBInstanceVertices = new VTXINSTANCE_ANIMMESH[m_iNumInstance];
-	VTXINSTANCE_ANIMMESH* pVBInstanceVertices = static_cast<VTXINSTANCE_ANIMMESH*>(m_pVBInstanceVertices);
-	//memcpy(pVBInstanceVertices, pDesc->pTransformMatrix, sizeof(_float4x4) * m_iNumInstance);
-	ZeroMemory(pVBInstanceVertices, sizeof(VTXINSTANCE_ANIMMESH) * m_iNumInstance);
+
     return S_OK;
 }
 

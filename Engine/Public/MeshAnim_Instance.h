@@ -26,6 +26,8 @@ public:
 public:
 	virtual		HRESULT			Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance);
 	virtual		HRESULT			Initialize_Clone(void* pArg);
+	virtual		HRESULT			Render() override;
+	virtual		HRESULT			Render(ID3D11DeviceContext* pDC)override;
 
 #ifdef _DEBUG
 	_bool							Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
@@ -33,10 +35,11 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
-	HRESULT						Update_InstanceData(VTXINSTANCE_ANIMMESH* pMatrices);
+	HRESULT						Update_InstanceData(VTXINSTANCE_ANIMMESH* pMatrices, _uint iNumRenderCount);
 private:
 	_uint							m_iMaterialIndex = {};
 	_uint							m_iNumBones = {};
+	_uint							m_iNumMaxInstance = {};
 
 	vector<_uint>				m_BoneIndices;
 	_float4x4					m_BoneMatrices[g_iMaxNumBones] = {};
