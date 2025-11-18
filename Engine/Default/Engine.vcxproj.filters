@@ -362,6 +362,15 @@
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance">
       <UniqueIdentifier>{26ac64fc-251f-436e-b528-877d70a68300}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\96. Resource">
+      <UniqueIdentifier>{eaeef1d9-73ac-4384-a436-3538b5a0b152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\96. Resource\Manager">
+      <UniqueIdentifier>{c089c98e-a76d-4dcd-89ef-f6e5749ed7d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Material">
+      <UniqueIdentifier>{d12e14ea-3ebd-47d6-8607-ccec1cf635e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -734,6 +743,12 @@
     <ClInclude Include="..\Public\ModelAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Resource_Manager.h">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Material.h">
+      <Filter>01. Utility\04. Component\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1081,6 +1096,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\ModelAnim_Instance.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Resource_Manager.cpp">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Material.cpp">
+      <Filter>01. Utility\04. Component\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

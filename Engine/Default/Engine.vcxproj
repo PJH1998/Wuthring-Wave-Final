@@ -84,6 +84,7 @@
     <ClInclude Include="..\Public\Level_Manager.h" />
     <ClInclude Include="..\Public\Light.h" />
     <ClInclude Include="..\Public\Light_Manager.h" />
+    <ClInclude Include="..\Public\Material.h" />
     <ClInclude Include="..\Public\Mesh.h" />
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
@@ -96,6 +97,7 @@
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
     <ClInclude Include="..\public\RendererSubResource.h" />
+    <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
@@ -203,6 +205,7 @@
     <ClCompile Include="..\Private\Level_Manager.cpp" />
     <ClCompile Include="..\Private\Light.cpp" />
     <ClCompile Include="..\Private\Light_Manager.cpp" />
+    <ClCompile Include="..\Private\Material.cpp" />
     <ClCompile Include="..\Private\Mesh.cpp" />
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
@@ -215,6 +218,7 @@
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
     <ClCompile Include="..\private\RendererSubResource.cpp" />
+    <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />

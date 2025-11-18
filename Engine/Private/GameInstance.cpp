@@ -30,6 +30,7 @@
 #include "VolumetricFog.h"
 #include "HZB.h"
 #include "SFX_Hub.h"
+#include "Resource_Manager.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -1040,6 +1041,18 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 }
 #endif
 #pragma endregion
+
+#pragma region RESOURCE_MANAGER
+void CGameInstance::Load_Resource(const _char* pFolderPath)
+{
+	m_pResource_Manager->Load_Resource(pFolderPath);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResourceTag)
+{
+	return m_pResource_Manager->Get_Resource(strResourceTag);
+}
+#pragma endregion
+
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {
