@@ -320,7 +320,7 @@ void CGalbrenaGroundSprint::Check_StateTransition(_float fTimeDelta)
 		// STOP SPRINT 이면서 애니메이션이 재생이 끝났다면?
 		if (m_IsAnimationEnd && (eSprintType == EGalbrenaSprintType::STOP_SPRINT_L))
 		{
-			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
 			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE)); // 상위, 하위 상태
 			return;
 		}
