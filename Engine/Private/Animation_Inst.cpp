@@ -15,7 +15,6 @@ CAnimation_Inst::CAnimation_Inst()
 CAnimation_Inst::CAnimation_Inst(const CAnimation_Inst& Prototype)
 	: m_fDuration { Prototype.m_fDuration },
 	m_fTickPerSecond { Prototype.m_fTickPerSecond },
-	m_fCurrentTrackPosition { Prototype.m_fCurrentTrackPosition },
 	m_iNumChannels { Prototype.m_iNumChannels },
 	m_Channels { Prototype.m_Channels },
 	m_CurrentFrameIndices{ Prototype.m_CurrentFrameIndices }

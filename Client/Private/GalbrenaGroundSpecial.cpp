@@ -45,15 +45,18 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 	switch(eSpecialType)
 	{ 
 	case EGalbrenaSpecialType::ATTACK05:
+		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		break;
 	case EGalbrenaSpecialType::ATTACK06:
+		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		break;
 	case EGalbrenaSpecialType::ATTACK07:
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_FIRSTGUN);
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_SECONDGUN);
+		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
+		m_pGalbrena->Set_Gravity(false);
 		break;
 	case EGalbrenaSpecialType::ATTACK08:
-		m_pGalbrena->Set_Gravity(false);
 		break;
 	case EGalbrenaSpecialType::ATTACK08_H:
 		break;
@@ -126,11 +129,23 @@ void CGalbrenaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     // 2. 파츠 실행.
 	for (auto& iPartType : m_ActivePartTypes)
 	{
-		m_pGalbrena->Play_PartAnimation(
-			iPartType,
-			m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
-			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
-		);
+		if (iPartType == CGalbrena::PART_FIRSTGUN || iPartType == CGalbrena::PART_SECONDGUN)
+		{
+			m_pGalbrena->Play_PartAnimation(
+				iPartType,
+				m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+				m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+			);
+		}
+		else
+		{
+			m_pGalbrena->Play_PartAnimation(
+				iPartType,
+				m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+				m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+			);
+		}
+		
 	}
 	
 	

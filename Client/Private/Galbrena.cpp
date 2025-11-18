@@ -5,6 +5,7 @@
 #include "SpringCamera.h"
 #include "Wing.h"
 #include "GalbrenaShotGun.h"
+#include "GalbrenaDarkWing.h"
 #include "Collider.h"
 #include "AttackVolume.h"
 #include "GameSystem.h"
@@ -52,6 +53,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	//PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);
+	PartActivate(PART_DARKWING, false);
 	PartActivate(PART_LION, false);
 	PartActivate(PART_WING, false);
 	
@@ -64,6 +66,9 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	m_pQTEColliderCom->Set_Position(vPos);
 
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
+	m_fCameraOriginOffset = 1.2f;
+	m_fCameraOffset = 1.2f;
     return S_OK;
 }
 
@@ -71,7 +76,6 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -115,14 +119,16 @@ void CGalbrena::Update(_float fTimeDelta)
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
+
+	_bool IsSelect = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
 	if (!m_IsQTE)
 	{
 		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
 		// 6. Camera 갱신 => 위치 따라오게
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
 	}
 	else
 	{
@@ -270,6 +276,15 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
+			break;
+		}
+
 	}
 
 	// 상태 변수 초기화
@@ -292,6 +307,9 @@ void CGalbrena::Play_PartAnimation(_uint iPartType, const _string& strAnimName, 
 		break;
 	case PART_LION:
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
 	case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
 		break;
@@ -313,6 +331,9 @@ void CGalbrena::PartActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_LION:
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Activate(IsActive);
+		break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
 		break;
@@ -331,6 +352,9 @@ void CGalbrena::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	case PART_SECONDGUN:
 		m_pGalbrenaSecondShotGun->Change_Volume(iVolumeIdx);
 		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Change_Volume(iVolumeIdx);
+		break;
 	case PART_LION:
 		break;
 	}
@@ -345,6 +369,9 @@ void CGalbrena::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_SECONDGUN:
 		m_pGalbrenaSecondShotGun->Volume_Activate(IsActive);
+		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Volume_Activate(IsActive);
 		break;
 	case PART_LION:
 		break;
@@ -362,6 +389,9 @@ void CGalbrena::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 		m_pGalbrenaSecondShotGun->Clear_Animation(strAnimName);
 		break;
 	case PART_LION:
+		break;
+	case PART_DARKWING:
+		m_pGalbrenaDarkWing->Clear_Animation(strAnimName);
 		break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
@@ -386,6 +416,8 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 		break;
 	case PART_SECONDGUN:
 		break;
+	case PART_DARKWING:
+		break;
 	case PART_LION:
 		break;
 	case PART_WING:
@@ -397,7 +429,7 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 // Hit 판정.
 void CGalbrena::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit)
+	if (nullptr == pArg || m_IsHit || m_IsQTE)
 		return;
 
 	_uint iFlag = {};
@@ -466,6 +498,17 @@ void CGalbrena::Bind_QTE(_bool IsQTE)
 		GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
 	}
+}
+
+void CGalbrena::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CGalbrena::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
 
@@ -587,6 +630,19 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 			if (var3 == TEXT("On"))
 			{
 				m_pGalbrenaSecondShotGun->Activate(false);
+				return;
+			}
+		}
+	}
+	else if (var1 == TEXT("DarkWing"))
+	{
+		// 2. Action Tag
+		if (var2 == TEXT("Dissolve"))
+		{
+			// 3. Dissolve On / Off
+			if (var3 == TEXT("On"))
+			{
+				m_pGalbrenaDarkWing->Activate(false);
 				return;
 			}
 		}
@@ -854,6 +910,23 @@ void CGalbrena::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 
 		case PARTTYPE::PART_LION:
 			break;
+		case PARTTYPE::PART_DARKWING:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetGalbrenaDarkWingCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("PART_DARKWING");
+
+			m_pGalbrenaDarkWing = dynamic_cast<CGalbrenaDarkWing*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pGalbrenaDarkWing);
+			Safe_AddRef(m_pGalbrenaDarkWing);
+			break;
 
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
@@ -1022,4 +1095,5 @@ void CGalbrena::Free()
 	Safe_Release(m_pWing);
 	Safe_Release(m_pGalbrenaFirstShotGun);
 	Safe_Release(m_pGalbrenaSecondShotGun);
+	Safe_Release(m_pGalbrenaDarkWing);
 }

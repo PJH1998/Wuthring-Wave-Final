@@ -358,6 +358,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 		// 이전 캐릭터 비활성화
 		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)); // 혹시 모르니.
+		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 		//m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
 		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
 	}
@@ -365,6 +366,8 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	// 2. 새 캐릭터 활성화
 	m_iCurrentCharacterIdx = eNextCharacter;
 	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
+	
+	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT)); // 선택된걸 확인하기.
 	
 	// Change Time 부여를 위한 Condition 추가
 	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
@@ -384,23 +387,29 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	m_Characters[m_iCurrentCharacterIdx]->Sync_Collider(XMVectorZero(), fTimeDelta);  // 속도 0으로 초기화
 
 	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작) => 새 캐릭터.
-//    - 새 캐릭터의 StateContext 초기화 (e.g., IdleType 설정). => 모두 고정.
+	//    - 새 캐릭터의 StateContext 초기화 (e.g., IdleType 설정). => 모두 고정.
 	m_Characters[m_iCurrentCharacterIdx]->Set_Gravity(true);  // 중력 활성화 (필요 시)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
 
 	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
 
+	
+
 	// 6. 협주 확인. Ensemble
 	// 이전 캐릭터의 협주게이지 확인 => Get_HarmonyGauge
-	CHARACTERTYPE eCharacterType = static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx);
+	CHARACTERTYPE ePrevCharacterType = static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx);
+	CHARACTERTYPE eCurCharacterType = static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx);
 
 
-	// 7. QTE 실행. 가능하면 ㄴ
-	if (IsQTEPossible(eCharacterType))
+	// 7. QTE 실행. 가능하면
+	if (IsQTEPossible(ePrevCharacterType))
 	{
 		// QTE 실행.
-		ExecuteQTE(eCharacterType);
+		ExecuteQTE(ePrevCharacterType);
+
+		// 둘다 실행?
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::QTE);
 	}
 	else
 	{
@@ -728,7 +737,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
     RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-    RigidbodyDesc.vExtent = _float3(10.f, 5.f, 10.f);
+    RigidbodyDesc.vExtent = _float3(30.f, 15.f, 30.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
     if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

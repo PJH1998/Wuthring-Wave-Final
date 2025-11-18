@@ -354,8 +354,12 @@ void CCharacter::End_SFX()
 
 void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 {
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+	
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, m_pModelCom);
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
 }
 
 // 내 Velocity 고정.
@@ -382,6 +386,7 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 
 	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
+
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {

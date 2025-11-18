@@ -4,7 +4,7 @@
 NS_BEGIN(Client)
 
 // Run State - Run 관련 모든 애니메이션 관리
-class CAugustaGroundQTE final : public CGroundState
+class CGalbrenaGroundQTE final : public CGroundState
 {
 private:
     enum QTESTATE
@@ -14,12 +14,12 @@ private:
 		MOVE,
 		LAND,
 		FALL,
-		END
+        END
     };
 
 private:
-    explicit CAugustaGroundQTE() = default;
-    virtual ~CAugustaGroundQTE() = default;
+    explicit CGalbrenaGroundQTE() = default;
+    virtual ~CGalbrenaGroundQTE() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -28,7 +28,7 @@ public:
     virtual void OnExit() override;
 
 private:
-    class CAugusta* m_pAugusta = { nullptr };
+    class CGalbrena* m_pGalbrena = { nullptr };
 
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
@@ -42,7 +42,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundQTE* Create(class CGameObject* pOwner);
+    static CGalbrenaGroundQTE* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

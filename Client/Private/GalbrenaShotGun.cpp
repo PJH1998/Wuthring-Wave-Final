@@ -118,7 +118,13 @@ void CGalbrenaShotGun::Render()
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
             CRASH("Ready Diffuse Texture Failed");
 
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		_bool HasNormal = { false };
+
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 
 		// 3. Mask Texture
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);

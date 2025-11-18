@@ -832,6 +832,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\Effect_Radial.h">
       <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+	</ClInclude>
+    <ClInclude Include="..\Public\GalbrenaDarkWing.h">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundQTE.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1317,6 +1323,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Radial.cpp">
       <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+	</ClCompile>
+    <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
