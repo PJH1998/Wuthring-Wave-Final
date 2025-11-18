@@ -333,6 +333,7 @@
     <ClInclude Include="..\public\UI_Loading.h" />
     <ClInclude Include="..\public\UI_LockOn.h" />
     <ClInclude Include="..\public\UI_Logo.h" />
+    <ClInclude Include="..\public\UI_MobHPBar.h" />
     <ClInclude Include="..\public\UI_Parry.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_Text.h">
@@ -518,6 +519,7 @@
     <ClCompile Include="..\private\UI_Loading.cpp" />
     <ClCompile Include="..\private\UI_LockOn.cpp" />
     <ClCompile Include="..\private\UI_Logo.cpp" />
+    <ClCompile Include="..\private\UI_MobHPBar.cpp" />
     <ClCompile Include="..\private\UI_Parry.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">

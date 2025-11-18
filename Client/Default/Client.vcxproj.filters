@@ -319,6 +319,9 @@
     <Filter Include="03. GameObject\Actor\NPC">
       <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Props\MobHPBar">
+      <UniqueIdentifier>{2070fc30-04c0-4684-8025-4587fbef7c5e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -842,6 +845,7 @@
     <ClInclude Include="..\public\DummyNPC.h">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_MobHPBar.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1330,6 +1334,7 @@
     <ClCompile Include="..\private\DummyNPC.cpp">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_MobHPBar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

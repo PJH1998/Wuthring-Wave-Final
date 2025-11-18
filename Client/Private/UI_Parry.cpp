@@ -77,7 +77,6 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Parry", this);
-	//m_vOriginSca = m_pTransformCom->Get_Scaled();
 
     return S_OK;
 }

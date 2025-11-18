@@ -14,7 +14,7 @@ public:
 	explicit CUI_Parry(const CUI_Parry& Prototype);
 	virtual ~CUI_Parry() = default;
 
-public: // 생성/복제
+public:
 	virtual HRESULT Initialize_Prototype()							override;
 	virtual HRESULT Initialize_Clone(void* pArg)					override;
 	virtual void    Priority_Update(_float fTimeDelta)				override;
@@ -33,9 +33,6 @@ private:
 	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
 	 
 private:
-	//class CGameSystem*		m_pGameSystem = { nullptr };
-	//CTransform* m_pTargetTransform = { nullptr };
-
 	_float			m_fElapsedTime = 0.f;
 	_bool			m_isParried = false;
 

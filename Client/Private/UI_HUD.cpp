@@ -87,9 +87,11 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 void CUI_HUD::Update(_float fTimeDelta)
 {
 	m_iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
-	if (m_iSelectedCHIndex == 2)
-		m_iSelectedCHIndex = 0;
+	//if (m_iSelectedCHIndex == 2)
+	//	m_iSelectedCHIndex = 0;
 
+	if (m_iSelectedCHIndex == 2)
+		int i = 10;
 
 	m_pAbility = m_pPlayerStatus->Get_Ability(m_iSelectedCHIndex);
 
@@ -393,7 +395,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 1.f };
 				break;
 			}
-			pSkillUI[CH_ROVER]->Set_UIDesc(galbrenaUIDesc);
+			pSkillUI[CH_GALBRENA]->Set_UIDesc(galbrenaUIDesc);
 			break;
 
 		}
@@ -404,7 +406,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
     // ==============================
 	// * [Change Update] Cooldown
-	// ==============================
+	// ======wwwwwwwwwww==================
     for (_uint i = 0; i < CH_END; i++)
     {
         _float fCooldown = fChangeCD[i];
