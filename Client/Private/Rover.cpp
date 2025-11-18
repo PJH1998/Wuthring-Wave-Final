@@ -123,7 +123,7 @@ void CRover::Update(_float fTimeDelta)
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
 		// 6. Camera 갱신 => 위치 따라오게
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f); // 카메라 이벤트중이면 제어못하게?
 
 	}
 	else
@@ -267,6 +267,22 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			// 애니메이션 변경할 값.
 			GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+			break;
+		}
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+			// 내 앞에서 생성. (안 곂치게)
+			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+			
+			vPos += vLook * 5.f;
+			m_pColliderCom->Set_Position(vPos);
+			m_pColliderCom->IsActivate(true);
+
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 			break;
 		}
 	}
@@ -457,9 +473,9 @@ void CRover::Bind_QTE(_bool IsQTE)
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 		// 내 앞에서 생성. (안 곂치게)
-		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+		_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
-		vPos += vLook * 1.f;
+		vPos += vLook * 5.f;
 		m_pQTEColliderCom->Set_Position(vPos);
 		m_pQTEColliderCom->IsActivate(true);
 

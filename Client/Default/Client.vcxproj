@@ -223,6 +223,7 @@
     <ClInclude Include="..\Public\GalbrenaGroundDodge.h" />
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
     <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundQTE.h" />
     <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecial.h" />
@@ -421,6 +422,7 @@
     <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp" />

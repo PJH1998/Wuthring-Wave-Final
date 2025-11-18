@@ -282,11 +282,22 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 	// 애니메이션 변경할 값.
 	switch (eTransitionType)
 	{
-	case CHARACTER_TRANSITIONTYPE::IDLE:
-		GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-		break;
+		case CHARACTER_TRANSITIONTYPE::IDLE:
+		{
+			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+			break;
+		}
+		
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
+			break;
+		}
 	}
+	
 	// 상태 변수 초기화
 	m_StateContext.Clear();
 

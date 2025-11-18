@@ -116,6 +116,9 @@ void CGalbrena::Update(_float fTimeDelta)
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
+
+	_bool IsSelect = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
 	if (!m_IsQTE)
 	{
 		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
@@ -271,6 +274,14 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
+			break;
+		}
+
 	}
 
 	// 상태 변수 초기화

@@ -37,6 +37,8 @@ void CRoverGroundQTE::OnEnter(void* pArg)
 	// 5. 중력 켰다.
 	m_pRover->Set_Gravity(false);
 	m_pRover->Rotate_Target();
+
+	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CRoverGroundQTE::OnUpdate(_float fTimeDelta)
@@ -61,17 +63,28 @@ void CRoverGroundQTE::OnExit()
 {
     CGroundState::OnExit();
 	m_pRover->Set_Gravity(false);
-	m_pRover->Set_QTEEnd(true);
+	if (!m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT)))
+	{
+		m_pRover->Set_QTEEnd(true);
+		m_pRover->Bind_ChangeEffect();
+	}
+		
 	
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
+	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	
 }
 
 
 
 void CRoverGroundQTE::Handle_Input()
 {
-	
+	m_States[SELECT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
+	m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey) && m_States[SELECT];
+	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 }
 
 void CRoverGroundQTE::Update_QTEAnimation(_float fTimeDelta)
@@ -93,10 +106,48 @@ void CRoverGroundQTE::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
+	if (IsEscapePossible)
+	{
+		if (m_States[MOVE])
+		{
+			if (m_States[LAND])
+			{
+				m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::RUN_F;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN));
+				return;
+			}
+			else if (!m_States[LAND])
+			{
+				m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
+				return;
+			}
+		}
+	}
+
 	// 1. 끝나면 콜백을 호출시켜야함 => Player가 인지하게끔?
 	if (m_IsAnimationEnd)
 	{
-		OnExit();
+		if (m_States[SELECT])
+		{
+			if (m_States[LAND])
+			{
+				m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+				return;
+			}
+			else if (!m_States[LAND])
+			{
+				m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
+				return;
+			}
+		}
+		else
+		{
+			OnExit();
+		}
+		
 	
 		return;
 	}

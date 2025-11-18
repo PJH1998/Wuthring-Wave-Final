@@ -269,7 +269,7 @@ public:
 #pragma endregion
 
 	
-#pragma region CONDITION
+#pragma region CHARACTER CONDITION
 public:
 	void Add_Condition(_uint iConditionFlag);
 	_bool Check_AnyCondition(_uint iConditionFlag);

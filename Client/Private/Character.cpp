@@ -383,6 +383,7 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
+
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
 	if (nullptr == m_pAbillityCom)
