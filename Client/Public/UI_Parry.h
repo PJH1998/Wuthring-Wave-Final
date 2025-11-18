@@ -31,7 +31,7 @@ private:
 	void			Ready_Presets();
 	void			Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos);
 	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
-
+	 
 private:
 	//class CGameSystem*		m_pGameSystem = { nullptr };
 	//CTransform* m_pTargetTransform = { nullptr };
@@ -40,6 +40,8 @@ private:
 	_bool			m_isParried = false;
 
 	_float3			m_vTargetPos = _float3(0.f, -10.f, 0.f);
+
+	//_float3			m_vOriginSca = {};
 
 public:
 	static CUI_Parry*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

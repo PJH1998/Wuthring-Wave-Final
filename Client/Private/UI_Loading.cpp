@@ -68,9 +68,6 @@ void CUI_Loading::Priority_Update(_float fTimeDelta)
 
 void CUI_Loading::Update(_float fTimeDelta)
 {
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
-
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
@@ -78,6 +75,9 @@ void CUI_Loading::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }

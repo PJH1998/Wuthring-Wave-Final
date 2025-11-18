@@ -58,6 +58,9 @@ void CUI_Text_Damage::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+	
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);
 }

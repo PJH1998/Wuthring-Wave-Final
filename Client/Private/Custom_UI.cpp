@@ -114,7 +114,7 @@ void CCustom_UI::Render()
 
 
 
-	if (m_tUIDesc.strUIName == L"LockOn")							// Debug
+	if (m_tUIDesc.strUIName == L"SectorA_Parry")
 		int i = 10;
 
 

@@ -94,14 +94,15 @@ void CUI_Logo::Update(_float fTimeDelta)
 
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
 }
 
 void CUI_Logo::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }

@@ -241,9 +241,8 @@ void CAnimator_UI::Update_Animation_Calculate()
     // if target doesnt have selected animation, binds default value to shader.
     // if not, it will be affected by pre-played animations.
 #ifdef _DEBUG
-	if (m_pOwner->Get_UIDesc().strUIName == L"SectorA_LockOn")
+	if (m_pOwner->Get_UIDesc().strUIName == L"SectorA_Parry")
 		int i = 10;
-
 #endif // _DEBUG
 
 

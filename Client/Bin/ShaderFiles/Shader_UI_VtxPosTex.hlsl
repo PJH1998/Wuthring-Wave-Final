@@ -10,9 +10,10 @@
 // Basic Variables
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
-Texture2D g_TextureFX;
 float g_AlphaStrength;
 
+Texture2D g_TextureFX;
+float g_FXStrength;
 
 // Gradient Variables
 float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f }; // based on worldspace.         for discard by pos (esc menu, inventory, etc..)

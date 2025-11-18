@@ -73,6 +73,7 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Parry", this);
+	//m_vOriginSca = m_pTransformCom->Get_Scaled();
 
     return S_OK;
 }
@@ -111,7 +112,7 @@ void CUI_Parry::Update(_float fTimeDelta)
 
 
 	// 시간 경과 시 비활성화.
-	const _float fNormalEndTime = 0.35f;
+	const _float fNormalEndTime = 0.50f;
 	const _float fParriedEndTime = 0.34f;
 
 	if (!m_isParried &&
@@ -130,9 +131,6 @@ void CUI_Parry::Update(_float fTimeDelta)
 	}
 
 	__super::Update(fTimeDelta);
-
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
 }
 
 void CUI_Parry::Late_Update(_float fTimeDelta)
@@ -146,7 +144,12 @@ void CUI_Parry::Late_Update(_float fTimeDelta)
 	Update_CamDistScale(pSectorAMain, 40.f);
 	Update_CamDistScale(pSectorAEff, 40.f);
 
+	//Update_CamDistScale(this, 40.f);
 
+
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);
 }
@@ -235,7 +238,7 @@ void CUI_Parry::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance
 {
 	CTransform* pTargetTransform = static_cast<CTransform*>(pTargetUI->Get_Component(L"Com_Transform"));
 
-	_float3 vScale = pTargetTransform->Get_Scaled(); // 부모가 작아지니 그만큼 자식도 작아져서 왜곡 존재. 그러면 어떻게 해야함?
+	_float3 vScale =/* (pTargetUI == this)? m_vOriginSca :*/ pTargetTransform->Get_Scaled();
 
 	_float3 vTargetPos = m_vTargetPos;
 	_float fDist = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat3(&vTargetPos)));
