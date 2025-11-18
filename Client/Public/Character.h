@@ -280,6 +280,9 @@ public:
 
 
 	void Bind_ChangeTimer() { m_fChangeTimer = m_fChangeDuration; } // Dissolve에 바인딩할 변수값.
+
+	virtual void Reset_QTECamera() {};
+	virtual void Bind_QTECamera() {};
 #pragma endregion
 
 
@@ -334,6 +337,9 @@ protected:
 
 	_float m_fChangeDuration = { 1.f }; // 변환시간.
 	_float m_fChangeTimer = { };
+
+	_float m_fCameraOffset = {};
+	_float m_fCameraOriginOffset = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

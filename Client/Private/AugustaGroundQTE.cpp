@@ -49,6 +49,11 @@ void CAugustaGroundQTE::OnEnter(void* pArg)
 
 
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	// 6. 카메라
+	_bool IsSelect = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	if (IsSelect) // 선택된 캐릭터일때만?
+		m_pAugusta->Bind_QTECamera();
 }
 
 void CAugustaGroundQTE::OnUpdate(_float fTimeDelta)
@@ -74,10 +79,16 @@ void CAugustaGroundQTE::OnExit()
     CGroundState::OnExit();
 	m_pAugusta->Set_Gravity(false);
 
-	if (!m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT)))
+	_bool IsSelect = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
+	if (!IsSelect)
 	{
 		m_pAugusta->Set_QTEEnd(true);
 		m_pAugusta->Bind_ChangeEffect();
+	}
+	else
+	{
+		m_pAugusta->Reset_QTECamera();
 	}
 		
 	// 공격 콜라이더 비활성화
@@ -85,6 +96,7 @@ void CAugustaGroundQTE::OnExit()
 	m_pAugusta->PartActivate(m_iPartType, false); // 파츠 변경. // Volume Activate는 Notify로..
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
+	
 	
 }
 

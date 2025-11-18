@@ -66,6 +66,9 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	m_pQTEColliderCom->Set_Position(vPos);
 
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
+	m_fCameraOriginOffset = 1.2f;
+	m_fCameraOffset = 1.2f;
     return S_OK;
 }
 
@@ -125,8 +128,7 @@ void CGalbrena::Update(_float fTimeDelta)
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
 		// 6. Camera 갱신 => 위치 따라오게
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
 	}
 	else
 	{
@@ -276,6 +278,7 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 		}
 		case CHARACTER_TRANSITIONTYPE::QTE:
 		{
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
 			// 애니메이션 변경할 값.
 			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
@@ -426,7 +429,7 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 // Hit 판정.
 void CGalbrena::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit)
+	if (nullptr == pArg || m_IsHit || m_IsQTE)
 		return;
 
 	_uint iFlag = {};
@@ -495,6 +498,17 @@ void CGalbrena::Bind_QTE(_bool IsQTE)
 		GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
 	}
+}
+
+void CGalbrena::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CGalbrena::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
 

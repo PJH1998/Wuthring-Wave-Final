@@ -69,6 +69,8 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	m_pQTEColliderCom->Set_Position(vPos);
 
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
+
     return S_OK;
 }
 
@@ -277,9 +279,11 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
 			
 			vPos += vLook * 5.f;
+			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
 			m_pColliderCom->Set_Position(vPos);
 			m_pColliderCom->IsActivate(true);
 
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
 			// 애니메이션 변경할 값.
 			GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
@@ -483,6 +487,17 @@ void CRover::Bind_QTE(_bool IsQTE)
 		GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 	}
+}
+
+void CRover::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CRover::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
 

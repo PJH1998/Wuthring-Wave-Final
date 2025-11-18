@@ -39,6 +39,11 @@ void CGalbrenaGroundQTE::OnEnter(void* pArg)
 	m_pGalbrena->Rotate_Target();
 
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	// 6. 카메라 변경
+	_bool IsSelect = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	if (IsSelect) // 선택된 캐릭터일때만?
+		m_pGalbrena->Bind_QTECamera();
 }
 
 void CGalbrenaGroundQTE::OnUpdate(_float fTimeDelta)
@@ -68,12 +73,16 @@ void CGalbrenaGroundQTE::OnExit()
 		m_pGalbrena->Set_QTEEnd(true);
 		m_pGalbrena->Bind_ChangeEffect();
 	}
+	else
+		m_pGalbrena->Reset_QTECamera();
 		
 	
 	// 공격 콜라이더 비활성화
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	//m_pGalbrena->Reset_QTECamera();
 
 	
 }

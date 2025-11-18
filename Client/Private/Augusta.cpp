@@ -291,7 +291,18 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 		
 		case CHARACTER_TRANSITIONTYPE::QTE:
 		{
-			// 애니메이션 변경할 값.
+			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+			// 내 앞에서 생성. (안 곂치게)
+			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+
+			vPos += vLook * -1.f;
+			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
+			m_pColliderCom->Set_Position(vPos);
+			m_pColliderCom->IsActivate(true);
+
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+
 			GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
 			break;
@@ -462,7 +473,7 @@ void CAugusta::Hit_Judge(void* pArg)
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
 	m_fDodgeableHitTimer = m_fDodgeableDuration;
 
-
+	
 	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
 	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 	if (!IsAttack)
@@ -523,6 +534,17 @@ void CAugusta::Bind_QTE(_bool IsQTE)
 		GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
 	}
+}
+
+void CAugusta::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CAugusta::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
 

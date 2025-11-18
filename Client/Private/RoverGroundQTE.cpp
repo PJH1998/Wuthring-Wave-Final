@@ -39,6 +39,11 @@ void CRoverGroundQTE::OnEnter(void* pArg)
 	m_pRover->Rotate_Target();
 
 	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	// 6. 카메라 변경.
+	_bool IsSelect = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	if (IsSelect) // 선택된 캐릭터일때만?
+		m_pRover->Bind_QTECamera();
 }
 
 void CRoverGroundQTE::OnUpdate(_float fTimeDelta)
@@ -68,6 +73,8 @@ void CRoverGroundQTE::OnExit()
 		m_pRover->Set_QTEEnd(true);
 		m_pRover->Bind_ChangeEffect();
 	}
+	else
+		m_pRover->Reset_QTECamera();
 		
 	
 	// 공격 콜라이더 비활성화

@@ -66,6 +66,9 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 	
 	pGameInstance->OnShake(Desc);
 
+	// 8. Effect
+	m_pGalbrena->Spawn_Effect(TEXT("Common_Limit"));
+
 }
 
 void CGalbrenaGroundDodge::OnUpdate(_float fTimeDelta)
