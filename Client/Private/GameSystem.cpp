@@ -295,6 +295,13 @@ MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
 }
 #pragma endregion
 
+#pragma region SFX_PREFAB
+void CGameSystem::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex)
+{
+	m_pParser->Ready_SFX_Prefab(pFolderPath, iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex);
+}
+#pragma endregion
+
 void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);

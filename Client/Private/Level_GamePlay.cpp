@@ -420,17 +420,22 @@ void CLevel_GamePlay::Ready_Mouse()
 
 void CLevel_GamePlay::Ready_SFX()
 {
+	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::GAMEPLAY));
+
+#pragma region SFX
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
 		CRASH("Failed Add Pool SONORA_CHANGE");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiSFX"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Augusta_UltiSFX"), 1)))
-		CRASH("Failed Add Pool Augusta_UltiSFX");
-	
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Augusta_UltiPostSFX"), 1)))
-		CRASH("Failed Add Pool Augusta_UltiPostSFX");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
+	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
+	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
+	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiStar"), 1)))
+	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
+
+#pragma endregion
 }
 
 #ifdef _DEBUG
@@ -451,13 +456,15 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	{
 		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
 		//Desc.fEffectTime = 3.f;
-		//Desc.fRadialTime = 2.f;
-		//Desc.fFadeTime = 2.f;
+		//Desc.fRadialTime = 1.f;
+		//Desc.fFadeTime = 1.f;
+		  
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
+	}
 
-		//m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
-		
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_Augusta_UltiSFX"), XMMatrixIdentity(), nullptr);
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_Augusta_UltiPostSFX"), XMMatrixIdentity(), nullptr);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
 	if (ImGui::CollapsingHeader("LUT"))

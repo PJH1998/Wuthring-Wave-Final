@@ -17,7 +17,6 @@ protected:
 	explicit CVIBuffer_Instance(const CVIBuffer_Instance& Prototype);
 	virtual ~CVIBuffer_Instance() = default;
 
-
 public:
 	virtual HRESULT		Initialize_Prototype();
 	virtual HRESULT		Initialize_Prototype(const INSTANCE_DESC* pDesc);

@@ -113,6 +113,10 @@ public:
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
 #pragma endregion
 
+#pragma region SFX_PREFAB
+	void	Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex);
+#pragma endregion
+
 private:
 	class	CParser*			m_pParser						= { nullptr };
 	class	CFactory*			m_pFactory						= { nullptr };

@@ -59,8 +59,10 @@ void CAugustaBlur::Update(_float fTimeDelta)
 {
 	m_fCurrentTime += fTimeDelta;
 
+	_float fRatio = 1.f - SmoothStep(m_vEffectTime.x, m_vEffectTime.y, m_fCurrentTime);
+
 //	m_SlashData.fIntensity = 1.f - SmoothStep(m_vEffectTime.x, m_vEffectTime.y, m_fCurrentTime);
-	m_RadialData.fLengthScale = (- 0.4f * (1.f - SmoothStep(m_vEffectTime.x, m_vEffectTime.y, m_fCurrentTime)));
+	m_RadialData.fLengthScale = (- 0.4f * fRatio);
 }
 
 void CAugustaBlur::Late_Update(_float fTimeDelta)
@@ -96,12 +98,12 @@ void CAugustaBlur::Render()
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		CRASH("Failed to Bind ProjMatrix");
 
-	if (FAILED(m_pShader->Bind_Value("vScreenSize", &m_vWinSize, sizeof(_float2))))
+	if (FAILED(m_pShader->Bind_Value("g_vScreenSize", &m_vWinSize, sizeof(_float2))))
 		CRASH("Failed to Bind vScreenSize");
 
 	if(FAILED(m_pNoiseTexture->Bind_Shader_Resource(m_pShader, "g_NoiseTexture")))
 		CRASH("Failed to Bind NoseTexture");
-
+	
 	if (FAILED(m_pShader->Bind_Texture("g_SceneTexture", m_pGameInstance->Get_CurrentSceneSRV())))
 		CRASH("Failed to Bind SceneTexture");
 
@@ -138,6 +140,15 @@ HRESULT CAugustaBlur::Ready_Buffer()
 	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_pBuffer)))
 		CRASH("Failed to Create : Constant Buffer");
 
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer_Rect), nullptr)))
+		ASSERT_CRASH(m_pVIBuffer_Rect);
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
+		ASSERT_CRASH(m_pShader);
+
 	return S_OK;
 }
 
@@ -167,6 +178,8 @@ void CAugustaBlur::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pVIBuffer_Rect);
+	Safe_Release(m_pShader);
 	Safe_Release(m_pBuffer);
 	Safe_Release(m_pNoiseTexture);
 }

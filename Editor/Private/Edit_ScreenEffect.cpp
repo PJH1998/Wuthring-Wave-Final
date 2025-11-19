@@ -77,14 +77,6 @@ void CEdit_ScreenEffect::Render()
 
 HRESULT CEdit_ScreenEffect::Ready_Components()
 {
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
-		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer_Rect), nullptr)))
-		ASSERT_CRASH(m_pVIBuffer_Rect);
-
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ScreenEffect"),
-		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
-		ASSERT_CRASH(m_pShader);
-
 	return S_OK;
 }
 
@@ -102,7 +94,4 @@ void CEdit_ScreenEffect::Setting_Pos(_float fPosX, _float fPosY)
 void CEdit_ScreenEffect::Free()
 {
 	__super::Free();
-
-	Safe_Release(m_pVIBuffer_Rect);
-	Safe_Release(m_pShader);
 }

@@ -91,9 +91,6 @@ void CAugusta_SFX::Render()
 	if (FAILED(m_pMaskTexture->Bind_Shader_Resource(m_pShader, "g_MaskTexture")))
 		CRASH("Failed to Bind MaskTexture");
 
-	if (FAILED(m_pNoiseTexture->Bind_Shader_Resource(m_pShader, "g_NoiseTexture")))
-		CRASH("Failed to Bind NoiseTexture");
-
 	if(FAILED(m_pShader->Bind_Value("g_vColor", &m_vColor, sizeof(_float3))))
 		CRASH("Failed to Bind vColor");
 
@@ -125,9 +122,13 @@ HRESULT CAugusta_SFX::Ready_Textures()
 	m_pMaskTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_300156.png"), 1);
 	ASSERT_CRASH(m_pMaskTexture);
 
-	m_pNoiseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Normal_40004.png"), 1);
-	ASSERT_CRASH(m_pNoiseTexture);
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer_Rect), nullptr)))
+		ASSERT_CRASH(m_pVIBuffer_Rect);
 
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
+		ASSERT_CRASH(m_pShader);
 
 	return S_OK;
 }
@@ -158,6 +159,8 @@ void CAugusta_SFX::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pVIBuffer_Rect);
+	Safe_Release(m_pShader);
 	Safe_Release(m_pMaskTexture);
 	Safe_Release(m_pNoiseTexture);
 }
