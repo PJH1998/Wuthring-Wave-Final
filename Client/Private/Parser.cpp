@@ -19,6 +19,8 @@
 #include "Sequence.h"
 #include "Effect_Radial.h"
 
+#include "SFX_Prefab.h"
+
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
 	m_pDevice { pDevice }, m_pContext { pContext }
@@ -1348,6 +1350,60 @@ void CParser::Load_FXRadial_FromJson(const _string& strFilePath, const _string& 
 	{
 		MSG_BOX("Effect_Rect Load Fail");
 		return;
+	}
+}
+
+void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex)
+{
+	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().stem().string();
+
+			ifstream InputFile(filePath);
+			json PrefabJson;
+			InputFile >> PrefabJson;
+
+			CSFX_Prefab::SFX_PREFAB_DESC PrefabDesc = {};
+
+			vector<CSFX_Prefab::SFX_PREFAB_DATA> Children;
+			
+			
+			_wstring strPrototype = TEXT("Prototype_");
+			_wstring strPooling = TEXT("Pooling_");
+
+			for (auto& Data : PrefabJson["Children"])
+			{
+				CSFX_Prefab::SFX_PREFAB_DATA SFX_Data = {};
+				
+				SFX_Data.fStartTime = Data["StartTime"];
+				
+				_wstring strSfxTag = StringToWString(Data["Tag"]);
+				SFX_Data.strSfxTag = strPooling + strSfxTag;
+
+				m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
+					SFX_Data.strSfxTag, 1, nullptr);
+
+				Children.push_back(SFX_Data);
+			}
+			
+			if (Children.size() > 1)
+			{
+				sort(Children.begin(), Children.end(), [&](CSFX_Prefab::SFX_PREFAB_DATA pSour, CSFX_Prefab::SFX_PREFAB_DATA  pDest) {
+					return pSour.fStartTime < pDest.fStartTime; });
+			}
+
+			PrefabDesc.Children = &Children;
+
+			_wstring PoolingTag = StringToWString(PrefabJson["Tag"]);
+
+			m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
+				PoolingTag, 1, &PrefabDesc);
+
+			InputFile.close();
+		}
 	}
 }
 

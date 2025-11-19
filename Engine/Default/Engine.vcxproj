@@ -145,6 +145,7 @@
     <ClInclude Include="..\public\VIBuffer_Decal.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_FXMesh_Instance.h" />
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Mesh.h" />
     <ClInclude Include="..\Public\VIBuffer_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h" />
@@ -275,6 +276,7 @@
     <ClCompile Include="..\private\VIBuffer_Decal.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_FXMesh_Instance.cpp" />
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Mesh.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp" />

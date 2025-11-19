@@ -368,6 +368,9 @@
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance">
       <UniqueIdentifier>{ea694176-fb29-4956-86f4-868581b42cfe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Rect\Instance">
+      <UniqueIdentifier>{295226f9-6a82-4c8a-b5c7-2befd237547d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -746,6 +749,9 @@
     <ClInclude Include="..\Public\MeshAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Rect\Instance</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1099,6 +1105,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MeshAnim_Instance.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Rect\Instance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
