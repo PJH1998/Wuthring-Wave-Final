@@ -86,6 +86,18 @@ namespace Engine
 		_float fTrackPosition;
 	}KEYFRAME;
 
+
+    // MORPH KEYFRAME
+	typedef struct tagKeyFrameCurve
+	{
+		_float fTrackPosition;
+		_float fValue;
+		_float fArriveTangent;
+		_float LeaveTangent; 
+		_uint iInterpolationType;
+	}KEYFRAME_CURVE;
+
+
 	typedef struct tagCameraFrame
 	{
 		// [Target] LookPos = TargetPos + vTranslation
@@ -395,6 +407,8 @@ namespace Engine
 		_bool			 IsActive = false;
 		_matrix			OffsetMatrix = {};
 	}EFFECT_INFO;
+
+
 }
 
 

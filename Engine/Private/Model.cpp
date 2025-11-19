@@ -261,24 +261,30 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 		return E_FAIL;
 	}
 
-	if (MODELTYPE::ANIM == m_eType)
+	if (MODELTYPE::CHARACTER == m_eType)
 	{
-		if (FAILED(Ready_Bone(InputFile, -1)))
+		if (FAILED(Ready_CharacterModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
-
-		if (FAILED(Ready_Animation(pFilePath)))
+	}
+	else if (MODELTYPE::ANIM == m_eType)
+	{
+		if (FAILED(Ready_AnimModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
 	}
 	else if (MODELTYPE::ECO == m_eType)
 	{
-		if (FAILED(Ready_Bone(InputFile, -1)))
+		if (FAILED(Ready_EchoModel(PreTransformMatrix, pFilePath, InputFile)))
+			return E_FAIL;
+	}
+	else
+	{
+		// Map NonAnim
+		if (FAILED(Ready_NonAnimModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
 	}
 
-	if (FAILED(Ready_Mesh(InputFile)))
-		return E_FAIL;
-	if (FAILED(Ready_Material(pFilePath)))
-		return E_FAIL;
+
+
 	InputFile.close();
 
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
@@ -357,69 +363,9 @@ HRESULT CModel::Clear_Materials(CDeferredShader* pShader, const _char* pConstanc
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Clear_Resource(pShader, pConstanceName, eTextureType, pEffect);
 }
 
-//_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
-//{
-//	// 다른 Animation 들어올 시, 이전 Animation 저장
-//	//if (m_strPreAnimation != strAnimationName)
-//	//{
-//	//	m_isChangeAnimation = true;
-//	//	m_strPreAnimation = strAnimationName;
-//	//}
-//
-//	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
-//	if (true == isBlend && true == m_isBlend)
-//	{
-//		*pTrackPosition = 0.f;
-//		if (true == m_Animations.find(strAnimationName)->second->Blend_TransformationMatrices(fTimeDelta, m_Bones, 1.f))
-//		{
-//			Clear_Animation(strAnimationName);
-//			m_isBlend = false;
-//		}
-//	}
-//	else
-//	{
-//		auto iter = m_Animations.find(strAnimationName);
-//		if (iter == m_Animations.end())
-//			return S_OK;
-//
-//		_float fTrackPosition = {};
-//
-//
-//		if (true == iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition))
-//		{
-//			if (m_strPreAnimation != strAnimationName)
-//			{
-//				if(m_strPreAnimation != "")
-//					m_isBlend = true;
-//				m_strPreAnimation = strAnimationName;
-//			}
-//			Clear_Animation(strAnimationName);
-//			return true;
-//		}
-//		if(nullptr != pTrackPosition)
-//			*pTrackPosition = fTrackPosition;
-//
-//		// Root Node Translation 조정
-//		if (true == isRootMotion)
-//			Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
-//	}
-//
-//
-//	for (auto& pBone : m_Bones)
-//		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-//
-//
-//	return false;
-//}
 
 _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
-	// 다른 Animation 들어올 시, 이전 Animation 저장
-	//if (m_strPreAnimation != strAnimationName)
-	//{
-	//	m_isChangeAnimation = true;
-	//	m_strPreAnimation = strAnimationName;
-	//}
 
 	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
 
@@ -1084,6 +1030,70 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
 }
 
+HRESULT CModel::Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
+{
+	if (FAILED(Ready_Mesh(InputFile)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT CModel::Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
+{
+	if (FAILED(Ready_Bone(InputFile, -1)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Animation(pFilePath)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Mesh(InputFile)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT CModel::Ready_CharacterModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
+{
+
+	// Ready Bone 동일.
+	if (FAILED(Ready_Bone(InputFile, -1)))
+		return E_FAIL;
+
+	// Animation Import가 다름.
+	if (FAILED(Ready_MorphAnimation(pFilePath)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Mesh(InputFile)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+
+
+	return S_OK;
+}
+
+HRESULT CModel::Ready_EchoModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
+{
+	if (FAILED(Ready_Bone(InputFile, -1)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Mesh(InputFile)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+
 //void CModel::Compute_RootAnimation(_float fRootMotionRate)
 //{
 //	_vector vScale{}, vRotation{}, vTranslation{};
@@ -1187,6 +1197,11 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 	return S_OK;
 }
 
+HRESULT CModel::Ready_ShapeKeyMesh(ifstream& InputFile)
+{
+	return S_OK;
+}
+
 HRESULT CModel::Ready_Material(const _char* pFilePath)
 {
 	_char szMaterialFilePath[MAX_PATH] = {};
@@ -1266,6 +1281,47 @@ HRESULT CModel::Ready_Animation(const _char* pFilePath)
 	for (auto& pair : m_Animations)
 		m_AnimationNameToIndex.emplace(pair.first, iAnimIdx++);
 		
+
+	return S_OK;
+}
+
+HRESULT CModel::Ready_MorphAnimation(const _char* pFilePath)
+{
+
+#pragma region 기존 애니메이션 영역.
+	_char szDrivePath[MAX_PATH] = {};
+	_char szDirPath[MAX_PATH] = {};
+	_char szFileName[MAX_PATH] = {};
+
+	_splitpath_s(pFilePath, szDrivePath, MAX_PATH, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
+
+	_char szFilePath[MAX_PATH] = {};
+	strcpy_s(szFilePath, szDrivePath);
+	strcat_s(szFilePath, szDirPath);
+	strcat_s(szFilePath, "Animation/");
+	strcat_s(szFilePath, szFileName);
+	strcat_s(szFilePath, "_Anim.dat");
+
+	ifstream AnimationFile(szFilePath, ios::binary);
+
+	AnimationFile.read(reinterpret_cast<_char*>(&m_iNumAnimations), sizeof(_uint));
+
+	for (size_t i = 0; i < m_iNumAnimations; ++i)
+	{
+		CAnimation* pAnimation = CAnimation::Create(AnimationFile, m_Bones);
+		if (nullptr == pAnimation)
+			return E_FAIL;
+		m_Animations.emplace(pAnimation->Get_Name(), pAnimation);
+#ifdef _DEBUG
+		m_AnimationNames.push_back(pAnimation->Get_Name());
+#endif
+	}
+
+
+#pragma endregion
+
+
+
 
 	return S_OK;
 }

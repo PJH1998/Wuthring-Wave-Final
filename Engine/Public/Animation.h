@@ -31,7 +31,7 @@ public:
 	void				Sort_AnimNotify();
 
 public:
-	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
+	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
 	_bool				Update_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
 	_bool				Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
 
@@ -39,7 +39,10 @@ public:
 
 	_bool				Blend_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float fTrackLength);
 
-	_bool Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
+	_bool			Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
+
+	_bool	        Bind_MorphChannels(const vector<string>& modelShapeKeys);
+	_bool			Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights, _float* pFacialTrackPosition = nullptr);
 private:
 	_char									m_szName[MAX_PATH] = {};
 	_float									m_fDuration = {};
@@ -54,15 +57,27 @@ private:
 
 	_uint							m_iNotifyIndex = {};
 	
-	// ?좉퇋 Notify 
+	// Notify 
 	vector<class CAnimNotify*> m_AnimNotifies;
 
-	/* ��� */
+#pragma region MORPH TARGET
+	// Morph Target Data
+	_uint							m_iNumMorphMeshChannels = { }; // 기본 0
+	vector<class CMorphChannel*>	m_MorphMeshChannels;
+
+	// 매핑 테이블 => 현재 MorphChannel[i]가 Model의 ShapeKeyWeights의 몇번째 인덱스인지 저장.
+	vector<_int> 					m_MorphKeyIndicies; 
+
+#pragma endregion
+
+	
+
+
 
 private:
 
 public:
-	static CAnimation* Create(ifstream& InputFile, const vector<class CBone*>& Bones);
+	static CAnimation* Create(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
 	CAnimation* Clone();
 	virtual void Free() override;
 };

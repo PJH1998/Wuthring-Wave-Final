@@ -35,6 +35,11 @@ HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>&
 		if (FAILED(Ready_Mesh_Map(PreTransformMatrix, InputFile, MinPos, MaxPos)))
 			return E_FAIL;
 	}
+	else if (MODELTYPE::CHARACTER == eType)
+	{
+		if (FAILED(Ready_Mesh_Character(Bones, PreTransformMatrix, InputFile)))
+			return E_FAIL;
+	}
 
     return S_OK;
 }
@@ -241,6 +246,98 @@ HRESULT CMesh::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTr
         return E_FAIL;
 
     Safe_Delete_Array(pIndices);
+
+    return S_OK;
+}
+
+HRESULT CMesh::Ready_Mesh_Character(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile)
+{
+	VTXANIMMESH* pVertices = { nullptr };
+	_uint* pIndices = { nullptr };
+
+	InputFile.read(reinterpret_cast<_char*>(&m_iNumVertices), sizeof(_uint));
+	pVertices = new VTXANIMMESH[m_iNumVertices];
+	ZeroMemory(pVertices, sizeof(VTXANIMMESH) * m_iNumVertices);
+	InputFile.read(reinterpret_cast<_char*>(&m_iNumIndices), sizeof(_uint));
+	m_iNumIndices = m_iNumIndices * 3;
+	pIndices = new _uint[m_iNumIndices];
+	InputFile.read(reinterpret_cast<_char*>(&m_iMaterialIndex), sizeof(_uint));
+	InputFile.read(reinterpret_cast<_char*>(&m_iNumBones), sizeof(_uint));
+	for (size_t i = 0; i < m_iNumBones; ++i)
+	{
+		_uint iLength = {};
+		// Bone Name Length
+		InputFile.read(reinterpret_cast<_char*>(&iLength), sizeof(_uint));
+		_char szName[MAX_PATH] = {};
+		// Bone Name
+		InputFile.read(szName, iLength);
+		auto iter = find_if(Bones.begin(), Bones.end(), [&](CBone* pBone)->_bool {
+			return 0 == strcmp(szName, pBone->Get_Name());
+			});
+
+		if (iter == Bones.end())
+			return E_FAIL;
+
+		m_BoneIndices.push_back(iter - Bones.begin());
+
+		// OffsetMatrix
+		_float4x4 OffsetMatrix = {};
+		InputFile.read(reinterpret_cast<_char*>(&OffsetMatrix), sizeof(_float4x4));
+		XMStoreFloat4x4(&OffsetMatrix, XMMatrixTranspose(XMLoadFloat4x4(&OffsetMatrix)));
+		m_OffsetMatrices.push_back(OffsetMatrix);
+	}
+
+	if (0 == m_iNumBones)
+	{
+		_float4x4 OffsetMatrix = {};
+		XMStoreFloat4x4(&OffsetMatrix, XMMatrixIdentity());
+		m_OffsetMatrices.push_back(OffsetMatrix);
+		m_BoneIndices.push_back(0);
+	}
+
+	InputFile.read(reinterpret_cast<_char*>(pVertices), sizeof(VTXANIMMESH) * m_iNumVertices);
+	InputFile.read(reinterpret_cast<_char*>(pIndices), sizeof(_uint) * m_iNumIndices);
+
+	m_iVertexStride = sizeof(VTXANIMMESH);
+	m_iNumVertexBuffers = 1;
+
+	D3D11_BUFFER_DESC   VBDesc = {};
+	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
+	VBDesc.Usage = D3D11_USAGE_DEFAULT;
+	VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VBDesc.CPUAccessFlags = 0;
+	VBDesc.MiscFlags = 0;
+	VBDesc.StructureByteStride = m_iVertexStride;
+
+	D3D11_SUBRESOURCE_DATA VBInitialData = {};
+	VBInitialData.pSysMem = pVertices;
+
+	if (FAILED(m_pDevice->CreateBuffer(&VBDesc, &VBInitialData, &m_pVB)))
+		return E_FAIL;
+
+	Safe_Delete_Array(pVertices);
+#pragma endregion
+
+#pragma region INDEX
+	m_iIndexStride = 4;
+	m_eIndexFormat = DXGI_FORMAT_R32_UINT;
+	m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	D3D11_BUFFER_DESC IBDesc = {};
+	IBDesc.ByteWidth = m_iNumIndices * m_iIndexStride;
+	IBDesc.Usage = D3D11_USAGE_DEFAULT;
+	IBDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	IBDesc.CPUAccessFlags = 0;
+	IBDesc.MiscFlags = 0;
+	IBDesc.StructureByteStride = m_iIndexStride;
+
+	D3D11_SUBRESOURCE_DATA IBInitialData = {};
+	IBInitialData.pSysMem = pIndices;
+
+	if (FAILED(m_pDevice->CreateBuffer(&IBDesc, &IBInitialData, &m_pIB)))
+		return E_FAIL;
+
+	Safe_Delete_Array(pIndices);
 
     return S_OK;
 }

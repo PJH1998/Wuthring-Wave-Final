@@ -118,6 +118,10 @@ private:
 	_uint									m_iNumMeshes = {};
 	vector<class CMesh*>				m_Meshes;
 
+	// Shape Key 데이터.
+	vector<_string> 					m_ShapeKeyNames;	
+	vector<_float>						m_ShapeKeyWeights;
+
 	_uint									m_iNumMaterials = {};
 	vector<class CMeshMaterial*>	m_Materials;
 
@@ -134,6 +138,9 @@ private:
 	map<_string, class CAnimation*>		m_Animations;
 	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
 
+
+
+
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
 
@@ -149,6 +156,9 @@ private:
 	_uint m_iSelectIndex = { 0 };
 #endif
 	
+
+
+
 
 
 #pragma region Compute Shader
@@ -173,10 +183,22 @@ private:
 	void								Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
 
 private:
+	HRESULT							Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	HRESULT							Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	HRESULT							Ready_CharacterModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	HRESULT							Ready_EchoModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	
+
+
+private:
 	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex);
 	HRESULT							Ready_Mesh(ifstream& InputFile);
+	HRESULT							Ready_ShapeKeyMesh(ifstream& InputFile);
+
 	HRESULT							Ready_Material(const _char* pFilePath);
 	HRESULT							Ready_Animation(const _char* pFilePath);
+	HRESULT							Ready_MorphAnimation(const _char* pFilePath);
+
 
 	HRESULT							Ready_Shared_Buffers();
 	HRESULT							Ready_Instance_Buffers();

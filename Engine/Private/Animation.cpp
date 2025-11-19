@@ -2,6 +2,7 @@
 #include "Animation.h"
 
 #include "Channel.h"
+#include "MorphChannel.h"
 
 #include "SoundNotify.h"
 #include "ColliderNotify.h"
@@ -87,8 +88,9 @@ void CAnimation::Sort_AnimNotify()
 	});
 }
 
-HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& Bones)
+HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
 {
+#pragma region 기존 애니메이션 내용 저장.
 	_uint iLength = {};
 	InputFile.read(reinterpret_cast<_char*>(&iLength), sizeof(_uint));
 	_char szAnimationName[MAX_PATH] = {};
@@ -96,7 +98,7 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 
 	_char* pAnimationName = { nullptr };
 	strtok_s(szAnimationName, "|", &pAnimationName);
-	if(0 == strcmp(pAnimationName, ""))
+	if (0 == strcmp(pAnimationName, ""))
 		strcpy_s(m_szName, szAnimationName);
 	else
 		strcpy_s(m_szName, pAnimationName);
@@ -116,59 +118,26 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
 
-	// Ribbon 애니메
-//#ifdef _DEBUG
-//	_string strNames[5] = {"Rib_Attack01", "Rib_Attack02", "Rib_Attack03", "Rib_Move_F", "Rib_Move_B"};
-//
-//	string strName = m_szName;
-//	_wstring Prefix = L"Animation Name : " + StringToWString(m_szName) + L"\n";
-//
-//	for (auto& str : strNames)
-//	{
-//		if (strName == str)
-//		{
-//			OutputDebugString(Prefix.c_str());
-//			for (size_t i = 0; i < m_iNumChannels; ++i)
-//			{
-//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-//
-//				if (m_Channels[i]->Get_NumKeyframes() == 2)
-//				{
-//					OutputDebugString(TEXT("Key Frame == 2 : "));
-//					OutputDebugString(boneName.c_str());
-//				}
-//			}
-//
-//			for (size_t i = 0; i < m_iNumChannels; ++i)
-//			{
-//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-//
-//				if (m_Channels[i]->Get_NumKeyframes() < 2)
-//				{
-//					OutputDebugString(TEXT("Key Frame < 2 : "));
-//					OutputDebugString(boneName.c_str());
-//				}
-//			}
-//
-//			for (size_t i = 0; i < m_iNumChannels; ++i)
-//			{
-//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-//
-//				if (m_Channels[i]->Get_NumKeyframes() > 2)
-//				{
-//					OutputDebugString(TEXT("Key Frame > 2 : "));
-//					OutputDebugString(boneName.c_str());
-//				}
-//
-//			}
-//
-//			Prefix = L"Animation Name : " + StringToWString(m_szName) + L" / End \n";
-//			OutputDebugString(Prefix.c_str());
-//		}
-//	}
-//#endif // _DEBUG
+	// 추가 작업.
+	if (eModelType == MODELTYPE::CHARACTER)
+	{
+		// 1. Morph Mesh Channels 개수를 받아옵니다.
+		InputFile.read(reinterpret_cast<_char*>(&m_iNumMorphMeshChannels), sizeof(_uint));
 
+		// 2. Morph Mesh Channels 정보를 가져옵니다.
+		for (_uint i = 0; i < m_iNumMorphMeshChannels; ++i)
+		{
+			CMorphChannel* pMorphChannel = CMorphChannel::Create(InputFile);
+			if (nullptr == pMorphChannel)
+				return E_FAIL;
 
+			m_MorphMeshChannels.push_back(pMorphChannel);
+		}
+
+	}
+#pragma endregion
+
+	
 
 	return S_OK;
 }
@@ -313,7 +282,55 @@ _bool CAnimation::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition
 	return false;
 }
 
-CAnimation* CAnimation::Create(ifstream& InputFile, const vector<class CBone*>& Bones)
+// MorphChannels 바인딩.
+_bool CAnimation::Bind_MorphChannels(const vector<string>& modelShapeKeys)
+{
+	m_MorphKeyIndicies.clear();
+	m_MorphKeyIndicies.resize(m_MorphMeshChannels.size(), -1); // -1로 초기화.
+
+	for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
+	{
+		const _char* pChannelName = m_MorphMeshChannels[i]->Get_Name();
+
+		// 모델의 쉐이프 키 목록에서 이름이 같은 인덱스를 찾음
+		for (size_t j = 0; j < modelShapeKeys.size(); ++j)
+		{
+			if (modelShapeKeys[j] == pChannelName)
+			{
+				// 매핑 성공! (예: Channel 0번은 Model Index 3번을 제어)
+				m_MorphKeyIndicies[i] = static_cast<_int>(j); 
+				break;
+			}
+		}
+	}
+	
+	return true;
+}
+
+_bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights, _float* pFacialTrackPosition)
+{
+	// 모든 가중치 0으로 초기화
+	fill(modelWeights.begin(), modelWeights.end(), 0.0f);
+
+	for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
+	{
+		_int iTargetIndex = m_MorphKeyIndicies[i];
+
+		// 매핑된 대상이 없다면? 스킵
+		if (iTargetIndex == -1) continue;
+		if (iTargetIndex >= modelWeights.size()) continue;
+
+		// 현재 시간 가중치 계산
+		_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition);
+
+		// 모델의 해당 인덱스에 가중치 적용
+		modelWeights[iTargetIndex] = fWeight;
+	}
+
+	return _bool();
+}
+
+CAnimation* CAnimation::Create(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
 {
 	CAnimation* pInstance = new CAnimation();
 
@@ -343,4 +360,10 @@ void CAnimation::Free()
 
 	for (auto& pChannel : m_Channels)
 		Safe_Release(pChannel);
+	m_Channels.clear();
+
+	for (auto& pMorphCannel : m_MorphMeshChannels)
+		Safe_Release(pMorphCannel);
+
+	m_MorphMeshChannels.clear();
 }

@@ -18,7 +18,9 @@ public:
 
 	HRESULT		Save_Dat_NonAnim(const _char* pFileName);
 	HRESULT		Save_Dat_Anim(const _char* pFileName);
+	HRESULT		Save_Dat_Character(const _char* pFileName);	
 	HRESULT		Save_Animation(const _char* pFileName);
+	HRESULT		Save_Animation_Character(const _char* pFileName);
 	HRESULT		Save_Material(const _char* pFileName);
 
 
