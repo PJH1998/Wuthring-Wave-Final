@@ -35,6 +35,7 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
+	HRESULT						Bind_OffsetMatrix(class CShader* pShader, const _char* pConstantName);
 	HRESULT						Update_InstanceData(VTXINSTANCE_ANIMMESH* pMatrices, _uint iNumRenderCount);
 private:
 	_uint							m_iMaterialIndex = {};

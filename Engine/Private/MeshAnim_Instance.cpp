@@ -16,6 +16,7 @@ CMeshAnim_Instance::CMeshAnim_Instance(const CMeshAnim_Instance& Prototype)
     , m_VertexPositions { Prototype.m_VertexPositions }
     , m_Indices { Prototype.m_Indices }
 	, m_iNumMaxInstance{ Prototype.m_iNumMaxInstance }
+	, m_OffsetMatrices{ Prototype.m_OffsetMatrices }
 {
 }
 
@@ -23,10 +24,15 @@ HRESULT CMeshAnim_Instance::Initialize_Prototype(const vector<class CBone*>& Bon
 {
 	m_iNumInstance = m_iNumMaxInstance = iNumInstance;
 	m_iNumVertexBuffers = 2;
+	m_OffsetMatrices.resize(Bones.size(), _float4x4(1.f,0.f,0.f,0.f,
+													0.f,1.f,0.f,0.f,
+													0.f,0.f,1.f,0.f,
+													0.f,0.f,0.f,1.f));
     if (FAILED(Ready_Mesh_Anim(Bones, PreTransformMatrix, InputFile)))
         return E_FAIL;
     
 #pragma region INSTANCE
+	m_iNumIndexPerInstance = m_iNumIndices;
 	m_iInstanceVertexStride = sizeof(VTXINSTANCE_ANIMMESH);
 	m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
 	m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -108,6 +114,11 @@ HRESULT CMeshAnim_Instance::Bind_BoneMatrices(CShader* pShader, const _char* pCo
     return pShader->Bind_Matrices(pConstantName, m_BoneMatrices, m_iNumBones);
 }
 
+HRESULT CMeshAnim_Instance::Bind_OffsetMatrix(CShader* pShader, const _char* pConstantName)
+{
+	return pShader->Bind_Matrices(pConstantName, m_OffsetMatrices.data(), m_OffsetMatrices.size());
+}
+
 HRESULT CMeshAnim_Instance::Update_InstanceData(VTXINSTANCE_ANIMMESH* pInstanceDatas, _uint iNumRenderCount)
 {
 	if (iNumRenderCount > m_iNumMaxInstance)
@@ -168,7 +179,7 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
         _float4x4 OffsetMatrix = {};
         InputFile.read(reinterpret_cast<_char*>(&OffsetMatrix), sizeof(_float4x4));
         XMStoreFloat4x4(&OffsetMatrix, XMMatrixTranspose(XMLoadFloat4x4(&OffsetMatrix)));
-        m_OffsetMatrices.push_back(OffsetMatrix);
+        m_OffsetMatrices[m_BoneIndices.back()] = (OffsetMatrix);
     }
 
     if (0 == m_iNumBones)

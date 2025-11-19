@@ -5,6 +5,8 @@
 #include "Dummy.h"
 #include "MapObject.h"
 #include "AnimationDummy.h"
+
+#pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
@@ -16,7 +18,7 @@
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
-
+#pragma endregion
 
 
 #pragma region PLAYER
@@ -43,9 +45,10 @@
 #include "Player.h"
 #pragma endregion
 
-
-
-
+#pragma region NPC
+#include "DummyNPC.h"
+#include "DummyCell.h"
+#pragma endregion
 
 
 #pragma region UI
@@ -92,6 +95,7 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     
+	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
 	Load_Action();
 
     return S_OK;
@@ -631,6 +635,24 @@ HRESULT CLoader_Test::Load_Galbrena()
 HRESULT CLoader_Test::Load_Action()
 {
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_NPC()
+{
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimInstanceTest"),
+		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, 30, 
+			"../../Client/Bin/Resource/Model/Monster/HavocWarrior/HavocWarrior.dat"))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
+		CDummyNPC::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyCell"),
+		CDummyCell::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 	return S_OK;
 }
 

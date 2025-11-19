@@ -310,6 +310,9 @@
     <Filter Include="03. GameObject\Actor\NPC">
       <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\DummyCell">
+      <UniqueIdentifier>{8b8d53a6-3e7d-4e7d-b055-aff0ed90d33e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -830,6 +833,9 @@
     <ClInclude Include="..\Public\GalbrenaDarkWing.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\DummyCell.h">
+      <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1315,6 +1321,9 @@
     <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\DummyCell.cpp">
+      <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1380,6 +1389,15 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxInstance_AnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh_Skinning.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

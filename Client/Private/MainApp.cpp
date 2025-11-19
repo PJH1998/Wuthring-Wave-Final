@@ -266,6 +266,10 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ScreenEffect.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_ScreenEffect");
 
+	// Shader_VtxAnimMesh_Instance
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh_Instance.hlsl"), VTXANIMMESH_INSTANCE::Elements, VTXANIMMESH_INSTANCE::iNumElements))))
+		CRASH("Shader_VtxAnimMesh_Instance");
 
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
@@ -290,6 +294,16 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshNonRib.hlsl")
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute NonRibAnimMesh Shader");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxInstance_AnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute Instance_AnimMesh Shader");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh_Skinning.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute Instance_AnimMesh Shader");
 
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

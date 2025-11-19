@@ -124,15 +124,6 @@ namespace Engine
 		_float2		vLifeTime;
 	}VTXINSTACNE_FXMESH;
 
-	typedef struct tagVertexInstanceAnimMesh
-	{
-		_float4		vRight;
-		_float4		vUp;
-		_float4		vLook;
-		_float4		vTranslation;
-		_uint		iBaseIndex;		//인스턴스의 뼈 팔레트 시작 패딩 인덱스
-	}VTXINSTANCE_ANIMMESH;
-
 	typedef struct tagVertexInstanceParticle
 	{
 		_float4		vRight;
@@ -237,7 +228,34 @@ namespace Engine
 		};
 	}VTX_DECAL;
 
+	typedef struct tagVertexInstanceAnimMesh
+	{
+		_float4		vRight;
+		_float4		vUp;
+		_float4		vLook;
+		_float4		vTranslation;
+		_uint		iBaseIndex;		//인스턴스의 뼈 팔레트 시작 패딩 인덱스
+	}VTXINSTANCE_ANIMMESH;
 
+	typedef struct tagVertexAnimMeshInstance
+	{
+		static const _uint iNumElements = { 12 };
+		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] = {
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "BLENDINDEX", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 80, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "INSTANCEID", 0, DXGI_FORMAT_R32_UINT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		};
+	}VTXANIMMESH_INSTANCE;
 
 	// ==============================
 	// * for UI Instancing
