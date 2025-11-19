@@ -1,5 +1,5 @@
 #include "Engine_Shader_Defines.hlsli"
-
+typedef row_major matrix matrix_rm;
 row_major matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float g_fLightFar;
 
@@ -27,7 +27,7 @@ cbuffer GlobalConstants
     int g_iNumBlendWeightsToUse = 2; 
 }
 
-StructuredBuffer<float4x4> g_CombinedBoneMatrices;
+StructuredBuffer<matrix_rm> g_CombinedBoneMatrices;
 
 struct VS_IN
 {
