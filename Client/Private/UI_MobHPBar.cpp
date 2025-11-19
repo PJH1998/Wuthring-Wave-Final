@@ -31,7 +31,7 @@ HRESULT CUI_MobHPBar::Initialize_Clone(void* pArg)
 	Ready_Presets();
 
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
-	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHP.json";
+	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarExtended.json";
 	Load_ChildObjects(strFilePath);
 
 	// Load Animations from json.
@@ -167,6 +167,12 @@ void CUI_MobHPBar::Ready_Presets()
 
 void CUI_MobHPBar::Update_Instances()
 {
+	const _float fDistancecPivot = 10.f;
+
+
+
+
+
 	vector<CCustom_UI*> vecFloatingUIs = {};
 	vecFloatingUIs.push_back(Find_ChildObject(L"InstHPFrame"));
 	vecFloatingUIs.push_back(Find_ChildObject(L"InstHPBar"));
@@ -181,8 +187,6 @@ void CUI_MobHPBar::Update_Instances()
 
 
 		Calc_ApplyTargetPos(floatingUI);
-
-		_float fDistancecPivot = 40.f;
 		Calc_CamDistScale(floatingUI, fDistancecPivot);
 	}
 }
@@ -272,6 +276,20 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 
 	_float4 vTransparentColor = { 0.f, 0.f, 0.f, 0.f };
 
+	_float4 vHPBarColor		= { 0.816f, 0.302f, 0.231f, 0.900f };
+	_float4 vHPBarGradColor	= { 0.820f, 0.361f, 0.231f, 0.900f };
+	_float4 vHPBgColor		= { 0.500f, 0.500f, 0.500f, 0.800f };
+	_float4 vSABarColor		= { 0.900f, 0.900f, 0.900f, 0.900f };
+	_float4 vSABgColor		= { 0.500f, 0.500f, 0.500f, 0.800f };
+
+	const _float4 vHPColor1 = { 1.f, .7f, .1f, 1.f };
+	const _float4 vHPColor2 = { 1.f, .2f, .0f, 1.f };
+	const _float4 vHPBackColor1 = { .8f, .8f, .8f, 1.f };
+
+	const _float4 vSAColor = { 1.f, 1.f, 1.f, 1.f };   // before armor break
+	const _float4 vSABreakColor = { .9f, .8f, .3f, 1.f };
+	const _float4 vSABackColor = { 1.f, 1.f, 1.f, .3f };   // after armor break
+
 	vecVariantMat.resize(m_vecMobInfo.size());
 
 	if (pTargetUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
@@ -280,15 +298,15 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 		if (pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")		// HP Bar
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 			{
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantColor;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantEndColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPColor1;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPColor2;
 				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = .7f;// m_vecMobInfo[i].fMobCurHP/ m_vecMobInfo[i].fMobMaxHP;
 			}
 		else														// HP BG
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 			{
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantColor;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantEndColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPBackColor1;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPBackColor1;
 				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
 			}
 
@@ -298,15 +316,15 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 		if (pTargetUI->Get_UIDesc().strUIName == L"InstSABar")		// SA Bar
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 			{
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantEndColor;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantTmpColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSAColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSAColor;
 				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = .3f; // m_vecMobInfo[i].fMobCurSA / m_vecMobInfo[i].fMobMaxSA;
 			}
 		else														// SA BG
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 			{
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantEndColor;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantTmpColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSABackColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSABackColor;
 				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
 			}
 	}
@@ -324,6 +342,11 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 
 void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance)
 {
+	const _float fMaxScaleFactor = 0.6f;
+
+
+
+
 	// 이제 여기서 어케함? 인스턴스별로 크기 조절해줘야하는데
 	// 아마 각자 인스턴스의 위치별 중점을 기준으로 줄어들꺼라 또 틀어질 듯
 
@@ -353,7 +376,7 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 
 		// calc scale factor
 		_float fScaleFactor = fPivotDistance / fDist;
-		fScaleFactor = fScaleFactor > 1.f ? 1.f : fScaleFactor; // 최대 1배까지만 확대
+		fScaleFactor = fScaleFactor > fMaxScaleFactor ? fMaxScaleFactor : fScaleFactor; // 최대 1배까지만 확대
 
 		// apply scale
 		vecInstDesc[i].vSInstRight = {
@@ -374,33 +397,28 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 			vecInstDesc[i].vSInstLook.z / vInstScale.z * fScaleFactor,
 			0.f
 		};
+
+		// 카메라 거리에 따라 translation 도 보정할 필요가 있을 듯
+		// 현재는 보정이 없어 중점으로부터 벗어난 sa 바가 거리에 관계없이, 작아지더라도 hp 바와 일정한 거리를 유지하는 문제가 생김
+		// hp바는 원점이고, sa바는 y축으로 -10만큼 아래에 존재. (screen space 상으로)
+
+		// 얘 자체의 transform 을 통해 역산 가능할 것 같은데..
+		_float3 vObjTrans = {}; XMStoreFloat3(&vObjTrans, static_cast<CTransform*>(pTargetUI->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
+		_float3 vObjSca = static_cast<CTransform*>(pTargetUI->Get_Component(L"Com_Transform"))->Get_Scaled();
+
 		vecInstDesc[i].vSInstTrans = {
-			vecInstDesc[i].vSInstTrans.x,
-			vecInstDesc[i].vSInstTrans.y,
-			vecInstDesc[i].vSInstTrans.z,
+			vecInstDesc[i].vSInstTrans.x - vObjTrans.x * (1.f - fScaleFactor) / vObjSca.x,
+			vecInstDesc[i].vSInstTrans.y - vObjTrans.y * (1.f - fScaleFactor) / vObjSca.y,
+			vecInstDesc[i].vSInstTrans.z - vObjTrans.z * (1.f - fScaleFactor) / vObjSca.z,
 			1.f
 		};
+		// -15*(1-거리에따른Scale배율)/14
+		// 멀어질 수록 -15로 떨어져있던 것이 0에 가까워져야 함
 
 		// 이제 다시 적용
 		// apply inst desc.
 		pTargetUI->Set_UIDesc(targetDesc);
-
-
-
-
-
-
-
 	}
-
-
-
-
-
-
-
-
-
 }
 
 CUI_MobHPBar* CUI_MobHPBar::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
