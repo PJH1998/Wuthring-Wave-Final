@@ -136,8 +136,24 @@ void CUI_MobHPBar::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_vecMobInfo.clear();
 
 #ifdef KSTA_UITEST_MOBHPPOS
+
 	UI_MOBINFO_DESC tTmpDesc = {};
-	m_vecMobInfo.push_back(tTmpDesc);
+	
+	const _uint iNumTestMobs = 3;
+
+	for (_uint i = 0; i < iNumTestMobs; i++)
+	{
+		_float3 fTestOffset = {
+			m_pGameInstance->Rand(-10.f, 10.f),
+			m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
+			m_pGameInstance->Rand(-10.f, 10.f)
+		};
+
+		tTmpDesc.vMobPos = fTestOffset;
+
+		m_vecMobInfo.push_back(tTmpDesc);
+	}
+
 #endif // KSTA_UITEST_MOBHPPOS
 
 
@@ -237,17 +253,151 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 			/* vecInstDesc[i].vSInstTrans.z +*/ vCalcedDeltaPos.z,
 			/* vecInstDesc[i].vSInstTrans.w  */ 1.f
 		};
-
-		vecInstDesc[i];
 	}
 
 	// apply desc. finally.
 	pTargetUI->Set_UIDesc(targetDesc);
+	
+	
+	
+
+
+	// calc variant desc.
+	vector<_float4x4> vecVariantMat = {};
+
+
+	_float4 vVariantColor = { 1.f, 0.f, 1.f, 1.f };
+	_float4 vVariantEndColor = { 0.f, 1.f, 1.f, 1.f };
+	_float4 vVariantTmpColor = { 1.f, 1.f, 0.f, 1.f };
+
+	_float4 vTransparentColor = { 0.f, 0.f, 0.f, 0.f };
+
+	vecVariantMat.resize(m_vecMobInfo.size());
+
+	if (pTargetUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
+		pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")
+	{
+		if (pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")		// HP Bar
+			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+			{
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantEndColor;
+				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = .7f;// m_vecMobInfo[i].fMobCurHP/ m_vecMobInfo[i].fMobMaxHP;
+			}
+		else														// HP BG
+			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+			{
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantEndColor;
+				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
+			}
+
+	}
+	else
+	{
+		if (pTargetUI->Get_UIDesc().strUIName == L"InstSABar")		// SA Bar
+			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+			{
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantEndColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantTmpColor;
+				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = .3f; // m_vecMobInfo[i].fMobCurSA / m_vecMobInfo[i].fMobMaxSA;
+			}
+		else														// SA BG
+			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+			{
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vVariantEndColor;
+				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vVariantTmpColor;
+				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
+			}
+	}
+
+	// create variant matrix.
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
+	
+	// apply variant desc.
+	pTargetUI->Set_VariantUIDesc(tVariantDesc);
 }
 
 void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance)
 {
+	// 이제 여기서 어케함? 인스턴스별로 크기 조절해줘야하는데
+	// 아마 각자 인스턴스의 위치별 중점을 기준으로 줄어들꺼라 또 틀어질 듯
+
+	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 	
+	for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+	{
+		_float4x4 matInstTransform = {};
+
+		*reinterpret_cast<_float4*>(&matInstTransform._11) = vecInstDesc[i].vSInstRight;
+		*reinterpret_cast<_float4*>(&matInstTransform._21) = vecInstDesc[i].vSInstUp;
+		*reinterpret_cast<_float4*>(&matInstTransform._31) = vecInstDesc[i].vSInstLook;
+		*reinterpret_cast<_float4*>(&matInstTransform._41) = vecInstDesc[i].vSInstTrans;
+
+		// calculate inst scale
+		_float3 vInstScale = {
+			XMVectorGetX(XMVector3Length(XMLoadFloat4(&vecInstDesc[i].vSInstRight))),
+			XMVectorGetX(XMVector3Length(XMLoadFloat4(&vecInstDesc[i].vSInstUp))),
+			XMVectorGetX(XMVector3Length(XMLoadFloat4(&vecInstDesc[i].vSInstLook)))
+		};
+
+		// calculate target distance from camera
+		const _matrix matCamView = m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW);
+		_float3 vTargetPos = m_vecMobInfo[i].vMobPos;
+		_float fDist = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat3(&vTargetPos)));
+
+		// calc scale factor
+		_float fScaleFactor = fPivotDistance / fDist;
+		fScaleFactor = fScaleFactor > 1.f ? 1.f : fScaleFactor; // 최대 1배까지만 확대
+
+		// apply scale
+		vecInstDesc[i].vSInstRight = {
+			vecInstDesc[i].vSInstRight.x / vInstScale.x * fScaleFactor,
+			vecInstDesc[i].vSInstRight.y / vInstScale.y * fScaleFactor,
+			vecInstDesc[i].vSInstRight.z / vInstScale.z * fScaleFactor,
+			0.f
+		};
+		vecInstDesc[i].vSInstUp = {
+			vecInstDesc[i].vSInstUp.x / vInstScale.x * fScaleFactor,
+			vecInstDesc[i].vSInstUp.y / vInstScale.y * fScaleFactor,
+			vecInstDesc[i].vSInstUp.z / vInstScale.z * fScaleFactor,
+			0.f
+		};
+		vecInstDesc[i].vSInstLook = {
+			vecInstDesc[i].vSInstLook.x / vInstScale.x * fScaleFactor,
+			vecInstDesc[i].vSInstLook.y / vInstScale.y * fScaleFactor,
+			vecInstDesc[i].vSInstLook.z / vInstScale.z * fScaleFactor,
+			0.f
+		};
+		vecInstDesc[i].vSInstTrans = {
+			vecInstDesc[i].vSInstTrans.x,
+			vecInstDesc[i].vSInstTrans.y,
+			vecInstDesc[i].vSInstTrans.z,
+			1.f
+		};
+
+		// 이제 다시 적용
+		// apply inst desc.
+		pTargetUI->Set_UIDesc(targetDesc);
+
+
+
+
+
+
+
+	}
+
+
+
+
+
+
 
 
 

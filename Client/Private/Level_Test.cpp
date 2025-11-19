@@ -691,9 +691,19 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 #pragma region KSTA_UITEST_MOBHPBAR
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	
+	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
+	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
+	
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+		!isTargetAlive)
 	{
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+			isTargetAlive)
+	{
+		pTargetMobHPBarUI->SetActivate(false);
 	}
 
 

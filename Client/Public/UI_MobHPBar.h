@@ -19,7 +19,7 @@ public:
 		_float fMobMaxHP = 500.f;
 
 		_float fMobCurSA = 300.f;
-		_float fMobMaxSA = 300.f;
+		_float fMobMaxSA = 300.f;	
 
 		_float3 vMobPos = { 0.f, -10.f, 0.f };
 	} UI_MOBINFO_DESC;
@@ -30,7 +30,7 @@ public:
 	virtual ~CUI_MobHPBar() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype()							override;
+	virtual HRESULT Initialize_Prototype()							override;	
 	virtual HRESULT Initialize_Clone(void* pArg)					override;
 	virtual void    Priority_Update(_float fTimeDelta)				override;
 	virtual void    Update(_float fTimeDelta)						override;

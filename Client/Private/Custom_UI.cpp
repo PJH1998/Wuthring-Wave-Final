@@ -114,25 +114,36 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
-	if (m_tUIDesc.strFileName == L"EmptyCanvuspng")							// 계층 나누기용 무의미 투명 텍스쳐면 렌더 스킵
+
+	if (m_tUIDesc.strUIName == L"InstHPFrame")
+	{
+		//_float4x4 matDist = {};
+		//
+		//*reinterpret_cast<_float4*>(&matDist._11) = m_tUIDesc.vecInstanceDescs[0].vSInstRight;
+		//*reinterpret_cast<_float4*>(&matDist._21) = m_tUIDesc.vecInstanceDescs[0].vSInstUp;
+		//*reinterpret_cast<_float4*>(&matDist._31) = m_tUIDesc.vecInstanceDescs[0].vSInstLook;
+		//*reinterpret_cast<_float4*>(&matDist._41) = m_tUIDesc.vecInstanceDescs[0].vSInstTrans;
+
+		OutPutDebugMatrix(L"InstHPFrame UI Transform", *m_pTransformCom->Get_WorldMatrixPtr());
+	}
+
+
+	if (m_tUIDesc.strFileName == L"EmptyCanvuspng")							// 계층 나누기용 무의미 투명 텍스쳐면 렌더콜 스킵
 		return;
 
 
 
-	if (m_tUIDesc.strUIName == L"InstHPBar")
-	{
-		_float4x4 matDist = {};
-
-		*reinterpret_cast<_float4*>(&matDist._11) = m_tUIDesc.vecInstanceDescs[0].vSInstRight;
-		*reinterpret_cast<_float4*>(&matDist._21) = m_tUIDesc.vecInstanceDescs[0].vSInstUp;
-		*reinterpret_cast<_float4*>(&matDist._31) = m_tUIDesc.vecInstanceDescs[0].vSInstLook;
-		*reinterpret_cast<_float4*>(&matDist._41) = m_tUIDesc.vecInstanceDescs[0].vSInstTrans;
-
-
-		OutPutDebugMatrix(L"InstHPBar", matDist);
-
-
-	}
+	//if (m_tUIDesc.strUIName == L"InstHPBar")
+	//{
+	//	_float4x4 matDist = {};
+	//
+	//	*reinterpret_cast<_float4*>(&matDist._11) = m_tUIDesc.vecInstanceDescs[0].vSInstRight;
+	//	*reinterpret_cast<_float4*>(&matDist._21) = m_tUIDesc.vecInstanceDescs[0].vSInstUp;
+	//	*reinterpret_cast<_float4*>(&matDist._31) = m_tUIDesc.vecInstanceDescs[0].vSInstLook;
+	//	*reinterpret_cast<_float4*>(&matDist._41) = m_tUIDesc.vecInstanceDescs[0].vSInstTrans;
+	//
+	//	OutPutDebugMatrix(L"InstHPBar", matDist);
+	//}
 
 
 
