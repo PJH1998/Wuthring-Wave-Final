@@ -99,23 +99,8 @@ void CUI_MobHPBar::Late_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-
-
-
-
-	//CCustom_UI* pHpInstUI = Find_ChildObject(L"수정필요, 자식오브젝트 이름");
-	//auto instDesc = pHpInstUI->Get_UIDesc().vecInstanceDescs;
-
-	//for (auto& mobInstDesc: instDesc)
-
-
-
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
-
-	//instDesc.resize(m_vecMobInfo.size());				// 주시중인 몹 갯수만큼 인스턴스 갯수 변경
-	//Update_ApplyInstTargetPos(instDesc[i], );			// 해당 UI를 타겟 위치로 이동시킴.
-	//Update_CamDistInstScale(mobInstDesc, 40.f);
 
 	Update_Instances();
 
@@ -126,9 +111,6 @@ void CUI_MobHPBar::Render()
 {
 	if (!m_isActivate)
 		return;
-
-
-
 }
 
 void CUI_MobHPBar::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -136,7 +118,6 @@ void CUI_MobHPBar::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_vecMobInfo.clear();
 
 #ifdef KSTA_UITEST_MOBHPPOS
-
 	UI_MOBINFO_DESC tTmpDesc = {};
 	
 	const _uint iNumTestMobs = 3;
@@ -153,7 +134,6 @@ void CUI_MobHPBar::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		m_vecMobInfo.push_back(tTmpDesc);
 	}
-
 #endif // KSTA_UITEST_MOBHPPOS
 
 
@@ -170,9 +150,6 @@ void CUI_MobHPBar::Update_Instances()
 	const _float fDistancecPivot = 10.f;
 
 
-
-
-
 	vector<CCustom_UI*> vecFloatingUIs = {};
 	vecFloatingUIs.push_back(Find_ChildObject(L"InstHPFrame"));
 	vecFloatingUIs.push_back(Find_ChildObject(L"InstHPBar"));
@@ -187,7 +164,10 @@ void CUI_MobHPBar::Update_Instances()
 
 
 		Calc_ApplyTargetPos(floatingUI);
-		Calc_CamDistScale(floatingUI, fDistancecPivot);
+
+		if (floatingUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
+			floatingUI->Get_UIDesc().strUIName == L"InstHPBar")
+			Calc_CamDistScale(floatingUI, fDistancecPivot);
 	}
 }
 
@@ -199,21 +179,13 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 
 	_float4x4 matCombined = pTargetUI->Get_CombinedMatrix();
-	//_matrix matCombined = XMLoadFloat4x4(&pTargetUI->Get_CombinedMatrix());
-	//_matrix matLocal = static_cast<CTransform*>(pTargetUI->Get_Component(L"Com_Transform"))->Get_WorldMatrix();
-	//_matrix matParentCombined_Load = XMMatrixInverse(nullptr, matLocal) * matCombined;
-	//
-	//_float4x4 matParentCombined = {}; XMStoreFloat4x4(&matParentCombined, matParentCombined_Load);	// 역산해 온 부모의 combined matrix, 이러면 굳이 부모 정보 안가져와도 됨
-	//_float3 vParentSca = _float3(
-	//	XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&matParentCombined._11)))),
-	//	XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&matParentCombined._21)))),
-	//	XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&matParentCombined._31))))
-	//);
+
 	_float3 vCombinedSca = _float3(
 		XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&matCombined._11)))),
 		XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&matCombined._21)))),
 		XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&matCombined._31))))
 	);
+
 
 	for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 	{
@@ -257,6 +229,17 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 			/* vecInstDesc[i].vSInstTrans.z +*/ vCalcedDeltaPos.z,
 			/* vecInstDesc[i].vSInstTrans.w  */ 1.f
 		};
+
+
+		// 만약 SA 없는 적이라면 SA 바 가림.
+		if (pTargetUI->Get_UIDesc().strUIName == L"InstSAFrame" ||
+			pTargetUI->Get_UIDesc().strUIName == L"InstSABar")
+		{
+			if (m_vecMobInfo[i].isHaveSA)
+				vecInstDesc[i].vClipTexcoordX = { 0.f, 1.f };
+			else
+				vecInstDesc[i].vClipTexcoordX = { 0.f, 0.f };
+		}
 	}
 
 	// apply desc. finally.

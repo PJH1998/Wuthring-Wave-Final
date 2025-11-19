@@ -70,8 +70,9 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
 	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_Initialize");
 
-	// 보스 UI용 텍스트 객체 생성 및 부모연결
+	// 보스 UI용 + 플레이어 UI용 텍스트 객체 생성 및 부모연결
 	Ready_BossUINameText();
+	Ready_PlayerHPText();
 	
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_HUD", this);
@@ -110,7 +111,7 @@ void CUI_HUD::Update(_float fTimeDelta)
 	Update_UI_PlayerEnergyBar_Augusta(fTimeDelta);
 	Update_UI_PlayerEnergyBar_Galbrena(fTimeDelta);
 
-
+	Update_Text_PlayerHP();
 
     __super::Update(fTimeDelta);            // Update Animator_UI Component
 }
@@ -147,7 +148,9 @@ void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey,
 		auto& bossNameDesc = pTargetText->Get_TextUIDesc();
 
 		bossNameDesc.strText = strUIBosssName;
-		pTargetText->Set_TextUIDesc(bossNameDesc);
+		//pTargetText->Set_TextUIDesc(bossNameDesc);
+		pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
+		pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
 	}
 }
 
@@ -216,7 +219,7 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 	pFont->Update_Description(0.f);
 
 
-
+	
 
 	// 중앙 정렬
 
@@ -224,6 +227,40 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 
 	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
 
+	return S_OK;
+}
+
+HRESULT CUI_HUD::Ready_PlayerHPText()
+{
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f + 496.f },
+		L"이건테스트에요",	// 현재체력/최대체력 표시
+		TEXT_COLOR_TYPE::TT_PLAYERHP,
+		0.22f,
+		L"UI_Text_Player_HP"
+	);
+	
+	CCustom_UI* pAttacher = this->Find_ChildObject(L"SectorB_Status");
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+	// 중앙 정렬
+
+	auto& playerHPDesc = pFont->Get_TextUIDesc();
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
 	return S_OK;
 }
 
@@ -815,6 +852,21 @@ void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
     uiInstDescs.push_back(tDesc);
     uiDesc.vecInstanceDescs = uiInstDescs;
     pFeedbackUI->Set_UIDesc(uiDesc);
+}
+
+void CUI_HUD::Update_Text_PlayerHP()
+{
+	CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_Player_HP"));
+
+	auto& playerHPDesc = pTargetText->Get_TextUIDesc();
+
+
+	_uint iPlayerCurHP = static_cast<_uint>(m_pAbility->Get_Hp());
+	_uint iPlayerMaxHP = static_cast<_uint>(m_pAbility->Get_MaxHp());
+
+	playerHPDesc.strText = to_wstring(iPlayerCurHP) + L"/" + to_wstring(iPlayerMaxHP);
+
+	pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
 }
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)

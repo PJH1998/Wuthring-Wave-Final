@@ -15,11 +15,13 @@ public:
 		_uint iMobLvl = 10;
 		//_wstring strMobName = L"Test Mob";
 		
-		_float fMobCurHP = 500.f;
-		_float fMobMaxHP = 500.f;
+		_float	fMobCurHP = 500.f;
+		_float	fMobMaxHP = 500.f;
 
-		_float fMobCurSA = 300.f;
-		_float fMobMaxSA = 300.f;	
+		_bool	isHaveSA = false;
+
+		_float	fMobCurSA = 300.f;
+		_float	fMobMaxSA = 300.f;	
 
 		_float3 vMobPos = { 0.f, -10.f, 0.f };
 	} UI_MOBINFO_DESC;
