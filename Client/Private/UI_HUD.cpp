@@ -357,9 +357,9 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			// * [SK Icon Update] Galbrena
 			// ==============================
 		case UI_CHARACTERTYPE::GALBRENA:
+			// Galbrena
 			Update_Icon_Galbrena(UISlots);
 			break;
-
 		}
 
     }
@@ -545,7 +545,8 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
 	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
-	_bool isIn_Galbrena_BurstMode = false; /* ksta : 나중에 버스트 모드 조건 삽입 */
+	_bool isIn_Galbrena_BurstMode = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
+		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false; /* ksta : 나중에 버스트 모드 조건 삽입 */
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
@@ -653,6 +654,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 
 	
 
+	// LB Btn
 	_bool isChar_LBBtnFeedbackAble = false;
 
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
@@ -674,7 +676,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}break;
 	case CH_GALBRENA:
 	{
-		_bool isIn_Galbrena_BurstMode = false; /* ksta : 나중에 버스트 모드 조건 삽입 */
+		_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
 		if (isIn_Galbrena_BurstMode)
 			isChar_LBBtnFeedbackAble = true;
 		else
@@ -683,8 +685,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}
 
 
-
+	// E Btn
 	_bool isChar_EButtonFeedbackAble = true;
+
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
 	{
 	case CH_ROVER:
@@ -707,17 +710,21 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}
 
 
+	// R Btn
+	_bool isChar_RuttonFeedbackAble = true;
+
+
 	
 	// 클릭마다 해당 위치에 피드백 생성
 	if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN &&
 		isChar_EButtonFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_EBtn);
-	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN &&
+		isChar_RuttonFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_RBtn);
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		isChar_LBBtnFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_LBBtn);
-	
 }
 
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
@@ -1181,7 +1188,6 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
-	_bool isIn_Rover_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
 
 
 	//tUISlot.
@@ -1191,60 +1197,69 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     switch (m_iSelectedCHIndex)
     {
     case Client::CUI_HUD::CH_ROVER:
-        Find_ChildObject(L"Group_Rover")    ->Set_Active(true);     // CH change visible
-        Find_ChildObject(L"Group_Augusta")  ->Set_Active(false);
-        Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
+	{
+		Find_ChildObject(L"Group_Rover")->Set_Active(true);     // CH change visible
+		Find_ChildObject(L"Group_Augusta")->Set_Active(false);
+		Find_ChildObject(L"Group_Galbrena")->Set_Active(false);
 
-        if	(	!isIn_Rover_BurstMode	)
-        {
-            Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(false);
-            // Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
-        } 
-        else if(isIn_Rover_BurstMode)
-        {
-            Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(true);
-            // Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
-        }
-                                    
-                                    
+		_bool isIn_Rover_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+
+		if (!isIn_Rover_BurstMode)
+		{
+			Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(false);
+			// Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
+		}
+		else if (isIn_Rover_BurstMode)
+		{
+			Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(true);
+			// Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
+		}
+
+
+	}
         break;
     case Client::CUI_HUD::CH_AUGUSTA:
-        Find_ChildObject(L"Group_Rover")    ->Set_Active(false);
-        Find_ChildObject(L"Group_Augusta")  ->Set_Active(true);
-        Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
+	{
+		Find_ChildObject(L"Group_Rover")->Set_Active(false);
+		Find_ChildObject(L"Group_Augusta")->Set_Active(true);
+		Find_ChildObject(L"Group_Galbrena")->Set_Active(false);
 
-        if  (	!isIn_Augusta_AdvUlt	)
-        {
-            Find_ChildObject(L"Frame_Augusta")->Set_Active(true);
-            Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(true);
-            Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(false);
-        }
-		else if(isIn_Augusta_AdvUlt)
-        {
-            Find_ChildObject(L"Frame_Augusta")->Set_Active(false);
-            Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(false);
-            Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(true);
-        }
+		if (!isIn_Augusta_AdvUlt)
+		{
+			Find_ChildObject(L"Frame_Augusta")->Set_Active(true);
+			Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(true);
+			Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(false);
+		}
+		else if (isIn_Augusta_AdvUlt)
+		{
+			Find_ChildObject(L"Frame_Augusta")->Set_Active(false);
+			Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(false);
+			Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(true);
+		}
+	}
 
         break;
     case Client::CUI_HUD::CH_GALBRENA:
-        Find_ChildObject(L"Group_Rover")    ->Set_Active(false);
-        Find_ChildObject(L"Group_Augusta")  ->Set_Active(false);
-        Find_ChildObject(L"Group_Galbrena") ->Set_Active(true);
+	{
+		Find_ChildObject(L"Group_Rover")->Set_Active(false);
+		Find_ChildObject(L"Group_Augusta")->Set_Active(false);
+		Find_ChildObject(L"Group_Galbrena")->Set_Active(true);
 
-        if  (	m_iPlayerEnhancedMode == 0 ||
-				m_iPlayerEnhancedMode == 2	)
-        {
-            Find_ChildObject(L"Frame_Galbrena")->Set_Active(true);
-            Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(true);
-            Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(false);
-        }
-        else if(m_iPlayerEnhancedMode == 1)
-        {
-            Find_ChildObject(L"Frame_Galbrena")->Set_Active(false);
-            Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(false);
-            Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(true);
-        }
+		_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+
+		if (!isIn_Galbrena_BurstMode)
+		{
+			Find_ChildObject(L"Frame_Galbrena")->Set_Active(true);
+			Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(true);
+			Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(false);
+		}
+		else if (isIn_Galbrena_BurstMode)
+		{
+			Find_ChildObject(L"Frame_Galbrena")->Set_Active(false);
+			Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(false);
+			Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(true);
+		}
+	}
 
         break;
     }
@@ -1334,7 +1349,6 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-	_bool isIn_Rover_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
 
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
@@ -1422,6 +1436,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     {
     case CH_ROVER:     
         {
+			_bool isIn_Rover_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+
             if      (!isIn_Rover_BurstMode)     /* Normal */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
@@ -1503,8 +1519,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         }break;
     case CH_GALBRENA:  
         {
-            if  (	m_iPlayerEnhancedMode == 0 ||
-					m_iPlayerEnhancedMode == 1)     /* Normal */  
+			_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+
+            if  (	!isIn_Galbrena_BurstMode	)     /* Normal */
             { 
                 vSingleColor [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_L][0];   // color
                 vSingleColor [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_L][1];  
@@ -1526,7 +1543,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 11, vIsVisibleStatic.end() - 26, false);
             }
-            else if(m_iPlayerEnhancedMode == 2)     /* Burst   */
+            else if(isIn_Galbrena_BurstMode		)     /* Burst   */
             { 
                 vSingleColor [0] = vecColorPreset[ENCL_GALBRENA_ULT][0];        // color
                 vSingleColor [1] = vecColorPreset[ENCL_GALBRENA_ULT][1];       
@@ -1602,8 +1619,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 	// galbrena energy bar
     if (m_iSelectedCHIndex == CH_GALBRENA)
     {
-        if (m_iPlayerEnhancedMode == 0 ||
-			m_iPlayerEnhancedMode == 1)
+		_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+
+        if (!isIn_Galbrena_BurstMode)
         {
             for (uint i = 0; i < vecVariantMat.size(); i++)
                 if (i >= 15)
@@ -1995,6 +2013,7 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 	UI_GALBRENA_STATE eState_Galbrena_R = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 	UI_GALBRENA_STATE eState_Galbrena_LB = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
 
+	_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
 
 
 	// ==============================
@@ -2034,19 +2053,20 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 	// ==============================
 	
 	// 버스트모드인지를 확인 가능한 무언가가 있어야 할 듯
-	switch (eState_Galbrena_LB)
+	
+	if (isIn_Galbrena_BurstMode)
 	{
-	case Client::UI_GALBRENA_STATE::DEFAULT:
-		break;
-	case Client::UI_GALBRENA_STATE::E_BURST_READY:
-		break;
-	case Client::UI_GALBRENA_STATE::E_DEFAULT_READY:
-		break;
-	case Client::UI_GALBRENA_STATE::END:
-		break;
-	default:
-		break;
+		galbrenaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+		galbrenaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+		galbrenaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.f, 1.f };
 	}
+	else
+	{
+		galbrenaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+		galbrenaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+		galbrenaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.f, 0.f };
+	}
+	
 
 
 

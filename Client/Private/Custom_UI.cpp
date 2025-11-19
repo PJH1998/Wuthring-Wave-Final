@@ -118,21 +118,6 @@ void CCustom_UI::Render()
 		return;
 
 
-
-	//if (m_tUIDesc.strUIName == L"InstHPBar")
-	//{
-	//	_float4x4 matDist = {};
-	//
-	//	*reinterpret_cast<_float4*>(&matDist._11) = m_tUIDesc.vecInstanceDescs[0].vSInstRight;
-	//	*reinterpret_cast<_float4*>(&matDist._21) = m_tUIDesc.vecInstanceDescs[0].vSInstUp;
-	//	*reinterpret_cast<_float4*>(&matDist._31) = m_tUIDesc.vecInstanceDescs[0].vSInstLook;
-	//	*reinterpret_cast<_float4*>(&matDist._41) = m_tUIDesc.vecInstanceDescs[0].vSInstTrans;
-	//
-	//	OutPutDebugMatrix(L"InstHPBar", matDist);
-	//}
-
-
-
     if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
         for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
             m_tUIDesc.vecInstanceDescs[i].matExtraData = m_cachedVariantUIDesc.matVariantValues[i];
