@@ -6,12 +6,15 @@
 #include "Trail_Mesh.h"
 #include "Effect_Rect.h"
 #include "Effect_Decal.h"
+#include "Effect_Radial.h"
+#include "VIBuffer_FXMesh_Instance.h"
+#include "VIBuffer_Point_Instance.h"
+
 NS_BEGIN(Editor)
 
 //다른 곳에서 이펙트 불러오는 연동성을 위해 추가한 것.?
 class CLoad_Controller final : public CBase
 {
-
 private:
 	explicit CLoad_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CLoad_Controller() = default;
@@ -49,6 +52,8 @@ public:
 
 	void Load_FXDecal_FromJson(const _string& strFilePath, const _wstring& DecalTag);
 
+	void Load_FXRadial_FromJson(const _string& strFilePath, const _wstring& RadialTag);
+
 public:
 	void Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc);
 
@@ -63,6 +68,8 @@ public:
 	void Get_FXRect_Desc(const _wstring& RectTag, CEffect_Rect::FXRECT_DESC& RectDesc);
 
 	void Get_FXDecal_Desc(const _wstring& DecalTag, CEffect_Decal::DECAL_DESC& DecalDesc);
+
+	void Get_FXRadial_Desc(const _wstring& RadialTag, CEffect_Radial::RADIAL_DESC& RadialDesc);
 
 public:
 	void Reset_Load();
@@ -95,6 +102,10 @@ private:
 
 	//Decal 저장
 	map<const _wstring, CEffect_Decal::DECAL_DESC>							m_tDecalDesc = {};
+
+	//Radial 저장
+	map<const _wstring, CEffect_Radial::RADIAL_DESC>						m_tRadialDesc = {};
+
 public:
 	static CLoad_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eCurrentLevel);
 	virtual	void Free() override;

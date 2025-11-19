@@ -245,9 +245,11 @@ public:
 #ifdef _DEBUG
 public:
 	void Debug_FullCost(_bool IsAll = false);
+	void Clear_CoolTime();
 #else
 public:
 	void Debug_FullCost(_bool IsAll = false);
+	void Clear_CoolTime();
 #endif // _DEBUG
 
 

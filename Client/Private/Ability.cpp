@@ -714,6 +714,10 @@ void CAbility::Print_CoolTime()
 	}
 	cout << "Cool Down End" << endl;
 }
+void CAbility::Clear_CoolTime()
+{
+	m_mapSkillCooldowns.clear();
+}
 #else
 void CAbility::Debug_FullCost(_bool IsAll)
 {
@@ -760,6 +764,11 @@ void CAbility::Print_CoolTime()
 		cout << pair.first << " : " << pair.second << endl;
 	}
 	cout << "Cool Down End" << endl;
+}
+
+void CAbility::Clear_CoolTime()
+{
+	m_mapSkillCooldowns.clear();
 }
 #endif // _DEBUG
 

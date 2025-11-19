@@ -272,7 +272,7 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 		case CHARACTER_TRANSITIONTYPE::IDLE:
 		{
 			// 애니메이션 변경할 값.
-			GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+			GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			break;
 		}

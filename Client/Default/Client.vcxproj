@@ -173,6 +173,7 @@
     <ClInclude Include="..\Public\AugustaAirJump.h" />
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
+    <ClInclude Include="..\Public\Augusta_UltiPostSFX.h" />
     <ClInclude Include="..\Public\AugustaClimbExit.h" />
     <ClInclude Include="..\Public\AugustaClimbMove.h" />
     <ClInclude Include="..\Public\AugustaGriffon.h" />
@@ -190,11 +191,11 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
     <ClInclude Include="..\Public\AugustaHit.h" />
-    <ClInclude Include="..\public\AugustaSFX.h" />
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
+    <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
     <ClInclude Include="..\Public\Client_CharacterEnum.h" />
@@ -206,6 +207,7 @@
     <ClInclude Include="..\Public\Effect_Decal.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Director.h" />
+    <ClInclude Include="..\Public\Effect_Radial.h" />
     <ClInclude Include="..\Public\Effect_Rect.h" />
     <ClInclude Include="..\Public\ElectroPredator.h" />
     <ClInclude Include="..\Public\Event_Camera.h" />
@@ -388,9 +390,10 @@
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaHit.cpp" />
-    <ClCompile Include="..\private\AugustaSFX.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
     <ClCompile Include="..\Private\AttackVolume.cpp" />
+    <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
+    <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
@@ -408,6 +411,7 @@
     <ClCompile Include="..\private\DummyNPC.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
+    <ClCompile Include="..\Private\Effect_Radial.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp" />
     <ClCompile Include="..\Private\ElectroPredator.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />

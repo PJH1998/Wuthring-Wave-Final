@@ -13,7 +13,11 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+
+//SFX
+#ifdef _DEBUG
 #include "SonoraChange.h"
+#endif
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -25,6 +29,8 @@ HRESULT CLevel_GamePlay::Initialize()
 {
 	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+
+	m_pGameInstance->Setting_LUT(0, 0.25f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -40,6 +46,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
 		CRASH("Test");
 	
+
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
 	m_pGameInstance->Render_ShadowMap();
@@ -59,8 +66,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_CameraNF();
 
 	m_pGameInstance->SettingFog(true);
-	m_pGameInstance->Set_LUT_Index(0);
-
+	
 
 	Ready_UI();
 	Ready_Layer_Player();
@@ -424,7 +430,15 @@ void CLevel_GamePlay::Ready_SFX()
 {
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
-		CRASH("h");
+		CRASH("Failed Add Pool SONORA_CHANGE");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiSFX"),
+		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Augusta_UltiSFX"), 1)))
+		CRASH("Failed Add Pool Augusta_UltiSFX");
+	
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
+		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Augusta_UltiPostSFX"), 1)))
+		CRASH("Failed Add Pool Augusta_UltiPostSFX");
 }
 
 #ifdef _DEBUG
@@ -443,12 +457,38 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
-		CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-		Desc.fEffectTime = 3.f;
-		Desc.fRadialTime = 2.f;
-		Desc.fFadeTime = 2.f;
+		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+		//Desc.fEffectTime = 3.f;
+		//Desc.fRadialTime = 2.f;
+		//Desc.fFadeTime = 2.f;
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+		//m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+		
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_Augusta_UltiSFX"), XMMatrixIdentity(), nullptr);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_Augusta_UltiPostSFX"), XMMatrixIdentity(), nullptr);
+	}
+
+	if (ImGui::CollapsingHeader("LUT"))
+	{
+		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
+		{
+			for (_uint i = 0; i < 7; ++i)
+			{
+
+#ifdef _DEBUG
+				if (ImGui::Selectable(to_string(i).c_str()))
+				{
+					m_iLUT_Index = i;
+				}
+#endif // _DEBUG
+			}
+
+			ImGui::EndCombo();
+		}
+
+		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
+		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
 	}
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))

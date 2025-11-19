@@ -5,6 +5,7 @@
 #include "Trail_Mesh.h"
 #include "Effect_Rect.h"
 #include "Effect_Decal.h"
+#include "Effect_Radial.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
@@ -213,6 +214,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
     CTrail_Mesh::TRAILMESH_DESC* pTrailDesc = {};
 	CEffect_Rect::FXRECT_DESC* pRectDesc = {};
 	CEffect_Decal::DECAL_DESC* pDecalDesc = {};
+	CEffect_Radial::RADIAL_DESC* pRadialDesc = {};
 
     //프리팹 프레임에 미리 추가.
     FRAME_DESC FrameDesc = {};
@@ -263,6 +265,15 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 		FrameDesc.eChildrenType = eType;
 
 		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectDecal"), PROTOTYPE::GAMEOBJECT, pArg));
+		break;
+	case EFFECT_TYPE::RADIAL:
+		pRadialDesc = static_cast<CEffect_Radial::RADIAL_DESC*>(pArg);
+		strChildrenTag = pRadialDesc->strMyTag;
+
+		FrameDesc.strChildrenTag = pRadialDesc->strMyTag;
+		FrameDesc.eChildrenType = eType;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectRadial"), PROTOTYPE::GAMEOBJECT, pArg));
 		break;
 
     case EFFECT_TYPE::END:

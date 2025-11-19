@@ -25,6 +25,7 @@ HRESULT CEffect_Controller::Initialize()
     m_pLoad_Controller = CLoad_Controller::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 	m_pRect_Controller = CRect_Controller::Create(m_pDevice, m_pContext);
 	m_pDecal_Controller = CDecal_Controller::Create(m_pDevice, m_pContext);
+	m_pRadial_Controller = CRadial_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -177,6 +178,13 @@ void CEffect_Controller::Prefab_Tab()
 						m_eChildrenType = EFFECT_TYPE::DECAL;
 					}
 
+					if (ImGui::Button("Radial"))
+					{
+						m_pRadial_Controller->Set_RadialTag(m_ChildrenTag);
+
+						m_eChildrenType = EFFECT_TYPE::RADIAL;
+					}
+
                     //위에서 정해진 타입에 따라 컨트롤러 활성화
                     if (m_eChildrenType == EFFECT_TYPE::PARTICLE)
                     {
@@ -299,6 +307,30 @@ void CEffect_Controller::Prefab_Tab()
 							m_eChildrenType = EFFECT_TYPE::END;
 						}
 					}
+
+					if (m_eChildrenType == EFFECT_TYPE::RADIAL)
+					{
+						CEffect_Radial::RADIAL_DESC pDesc = {};
+
+						m_pRadial_Controller->Radial_Base_Tab(pDesc, m_bChildrenCreatFlag);
+
+						if (m_bChildrenCreatFlag)
+						{
+							m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
+
+							CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
+							Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+							Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::RADIAL;
+
+							m_pSelectedPrefabDesc->ChildrenCount += 1;
+							m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
+
+							m_ChildrenTag[0] = _T('\0');
+							m_bChildrenCreatFlag = false;
+							m_bChildrenTagFlag = false;
+							m_eChildrenType = EFFECT_TYPE::END;
+						}
+					}
                 }
 
                 if (ImGui::Button("Load Children"))
@@ -346,6 +378,9 @@ void CEffect_Controller::Prefab_Tab()
 
 					if (m_IsDecalEffect)
 						m_pDecal_Controller->Update();
+
+					if (m_IsRadialEffect)
+						m_pRadial_Controller->Update();
                     
                     if (ImGui::Button("Apply"))
                     {
@@ -413,6 +448,15 @@ void CEffect_Controller::Prefab_Tab()
 						   m_pSelectedPrefab->Add_Children(pDecalDesc, EFFECT_TYPE::DECAL);
 					   }
 
+					   if (m_IsRadialEffect)
+					   {
+						   CEffect_Radial::RADIAL_DESC* pDecalDesc = m_pRadial_Controller->Get_RadialDesc(m_strChildrenTag);
+
+						   m_pSelectedPrefab->Remove_Children(pDecalDesc->strMyTag);
+
+						   m_pSelectedPrefab->Add_Children(pDecalDesc, EFFECT_TYPE::RADIAL);
+					   }
+
                     }
 
                     if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
@@ -460,6 +504,15 @@ void CEffect_Controller::Prefab_Tab()
 								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
 								m_pDecal_Controller->Remove_Desc(m_strChildrenTag);
+
+								Reset_ChildrenInfo();
+							}
+
+							if (m_IsRadialEffect)
+							{
+								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
+
+								m_pRadial_Controller->Remove_Desc(m_strChildrenTag);
 
 								Reset_ChildrenInfo();
 							}
@@ -523,6 +576,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsTrailMesh = false;
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
+		m_IsRadialEffect = false;
 
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
@@ -533,6 +587,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsTrailMesh = false;
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
+		m_IsRadialEffect = false;
 
         m_pMesh_Controller->UpdateSelected_FXMeshFormTag(m_strChildrenTag);
     }
@@ -543,6 +598,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsTrailMesh = true;
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
+		m_IsRadialEffect = false;
 
         m_pTrailMesh_Controller->UpdateSelected_TrailMeshFormTag(m_strChildrenTag);
     }
@@ -553,6 +609,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsTrailMesh = false;
 		m_IsRectEffect = true;
 		m_IsDecalEffect = false;
+		m_IsRadialEffect = false;
 
 		m_pRect_Controller->UpdateSelected_RectFormTag(m_strChildrenTag);
 	}
@@ -563,9 +620,21 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsTrailMesh = false;
 		m_IsRectEffect = false;
 		m_IsDecalEffect = true;
+		m_IsRadialEffect = false;
 
 	
 		m_pDecal_Controller->UpdateSelected_DecalFormTag(m_strChildrenTag);
+	}
+	else if (dynamic_cast<CEffect_Radial*>(m_pSelectedPrefab->Get_Children(m_strChildrenTag)))
+	{
+		m_IsParticle = false;
+		m_IsMeshEffect = false;
+		m_IsTrailMesh = false;
+		m_IsRectEffect = false;
+		m_IsDecalEffect = false;
+		m_IsRadialEffect = true;
+
+		m_pRadial_Controller->UpdateSelected_RadialFormTag(m_strChildrenTag);
 	}
 
     //프리팹이 들고 있는 구조체에서 자식과 동일한 프레임 찾기
@@ -593,29 +662,29 @@ void CEffect_Controller::Selected_Prefab_Info()
 
             ImGui::Text("Offset Pos");
             ImGui::PushItemWidth(60);
-            ImGui::InputFloat("##ChildrenOffset Pos.x", &(m_pSelectedPrefabFrame->vOffsetPos.x));
+            ImGui::InputFloat("##ChildrenOffsetPos.x", &(m_pSelectedPrefabFrame->vOffsetPos.x));
             ImGui::SameLine();
-            ImGui::InputFloat("##ChildrenOffset Pos.y", &(m_pSelectedPrefabFrame->vOffsetPos.y));
+            ImGui::InputFloat("##ChildrenOffsetPos.y", &(m_pSelectedPrefabFrame->vOffsetPos.y));
             ImGui::SameLine();
-            ImGui::InputFloat("##ChildrenOffset Pos.z", &(m_pSelectedPrefabFrame->vOffsetPos.z));
+            ImGui::InputFloat("##ChildrenOffsetPos.z", &(m_pSelectedPrefabFrame->vOffsetPos.z));
             ImGui::PopItemWidth();
 
             ImGui::Text("Offset Size");
             ImGui::PushItemWidth(60);
-            ImGui::InputFloat("##ChildrenOffset Size.x", &(m_pSelectedPrefabFrame->vOffsetSize.x));
+            ImGui::InputFloat("##ChildrenOffsetSize.x", &(m_pSelectedPrefabFrame->vOffsetSize.x));
             ImGui::SameLine();
-            ImGui::InputFloat("##ChildrenOffset Size.y", &(m_pSelectedPrefabFrame->vOffsetSize.y));
+            ImGui::InputFloat("##ChildrenOffsetSize.y", &(m_pSelectedPrefabFrame->vOffsetSize.y));
             ImGui::SameLine();
-            ImGui::InputFloat("##ChildrenOffset Size.z", &(m_pSelectedPrefabFrame->vOffsetSize.z));
+            ImGui::InputFloat("##ChildrenOffsetSize.z", &(m_pSelectedPrefabFrame->vOffsetSize.z));
             ImGui::PopItemWidth();
 
             ImGui::Text("Offset Rot");
             ImGui::PushItemWidth(60);
-            ImGui::InputFloat("##ChildrenOffset Rot.x", &(m_pSelectedPrefabFrame->vOffsetRot.x));
+            ImGui::InputFloat("##ChildrenOffsetRot.x", &(m_pSelectedPrefabFrame->vOffsetRot.x));
             ImGui::SameLine();
-            ImGui::InputFloat("##ChildrenOffset Rot.y", &(m_pSelectedPrefabFrame->vOffsetRot.y));
+            ImGui::InputFloat("##ChildrenOffsetRot.y", &(m_pSelectedPrefabFrame->vOffsetRot.y));
             ImGui::SameLine();
-            ImGui::InputFloat("##ChildrenOffset Rot.z", &(m_pSelectedPrefabFrame->vOffsetRot.z));
+            ImGui::InputFloat("##ChildrenOffsetRot.z", &(m_pSelectedPrefabFrame->vOffsetRot.z));
             ImGui::PopItemWidth();
 
 			m_pGameInstance->Use_Gizmo_Offset(&m_pSelectedPrefabFrame->vOffsetSize, &m_pSelectedPrefabFrame->vOffsetRot,
@@ -627,7 +696,7 @@ void CEffect_Controller::Selected_Prefab_Info()
                 m_pSelectedPrefab->Set_FrameDesc(m_pSelectedPrefabFrame);
             }
             ImGui::SameLine(0.f, 30.f);
-            if (ImGui::Button("Reset Frame") || m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::DOWN )
+            if (ImGui::Button("Reset Frame") || m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::DOWN ) 
             {
                 m_pSelectedPrefab->Reset_Prefab_Info();
                 m_pSelectedPrefab->SetActivate(true);
@@ -942,6 +1011,27 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
 			Decal_To_Json(DecalJson, pDecalDesc);
 
 			jsonStream << DecalJson.dump(2);
+			jsonStream.close();
+		}
+		if (Prefab->second.FrameDesc[i].eChildrenType == EFFECT_TYPE::RADIAL)
+		{
+			_string RadialPath = {};
+			CEffect_Radial::RADIAL_DESC* pRadialDesc = {};
+
+			pRadialDesc = m_pRadial_Controller->Get_RadialDesc(Prefab->second.FrameDesc[i].strChildrenTag);
+
+			RadialPath = DefaultPath;
+			RadialPath += "/FXRadial/";
+			RadialPath += WStringToString(Prefab->second.FrameDesc[i].strChildrenTag);
+			RadialPath += ".json";
+
+			ofstream jsonStream(RadialPath);
+
+			json RadialJson;
+
+			Radial_To_Json(RadialJson, pRadialDesc);
+
+			jsonStream << RadialJson.dump(2);
 			jsonStream.close();
 		}
     }
@@ -1296,6 +1386,26 @@ void CEffect_Controller::Decal_To_Json(json& Decal, CEffect_Decal::DECAL_DESC* p
 	Decal["Color"] = ColorJson;
 }
 
+void CEffect_Controller::Radial_To_Json(json& Radial, CEffect_Radial::RADIAL_DESC* pRadialDesc)
+{
+	Radial["MyTag"] = WStringToString(pRadialDesc->strMyTag);
+	Radial["MyType"] = pRadialDesc->eMyType;
+
+	Radial["LifeTime"] = pRadialDesc->fLifeTime;
+
+	json CenterJson = json::array();
+	CenterJson.push_back(pRadialDesc->Center.x);
+	CenterJson.push_back(pRadialDesc->Center.y);
+	Radial["Center"] = CenterJson;
+
+	json DistanceRange = json::array();
+	DistanceRange.push_back(pRadialDesc->DistanceRange.x);
+	DistanceRange.push_back(pRadialDesc->DistanceRange.y);
+	Radial["DistanceRange"] = DistanceRange;
+
+	Radial["IntensityRange"] = pRadialDesc->IntensityRange;
+}
+
 void CEffect_Controller::Load_Prefab()
 {
     CEffect_Prefab::PREFAB_DESC PrefabDesc = {};
@@ -1349,6 +1459,11 @@ void CEffect_Controller::Load_Prefab()
 		else if (FrameDesc.eChildrenType == EFFECT_TYPE::DECAL)
 		{
 			Load_FXDecal(FrameDesc.strChildrenTag);
+		}
+
+		else if (FrameDesc.eChildrenType == EFFECT_TYPE::RADIAL)
+		{
+			Load_FXRadial(FrameDesc.strChildrenTag);
 		}
     }
 }
@@ -1430,6 +1545,18 @@ void CEffect_Controller::Load_FXDecal(const _wstring& DecalTag)
 	m_pSelectedPrefab->Add_Children(&DecalDesc, EFFECT_TYPE::DECAL);
 
 	m_pDecal_Controller->Set_DecalDesc(Tag, DecalDesc);
+}
+
+void CEffect_Controller::Load_FXRadial(const _wstring& RadialTag)
+{
+	CEffect_Radial::RADIAL_DESC RadialDesc = {};
+	_wstring Tag = RadialTag;
+
+	m_pLoad_Controller->Get_FXRadial_Desc(Tag, RadialDesc);
+
+	m_pSelectedPrefab->Add_Children(&RadialDesc, EFFECT_TYPE::RADIAL);
+
+	m_pRadial_Controller->Set_RadialDesc(Tag, RadialDesc);
 }
 
 void CEffect_Controller::Save_SelectedChildren_To_Json()
