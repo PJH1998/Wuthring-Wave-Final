@@ -393,8 +393,8 @@ void CLevel_GamePlay::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-			CRASH("Failed to Add RootUI to UI_Manager.");
+	//	if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
+	//		CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
@@ -408,13 +408,13 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
 		CRASH("Failed Ready Button_Interact");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
-		iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
-		CRASH("Failed Ready LockOn");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+	//	CRASH("Failed Ready LockOn");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
-		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
-		CRASH("Failed Ready Parry");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+	//	CRASH("Failed Ready Parry");
 
 	// _UI
 }
@@ -470,7 +470,7 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
 	{
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
