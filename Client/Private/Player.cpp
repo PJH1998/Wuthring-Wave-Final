@@ -279,6 +279,7 @@ void CPlayer::Player_KeyInput()
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
+		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
