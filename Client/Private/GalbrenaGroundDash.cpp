@@ -124,7 +124,7 @@ void CGalbrenaGroundDash::Check_StateTransition(_float fTimeDelta)
     // 애니메이션 끝나면?
     if (m_IsAnimationEnd)
     {
-        m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+        m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
         m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE)); // 상위, 하위 상태
         return;
     }

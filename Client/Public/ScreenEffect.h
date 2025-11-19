@@ -25,6 +25,12 @@ protected:
 	CVIBuffer_Rect*			m_pVIBuffer_Rect = { nullptr };
 	CShader*				m_pShader = { nullptr };
 
+	_float2					m_vWinSize = {};
+
+protected:
+	void					Setting_Scale(_float fSizeX, _float fSizeY);
+	void					Setting_Pos(_float fPosX, _float fPosY);
+
 private:
 	HRESULT					Ready_Components();
 

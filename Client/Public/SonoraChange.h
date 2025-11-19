@@ -37,14 +37,13 @@ private:
 	_float					m_fEffectTime = {};
 	_float					m_fRadialTime = {};
 	_float					m_fFadeTime = {};
-
+	_float					m_fFadeIntensity = {};
 	_float2					m_vRadialCenter = {};
 
 	_float2					m_vRadialDistanceRange = {};
 	_float2					m_vRadialIntensityRange = {};
 	
-
-	_float4					m_vFadeColor = {};
+	_float3					m_vFadeColor = {};
 
 private:
 	HRESULT					Bind_ShaderResources();

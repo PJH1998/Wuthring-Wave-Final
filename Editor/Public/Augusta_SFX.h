@@ -27,12 +27,17 @@ public:
 	virtual		void		Reset() override;
 
 private:
-	CTexture*				m_pBaseTexture = { nullptr };	//Tile_262
 	CTexture*				m_pMaskTexture = { nullptr };	//Mask_300156
-	CTexture*				m_pNoiseTexture = { nullptr };	//Tile_30010
-	CTexture*				m_pSecondTexture = { nullptr };	//Tile_530002
+	CTexture*				m_pNoiseTexture = { nullptr };
+	
+	_float2					m_vEffectTime = {};
+	_float					m_fCurrentTime = {};
 
-	_bool	test = {};
+	_float3					m_vColor = { _float3(1.f, 1.f, 1.f) };
+	
+	_float2					m_vPos = {};
+	_float2					m_vScale = {};
+
 private:
 	HRESULT					Ready_Textures();
 

@@ -18,6 +18,9 @@ HRESULT CLevel_Logo::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+
+	m_pGameInstance->Setting_LUT(0, 0.f, false);
+
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
 	Ready_Layer_LogoFemaleRover();
@@ -35,7 +38,6 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SetUp_CameraNF();
 
 	m_pGameInstance->SettingFog(true);
-	m_pGameInstance->Set_LUT_Index(1);
 
 	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
 

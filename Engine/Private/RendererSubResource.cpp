@@ -15,7 +15,7 @@ CRendererSubResource::CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceCo
 
 HRESULT CRendererSubResource::Initialize()
 {
-    m_iNumLUT_Textures = 4;
+    m_iNumLUT_Textures = 7;
 
     if (FAILED(Ready_Shader_Filters()))
         CRASH("Failed Ready Shader Filters");

@@ -850,6 +850,14 @@ void CCharacter::Debug_FullCost(_bool IsAll)
 	m_pAbillityCom->Debug_FullCost(IsAll);
 }
 
+void CCharacter::Clear_CoolTime()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Clear_CoolTime();
+}
+
 #else
 void CCharacter::Debug_FullCost(_bool IsAll)
 {
@@ -858,6 +866,14 @@ void CCharacter::Debug_FullCost(_bool IsAll)
 
 	m_pAbillityCom->Debug_FullCost(IsAll);
 }
+void CCharacter::Clear_CoolTime()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Clear_CoolTime();
+}
+
 #endif // _DEBUG
 
 

@@ -134,10 +134,11 @@ public:
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
-	void						Set_LUT_Index(_uint iIndex);
 	void						Render_ShadowMap();
 	void						SettingFog(_bool IsOn);
-	ID3D11ShaderResourceView* Get_CurrentSceneSRV();
+	ID3D11ShaderResourceView*	Get_CurrentSceneSRV();
+	void						Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut);
+	void						Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut);
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);

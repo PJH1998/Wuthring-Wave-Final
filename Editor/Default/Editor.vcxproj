@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\public\Animator_UI.h" />
+    <ClInclude Include="..\public\AugustaBlur.h" />
     <ClInclude Include="..\public\Augusta_SFX.h" />
     <ClInclude Include="..\Public\Camera_Interface.h" />
     <ClInclude Include="..\Public\ASM_Interface.h" />
@@ -242,6 +243,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Animator_UI.cpp" />
+    <ClCompile Include="..\private\AugustaBlur.cpp" />
     <ClCompile Include="..\private\Augusta_SFX.cpp" />
     <ClCompile Include="..\Private\Camera_Interface.cpp" />
     <ClCompile Include="..\Private\ASM_Interface.cpp" />
