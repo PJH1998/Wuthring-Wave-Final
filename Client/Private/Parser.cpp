@@ -171,6 +171,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				_string ModelName = Name;
 				ModelName.pop_back();
 
+
 				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
 					if (entry2.path().string().find("MapData") != std::string::npos)
 						continue;
@@ -209,11 +210,17 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 					else
 						//if (entry2.path().string().find("Instance") == std::string::npos)
 					{
-						m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
+							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
+								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
+								CRASH("Prototype Create Failed");
+							//});
+
+	/*					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
 							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
 								CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
 								CRASH("Prototype Create Failed");
-							});
+							});*/
 						break;
 					}
 					//프로토타입 생성
@@ -226,6 +233,8 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 
 void CParser::Clone_MapObjects(LEVEL eLevel)
 {
+	m_pGameInstance->LoadLastLOD();
+
 	if (m_LoadingMap[eLevel].empty())
 		MSG_BOX("Map Clone Failed");
 
@@ -295,6 +304,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 	if (pFilePath.find("Instance") != std::string::npos)
 	{
+		return;
 		for (_uint i = 0; i < m_MapInstanceData.size(); ++i)
 		{
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
@@ -303,6 +313,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
 	{
+		return;
 		_uint NameLength;
 
 		_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -316,6 +327,12 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 			File.read(Desc.ModelName, NameLength);
 			_string Name = Desc.ModelName;
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			strcpy_s(Desc.ModelName, Name.c_str());
 			OBJECTTYPE Type;
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
@@ -354,6 +371,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Meteo") != std::string::npos) 
 	{
+		return;
 		CMapObject_Meteo::MAP_LOAD Desc{};
 		
 		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
@@ -457,16 +475,19 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 					switch (pDesc.eObjectType)
 					{
 					case OBJECTTYPE::SONORA:
+						return;
 						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
 							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA:
+						return;
 						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
 							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA_FLOOR:
+						return;
 						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
 							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
 						break;
@@ -581,6 +602,7 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 
 	strEffectPath = strDefaultPath;
 	strEffectPath += "/FXDecal/";
+	return;
 	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
 	{
 		if (entry.is_regular_file())

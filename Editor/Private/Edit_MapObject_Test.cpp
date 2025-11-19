@@ -20,14 +20,25 @@ HRESULT CEdit_MapObject_Test::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 	Ready_Component(pArg);
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_pGameInstance->Rand(-1800, 1800), m_pGameInstance->Rand(-1800, 1800), m_pGameInstance->Rand(-1800, 1800), 1.f));
+	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_pGameInstance->Rand(-1600.f, 1600.f), m_pGameInstance->Rand(-1600.f, 1600.f), m_pGameInstance->Rand(-1600.f, 1600.f), 1.f));
 	_float3 vPos;
 	XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	m_pTransformCom->Get_State(STATE::POSITION);
-	m_pBoundingBox = new BoundingBox(vPos, _float3(300.f, 300.f, 300.f));
+	m_pBoundingBox = new BoundingBox(vPos, _float3(200.f, 200.f, 200.f));
 	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	AddRef();
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.vPos = m_pBoundingBox->Center;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Static;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.vExtent = _float3(20.f,20.f,20.f);
+
+	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
+
 	return S_OK;
 }
 
@@ -62,10 +73,16 @@ void CEdit_MapObject_Test::Render()
 
 void CEdit_MapObject_Test::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
+	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
+
 	if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
 	{
-		//여기서 Late Render같은 곳에 추가해버리는 코드 추가?.
-		//return;
+		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
+			m_pModelCom->Request_LOD(m_iLODIndex);
+		//여기에 어떤 LOD인덱스 부분에 넣을건지도 넣어야됨.
+		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
+		return;
 	}
 	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
 
@@ -121,9 +138,22 @@ void CEdit_MapObject_Test::Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTi
 
 HRESULT CEdit_MapObject_Test::Ready_Component(void* pArg)
 {
-	BUFFER_TEST* pDesc = static_cast<BUFFER_TEST*>(pArg);
+	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	pDesc->ModelName;
+	m_iLevel = pDesc->iLevel;
+	strcpy_s(m_ModelName, pDesc->ModelName);
 
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
+	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+	_tchar Name[MAX_PATH] = {};
+
+	MultiByteToWideChar(CP_ACP, 0, pDesc->ModelName, -1, Name, strlen(pDesc->ModelName));
+	lstrcat(Model, Name);
+	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
+
+	_wstring ModelCom = Model;
+	//ModelCom.pop_back();
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
 
@@ -170,4 +200,6 @@ void CEdit_MapObject_Test::Free()
 
     Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
+	Safe_Release(m_pRigidbodyCom);
+	
 }

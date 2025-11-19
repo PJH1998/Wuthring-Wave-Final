@@ -498,9 +498,13 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
-HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+//HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+//{
+//    return m_pRenderer->Add_Render_StaticObject(Container);
+//}
+HRESULT CGameInstance::Add_Render_StaticObject(vector<class CStaticObject*>* Container)
 {
-    return m_pRenderer->Add_Render_StaticObject(Container);
+	return m_pRenderer->Add_Render_StaticObject(Container);
 }
 HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
@@ -1026,7 +1030,7 @@ void CGameInstance::RequestData(CModel_Streaming* pModel, const _string& pFilePa
 void CGameInstance::LoadLastLOD()
 {
 	m_pModel_Manager->LoadLastLOD();
-}
+ }
 
 void CGameInstance::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
 {
@@ -1038,14 +1042,34 @@ void CGameInstance::Add_To_RenderTest(vector<class CStaticObject*>* Container)
 	m_pModel_Manager->Add_To_RenderTest(Container);
 }
 
+_uint CGameInstance::Render_ObjectsNum(_uint iLODIndex)
+{
+	return m_pModel_Manager->Render_ObjectsNum(iLODIndex);
+}
+
+void CGameInstance::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread)
+{
+	m_pModel_Manager->Bind_SharedBuffer(iLODIndex, pDC, iNumThread);
+}
+
+void CGameInstance::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC)
+{
+	m_pModel_Manager->Bind_SharedBuffer(iLODIndex, pDC);
+}
+
 void CGameInstance::RenderBufferPool(_uint iLODIndex)
 {
 	m_pModel_Manager->RenderBufferPool(iLODIndex);
 }
 
-void CGameInstance::RenderBufferPool(_uint iLODIndex, ID3D11DeviceContext* pContext)
+void CGameInstance::RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext)
 {
-	m_pModel_Manager->RenderBufferPool(iLODIndex, pContext);
+	m_pModel_Manager->RenderBufferPool(iThreadIndex, iLODIndex, iStartIndex, iEndIndex, pContext);
+}
+
+void CGameInstance::Clear_BufferPool()
+{
+	m_pModel_Manager->Clear_BufferPool();
 }
 
 #pragma region SFX_HUB

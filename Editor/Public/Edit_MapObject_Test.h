@@ -50,6 +50,7 @@ private:
 private:
 	class CDeferredShader* m_pShaderCom = { nullptr };
 	CModel_Streaming* m_pModelCom = { nullptr };
+	CRigidbody* m_pRigidbodyCom = { nullptr };
 
 	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};

@@ -39,7 +39,7 @@ HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
 
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(2000, 2000, 2000));
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4000, 4000,4000));
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
 
@@ -372,7 +372,7 @@ void CLevel_Map::Menu_Model_Load()
 					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
 					Desc.iLevel = m_iLevel;
 
-					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object")
 						, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 				}
 			}
@@ -752,14 +752,17 @@ void CLevel_Map::Menu_Save_Load()
 
 								m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
 									CEdit_MapObject::MAP_LOAD pDesc{};
+									//CEdit_MapObject_Test::MAP_LOAD pDesc{};
 									strcpy_s(pDesc.ModelName, ModelName.c_str());
 									pDesc.iShaderPassIndex = ShaderPass;
 									pDesc.eObjectType = eObjectType;
 									pDesc.WorldMatrix = &Matrix;
 									pDesc.iLevel = m_iLevel;
+									m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object")
+										, m_iLevel, TEXT("Layer_MapObject"), &pDesc);
 
-									m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-										, m_iLevel, TEXT("Layer_Test"), &pDesc);
+									/*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+										, m_iLevel, TEXT("Layer_Test"), &pDesc);*/
 									});
 
 							}
@@ -851,10 +854,13 @@ void CLevel_Map::Load_Objects()
 
 				_wstring key = L"Prototype_Component_Model_" + namePart;
 
+				if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+					CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
+					continue;
 
+				//continue;
 
-
-				m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+				/*m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
 					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
 						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
 						CRASH("Prototype Create Failed");
@@ -870,7 +876,7 @@ void CLevel_Map::Load_Objects()
 							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str(),true))))
 							CRASH("Prototype Create Failed");
 						});
-				}
+				}*/
 				if (lstrcmp(LastVersionName.c_str(), key.c_str()) && !LastVersionName.empty())
 				{
 					// ✅ (수정됨) '이전' 경로를 검사합니다.
@@ -882,6 +888,8 @@ void CLevel_Map::Load_Objects()
 					}
 					else
 					{
+
+
 						m_PrototypeNames.push_back(LastVersionName + to_wstring(Lastversion));
 						m_ModelPaths.push_back(LastVersionPath);
 					}
@@ -911,16 +919,16 @@ void CLevel_Map::Load_Objects()
 
     m_pGameInstance->Wait_Thread_End();
     
-    for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
-    {
-        m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
-    }
+    //for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+    //{
+    //    m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
+    //}
 
 
-    for (_uint i = 0; i < m_FoliageNames.size(); ++i)
-    {
-        m_pPreViewObject->Add_Model(m_FoliageNames[i]);
-    }
+    //for (_uint i = 0; i < m_FoliageNames.size(); ++i)
+    //{
+    //    m_pPreViewObject->Add_Model(m_FoliageNames[i]);
+    //}
     
     m_pGameInstance->Wait_Thread_End();
 
@@ -1064,53 +1072,54 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 
 
-	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test"),
-		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL"))))
-		CRASH("Prototype Create Failed");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test2"),
-		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01OL"))))
-		CRASH("Prototype Create Failed");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test3"),
-		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01SL"))))
-		CRASH("Prototype Create Failed");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test4"),
-		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01RL"))))
-		CRASH("Prototype Create Failed");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test5"),
-		CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01TL"))))
-		CRASH("Prototype Create Failed");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test_Object"),
 		CEdit_MapObject_Test::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
-	m_pGameInstance->LoadLastLOD();
-	CEdit_MapObject_Test::BUFFER_TEST TT{};
-	for (_uint i = 0; i < 500; ++i)
-	{
-		strcpy_s(TT.ModelName, "Prototype_Test");
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
-	/*	strcpy_s(TT.ModelName, "Prototype_Test2");
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+	//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test"),
+	//	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL"))))
+	//	CRASH("Prototype Create Failed");
 
-		strcpy_s(TT.ModelName, "Prototype_Test3");
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+	//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test2"),
+	//	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01OL"))))
+	//	CRASH("Prototype Create Failed");
 
-		strcpy_s(TT.ModelName, "Prototype_Test4");
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+	//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test3"),
+	//	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01SL"))))
+	//	CRASH("Prototype Create Failed");
 
-		strcpy_s(TT.ModelName, "Prototype_Test5");
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
-	*/}
-    //Load_Objects();
+	//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test4"),
+	//	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01RL"))))
+	//	CRASH("Prototype Create Failed");
+
+	//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Test5"),
+	//	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01TL"))))
+	//	CRASH("Prototype Create Failed");
+	
+	//CEdit_MapObject_Test::BUFFER_TEST TT{};
+	//for (_uint i = 0; i < 500; ++i)
+	//{
+	//	strcpy_s(TT.ModelName, "Prototype_Test");
+	//	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+	//	strcpy_s(TT.ModelName, "Prototype_Test2");
+	//	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+
+	//	strcpy_s(TT.ModelName, "Prototype_Test3");
+	//	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+
+	//	strcpy_s(TT.ModelName, "Prototype_Test4");
+	//	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+
+	//	strcpy_s(TT.ModelName, "Prototype_Test5");
+	//	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_Test_Object"), m_iLevel, TEXT("Layer_Test"), &TT);
+	//}
+    Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
 		CEdit_MapObject_Destruction::Create(m_pDevice, m_pContext));
+	m_pGameInstance->LoadLastLOD();
 
     return S_OK;
 }

@@ -441,7 +441,11 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 	_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
 
 	m_pModelComArray.resize(V);
-
+	//_wstring ModelCom = Model;
+	//ModelCom.pop_back();
+	//if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
+	//	TEXT("Com_Test"), reinterpret_cast<CComponent**>(&m_pModelCom2), nullptr)))
+	//	CRASH("FAILED");
 	for (_uint i = 0; i < V; ++i)
 	{
 		_wstring ModelCom = Model;

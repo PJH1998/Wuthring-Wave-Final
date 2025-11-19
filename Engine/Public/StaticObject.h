@@ -12,7 +12,7 @@ protected:
 
 public:
 	void						Set_LOD(_uint iLOD = 0) { m_iLODIndex = iLOD; }
-	_uint						Get_LOD() { return m_iLODIndex; }
+	_uint						Get_LOD() { return min(m_iNumLOD - 1, m_iLODIndex); }
 	_float						Compute_Distance(const _fvector& vCamPos);
 
 public:

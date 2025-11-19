@@ -122,8 +122,8 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 						Container[2].reserve(1000);
 						Container[3].reserve(1000);
 						Cell->Update(CamPos, Container);
-						m_pGameInstance->Add_To_RenderTest(Container);
-						//m_pGameInstance->Add_Render_StaticObject(Container);
+						//m_pGameInstance->Add_To_RenderTest(Container);
+						m_pGameInstance->Add_Render_StaticObject(Container);
 						});
 				}
 				else

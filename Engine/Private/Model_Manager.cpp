@@ -39,10 +39,12 @@ HRESULT CModel_Manager::Initialize()
 
 void CModel_Manager::Update(_float fTimeDelta)
 {
-	m_fTotalPlayTime += fTimeDelta;
+	m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
+
 	auto DeleteIter = m_DeleteList.begin();
 	while (DeleteIter != m_DeleteList.end())
 	{
+		//지연 해제
 		DeleteIter->iLifeCount--;
 		if (DeleteIter->iLifeCount <= 0)
 		{
@@ -56,18 +58,20 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 	if (!m_StagingData.empty())
 	{
-		auto pTempVector = move(m_StagingData);
-		m_StagingData.clear();
+		vector<MOEDL_DATA> pTempVector;
+		{
+			lock_guard<mutex> lock(m_Mutex);
+			pTempVector = move(m_StagingData);
+			m_StagingData.clear();
+		}
 
-		/*iFrame++;
-		if(iFrame>=iTestFrame)
-			iFrame = 0;*/
 		for (auto& Data : pTempVector)
 		{
-			//auto& Data = m_StagingData[m_StagingData.size()-1];
 			//Data의 Data.LoadData 개수가 메쉬의 개수.
 			vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
 			pData->clear();
+			if (Data.LoadData.empty())
+				continue;
 			for (_uint i = 0; i < Data.LoadData.size(); ++i)
 			{
 				_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
@@ -110,16 +114,13 @@ void CModel_Manager::Update(_float fTimeDelta)
 				pData->push_back(Desc);
 			}
 			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
-		//m_StagingData.pop_back();
 		}
 		pTempVector.clear();
 	}
 
-	//지연 해제 하면 좋다고 함? 어떻게 하는지 몰라서 아직 내비두는 중 + 옥토트리 및 디퍼드 컨텍스트 적용 전.
-
-	//이터레이터를 이동.
 	if (m_ModelPrototypes.empty())
 		return;
+
 
 	if (m_iSearchIndex == m_ModelPrototypes.end())
 		m_iSearchIndex = m_ModelPrototypes.begin();
@@ -129,31 +130,32 @@ void CModel_Manager::Update(_float fTimeDelta)
 		CModel_Streaming* pModel = m_iSearchIndex->second;
 		for (_uint i = 0; i < 3; ++i)
 		{
-			if (pModel->Is_RenderTimeOver(i)&& pModel->Get_MeshState(i) == LOADSTATE::LOADED)
+			if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
 			{
-				auto& MeshVector = pModel->Get_MeshDesc(0)[i];
-
-				for (auto& pDesc : MeshVector)
+				if (pModel->Get_MeshDesc(0)[i].empty())
+					continue;
+				vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
+				if (pMeshVector->empty())
+					continue;
+				for (auto& pDesc : *pMeshVector)
 				{
 					DELETE_DATA Data{};
 					Data.iLifeCount = 3;
 					Data.iLODIndex = i;
 					Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
 					Data.IndexSize = pDesc.IndexSize;
-					Data.VertexOffset = pDesc.VertexOffset* sizeof(VTXMESH);
+					Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
 					Data.VertexSize = pDesc.VertexSize;
 
 					m_DeleteList.push_back(Data);
-					//m_pBufferPool[i]->FreeMemory_Vertex(pDesc.VertexOffset, pDesc.VertexSize);
-					//m_pBufferPool[i]->FreeMemory_Index(pDesc.IndexOffset, pDesc.IndexSize);
 				}
-				pModel->Get_MeshDesc(0)[i].clear();
 				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
 			}
 		}
 		m_iSearchIndex++;
 		iCheckCount++;
 	}
+
 }
 
 HRESULT CModel_Manager::RegisterPrototype(const _char* pFilePath, CModel_Streaming* pModel)
@@ -172,28 +174,35 @@ void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFileP
 	//여기에는 LOD가 안붙어있고 모델에는 붙어있음.
 
 	atomic<LOADSTATE>& LoadState = pModel->Get_MeshState(iLODIndex);
+	
+	if (LoadState != LOADSTATE::NOTLOADED)
+		return;
+
 	LOADSTATE ExpectedState = LOADSTATE::NOTLOADED;
 	if (LoadState.compare_exchange_strong(ExpectedState, LOADSTATE::LOADING))
 	{
 		//파일 경로 전체는 모델 매니저에 저장. 파일 이름(뒤에 LOD가 붙어야하니까)은 모델에 저장?
-		m_pGameInstance->Add_Work([=,lModel = pModel, lFilePath = pFilePath, liLODIndex = iLODIndex]() {
-			LoadData(lModel, lFilePath, liLODIndex);
+		m_pGameInstance->Add_Work([=, lModel = pModel, lFilePath = pFilePath, liLODIndex = iLODIndex, Matrix = XMLoadFloat4x4(&m_PreTransformMatrix)]() {
+			LoadData(lModel, lFilePath, liLODIndex, Matrix);
 			});
 	}
 
 	//게임이니셜라이즈 하기 전에 LOD3번은 전부 미리 만들어두라고 요청하는 함수 만들기.(내부에는 Wait걸고)
 }
 
-void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath, _uint iLODIndex)
+void CModel_Manager::LoadData(CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex,_fmatrix PreMatrix)
 {
 	//pFilePath는 파일 경로 말고 _LOD까지 붙은거. 
-	ifstream File(pFilePath  + to_string(iLODIndex) + ".dat", ios::binary);
+	ifstream File(pFilePath + to_string(iLODIndex) + ".dat", ios::binary);
 	if (!File.is_open())
-		CRASH("Failed");
+		CRASH("Failed to Open File");
 
-	_uint iNumMeshes;
+	_uint iNumMeshes = 0;
 	File.read(reinterpret_cast<_char*>(&iNumMeshes), sizeof(_uint));
-	
+
+	if (iNumMeshes > 1000 || iNumMeshes == 0)
+		CRASH("Invalid Mesh Count: Memory Corruption Suspected");
+
 	MOEDL_DATA Datas;
 	Datas.pModel = pModel;
 	Datas.LoadData.resize(iNumMeshes);
@@ -201,8 +210,8 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 	for (_uint i = 0; i < iNumMeshes; ++i)
 	{
 		_uint iNumVertices = {};
-		vector<VTXMESH> pVertices = Datas.LoadData[i].VertexData;
-		vector<_uint> pIndices = Datas.LoadData[i].IndexData;
+		vector<VTXMESH>& pVertices = Datas.LoadData[i].VertexData;
+		vector<_uint>& pIndices = Datas.LoadData[i].IndexData;
 		_uint iNumMaterialIndex = {};
 		File.read(reinterpret_cast<_char*>(&iNumVertices), sizeof(_uint));
 		//pVertices = new VTXMESH[iNumVertices];
@@ -221,19 +230,17 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 
 		for (size_t j = 0; j < iNumVertices; ++j)
 		{
-			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vPosition,	 XMVector3TransformCoord(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vPosition), XMLoadFloat4x4(&m_PreTransformMatrix)));
-			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vNormal,		XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vNormal), XMLoadFloat4x4(&m_PreTransformMatrix)));
-			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vTangent,	XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vTangent), XMLoadFloat4x4(&m_PreTransformMatrix)));
-			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vBinormal,	XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vBinormal), XMLoadFloat4x4(&m_PreTransformMatrix)));
+			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vPosition, XMVector3TransformCoord(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vPosition), PreMatrix));
+			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vNormal, XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vNormal), PreMatrix));
+			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vTangent, XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vTangent), PreMatrix));
+			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vBinormal), PreMatrix));
 		}
 	}
-
-		//여기서 스테이징 버퍼에 올리고 버퍼풀에 올려야함.
+	
 	{
 		lock_guard<mutex> lock(m_Mutex);
 		m_StagingData.push_back(move(Datas));
 	}
-
 }
 
 void CModel_Manager::RenderBufferPool(_uint iLODIndex)
@@ -249,17 +256,44 @@ void CModel_Manager::RenderBufferPool(_uint iLODIndex)
 	m_RenderObjects[iLODIndex].clear();
 }
 
-void CModel_Manager::RenderBufferPool(_uint iLODIndex, ID3D11DeviceContext* pContext)
+void CModel_Manager::RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext)
 {
-	m_pBufferPool[iLODIndex]->Bind_BufferPool(pContext);
-	for (auto& pObject : m_RenderObjects[iLODIndex])
+	if (m_RenderObjects[iLODIndex].empty())
+		return;
+	for (_uint i = iStartIndex; i < iEndIndex; ++i)
 	{
-		pObject->Render(pContext, iLODIndex);
-		//호출된 시간을 밑으로 체크해야하는데 StaticObject에는 저 함수가 없어서 보류.
-		pObject->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
-		Safe_Release(pObject);
+		m_RenderObjects[iLODIndex][i]->Render(pContext, iThreadIndex);
+		m_RenderObjects[iLODIndex][i]->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
+		Safe_Release(m_RenderObjects[iLODIndex][i]);
 	}
-	m_RenderObjects[iLODIndex].clear();
+}
+
+void CModel_Manager::Clear_BufferPool()
+{
+	for (auto& pRenderObjects : m_RenderObjects) {
+		pRenderObjects.second.clear();
+	}
+}
+
+_uint CModel_Manager::Render_ObjectsNum(_uint iLODIndex)
+{
+	if (iLODIndex >= 4)
+		return 0;
+
+	if (m_RenderObjects[iLODIndex].empty())
+		return 0;
+	return m_RenderObjects[iLODIndex].size();
+}
+
+void CModel_Manager::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread)
+{
+	for (_uint i = 0; i < iNumThread; ++i)
+		m_pBufferPool[iLODIndex]->Bind_BufferPool(pDC[i]);
+}
+
+void CModel_Manager::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC)
+{
+	m_pBufferPool[iLODIndex]->Bind_BufferPool(pDC);
 }
 
 void CModel_Manager::LoadLastLOD()
@@ -326,8 +360,11 @@ void CModel_Manager::LoadLastLOD()
 
 void CModel_Manager::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
 {
-	m_RenderObjects[iLODIndex].push_back(pObject);
-	Safe_AddRef(pObject);
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_RenderObjects[iLODIndex].push_back(pObject);
+		Safe_AddRef(pObject);
+	}
 }
 
 void CModel_Manager::Add_To_RenderTest(vector<class CStaticObject*>* Container)
@@ -350,12 +387,6 @@ void CModel_Manager::Add_To_RenderTest(vector<class CStaticObject*>* Container)
 			Container[i].clear();
 		}
 	}
-	/*vector<class CStaticObject*> pTemp = move(Container);
-	for (auto& pObject : pTemp)
-	{
-		m_RenderObjects[pObject->Get_LOD()].push_back(pObject);
-		Safe_AddRef(pObject);
-	}*/
 }
 
 CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -65,20 +65,19 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 	if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::LOADED)
 	{
 		//m_Meshes[iLODIndex]->Bind_Resources(iMeshIndex);
-		m_fRenderTime[iLODIndex] = m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
 		m_pModelPrototype->m_Meshes[iLODIndex]->Render(iMeshIndex);
 		return S_OK;
 	}
 	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
-		m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
+		m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
 	//모델 매니저에 해당하는 LOD단계 요청할것.
 	//m_pGameInstance
 	//준비된 것 중 제일 높은 LOD 단계 렌더시키기.
 
 
 	//LOD단계가 준비가 안돼있으면 어쩔 수 없이 버퍼를 다시 바인딩 하므로 렉이 살짝 먹을듯? 아니면 Real_Late_Renedr 함수를 만들어서 늦어진 친구들을 다시 렌더하는 걸 만들어?
-	_uint RenderLOD = m_iMaxLOD;
-	for (_uint i = 0; i < m_iMaxLOD - 1; ++i)
+	_uint RenderLOD = m_pModelPrototype->m_iMaxLOD;
+	for (_uint i = 0; i < m_pModelPrototype->m_iMaxLOD - 1; ++i)
 	{
 		if (m_pModelPrototype->m_Meshes[i]->IsLoaded() == LOADSTATE::LOADED)
 		{
@@ -88,7 +87,6 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 	}
 	if (m_pModelPrototype->m_Meshes[RenderLOD]->Is_Overed(iMeshIndex))
 		return S_OK;
-	m_fRenderTime[RenderLOD] = m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
 	m_pModelPrototype->m_Meshes[RenderLOD]->Bind_Resources(iMeshIndex);
 	m_pModelPrototype->m_Meshes[RenderLOD]->Render(iMeshIndex);
 	return S_OK;
@@ -112,31 +110,21 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
+	if (!m_pModelPrototype->m_Meshes[iLODIndex])
+		return S_OK;
 	if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::LOADED)
 	{
-		m_fRenderTime[iLODIndex] = m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
-		m_Meshes[iLODIndex]->Render(iMeshIndex, pDC);
+		m_pModelPrototype->m_Meshes[iLODIndex]->Render(iMeshIndex, pDC);
 		return S_OK;
 	}
 	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
-		m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
+		m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
 
-	_uint RenderLOD = m_iMaxLOD;
-	for (_uint i = 0; i < m_iMaxLOD - 1; ++i)
-	{
-		if (m_pModelPrototype->m_Meshes[i]->IsLoaded() == LOADSTATE::LOADED)
-		{
-			RenderLOD = i;
-			break;
-		}
-	}
-
-	if (m_pModelPrototype->m_Meshes[RenderLOD]->Is_Overed(iMeshIndex))
+	if (m_pModelPrototype->m_Meshes[m_iMaxLOD]->Is_Overed(iMeshIndex))
 		return S_OK;
 
-	m_fRenderTime[RenderLOD] = m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default"));
-	m_pModelPrototype->m_Meshes[RenderLOD]->Bind_Resources(iMeshIndex, pDC);
-	m_Meshes[m_iMaxLOD]->Render(iMeshIndex, pDC);
+	m_pModelPrototype->m_Meshes[m_iMaxLOD]->Bind_Resources(iMeshIndex, pDC);
+	m_pModelPrototype->m_Meshes[m_iMaxLOD]->Render(iMeshIndex, pDC);
 	return S_OK;
 }
 
@@ -145,30 +133,24 @@ void CModel_Streaming::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 
 }
 
+vector<CModel_Manager::SHARED_DATA_DESC>* CModel_Streaming::Get_MeshDesc(_uint iLODIndex)
+{
+	auto vector = m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc();
+
+	return vector;
+}
+
 void CModel_Streaming::RequestLastLODModel()
 {
-	--m_iMaxLOD;
-
-	size_t lastDotPos = m_ModelPath.find_last_of('.');
-
-	// 2. '.'을 찾았는지, 그리고 '.'이 경로의 맨 앞이 아닌지 확인합니다.
-	// (e.g., ".config" 같은 숨김 파일을 방지)
-	if (lastDotPos != std::string::npos && lastDotPos > 0)
-	{
-		// 3. '.' 위치 "앞까지"의 문자열만 잘라서(substr) 다시 저장합니다.
-		m_ModelPath = m_ModelPath.substr(0, lastDotPos);
-	}
-	m_ModelPath.pop_back();
-
 	m_pGameInstance->RequestData(this, m_ModelPath, m_iMaxLOD);
 }
 
 _bool CModel_Streaming::Is_RenderTimeOver(_uint iLODIndex)
 {
-	if (iLODIndex >= m_iMaxLOD)
+	if (iLODIndex >= m_iMaxLOD || !m_isClone)
 		return false;
 
-	return  m_pGameInstance->Get_TimeDelta(TEXT("Timer_Default")) - m_pModelPrototype->m_fRenderTime[iLODIndex] >= 5.f;
+	return  m_pGameInstance->Get_PlayTime() - m_pModelPrototype->m_fRenderTime[iLODIndex] >= 5.f;
 }
 
 HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
@@ -201,6 +183,8 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 		if (IsNameSave)
 			LastModelPath = m_ModelPath = entry.path().string();
 	}
+	--m_iMaxLOD;
+
 	return S_OK;
 }
 
@@ -241,6 +225,15 @@ HRESULT CModel_Streaming::Ready_Material()
 
 	MaterialFile.close();
 
+	if (!m_ModelPath.empty())
+	{
+		size_t lastDotPos = m_ModelPath.find_last_of('.');
+		if (lastDotPos != std::string::npos)
+			m_ModelPath = m_ModelPath.substr(0, lastDotPos);
+
+		if (!m_ModelPath.empty())
+			m_ModelPath.pop_back();
+	}
 	return S_OK;
 }
 
@@ -268,10 +261,29 @@ _uint CModel_Streaming::Get_LastLODIndex()
 {
 	for (_uint i = 0; i < 4; ++i)
 	{
-		if (!m_Meshes[i])
+		if (!m_pModelPrototype->m_Meshes[i])
 			return i - 1;
 	}
-	return m_iMaxLOD;
+	return m_pModelPrototype->m_iMaxLOD;
+}
+
+void CModel_Streaming::Request_LOD(_uint iLODIndex)
+{
+	m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
+}
+
+_uint CModel_Streaming::Get_ReadyLOD()
+{
+	_uint RenderLOD = m_pModelPrototype->m_iMaxLOD;
+	for (_uint i = 0; i < m_pModelPrototype->m_iMaxLOD - 1; ++i)
+	{
+		if (m_pModelPrototype->m_Meshes[i]->IsLoaded() == LOADSTATE::LOADED)
+		{
+			RenderLOD = i;
+			break;
+		}
+	}
+	return RenderLOD;
 }
 
 CModel_Streaming* CModel_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath)

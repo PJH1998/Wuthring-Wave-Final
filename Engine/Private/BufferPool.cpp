@@ -88,7 +88,7 @@ m_pVertexBufferPool,
 HRESULT CBufferPool::Bind_BufferPool(ID3D11DeviceContext* pDC)
 {
 	ID3D11Buffer* Buffers[] = {
-m_pVertexBufferPool,
+		m_pVertexBufferPool,
 	};
 
 	_uint Strides[] = {
