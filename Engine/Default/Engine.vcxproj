@@ -114,6 +114,7 @@
     <ClInclude Include="..\public\SFX.h" />
     <ClInclude Include="..\public\SFX_Hub.h" />
     <ClInclude Include="..\public\ShadowMap.h" />
+    <ClInclude Include="..\Public\ShapeKey.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\public\SSAO.h" />
     <ClInclude Include="..\Public\State.h" />
@@ -245,6 +246,7 @@
     <ClCompile Include="..\private\SFX.cpp" />
     <ClCompile Include="..\private\SFX_Hub.cpp" />
     <ClCompile Include="..\private\ShadowMap.cpp" />
+    <ClCompile Include="..\Private\ShapeKey.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\private\SSAO.cpp" />
     <ClCompile Include="..\Private\State.cpp" />

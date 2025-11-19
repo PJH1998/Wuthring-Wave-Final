@@ -61,4 +61,13 @@ namespace Editor
 	}SQ_SFX_DATA;
 #pragma endregion
 
+#pragma region MORPH SAVE
+	typedef struct tagMorphSaveData
+	{
+		_string strName;
+		vector<KEYFRAME_CURVE> vecKeys;
+	}MOPRH_SAVE_DATA;
+
+#pragma endregion
+
 }

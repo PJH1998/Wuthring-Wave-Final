@@ -115,6 +115,9 @@ private:
 
 
 	_float m_fAnimationSpeed = { 1.f };
+
+	// Facial
+	vector<_float> m_fMorphWeights;
 	
 
 #ifdef _DEBUG

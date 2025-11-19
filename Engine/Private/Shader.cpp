@@ -145,6 +145,19 @@ HRESULT CShader::Bind_Value(const _char* pConstantName, const void* pValue, _uin
     return pVariable->SetRawValue(pValue, 0, iLength);
 }
 
+HRESULT CShader::Bind_SRV(const _char* pConstantName, ID3D11ShaderResourceView* pSRV)
+{
+	ID3DX11EffectVariable* pVariable = m_pEffect->GetVariableByName(pConstantName);
+	if (nullptr == pVariable)
+		return E_FAIL;
+
+	ID3DX11EffectShaderResourceVariable* pSRVariable = pVariable->AsShaderResource();
+	if (nullptr == pSRVariable)
+		return E_FAIL;
+
+	return pSRVariable->SetResource(pSRV);
+}
+
 #ifdef _DEBUG
 const char* CShader::Get_PassName(_uint iNumPass)
 {

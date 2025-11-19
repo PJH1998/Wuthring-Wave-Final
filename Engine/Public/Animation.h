@@ -53,7 +53,7 @@ private:
 	vector<class CChannel*>				m_Channels;
 	vector<_uint>						m_CurrentFrameIndices;
 
-	vector<NOTIFY>					m_Notifies; // ?명솚?깆쓣 ?꾪빐 ?대젮??
+	vector<NOTIFY>					m_Notifies; // 
 
 	_uint							m_iNotifyIndex = {};
 	
@@ -62,7 +62,7 @@ private:
 
 #pragma region MORPH TARGET
 	// Morph Target Data
-	_uint							m_iNumMorphMeshChannels = { }; // 기본 0
+	_uint							m_iNumMorphCurves = { }; // 기본 0
 	vector<class CMorphChannel*>	m_MorphMeshChannels;
 
 	// 매핑 테이블 => 현재 MorphChannel[i]가 Model의 ShapeKeyWeights의 몇번째 인덱스인지 저장.

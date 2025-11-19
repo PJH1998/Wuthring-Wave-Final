@@ -2,6 +2,12 @@
 #include "Component.h"
 
 NS_BEGIN(Engine)
+typedef struct tagShapeKeyInfo
+{
+	_uint iMeshIndex; // 어떤 메쉬에 속해있는지?
+	class CShapeKey* pShapeKey; // 실제 Shape Key 객체 포인터.
+}SHAPEKEYINFO;
+
 class ENGINE_DLL CModel final : public CComponent
 {
 public:
@@ -47,9 +53,15 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
-	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
-	
+	// View 용도.
+	const vector<_string>& Get_AllShapeKeyNames() const { return m_ShapeKeyNames; }
+	// 제어용도
+	void Set_ShapeKeyWeight(const _string& strKeyName, _float fWeight);
+	_uint Get_NumShapeKeys() { return static_cast<_uint>(m_ShapeKeyNames.size()); }
+	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
+	_bool Is_MeshMorphable(_uint iMeshIndex) const;
+
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
@@ -64,6 +76,7 @@ public:
 public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
 	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback);
+
 
 public:
 	virtual		HRESULT				Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
@@ -80,10 +93,11 @@ public:
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect);
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	HRESULT							Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
+	HRESULT							Bind_MorphWeights(class CShader* pShader);
+	HRESULT							Bind_MorphSRV(class CShader* pShader, _uint iMeshIndex);
 	HRESULT							Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	// Compute Shader
-	//_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
 										, _float fRootMotionRate = 0.1f);
@@ -98,7 +112,6 @@ public:
 
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
-	//void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTrackPosition);
 
 
@@ -118,9 +131,7 @@ private:
 	_uint									m_iNumMeshes = {};
 	vector<class CMesh*>				m_Meshes;
 
-	// Shape Key 데이터.
-	vector<_string> 					m_ShapeKeyNames;	
-	vector<_float>						m_ShapeKeyWeights;
+	
 
 	_uint									m_iNumMaterials = {};
 	vector<class CMeshMaterial*>	m_Materials;
@@ -156,7 +167,19 @@ private:
 	_uint m_iSelectIndex = { 0 };
 #endif
 	
+#pragma region FACIAL
+	vector<_string> 		   m_ShapeKeyNames;
+	vector<_float>			   m_ShapeKeyWeights;
 
+	map<_string, _uint>		   m_ShapeKeyIndices;
+	map<_string, vector<SHAPEKEYINFO>> m_ShapeKeys; // Shape key 정보
+	
+	
+	// ImGui에서 이 리스트만 쭉 뿌리면 블렌더와 똑같은 목록이 나옵니다.
+	
+#pragma endregion
+
+	
 
 
 

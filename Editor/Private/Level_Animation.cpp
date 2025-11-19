@@ -21,6 +21,14 @@ HRESULT CLevel_Animation::Initialize()
         return E_FAIL;
     }
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMeshCharacter.hlsl")
+			, VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+		return E_FAIL;
+	}
+
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
 	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);

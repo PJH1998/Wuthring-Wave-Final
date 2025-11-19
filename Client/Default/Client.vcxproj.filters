@@ -826,7 +826,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Augusta_UltiSFX.h">
       <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
-    </ClInclude>  
+    </ClInclude>
     <ClInclude Include="..\Public\RoverAirJump.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClInclude>
@@ -841,7 +841,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Effect_Radial.h">
       <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaDarkWing.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClInclude>
@@ -1326,13 +1326,13 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Radial.cpp">
       <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
-    </ClCompile>  
+    </ClCompile>
     <ClCompile Include="..\private\ScreenEffect.cpp">
       <Filter>03. GameObject\ScreenEffect\SFX</Filter>
     </ClCompile>
@@ -1407,6 +1407,12 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshCharacter.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMeshCharacter.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

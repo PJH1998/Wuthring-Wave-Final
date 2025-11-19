@@ -176,33 +176,66 @@ HRESULT CModelLoader::Save_Dat_Character(const _char* pFileName)
 		// 2. Shape Key (Morph Target) 정보 저장 시작 =. Shape Key (Morph Target) 개수 저장.
 		file.write(reinterpret_cast<const _char*>(&pMesh->mNumAnimMeshes), sizeof(_uint)); 
 
+		// 최적화 1 루프 밖에서 임시 버퍼 미리 할당 (최대 버텍스 개수만큼)
+		_float3* pDeltaPosBuffer = new _float3[pMesh->mNumVertices];
+		_float3* pDeltaNormalBuffer = new _float3[pMesh->mNumVertices];
+
 		for (size_t k = 0; k < pMesh->mNumAnimMeshes; ++k)
 		{
 			aiAnimMesh* pAnimMesh = pMesh->mAnimMeshes[k];
-
-			// 쉐이프 키 이름 저장
+			
+			// 1. 이름
 			aiString strShapeName = pAnimMesh->mName;
 			_uint iNameLen = strShapeName.length;
 			file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
 			file.write(reinterpret_cast<const _char*>(strShapeName.data), iNameLen);
 
-			// 변위(Delta) 데이터 개수 저장(보통 기본 메쉬 정점 수와 같음)
-			file.write(reinterpret_cast<const _char*>(&pAnimMesh->mNumVertices), sizeof(_uint));
+			// 2. 정점 개수
+			_uint iNumVertices = pAnimMesh->mNumVertices;
+			file.write(reinterpret_cast<const _char*>(&iNumVertices), sizeof(_uint));
 
-			// 쉐이프 키는 '최종 위치'가 아닌 '이동해야 할 거리(Delta)'를 담고 있습니다.
-			file.write(reinterpret_cast<const _char*>(pAnimMesh->mVertices), sizeof(_float3) * pAnimMesh->mNumVertices);
-
-			//	법선 변위(Delta Normal) 저장(데이터가 있는지 확인)
-			if (pAnimMesh->mNormals)
-				file.write(reinterpret_cast<const _char*>(pAnimMesh->mNormals), sizeof(_float3) * pAnimMesh->mNumVertices);
-			else
+			// 3. Delta Position (변화량 위치만 저장)
+			// 델타 값을 담을 임시 배열 할당.
+			for (_uint v = 0; v < iNumVertices; ++v)
 			{
-				// 여기서는 간단히 0으로 채운 벡터를 씀 (안전장치)
-				_float3 vZero = { 0.f, 0.f, 0.f };
-				for (_uint z = 0; z < pAnimMesh->mNumVertices; ++z)
-					file.write(reinterpret_cast<const _char*>(&vZero), sizeof(_float3)); // 법선 데이터가 없다면 0으로 채운 더미 데이터를 넣거나, 로드 시 처리해야 함.
+				_float fDeltaX = pAnimMesh->mVertices[v].x - pMesh->mVertices[v].x; // x 변화량만 저장
+				_float fDeltaY = pAnimMesh->mVertices[v].y - pMesh->mVertices[v].y; // y 변화량만 저장
+				_float fDeltaZ = pAnimMesh->mVertices[v].z - pMesh->mVertices[v].z; // z 변화량만 저장
+
+				pDeltaPosBuffer[v].x = fDeltaX;
+				pDeltaPosBuffer[v].y = fDeltaY;
+				pDeltaPosBuffer[v].z = fDeltaZ;
 			}
+
+			// 계산된 Delta 값 저장.
+			file.write(reinterpret_cast<const _char*>(pDeltaPosBuffer), sizeof(_float3) * iNumVertices);
+
+			// 4. Delta Normal에 대한 존재 확인하기.
+			_bool bHasNormal = (pAnimMesh->mNormals != nullptr);
+			file.write(reinterpret_cast<const _char*>(&bHasNormal), sizeof(_bool));
+
+			// 5. Normal이 존재한다면?
+			if (bHasNormal)
+			{
+				const aiVector3D* pBaseNorm = pMesh->mNormals;
+				const aiVector3D* pTargetNorm = pAnimMesh->mNormals;
+
+				for (_uint v = 0; v < iNumVertices; ++v)
+				{
+					// Delta Normal 계산
+					pDeltaNormalBuffer[v].x = pTargetNorm[v].x - pBaseNorm[v].x;
+					pDeltaNormalBuffer[v].y = pTargetNorm[v].y - pBaseNorm[v].y;
+					pDeltaNormalBuffer[v].z = pTargetNorm[v].z - pBaseNorm[v].z;
+				}
+				// 5. 계산된 Delta Normal 일괄 저장
+				file.write(reinterpret_cast<const _char*>(pDeltaNormalBuffer), sizeof(_float3) * iNumVertices);
+			}
+				
 		}
+		// [최적화 1 종료] 루프가 다 끝난 뒤 메모리 해제
+		Safe_Delete_Array(pDeltaPosBuffer);
+		Safe_Delete_Array(pDeltaNormalBuffer);
+
 		// --- Shape Key 저장 끝 ---
 
 
@@ -321,11 +354,11 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 		file.write(strName.data, iLength);
 
 		_float fDuration = pAnimation->mDuration;
-		// Animation Duration (吏?띿떆媛?
+		// Animation Duration
 		file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
 
 		_float fTickPerSecond = pAnimation->mTicksPerSecond;
-		// Animation TickPerSecond (珥덈떦 ?대룞??
+		// Animation TickPerSecond
 		file.write(reinterpret_cast<const _char*>(&fTickPerSecond), sizeof(_float));
 
 		_uint iNumChannels = pAnimation->mNumChannels;
@@ -455,7 +488,7 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 			aiNodeAnim* pChannel = pAnimation->mChannels[j];
 			aiString strChannelName = pChannel->mNodeName;
 			_uint iChannelNameLength = strChannelName.length;
-			
+
 			// Channel(Bone) Name
 			file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
 			file.write(strChannelName.data, iChannelNameLength);
@@ -479,7 +512,7 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 				if (k < pChannel->mNumRotationKeys)
 				{
 					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
-					
+
 					{
 						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
 						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
@@ -502,58 +535,81 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 		// 1. MorphMeshChannels 채널을 확인하고 있다면 데이터를 저장합니다.
 		if (pAnimation->mNumMorphMeshChannels > 0)
 		{
-			// 1. 개수 확인.
-			_uint iNumMorphMeshChannels = pAnimation->mNumMorphMeshChannels;
-			file.write(reinterpret_cast<const _char*>(&iNumMorphMeshChannels), sizeof(_uint));
+			// [최적화] 중복 방지 및 자동 정렬을 위해 map 사용
+			// Key: 쉐이프키 이름 ("Smile"), Value: 해당 키의 시간별 변화량 목록
+			map<string, vector<KEYFRAME_CURVE>> mapMorphCurves;
 
-			for (size_t k = 0; k < iNumMorphMeshChannels; ++k)
+			for (size_t i = 0; i < pAnimation->mNumMorphMeshChannels; ++i)
 			{
-				aiMeshMorphAnim* pMorphChannel = pAnimation->mMorphMeshChannels[k];
+				aiMeshMorphAnim* pMorphChannel = pAnimation->mMorphMeshChannels[i];
 
-				// 2. Shape Key 이름 찾기.
-				aiString strCurveName = pMorphChannel->mName;
-				_uint iNameLen = strCurveName.length;
+				// 1. 채널 이름으로 타겟 메쉬 찾기
+				aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
+				if (nullptr == pTargetMesh) continue;
 
-				file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
-				file.write(strCurveName.data, iNameLen);
-
-				// 3. KeyFrame 개수 저장.
-				_uint iNumKeys = pMorphChannel->mNumKeys;
-				file.write(reinterpret_cast<const _char*>(&iNumKeys), sizeof(_uint));
-
-				// 4. 키 프레임 데이터 (Time, Value) 저장.
-				for (size_t key = 0; key < iNumKeys; ++key)
+				// 2. [최적화 로직] 시간(Keys)을 기준으로 먼저 순회합니다.
+				//    Assimp는 "시간 -> 활성화된 쉐이프키 목록" 순서로 저장되어 있기 때문입니다.
+				for (_uint keyIdx = 0; keyIdx < pMorphChannel->mNumKeys; ++keyIdx)
 				{
-					// mTime(double), mValues(unsigned int*), mWeights(double*)
-					aiMeshMorphKey MorphKey = pMorphChannel->mKeys[key];
+					const aiMeshMorphKey& MorphKey = pMorphChannel->mKeys[keyIdx];
 
-					KEYFRAME_CURVE KeyFrameCurve = {};
-					_float fTrackPosition = static_cast<_float>(MorphKey.mTime);
-					_float fValue = 0.f;
-
-					// MorphKey 구조
-					
-					if (MorphKey.mNumValuesAndWeights > 0)
+					// 이 시간대(Time)에 변화가 있는 모든 쉐이프 키들을 순회
+					for (unsigned int v = 0; v < MorphKey.mNumValuesAndWeights; ++v)
 					{
-						fValue = static_cast<_float>(MorphKey.mWeights[0]);
-						fValue /= 100.f; // fWeight 정규화 /100.f
-						fValue = max(0.0f, min(fValue, 1.0f)); // Clamp
+						// mValues[v]는 쉐이프 키의 인덱스입니다.
+						_uint iShapeIdx = MorphKey.mValues[v];
+
+						// 인덱스 안전 검사
+						if (iShapeIdx >= pTargetMesh->mNumAnimMeshes) continue;
+
+						// 인덱스로부터 쉐이프 키 이름("Smile") 추출
+						aiAnimMesh* pAnimMesh = pTargetMesh->mAnimMeshes[iShapeIdx];
+						string strShapeKeyName = pAnimMesh->mName.C_Str();
+
+						// "Basis" 등 불필요한 키 제외
+						if (strShapeKeyName == "Basis" || strShapeKeyName.empty()) continue;
+
+						// 가중치 처리
+						_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
+						//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
+						//fWeight = max(0.0f, min(fWeight, 1.0f)); // 안전장치
+
+						// 맵에 데이터 추가 (자동으로 이름별로 분류됨)
+						KEYFRAME_CURVE KeyFrame = {};
+						KeyFrame.fTrackPosition = static_cast<_float>(MorphKey.mTime);
+						KeyFrame.fValue = fWeight;
+
+						mapMorphCurves[strShapeKeyName].push_back(KeyFrame);
 					}
-
-					KeyFrameCurve.fTrackPosition = fTrackPosition;
-					KeyFrameCurve.fValue = fValue;
-					KeyFrameCurve.iInterpolationType = ENUM_CLASS(KEY_INPTEROLATION::LINEAR);
-
-					file.write(reinterpret_cast<const _char*>(&KeyFrameCurve), sizeof(KEYFRAME_CURVE));
 				}
+			}
+
+			// 3. 정리된 데이터를 파일에 저장
+			_uint iTotalCurves = mapMorphCurves.size();
+			file.write(reinterpret_cast<const _char*>(&iTotalCurves), sizeof(_uint));
+
+			for (auto& Pair : mapMorphCurves)
+			{
+				string strCurveName = Pair.first;     // 이름
+				auto& vecKeys = Pair.second;          // 키프레임들
+
+				// 이름 저장
+				_uint iNameLen = strCurveName.length();
+				file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
+				file.write(strCurveName.data(), iNameLen);
+
+				// 키 개수 및 데이터 저장
+				_uint iNumKeys = vecKeys.size();
+				file.write(reinterpret_cast<const _char*>(&iNumKeys), sizeof(_uint));
+				file.write(reinterpret_cast<const _char*>(vecKeys.data()), sizeof(KEYFRAME_CURVE) * iNumKeys);
 			}
 		}
 		else
 		{
-			// 1. 개수 확인. 없다면 0 저장.
 			_uint iZero = 0;
 			file.write(reinterpret_cast<const _char*>(&iZero), sizeof(_uint));
 		}
+
 	}
 
 	file.close();
@@ -809,6 +865,57 @@ void CModelLoader::Show_Info()
 	ImGui::PushID(1001);
 	ImGui::Text(szInfo);
 	ImGui::PopID();
+}
+
+aiMesh* CModelLoader::FindMeshByMorphChannelName(const aiString& strMorphChannelName)
+{
+	string strNodeName = strMorphChannelName.C_Str();
+
+	// 1. *0 제거
+	size_t starPos = strNodeName.find('*');
+	if (starPos != std::string::npos)
+		strNodeName = strNodeName.substr(0, starPos);
+
+	// 2. 타겟 노드 찾기.
+	aiNode* pTargetNode = Find_Node(m_pAIScene->mRootNode, strNodeName);
+
+
+	// 3. 노드를 못 찾음 (이름 불일치 등)
+	if (nullptr == pTargetNode)
+		return nullptr;
+
+	// 4. 찾은 Node에 연결된 메쉬 인덱스들을 순회하며 Shape Key가 있는 메쉬를 찾음
+	//    (Blender의 Mesh 오브젝트 하나가 Material 개수만큼 쪼개져 있으므로 순회 필요)
+	for (unsigned int i = 0; i < m_pAIScene->mNumMeshes; ++i)
+	{
+		_uint iMeshIndex = pTargetNode->mMeshes[i];
+		aiMesh* pMesh = m_pAIScene->mMeshes[iMeshIndex];
+
+
+		// Shape Key(AnimMeshes) 데이터가 존재하는지 확인
+		if (pMesh->mNumAnimMeshes > 0)
+			return pMesh; // 진짜 데이터를 가진 메쉬 반환
+	}
+
+	return nullptr;
+}
+
+aiNode* CModelLoader::Find_Node(aiNode* pNode, const _string& strNodeName)
+{
+	if (!pNode) return nullptr;
+
+	// 현재 노드 이름과 찾는 이름이 같으면 반환
+	if (strNodeName == pNode->mName.C_Str())
+		return pNode;
+
+	// 자식 노드들 순회
+	for (_uint i = 0; i < pNode->mNumChildren; ++i)
+	{
+		aiNode* pResult = Find_Node(pNode->mChildren[i], strNodeName);
+		if (pResult) return pResult;
+	}
+
+	return nullptr;
 }
 
 HRESULT CModelLoader::Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType)

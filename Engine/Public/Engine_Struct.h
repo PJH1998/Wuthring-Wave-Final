@@ -97,7 +97,6 @@ namespace Engine
 		_uint iInterpolationType;
 	}KEYFRAME_CURVE;
 
-
 	typedef struct tagCameraFrame
 	{
 		// [Target] LookPos = TargetPos + vTranslation

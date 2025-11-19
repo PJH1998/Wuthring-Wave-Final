@@ -7,9 +7,40 @@ CMorphChannel::CMorphChannel()
 {
 }
 
-_float CMorphChannel::Get_CurrentWeight(_float fTimeAcc)
+_float CMorphChannel::Get_CurrentWeight(_float fTrackPosition)
 {
-	return _float();
+	if (m_KeyFrames.empty())
+		return 0.f;
+
+	if (m_KeyFrames.size() == 1)
+		return m_KeyFrames[0].fValue;
+
+	if (fTrackPosition >= m_KeyFrames.back().fTrackPosition)
+		return m_KeyFrames.back().fValue;
+
+	// 첫 키프레임 전이면 첫 값
+	if (fTrackPosition <= m_KeyFrames[0].fTrackPosition)
+		return m_KeyFrames[0].fValue;
+
+	// 현재 구간 찾기.
+	auto it = std::lower_bound(m_KeyFrames.begin(), m_KeyFrames.end(), fTrackPosition,
+		[](const KEYFRAME_CURVE& a, _float time) { return a.fTrackPosition < time; });
+
+	if (it == m_KeyFrames.begin())
+		return m_KeyFrames[0].fValue;
+	if (it == m_KeyFrames.end())
+		return m_KeyFrames.back().fValue;
+
+	auto next = it;
+	auto prev = std::prev(it);
+
+	_float t0 = prev->fTrackPosition;
+	_float t1 = next->fTrackPosition;
+	_float v0 = prev->fValue;
+	_float v1 = next->fValue;
+
+	_float ratio = (fTrackPosition - t0) / (t1 - t0);
+	return v0 + (v1 - v0) * ratio;  // Linear 보간
 }
 
 // 어떤 Shape Key인지 저장?

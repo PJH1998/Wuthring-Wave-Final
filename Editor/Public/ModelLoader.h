@@ -44,8 +44,11 @@ private:
 private:
 	void					Load_File();
 	void					Save_File();
-
 	void					Show_Info();
+
+private:
+	aiMesh* FindMeshByMorphChannelName(const aiString& strMorphChannelName); // 메쉬 찾기 함수
+	aiNode* Find_Node(aiNode* pNode, const _string& strNodeName);
 
 private:
 	HRESULT				Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType);

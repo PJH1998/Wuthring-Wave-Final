@@ -371,6 +371,9 @@
     <Filter Include="01. Utility\04. Component\Model\Animation\MorphChannel">
       <UniqueIdentifier>{ffcb18d6-3f35-4e61-bb31-e24180b30d7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\Model\Mesh\ShapeKey">
+      <UniqueIdentifier>{5e9d27af-5e70-4c26-8439-18f578372255}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -752,6 +755,9 @@
     <ClInclude Include="..\Public\MorphChannel.h">
       <Filter>01. Utility\04. Component\Model\Animation\MorphChannel</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\ShapeKey.h">
+      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1108,6 +1114,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MorphChannel.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\MorphChannel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShapeKey.cpp">
+      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

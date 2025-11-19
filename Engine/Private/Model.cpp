@@ -3,6 +3,7 @@
 #include "GameInstance.h"
 
 #include "Mesh.h"
+#include "ShapeKey.h"
 #include "MeshMaterial.h"
 #include "Bone.h"
 #include "Animation.h"
@@ -31,7 +32,10 @@ CModel::CModel(const CModel& Prototype)
 	m_SRVs { Prototype.m_SRVs },
 	m_isRibAnimation { Prototype.m_isRibAnimation },
 	pMin{Prototype.pMin},
-	pMax{Prototype.pMax}
+	pMax{Prototype.pMax},
+	m_ShapeKeyNames { Prototype.m_ShapeKeyNames },
+	m_ShapeKeyIndices{ Prototype.m_ShapeKeyIndices},
+	m_ShapeKeys { Prototype.m_ShapeKeys }
 	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
 	for (auto& pMesh : m_Meshes)
@@ -62,6 +66,9 @@ CModel::CModel(const CModel& Prototype)
 
 	// 크기만 지정.
 	m_UAVs.resize(Prototype.m_UAVs.size());
+
+	// 가중치 배열은 Instance 각각이 소유해야 합니다. => 복제본마다 다를 수 있음.
+	m_ShapeKeyWeights.resize(Prototype.m_ShapeKeyWeights.size(), 0.f);
 
 #ifdef _DEBUG
 	m_AnimationNames = Prototype.m_AnimationNames;
@@ -133,9 +140,32 @@ const vector<_uint>& CModel::Get_Indices(_uint iIndex)
 		CRASH("Mesh Index Error");
 	return m_Meshes[iIndex]->Get_Indices();
 }
+
+void CModel::Set_ShapeKeyWeight(const _string& strKeyName, _float fWeight)
+{
+	// 1. 이름으로 인덱스 찾기.
+	auto iter = m_ShapeKeyIndices.find(strKeyName);
+
+	if (iter == m_ShapeKeyIndices.end())
+		return;
+
+	// 2. 인덱스 가져오기
+	_uint iIndex = iter->second;
+
+	// 3. 가중치 배열 갱신.
+	if (iIndex < m_ShapeKeyWeights.size())
+		m_ShapeKeyWeights[iIndex] = fWeight;
+}
+
 void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
 {
 	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
+}
+
+_bool CModel::Is_MeshMorphable(_uint iMeshIndex) const
+{
+	if (iMeshIndex >= m_Meshes.size()) return false;
+	return m_Meshes[iMeshIndex]->Has_MorphData();
 }
 
 #ifdef _DEBUG
@@ -263,6 +293,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 
 	if (MODELTYPE::CHARACTER == m_eType)
 	{
+		// Animation의 경우는 FilePath를 이용해서 새로운 FileStream을 생성해서 읽어들임.
 		if (FAILED(Ready_CharacterModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
 	}
@@ -355,6 +386,42 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
+HRESULT CModel::Bind_MorphWeights(CShader* pShader)
+{
+	_int iNumShapeKeys = static_cast<_int>(m_ShapeKeyWeights.size());
+	if (FAILED(pShader->Bind_Value("g_NumShapeKeys", &iNumShapeKeys, sizeof(_int))))
+		return E_FAIL;
+	
+	if (iNumShapeKeys > 0)
+	{
+		// g_MorphWeights 바인딩
+		if (FAILED(pShader->Bind_Value("g_MorphWeights", m_ShapeKeyWeights.data(), sizeof(_float) * m_ShapeKeyWeights.size())))
+			return E_FAIL;
+		
+	}
+	
+
+	return S_OK;
+}
+
+HRESULT CModel::Bind_MorphSRV(CShader* pShader, _uint iMeshIndex)
+{
+	if (iMeshIndex >= m_Meshes.size()) return E_FAIL;
+
+	// 가중치가 없으면(=표정이 없으면) 굳이 바인딩 안 해도 됨 (최적화)
+	if (m_ShapeKeyWeights.empty()) return S_OK;
+
+	// (1) Delta SRV (Position, Normal Delta)
+	m_Meshes[iMeshIndex]->Bind_MorphSRV(pShader);
+
+	// (2) 정점 개수 (g_TotalVerts) - 인덱싱 필수값
+	_int iTotalVerts = static_cast<_int>(m_Meshes[iMeshIndex]->Get_NumVertices());
+	if (FAILED(pShader->Bind_Value("g_TotalVerts", &iTotalVerts, sizeof(_int))))
+		return E_FAIL;
+
+	return S_OK;
+}
+
 HRESULT CModel::Clear_Materials(CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
 {
 	if (iMeshIndex >= m_Meshes.size())
@@ -383,9 +450,25 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 		Clear_Animation(strAnimationName);
 	}
 	
+	// 1. Bone Local Matrix 계산 
 	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
 	if (nullptr != pTrackPosition)
 		*pTrackPosition = fTrackPosition;
+
+	
+	// 2. Facial Animation 계산
+	if (m_eType == MODELTYPE::CHARACTER)
+	{
+		// Facial Animation Weight 계산
+		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights, nullptr);
+
+		// 모든 메쉬에게 "지금 설정된 가중치(m_ShapeKeyWeights)대로 얼굴 바꿔!" 라고 명령
+		for (auto& pMesh : m_Meshes)
+		{
+			// 위에서 만든 CPU 연산 함수 호출
+			pMesh->Update_Morph_CPU(m_ShapeKeyWeights);
+		}
+	}
 
 	// Root Node Translation 조정
 	if (true == isRootMotion)
@@ -402,6 +485,8 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
+
+	
 
 	return false;
 }
@@ -665,6 +750,8 @@ HRESULT CModel::Render(_uint iMeshIndex)
 	
 	return S_OK;
 }
+
+
 
 HRESULT CModel::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
@@ -1046,13 +1133,17 @@ HRESULT CModel::Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFileP
 	if (FAILED(Ready_Bone(InputFile, -1)))
 		return E_FAIL;
 
-	if (FAILED(Ready_Animation(pFilePath)))
-		return E_FAIL;
+	//if (FAILED(Ready_Animation(pFilePath)))
+	//	return E_FAIL;
 
 	if (FAILED(Ready_Mesh(InputFile)))
 		return E_FAIL;
 
 	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+
+	// 순서 테스트. => 마지막으로 돌려도 무방함.
+	if (FAILED(Ready_Animation(pFilePath)))
 		return E_FAIL;
 
 	return S_OK;
@@ -1061,18 +1152,20 @@ HRESULT CModel::Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFileP
 HRESULT CModel::Ready_CharacterModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
 {
 
-	// Ready Bone 동일.
+	// 1. Ready Bone 동일.
 	if (FAILED(Ready_Bone(InputFile, -1)))
 		return E_FAIL;
 
-	// Animation Import가 다름.
-	if (FAILED(Ready_MorphAnimation(pFilePath)))
+	// 2. ShapeKeyMesh는 다름.
+	if (FAILED(Ready_ShapeKeyMesh(InputFile)))
 		return E_FAIL;
 
-	if (FAILED(Ready_Mesh(InputFile)))
-		return E_FAIL;
-
+	// 3. Matreial은 동일.
 	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+
+	// 4. Animation Import가 다름. => 별개의 파일.
+	if (FAILED(Ready_MorphAnimation(pFilePath)))
 		return E_FAIL;
 
 
@@ -1179,6 +1272,7 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 		}
 	}
 #endif
+
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
 		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
@@ -1199,6 +1293,45 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 
 HRESULT CModel::Ready_ShapeKeyMesh(ifstream& InputFile)
 {
+	// 1. Mesh 개수 저장.
+	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
+
+	// 2. Mesh 개수 만큼 순회돌면서 Mesh 생성.
+	for (size_t i = 0; i < m_iNumMeshes; ++i)
+	{
+		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
+		ASSERT_CRASH(pMesh);
+		m_Meshes.push_back(pMesh);
+
+		const vector<CShapeKey*>& MeshKeys = pMesh->Get_ShapeKeys();
+		for (auto& pKey : MeshKeys)
+		{
+			_string strName = pKey->Get_Name();
+
+			// 1. 처음 보는 이름이라면? 리스트(Model)에 추가!
+			if (m_ShapeKeyIndices.find(strName) == m_ShapeKeyIndices.end())
+			{
+				m_ShapeKeyIndices.emplace(strName, m_ShapeKeyNames.size()); // 인덱스 부여
+				m_ShapeKeyNames.push_back(strName);							// 이름 목록 추가
+				m_ShapeKeyWeights.push_back(0.f);							// 가중치 0으로 초기화
+			}
+
+			// 2. 관리 맵에 등록 (어떤 메쉬의 키인지)
+			SHAPEKEYINFO Info;
+			Info.pShapeKey = pKey;
+			Info.iMeshIndex = i;
+
+			// 3. Info에 "전역 가중치 배열의 몇 번째를 참조해야 하는지" 알려줌 (중요!)
+			Info.pShapeKey->Set_GlobalWeightIndex(m_ShapeKeyIndices.at(strName));
+
+			auto iter = m_ShapeKeys.find(strName);
+			if (iter == m_ShapeKeys.end())
+				m_ShapeKeys.emplace(strName, vector<SHAPEKEYINFO>());
+			m_ShapeKeys.at(strName).push_back(Info);
+		}
+
+	}
+
 	return S_OK;
 }
 
@@ -1302,16 +1435,18 @@ HRESULT CModel::Ready_MorphAnimation(const _char* pFilePath)
 	strcat_s(szFilePath, szFileName);
 	strcat_s(szFilePath, "_Anim.dat");
 
+	// 새로운 파일 스트림 열기.
 	ifstream AnimationFile(szFilePath, ios::binary);
 
 	AnimationFile.read(reinterpret_cast<_char*>(&m_iNumAnimations), sizeof(_uint));
 
 	for (size_t i = 0; i < m_iNumAnimations; ++i)
 	{
-		CAnimation* pAnimation = CAnimation::Create(AnimationFile, m_Bones);
+		CAnimation* pAnimation = CAnimation::Create(AnimationFile, m_Bones, MODELTYPE::CHARACTER);
 		if (nullptr == pAnimation)
 			return E_FAIL;
 		m_Animations.emplace(pAnimation->Get_Name(), pAnimation);
+		pAnimation->Bind_MorphChannels(m_ShapeKeyNames);
 #ifdef _DEBUG
 		m_AnimationNames.push_back(pAnimation->Get_Name());
 #endif

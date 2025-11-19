@@ -19,7 +19,11 @@ CAnimation::CAnimation(const CAnimation& Prototype)
 	m_fCurrentTrackPosition { Prototype.m_fCurrentTrackPosition },
 	m_iNumChannels { Prototype.m_iNumChannels },
 	m_Channels { Prototype.m_Channels },
-	m_CurrentFrameIndices{ Prototype.m_CurrentFrameIndices }
+	m_CurrentFrameIndices{ Prototype.m_CurrentFrameIndices },
+	m_iNumMorphCurves{ Prototype.m_iNumMorphCurves },
+	m_MorphKeyIndicies { Prototype.m_MorphKeyIndicies },
+	m_MorphMeshChannels { Prototype.m_MorphMeshChannels } 
+	
 {
 	strcpy_s(m_szName, Prototype.m_szName);
 
@@ -27,6 +31,8 @@ CAnimation::CAnimation(const CAnimation& Prototype)
 		Safe_AddRef(pChannel);
 
 	
+	for (auto& pMorphChannel : m_MorphMeshChannels)
+		Safe_AddRef(pMorphChannel);
 }
 
 void CAnimation::Register_Notify(const NOTIFY& AnimNotify)
@@ -121,11 +127,11 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	// 추가 작업.
 	if (eModelType == MODELTYPE::CHARACTER)
 	{
-		// 1. Morph Mesh Channels 개수를 받아옵니다.
-		InputFile.read(reinterpret_cast<_char*>(&m_iNumMorphMeshChannels), sizeof(_uint));
+		// 1. Morph Mesh Curves 개수를 받아옵니다.
+		InputFile.read(reinterpret_cast<_char*>(&m_iNumMorphCurves), sizeof(_uint));
 
-		// 2. Morph Mesh Channels 정보를 가져옵니다.
-		for (_uint i = 0; i < m_iNumMorphMeshChannels; ++i)
+		// 2. Morph Mesh Curves 정보를 가져옵니다.
+		for (_uint i = 0; i < m_iNumMorphCurves; ++i)
 		{
 			CMorphChannel* pMorphChannel = CMorphChannel::Create(InputFile);
 			if (nullptr == pMorphChannel)
@@ -185,7 +191,6 @@ _bool CAnimation::Update_TransformationMatrices(_float fTimeDelta, const vector<
 //	return false;
 //}
 
-// TrackPosition�� �ܺο��� �־��ִ� ���� => Rib TrackPosition�� �⺻ TrackPosition�� Sync�� �½��ϴ�.
 _bool CAnimation::Update_RibTransformationMatrices(_float fTrackPosition, const vector<class CBone*>& Bones, _float* pTrackPosition)
 {
 	m_fCurrentTrackPosition = fTrackPosition;
@@ -309,6 +314,9 @@ _bool CAnimation::Bind_MorphChannels(const vector<string>& modelShapeKeys)
 
 _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights, _float* pFacialTrackPosition)
 {
+
+	if (modelWeights.empty()) return false;
+
 	// 모든 가중치 0으로 초기화
 	fill(modelWeights.begin(), modelWeights.end(), 0.0f);
 
@@ -327,14 +335,14 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 		modelWeights[iTargetIndex] = fWeight;
 	}
 
-	return _bool();
+	return true;
 }
 
 CAnimation* CAnimation::Create(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
 {
 	CAnimation* pInstance = new CAnimation();
 
-	if (FAILED(pInstance->Initialize(InputFile, Bones)))
+	if (FAILED(pInstance->Initialize(InputFile, Bones, eModelType)))
 	{
 		MSG_BOX("Failed to Create : Animation");
 		Safe_Release(pInstance);

@@ -734,6 +734,9 @@ void CAnimationTool::LoadDat()
 	_float fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
 
+	static bool isCharacter = { false };
+	ImGui::Checkbox("Character", &isCharacter);
+
 	static bool isPart = { false };
 	ImGui::Checkbox("Part", &isPart);
 
@@ -818,7 +821,13 @@ void CAnimationTool::LoadDat()
 
             wStrModelName = StringToWString(strModelName);
 
-            HRESULT hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
+			HRESULT hr = {};
+			// Character를 설정했으면 Character로 Load Dat
+			if (isCharacter)
+				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str());
+			else
+				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
+            
             if (FAILED(hr))
             {
                 return;
@@ -1059,7 +1068,8 @@ void CAnimationTool::Render_Model_Detail()
         Desc.fSpeedPerSec = fSpeedPerSec;
         Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
-        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+        //Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter");
         Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));

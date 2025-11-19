@@ -151,6 +151,7 @@ void CAnimationActor::Update(_float fTimeDelta)
 		 
         IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
 
+		
         //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
 
@@ -228,17 +229,37 @@ void CAnimationActor::Render()
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
     {
+		// 1. 재질 기존 유지.
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			return;
             //CRASH("Ready Diffuse Texture Failed");
 
         //if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
         //    return E_FAIL;
+		
 
+		// 2. 뼈 행렬 (기존 유지)
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(2)))
+		_uint iPassIndex = 1; // 기본값: 1번 (AnimPass - 뼈대만)
+
+		if (m_pModelCom->Is_MeshMorphable(i))
+		{
+			// Morph 능력이 있다면 데이터 바인딩 시도
+			if (SUCCEEDED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
+				iPassIndex = 2; // 성공하면 2번 (MorphAnimPass - 얼굴+뼈대)
+		}
+
+		// 3. 메쉬별 Morph SRV & 정점 개수 바인딩
+		if (FAILED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
+			CRASH("Bind Morph SRV Failed");
+
+		if (FAILED(m_pModelCom->Bind_MorphWeights(m_pShaderCom)))
+			CRASH("Bind Morph SRV Failed");
+
+
+        if (FAILED(m_pShaderCom->Begin(iPassIndex)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -328,11 +349,12 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 
         // 4. fTimeDelta = 0.f로 GPU 업데이트를 1회 실행합니다.
         //    (기존 주석 코드를 GPU 버전으로 변경)
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,
-            m_strCurrentAnimation,
-            0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
-            &m_fTrackPosition,
-            true, 0.1f);
+		m_pModelCom->Play_Animation(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
+        //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,
+        //    m_strCurrentAnimation,
+        //    0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
+        //    &m_fTrackPosition,
+        //    true, 0.1f);
 
        // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
        // m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
