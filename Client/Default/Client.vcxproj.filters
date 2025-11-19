@@ -331,6 +331,9 @@
     <Filter Include="03. GameObject\Effect\Prefab\Radial">
       <UniqueIdentifier>{8d374cac-4c3e-4492-8daa-51e35e3449b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX\GalbrenaUlti">
+      <UniqueIdentifier>{32b72cfb-8e3e-47d5-ab33-2805cf83a753}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -844,7 +847,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Augusta_UltiSFX.h">
       <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
-    </ClInclude>  
+    </ClInclude>
     <ClInclude Include="..\Public\RoverAirJump.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClInclude>
@@ -859,13 +862,28 @@
     </ClInclude>
     <ClInclude Include="..\Public\Effect_Radial.h">
       <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaDarkWing.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Slash.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SFX_Prefab.h">
+      <Filter>03. GameObject\ScreenEffect\Prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Star.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaUlti_SFX_Circle.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_PostSFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>      
     <ClInclude Include="..\public\UI_MobHPBar.h">
       <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
     </ClInclude>
@@ -1353,13 +1371,13 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Radial.cpp">
       <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
-    </ClCompile>  
+    </ClCompile>
     <ClCompile Include="..\private\ScreenEffect.cpp">
       <Filter>03. GameObject\ScreenEffect\SFX</Filter>
     </ClCompile>
@@ -1369,6 +1387,21 @@
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp">
       <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Slash.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SFX_Prefab.cpp">
+      <Filter>03. GameObject\ScreenEffect\Prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Star.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaUlti_SFX_Circle.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>      
     <ClCompile Include="..\private\UI_MobHPBar.cpp">
       <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
     </ClCompile>
@@ -1427,9 +1460,6 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl">
-      <Filter>96. ShaderFiles</Filter>
-    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
@@ -1437,6 +1467,15 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Sonora.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

@@ -38,6 +38,9 @@ private:
 	_float2					m_vPos = {};
 	_float2					m_vScale = {};
 
+	CVIBuffer_Rect*			m_pVIBuffer_Rect = { nullptr };
+	CShader*				m_pShader = { nullptr };
+
 private:
 	HRESULT					Ready_Textures();
 

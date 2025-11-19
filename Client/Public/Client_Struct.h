@@ -4,6 +4,14 @@
 
 namespace Client
 {
+	typedef struct tagSFX_RadialData {
+		_float fMinDistance;
+		_float fMaxDistance;
+		_float fLengthScale;
+		_float fPadding0;
+		_float2 vPivot;
+		_float2 fPadding1;
+	}SFX_RADIAL_DATA;
 
 	typedef struct tagCharacterStat
 	{
@@ -179,5 +187,6 @@ namespace Client
 	typedef struct tagSQSFXData : public SEQUENCE_ITEM_DATA {
 		SFX_TYPE			eSFXType;
 	}SQ_SFX_DATA;
+
 #pragma endregion
 }

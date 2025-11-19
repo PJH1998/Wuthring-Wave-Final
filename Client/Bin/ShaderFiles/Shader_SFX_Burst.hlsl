@@ -6,9 +6,15 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float g_fIntensity;
 
-float2 vScreenSize;
+float2 g_vScreenSize;
 
 float3 g_vColor;
+float g_fCircleRadius;
+float g_fCircleWidth;
+
+float g_fMaxRadian;
+
+bool g_IsReverse = false;
 
 Texture2D g_SceneTexture;
 Texture2D g_MaskTexture;
@@ -16,7 +22,6 @@ Texture2D g_NoiseTexture;
 Texture2D g_NoiseMaskTexture;
 
 #define RADIUS 16
-
 
 cbuffer RadialData : register(b0)
 {
@@ -72,19 +77,6 @@ struct PS_OUT_POST_SFX
     float4 vColor : SV_TARGET0;
 };
 
-PS_OUT_SFX PS_SONORA(PS_IN In)
-{
-    PS_OUT_SFX Out = (PS_OUT_SFX) 0;
-    
-    Out.vColor.xyz = g_vColor.xyz;
-    
-    float fAlpha = g_fIntensity * 0.1f;
-    
-    Out.vColor.a = fAlpha;
-    
-    return Out;
-}
-
 PS_OUT_SFX PS_SLASH(PS_IN In)
 {
     PS_OUT_SFX Out = (PS_OUT_SFX) 0;
@@ -111,6 +103,62 @@ float Hash21(float2 vTexcoord)
     return frac(vInput.x * vInput.y);
 }
 
+float4 SFX_Radial_BlurMax(float2 vTexcoord, float2 vRadialScale, uint iSampleCount)
+{
+    float fMax = 1.f;
+    
+    if (vRadialScale.x > 0.f)
+    {
+        float fX = (1.f - vTexcoord.x) / (vRadialScale.x);
+        fMax = min(fMax, fX);
+    }
+    else if (vRadialScale.x < 0.f)
+    {
+        float fX = (vTexcoord.x) / (vRadialScale.x * -1.f);
+        fMax = min(fMax, fX);
+    }
+    
+    if (vRadialScale.y > 0.f)
+    {
+        float fY = (1.f - vTexcoord.y) / (vRadialScale.y);
+        fMax = min(fMax, fY);
+    }
+    else if (vRadialScale.y < 0.f)
+    {
+        float fY = (vTexcoord.y) / (vRadialScale.y * -1.f);
+        fMax = min(fMax, fY);
+    }
+    
+    vRadialScale *= fMax;
+    
+    float4 vColor = 0.f;
+    float4 vFinalColor = 0.f;
+    float fTotalWeight = 0.f;
+   
+    float Jitter = lerp(0.5f, 1.f, Hash21(vTexcoord));
+    
+    for (int i = 0; i < iSampleCount; ++i)
+    {
+        float fRatio = ((float) i + Jitter) / (float) iSampleCount;
+
+        float2 vOffset = vRadialScale * fRatio;
+        
+        float2 vOffsetTex = vTexcoord + vOffset;
+
+        float4 vSampleColor = g_SceneTexture.Sample(ClampSampler, vOffsetTex);
+
+        float fWeight = exp2(-fRatio * 3.f);
+        
+//        vColor += vSampleColor * fWeight;
+        vColor = max(vSampleColor, vColor);
+        fTotalWeight += fWeight;
+    }
+    
+    vFinalColor = vColor;
+    
+    return vFinalColor;
+}
+
 PS_OUT_POST_SFX PS_SLASH_BLUR(PS_IN In)
 {
     PS_OUT_POST_SFX Out = (PS_OUT_POST_SFX) 0;
@@ -126,31 +174,44 @@ PS_OUT_POST_SFX PS_SLASH_BLUR(PS_IN In)
     
     float fNoise = g_NoiseTexture.Sample(DefaultSampler, float2(fAngle * 30.f, 0.5f));
     
-    float Jitter = lerp(0.5f, 1.f, Hash21(In.vTexcoord));
+    float2 vRadialScale = vDir * fLengthScale * fNoise * fScale;
     
-    float2 vRadialScale = vDir * fLengthScale * fNoise * Jitter * fScale;
+    int iSampleCount = clamp(RADIUS * fScale, 4, RADIUS);
     
+    float4 vFinalColor = 0.f;
+    
+    vFinalColor = SFX_Radial_BlurMax(In.vTexcoord, vRadialScale, iSampleCount);
+    //vFinalColor = g_SceneTexture.Sample(DefaultSampler, In.vTexcoord);
+
+    Out.vColor = vFinalColor;
+    
+    return Out;
+}
+
+
+float4 SFX_Radial_Blur(float2 vTexcoord, float2 vRadialScale, uint iSampleCount)
+{
     float fMax = 1.f;
     
     if (vRadialScale.x > 0.f)
     {
-        float fX = (1.f - In.vTexcoord.x) / (vRadialScale.x);
+        float fX = (1.f - vTexcoord.x) / (vRadialScale.x);
         fMax = min(fMax, fX);
     }
     else if (vRadialScale.x < 0.f)
     {
-        float fX = (In.vTexcoord.x) / (vRadialScale.x * -1.f);
+        float fX = (vTexcoord.x) / (vRadialScale.x * -1.f);
         fMax = min(fMax, fX);
     }
     
     if (vRadialScale.y > 0.f)
     {
-        float fY = (1.f - In.vTexcoord.y) / (vRadialScale.y);
+        float fY = (1.f - vTexcoord.y) / (vRadialScale.y);
         fMax = min(fMax, fY);
     }
     else if (vRadialScale.y < 0.f)
     {
-        float fY = (In.vTexcoord.y) / (vRadialScale.y * -1.f);
+        float fY = (vTexcoord.y) / (vRadialScale.y * -1.f);
         fMax = min(fMax, fY);
     }
     
@@ -159,34 +220,82 @@ PS_OUT_POST_SFX PS_SLASH_BLUR(PS_IN In)
     float4 vColor = 0.f;
     float4 vFinalColor = 0.f;
     float fTotalWeight = 0.f;
-    
-    int iSampleCount = clamp(RADIUS * fScale, 4, RADIUS);
    
-   // float Jitter = lerp(0.5f, 1.f, Hash21(In.vTexcoord));
+    float Jitter = lerp(0.5f, 1.f, Hash21(vTexcoord));
     
-    for (int i = 1; i <= iSampleCount; ++i)
+    for (int i = 0; i < iSampleCount; ++i)
     {
-        float fRatio = ((float) i) / (float) iSampleCount;
+        float fRatio = ((float) i + Jitter) / (float) iSampleCount;
 
         float2 vOffset = vRadialScale * fRatio;
         
-        float2 vOffsetTex = In.vTexcoord + vOffset;
+        float2 vOffsetTex = vTexcoord + vOffset;
 
         float4 vSampleColor = g_SceneTexture.Sample(ClampSampler, vOffsetTex);
 
         float fWeight = exp2(-fRatio * 3.f);
         
-//        vColor += vSampleColor * fWeight;
-        vColor = max(vSampleColor, vColor);
+        vColor += vSampleColor * fWeight;
+//        vColor = max(vSampleColor, vColor);
         fTotalWeight += fWeight;
     }
     
+    vFinalColor = vColor / (fTotalWeight / 2.f);
     
-    if (fTotalWeight > 0.f)
-        vFinalColor = vColor;// / fTotalWeight;
-    else
-        vFinalColor = g_SceneTexture.Sample(DefaultSampler, In.vTexcoord);
+    return vFinalColor;
+}
 
+
+PS_OUT_SFX PS_GALBRENA_Circle(PS_IN In)
+{
+    PS_OUT_SFX Out = (PS_OUT_SFX) 0;
+    
+    float2 vTexel = In.vTexcoord * g_vScreenSize;
+    
+    float2 vCenter = float2(0.5f, 0.5f) * g_vScreenSize;
+    
+    float fDistance = length(vTexel - vCenter);
+    
+    float2 vRange = float2(g_fCircleRadius, g_fCircleRadius + g_fCircleWidth);
+    
+    if(fDistance >= vRange.x && fDistance <= vRange.y)
+    {
+        Out.vColor = float4(g_vColor, 1.f);
+    }
+    else
+        discard;
+    
+    return Out;
+}
+
+PS_OUT_POST_SFX PS_GALBRENA_BLUR(PS_IN In)
+{
+    PS_OUT_POST_SFX Out = (PS_OUT_POST_SFX) 0;
+
+    float2 vDir = In.vTexcoord - vPivot;
+    float fLength = length(vDir);
+    
+    float2 vNormalDir = normalize(vDir);
+    
+    float fScale = smoothstep(fMinDistance, fMaxDistance, fLength);
+    
+    float fAngle = atan2(vNormalDir.y, vNormalDir.x) / (2 * PI) + 0.5f;
+    
+    float fNoise = g_NoiseTexture.Sample(DefaultSampler, float2(fAngle * 30.f, 0.5f));
+    
+    float2 vRadialScale = vDir * fLengthScale * fNoise * fScale;
+    
+    int iSampleCount = clamp(RADIUS * fScale, 4, RADIUS);
+    
+    float4 vFinalColor = 0.f;
+    
+    vFinalColor = SFX_Radial_Blur(In.vTexcoord, vRadialScale, iSampleCount);
+    
+    if (g_IsReverse)
+    {
+        vFinalColor.xyz = 1.f - vFinalColor.xyz;
+    }
+    
     Out.vColor = vFinalColor;
     
     return Out;
@@ -194,17 +303,6 @@ PS_OUT_POST_SFX PS_SLASH_BLUR(PS_IN In)
 
 technique11 DefaultTechnique
 {
-    pass SonoraChange // 0
-    {
-        SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-
-        VertexShader = compile vs_5_0 VS_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_SONORA();
-    }
-
     pass AugustaSlash // 0
     {
         SetRasterizerState(RS_Cull_None);
@@ -225,6 +323,28 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_SLASH_BLUR();
+    }
+ 
+    pass GalbrenaCircle
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_GALBRENA_Circle();
+    }
+    
+    pass GalbrenaBlur
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_GALBRENA_BLUR();
     }
 }
 
