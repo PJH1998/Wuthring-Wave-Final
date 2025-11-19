@@ -212,6 +212,8 @@ PS_OUT PS_TrailDefault(PS_IN In)
         discard;
 
     Out.vDiffuse = float4(vColor.rgb, alpha);
+    
+    Out.vDiffuse.a *= g_Alpha;
 
     float fWeight = Luminance(Out.vDiffuse.xyz);
 
