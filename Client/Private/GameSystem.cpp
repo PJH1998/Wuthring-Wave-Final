@@ -36,8 +36,8 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pUI_ControlHelper = CUI_ControlHelper::Create();
 	ASSERT_CRASH(m_pUI_ControlHelper);
 
-	m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
-	ASSERT_CRASH(m_pUI_ControlHelper);
+	//m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
+	//ASSERT_CRASH(m_pUI_ControlHelper);
 
 	m_pDirector = CDirector::Create();
 	ASSERT_CRASH(m_pDirector);
@@ -196,7 +196,7 @@ void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMon
 void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
 {
 	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
-}
+}	
 
 //void CGameSystem::Toggle_InteractUI(_bool isOn, _wstring strText)
 //{
@@ -216,6 +216,26 @@ void CGameSystem::Hide_InteractUI(_bool isPressedAs)
 _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
 {
 	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
+}
+
+void CGameSystem::Attach_LockOnUI(_float3* pTargetPos)
+{
+	m_pUI_ControlHelper->Attach_LockOnUI(pTargetPos);
+}
+
+void CGameSystem::Detach_LockOnUI()
+{
+	m_pUI_ControlHelper->Detach_LockOnUI();
+}
+
+void CGameSystem::Attach_Parry(_float3* pTargetPos)
+{
+	m_pUI_ControlHelper->Attach_Parry(pTargetPos);
+}
+
+void CGameSystem::Enable_Parried()
+{
+	m_pUI_ControlHelper->Enable_Parried();
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
@@ -295,6 +315,13 @@ MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
 }
 #pragma endregion
 
+#pragma region SFX_PREFAB
+void CGameSystem::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex)
+{
+	m_pParser->Ready_SFX_Prefab(pFolderPath, iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex);
+}
+#pragma endregion
+
 void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
@@ -305,7 +332,7 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
-	Safe_Release(m_pUI_StatusSyncer);
+	//Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pMonsterTable);
 
 	Release();

@@ -258,7 +258,7 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 
 
 
-		// ksta : 크기 설정!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// 크기 설정!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		inst.vSInstRight	=	{ m_tTextDesc.fScale * (pGlyph->sWidth), 0.f, 0.f ,0.f };
 		inst.vSInstUp		=	{ 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
 		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };

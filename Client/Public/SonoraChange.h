@@ -33,8 +33,9 @@ public:
 	virtual		void		Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 	
 private:
-	_float					m_fCurrentTime = {};
-	_float					m_fEffectTime = {};
+	CVIBuffer_Rect*			m_pVIBuffer_Rect = { nullptr };
+	CShader*				m_pShader = { nullptr };
+
 	_float					m_fRadialTime = {};
 	_float					m_fFadeTime = {};
 	_float					m_fFadeIntensity = {};
@@ -46,6 +47,7 @@ private:
 	_float3					m_vFadeColor = {};
 
 private:
+	HRESULT					Ready_Components();
 	HRESULT					Bind_ShaderResources();
 
 public:

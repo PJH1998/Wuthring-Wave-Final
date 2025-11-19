@@ -214,7 +214,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     }
     else
     {
-        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         
         vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
         float fViewZ = vViewPos.z;
@@ -290,7 +290,7 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     }
     else
     {
-        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
         Out.vLightAcc.xyz *= fAtt;
     }

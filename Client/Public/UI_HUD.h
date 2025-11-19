@@ -59,6 +59,7 @@ private:
 
 	void					Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots);
 	void					Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots);
+	void					Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots);
 	
 	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 

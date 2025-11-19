@@ -210,12 +210,18 @@
     </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Radial_Controller\Radial">
       <UniqueIdentifier>{606c33d5-720d-4502-82fe-1a443a9678bc}</UniqueIdentifier>
-    </Filter>  
+    </Filter>
     <Filter Include="03. GameObject\SFX\Augusta\Slash">
       <UniqueIdentifier>{c319f2a6-687e-46aa-8a56-e1e6c61087c2}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\SFX\Augusta\Blur">
       <UniqueIdentifier>{c3ce7c20-a584-4462-b6ad-20fe10d384d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\SFX\Galbrena">
+      <UniqueIdentifier>{6be37b23-a636-4bc7-84ce-e899da39eb63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\SFX\Galbrena\Blur">
+      <UniqueIdentifier>{7c036509-854b-4b08-8d10-aec1747c6dbd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -462,6 +468,18 @@
     <ClInclude Include="..\Public\Effect_Radial.h">
       <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Galbrena_SFX.h">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Galbrena_SFX_Star.h">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Galbrena_SFX_Circle.h">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Galbrena_Blur.h">
+      <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -679,6 +697,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Radial.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Galbrena_SFX.cpp">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Galbrena_SFX_Star.cpp">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Galbrena_SFX_Circle.cpp">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Galbrena_Blur.cpp">
+      <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

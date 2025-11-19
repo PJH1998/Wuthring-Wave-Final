@@ -2,6 +2,10 @@
 #include "SFX_Interface.h"
 #include "Augusta_SFX.h"
 #include "AugustaBlur.h"
+#include "Galbrena_SFX.h"
+#include "Galbrena_SFX_Star.h"
+#include "Galbrena_SFX_Circle.h"
+#include "Galbrena_Blur.h"
 
 CSFX_Interface::CSFX_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CInterface_Edit { pDevice, pContext}
@@ -10,15 +14,32 @@ CSFX_Interface::CSFX_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CSFX_Interface::Initialize()
 {
-	CEdit_ScreenEffect* pAuguSlash = CAugusta_SFX::Create(m_pDevice, m_pContext);
-	ASSERT_CRASH(pAuguSlash);
+	//CEdit_ScreenEffect* pAuguSlash = CAugusta_SFX::Create(m_pDevice, m_pContext);
+	//ASSERT_CRASH(pAuguSlash);
+	//
+	//m_pCurrentSFXs.push_back(pAuguSlash);
+	//
+	//CEdit_ScreenEffect* pAuguBlur = CAugustaBlur::Create(m_pDevice, m_pContext);
+	//ASSERT_CRASH(pAuguBlur);
+	//
+	//m_pCurrentSFXs.push_back(pAuguBlur);
 
-	m_pCurrentSFXs.push_back(pAuguSlash);
+	CEdit_ScreenEffect* pGalbSlash = CGalbrena_SFX::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pGalbSlash);
+	m_pCurrentSFXs.push_back(pGalbSlash);
+	
+	CEdit_ScreenEffect* pGalbStar = CGalbrena_SFX_Star::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pGalbStar);
+	m_pCurrentSFXs.push_back(pGalbStar);
+	
+	CEdit_ScreenEffect* pGalbCircle = CGalbrena_SFX_Circle::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pGalbCircle);
+	m_pCurrentSFXs.push_back(pGalbCircle);
+	
+	CEdit_ScreenEffect* pGalbBlur = CGalbrena_Blur::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pGalbBlur);
+	m_pCurrentSFXs.push_back(pGalbBlur);
 
-	CEdit_ScreenEffect* pAuguBlur = CAugustaBlur::Create(m_pDevice, m_pContext);
-	ASSERT_CRASH(pAuguBlur);
-
-	m_pCurrentSFXs.push_back(pAuguBlur);
 
     return S_OK;
 }

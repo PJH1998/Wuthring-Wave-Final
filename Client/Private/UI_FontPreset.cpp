@@ -70,7 +70,7 @@ HRESULT CUI_FontPreset::Initialize()
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_BOSSNAME)] = tDesc;
 
 
-	// 필요한 색상이 있다면 ENUM 및 여기에 프리셋 추가..
+	// 필요한 색상이 있다면 ENUM 추가 및 여기에 프리셋 추가 후 사용하면 됩니다.
 
 
 

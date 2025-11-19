@@ -53,6 +53,8 @@ private:
 
 	ID3D11Buffer*			m_pBuffer = { nullptr };
 
+	CVIBuffer_Rect* m_pVIBuffer_Rect = { nullptr };
+	CShader* m_pShader = { nullptr };
 private:
 	HRESULT					Ready_Buffer();
 

@@ -15,6 +15,7 @@ CUI_Loading::CUI_Loading(const CUI_Loading& Prototype)
 	:CCustom_UI(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_Loading::Initialize_Prototype()
@@ -67,9 +68,6 @@ void CUI_Loading::Priority_Update(_float fTimeDelta)
 
 void CUI_Loading::Update(_float fTimeDelta)
 {
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
-
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
@@ -77,6 +75,9 @@ void CUI_Loading::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
@@ -132,6 +133,7 @@ HRESULT CUI_Loading::Ready_Texts()
 	CUI_Text* pDescriptionText = m_pGameSystem->Create_FontToScreen(_float2{ 150.f, 920.f }, strDescriptionText, TEXT_COLOR_TYPE::TT_NORMAL, 0.3f, L"UI_Text_DescriptionTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pDescriptionText);
 
+	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Text_TitleTest", pTitleText);
 	m_pGameInstance->Add_RootUI(L"UI_Text_DescriptionTest", pDescriptionText);
 
@@ -166,11 +168,16 @@ CGameObject* CUI_Loading::Clone(void* pArg)
 
 void CUI_Loading::Free()
 {
+	Safe_Release(m_pGameSystem);
+
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
 
-	m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
-	m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	if (m_isClone)
+	{
+		m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
+		m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	}
 
 	__super::Free();
 }

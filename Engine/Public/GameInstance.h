@@ -281,6 +281,7 @@ public:
 	void				Clear_RootUI();
 #pragma endregion
 
+
 #pragma region RCS_MANAGER
 	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);

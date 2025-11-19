@@ -233,6 +233,10 @@
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
+    <ClInclude Include="..\public\GalbrenaUlti_PostSFX.h" />
+    <ClInclude Include="..\Public\GalbrenaUlti_SFX_Circle.h" />
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Slash.h" />
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Star.h" />
     <ClInclude Include="..\public\Ggobul.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
@@ -307,6 +311,7 @@
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
+    <ClInclude Include="..\public\SFX_Prefab.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\public\SonoraChange.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
@@ -335,7 +340,10 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h" />
+    <ClInclude Include="..\public\UI_LockOn.h" />
     <ClInclude Include="..\public\UI_Logo.h" />
+    <ClInclude Include="..\public\UI_MobHPBar.h" />
+    <ClInclude Include="..\public\UI_Parry.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -433,6 +441,10 @@
     <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
+    <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp" />
+    <ClCompile Include="..\Private\GalbrenaUlti_SFX_Circle.cpp" />
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Slash.cpp" />
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Star.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
     <ClCompile Include="..\private\Ggobul.cpp" />
     <ClCompile Include="..\Private\GroundState.cpp" />
@@ -486,6 +498,7 @@
     <ClCompile Include="..\Private\RoverGroundSprint.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
+    <ClCompile Include="..\private\SFX_Prefab.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
@@ -522,7 +535,10 @@
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp" />
+    <ClCompile Include="..\private\UI_LockOn.cpp" />
     <ClCompile Include="..\private\UI_Logo.cpp" />
+    <ClCompile Include="..\private\UI_MobHPBar.cpp" />
+    <ClCompile Include="..\private\UI_Parry.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -562,7 +578,9 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst_Instance.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Sonora.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>

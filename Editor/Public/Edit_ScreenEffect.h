@@ -28,13 +28,11 @@ public:
 	virtual		void		Reset() {}
 
 protected:
+	_bool					m_IsPlay = {};
 	_float4x4				m_ViewMatrix = {};
 	_float4x4				m_ProjMatrix = {};
 
 	_float2					m_vWinSize = {};
-
-	CVIBuffer_Rect*			m_pVIBuffer_Rect = { nullptr };
-	CShader*				m_pShader = { nullptr };
 
 protected:
 	void					Setting_Scale(_float fSizeX, _float fSizeY);
