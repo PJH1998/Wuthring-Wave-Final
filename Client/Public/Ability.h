@@ -98,11 +98,14 @@ public:
 
 	void Print_Cost();
 	void Print_CoolTime();
+
+	void Clear_CoolTime();
 #else
 	void Print_Cost();
 	void Print_CoolTime();
 public:
 	void Debug_FullCost(_bool IsAll = false);
+	void Clear_CoolTime();
 #endif // _DEBUG
 
 
