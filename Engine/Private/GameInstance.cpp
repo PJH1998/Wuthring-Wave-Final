@@ -1101,10 +1101,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	Safe_Release(m_pFont_Manager);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
-
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
