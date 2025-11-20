@@ -52,6 +52,9 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	if (m_tUIDesc.strUIName == L"ParryCircle_Activated" &&
+		m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha < 1.f)
+		int i = 10;
 
 #ifdef _DEBUG
 	if (m_tUIDesc.strUIName == L"SectorA_LockOn")

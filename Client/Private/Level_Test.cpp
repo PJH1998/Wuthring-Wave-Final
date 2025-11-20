@@ -459,15 +459,15 @@ void CLevel_Test::Ready_UI()
 
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1)))
+		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1)))
 		CRASH("Failed Ready Button_Interact");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+		iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
 		CRASH("Failed Ready LockOn");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
@@ -666,20 +666,19 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 
-#pragma region KSTA_UITEST_LOCKON
-	CCustom_UI* pRootUI = m_pGameSystem->Find_RootUI(L"UI_LockOn");
+#pragma region [NUMPAD .] KSTA_UITEST_LOCKON
+	CCustom_UI* pRootUILockOn = m_pGameSystem->Find_RootUI(L"UI_LockOn");
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-		!pRootUI->IsActivate())
+		!pRootUILockOn->IsActivate())
 		m_pGameSystem->Attach_LockOnUI(nullptr);
 	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-		pRootUI->IsActivate())
+		pRootUILockOn->IsActivate())
 		m_pGameSystem->Detach_LockOnUI();
 #pragma endregion
 
 
-
-#pragma region KSTA_UITEST_PARRY
+#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
 	{
 		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
@@ -690,24 +689,16 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region KSTA_UITEST_MOBHPBAR
-	
+#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
 	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
 	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
-	
+
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
 		!isTargetAlive)
-	{
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	}
 	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
-			isTargetAlive)
-	{
+		isTargetAlive)
 		pTargetMobHPBarUI->SetActivate(false);
-	}
-
-
-
 #pragma endregion
 
 
