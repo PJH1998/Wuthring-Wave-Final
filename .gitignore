@@ -66,3 +66,4 @@ EngineSDK/*
 !Engine/ThirdPartyLib/ImGuiLib_d.pdb
 !Engine/ThirdPartyLib/freetyped.pdb
 Editor/Bin/Resource/BTtest
+Client/Bin/Resource/Map/Test/*

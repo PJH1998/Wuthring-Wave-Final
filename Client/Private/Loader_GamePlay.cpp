@@ -573,13 +573,13 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
-	/*if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
-		CUI_LockOn::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
-	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
-		CUI_Parry::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
-	*/
+	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
+	//	CUI_LockOn::Create(m_pDevice, m_pContext))))
+	//	OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
+	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
+	//	CUI_Parry::Create(m_pDevice, m_pContext))))
+	//	OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;

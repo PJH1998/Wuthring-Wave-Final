@@ -346,6 +346,12 @@ public:
 #endif
 #pragma endregion
 
+#pragma region RESOURCE_MANAGER
+	void									Load_Resource(const _char* pFolderPath);
+	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
+#pragma endregion
+
+
 public:
 	HRESULT					SetUp_CameraNF();
 	HRESULT					Clear_Resource(_uint iLevelID);
@@ -382,6 +388,7 @@ private:
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+	class CResource_Manager*	m_pResource_Manager = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

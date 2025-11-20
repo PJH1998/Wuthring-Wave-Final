@@ -797,8 +797,10 @@ void CLevel_Map::Load_Objects()
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/Box/";
 
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;

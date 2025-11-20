@@ -301,12 +301,12 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-10.f);
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(10.f);
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)

@@ -195,6 +195,10 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
+	
+
+	m_vOriginScreenPos		= pDesc->vScreenPos;
+
 #ifdef KSTA_ON_TRANSFORM_CACHING
 	m_vecCachedUITransform.resize(pDesc->vecInstanceDescs.size());
 
@@ -317,28 +321,35 @@ void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 	// 인자가 기본값이라면 현재 타입으로,
 	// 임의값이라면 해당 타입으로 정렬합니다.
 
-	if (m_tUIDesc.strUIName == L"UI_Text_HUD_BossName")
-		int i = 10;
-
 	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
 		m_eTextAlignmentType = eAlignmentType;
 
-	_float fAlignmentPixel = 0;
-	_float fOriginPosX = m_tTextDesc.vScreenPos.x;
+	if (m_tTextDesc.vecInstanceDescs.empty())		// 텍스트가 없으면 계산X
+		return;
 
-	for (auto& textInstDesc : m_tTextDesc.vecInstanceDescs)
-		fAlignmentPixel += (static_cast<_uint>(textInstDesc.vSInstRight.x) + 4.f);
+	_uint iTextLength = m_tTextDesc.strText.size();
+	m_tTextDesc.vecInstanceDescs.resize(iTextLength);	// 글자 수에 맞게 인스턴스 재정의
 
-	_float fOffsetX = fAlignmentPixel * m_tTextDesc.fScale;
+	const auto& firstInst = m_tTextDesc.vecInstanceDescs.front();
+	const auto& lastInst = m_tTextDesc.vecInstanceDescs.back();
 
+	_float fTotalVisualWidth = (lastInst.vSInstTrans.x + lastInst.vSInstRight.x) - firstInst.vSInstTrans.x;	// (문자열의 오른쪽 끝 좌표 - 왼쪽 끝 좌표)
+
+	_float fOffsetX = 0.f;
 	switch (m_eTextAlignmentType)
 	{
-	case Client::TEXT_ALIGN_TYPE::LEFT:		fOffsetX *= 0.f;		break;
-	case Client::TEXT_ALIGN_TYPE::CENTER:	fOffsetX *= 0.5f;		break;
-	case Client::TEXT_ALIGN_TYPE::RIGHT:	fOffsetX *= 1.f;		break;
+	case Client::TEXT_ALIGN_TYPE::LEFT:
+		fOffsetX = 0.f;
+		break;
+	case Client::TEXT_ALIGN_TYPE::CENTER:
+		fOffsetX = fTotalVisualWidth * 0.5f;
+		break;
+	case Client::TEXT_ALIGN_TYPE::RIGHT:
+		fOffsetX = fTotalVisualWidth;
+		break;
 	}
 
-	m_tTextDesc.vScreenPos.x = fOriginPosX - fOffsetX;
+	m_tTextDesc.vScreenPos.x = m_vOriginScreenPos.x - fOffsetX;
 }
 
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

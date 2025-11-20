@@ -849,6 +849,9 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SFX"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
+	/* RenderTarget SSS */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSS"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
 
 #ifdef _DEBUG
 	/* RenderTarget Debug */
@@ -873,7 +876,8 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
-
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_SSS"))))
+		ASSERT_CRASH(false);
 #pragma endregion
 
 #pragma region MRT_LIGHT
