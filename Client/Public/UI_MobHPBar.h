@@ -5,26 +5,10 @@ NS_BEGIN(Client)
 class CUI_MobHPBar final : public CUI_Image
 {
 public:
-	typedef struct tUIMobHPBarDesc {	// 나중에 Transform 은 아닌, 뼈 위치 등 기준으로 변경. matrix, float3 등
-		// hp와 같은 정보들을 벡터로 받아와야하나? 어떤 정보를 어떻게 받아오지
-
-	} UI_MOBHP_DESC;
-
-	typedef struct tUIMobsInfoDesc
-	{
-		_uint iMobLvl = 10;
-		//_wstring strMobName = L"Test Mob";
-		
-		_float	fMobCurHP = 500.f;
-		_float	fMobMaxHP = 500.f;
-
-		_bool	isHaveSA = false;
-
-		_float	fMobCurSA = 300.f;
-		_float	fMobMaxSA = 300.f;	
-
-		_float3 vMobPos = { 0.f, -10.f, 0.f };
-	} UI_MOBINFO_DESC;
+	//typedef struct tUIMobHPBarDesc {	// 나중에 Transform 은 아닌, 뼈 위치 등 기준으로 변경. matrix, float3 등
+	//	// hp와 같은 정보들을 벡터로 받아와야하나? 어떤 정보를 어떻게 받아오지
+	//
+	//} UI_MOBHP_DESC;
 
 public:
 	explicit CUI_MobHPBar(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -41,6 +25,9 @@ public:
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
+public:
+	void			Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
+
 private:
 	void			Ready_Presets();
 	void			Update_Instances();
@@ -50,6 +37,9 @@ private:
 
 private:
 	vector<UI_MOBINFO_DESC>		m_vecMobInfo = {};
+	vector<_string>				m_vecMobKeys = {};
+
+	class CGameSystem*			m_pGameSystem = { nullptr };
 
 public:
 	static CUI_MobHPBar*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

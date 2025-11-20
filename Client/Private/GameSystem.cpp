@@ -238,6 +238,11 @@ void CGameSystem::Enable_Parried()
 	m_pUI_ControlHelper->Enable_Parried();
 }
 
+void CGameSystem::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
+{
+	m_pUI_ControlHelper->Update_MobStatus(tDesc);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);

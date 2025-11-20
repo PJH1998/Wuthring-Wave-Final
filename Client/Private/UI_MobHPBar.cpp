@@ -3,6 +3,8 @@
 #include "UI_MobHPBar.h"
 #include "Animator_UI.h"
 
+#include "GameSystem.h"
+
 
 #define KSTA_UITEST_MOBHPPOS
 
@@ -14,6 +16,7 @@ CUI_MobHPBar::CUI_MobHPBar(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CUI_MobHPBar::CUI_MobHPBar(const CUI_MobHPBar& Prototype)
 	: CUI_Image(Prototype)
+	, m_pGameSystem { CGameSystem::GetInstance() }
 {
 }
 
@@ -52,6 +55,9 @@ HRESULT CUI_MobHPBar::Initialize_Clone(void* pArg)
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_MobHPBar", this);
 
+	m_vecMobInfo.reserve(10);
+	//m_vecMobKeys.reserve(10);
+
 	return S_OK;
 }
 
@@ -59,6 +65,15 @@ void CUI_MobHPBar::Priority_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	//if (m_vecMobInfo.empty())
+	//{
+	//	m_isActivate = false;
+	//}
+
+
+	m_vecMobInfo.clear();
+	//m_vecMobKeys.clear();
 
 	__super::Priority_Update(fTimeDelta);
 }
@@ -90,6 +105,40 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 
 
 
+#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
+
+	//static _bool isActiveMobHPBar = false;
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	//	isActiveMobHPBar = !isActiveMobHPBar;
+
+
+	//if (isActiveMobHPBar)
+	//{
+		UI_MOBINFO_DESC tTmpDesc = {};
+
+		const _uint iNumTestMobs = 3;
+
+		for (_uint i = 0; i < iNumTestMobs; i++)
+		{
+			//_float3 fTestOffset = {
+			//	m_pGameInstance->Rand(-10.f, 10.f),
+			//	m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
+			//	m_pGameInstance->Rand(-10.f, 10.f)
+			//};
+
+			_float3 fTestOffset = { 0.f, -10.f * i, 0.f};
+
+			tTmpDesc.vMobPos = fTestOffset;
+			tTmpDesc.fMobCurHP = 50.f;
+			tTmpDesc.fMobCurHP = 70.f;
+
+			m_pGameSystem->Update_MobStatus(tTmpDesc);
+		}
+	//}
+
+#pragma endregion
+
+
 
 	__super::Update(fTimeDelta);
 }
@@ -116,28 +165,34 @@ void CUI_MobHPBar::Render()
 void CUI_MobHPBar::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	m_vecMobInfo.clear();
+	//m_vecMobKeys.clear();
 
 #ifdef KSTA_UITEST_MOBHPPOS
-	UI_MOBINFO_DESC tTmpDesc = {};
-	
-	const _uint iNumTestMobs = 3;
-
-	for (_uint i = 0; i < iNumTestMobs; i++)
-	{
-		_float3 fTestOffset = {
-			m_pGameInstance->Rand(-10.f, 10.f),
-			m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
-			m_pGameInstance->Rand(-10.f, 10.f)
-		};
-
-		tTmpDesc.vMobPos = fTestOffset;
-
-		m_vecMobInfo.push_back(tTmpDesc);
-	}
+	//UI_MOBINFO_DESC tTmpDesc = {};
+	//
+	//const _uint iNumTestMobs = 3;
+	//
+	//for (_uint i = 0; i < iNumTestMobs; i++)
+	//{
+	//	_float3 fTestOffset = {
+	//		m_pGameInstance->Rand(-10.f, 10.f),
+	//		m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
+	//		m_pGameInstance->Rand(-10.f, 10.f)
+	//	};
+	//
+	//	tTmpDesc.vMobPos = fTestOffset;
+	//
+	//	m_vecMobInfo.push_back(tTmpDesc);
+	//}
 #endif // KSTA_UITEST_MOBHPPOS
 
-
 	m_isActivate = true;
+}
+
+void CUI_MobHPBar::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
+{
+	m_vecMobInfo.push_back(tDesc);
+	//m_vecMobKeys.push_back(tDesc.pMonsterKey);
 }
 
 void CUI_MobHPBar::Ready_Presets()
@@ -281,9 +336,13 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 		if (pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")		// HP Bar
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 			{
+				//_float fMobMaxHP = m_pGameSystem->Get_MonsterInfo(m_vecMobKeys[i].c_str())->fMaxHp;
+				_float fMobCurHP = m_vecMobInfo[i].fMobCurHP;
+				_float fMobMaxHP = m_vecMobInfo[i].fMobMaxHP;
+
 				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPColor1;
 				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPColor2;
-				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = .7f;// m_vecMobInfo[i].fMobCurHP/ m_vecMobInfo[i].fMobMaxHP;
+				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = fMobCurHP / fMobMaxHP; // m_vecMobInfo[i].fMobCurHP/ m_vecMobInfo[i].fMobMaxHP;
 			}
 		else														// HP BG
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
@@ -299,9 +358,12 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 		if (pTargetUI->Get_UIDesc().strUIName == L"InstSABar")		// SA Bar
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 			{
+				_float fMobCurSA = m_vecMobInfo[i].fMobCurSA;
+				_float fMobMaxSA = m_vecMobInfo[i].fMobMaxSA;
+
 				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSAColor;
 				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSAColor;
-				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = .3f; // m_vecMobInfo[i].fMobCurSA / m_vecMobInfo[i].fMobMaxSA;
+				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = fMobCurSA / fMobMaxSA; // m_vecMobInfo[i].fMobCurSA / m_vecMobInfo[i].fMobMaxSA;
 			}
 		else														// SA BG
 			for (_uint i = 0; i < m_vecMobInfo.size(); i++)

@@ -87,16 +87,20 @@ public:
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 
-	// 락온 UI를 생성합니다. / pTargetPos : 락온 대상의 위치 포인터.
+	// 락온 UI를 생성합니다. / *pTargetPos : 락온 대상의 위치 포인터.
 	void		Attach_LockOnUI(_float3* pTargetPos);
 	// 락온 UI를 해제합니다.
 	void		Detach_LockOnUI();
 
-	// 패리 UI를 생성합니다. / pTargetPos : 락온 대상의 위치 포인터.
+	// 패리 UI를 생성합니다. / *pTargetPos : 락온 대상의 위치 포인터.
 	// (일단은 생성 후 약 0.35초 = 21프레임 를 원이 겹치는 시점으로 잡았습니다.)
 	void		Attach_Parry(_float3* pTargetPos);
 	// 패리 UI가 살아있는 도중, 패리에 성공했음을 보냅니다. (원 즉시제거, 이펙트 이미지 출력)
 	void		Enable_Parried();
+
+	// (미완성) 몬스터 HP바 표시를 위한 정보를 할당합니다. / &tDesc : 필요 정보 구조체
+	// 살아 있는 동안, 매 프레임 호출이 필요합니다.
+	void		Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
 #pragma endregion
 
 #pragma region PLAYER STATUS

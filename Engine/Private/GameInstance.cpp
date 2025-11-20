@@ -31,8 +31,6 @@
 #include "HZB.h"
 #include "SFX_Hub.h"
 
-#define KSTA_DEBUG_ENABLEFONTMGR
-
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -52,10 +50,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
@@ -148,24 +144,15 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Priority_Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 
 	m_pObject_Manager->Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
-	
+
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Late_Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pDecal_Manager->Update(fTimeDelta);
 

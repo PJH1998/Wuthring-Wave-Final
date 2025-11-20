@@ -690,15 +690,42 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 #pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
-	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
-	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
+	//static _bool isActiveMobHPBar = false;
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	//	isActiveMobHPBar = !isActiveMobHPBar;
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
-		!isTargetAlive)
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
-		isTargetAlive)
-		pTargetMobHPBarUI->SetActivate(false);
+	//if (isActiveMobHPBar)
+		
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		if (m_pGameInstance->Find_UIObject(L"UI_MobHPBar")->IsActivate() == true)
+			m_pGameInstance->Find_UIObject(L"UI_MobHPBar")->SetActivate(false);
+		else
+			m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+	}
+
+	//if (isActiveMobHPBar)
+	//{
+	//	UI_MOBINFO_DESC tTmpDesc = {};
+	//
+	//	const _uint iNumTestMobs = 3;
+	//
+	//	for (_uint i = 0; i < iNumTestMobs; i++)
+	//	{
+	//		_float3 fTestOffset = {
+	//			m_pGameInstance->Rand(-10.f, 10.f),
+	//			m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
+	//			m_pGameInstance->Rand(-10.f, 10.f)
+	//		};
+	//
+	//		tTmpDesc.vMobPos = fTestOffset;
+	//		tTmpDesc.fMobCurHP = 50.f;
+	//		tTmpDesc.fMobCurHP = 70.f;
+	//
+	//		m_pGameSystem->Update_MobStatus(tTmpDesc);
+	//	}
+	//}
+
 #pragma endregion
 
 

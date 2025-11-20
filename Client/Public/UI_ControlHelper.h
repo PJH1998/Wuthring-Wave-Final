@@ -40,6 +40,8 @@ public:
 	void				Attach_Parry(_float3* pTargetPos);
 	void				Enable_Parried();
 
+	void				Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
+
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };
