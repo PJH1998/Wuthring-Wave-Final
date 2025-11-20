@@ -356,7 +356,8 @@ void CRenderer::Render_LOD(_uint iLODIndex)
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
 	// Static Object Render
-	for (_uint iLOD = 0; iLOD < 4; ++iLOD)
+	//for (_uint iLOD = 0; iLOD < 4; ++iLOD)
+	_uint iLOD = 0;
 	{
 		size_t iNumObjects = max(1, m_StaticObjects[iReadIndex][iLOD].size() / m_iNumThread);
 		for (_uint i = 0; i < m_iNumThread; ++i)

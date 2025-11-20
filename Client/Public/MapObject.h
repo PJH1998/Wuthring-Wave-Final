@@ -44,6 +44,7 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 	virtual		BoundingBox* Get_BoundingBox()override;
+	virtual		void					Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)override;
 
 private:
 	CDeferredShader*		m_pShaderCom = { nullptr };

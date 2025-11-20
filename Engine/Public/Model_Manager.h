@@ -30,7 +30,8 @@ public:
 		class CModel_Streaming* pModel = { nullptr };
 		_uint iLODIndex;
 		vector<LOADED_DATA >LoadData;
-	}MOEDL_DATA;
+	}MODEL_DATA;
+
 	typedef struct tagDeleteData {
 		_uint iLODIndex = {};
 		_uint VertexOffset = {};
@@ -58,6 +59,9 @@ public:
 	void LoadData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex, _fmatrix PreMatrix);
 	//m_pModel->Update를 만들어서 각 LOD 단계가 쓰이는지 안쓰이는지 확인하기?
 
+	MODEL_DATA  Acquire_Vector();
+	void		Relase_Vector(vector<MODEL_DATA>& data);
+
 
 	void LoadLastLOD();
 	void Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
@@ -81,15 +85,19 @@ private:
 	//모델을 갖고있기 vs 메쉬를 갖고있기
 	unordered_map<_string, class CModel_Streaming*> m_ModelPrototypes;
 	vector<SHARED_DATA_DESC> m_Data;
-	vector<MOEDL_DATA> m_StagingData;
+	vector<MODEL_DATA> m_StagingData;
+	vector<MODEL_DATA> m_DataPool;
 	_float4x4 m_PreTransformMatrix = {};
 	map<_uint, vector<class CStaticObject*>> m_RenderObjects;
-	mutex m_Mutex;
+	mutex m_StagingMutex;
+	mutex m_RenderMutex;
+	mutex m_DataPoolMutex;
 	unordered_map<_string, class CModel_Streaming*>::iterator m_iSearchIndex = {};
 	//벡터로 데이터 넣는 곳 필요.
 	const _uint m_iCheckPerFrame = { 10 };
 	_double m_fTotalPlayTime = {};
 	list<DELETE_DATA> m_DeleteList;
+
 public:
 	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void				Free() override;

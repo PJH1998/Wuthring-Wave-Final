@@ -55,14 +55,13 @@ void CModel_Manager::Update(_float fTimeDelta)
 		else
 			DeleteIter++;
 	}
-
+	
 	if (!m_StagingData.empty())
 	{
-		vector<MOEDL_DATA> pTempVector;
+		vector<MODEL_DATA> pTempVector;
 		{
-			lock_guard<mutex> lock(m_Mutex);
+			lock_guard<mutex> lock(m_StagingMutex);
 			pTempVector = move(m_StagingData);
-			m_StagingData.clear();
 		}
 
 		for (auto& Data : pTempVector)
@@ -115,7 +114,8 @@ void CModel_Manager::Update(_float fTimeDelta)
 			}
 			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
 		}
-		pTempVector.clear();
+
+		Relase_Vector(pTempVector);
 	}
 
 	if (m_ModelPrototypes.empty())
@@ -203,7 +203,8 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel, const _string& pFilePath
 	if (iNumMeshes > 1000 || iNumMeshes == 0)
 		CRASH("Invalid Mesh Count: Memory Corruption Suspected");
 
-	MOEDL_DATA Datas;
+	MODEL_DATA Datas = Acquire_Vector();
+	//MODEL_DATA Datas{};
 	Datas.pModel = pModel;
 	Datas.LoadData.resize(iNumMeshes);
 	Datas.iLODIndex = iLODIndex;
@@ -227,7 +228,6 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel, const _string& pFilePath
 		Datas.LoadData[i].IndexData.resize(Datas.LoadData[i].iNumIndices);
 		File.read(reinterpret_cast<_char*>(Datas.LoadData[i].IndexData.data()), sizeof(_uint) * Datas.LoadData[i].iNumIndices);
 
-
 		for (size_t j = 0; j < iNumVertices; ++j)
 		{
 			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vPosition, XMVector3TransformCoord(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vPosition), PreMatrix));
@@ -238,8 +238,43 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel, const _string& pFilePath
 	}
 	
 	{
-		lock_guard<mutex> lock(m_Mutex);
+		lock_guard<mutex> lock(m_StagingMutex);
 		m_StagingData.push_back(move(Datas));
+	}
+}
+
+CModel_Manager::MODEL_DATA CModel_Manager::Acquire_Vector()
+{
+	{
+		lock_guard<mutex> lock(m_DataPoolMutex);
+		if (m_DataPool.empty())
+			return MODEL_DATA();
+
+		MODEL_DATA Data = move(m_DataPool.back());
+		m_DataPool.pop_back();
+		return Data;
+	}
+}
+
+void CModel_Manager::Relase_Vector(vector<MODEL_DATA>& data)
+{
+	for (auto& Data : data)
+	{
+		for (auto& pData : Data.LoadData)
+		{
+			pData.IndexData.clear();
+			pData.VertexData.clear();
+			pData.iNumIndices = 0;
+		}
+		Data.pModel = nullptr;
+	}
+
+	{
+		lock_guard<mutex> lock(m_DataPoolMutex);
+		if (m_DataPool.empty())
+			m_DataPool = move(data);
+		else
+			m_DataPool.insert(m_DataPool.end(), make_move_iterator(data.begin()), make_move_iterator(data.end()));
 	}
 }
 
@@ -308,7 +343,6 @@ void CModel_Manager::LoadLastLOD()
 	m_pGameInstance->Wait_Thread_End();
 	for (auto& Data : m_StagingData)
 	{
-		Data.pModel;
 		//Data의 Data.LoadData 개수가 메쉬의 개수.
 		vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
 		pData->clear();
@@ -361,7 +395,7 @@ void CModel_Manager::LoadLastLOD()
 void CModel_Manager::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
 {
 	{
-		lock_guard<mutex> lock(m_Mutex);
+		lock_guard<mutex> lock(m_RenderMutex);
 		m_RenderObjects[iLODIndex].push_back(pObject);
 		Safe_AddRef(pObject);
 	}
@@ -370,7 +404,7 @@ void CModel_Manager::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
 void CModel_Manager::Add_To_RenderTest(vector<class CStaticObject*>* Container)
 {
 	{
-		lock_guard<mutex> lock(m_Mutex);
+		lock_guard<mutex> lock(m_RenderMutex);
 
 		for (_uint i = 0; i < 4; ++i)
 		{

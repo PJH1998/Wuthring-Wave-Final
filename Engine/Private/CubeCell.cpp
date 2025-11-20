@@ -201,9 +201,9 @@ void CCubeCell::Compute_Cell_LOD(const _fvector& vCamPos)
 
 _uint CCubeCell::Compute_Object_LOD(CStaticObject* pObject, const _fvector& vCamPos)
 {
-	//_int iLODCnt = m_iLODCnt.load(memory_order_acquire);
-	//if (iLODCnt > MAX_LOD)
-	//	return m_iLODIndex;
+	_int iLODCnt = m_iLODCnt.load(memory_order_acquire);
+	if (iLODCnt > MAX_LOD)
+		return m_iLODIndex;
 
 	_vector vCenter = XMLoadFloat3(&pObject->Get_BoundingBox()->Center);
 	_float fDistance = XMVectorGetX(XMVector3Length(vCenter - vCamPos));

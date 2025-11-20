@@ -191,6 +191,11 @@ BoundingBox* CMapObject::Get_BoundingBox()
 	return m_pBoundingBox;
 }
 
+void CMapObject::Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)
+{
+	m_pModelCom->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
+}
+
 void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
