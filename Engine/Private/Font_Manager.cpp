@@ -90,7 +90,9 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	HRESULT hr = m_pDevice->CreateTexture2D(&td, nullptr, &pFontInfo->pAtlasTex);
 	if (FAILED(hr))
+	{
 		return hr;
+	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC sd = {};
 	sd.Format = td.Format;
@@ -99,7 +101,10 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	hr = m_pDevice->CreateShaderResourceView(pFontInfo->pAtlasTex, &sd, &pFontInfo->pAtlasSRV);
 	if (FAILED(hr))
+	{
+		Safe_Release(pFontInfo->pAtlasTex);
 		return hr;
+	}
 
 	D3D11_SAMPLER_DESC smp = {};
 	smp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -107,7 +112,11 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	hr = m_pDevice->CreateSamplerState(&smp, &pFontInfo->pSampler);
 	if (FAILED(hr))
+	{
+		Safe_Release(pFontInfo->pAtlasSRV);
+		Safe_Release(pFontInfo->pAtlasTex);
 		return hr;
+	}
 
 	return S_OK;
 }

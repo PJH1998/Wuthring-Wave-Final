@@ -40,6 +40,7 @@ HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
 	_wstring strFilePath =
 		L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json";
 	Load_ChildObjects(strFilePath);
+	PreAssign_ChildUIs();
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -107,7 +108,7 @@ void CUI_Button_Interact::Render()
 
 void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	CCustom_UI* pRootUI = Find_ChildObject(L"Root_Interact_Multiplier");
+	CCustom_UI* pRootUI = m_pRUI_Interact_Multiplier;
 
 	//pRootUI->SetActivate(false);
 	//auto combinedKFDesc_Root = static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
@@ -115,7 +116,7 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	//static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Root);
 
 
-	CCustom_UI* pFocusedUI = Find_ChildObject(L"Interact_Focused");
+	CCustom_UI* pFocusedUI = m_pUI_Interact_Focused;
 	pFocusedUI->SetActivate(false);
 	//auto combinedKFDesc_Focused = static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
 	//combinedKFDesc_Focused->fAlpha = 1.f;
@@ -123,7 +124,7 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 
 
-	CCustom_UI* pPressedUI = Find_ChildObject(L"Interact_Pressed");
+	CCustom_UI* pPressedUI = m_pUI_Interact_Pressed;
 	pPressedUI->SetActivate(false);
 
 	//auto combinedKFDesc_Pressed = static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
@@ -147,14 +148,22 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	//	CRASH("");
 }
 
+void CUI_Button_Interact::PreAssign_ChildUIs()
+{
+	m_pRUI_Interact_Multiplier	= Find_ChildObject(L"Root_Interact_Multiplier");
+	m_pUI_Interact_Focused		= Find_ChildObject(L"Interact_Focused");
+	m_pUI_Interact_Pressed		= Find_ChildObject(L"Interact_Pressed");
+	m_pUI_Interact_Normal		= Find_ChildObject(L"Interact_Normal");
+}
+
 void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 {
-	CCustom_UI* pRootUI = Find_ChildObject(L"Root_Interact_Multiplier");
+	CCustom_UI* pRootUI = m_pRUI_Interact_Multiplier;
 
-	CCustom_UI* pFocusedUI	= Find_ChildObject(L"Interact_Focused");
-	CCustom_UI* pPressedUI	= Find_ChildObject(L"Interact_Pressed");
+	CCustom_UI* pFocusedUI	= m_pUI_Interact_Focused;
+	CCustom_UI* pPressedUI = m_pUI_Interact_Pressed;
 
-	CCustom_UI* pEventTargetUI = Find_ChildObject(L"Interact_Normal");		// 이벤트 판별용으로 쓸 UI.
+	CCustom_UI* pEventTargetUI = m_pUI_Interact_Normal;		// 이벤트 판별용으로 쓸 UI.
 
 
 	_bool isHoverEnter	= pEventTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER));
@@ -215,7 +224,7 @@ void CUI_Button_Interact::Create_ChildText()
 		L"UI_Text_Interact"
 	);
 
-	CCustom_UI* pAttacher = this->Find_ChildObject(L"Root_Interact_Multiplier");
+	CCustom_UI* pAttacher = m_pRUI_Interact_Multiplier;
 	auto fontDesc = pFont->Get_UIDesc();
 	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 

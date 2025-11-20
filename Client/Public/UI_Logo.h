@@ -27,9 +27,17 @@ private:
 	void					Create_ChildText();
 
 private:
+	void					PreAssign_ChildUIs();
+
 	void					Update_AnimControl(_float fTimeDelta);
 
 private:
+	CCustom_UI*				m_pUI_MainLogo		= nullptr;
+	CCustom_UI*				m_pUI_SmallLogo		= nullptr;
+	CCustom_UI*				m_pUI_ButtonLogo	= nullptr;
+	CCustom_UI*				m_pUI_BackLogo		= nullptr;
+
+
 	_float					m_fTimeElapsed = 0.f;
 	_uint					m_iAnimOrder = 0;
 

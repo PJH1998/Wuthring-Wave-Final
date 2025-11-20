@@ -32,10 +32,12 @@ HRESULT CUI_MobHPBar::Initialize_Clone(void* pArg)
 	Ready_Components(pArg);
 	//__super::Ready_Events();
 	Ready_Presets();
+	
 
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarExtended.json";
 	Load_ChildObjects(strFilePath);
+	PreAssign_ChildUIs();
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -43,10 +45,6 @@ HRESULT CUI_MobHPBar::Initialize_Clone(void* pArg)
 	};
 	Load_Animations(vecAnimFilePaths);
 	 
-
-	//CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
-	//static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
-	//static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
 
 
 	Reset(_fmatrix(), nullptr);
@@ -165,26 +163,6 @@ void CUI_MobHPBar::Render()
 void CUI_MobHPBar::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	m_vecMobInfo.clear();
-	//m_vecMobKeys.clear();
-
-#ifdef KSTA_UITEST_MOBHPPOS
-	//UI_MOBINFO_DESC tTmpDesc = {};
-	//
-	//const _uint iNumTestMobs = 3;
-	//
-	//for (_uint i = 0; i < iNumTestMobs; i++)
-	//{
-	//	_float3 fTestOffset = {
-	//		m_pGameInstance->Rand(-10.f, 10.f),
-	//		m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
-	//		m_pGameInstance->Rand(-10.f, 10.f)
-	//	};
-	//
-	//	tTmpDesc.vMobPos = fTestOffset;
-	//
-	//	m_vecMobInfo.push_back(tTmpDesc);
-	//}
-#endif // KSTA_UITEST_MOBHPPOS
 
 	m_isActivate = true;
 }
@@ -200,16 +178,24 @@ void CUI_MobHPBar::Ready_Presets()
 
 }
 
+void CUI_MobHPBar::PreAssign_ChildUIs()
+{
+	m_pUI_HPFrame	= Find_ChildObject(L"InstHPFrame");
+	m_pUI_HPBar		= Find_ChildObject(L"InstHPBar");
+	m_pUI_SAFrame	= Find_ChildObject(L"InstSAFrame");
+	m_pUI_SABar		= Find_ChildObject(L"InstSABar");
+}
+
 void CUI_MobHPBar::Update_Instances()
 {
 	const _float fDistancecPivot = 10.f;
 
 
 	vector<CCustom_UI*> vecFloatingUIs = {};
-	vecFloatingUIs.push_back(Find_ChildObject(L"InstHPFrame"));
-	vecFloatingUIs.push_back(Find_ChildObject(L"InstHPBar"));
-	vecFloatingUIs.push_back(Find_ChildObject(L"InstSAFrame"));
-	vecFloatingUIs.push_back(Find_ChildObject(L"InstSABar"));
+	vecFloatingUIs.push_back(m_pUI_HPFrame);
+	vecFloatingUIs.push_back(m_pUI_HPBar);
+	vecFloatingUIs.push_back(m_pUI_SAFrame);
+	vecFloatingUIs.push_back(m_pUI_SABar);
 
 	for (auto& floatingUI : vecFloatingUIs)
 	{

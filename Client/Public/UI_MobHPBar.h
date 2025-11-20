@@ -30,12 +30,18 @@ public:
 
 private:
 	void			Ready_Presets();
+	void			PreAssign_ChildUIs();
 	void			Update_Instances();
 
 	void			Calc_ApplyTargetPos(CCustom_UI* pTargetUI);
 	void			Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
 
 private:
+	CCustom_UI*		m_pUI_HPFrame		= nullptr;
+	CCustom_UI*		m_pUI_HPBar			= nullptr;
+	CCustom_UI*		m_pUI_SAFrame		= nullptr;
+	CCustom_UI*		m_pUI_SABar			= nullptr;
+
 	vector<UI_MOBINFO_DESC>		m_vecMobInfo = {};
 	vector<_string>				m_vecMobKeys = {};
 
