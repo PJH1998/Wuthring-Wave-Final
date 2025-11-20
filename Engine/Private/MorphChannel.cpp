@@ -7,7 +7,7 @@ CMorphChannel::CMorphChannel()
 {
 }
 
-_float CMorphChannel::Get_CurrentWeight(_float fTrackPosition)
+_float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition)
 {
 	if (m_KeyFrames.empty())
 		return 0.f;
@@ -15,15 +15,15 @@ _float CMorphChannel::Get_CurrentWeight(_float fTrackPosition)
 	if (m_KeyFrames.size() == 1)
 		return m_KeyFrames[0].fValue;
 
-	if (fTrackPosition >= m_KeyFrames.back().fTrackPosition)
+	if (fCurrentTrackPosition >= m_KeyFrames.back().fTrackPosition)
 		return m_KeyFrames.back().fValue;
 
 	// 첫 키프레임 전이면 첫 값
-	if (fTrackPosition <= m_KeyFrames[0].fTrackPosition)
+	if (fCurrentTrackPosition <= m_KeyFrames[0].fTrackPosition)
 		return m_KeyFrames[0].fValue;
 
 	// 현재 구간 찾기.
-	auto it = std::lower_bound(m_KeyFrames.begin(), m_KeyFrames.end(), fTrackPosition,
+	auto it = std::lower_bound(m_KeyFrames.begin(), m_KeyFrames.end(), fCurrentTrackPosition,
 		[](const KEYFRAME_CURVE& a, _float time) { return a.fTrackPosition < time; });
 
 	if (it == m_KeyFrames.begin())
@@ -39,9 +39,115 @@ _float CMorphChannel::Get_CurrentWeight(_float fTrackPosition)
 	_float v0 = prev->fValue;
 	_float v1 = next->fValue;
 
-	_float ratio = (fTrackPosition - t0) / (t1 - t0);
+	_float ratio = (fCurrentTrackPosition - t0) / (t1 - t0);
 	return v0 + (v1 - v0) * ratio;  // Linear 보간
 }
+
+_float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex)
+{
+	if (0.f == fCurrentTrackPosition)
+		*pCurrentFrameIndex = 0;
+
+	if (m_KeyFrames.back().fTrackPosition <= fCurrentTrackPosition)
+	{
+		*pCurrentFrameIndex = m_iNumKeyFrame - 1;
+	}
+	else
+	{
+		// 4. 인덱스 캐싱 로직
+
+#ifdef _DEBUG
+		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
+			--*pCurrentFrameIndex;
+#endif // _DEBUG
+
+		while (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fCurrentTrackPosition)
+			++*pCurrentFrameIndex;
+
+		// 5. 보간(Interpolation) 계산
+		_uint iNextIndex = *pCurrentFrameIndex + 1;
+
+		// [크래시 지점 방지] 위에서 *pCurrentFrameIndex 범위를 잡았으므로 안전하게 접근 가능
+		const KEYFRAME_CURVE& PrevKey = m_KeyFrames[*pCurrentFrameIndex];
+		const KEYFRAME_CURVE& NextKey = m_KeyFrames[iNextIndex];
+		_float t0 = PrevKey.fTrackPosition;
+		_float t1 = NextKey.fTrackPosition;
+		_float v0 = PrevKey.fValue;
+		_float v1 = NextKey.fValue;
+
+		if (t1 - t0 < 1e-5f)
+			return v0;
+
+		_float ratio = (fCurrentTrackPosition - t0) / (t1 - t0);
+
+		return v0 + (v1 - v0) * ratio;
+	}
+
+	return 0.f;
+}
+
+//_float CMorphChannel::Get_CurrentWeight(_float fTrackPosition, _uint* pCurrentFrameIndex)
+//{
+//	if (0.f == fTrackPosition)
+//		*pCurrentFrameIndex = 0;
+//
+//	// 1. 데이터 예외 처리
+//	if (m_KeyFrames.empty())
+//		return 0.f;
+//
+//	if (m_KeyFrames.size() <= 2)
+//		return m_KeyFrames[0].fValue;
+//
+//	_uint iNumKeyFrames = static_cast<_uint>(m_KeyFrames.size());
+//
+//	// 3. 트랙 포지션이 마지막 키프레임보다 뒤에 있다면 마지막 값 반환
+//	if (fTrackPosition >= m_KeyFrames.back().fTrackPosition)
+//	{
+//		*pCurrentFrameIndex = iNumKeyFrames - 1;
+//		return m_KeyFrames.back().fValue;
+//	}
+//	else
+//	{
+//		 //4. 인덱스 캐싱 로직 (Channel과 동일한 방식)
+//#ifdef _DEBUG
+//	while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fTrackPosition)
+//		--(*pCurrentFrameIndex);
+//#endif // _DEBUG
+//
+//
+//	// (iNumKeyFrames - 2)는 인덱스 오버플로우 방지 (Current + 1을 참조해야 하므로)
+//		while (*pCurrentFrameIndex < iNumKeyFrames - 1 && m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fTrackPosition)
+//			++(*pCurrentFrameIndex);
+//
+//		// 5. 보간(Interpolation) 계산
+//		_uint iNextIndex = *pCurrentFrameIndex + 1;
+//
+//		// 혹시 모를 인덱스 범위 체크 (안전장치)
+//		if (iNextIndex >= iNumKeyFrames)
+//			return m_KeyFrames.back().fValue;
+//
+//		const KEYFRAME_CURVE& PrevKey = m_KeyFrames[*pCurrentFrameIndex];
+//		const KEYFRAME_CURVE& NextKey = m_KeyFrames[iNextIndex];
+//
+//		_float t0 = PrevKey.fTrackPosition;
+//		_float t1 = NextKey.fTrackPosition;
+//		_float v0 = PrevKey.fValue;
+//		_float v1 = NextKey.fValue;
+//
+//		// 분모가 0이 되는 경우 방지 (시간 차이가 거의 없을 때)
+//		if (t1 - t0 < 1e-5f)
+//			return v0;
+//
+//		_float ratio = (fTrackPosition - t0) / (t1 - t0);
+//
+//		// Linear 보간 결과 반환
+//		return v0 + (v1 - v0) * ratio;
+//	}
+//
+//	
+//
+//	return 0.f;
+//}
 
 // 어떤 Shape Key인지 저장?
 HRESULT CMorphChannel::Initialize(ifstream& InputFile)

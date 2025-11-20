@@ -20,6 +20,7 @@ CAnimation::CAnimation(const CAnimation& Prototype)
 	m_iNumChannels { Prototype.m_iNumChannels },
 	m_Channels { Prototype.m_Channels },
 	m_CurrentFrameIndices{ Prototype.m_CurrentFrameIndices },
+	m_CurrentMorphCurveIndicies{ Prototype.m_CurrentMorphCurveIndicies },
 	m_iNumMorphCurves{ Prototype.m_iNumMorphCurves },
 	m_MorphKeyIndicies { Prototype.m_MorphKeyIndicies },
 	m_MorphMeshChannels { Prototype.m_MorphMeshChannels } 
@@ -123,6 +124,7 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	}
 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
+	
 
 	// 추가 작업.
 	if (eModelType == MODELTYPE::CHARACTER)
@@ -139,6 +141,8 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 
 			m_MorphMeshChannels.push_back(pMorphChannel);
 		}
+
+		m_CurrentMorphCurveIndicies.resize(m_iNumMorphCurves);
 
 	}
 #pragma endregion
@@ -329,7 +333,8 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 		if (iTargetIndex >= modelWeights.size()) continue;
 
 		// 현재 시간 가중치 계산
-		_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition);
+		//_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition);
+		_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[i]);
 
 		// 모델의 해당 인덱스에 가중치 적용
 		modelWeights[iTargetIndex] = fWeight;

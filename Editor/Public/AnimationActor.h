@@ -23,6 +23,7 @@ public:
 		class CTransform* pParentTransform = { nullptr };
 		_string strBoneName = { };
 		CAnimationActor* pParentActor = { nullptr };
+		_bool IsFacial = { false };
 	}ANIMATION_ACTOR_DESC;
 
 
@@ -39,7 +40,11 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
+
+	
 	virtual void Render_Shadow() override;
+
+	
 
 #ifdef _DEBUG
 public:
@@ -117,8 +122,8 @@ private:
 	_float m_fAnimationSpeed = { 1.f };
 
 	// Facial
-	vector<_float> m_fMorphWeights;
 	
+	_bool m_IsFacial = { false };
 
 #ifdef _DEBUG
 	// PartObject
@@ -128,6 +133,9 @@ private:
 	void Bind_Resources();
 	HRESULT Ready_Components(const ANIMATION_ACTOR_DESC* pDesc);
 	HRESULT Ready_Camera();
+
+	void Render_Facial();
+	void Render_Default();
 
 public:
 	virtual	CGameObject* Clone(void* pArg) override;

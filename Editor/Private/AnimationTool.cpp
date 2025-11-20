@@ -732,6 +732,7 @@ void CAnimationTool::LoadDat()
 	_matrix		PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 1.f;
 	_float fSize = 0.0001f;
+	//_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
 
 	static bool isCharacter = { false };
@@ -775,9 +776,7 @@ void CAnimationTool::LoadDat()
 			ImGui::InputFloat("fRadianZ", &fRadians[2]);
 			PreTransformMatrix *= XMMatrixRotationZ(XMConvertToRadians(fRadians[2]));
 		}
-			
 	}
-
 
     if (ImGui::Button("Load DAT File"))
     {
@@ -824,7 +823,12 @@ void CAnimationTool::LoadDat()
 			HRESULT hr = {};
 			// Character를 설정했으면 Character로 Load Dat
 			if (isCharacter)
+			{
+				_float fSize = 0.01f; // Blender에서 크기가 100배 작음.
+				PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
 				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str());
+			}
+				
 			else
 				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
             
@@ -1057,10 +1061,11 @@ void CAnimationTool::Render_Model_Detail()
 	static char textObject[256] = "";
 	ImGui::InputText("Object Name", textObject, sizeof(textObject));
 	
-
-
 	static bool IsPart = { false };
 	ImGui::Checkbox("Parts", &IsPart);
+
+	static bool IsFacial = { false };
+	ImGui::Checkbox("Facial", &IsFacial);
 
     if (ImGui::Button("Create Instance"))
     {
@@ -1068,8 +1073,16 @@ void CAnimationTool::Render_Model_Detail()
         Desc.fSpeedPerSec = fSpeedPerSec;
         Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
-        //Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
-        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter");
+
+		if (IsFacial)
+		{
+			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter");
+			Desc.IsFacial = true;
+		}
+			
+		else 
+			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+
         Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));

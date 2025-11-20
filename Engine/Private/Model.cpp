@@ -323,7 +323,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	m_RootMatrix = XMMatrixIdentity();
 
 
-	if (MODELTYPE::ANIM == m_eType)
+	if (MODELTYPE::ANIM == m_eType || MODELTYPE::CHARACTER == m_eType)
 	{
 		if (FAILED(Ready_Shared_Buffers()))
 			return E_FAIL;
@@ -334,7 +334,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 
 HRESULT CModel::Initialize_Clone(void* pArg)
 {
-	if (MODELTYPE::ANIM == m_eType)
+	if ((MODELTYPE::ANIM == m_eType) || (MODELTYPE::CHARACTER == m_eType))
 	{
 		// 1. Instance 전용 버퍼 생성.
 		if (FAILED(Ready_Instance_Buffers()))
@@ -517,6 +517,21 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
 	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
+
+
+	// Facial Animation Weight 계산
+	iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights, nullptr);
+
+	// 모든 메쉬에게 "지금 설정된 가중치(m_ShapeKeyWeights)대로 얼굴 바꿔!" 라고 명령
+	for (auto& pMesh : m_Meshes)
+	{
+		// 위에서 만든 CPU 연산 함수 호출
+		pMesh->Update_Morph_CPU(m_ShapeKeyWeights);
+	}
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//{
+	//	
+	//}
 
 	// 4. Root Motion 조정.
 	if (true == isRootMotion)
@@ -784,31 +799,31 @@ _bool CModel::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float
 #endif
  
 
-void CModel::ApplyComputeResults_ToBones()
-{
-	// 1. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
-	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
-
-	// 2. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
-	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
-	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &MappedSubResource);
-	if (FAILED(hr))
-		return;
-
-	// 3. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
-	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
-
-	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
-	for (size_t i = 0; i < m_Bones.size(); ++i)
-	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
-	}
-
-	// 5. Unmap으로 마무리합니다.
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
-}
+//void CModel::ApplyComputeResults_ToBones()
+//{
+//	// 1. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
+//	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
+//
+//	// 2. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+//	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+//	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &MappedSubResource);
+//	if (FAILED(hr))
+//		return;
+//
+//	// 3. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
+//	vector<_float4x4> vLocalMatrices(m_Bones.size());
+//	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+//
+//	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+//	for (size_t i = 0; i < m_Bones.size(); ++i)
+//	{
+//		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
+//		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+//	}
+//
+//	// 5. Unmap으로 마무리합니다.
+//	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+//}
 
 void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
 {
@@ -1468,9 +1483,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 {
 	ASSERT_CRASH(m_pDevice);
 
-	// 애니메이션 모델이 아니면 생성하지 않음.
-	if (MODELTYPE::ANIM != m_eType)
-		return S_OK;
+	// 애니메이션, 캐릭터 모델이 아니면 생성하지 않음.
 
 	HRESULT hr = S_OK;
 

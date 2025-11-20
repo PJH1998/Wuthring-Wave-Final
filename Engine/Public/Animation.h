@@ -65,8 +65,11 @@ private:
 	_uint							m_iNumMorphCurves = { }; // 기본 0
 	vector<class CMorphChannel*>	m_MorphMeshChannels;
 
+	vector<_uint>					m_CurrentMorphCurveIndicies;
+
 	// 매핑 테이블 => 현재 MorphChannel[i]가 Model의 ShapeKeyWeights의 몇번째 인덱스인지 저장.
 	vector<_int> 					m_MorphKeyIndicies; 
+
 
 #pragma endregion
 

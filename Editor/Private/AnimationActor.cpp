@@ -26,6 +26,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     if (FAILED(CContainerObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	m_IsFacial = pDesc->IsFacial;
     m_eCurLevel = pDesc->eLevel;
 
     m_iShaderPath = pDesc->iShaderPath;
@@ -226,45 +227,12 @@ void CAnimationActor::Render()
 {
     Bind_Resources();
 
-    _uint iNumMeshes = m_pModelCom->Get_NumMesh();
-    for (_uint i = 0; i < iNumMeshes; i++)
-    {
-		// 1. 재질 기존 유지.
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			return;
-            //CRASH("Ready Diffuse Texture Failed");
+	if (m_IsFacial)
+		Render_Facial();
+	else
+		Render_Default();
 
-        //if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
-        //    return E_FAIL;
-		
-
-		// 2. 뼈 행렬 (기존 유지)
-        if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
-            CRASH("Ready Bone Matrices Failed");
-
-		_uint iPassIndex = 1; // 기본값: 1번 (AnimPass - 뼈대만)
-
-		if (m_pModelCom->Is_MeshMorphable(i))
-		{
-			// Morph 능력이 있다면 데이터 바인딩 시도
-			if (SUCCEEDED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
-				iPassIndex = 2; // 성공하면 2번 (MorphAnimPass - 얼굴+뼈대)
-		}
-
-		// 3. 메쉬별 Morph SRV & 정점 개수 바인딩
-		if (FAILED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
-			CRASH("Bind Morph SRV Failed");
-
-		if (FAILED(m_pModelCom->Bind_MorphWeights(m_pShaderCom)))
-			CRASH("Bind Morph SRV Failed");
-
-
-        if (FAILED(m_pShaderCom->Begin(iPassIndex)))
-            CRASH("Ready Shader Begin Failed");
-
-        if (FAILED(m_pModelCom->Render(i)))
-            CRASH("Ready Render Failed");
-    }
+    
     
 }
 
@@ -595,6 +563,77 @@ HRESULT CAnimationActor::Ready_Camera()
 	m_pGameInstance->Change_MainCamera(ENUM_CLASS(m_eCurLevel), TEXT("Camera_Spring"));
 
 	return S_OK;
+}
+
+void CAnimationActor::Render_Facial()
+{
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		// 1. 재질 기존 유지.
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			return;
+		//CRASH("Ready Diffuse Texture Failed");
+
+	//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
+	//    return E_FAIL;
+
+
+	// 2. 뼈 행렬 (기존 유지)
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		//_uint iPassIndex = 2; // 기본값: 1번 (AnimPass - 뼈대만)
+		_uint iPassIndex = 1; // 기본값: 1번 (AnimPass - 뼈대만)
+
+		if (m_pModelCom->Is_MeshMorphable(i))
+		{
+			// Morph 능력이 있다면 데이터 바인딩 시도
+			if (SUCCEEDED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
+				iPassIndex = 2; // 성공하면 2번 (MorphAnimPass - 얼굴+뼈대)
+		}
+
+		// 3. 메쉬별 Morph SRV & 정점 개수 바인딩
+		if (FAILED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
+			CRASH("Bind Morph SRV Failed");
+
+		if (FAILED(m_pModelCom->Bind_MorphWeights(m_pShaderCom)))
+			CRASH("Bind Morph SRV Failed");
+
+
+		if (FAILED(m_pShaderCom->Begin(iPassIndex)))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
+}
+
+void CAnimationActor::Render_Default()
+{
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		// 1. 재질 기존 유지.
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			return;
+
+		//CRASH("Ready Diffuse Texture Failed");
+
+		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
+		//    return E_FAIL;
+
+
+		// 2. 뼈 행렬 (기존 유지)
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(2)))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
 }
 
 #ifdef _DEBUG
