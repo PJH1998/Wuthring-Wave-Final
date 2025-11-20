@@ -12,6 +12,8 @@
 #include "UI_Text.h"
 #include "UI_Button_Interact.h"
 //#include "UI_Interact.h"
+#include "UI_LockOn.h"
+#include "UI_Parry.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -139,11 +141,11 @@ void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
 		{
 			pInteractBtn->Find_ChildObject(L"Interact_Pressed")->SetActivate(true);
 			static_cast<CAnimator_UI*>(pInteractBtn->Find_ChildObject(L"Interact_Pressed")->Get_Component(L"Com_Animator_UI"))
-				->Change_Animation(L"Interact_Pressed_Trigger");
+				->Change_Animation(L"Interact_Pressed_Trigger", true);
 
 			pInteractBtn->Find_ChildObject(L"Interact_Focused")->SetActivate(true);
 			static_cast<CAnimator_UI*>(pInteractBtn->Find_ChildObject(L"Interact_Focused")->Get_Component(L"Com_Animator_UI"))
-				->Change_Animation(L"Interact_Focused_On");
+				->Change_Animation(L"Interact_Focused_On", true);
 		}
 
 		pInteractBtn->Req_OffInteract();
@@ -159,6 +161,49 @@ _bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractTyp
 		return false; // 없는데!
 
 	return pRootUI->Check_OnInteract(L"Interact_Normal", ENUM_CLASS(eEventInteractType), 0);
+}
+
+void CUI_ControlHelper::Attach_LockOnUI(_float3* pTargetPos)
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
+
+	if (!pRootUI)
+		return; 
+
+	// 풀링으로부터 꺼내기
+	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetPos };
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
+}
+void CUI_ControlHelper::Detach_LockOnUI()
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->SetActivate(false);
+}
+
+void CUI_ControlHelper::Attach_Parry(_float3* pTargetPos)
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_Parry");
+
+	if (!pRootUI)
+		return;
+
+	CUI_Parry::UI_PARRY_DESC tDesc = { pTargetPos };
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Enable_Parried()
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_Parry");
+
+	if (!pRootUI)
+		return;
+
+	static_cast<CUI_Parry*>(pRootUI)->Enable_Parried();
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

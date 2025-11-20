@@ -10,7 +10,11 @@ private:
     enum QTESTATE
     {
 		QTE = 0,
-        END
+		SELECT,
+		MOVE,
+		LAND,
+		FALL,
+		END
     };
 
 private:

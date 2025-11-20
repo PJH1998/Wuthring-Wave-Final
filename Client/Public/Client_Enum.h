@@ -106,9 +106,9 @@ namespace Client
 		, SHADOW // 3
 		, OUNTLINE // 4
 		, ROVER // 5
-		, NORMAL_YELLOW // 6
-		, LOGOROVER // 7
-		, GALBRENA // 8
+		, GALBRENA // 6
+		, NORMAL_YELLOW // 7
+		, LOGOROVER // 8
 		, DISSOLVE_NORMAL // 9
 		, END };
 
@@ -121,6 +121,9 @@ namespace Client
 		, DISSOLVE_WEAPON // 5
 		, END
 	};
+
+	enum class SHADER_SFX_BURST { AUGUSTA_SLASH, RADIAL_BLUR, GALBRENA_CIRCLE, GALBRENA_BLUR};
+	enum class SHADER_SFX_BURST_INSTANCE { GALBRENA_SLASH, GALBRENA_STAR };
 
 	enum class TEXT_COLOR_TYPE {
 		NONE,	// 기본값. 지정 안했다고 가정, 마젠타 출력
@@ -137,11 +140,11 @@ namespace Client
 		TT_PROGRESS,
 
 		TT_BOSSNAME,
+		TT_PLAYERHP,
 
 		END
 	};
 
-	enum class SHADER_SCREENEFFECT { SONORA_CHANGE};
 	enum class TEXT_ALIGN_TYPE {
 		LEFT, 
 		CENTER, 

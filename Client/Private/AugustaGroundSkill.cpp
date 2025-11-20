@@ -40,13 +40,14 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
     {
         case EAugustaSkillType::SKILL_STRIKE:
         {
+			
             //_string strBoneName = "WeaponProp06";
             _string strBoneName = "Root";
+			
             m_iPartType = CAugusta::PARTTYPE::PART_GRIFFON;
             m_pAugusta->PartActivate(m_iPartType, true);
             m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-            m_pAugusta->Set_Gravity(false);
-            m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
+            //m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
             
 			// 진입할때 한번만 회전 => Griffon
 			m_pAugusta->Rotate_Target();
@@ -55,6 +56,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 
+			m_pAugusta->Set_Gravity(false);
 			// 무적.
 			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
@@ -78,7 +80,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 
 			_string strBoneName = "WeaponProp05";
 			m_pAugusta->PartActivate(m_iPartType, true);
-			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+			//m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 			m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 			m_pAugusta->Set_Gravity(false);
 			// 진입할때 한번만.

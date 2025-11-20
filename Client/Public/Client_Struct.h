@@ -4,6 +4,14 @@
 
 namespace Client
 {
+	typedef struct tagSFX_RadialData {
+		_float fMinDistance;
+		_float fMaxDistance;
+		_float fLengthScale;
+		_float fPadding0;
+		_float2 vPivot;
+		_float2 fPadding1;
+	}SFX_RADIAL_DATA;
 
 	typedef struct tagCharacterStat
 	{
@@ -117,7 +125,7 @@ namespace Client
 		void* pTransform = { nullptr };  // Transform;
 		_float fAttack = { 0.f };			 // 공격력
 		_uint* pCondition = {};			// 컨디션 Value
-		_string strEffectTag = {};		// 호출할 이펙트 태그
+		_wstring strEffectTag = {};		// 호출할 이펙트 태그
 		TEXT_COLOR_TYPE eType{};		// 공격자 속성
 		ATTACKVOULME_DIR eDir{};
 		// Shaking이나, HitStop? 이런 거.
@@ -179,5 +187,6 @@ namespace Client
 	typedef struct tagSQSFXData : public SEQUENCE_ITEM_DATA {
 		SFX_TYPE			eSFXType;
 	}SQ_SFX_DATA;
+
 #pragma endregion
 }

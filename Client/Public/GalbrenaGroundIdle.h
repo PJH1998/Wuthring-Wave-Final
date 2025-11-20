@@ -27,11 +27,14 @@ private:
 
 		BURST,
 		ATTACK,
+		BURST_ATTACK,
 		SKILL_E,
 		SKILL_Q,
 		SKILL_R,
 		DEFAULT_E,
 		BURST_E,
+
+		
 
 		ULTI,
 

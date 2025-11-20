@@ -18,6 +18,7 @@ namespace Client
 		CHANGE = 1 << 5,
 		CUTSCENE = 1 << 6,
 		SKILLHIT = 1 << 7, // Skill에 맞았단 판정이 필요한 경우.(Galbrena Default E)
+		SELECT = 1 << 8, // 선택된 상태.
 		END
 	};
 

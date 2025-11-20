@@ -15,12 +15,13 @@ CUI_Button_Interact::CUI_Button_Interact(const CUI_Button_Interact& Prototype)
 	: CUI_Button(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 
 HRESULT CUI_Button_Interact::Initialize_Prototype()
 {
-	return __super::Initialize_Prototype();
+	return S_OK;
 }
 
 HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
@@ -81,9 +82,6 @@ void CUI_Button_Interact::Update(_float fTimeDelta)
 	Update_MouseFeedback(fTimeDelta);
 
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
-
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
 }
 
 
@@ -91,6 +89,9 @@ void CUI_Button_Interact::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
@@ -137,6 +138,7 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iAnimOrder = 0;
 
 	m_isActivate = true;
+	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Interact", this);
 
 	//if ( FAILED (static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Focused_Default")))
@@ -255,6 +257,7 @@ CGameObject* CUI_Button_Interact::Clone(void* pArg)
 
 void CUI_Button_Interact::Free()
 {
+	Safe_Release(m_pGameSystem);
 
 	__super::Free();
 

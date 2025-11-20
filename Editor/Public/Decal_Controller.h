@@ -137,7 +137,8 @@ private:
 	_float														m_fColor[4] = {1.f, 1.f, 1.f, 1.f};		
 
 	//Decal 베이스 정보
-	_bool														m_bEmissive = false;
+	_bool														m_bMaskEmissive = false;
+	_bool														m_bDiffuseEmissive = false;
 	_float3														m_EmissiveLuminance = {};
 
 public:

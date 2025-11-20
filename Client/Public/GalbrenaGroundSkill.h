@@ -17,20 +17,12 @@ private:
        MOVE,
        JUMP, 
        LAND,
+	   ATTACK,
        SKILL_E,
        SKILL_R,
 
-	   SKILL_RISE_ZERO,
-	   SKILL_RISE,
-	   AIRATTACK_HACKDOWN_START,
-
-	   ATTACK_PULL,
-	   ATTACK_SP_SKILL,
-
-	   POINT_E,
-	   SWORD_R,
-
-       AIR_ATTACK,
+	   DEFAULT_E,
+	   BURST_E,
        FALL,
        END
     };

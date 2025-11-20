@@ -22,10 +22,10 @@ public:
 	void				Render();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
-
+	ID3D11ShaderResourceView* Get_CurrentSceneSRV() { return m_pCurrentSceneSRV; }
 	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
-	void				Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
-	
+	void				Setting_LUT(_uint iIndex, _float fIntensity, _bool IsDynamicLUT) { m_iLUT_Index = iIndex, m_fLutLerpIntensity = fIntensity, m_IsDynamicLUT = IsDynamicLUT; }
+	void				Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut);
 	void				Render_ShadowMap();
 
 	void				Clear_Resource();
@@ -38,41 +38,46 @@ public:
 #endif
 
 private:
-	ID3D11Device*						m_pDevice = { nullptr };
-	ID3D11DeviceContext*			m_pContext = { nullptr };
-	ID3D11DeviceContext**			m_pDeferredContext = { nullptr };
-	class CGameInstance*			m_pGameInstance = { nullptr };
+	ID3D11Device*								m_pDevice = { nullptr };
+	ID3D11DeviceContext*						m_pContext = { nullptr };
+	ID3D11DeviceContext**						m_pDeferredContext = { nullptr };
+	class CGameInstance*						m_pGameInstance = { nullptr };
+
+	ID3D11ShaderResourceView*					m_pCurrentSceneSRV = { nullptr };
 
 	// 비동기 렌더링
-	_uint									m_iNumThread = {};
-	atomic<_int>						m_iNumEndThread = {};
-	vector<ID3D11CommandList*> m_CommandLists;
+	_uint										m_iNumThread = {};
+	atomic<_int>								m_iNumEndThread = {};
+	vector<ID3D11CommandList*>					m_CommandLists;
 	map<const _wstring, vector<ID3DX11Effect*>> m_Effects;
-	mutex									m_RenderMutex;
-	mutex									m_RenderAddMutex;
-	condition_variable					m_CV;
+	mutex										m_RenderMutex;
+	mutex										m_RenderAddMutex;
+	condition_variable							m_CV;
 
 	// Culling
-	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
-	vector<class CStaticObject*>	m_StaticObjects[2];
-	atomic<_uint>						m_iDoubleBufferIndex = {};
-	atomic<_uint>						m_iCullStack = {};
-	atomic<_bool>						m_isCompleteFrustumCull = { false };
-	list<class CGameObject*>		m_ShadowMapObjects;
-	_uint									m_iNumPreRenderObject = {};
+	list<class CGameObject*>					m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	vector<class CStaticObject*>				m_StaticObjects[2];
+	atomic<_uint>								m_iDoubleBufferIndex = {};
+	atomic<_uint>								m_iCullStack = {};
+	atomic<_bool>								m_isCompleteFrustumCull = { false };
+	list<class CGameObject*>					m_ShadowMapObjects;
+	_uint										m_iNumPreRenderObject = {};
 
 
-	class CShader*						m_pShader = { nullptr };
-	class CVIBuffer_Rect*				m_pVIBuffer = { nullptr };
+	class CShader*							m_pShader = { nullptr };
+	class CVIBuffer_Rect*					m_pVIBuffer = { nullptr };
 
 	_float4x4								m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint									m_iWinSizeX{}, m_iWinSizeY{};
 	_float									m_fWinSizeX{}, m_fWinSizeY{};
 	
-	CRendererSubResource*			m_pSubResource = { nullptr };
+	CRendererSubResource*					m_pSubResource = { nullptr };
 	_uint									m_iLUT_Index = {};
+	_float									m_fLutLerpIntensity = {};
+	_bool									m_IsDynamicLUT = {};
 
-	recursive_mutex					m_RecursiveMutex;
+
+	recursive_mutex							m_RecursiveMutex;
 
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
@@ -113,8 +118,9 @@ private:
 	void						Render_DistortionObject();
 	void						Render_Blend();
 	void						Render_LUT();
-	void						Render_Distortion();
+	void						Render_SFX();
 	void						Render_Fog();
+	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();

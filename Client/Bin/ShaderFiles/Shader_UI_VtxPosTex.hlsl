@@ -4,7 +4,7 @@
 
 
 // ==============================
-// * Global Variables
+// * Global Variabless
 // ==============================
 
 // Basic Variables
@@ -12,6 +12,8 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
 float g_AlphaStrength;
 
+Texture2D g_TextureFX;
+float g_FXStrength;
 
 // Gradient Variables
 float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f }; // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
@@ -174,19 +176,28 @@ VS_OUT VS_MAIN(VS_IN In)
     
     /* 정점의 로컬위치 * 월드 * 뷰 * 투영 */ 
         
+    float4 vFinalPos;
+    
+    
+    
     float4x4 matWV, matWVP;
     
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
+        
+    vFinalPos = mul(float4(In.vPosition, 1.f), matWVP);
     
-    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    
+    
+    
+    Out.vPosition = vFinalPos;
     Out.vTexcoord = In.vTexcoord;
     Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = Out.vPosition;
     
     return Out;
 }
-
+    
 // ==============================
 // * Pixel Shader
 // ==============================

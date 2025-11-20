@@ -392,7 +392,7 @@ HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
 }
-HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+ HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
@@ -517,9 +517,17 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
-void CGameInstance::Set_LUT_Index(_uint iIndex)
+ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
-	m_pRenderer->Set_LUT_Index(iIndex);
+	return m_pRenderer->Get_CurrentSceneSRV();
+}
+void CGameInstance::Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut)
+{
+	m_pRenderer->Get_Current_LutSetting(pOutIndex, pOutIntensity, pOutIsDnyamicLut);
+}
+void CGameInstance::Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut)
+{
+	m_pRenderer->Setting_LUT(iIndex, fLutLerpIntensity, IsDynamicLut);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)

@@ -94,7 +94,9 @@ PS_OUT PS_MAIN(PS_IN In)
     {
         vDifffuse = g_DiffuseTexture.Sample(DefaultSampler, vDecalUV);
         if (any(vDifffuse.xyz))
+        {
             vDifffuse.a = max(max(vDifffuse.r, vDifffuse.b), vDifffuse.g);
+        }
         else
             discard;
     }
@@ -128,6 +130,8 @@ PS_OUT PS_MAIN(PS_IN In)
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
     Out.vDiffuse.a -= fAlpha;
+    
+    
     
     if(any(vEmissive.xyz))
     {

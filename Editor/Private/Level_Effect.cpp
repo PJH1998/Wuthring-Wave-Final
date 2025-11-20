@@ -11,6 +11,7 @@
 #include"Edit_MapObject.h"
 #include "Effect_Rect.h"
 #include "Effect_Decal.h"
+#include "Effect_Radial.h"
 
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -40,6 +41,9 @@ HRESULT CLevel_Effect::Initialize()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectDecal"),
 		CEffect_Decal::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectRadial"),
+		CEffect_Radial::Create(m_pDevice, m_pContext));
 
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));

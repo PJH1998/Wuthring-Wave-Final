@@ -321,7 +321,6 @@ void CShader_Interface::Setting_LUT()
 			if (ImGui::Selectable(to_string(i).c_str()))
 			{
 				m_iLUT_Index = i;
-				m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
 			}
 #endif // _DEBUG
 		}
@@ -338,8 +337,10 @@ void CShader_Interface::Setting_LUT()
 
 	}
 
+	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, true);
 #ifdef _DEBUG
-	m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
+
+//	m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
 #endif // _DEBUG
 
 
