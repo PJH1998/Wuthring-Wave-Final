@@ -30,7 +30,8 @@ public:
 
 	void Create_TriggerBox();
 
-
+	void Ready_Map_Load_Prototype(const _char* pModelName);
+	void Ready_Debris_Prototype(const _char* pModelName);
 	void Logo_Test();
 private:
 	HRESULT Ready_Static_Component();
@@ -55,7 +56,7 @@ private:
 	class CEdit_TriggerBox* m_pPickedTriggerBox = { nullptr };
 	class CEdit_MonsterSpawnor* m_pPickedSpawnor = { nullptr };
 	class CEdit_Meteo* m_pPickedMeteo = { nullptr };
-
+	unordered_set< _string> m_szPrototypeName;
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
 	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
