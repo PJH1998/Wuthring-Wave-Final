@@ -132,6 +132,7 @@
     <ClInclude Include="..\Public\Rigidbody.h" />
     <ClInclude Include="..\Public\Shader.h" />
     <ClInclude Include="..\Public\Sound_Manager.h" />
+    <ClInclude Include="..\public\SubsurfaceScattering.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h" />
     <ClInclude Include="..\Public\Timer.h" />
@@ -263,6 +264,7 @@
     <ClCompile Include="..\Private\Rigidbody.cpp" />
     <ClCompile Include="..\Private\Shader.cpp" />
     <ClCompile Include="..\Private\Sound_Manager.cpp" />
+    <ClCompile Include="..\private\SubsurfaceScattering.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp" />
     <ClCompile Include="..\Private\Timer.cpp" />
@@ -293,6 +295,7 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\..\Client\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_DOF.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_HZB.hlsl" />

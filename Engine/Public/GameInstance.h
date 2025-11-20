@@ -136,6 +136,7 @@ public:
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	void						Render_ShadowMap();
 	void						SettingFog(_bool IsOn);
+	void						SettingSSS(_bool IsOn);
 	ID3D11ShaderResourceView*	Get_CurrentSceneSRV();
 	void						Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut);
 	void						Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut);

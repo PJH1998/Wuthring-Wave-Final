@@ -111,13 +111,11 @@ void SSAO_BLUR_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
         
         
         vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
-        vSharedDepthY[GTID.y][GTID.x] = g_DepthTexture.Load(LeftID).
-y;
+        vSharedDepthY[GTID.y][GTID.x] = g_DepthTexture.Load(LeftID).y;
         vSharedNormalY[GTID.y][GTID.x] = Compute_Normal_DTID(g_NormalTexture, LeftID);
         
         vSharedColorY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = InputTexture.Load(RightID);
-        vSharedDepthY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = g_DepthTexture.Load(RightID).
-y;
+        vSharedDepthY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = g_DepthTexture.Load(RightID).y;
         vSharedNormalY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = Compute_Normal_DTID(g_NormalTexture, RightID);
     }
     
