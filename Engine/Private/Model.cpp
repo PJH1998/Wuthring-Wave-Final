@@ -460,7 +460,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	if (m_eType == MODELTYPE::CHARACTER)
 	{
 		// Facial Animation Weight 계산
-		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights, nullptr);
+		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
 
 		// 모든 메쉬에게 "지금 설정된 가중치(m_ShapeKeyWeights)대로 얼굴 바꿔!" 라고 명령
 		for (auto& pMesh : m_Meshes)
@@ -520,13 +520,17 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 
 	// Facial Animation Weight 계산
-	iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights, nullptr);
-
-	// 모든 메쉬에게 "지금 설정된 가중치(m_ShapeKeyWeights)대로 얼굴 바꿔!" 라고 명령
-	for (auto& pMesh : m_Meshes)
+	if (m_eType == MODELTYPE::CHARACTER)
 	{
-		// 위에서 만든 CPU 연산 함수 호출
-		pMesh->Update_Morph_CPU(m_ShapeKeyWeights);
+		// Facial Animation Weight 계산
+		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
+
+		// 모든 메쉬에게 "지금 설정된 가중치(m_ShapeKeyWeights)대로 얼굴 바꿔!" 라고 명령
+		for (auto& pMesh : m_Meshes)
+		{
+			// 위에서 만든 CPU 연산 함수 호출
+			pMesh->Update_Morph_CPU(m_ShapeKeyWeights);
+		}
 	}
 	//if (m_eType == MODELTYPE::CHARACTER)
 	//{
@@ -797,33 +801,6 @@ _bool CModel::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float
 	return false;
 }
 #endif
- 
-
-//void CModel::ApplyComputeResults_ToBones()
-//{
-//	// 1. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
-//	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
-//
-//	// 2. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
-//	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
-//	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &MappedSubResource);
-//	if (FAILED(hr))
-//		return;
-//
-//	// 3. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-//	vector<_float4x4> vLocalMatrices(m_Bones.size());
-//	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
-//
-//	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
-//	for (size_t i = 0; i < m_Bones.size(); ++i)
-//	{
-//		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-//		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
-//	}
-//
-//	// 5. Unmap으로 마무리합니다.
-//	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
-//}
 
 void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
 {
@@ -1467,6 +1444,15 @@ HRESULT CModel::Ready_MorphAnimation(const _char* pFilePath)
 #endif
 	}
 
+	AnimationFile.close();
+
+
+	// Compute Shader 계산을 위한 Animation Index 저장.
+
+	_uint iAnimIdx = 0;
+	m_AnimationNameToIndex.clear();
+	for (auto& pair : m_Animations)
+		m_AnimationNameToIndex.emplace(pair.first, iAnimIdx++);
 
 #pragma endregion
 
