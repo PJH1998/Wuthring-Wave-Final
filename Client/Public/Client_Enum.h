@@ -140,6 +140,7 @@ namespace Client
 		TT_PROGRESS,
 
 		TT_BOSSNAME,
+		TT_PLAYERHP,
 
 		END
 	};

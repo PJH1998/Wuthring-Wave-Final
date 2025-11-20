@@ -49,6 +49,7 @@ protected:
 	_uint								m_iNumTextures = {};
 
 	TEXT_UI_DESC						m_tTextDesc = {};
+	_float2								m_vOriginScreenPos = {};
 
 	TEXT_ALIGN_TYPE						m_eTextAlignmentType = TEXT_ALIGN_TYPE::LEFT;
 
