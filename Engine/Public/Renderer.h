@@ -24,6 +24,7 @@ public:
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	ID3D11ShaderResourceView* Get_CurrentSceneSRV() { return m_pCurrentSceneSRV; }
 	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
+	void				SettingSSS(_bool IsOn) { m_IsSSS = IsOn; }
 	void				Setting_LUT(_uint iIndex, _float fIntensity, _bool IsDynamicLUT) { m_iLUT_Index = iIndex, m_fLutLerpIntensity = fIntensity, m_IsDynamicLUT = IsDynamicLUT; }
 	void				Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut);
 	void				Render_ShadowMap();
@@ -82,6 +83,9 @@ private:
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
 	_bool									m_IsFog = { true };
+
+	_bool									m_IsSSS = { false };
+
 #ifdef _DEBUG
 	list<class CComponent*>					m_DebugComponents;
 	_bool									m_isRenderDebug = { true };
@@ -109,6 +113,7 @@ private:
 	void						Render_SSAO();
 	void						Render_Dynamic();
 	void						Render_Light();
+	void						Render_SSS();
 	void						Render_Combined();
 	void						Render_NonLight();
 	void						Render_Emissive();	// 단독 Emissive

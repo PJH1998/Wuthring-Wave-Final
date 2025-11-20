@@ -475,6 +475,20 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_IsSSS = !m_IsSSS;
+		m_pGameInstance->SettingSSS(m_IsSSS);
+	}
+
+
+	ImGui::Begin("SHADER");
+
+	//if (ImGui::CollapsingHeader("SSS"))
+	//{
+	//	ImGui::Checkbox("IsSSS", &m_IsSSS);
+	
+	//}
 	if (ImGui::CollapsingHeader("LUT"))
 	{
 		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
@@ -498,16 +512,17 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
 	}
 
-	if (ImGui::CollapsingHeader("MOTION_BLUR"))
-	{
-		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+	ImGui::End();
+	//if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	//{
+	//	ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
 
-		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+	//	ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
 
-		ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
+	//	ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
 
-		m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
-	}
+	//	m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+	//}
 }
 #endif
 

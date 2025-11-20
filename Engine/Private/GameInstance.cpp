@@ -517,6 +517,10 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
+void CGameInstance::SettingSSS(_bool IsOn)
+{
+	m_pRenderer->SettingSSS(IsOn);
+}
 ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
 	return m_pRenderer->Get_CurrentSceneSRV();
