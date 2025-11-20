@@ -9,6 +9,7 @@
 #include "MotionBlur.h"
 #include "ScreenBlur.h"
 #include "RadialBlur.h"
+#include "SubsurfaceScattering.h"
 
 CSFX_Hub::CSFX_Hub(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -186,6 +187,10 @@ HRESULT CSFX_Hub::Ready_SFX()
 	ASSERT_CRASH(pRadialBlur);
 	m_SFXs.emplace(SFX_TYPE::RADIAL, pRadialBlur);
 
+	CSubsurfaceScattering* pSSS = CSubsurfaceScattering::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
+	ASSERT_CRASH(pSSS);
+	m_SFXs.emplace(SFX_TYPE::SSS, pSSS);
+
 	return S_OK;
 }
 
@@ -266,6 +271,19 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_RadialBlur"), &BlurRCS)))
 		CRASH("Failed Add RCS_MotionBlur");
 #pragma endregion
+
+#pragma region SSS
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSS.hlsl");
+	BlurRCS.strEntryPoint = "SSSBlur_X";
+	BlurRCS.iWidth = m_iWinSizeX;
+	BlurRCS.iHeight = m_iWinSizeY;
+	BlurRCS.iMipLevels = 1;
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSSBlur_X"), &BlurRCS)))
+		CRASH("Failed Add RCS_SSSBlur_X");
+
+	BlurRCS.strEntryPoint = "SSSBlur_Y";
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSSBlur_Y"), &BlurRCS)))
+		CRASH("Failed Add RCS_SSSBlur_Y");
 #pragma endregion
 
 #pragma region DOWNSAMPLE
