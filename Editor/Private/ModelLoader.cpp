@@ -402,7 +402,8 @@ void CModelLoader::Load_File()
 								return;
 							}
 							//_string SaveFilePath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/";
-							_string SaveFilePath = "../../Client/Bin/Resource/Map/Test/";
+							//_string SaveFilePath = "../../Client/Bin/Resource/Map/Test/";
+							_string SaveFilePath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 
 							
 
@@ -422,8 +423,12 @@ void CModelLoader::Load_File()
 								CutPos = FileName.find(".mo");
 							else if (FileName.find(".ao") != string::npos)
 								CutPos = FileName.find(".ao");
-							if (CutPos != std::string::npos)
-								FileName = FileName.substr(0, CutPos);
+							//f (CutPos != std::string::npos)
+							//	FileName = FileName.substr(0, CutPos);
+
+							size_t Ext = FileName.find(".");
+							if (Ext != std::string::npos)
+								FileName = FileName.substr(0, Ext);
 
 							SaveFilePath +=  FileName + ".dat";
 

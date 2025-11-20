@@ -44,6 +44,7 @@ private:
 	_float	m_fLimitDepth = {150.f};
 	_float	m_fLengthScale = {5.f};
 	_bool	m_IsDyanmicLUT = { false };
+	_bool	m_IsSSS = { true };
 #endif
 
 private:

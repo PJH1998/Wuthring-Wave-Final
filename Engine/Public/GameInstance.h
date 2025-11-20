@@ -136,6 +136,7 @@ public:
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	void						Render_ShadowMap();
 	void						SettingFog(_bool IsOn);
+	void						SettingSSS(_bool IsOn);
 	ID3D11ShaderResourceView*	Get_CurrentSceneSRV();
 	void						Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut);
 	void						Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut);
@@ -346,6 +347,12 @@ public:
 #endif
 #pragma endregion
 
+#pragma region RESOURCE_MANAGER
+	void									Load_Resource(const _char* pFolderPath);
+	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
+#pragma endregion
+
+
 public:
 	HRESULT					SetUp_CameraNF();
 	HRESULT					Clear_Resource(_uint iLevelID);
@@ -382,6 +389,7 @@ private:
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+	class CResource_Manager*	m_pResource_Manager = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

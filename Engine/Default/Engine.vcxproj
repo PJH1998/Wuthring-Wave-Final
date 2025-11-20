@@ -88,6 +88,7 @@
     <ClInclude Include="..\Public\Level_Manager.h" />
     <ClInclude Include="..\Public\Light.h" />
     <ClInclude Include="..\Public\Light_Manager.h" />
+    <ClInclude Include="..\Public\Material.h" />
     <ClInclude Include="..\Public\Mesh.h" />
     <ClInclude Include="..\Public\MeshAnim_Instance.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -107,6 +108,7 @@
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
     <ClInclude Include="..\public\RendererSubResource.h" />
+    <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
@@ -132,6 +134,7 @@
     <ClInclude Include="..\Public\Rigidbody.h" />
     <ClInclude Include="..\Public\Shader.h" />
     <ClInclude Include="..\Public\Sound_Manager.h" />
+    <ClInclude Include="..\public\SubsurfaceScattering.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h" />
     <ClInclude Include="..\Public\Timer.h" />
@@ -219,6 +222,7 @@
     <ClCompile Include="..\Private\Level_Manager.cpp" />
     <ClCompile Include="..\Private\Light.cpp" />
     <ClCompile Include="..\Private\Light_Manager.cpp" />
+    <ClCompile Include="..\Private\Material.cpp" />
     <ClCompile Include="..\Private\Mesh.cpp" />
     <ClCompile Include="..\Private\MeshAnim_Instance.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -238,6 +242,7 @@
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
     <ClCompile Include="..\private\RendererSubResource.cpp" />
+    <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />
@@ -263,6 +268,7 @@
     <ClCompile Include="..\Private\Rigidbody.cpp" />
     <ClCompile Include="..\Private\Shader.cpp" />
     <ClCompile Include="..\Private\Sound_Manager.cpp" />
+    <ClCompile Include="..\private\SubsurfaceScattering.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp" />
     <ClCompile Include="..\Private\Timer.cpp" />
@@ -293,6 +299,7 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\..\Client\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_DOF.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_HZB.hlsl" />

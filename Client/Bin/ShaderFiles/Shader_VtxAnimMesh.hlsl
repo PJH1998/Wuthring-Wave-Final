@@ -19,6 +19,7 @@ float g_fFlowRate = 0.f;
 
 matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
+bool g_HasSkinMask = false;
 
 cbuffer GlobalConstants
 {
@@ -99,6 +100,7 @@ struct PS_OUT
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
     float4 vPBR : SV_TARGET5;
+    float4 vSSS : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -176,6 +178,12 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
     
+    if(g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
+    
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
@@ -225,7 +233,11 @@ PS_OUT PS_ROVER(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
@@ -276,7 +288,11 @@ PS_OUT PS_GALBRENA(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
@@ -327,7 +343,11 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
