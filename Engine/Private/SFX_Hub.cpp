@@ -205,7 +205,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	BlurDesc.iHeight = m_iWinSizeY;
 	BlurDesc.fDefinitionX = 16.f;
 	BlurDesc.fDefinitionY = 16.f;
-	BlurDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	BlurDesc.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	BlurDesc.iMipLevels = 1;
 	BlurDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
 
@@ -228,7 +228,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	BlurRCS.iHeight = m_iWinSizeY >> 1;
 	BlurRCS.fDefinitionX = 16.f;
 	BlurRCS.fDefinitionY = 16.f;
-	BlurRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	BlurRCS.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	BlurRCS.iMipLevels = 3;
 	BlurRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
@@ -295,7 +295,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	DownSampleRCS.iHeight = m_iWinSizeY >> 1;
 	DownSampleRCS.fDefinitionX = 16.f;
 	DownSampleRCS.fDefinitionY = 16.f;
-	DownSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	DownSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	DownSampleRCS.iMipLevels = 3;
 	DownSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
@@ -318,7 +318,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	UpSampleRCS.iHeight = m_iWinSizeY;
 	UpSampleRCS.fDefinitionX = 16.f;
 	UpSampleRCS.fDefinitionY = 16.f;
-	UpSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	UpSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	UpSampleRCS.iMipLevels = 3;
 	UpSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 

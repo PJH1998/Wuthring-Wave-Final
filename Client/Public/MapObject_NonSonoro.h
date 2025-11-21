@@ -53,6 +53,8 @@ private:
 	CShader* m_pShadowShaderCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	vector<CModel*>		m_pModelComArray;
+	class CModel_Streaming* m_pModelCom;
+
 	class CGameSystem* m_pGameSystem = { nullptr };
 
 	_uint						m_iShaderPassIndex = {};

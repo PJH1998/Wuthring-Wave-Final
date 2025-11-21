@@ -43,6 +43,23 @@ HRESULT CMaterial::Bind_Resource(CDeferredShader* pShader, const _char* pConstan
 	return pShader->Bind_Textures(pConstantName, &m_SRVs[ENUM_CLASS(eTextureType)].front(), m_SRVs[ENUM_CLASS(eTextureType)].size(), pEffect);
 }
 
+HRESULT CMaterial::Bind_Resource(CShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, _uint iTextureIndex)
+{
+	if (iTextureIndex >= m_SRVs[ENUM_CLASS(eTextureType)].size())
+		return E_FAIL;
+
+	return pShader->Bind_Texture(pConstantName, m_SRVs[ENUM_CLASS(eTextureType)][iTextureIndex]);
+}
+
+
+HRESULT CMaterial::Bind_Resource(CShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType)
+{
+	if (0 == m_SRVs[ENUM_CLASS(eTextureType)].size())
+		return E_FAIL;
+
+	return pShader->Bind_Textures(pConstantName, &m_SRVs[ENUM_CLASS(eTextureType)].front(), m_SRVs[ENUM_CLASS(eTextureType)].size());
+}
+
 HRESULT CMaterial::Clear_Resource(CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
 {
 	if (0 == m_SRVs[ENUM_CLASS(eTextureType)].size())

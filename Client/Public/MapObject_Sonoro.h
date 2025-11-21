@@ -51,6 +51,7 @@ private:
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
 	vector<CModel*>		m_pModelComArray;
+	class CModel_Streaming* m_pModelCom;
 
 	_uint						m_iShaderPassIndex = {};
 	_bool*						m_IsRender = { nullptr };

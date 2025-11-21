@@ -57,8 +57,12 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
-	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-	LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
+
+	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
@@ -485,11 +489,14 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 
 	ImGui::Begin("SHADER");
 
-	//if (ImGui::CollapsingHeader("SSS"))
-	//{
-	//	ImGui::Checkbox("IsSSS", &m_IsSSS);
+	if (ImGui::CollapsingHeader("HDR"))
+	{
+
+		ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
+		
+		m_pGameInstance->SettingHDR(m_fExposure);
 	
-	//}
+	}
 	if (ImGui::CollapsingHeader("LUT"))
 	{
 		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
