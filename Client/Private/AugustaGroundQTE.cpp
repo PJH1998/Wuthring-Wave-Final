@@ -46,6 +46,14 @@ void CAugustaGroundQTE::OnEnter(void* pArg)
 	m_pAugusta->Set_Gravity(true);
 
 	m_pAugusta->Rotate_Target();
+
+
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	// 6. 카메라
+	_bool IsSelect = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	if (IsSelect) // 선택된 캐릭터일때만?
+		m_pAugusta->Bind_QTECamera();
 }
 
 void CAugustaGroundQTE::OnUpdate(_float fTimeDelta)
@@ -70,16 +78,36 @@ void CAugustaGroundQTE::OnExit()
 {
     CGroundState::OnExit();
 	m_pAugusta->Set_Gravity(false);
-	m_pAugusta->Set_QTEEnd(true);
+
+	_bool IsSelect = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
+	if (!IsSelect)
+	{
+		m_pAugusta->Set_QTEEnd(true);
+		m_pAugusta->Bind_ChangeEffect();
+	}
+	else
+	{
+		m_pAugusta->Reset_QTECamera();
+	}
+		
 	// 공격 콜라이더 비활성화
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
+	m_pAugusta->PartActivate(m_iPartType, false); // 파츠 변경. // Volume Activate는 Notify로..
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	
+	
 }
 
 
 
 void CAugustaGroundQTE::Handle_Input()
 {
-	
+	m_States[SELECT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
+	m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey) && m_States[SELECT];
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
@@ -108,13 +136,48 @@ void CAugustaGroundQTE::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
+	if (IsEscapePossible)
+	{
+		if (m_States[MOVE])
+		{
+			if (m_States[LAND])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+				return;
+			}
+			else if (!m_States[LAND])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
+				return;
+			}
+		}
+	}
+
 	// 1. 끝나면 콜백을 호출시켜야함 => Player가 인지하게끔?
 	if (m_IsAnimationEnd)
 	{
-		OnExit();
-		/*m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));*/
-		return;
+		if (m_States[SELECT])
+		{
+			if (m_States[LAND])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+				return;
+			}
+			else if (!m_States[LAND])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
+				return;
+			}
+		}
+		else
+		{
+			OnExit();
+			return;
+		}
 	}
 	
 }

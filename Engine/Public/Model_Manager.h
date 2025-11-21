@@ -56,11 +56,12 @@ public:
 	HRESULT RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
 	//로딩이 완료되면 모델에게 해당 LOD인덱스 모델의 버퍼풀에 해당하는 정보 전달.
 	void RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
+	void SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void LoadData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex, _fmatrix PreMatrix);
 	//m_pModel->Update를 만들어서 각 LOD 단계가 쓰이는지 안쓰이는지 확인하기?
 
 	MODEL_DATA  Acquire_Vector();
-	void		Relase_Vector(vector<MODEL_DATA>& data);
+	void		Release_Vector(vector<MODEL_DATA>& data);
 
 
 	void LoadLastLOD();
@@ -73,6 +74,7 @@ public:
 	_uint Render_ObjectsNum(_uint iLODIndex);
 	void Bind_SharedBuffer(_uint iLODIndex,ID3D11DeviceContext** pDC, _uint iNumThread);
 	void Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
+	void SetUp_Models();
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
@@ -96,8 +98,9 @@ private:
 	//벡터로 데이터 넣는 곳 필요.
 	const _uint m_iCheckPerFrame = { 10 };
 	_double m_fTotalPlayTime = {};
-	list<DELETE_DATA> m_DeleteList;
+	vector<DELETE_DATA> m_DeleteList;
 
+	_uint iCurrentLoadCnt = {};
 public:
 	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void				Free() override;

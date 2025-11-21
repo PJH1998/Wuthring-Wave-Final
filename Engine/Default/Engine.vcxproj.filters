@@ -362,6 +362,27 @@
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance">
       <UniqueIdentifier>{26ac64fc-251f-436e-b528-877d70a68300}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\96. Resource">
+      <UniqueIdentifier>{eaeef1d9-73ac-4384-a436-3538b5a0b152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\96. Resource\Manager">
+      <UniqueIdentifier>{c089c98e-a76d-4dcd-89ef-f6e5749ed7d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Material">
+      <UniqueIdentifier>{d12e14ea-3ebd-47d6-8607-ccec1cf635e1}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="01. Utility\04. Component\ModelAnim_Instance\Animation_Inst">
+      <UniqueIdentifier>{5c49a93a-c744-4a48-a72f-9eb9a1b57be2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance">
+      <UniqueIdentifier>{ea694176-fb29-4956-86f4-868581b42cfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Rect\Instance">
+      <UniqueIdentifier>{295226f9-6a82-4c8a-b5c7-2befd237547d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\SSS">
+      <UniqueIdentifier>{e98527a6-6b5a-432f-8e18-5d7e2048d4fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -739,6 +760,24 @@
     <ClInclude Include="..\Public\ModelAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClInclude>
+	  <ClInclude Include="..\Public\Resource_Manager.h">
+		  <Filter>01. Utility\96. Resource\Manager</Filter>
+	  </ClInclude>
+	  <ClInclude Include="..\Public\Material.h">
+		  <Filter>01. Utility\04. Component\Material</Filter>
+	  </ClInclude>
+    <ClInclude Include="..\Public\Animation_Inst.h">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MeshAnim_Instance.h">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Rect\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SubsurfaceScattering.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1092,6 +1131,24 @@
     <ClCompile Include="..\Private\ModelAnim_Instance.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Resource_Manager.cpp">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Material.cpp">
+      <Filter>01. Utility\04. Component\Material</Filter>
+	</ClCompile>
+    <ClCompile Include="..\Private\Animation_Inst.cpp">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MeshAnim_Instance.cpp">
+      <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Rect\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SubsurfaceScattering.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
@@ -1154,6 +1211,9 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_RadialBlur.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Client\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

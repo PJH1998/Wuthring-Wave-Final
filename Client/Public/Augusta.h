@@ -162,6 +162,8 @@ public:
 	void Sync_Position();
 
 	virtual void Bind_QTE(_bool IsQTE) override;
+	virtual void Reset_QTECamera() override;
+	virtual void Bind_QTECamera() override;
 
 #pragma region 2. NOTIFY
 public:
@@ -214,7 +216,8 @@ private:
 #pragma endregion
 
 
-
+private:
+	void Update_TargetDistance();
 
 
 private:

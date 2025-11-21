@@ -31,6 +31,8 @@ HRESULT CGalbrenaShotGun::Initialize_Clone(void* pArg)
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	m_isActivate = false;
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
@@ -116,7 +118,13 @@ void CGalbrenaShotGun::Render()
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
             CRASH("Ready Diffuse Texture Failed");
 
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		_bool HasNormal = { false };
+
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 
 		// 3. Mask Texture
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
@@ -139,7 +147,13 @@ void CGalbrenaShotGun::Render()
 void CGalbrenaShotGun::Activate(_bool IsActivate)
 {
 	//CProp::Activate(IsActivate);
-	
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // Animation 클리어.
+
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
 	if (true == IsActivate)
 	{
 		Prop_Reset();
@@ -150,9 +164,11 @@ void CGalbrenaShotGun::Activate(_bool IsActivate)
 	if (false == IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, nullptr);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		Bind_DissolveTimer();
-		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
+
+		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
+		
 	}
 }
 

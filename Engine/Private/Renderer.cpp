@@ -200,6 +200,7 @@ void CRenderer::Render()
 	Render_Dynamic();
 
 	Render_Light();
+	Render_SSS();
 	Render_Combined();
 	
 	Render_Outline();
@@ -296,6 +297,18 @@ void CRenderer::Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex)
 	m_CommandLists[iIndex] = pCL;
 }
 
+void CRenderer::Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut)
+{
+	if(nullptr != pOutIndex)
+		*pOutIndex = m_iLUT_Index;
+	
+	if(nullptr != pOutIntensity)
+		*pOutIntensity = m_fLutLerpIntensity;
+
+	if (nullptr != pOutIsDynamicLut)
+		*pOutIsDynamicLut = m_IsDynamicLUT;
+}
+
 void CRenderer::Render_ShadowMap()
 {
 	if (m_ShadowMapObjects.empty())
@@ -353,11 +366,12 @@ void CRenderer::Render_LOD(_uint iLODIndex)
 				});
 		}
 		*/
+
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
 	// Static Object Render
-	//for (_uint iLOD = 0; iLOD < 4; ++iLOD)
-	_uint iLOD = 0;
+	for (_uint iLOD = 0; iLOD < 4; ++iLOD)
+	//_uint iLOD = 0;
 	{
 		size_t iNumObjects = max(1, m_StaticObjects[iReadIndex][iLOD].size() / m_iNumThread);
 		for (_uint i = 0; i < m_iNumThread; ++i)
@@ -412,6 +426,123 @@ void CRenderer::Render_LOD(_uint iLODIndex)
 		}
 	}
 
+}
+
+void CRenderer::Render_LOD_Weight()
+{
+	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+
+
+	const _float fLODWeights[4] = { 3.f,2.f,1.f,0.5f };
+
+	_float dTotalRenderCost = 0.f;
+	_float dLODCost[4] = { 0.f };
+
+	_uint iAssignedThreads[4] = { 0 };
+	_uint iUsedThreads = { 0 };
+	for (_uint i = 0; i < 4; ++i)
+	{
+		size_t ObjCnt = m_StaticObjects[iReadIndex][i].size();
+		if (ObjCnt > 0)
+		{
+			dLODCost[i] = static_cast<_float>(ObjCnt) * fLODWeights[i];
+			dTotalRenderCost += dLODCost[i];
+		}
+	}
+	if (dTotalRenderCost == 0.f)
+		return;
+
+	for (_uint i = 0; i < 4; ++i)
+	{
+		if (dLODCost[i] > 0)
+		{
+			_float RenderRatio = dLODCost[i] / dTotalRenderCost;
+
+			_uint ThreadCnt = (RenderRatio * m_iNumThread);
+			if (ThreadCnt == 0 && m_StaticObjects[iReadIndex][i].size() > 0)
+				ThreadCnt = 1;
+			iAssignedThreads[i] = ThreadCnt;
+			iUsedThreads += ThreadCnt;
+		}
+	}
+
+	if (iUsedThreads < m_iNumThread && m_StaticObjects[iReadIndex][0].size() > 0)
+	{
+		iAssignedThreads[0] += (m_iNumThread - iUsedThreads);
+	}
+
+
+	_uint iGlobalThreadIdx = 0;
+
+	m_iNumEndThread.store(0);
+
+	for (_uint iLOD = 0; iLOD < 4; ++iLOD)
+	{
+		_uint iThreadCntForThisLOD = iAssignedThreads[iLOD];
+
+		_uint iTotalObjects = m_StaticObjects[iReadIndex][iLOD].size();
+		_uint iNumObjPerThread = max(1, iTotalObjects / max(1, iThreadCntForThisLOD));
+
+		for (_uint i = 0; i < iThreadCntForThisLOD; ++i)
+		{
+			if (iGlobalThreadIdx >= m_iNumThread)
+				break;
+
+			_uint iStartIndex = i * iNumObjPerThread;
+			_uint iEndIndex = min((i + 1) * iNumObjPerThread, iTotalObjects);
+
+			if (i == iThreadCntForThisLOD - 1)
+				iEndIndex = iTotalObjects;
+
+			_float fPlayTime = m_pGameInstance->Get_PlayTime();
+
+			if (iStartIndex < iEndIndex)
+			{
+				m_pGameInstance->Add_Render_Work([this, iLOD, iStartIndex, iEndIndex, iReadIndex, iGlobalThreadIdx, fPlayTime]() {
+					auto pDC = m_pDeferredContext[iGlobalThreadIdx];
+					pDC->ClearState();
+					Setting_Viewport(pDC, m_fWinSizeX, m_fWinSizeY);
+					m_pGameInstance->SetUp_MRT(pDC, TEXT("MRT_Object"));
+					m_pGameInstance->Bind_SharedBuffer(iLOD, pDC);
+
+					for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
+					{
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Set_LOD(iLOD);
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Render(pDC, iGlobalThreadIdx);
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Set_RenderTime(iLOD, fPlayTime);
+					}
+
+
+					ID3D11CommandList* pCL = nullptr;
+					pDC->FinishCommandList(false, &pCL);
+					Merge_CommandList(pCL, iGlobalThreadIdx);
+					{
+						lock_guard<mutex> lock(m_RenderAddMutex);
+						m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+						m_CV.notify_one();
+					}
+					});
+				iGlobalThreadIdx++;
+			}
+		}
+	}
+
+	if (iGlobalThreadIdx > 0)
+	{
+		unique_lock<mutex> lock(m_RenderAddMutex);
+		m_CV.wait(lock, [&]() { return m_iNumEndThread.load() == iGlobalThreadIdx; });
+	}
+
+	for (_uint i = 0; i < iGlobalThreadIdx; ++i)
+	{
+		// 1차원 배열로 관리한다고 가정 (Merge_CommandList 수정 필요할 수 있음)
+		if (m_CommandLists[i])
+		{
+			m_pContext->ExecuteCommandList(m_CommandLists[i], true);
+			Safe_Release(m_CommandLists[i]);
+			m_CommandLists[i] = nullptr;
+		}
+	}
 }
 
 void CRenderer::Clear_Resource()
@@ -512,26 +643,8 @@ void CRenderer::Render_Static()
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
-	Render_LOD(0);
-	//Render_LOD(1);
-	//Render_LOD(2);
-	//Render_LOD(3);
-
-	//{
-	//	unique_lock<mutex> lock(m_RenderAddMutex);
-	//	m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
-	//	m_iNumEndThread.store(0, memory_order_release);
-	//}
-	//// CommandLists Execute
-	//for (auto& pCL : m_CommandLists)
-	//{
-	//	if (nullptr != pCL)
-	//	{
-	//		m_pContext->ExecuteCommandList(pCL, true);
-	//		Safe_Release(pCL);
-	//	}
-	//}
-
+	//Render_LOD(0);
+	Render_LOD_Weight();
 	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
@@ -539,15 +652,15 @@ void CRenderer::Render_Static()
 			pObjects.clear();
 		//m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
-		for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
-			m_pGameInstance->Occlusion_Culling(pObjects);
+		//for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
+		//	m_pGameInstance->Occlusion_Culling(pObjects);
 		//m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
 		m_iCullStack.exchange(0, memory_order_release);
 		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
 
 	m_pGameInstance->Clear_BufferPool();
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
+	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 
 	m_pGameInstance->End_MRT();
 }
@@ -642,13 +755,33 @@ void CRenderer::Render_Light()
 	m_pGameInstance->End_MRT();
 }
 
+void CRenderer::Render_SSS()
+{
+	if (false == m_IsSSS)
+		return;
+
+	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::SSS, m_pVIBuffer, m_pShader)))
+		return;
+}
+
 void CRenderer::Render_Combined()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightAcc"), m_pShader, "g_LightAccTexture")))
-		CRASH("Render Fail")
+	ID3D11ShaderResourceView* pDiffuse = m_IsSSS ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSSBlur_Y")) : m_pGameInstance->Get_RT_SRV(TEXT("RT_LightDiffuse"));
+
+	if (FAILED(m_pShader->Bind_Texture("g_LightDiffuseTexture", pDiffuse)))
+		CRASH("Render Fail");
+
+	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightDiffuse"), m_pShader, "g_LightDiffuseTexture")))
+	//	CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightSpecular"), m_pShader, "g_LightSpecularTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightAmbient"), m_pShader, "g_LightAmbientTexture")))
+		CRASH("Render Fail");
 
 	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO_BLUR_Y"), m_pShader, "g_SsaoTexture")))
 		CRASH("Failed Bind_SsaoTexture");
@@ -703,11 +836,15 @@ void CRenderer::Render_LUT()
 
 	if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
 		CRASH("Failed Bind CurrentScene");
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
-	//	CRASH("Failed Bind RT_Backbuffer");
-
+	
 	if (FAILED(m_pSubResource->Bind_LUT_Texture(m_pShader, m_iLUT_Index)))
 		return;
+
+	if (FAILED(m_pShader->Bind_Value("g_fLutLerpIntensity", &m_fLutLerpIntensity, sizeof(_float))))
+		CRASH("Failed to Bind LutIntensity");
+
+	if(FAILED(m_pShader->Bind_Value("g_IsDynamicLUT", &m_IsDynamicLUT, sizeof(_bool))))
+		CRASH("Failed to Bind IsDynamicLUT");
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::LUT));
 
@@ -856,7 +993,7 @@ void CRenderer::Render_ScreenEffect()
 	if(SUCCEEDED(m_pGameInstance->Render_SFX_Toggle(m_pVIBuffer, m_pShader)))
 		m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 		
-	if (m_RenderObjects[ENUM_CLASS(RENDERGROUP::POST_SFX)].empty())
+	if (m_RenderObjects[ENUM_CLASS(RENDERGROUP::POST_SFX)].empty())		// 없을 시 그냥 Draw
 	{
 		//Combined
 		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pCurrentSceneSRV)))
@@ -869,7 +1006,7 @@ void CRenderer::Render_ScreenEffect()
 	}
 	else
 	{
-		Render_ObjectList(ENUM_CLASS(RENDERGROUP::POST_SFX));
+		Render_ObjectList(ENUM_CLASS(RENDERGROUP::POST_SFX));			// 반 드 시 CurrentSceneSRV 받아서 그릴것..!
 	}
 }
 
@@ -973,10 +1110,6 @@ HRESULT CRenderer::Ready_RT()
 	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_PBR"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
-	/* RenderTarget Light */
-	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAcc"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f ,0.f, 0.f, 0.f))))
-		ASSERT_CRASH(false);
-
 	/* RenderTarget Back_Buffer */
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BackBuffer"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
@@ -1013,6 +1146,23 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SFX"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
+	/* RenderTarget SSS */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSS"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	/* RenderTarget LightDiffuse */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDiffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	/* RenderTarget LightSpecular */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightSpecular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	/* RenderTarget LightAmbient */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAmbient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+
 
 #ifdef _DEBUG
 	/* RenderTarget Debug */
@@ -1037,11 +1187,16 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
-
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_SSS"))))
+		ASSERT_CRASH(false);
 #pragma endregion
 
 #pragma region MRT_LIGHT
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_LightAcc"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_LightDiffuse"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_LightSpecular"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_LightAmbient"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

@@ -15,6 +15,8 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
     SetUp_Animations();
 
 	// 매핑.
+	m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
     return S_OK;
 }
@@ -39,6 +41,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 
     // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "";
@@ -59,7 +62,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			{
 				m_iSubPartType = CAugusta::PARTTYPE::PART_GRIFFON;
 				m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Root");
-				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+				//m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
@@ -236,7 +239,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 		
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
-			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
+			m_PartsAnimations.at(m_Animations[m_iCurrentAnimIdx].strAnimName),
 			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true,false
 		);
 	}

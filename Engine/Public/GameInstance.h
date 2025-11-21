@@ -136,10 +136,12 @@ public:
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
-	void						Set_LUT_Index(_uint iIndex);
 	void						Render_ShadowMap();
 	void						SettingFog(_bool IsOn);
-	ID3D11ShaderResourceView* Get_CurrentSceneSRV();
+	void						SettingSSS(_bool IsOn);
+	ID3D11ShaderResourceView*	Get_CurrentSceneSRV();
+	void						Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut);
+	void						Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut);
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
@@ -282,6 +284,7 @@ public:
 	void				Clear_RootUI();
 #pragma endregion
 
+
 #pragma region RCS_MANAGER
 	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
@@ -343,6 +346,7 @@ public:
 	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
 	void						RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
 	void						Clear_BufferPool();
+	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 #pragma endregion
 
 
@@ -361,6 +365,12 @@ public:
 	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
 #endif
 #pragma endregion
+
+#pragma region RESOURCE_MANAGER
+	void									Load_Resource(const _char* pFolderPath);
+	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
+#pragma endregion
+
 
 public:
 	HRESULT					SetUp_CameraNF();
@@ -399,6 +409,7 @@ private:
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+	class CResource_Manager*	m_pResource_Manager = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

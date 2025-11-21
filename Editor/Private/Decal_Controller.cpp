@@ -276,6 +276,11 @@ void CDecal_Controller::Decal_Tab()
 						m_pSelectedDecalDesc->wstrDecalTag = StringToWString(m_DecalData[m_iSelectedDacalData]);
 					}
 
+					if(ImGui::Button("Create Base"))
+					{
+						m_IsDecalDataFlag = true;
+					}
+
                     ImGui::Checkbox("Root", &(m_pSelectedDecalDesc->IsRootOn));
 
                     ImGui::Text("LifeTime");
@@ -375,6 +380,17 @@ void CDecal_Controller::DecalData_Base_Tab()
 		if (ImGui::InputText("DecalData", m_DecalDataTag, IM_ARRAYSIZE(m_DecalDataTag), ImGuiInputTextFlags_EnterReturnsTrue))
 			m_bDataTagFlag = true;
 
+		if (ImGui::Checkbox("MaskEmissive", &m_bMaskEmissive))
+		{
+			if (m_bMaskEmissive)
+				m_bDiffuseEmissive = false;
+		}
+		if (ImGui::Checkbox("DiffuseEmissive", &m_bDiffuseEmissive))
+		{
+			if (m_bDiffuseEmissive)
+				m_bMaskEmissive = false;
+		}
+
 		ImGui::Text("EmissiveLuminance");
 		ImGui::PushItemWidth(60);
 		ImGui::InputFloat("##EmissiveLuminanceX", &(m_EmissiveLuminance.x));
@@ -452,6 +468,7 @@ void CDecal_Controller::DecalData_Base_Tab()
 				_tchar szDiffuse[MAX_PATH] = {};
 				_tchar szMask[MAX_PATH] = {};
 				_tchar szNormal[MAX_PATH] = {};
+				_tchar szEmissive[MAX_PATH] = {};
 				const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 				DECAL_DATADESC DataDesc = {};
 
@@ -467,8 +484,6 @@ void CDecal_Controller::DecalData_Base_Tab()
 
 					DataDesc.TextureDesc.push_back(TextureDesc);
 
-					m_iSelectedDiffuseTexture = -1;
-
 					wcscpy_s(szDiffuse, TextureDesc.TexturePath.c_str());
 					DecalTexturePath[ENUM_CLASS(TEXTURETYPE::DIFFUSE)] = szDiffuse;
 				}
@@ -481,8 +496,6 @@ void CDecal_Controller::DecalData_Base_Tab()
 
 					DataDesc.TextureDesc.push_back(TextureDesc);
 
-					m_iSelectedMaskTexture = -1;
-
 					wcscpy_s(szMask, TextureDesc.TexturePath.c_str());
 					DecalTexturePath[ENUM_CLASS(TEXTURETYPE::MASK)] = szMask;
 				}
@@ -490,15 +503,29 @@ void CDecal_Controller::DecalData_Base_Tab()
 				if (m_iSelectedNormalTexture >= 0)
 				{
 					TEXTURE_DESC TextureDesc = {};
-					TextureDesc.eType = TEXTURETYPE::MASK;
+					TextureDesc.eType = TEXTURETYPE::NORMAL;
 					TextureDesc.TexturePath = StringToWString(m_NormalTextures[m_iSelectedNormalTexture].strTexturePath);
 
 					DataDesc.TextureDesc.push_back(TextureDesc);
 
-					m_iSelectedNormalTexture = -1;
-
 					wcscpy_s(szNormal, TextureDesc.TexturePath.c_str());
 					DecalTexturePath[ENUM_CLASS(TEXTURETYPE::NORMAL)] = szNormal;
+				}
+
+				if (m_bMaskEmissive || m_bDiffuseEmissive)
+				{
+					TEXTURE_DESC TextureDesc = {};
+					TextureDesc.eType = TEXTURETYPE::EMISSIVE;
+
+					if(m_bMaskEmissive)
+						TextureDesc.TexturePath = StringToWString(m_MaskTextures[m_iSelectedMaskTexture].strTexturePath);
+					else
+						TextureDesc.TexturePath = StringToWString(m_DiffuseTextures[m_iSelectedDiffuseTexture].strTexturePath);
+
+					DataDesc.TextureDesc.push_back(TextureDesc);
+
+					wcscpy_s(szEmissive, TextureDesc.TexturePath.c_str());
+					DecalTexturePath[ENUM_CLASS(TEXTURETYPE::EMISSIVE)] = szEmissive;
 				}
 
 				m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath, m_EmissiveLuminance);
@@ -518,6 +545,12 @@ void CDecal_Controller::DecalData_Base_Tab()
 				m_IsDecalDataFlag = false;
 
 				m_EmissiveLuminance = _float3(0.f, 0.f, 0.f);
+				m_bDiffuseEmissive = false;
+				m_bMaskEmissive = false;
+
+				m_iSelectedNormalTexture = -1;
+				m_iSelectedMaskTexture = -1;
+				m_iSelectedDiffuseTexture = -1;
             }
         }
         ImGui::End();

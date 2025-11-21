@@ -33,9 +33,10 @@ private:
         SKILL_R,
 
 		SPRINT_F,
+		DEFAULT_E,
 		BURST,
 		BURST_E,
-		DEFAULT_E,
+		BURST_ATTACK,
 		ULTI,
 
 		// 소모값 없음 => 쿨타임 존재.

@@ -32,12 +32,12 @@ private:
 
 	_uint			m_iAnimOrder = 0;
 
-	class CGameSystem* m_pGameSystem = { nullptr };
+	class CGameSystem*	m_pGameSystem = { nullptr };
 
 public:
 	static CUI_Button_Interact* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual CGameObject*	Clone(void* pArg) override;
-	virtual void            Free() override;
+	virtual CGameObject*		Clone(void* pArg) override;
+	virtual void				Free() override;
 };
 
 NS_END

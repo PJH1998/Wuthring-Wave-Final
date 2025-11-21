@@ -285,6 +285,16 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
 				Load_FXDecal_FromJson(DecalPath, FrameDesc.strChildrenTag);
 			}
+
+			if (FrameDesc.eChildrenType == EFFECT_TYPE::RADIAL)
+			{
+				_string RadialPath = strFolderPath;
+				RadialPath += "/FXRadial/";
+				RadialPath += WStringToString(FrameDesc.strChildrenTag);
+				RadialPath += ".json";
+
+				Load_FXRadial_FromJson(RadialPath, FrameDesc.strChildrenTag);
+			}
         }
     }
 
@@ -897,6 +907,48 @@ void CLoad_Controller::Load_FXDecal_FromJson(const _string& strFilePath, const _
 
 }
 
+void CLoad_Controller::Load_FXRadial_FromJson(const _string& strFilePath, const _wstring& RadialTag)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json RadialJson;
+	JsonStream >> RadialJson;
+	JsonStream.close();
+
+	CEffect_Radial::RADIAL_DESC Desc = {};
+
+	if (RadialJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(RadialJson["MyTag"].get<_string>());
+
+	if (RadialJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(RadialJson["MyType"].get<double>());
+
+	if(RadialJson.contains("LifeTime"))
+		Desc.fLifeTime = RadialJson["LifeTime"].get<_float>();
+
+	if (RadialJson.contains("IntensityRange"))
+		Desc.IntensityRange = RadialJson["IntensityRange"].get<_float>();
+
+	if (RadialJson.contains("Center") && RadialJson["Center"].is_array())
+	{
+		json CenterJson = RadialJson["Center"];
+		Desc.Center.x = CenterJson[0].get<_float>();
+		Desc.Center.y = CenterJson[1].get<_float>();
+	}
+
+	if (RadialJson.contains("DistanceRange") && RadialJson["DistanceRange"].is_array())
+	{
+		json DistanceRangeJson = RadialJson["DistanceRange"];
+		Desc.DistanceRange.x = DistanceRangeJson[0].get<_float>();
+		Desc.DistanceRange.y = DistanceRangeJson[1].get<_float>();
+	}
+
+	m_tRadialDesc.emplace(RadialTag, Desc);
+}
+
 void CLoad_Controller::Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc)
 {
     PrefabDesc = m_tPrefabDesc;
@@ -958,6 +1010,14 @@ void CLoad_Controller::Get_FXDecal_Desc(const _wstring& DecalTag, CEffect_Decal:
 		DecalDesc = iter->second;
 }
 
+void CLoad_Controller::Get_FXRadial_Desc(const _wstring& RadialTag, CEffect_Radial::RADIAL_DESC& RadialDesc)
+{
+	auto iter = m_tRadialDesc.find(RadialTag);
+
+	if (iter != m_tRadialDesc.end())
+		RadialDesc = iter->second;
+}
+
 void CLoad_Controller::Reset_Load()
 {
     m_tEffectMeshDesc.clear();
@@ -967,6 +1027,7 @@ void CLoad_Controller::Reset_Load()
     m_tTrailMeshDesc.clear();
 	m_tRectDesc.clear();
 	m_tDecalDesc.clear();
+	m_tRadialDesc.clear();
 
     CEffect_Prefab::PREFAB_DESC Desc = {};
     m_tPrefabDesc = Desc;

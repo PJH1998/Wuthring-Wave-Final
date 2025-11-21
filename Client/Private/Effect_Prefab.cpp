@@ -221,6 +221,13 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
 		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
 		break;
 
+	case EFFECT_TYPE::RADIAL:
+		strChildrenProtoTag += TEXT("FXRadial_");
+		strChildrenProtoTag += strChildrenNameTag;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+		break;
+
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
         break;

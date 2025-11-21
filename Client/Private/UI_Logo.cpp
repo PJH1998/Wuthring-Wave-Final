@@ -76,6 +76,9 @@ HRESULT CUI_Logo::Initialize_Clone(void* pArg)
 	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(pBackLogoUI->Get_Component(L"Com_Animator_UI"));
 	pAnimator_BackLogo->Change_Animation(L"Logo_AB_Initialize");
 
+	m_isClone = true;
+	m_pGameInstance->Add_RootUI(L"UI_Logo", this);
+
 	return S_OK;
 }
 
@@ -91,14 +94,15 @@ void CUI_Logo::Update(_float fTimeDelta)
 
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
 }
 
 void CUI_Logo::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
@@ -214,6 +218,9 @@ CGameObject* CUI_Logo::Clone(void* pArg)
 
 void CUI_Logo::Free()
 {
+	if (m_isClone)
+		m_pGameInstance->Remove_RootUI(L"UI_Logo");
+
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
 

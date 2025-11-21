@@ -114,7 +114,7 @@ void CAugustaGroundRun::Handle_Input()
 	if (m_States[SKILL_R])
 		m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Burst01")); // 궁극기 R스킬(검뽑는거)
 	
-	m_States[ECHO_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // Echo 궁극기. (기본 궁극기)
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // Echo 궁극기. (기본 궁극기)
 	
 
     // DASH보다 우선순위 높음.
@@ -240,7 +240,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
     }
-	if (m_States[ECHO_R])
+	if (m_States[ULTI])
 	{
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Attack_SpeedDrive"))
 			return;

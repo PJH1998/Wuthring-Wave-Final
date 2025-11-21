@@ -33,6 +33,13 @@ public:
 
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
+
+	void				Attach_LockOnUI(_float3* pTargetPos);
+	void				Detach_LockOnUI();
+
+	void				Attach_Parry(_float3* pTargetPos);
+	void				Enable_Parried();
+
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };

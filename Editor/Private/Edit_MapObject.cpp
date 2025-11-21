@@ -807,7 +807,8 @@ void CEdit_MapObject::About_Texture()
         //config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
 
         //When Many Model Need Same texture, use this
-        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Obj/Tex";
+        //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Obj/Tex";
+        config.path = "C:/Hilde/Wuthering_Wave_Final/Client/Bin/Resource/Map/Test/Heaven_Tex";
         //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/";
 
         for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)

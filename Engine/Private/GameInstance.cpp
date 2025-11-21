@@ -32,6 +32,7 @@
 
 #include"Model_Manager.h"
 #include "SFX_Hub.h"
+#include "Resource_Manager.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -137,6 +138,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pSFX_Hub);
+	m_pResource_Manager = CResource_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pResource_Manager);
 
 	return S_OK;
 }
@@ -397,7 +400,7 @@ HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
 }
-HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+ HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
@@ -526,13 +529,21 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
+void CGameInstance::SettingSSS(_bool IsOn)
+{
+	m_pRenderer->SettingSSS(IsOn);
+}
 ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
 	return m_pRenderer->Get_CurrentSceneSRV();
 }
-void CGameInstance::Set_LUT_Index(_uint iIndex)
+void CGameInstance::Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut)
 {
-	m_pRenderer->Set_LUT_Index(iIndex);
+	m_pRenderer->Get_Current_LutSetting(pOutIndex, pOutIntensity, pOutIsDnyamicLut);
+}
+void CGameInstance::Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut)
+{
+	m_pRenderer->Setting_LUT(iIndex, fLutLerpIntensity, IsDynamicLut);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
@@ -1072,6 +1083,11 @@ void CGameInstance::Clear_BufferPool()
 	m_pModel_Manager->Clear_BufferPool();
 }
 
+void CGameInstance::SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex)
+{
+	m_pModel_Manager->SetUp_Data(pModel, pFilePath, iLODIndex);
+}
+
 #pragma region SFX_HUB
 HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
@@ -1108,6 +1124,18 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 }
 #endif
 #pragma endregion
+
+#pragma region RESOURCE_MANAGER
+void CGameInstance::Load_Resource(const _char* pFolderPath)
+{
+	m_pResource_Manager->Load_Resource(pFolderPath);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResourceTag)
+{
+	return m_pResource_Manager->Get_Resource(strResourceTag);
+}
+#pragma endregion
+
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {
@@ -1161,6 +1189,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pFont_Manager);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 
+	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
@@ -1185,9 +1214,9 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
-	Safe_Release(m_pGraphic_Device);
 	Safe_Release(m_pModel_Manager);
-
+	
+	Safe_Release(m_pGraphic_Device);
 	Release();
 }
 

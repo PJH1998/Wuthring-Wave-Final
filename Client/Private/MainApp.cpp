@@ -220,6 +220,7 @@ void CMainApp::Ready_Event()
 
 void CMainApp::Ready_Prototype_ForStatic()
 {
+#pragma region SHADER
 	// Shader_VtxMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
@@ -240,7 +241,6 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPropAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Shader_VtxAnimMesh");
 
-
 	// Shader_VtxPropAnimMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
@@ -250,28 +250,53 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPosTex"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_UI_VtxPosTex");
-	
+
 	// Shader_VtxSkyBox
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxSkyBox"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
 		CRASH("Shader_VtxSkyBox");
-		
+
 	// Shader_VtxArrow
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxArrow"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Arrow.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
 		CRASH("Shader_VtxMesh");
 
-	// Shader_SFX
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ScreenEffect"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ScreenEffect.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+	// Shader_VtxInstance_PointParticle
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements))))
+		CRASH("Shader_VtxInstance_PointParticle");
+
+	//Shader_VtxTrailMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxTrailMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxTrailMesh");
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxFXRect"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxFXRect.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
+
+	// Shader_SFX_Sonora
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Sonora"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_SFX_Sonora.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_ScreenEffect");
 
+	// Shader_SFX_AugustaUlti
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_SFX_Burst.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_ScreenEffect");
 
+	// Shader_SFX_GalbrenaUlti_Instance
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_SFX_Burst_Instance.hlsl"), VTXRECTINSTANCE::Elements, VTXRECTINSTANCE::iNumElements))))
+		CRASH("Shader_ScreenEffect");
+
+#pragma endregion
+
+#pragma region COMPUTE_SHADER
 	SHADER_MACRO eShaderMacro = {
-		{"THREAD_X", "64" }
-		,{"THREAD_Y", "1" }
-		,{"THREAD_Z", "1" }
-		, { NULL, NULL }
+	{"THREAD_X", "64" }
+	,{"THREAD_Y", "1" }
+	,{"THREAD_Z", "1" }
+	, { NULL, NULL }
 	};
 	string strEntryPoint = "CSMain";
 
@@ -279,7 +304,6 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute AnimMesh Shader");
-
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"),
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshFly.hlsl")
@@ -291,6 +315,19 @@ void CMainApp::Ready_Prototype_ForStatic()
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute NonRibAnimMesh Shader");
 
+	//Shader_ComputeShader_Particle
+	SHADER_MACRO eShaderMacroParticle = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
+	string strEntryParticle = "main";
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
+#pragma endregion
+
+#pragma region COLLIDER
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))
@@ -300,6 +337,19 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		CCollider::Create(m_pDevice, m_pContext))))
 		CRASH("Collider");
+#pragma endregion
+
+#pragma region VIBUFFER
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
+		CVIBuffer_Point::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		CVIBuffer_Rect::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect_Instance"),
+		CVIBuffer_Rect_Instance::Create(m_pDevice, m_pContext, 10));
+#pragma endregion
+
 
 	_fmatrix PreMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Model_Wolf"),
@@ -325,38 +375,6 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
 		CEffect_Prefab::Create(m_pDevice, m_pContext))))
 		CRASH("Prefab");
-
-	// Shader_VtxInstance_PointParticle
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements))))
-		CRASH("Shader_VtxInstance_PointParticle");
-
-	//Shader_VtxTrailMesh
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxTrailMesh"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
-		CRASH("Shader_VtxTrailMesh");
-
-
-
-	//Shader_ComputeShader_Particle
-	SHADER_MACRO eShaderMacroParticle = {
-		{"THREAD_X", "64" }
-		,{"THREAD_Y", "1" }
-		,{"THREAD_Z", "1" }
-		, { NULL, NULL }
-	};
-	string strEntryParticle = "main";
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
-		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
-
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxFXRect"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxFXRect.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
-
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
-		CVIBuffer_Point::Create(m_pDevice, m_pContext));
-
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
-		CVIBuffer_Rect::Create(m_pDevice, m_pContext));
 
 	// Ability 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Ability"),

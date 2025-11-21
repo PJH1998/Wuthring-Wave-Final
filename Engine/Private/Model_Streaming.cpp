@@ -2,6 +2,7 @@
 #include"Model_Streaming.h"
 #include"MeshMaterial.h"
 #include"GameInstance.h"
+#include"Material.h"
 
 CModel_Streaming::CModel_Streaming(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CComponent(pDevice, pContext)
@@ -49,7 +50,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
+	//return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
 }
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType)
@@ -57,7 +58,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
+	//return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
 }
 
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
@@ -120,11 +121,11 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex, ID3D11Device
 	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
 		m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
 
-	if (m_pModelPrototype->m_Meshes[m_iMaxLOD]->Is_Overed(iMeshIndex))
-		return S_OK;
+	//if (m_pModelPrototype->m_Meshes[m_iMaxLOD]->Is_Overed(iMeshIndex))
+	//	return S_OK;
 
-	m_pModelPrototype->m_Meshes[m_iMaxLOD]->Bind_Resources(iMeshIndex, pDC);
-	m_pModelPrototype->m_Meshes[m_iMaxLOD]->Render(iMeshIndex, pDC);
+	//m_pModelPrototype->m_Meshes[m_iMaxLOD]->Bind_Resources(iMeshIndex, pDC);
+	//m_pModelPrototype->m_Meshes[m_iMaxLOD]->Render(iMeshIndex, pDC);
 	return S_OK;
 }
 
@@ -140,9 +141,10 @@ vector<CModel_Manager::SHARED_DATA_DESC>* CModel_Streaming::Get_MeshDesc(_uint i
 	return vector;
 }
 
-void CModel_Streaming::RequestLastLODModel()
+void CModel_Streaming::RequestModel(_uint iLODIndex)
 {
-	m_pGameInstance->RequestData(this, m_ModelPath, m_iMaxLOD);
+	m_pGameInstance->SetUp_Data(this, m_ModelPath, 0);
+	//m_pGameInstance->SetUp_Data(this, m_ModelPath, m_iMaxLOD);
 }
 
 _bool CModel_Streaming::Is_RenderTimeOver(_uint iLODIndex)
@@ -216,7 +218,7 @@ HRESULT CModel_Streaming::Ready_Material()
 
 	for (auto& MaterialData : MaterialsData["Materials"])
 	{
-		CMeshMaterial* pMeshMaterial = CMeshMaterial::Create(m_pDevice, m_pContext, szMaterialFilePath, MaterialData);
+		CMaterial* pMeshMaterial = CMaterial::Create(m_pDevice, m_pContext, MaterialData);
 		if (nullptr == pMeshMaterial)
 			return E_FAIL;
 

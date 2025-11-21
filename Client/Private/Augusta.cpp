@@ -92,18 +92,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	m_pTransformCom->Save_PreviousPosition();
 
 	// 4. 몬스터가 있다면?
-	if (nullptr != m_pTargetTransform)
-	{
-		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
-		vDistance = XMVectorSetY(vDistance, 0.f);
-		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
-	}
+	Update_TargetDistance();
 	
-	// 5. MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
-
-	// 6. Change Timer 계산. => Dissolve에 사용
+	// 5. Change Timer 계산. => Dissolve에 사용
 	Calc_ChangeTimer(fTimeDelta);
 
 	
@@ -213,8 +204,15 @@ void CAugusta::Render()
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
 
+		_bool HasMask = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			HasMask = true;
+
 		if(FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
+			CRASH("Ready g_HasSkinMask Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -291,11 +289,33 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 	// 애니메이션 변경할 값.
 	switch (eTransitionType)
 	{
-	case CHARACTER_TRANSITIONTYPE::IDLE:
-		GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-		break;
+		case CHARACTER_TRANSITIONTYPE::IDLE:
+		{
+			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+			break;
+		}
+		
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+			// 내 앞에서 생성. (안 곂치게)
+			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+
+			vPos += vLook * -1.f;
+			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
+			m_pColliderCom->Set_Position(vPos);
+			m_pColliderCom->IsActivate(true);
+
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+
+			GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
+			break;
+		}
 	}
+	
 	// 상태 변수 초기화
 	m_StateContext.Clear();
 
@@ -460,7 +480,7 @@ void CAugusta::Hit_Judge(void* pArg)
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
 	m_fDodgeableHitTimer = m_fDodgeableDuration;
 
-
+	
 	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
 	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 	if (!IsAttack)
@@ -521,6 +541,17 @@ void CAugusta::Bind_QTE(_bool IsQTE)
 		GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
 	}
+}
+
+void CAugusta::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CAugusta::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
 
@@ -878,6 +909,25 @@ void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 	}
 }
+
+void CAugusta::Update_TargetDistance()
+{
+	const _float4x4* pTargetMatrix = nullptr;
+
+	_vector vTargetPos = {};
+
+	// LockOn Target 우선
+	if (nullptr != m_pLockOnTargetTransform)
+		vTargetPos = m_pLockOnTargetTransform->Get_State(STATE::POSITION);
+	// 없으면 Target Transform.
+	else if (nullptr != m_pTargetTransform)
+		vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION);
+
+	// 거리 계산. Y제외.
+	_vector vDistance = m_pTransformCom->Get_State(STATE::POSITION) - vTargetPos;
+	vDistance = XMVectorSetY(vDistance, 0.f);
+	m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+}
 #pragma endregion
 
 
@@ -1101,6 +1151,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(6.f, 6.f, 2.f); // y작게? x, z 평면 크게.
+	TriggerDesc.eDir = ATTACKVOULME_DIR::UPPER;
 	m_AttackVolumes[VOLUME_HACKDOWN] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

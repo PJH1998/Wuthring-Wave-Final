@@ -25,6 +25,7 @@
 #include "AnimMachine.h"
 #include "VIBuffer_Spectrum.h"
 #include"Model_Streaming.h"
+#include "VIBuffer_Rect_Instance.h"
 // ==================
 
 NS_BEGIN(Engine)

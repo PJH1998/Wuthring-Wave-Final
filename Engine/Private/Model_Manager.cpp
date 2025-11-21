@@ -9,7 +9,7 @@ CModel_Manager::CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 {
 	Safe_AddRef(m_pDevice);
 	Safe_AddRef(m_pContext); 
-		Safe_AddRef(m_pGameInstance);
+	Safe_AddRef(m_pGameInstance);
 }
 
 HRESULT CModel_Manager::Initialize()
@@ -40,20 +40,21 @@ HRESULT CModel_Manager::Initialize()
 void CModel_Manager::Update(_float fTimeDelta)
 {
 	m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
-
-	auto DeleteIter = m_DeleteList.begin();
-	while (DeleteIter != m_DeleteList.end())
+	iCurrentLoadCnt = 0;
+	for (_uint i = 0; i < m_DeleteList.size(); ++i)
 	{
-		//지연 해제
-		DeleteIter->iLifeCount--;
-		if (DeleteIter->iLifeCount <= 0)
+		auto& Data = m_DeleteList[i];
+		Data.iLifeCount--;
+		if (Data.iLifeCount <= 0)
 		{
-			m_pBufferPool[DeleteIter->iLODIndex]->FreeMemory_Vertex(DeleteIter->VertexOffset, DeleteIter->VertexSize);
-			m_pBufferPool[DeleteIter->iLODIndex]->FreeMemory_Index(DeleteIter->IndexOffset, DeleteIter->IndexSize);
-			DeleteIter = m_DeleteList.erase(DeleteIter);
+			m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
+			m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
+			if (i != m_DeleteList.size() - 1)
+				m_DeleteList[i] = m_DeleteList.back();
+			m_DeleteList.pop_back();
 		}
 		else
-			DeleteIter++;
+			i++;
 	}
 	
 	if (!m_StagingData.empty())
@@ -79,14 +80,24 @@ void CModel_Manager::Update(_float fTimeDelta)
 				if (VertexOffset == -1)
 					CRASH("Failed");
 
-				D3D11_MAPPED_SUBRESOURCE StagingDesc{};
-				m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-				memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
-				m_pContext->Unmap(m_pStagingBuffer, 0);
+				D3D11_BOX PoolBox{};
+				PoolBox.left = VertexOffset;
+				PoolBox.top = 0;
+				PoolBox.front = 0;
+				PoolBox.right = VertexOffset + VertexSize;
+				PoolBox.bottom = 1;
+				PoolBox.back = 1;
 
-				D3D11_BOX PoolBox = { 0,0,0,VertexSize,1,1 };
-				m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
-					0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+				m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
+
+				D3D11_MAPPED_SUBRESOURCE StagingDesc{};
+				/*m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+				memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
+				m_pContext->Unmap(m_pStagingBuffer, 0);*/
+
+				///*D3D11_BOX */PoolBox = { 0,0,0,VertexSize,1,1 };
+				//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
+				//	0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 
 				_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
@@ -95,13 +106,23 @@ void CModel_Manager::Update(_float fTimeDelta)
 				if (IndexOffSet == -1)
 					CRASH("Failed");
 
-				m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-				memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
-				m_pContext->Unmap(m_pStagingBuffer, 0);
 
-				PoolBox = { 0,0,0,IndexSize,1,1 };
+				PoolBox.left = IndexOffSet;
+				PoolBox.top = 0;
+				PoolBox.front = 0;
+				PoolBox.right = IndexOffSet + IndexSize;
+				PoolBox.bottom = 1;
+				PoolBox.back = 1;
+
+				m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(), 0, &PoolBox, Data.LoadData[i].IndexData.data(), 0, 0);
+
+				//m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+				//memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
+				//m_pContext->Unmap(m_pStagingBuffer, 0);
+
+				/*PoolBox = { 0,0,0,IndexSize,1,1 };
 				m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
-					0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+					0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);*/
 
 				SHARED_DATA_DESC Desc{};
 				Desc.IndexOffset = IndexOffSet / sizeof(_uint);
@@ -114,8 +135,7 @@ void CModel_Manager::Update(_float fTimeDelta)
 			}
 			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
 		}
-
-		Relase_Vector(pTempVector);
+		Release_Vector(pTempVector);
 	}
 
 	if (m_ModelPrototypes.empty())
@@ -178,9 +198,13 @@ void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFileP
 	if (LoadState != LOADSTATE::NOTLOADED)
 		return;
 
+	if (iCurrentLoadCnt > 5)
+		return;
+
 	LOADSTATE ExpectedState = LOADSTATE::NOTLOADED;
 	if (LoadState.compare_exchange_strong(ExpectedState, LOADSTATE::LOADING))
 	{
+		iCurrentLoadCnt++;
 		//파일 경로 전체는 모델 매니저에 저장. 파일 이름(뒤에 LOD가 붙어야하니까)은 모델에 저장?
 		m_pGameInstance->Add_Work([=, lModel = pModel, lFilePath = pFilePath, liLODIndex = iLODIndex, Matrix = XMLoadFloat4x4(&m_PreTransformMatrix)]() {
 			LoadData(lModel, lFilePath, liLODIndex, Matrix);
@@ -188,6 +212,22 @@ void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFileP
 	}
 
 	//게임이니셜라이즈 하기 전에 LOD3번은 전부 미리 만들어두라고 요청하는 함수 만들기.(내부에는 Wait걸고)
+}
+
+void CModel_Manager::SetUp_Data(CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex)
+{
+	atomic<LOADSTATE>& LoadState = pModel->Get_MeshState(iLODIndex);
+
+	if (LoadState != LOADSTATE::NOTLOADED)
+		return;
+
+	LOADSTATE ExpectedState = LOADSTATE::NOTLOADED;
+	if (LoadState.compare_exchange_strong(ExpectedState, LOADSTATE::LOADING))
+	{
+		m_pGameInstance->Add_Work([=, lModel = pModel, lFilePath = pFilePath, liLODIndex = iLODIndex, Matrix = XMLoadFloat4x4(&m_PreTransformMatrix)]() {
+			LoadData(lModel, lFilePath, liLODIndex, Matrix);
+			});
+	}
 }
 
 void CModel_Manager::LoadData(CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex,_fmatrix PreMatrix)
@@ -256,18 +296,10 @@ CModel_Manager::MODEL_DATA CModel_Manager::Acquire_Vector()
 	}
 }
 
-void CModel_Manager::Relase_Vector(vector<MODEL_DATA>& data)
+void CModel_Manager::Release_Vector(vector<MODEL_DATA>& data)
 {
 	for (auto& Data : data)
-	{
-		for (auto& pData : Data.LoadData)
-		{
-			pData.IndexData.clear();
-			pData.VertexData.clear();
-			pData.iNumIndices = 0;
-		}
 		Data.pModel = nullptr;
-	}
 
 	{
 		lock_guard<mutex> lock(m_DataPoolMutex);
@@ -335,7 +367,7 @@ void CModel_Manager::LoadLastLOD()
 {
 	for (auto& pModel : m_ModelPrototypes)
 	{
-		pModel.second->RequestLastLODModel();
+		pModel.second->RequestModel();
 		for (_uint i = 0; i < 4; ++i)
 			pModel.second->Get_SharedBuffers(i, m_pBufferPool[i]->Get_VertexBuffer(), m_pBufferPool[i]->Get_IndexBuffer());
 	}
@@ -353,15 +385,24 @@ void CModel_Manager::LoadLastLOD()
 
 			if (VertexOffset == -1)
 				CRASH("Failed");
-
+			
 			D3D11_MAPPED_SUBRESOURCE StagingDesc{};
-			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-			memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
-			m_pContext->Unmap(m_pStagingBuffer, 0);
+			D3D11_BOX PoolBox{};
+			PoolBox.left = VertexOffset;
+			PoolBox.top = 0;
+			PoolBox.front = 0;
+			PoolBox.right = VertexOffset + VertexSize;
+			PoolBox.bottom = 1;
+			PoolBox.back = 1;
 
-			D3D11_BOX PoolBox = { 0,0,0,VertexSize,1,1 };
-			m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
-				0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+			m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
+			//m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+			//memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
+			//m_pContext->Unmap(m_pStagingBuffer, 0);
+
+			//PoolBox = { 0,0,0,VertexSize,1,1 };
+			//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
+			//	0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 
 			_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
@@ -370,25 +411,35 @@ void CModel_Manager::LoadLastLOD()
 			if (IndexOffSet == -1)
 				CRASH("Failed");
 
-			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-			memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
-			m_pContext->Unmap(m_pStagingBuffer, 0);
+			PoolBox.left = IndexOffSet;
+			PoolBox.top = 0;
+			PoolBox.front = 0;
+			PoolBox.right = IndexOffSet + IndexSize;
+			PoolBox.bottom = 1;
+			PoolBox.back = 1;
 
-			PoolBox = { 0,0,0,IndexSize,1,1 };
-			m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
-				0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
+			m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(), 0, &PoolBox, Data.LoadData[i].IndexData.data(), 0, 0);
+			/*m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
+			memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
+			m_pContext->Unmap(m_pStagingBuffer, 0);*/
+
+			//PoolBox = { 0,0,0,IndexSize,1,1 };
+			//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
+			//	0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 			SHARED_DATA_DESC Desc{};
-			Desc.IndexOffset = IndexOffSet;
+			Desc.IndexOffset = IndexOffSet / sizeof(_uint);
 			Desc.IndexSize = IndexSize;
 			Desc.NumIndices = Data.LoadData[i].iNumIndices;
-			Desc.VertexOffset = VertexOffset;
+			Desc.VertexOffset = VertexOffset / sizeof(VTXMESH);
 			Desc.VertexSize = VertexSize;
+
 
 			pData->push_back(Desc);
 		}
 		Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
 	}
+	Release_Vector(m_StagingData);
 	m_StagingData.clear();
 }
 

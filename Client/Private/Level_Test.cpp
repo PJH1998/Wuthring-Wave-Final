@@ -24,11 +24,13 @@
 #include"Trigger_Box.h"
 #include "UI_Text_Damage.h"
 #include "SceneCamera.h"
+#include "UI_Parry.h"
+#include "UI_MobHPBar.h"
 
-#define KSTA_UITEST_ONLEVEL
-#ifdef KSTA_UITEST_ONLEVEL
+//#define KSTA_UITEST_OLD
+#ifdef KSTA_UITEST_OLD
 #include "UI_Text.h"
-#endif // KSTA_UITEST_ONLEVEL
+#endif // KSTA_UITEST_OLD
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -110,10 +112,9 @@ void CLevel_Test::Update(_float fTimeDelta)
 
 	Toggle_HUD();
 
-	//Testing_UI(fTimeDelta);
+	Testing_UI(fTimeDelta);
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-		m_pGameInstance->Play_Sequence(TEXT("Test"));
+	
 }
 
 void CLevel_Test::Render()
@@ -170,14 +171,14 @@ void CLevel_Test::Ready_Dummy()
 	DummyDesc.eLevel = m_eCurLevel;
 	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
 	DummyDesc.strInitAnimTag = "Stand1";
-	DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로사우로스?
 	//DummyDesc.strInitAnimTag = "Stand";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Ggobul");						//꼬불이
 	//DummyDesc.strInitAnimTag = "SAttack01_1";
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
@@ -191,7 +192,7 @@ void CLevel_Test::Ready_Dummy()
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
 	Ggobul.fAttackDmg =0.f;
@@ -207,7 +208,7 @@ void CLevel_Test::Ready_Dummy()
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	Tantacle.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
 	Tantacle.fSpeedPerSec = 10.f;
 	Tantacle.fAttackDamage = 0.f;
@@ -230,7 +231,7 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.fSpeedPerSec = 10.f;
     MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     MobDesc.pAnimationTag = "Born1";
-	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
@@ -247,7 +248,7 @@ void CLevel_Test::Ready_MonsterTest()
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
 	Ggobul.fAttackDmg = MobDesc.fAttackDmg;
@@ -263,7 +264,7 @@ void CLevel_Test::Ready_MonsterTest()
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	Tantacle.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
 	Tantacle.fSpeedPerSec = 10.f;
 	Tantacle.fAttackDamage = MobDesc.fAttackDmg;
@@ -306,7 +307,7 @@ void CLevel_Test::Ready_HavocWarrior()
 	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
 	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
+	tDesc.strFolderPath = "../Bin/Resource/Model/Monster/HavocWarrior/Notify";
 	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	tDesc.fSpeedPerSec = 10.f;
 	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
@@ -332,7 +333,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
 	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
+	ADesc.strFolderPath = "../Bin/Resource/Model/Monster/ElectroPredator/Notify";
 	ADesc.fRotationPerSec = XMConvertToRadians(100.f);
 	ADesc.fSpeedPerSec = 10.f;
 	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
@@ -388,7 +389,7 @@ void CLevel_Test::Ready_CoroSaurus()
 	CoroDesc.fSpeedPerSec = 10.f;
 	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
 	CoroDesc.pAnimationTag = "Idle1";
-	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
+	CoroDesc.strFolderPath = "../Bin/Resource/Model/Monster/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
 	CoroDesc.fAttackDmg = pInfo->fAttack;
 	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
@@ -450,20 +451,32 @@ void CLevel_Test::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-			CRASH("Failed to Add RootUI to UI_Manager.");
+		//if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
+		//	CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1)))
 		CRASH("Failed Ready Button_Interact");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+		CRASH("Failed Ready LockOn");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+		CRASH("Failed Ready Parry");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_MobHPBar"),
+		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
+		CRASH("Failed Ready MobHPBar");
 
 	// _UI
 }
@@ -475,7 +488,7 @@ void CLevel_Test::Ready_Scene()
 	CameraDesc.fFovy = XMConvertToRadians(60.f);
 	CameraDesc.fNear = 0.1f;
 	CameraDesc.fFar = 1000.f;
-	CameraDesc.vEye = _float4(-1.019107, 5.458634, -15.936163, 1.f);
+	CameraDesc.vEye = _float4(-1.019107f, 5.458634f, -15.936163f, 1.f);
 	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
 	CameraDesc.fSpeedPerSec = 10.f;
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
@@ -486,7 +499,7 @@ void CLevel_Test::Ready_Scene()
 
 void CLevel_Test::Testing_UI(_float fTimeDelta)
 {
-#ifdef KSTA_UITEST_ONLEVEL
+#ifdef KSTA_UITEST_OLD
 
 	_uint iDestLevel = ENUM_CLASS(m_eCurLevel);
 	static _bool isInitialized = false;
@@ -602,10 +615,20 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 
+
+
+
+#endif // KSTA_UITEST_OLD
+
+
+
+
+
 	// interact
+#pragma region KSTA_UITEST_INTERACT
 
 	static _uint iInteractIndex = 0;
-	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND};
+	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
 
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
@@ -639,11 +662,55 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
 		cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
+#pragma endregion
 
 
 
+#pragma region KSTA_UITEST_LOCKON
+	CCustom_UI* pRootUI = m_pGameSystem->Find_RootUI(L"UI_LockOn");
 
-#endif // KSTA_UITEST_ONLEVEL
+	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		!pRootUI->IsActivate())
+		m_pGameSystem->Attach_LockOnUI(nullptr);
+	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		pRootUI->IsActivate())
+		m_pGameSystem->Detach_LockOnUI();
+#pragma endregion
+
+
+
+#pragma region KSTA_UITEST_PARRY
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
+	{
+		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
+			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
+
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
+	}
+#pragma endregion
+
+
+#pragma region KSTA_UITEST_MOBHPBAR
+	
+	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
+	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
+	
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+		!isTargetAlive)
+	{
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+			isTargetAlive)
+	{
+		pTargetMobHPBarUI->SetActivate(false);
+	}
+
+
+
+#pragma endregion
+
+
 
 }
 
@@ -674,11 +741,11 @@ void CLevel_Test::Toggle_HUD()
 	}
 
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
-	{
-		isToggled_BOSSHP = !isToggled_BOSSHP;
-		CGameSystem::GetInstance()->HUD_Toggle_BossStatusUI(isToggled_BOSSHP);
-	}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
+	//{
+	//	isToggled_BOSSHP = !isToggled_BOSSHP;
+	//	CGameSystem::GetInstance()->HUD_Toggle_BossStatusUI(isToggled_BOSSHP);
+	//}
 }
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)

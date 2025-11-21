@@ -2,10 +2,10 @@
 #include "ModelAnim_Instance.h"
 #include "GameInstance.h"
 
-#include "Mesh.h"
+#include "MeshAnim_Instance.h"
 #include "MeshMaterial.h"
 #include "Bone.h"
-#include "Animation.h"
+#include "Animation_Inst.h"
 #include "Channel.h"
 #include "ComputeShader.h"
 
@@ -30,8 +30,8 @@ CModelAnim_Instance::CModelAnim_Instance(const CModelAnim_Instance& Prototype)
 	m_Buffers {Prototype.m_Buffers},
 	m_SRVs { Prototype.m_SRVs },
 	m_isRibAnimation { Prototype.m_isRibAnimation },
-	pMin{Prototype.pMin},
-	pMax{Prototype.pMax}
+	m_iNumInstance { Prototype.m_iNumInstance },
+	m_MeshTypeCounts{ Prototype.m_MeshTypeCounts }
 	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
 	for (auto& pMesh : m_Meshes)
@@ -133,54 +133,11 @@ const vector<_uint>& CModelAnim_Instance::Get_Indices(_uint iIndex)
 		CRASH("Mesh Index Error");
 	return m_Meshes[iIndex]->Get_Indices();
 }
-void CModelAnim_Instance::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
-{
-	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
-}
 
 #ifdef _DEBUG
-_float* CModelAnim_Instance::Get_TrackPositionPtr(const _string& strAnimName)
-{
-	return m_Animations[strAnimName]->Get_TrackPositionPtr();
-}
-
 _float CModelAnim_Instance::Get_Duration(const _string& strAnimName)
 {
 	return m_Animations[strAnimName]->Get_Duration();
-}
-
-HRESULT CModelAnim_Instance::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
-{
-	_int iNextBoneIndex = iBoneIndex + 1;
-	ImGuiTreeNodeFlags iFlag = 0;
-	if ((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentIndex() != iBoneIndex))
-		iFlag |= ImGuiTreeNodeFlags_Leaf;
-	else
-		iFlag |= (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen);
-
-	if (ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
-	{
-		//Selecting Interaction 
-		if (ImGui::IsItemClicked())
-		{
-			std::cout << "selected : " << m_Bones[iBoneIndex]->Get_Name() << std::endl;
-			m_iSelectIndex = iBoneIndex;
-		}
-
-		while (iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentIndex() == iBoneIndex)
-		{
-			Bind_Bone_to_GUI(iNextBoneIndex, TransformMatrix);
-		}
-
-		ImGui::TreePop();
-	}
-	iBoneIndex = iNextBoneIndex;
-	return S_OK;
-}
-void CModelAnim_Instance::Render_Gizmo(_fmatrix TransformMatrix)
-{
-	_fmatrix BoneLocalMatrix = XMLoadFloat4x4(m_Bones[m_iSelectIndex]->Get_CombinedTransformationMatrix());
-	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
 }
 
 _bool CModelAnim_Instance::Find_Animation(const _string& strAnimName)
@@ -192,8 +149,6 @@ _bool CModelAnim_Instance::Find_Animation(const _string& strAnimName)
 	}
 	return false;
 }
-
-
 #endif // _DEBUG
 
 void CModelAnim_Instance::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
@@ -224,7 +179,7 @@ void CModelAnim_Instance::Register_AllNotifies(const _string& strNotifyFolderPat
 	for (auto& pair : m_Animations)
 	{
 		const _string& animName = pair.first;
-		CAnimation* pAnimation = pair.second;
+		CAnimation_Inst* pAnimation = pair.second;
 
 		_string filePath = strNotifyFolderPath + "/" + animName + ".json";
 
@@ -249,17 +204,23 @@ void CModelAnim_Instance::Register_AllNotifies(const _string& strNotifyFolderPat
 		
 }
 
-HRESULT CModelAnim_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
+HRESULT CModelAnim_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath, vector<_string>* strMeshTypes)
 {
 	m_eType = eType;
 	XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
+	if (nullptr == strMeshTypes)
+		m_iNumMeshType = 1;
+	else
+		m_iNumMeshType = static_cast<_uint>(strMeshTypes->size());
 
+	m_MeshTypeCounts.resize(m_iNumMeshType, 0);
 	ifstream InputFile(pFilePath, ios::binary);
 	if (false == InputFile.is_open())
 	{
 		MSG_BOX("Failed Open : Model");
 		return E_FAIL;
 	}
+	m_iNumInstance = iNumInstance;
 
 	if (MODELTYPE::ANIM == m_eType)
 	{
@@ -299,15 +260,19 @@ HRESULT CModelAnim_Instance::Initialize_Clone(void* pArg)
 {
 	if (MODELTYPE::ANIM == m_eType)
 	{
+		m_AnimCBInfos.reserve(m_iNumInstance);
+		m_VtxInstanceDatas.reserve(m_iNumInstance);
 		// 1. Instance 전용 버퍼 생성.
 		if (FAILED(Ready_Instance_Buffers()))
 			return E_FAIL;
 
+		m_pVtxInstanceDatas.reserve(m_iNumMeshes);
+		for (_uint i = 0; i < m_iNumMeshType; i++)
+		{
+			m_pVtxInstanceDatas[i].resize(m_MeshTypeCounts[i]);
+		}
 	}
-#ifdef _DEBUG
-	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
-		Ready_BoundingBox(pMin, pMax);
-#endif
+
     return S_OK;
 }
 
@@ -357,52 +322,101 @@ HRESULT CModelAnim_Instance::Clear_Materials(CDeferredShader* pShader, const _ch
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Clear_Resource(pShader, pConstanceName, eTextureType, pEffect);
 }
 
-_bool CModelAnim_Instance::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
+//_bool CModelAnim_Instance::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
+//{
+//	auto iter = m_Animations.find(strAnimationName);
+//	if (iter == m_Animations.end())
+//		return false;
+//
+//
+//	_float fTrackPosition = {};
+//
+//	if (m_strPreAnimation != strAnimationName)
+//	{
+//		m_isChangeAnimation = true;
+//		m_strPreAnimation = strAnimationName;
+//		Clear_Animation(strAnimationName);
+//	}
+//	
+//	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
+//	if (nullptr != pTrackPosition)
+//		*pTrackPosition = fTrackPosition;
+//
+//	// Root Node Translation 조정
+//	if (true == isRootMotion)
+//		Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
+//
+//
+//	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+//	if (IsAnimationEnd)
+//	{
+//		Clear_Animation(strAnimationName);
+//		return true; // 애니메이션 종료
+//	}
+//
+//	for (auto& pBone : m_Bones)
+//		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+//
+//
+//	return false;
+//}
+
+_bool CModelAnim_Instance::Update_RootMotion(const _string& strAnimationName, CTransform* pTransform, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
-	// 다른 Animation 들어올 시, 이전 Animation 저장
-	//if (m_strPreAnimation != strAnimationName)
-	//{
-	//	m_isChangeAnimation = true;
-	//	m_strPreAnimation = strAnimationName;
-	//}
-
-	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
-
 	auto iter = m_Animations.find(strAnimationName);
 	if (iter == m_Animations.end())
 		return false;
 
-
-	_float fTrackPosition = {};
-
+	// 1. 이전 애니메이션 체크해서 동일하지 않은 경우 Clear
 	if (m_strPreAnimation != strAnimationName)
 	{
 		m_isChangeAnimation = true;
 		m_strPreAnimation = strAnimationName;
 		Clear_Animation(strAnimationName);
 	}
-	
-	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
-	if (nullptr != pTrackPosition)
-		*pTrackPosition = fTrackPosition;
 
-	// Root Node Translation 조정
-	if (true == isRootMotion)
-		Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
+	// 2. 현재 애니메이션의 Track Position 업데이트
+	_float fTrackPosition = 0.f;
 
+	// 3. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
+	//_matrix RootMatrix = XMMatrixIdentity();
+	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition, isRootMotion, &m_RootMatrix);
+	*pTrackPosition = fTrackPosition;
 
-	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (IsAnimationEnd)
+	// 6. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	if (bIsAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
-		return true; // 애니메이션 종료
+		//return true; // 애니메이션 종료
 	}
 
-	for (auto& pBone : m_Bones)
-		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+	if (true == isRootMotion)
+		Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
+	else
+		m_RootMatrix = XMMatrixIdentity();
+	Sync_RootNode(pTransform, fTimeDelta);
 
+	return bIsAnimationEnd;
+}
 
-	return false;
+void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices)
+{
+	m_AnimCBInfos[iInstanceIndex].fTrackPosition = *pTrackPosition;
+	m_AnimCBInfos[iInstanceIndex].iAnimindex = m_AnimationNameToIndex[strAnimationName];
+	m_AnimCBInfos[iInstanceIndex].IsRibAnimUsed = false;
+	m_AnimCBInfos[iInstanceIndex].iRibbonAnimIndex = 0;
+
+	XMStoreFloat4(&m_VtxInstanceDatas[iInstanceIndex].vRight, WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)]);
+	XMStoreFloat4(&m_VtxInstanceDatas[iInstanceIndex].vUp, WorldMatrix.r[ENUM_CLASS(STATE::UP)]);
+	XMStoreFloat4(&m_VtxInstanceDatas[iInstanceIndex].vLook, WorldMatrix.r[ENUM_CLASS(STATE::LOOK)]);
+	XMStoreFloat4(&m_VtxInstanceDatas[iInstanceIndex].vTranslation, WorldMatrix.r[ENUM_CLASS(STATE::POSITION)]);
+	m_VtxInstanceDatas[iInstanceIndex].iBaseIndex = iInstanceIndex;
+
+	// 각 메쉬 타입별로 인스턴스 매트릭스를 분배
+	for (_uint i = 0; i < m_iNumMeshType; ++i)
+	{
+		m_pVtxInstanceDatas[(pPaddingIndices[i] + m_MeshTypeCounts[i])].push_back(m_VtxInstanceDatas[iInstanceIndex]);
+	}
 }
 
 _bool CModelAnim_Instance::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
@@ -426,7 +440,7 @@ _bool CModelAnim_Instance::Play_Animation_GPU(CComputeShader* pComputeShaderCom,
 	_float fTrackPosition = 0.f;
 
 	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
+	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition, &m_RootMatrix);
 	*pTrackPosition = fTrackPosition;
 
 	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
@@ -456,53 +470,19 @@ _bool CModelAnim_Instance::Play_Animation_GPU(CComputeShader* pComputeShaderCom,
 	return false;
 }
 
-_bool CModelAnim_Instance::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
+void CModelAnim_Instance::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _uint iInstanceIndex)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 	ASSERT_CRASH(pTrackPosition);
 
-	auto iter = m_Animations.find(strAnimationName);
-	if (iter == m_Animations.end())
-		return false;
-
-	// 1. 이전 애니메이션 체크해서 동일하지 않은 경우 Clear
-	if (m_strPreAnimation != strAnimationName)
-	{
-		m_isChangeAnimation = true;
-		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
-	}
-
-	// 2. 현재 애니메이션의 Track Position 업데이트
-	_float fTrackPosition = 0.f;
-
-	// 3. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
-	*pTrackPosition = fTrackPosition;
-
 	// 4. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromComputeNonRib(pComputeShaderCom, fTrackPosition, strAnimationName);
+	FetchLocalMatrices_FromComputeNonRib(pComputeShaderCom);
 
-	// 5. Root Motion 설정.
-	if (true == isRootMotion)
-		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
-	else
-		m_RootMatrix = XMMatrixIdentity();
-
-	// 6. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (bIsAnimationEnd)
+	for (_uint i = 0; i < m_iNumMeshes; i++)
 	{
-		Clear_Animation(strAnimationName);
-		return true; // 애니메이션 종료
+		m_Meshes[i]->Update_InstanceData(m_pVtxInstanceDatas[i].data(), m_pVtxInstanceDatas[i].size());
+		m_pVtxInstanceDatas[i].clear();
 	}
-
-	// 7. Combined는 한번만.
-	for (_uint i = 0; i < m_Bones.size(); i++)
-	{
-		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	}
-
-	return false;
 }
 
 void CModelAnim_Instance::Clear_Animation(const _string& strAnimationName, _float fTrackPosition)
@@ -519,7 +499,7 @@ void CModelAnim_Instance::Clear_Animation(const _string& strAnimationName, _floa
 	if (iter == m_Animations.end())
 		return;
 
-	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
+	//m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 }
 
 void CModelAnim_Instance::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
@@ -697,20 +677,19 @@ void CModelAnim_Instance::FetchLocalMatrices_FromCompute(CComputeShader* pComput
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
-void CModelAnim_Instance::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
+void CModelAnim_Instance::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShaderCom)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 	// 1. 상수 버퍼(CB) 업데이트
 	// - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
+	//_uint iRenderInstanceCount = m_AnimCBInfos.size();
+
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
-
 	// 2. 애니메이션 정보 CB 구조체에 정보 바인딩.
 	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
-	pAnimCBInfo->fTrackPosition = fTrackPosition;
-	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
-	pAnimCBInfo->IsRibAnimUsed = false;
-	pAnimCBInfo->iRibbonAnimIndex = 0;
+
+	memcpy(pAnimCBInfo, m_AnimCBInfos.data(), sizeof(ANIMATION_CBINFO) * m_iNumInstance);
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
@@ -720,14 +699,14 @@ void CModelAnim_Instance::FetchLocalMatrices_FromComputeNonRib(CComputeShader* p
 	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
 	pComputeShaderCom->Set_SRV("g_InverseBindPoses", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
 	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
-	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
+	pComputeShaderCom->Set_SRV("AnimationInfoCB", m_SRVs[BUFFER_ANIM_INFOCB]);
 
 	// EX) 뼈 504개, 팀 크기 64명
 	// 4. Compute Shader 실행 (Dispatch)
 	// - 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
 	// - 예: 셰이더 스레드 그룹 크기가 64일 때, (총 뼈 개수 + 63) / 64
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
-	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
+	_uint iGroupCount = (iNumBones * m_iNumInstance + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
 
 	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
@@ -759,11 +738,11 @@ void CModelAnim_Instance::Compute_RootAnimation(_float fRootMotionRate, _bool is
 	// PreTransform의 스케일 추출
 	// 1. GPU 계산 로컬본 전체 가져오기.
 	_vector vScale{}, vRotation{}, vTranslation{};
-	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
+	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_RootMatrix);
 
 	// 2. 스켈레톤의 루트 본은 '제자리'에서 (Scale, Rotation)만 하도록
 	_matrix RootBoneLocalMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneLocalMatrix);
+	m_RootMatrix = RootBoneLocalMatrix;
 
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
@@ -796,17 +775,8 @@ void CModelAnim_Instance::Compute_RootAnimation(_float fRootMotionRate, _bool is
 		vRotationDelta = XMQuaternionIdentity();           
 	}
 
-	// 행렬은 이제 '엔진 좌표계' 기준.
-	//m_RootMatrix = XMMatrixAffineTransformation(
-	//	//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
-	//	XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
-	//	XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
-	//	vRotationDelta,                  // 회전 델타
-	//	vLocalTranslate * fRootMotionRate // 이동 델타
-	//);
 	m_RootMatrix = XMMatrixAffineTransformation(
-		//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
-		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+		XMVectorSet(1.f, 1.f, 1.f, 0.f), // 스케일 델타 (없음)
 		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
 		vRotationDelta,                  // 회전 델타
 		vLocalTranslate * m_fPreScale * fRootMotionRate // 이동 델타
@@ -853,36 +823,12 @@ HRESULT CModelAnim_Instance::Ready_Mesh(ifstream& InputFile)
 {
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
 
-	//_float* pMin = nullptr;
-	//_float* pMax = nullptr;
-
-#ifdef _DEBUG
-	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO== m_eType)
-	{
-		pMin = new _float[3];
-		pMax = new _float[3];
-
-		for (_uint i = 0; i < 3; ++i)
-		{
-			pMin[i] = FLT_MAX;
-			pMax[i] = FLT_MIN;
-		}
-	}
-#endif
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
-		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
+		CMeshAnim_Instance* pMesh = CMeshAnim_Instance::Create(m_pDevice, m_pContext, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, m_iNumInstance);
 		ASSERT_CRASH(pMesh);
 		m_Meshes.push_back(pMesh);
 	}
-
-	//if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
-	//{
-	//	//Ready_BoundingBox(pMin, pMax);
-
-	//	Safe_Delete_Array(pMin);
-	//	Safe_Delete_Array(pMax);
-	//}
 
 	return S_OK;
 }
@@ -947,7 +893,7 @@ HRESULT CModelAnim_Instance::Ready_Animation(const _char* pFilePath)
 
 	for (size_t i = 0; i < m_iNumAnimations; ++i)
 	{
-		CAnimation* pAnimation = CAnimation::Create(AnimationFile, m_Bones);
+		CAnimation_Inst* pAnimation = CAnimation_Inst::Create(AnimationFile, m_Bones);
 		if (nullptr == pAnimation)
 			return E_FAIL;
 		m_Animations.emplace(pAnimation->Get_Name(), pAnimation);
@@ -995,7 +941,7 @@ HRESULT CModelAnim_Instance::Ready_Shared_Buffers()
 	// Depth1에 대한 설정.
 	for (const auto& Pair : m_Animations)
 	{
-		CAnimation* pAnimation = Pair.second;
+		CAnimation_Inst* pAnimation = Pair.second;
 		ANIMINFO animInfo = {};
 
 		// 시작 인덱스, 개수, 지속시간.
@@ -1073,7 +1019,7 @@ HRESULT CModelAnim_Instance::Ready_Instance_Buffers()
 	D3D11_BUFFER_DESC bufferDesc = {};
 	// 2-4. 최종 로컬 행렬 출력(Output) 버퍼 (g_OutLocalMatrices)
 	bufferDesc = {};
-	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
+	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size()) * m_iNumInstance;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1082,30 +1028,29 @@ HRESULT CModelAnim_Instance::Ready_Instance_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 	hr = m_pDevice->CreateUnorderedAccessView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_UAVs[UAV_FINAL_BONEMATRIX]);
 	if (FAILED(hr)) return E_FAIL;
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = static_cast<_uint>(m_Bones.size()) * m_iNumInstance;
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_SRVs[SRV_FINAL_BONEMATRIX]);
 	if (FAILED(hr)) return E_FAIL;
 
 	// 2-5. 매 프레임 업데이트할 상수 버퍼 (AnimationInfo)
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
-	bufferDesc.ByteWidth = sizeof(ANIMATION_CBINFO);
+	bufferDesc.ByteWidth = sizeof(ANIMATION_CBINFO) * m_iNumInstance;
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOCB]);
 	if (FAILED(hr)) return E_FAIL;
-
-	// 2-5. 매 프레임 업데이트할 상수 버퍼 (ANIMATIONFLY_CBINFO)
-	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
-	bufferDesc.ByteWidth = sizeof(ANIMATIONFLY_CBINFO);
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOFLYCB]);
+	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_ANIM_INFOCB], nullptr, &m_SRVs[BUFFER_ANIM_INFOCB]);
 	if (FAILED(hr)) return E_FAIL;
 
 	// 2-6. GPU -> CPU 복사를 위한 Staging 버퍼
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
-	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
+	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size()) * m_iNumInstance;
 	bufferDesc.Usage = D3D11_USAGE_STAGING;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_STAGING]);
@@ -1114,11 +1059,11 @@ HRESULT CModelAnim_Instance::Ready_Instance_Buffers()
 	return S_OK;
 }
 
-CModelAnim_Instance* CModelAnim_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
+CModelAnim_Instance* CModelAnim_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath, vector<_string>* strMeshTypes)
 {
 	CModelAnim_Instance* pInstance = new CModelAnim_Instance(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath)))
+	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, iNumInstance, pFilePath, strMeshTypes)))
 	{
 		MSG_BOX("Failed to Create : Model");
 		Safe_Release(pInstance);
@@ -1174,18 +1119,6 @@ void CModelAnim_Instance::Free()
 		Safe_Release(pUAV);
 	m_UAVs.clear();
 
+	m_pVtxInstanceDatas.clear();
 
-#ifdef _DEBUG
-
-	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
-	{
-		if (m_isClone)
-			Safe_Delete(m_pBoundingBox);
-		else
-		{
-			Safe_Delete_Array(pMin);
-			Safe_Delete_Array(pMax);
-		}
-	}
-#endif
 }

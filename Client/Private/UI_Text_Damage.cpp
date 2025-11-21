@@ -58,6 +58,9 @@ void CUI_Text_Damage::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+	
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);
 }
@@ -82,7 +85,10 @@ void CUI_Text_Damage::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_tTextDesc = *static_cast<TEXT_UI_DESC*>(pArg);
 	m_isActivate = true;
 
- 	for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
+	_uint iNumInstances = m_tTextDesc.strText.length();
+	m_tUIDesc.vecInstanceDescs.resize(iNumInstances);
+
+ 	for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++) // 종종 터짐.
 		m_tUIDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
 }
 
@@ -109,7 +115,7 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 	auto& vecInstDescs = textUIDesc.vecInstanceDescs;
 	_float fStartScale = 2.5f;
 
-	// ksta : 각종 인스턴스 갱신용 정보들 (위치용 행렬, 커스텀 변수용 행렬 등등)
+	//        각종 인스턴스 갱신용 정보들 (위치용 행렬, 커스텀 변수용 행렬 등등)
 	//		  꺼내와서 가공하고 다시 재할당해주는 식으로 사용하면 됨
 
 	// 6~10프레임 (약 0.1~0.17초) 중으로 인스턴스 하나의 시작 애니메이션이 끝나야 함 

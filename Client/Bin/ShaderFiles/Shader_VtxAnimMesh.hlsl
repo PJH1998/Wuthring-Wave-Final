@@ -19,6 +19,7 @@ float g_fFlowRate = 0.f;
 
 matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
+bool g_HasSkinMask = false;
 
 cbuffer GlobalConstants
 {
@@ -99,6 +100,7 @@ struct PS_OUT
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
     float4 vPBR : SV_TARGET5;
+    float4 vSSS : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -176,6 +178,12 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
     
+    if(g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
+    
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
@@ -225,58 +233,11 @@ PS_OUT PS_ROVER(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
-    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-    
-    //Test
-    Out.vPBR.a = 1.f;
-
-    vNormal.xyz = vNormal * 0.5f + 0.5f;
-    
-    Out.vNormal = vNormal;
-    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-    Out.vDepth.y = In.vProjPos.w;
-    Out.vDepth.z = 1.f;
-    
-    
-    return Out;
-}
-
-PS_OUT PS_LOGO_ROVER(PS_IN In)
-{
-    PS_OUT Out = (PS_OUT) 0;
-
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    // 
-    float4 vNormal = 0.f;
-    
-    if (g_HasNormal)
+    if (g_HasSkinMask)
     {
-        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
-        
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-            
-        float3 vTangent = In.vTangent.xyz;
-        float3 vBinormal = In.vBinormal.xyz * -1.f;
-        float3 vInNormal = In.vNormal.xyz;
-        
-        float3x3 WorldMatrix;
-        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-        
-        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
-        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
     }
-    else
-    {
-        vNormal = In.vNormal;
-        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
-        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
-    }
-    
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
@@ -327,7 +288,11 @@ PS_OUT PS_GALBRENA(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     //Test
@@ -338,10 +303,68 @@ PS_OUT PS_GALBRENA(PS_IN In)
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
     
     
     return Out;
 }
+
+PS_OUT PS_LOGO_ROVER(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    // 
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vSSS.a = 1.f; // test
+    }
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+    //Test
+    Out.vPBR.a = 1.f;
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    
+    return Out;
+}
+
+
 
 
 
@@ -569,7 +592,18 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_ROVER();
     }
 
-    pass NormalYellow // 6
+    pass Galbrena // 6
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_GALBRENA();
+    }
+
+    pass NormalYellow // 7
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -580,7 +614,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_NORMALTEX();
     }
 
-    pass LogoRover // 7
+    pass LogoRover // 8
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -591,14 +625,5 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LOGO_ROVER();
     }
 
-    pass Galbrena // 8
-    {
-        SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-
-        VertexShader = compile vs_5_0 VS_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_GALBRENA();
-    }
+  
 }

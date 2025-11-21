@@ -191,8 +191,9 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 		{
 			if (m_States[ATTACK])
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1);
+				//m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
+				//m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
 				return;
 			}
 		}
@@ -299,7 +300,7 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 				}
 				else
 				{
-					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 					return;
 				}
@@ -329,7 +330,7 @@ void CGalbrenaAirAttack::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.0f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START02),"AirAttack_Start02", 1.0f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1),"AirAttack_Loop_1", 1.0f, 5.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1),"AirAttack_Loop_1", 1.5f, 5.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2),"AirAttack_Loop_2", 1.0f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 45.f, 1.f);
 

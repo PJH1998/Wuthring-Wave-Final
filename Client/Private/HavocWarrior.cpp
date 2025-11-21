@@ -546,8 +546,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+		
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-		 * XMMatrixTranslation(0.f, 1.35f, 0.f));
+		 * XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
@@ -567,8 +569,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 #pragma endregion
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f));
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 
 #pragma region PHYSICS
@@ -598,8 +602,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 
 #pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f));
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
 #pragma endregion
 
 #ifdef _DEBUG

@@ -42,6 +42,7 @@ HRESULT CRoverDarkWing::Initialize_Clone(void* pArg)
 void CRoverDarkWing::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	if (m_IsAnimationEnd) // 애니메이션 끝나면 자동으로 비활성화
 		m_isActivate = false;
@@ -91,10 +92,16 @@ void CRoverDarkWing::Render()
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-		if (m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0))
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			continue;// Diffuse 없는 놈도 있음.
 
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		_bool HasNormal = { false };
+
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");

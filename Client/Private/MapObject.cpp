@@ -110,7 +110,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 	//	m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
 	//	m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
 	//}
-	
+
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
@@ -125,13 +125,15 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 	_bool HasNormal = { true };
 	_bool HasMask = { true };
 	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
-	for (_uint i = 0; i < iNumMesh; ++i)
-	{
+
 	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
 		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
 			return;
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))

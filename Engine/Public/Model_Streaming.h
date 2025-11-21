@@ -29,7 +29,7 @@ public:
 	atomic<LOADSTATE>& Get_MeshState(_uint iLODIndex) { return m_pModelPrototype->m_LodState[iLODIndex]; }
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc(_uint iLODIndex);
-	void									  RequestLastLODModel();
+	void									  RequestModel(_uint iLODIndex = 99);
 	void									  Set_RenderTime(_uint iLODIndex, _float fTimeDelta) { m_pModelPrototype->m_fRenderTime[iLODIndex] = fTimeDelta; }
 	_bool									  Is_RenderTimeOver(_uint iLODIndex);
 public:
@@ -47,7 +47,7 @@ private:
 	class CMesh_Streaming*					m_Meshes[4] = { nullptr,nullptr,nullptr,nullptr };
 
 	_uint									m_iNumMaterials = {};
-	vector<class CMeshMaterial*>	m_Materials;
+	vector<class CMaterial*>	m_Materials;
 	atomic<LOADSTATE>						m_LodState[4] = { LOADSTATE::NOTLOADED,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED };
 
 	_float									m_fRenderTime[4] = { 0.f,0.f,0.f,0.f };

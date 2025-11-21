@@ -1,3 +1,5 @@
+// Æó±â
+
 Texture2D g_FontAtlas : register(t0);
 
 SamplerState FontSampler = sampler_state
