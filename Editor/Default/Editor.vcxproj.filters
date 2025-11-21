@@ -447,10 +447,6 @@
       <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_Meteo.h" />
-    <ClInclude Include="..\Public\Edit_MapObject_Test.h" />
-    <ClInclude Include="Level_SFX.h">
-      <Filter>01. Level\ScreenEffect</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\SFX_Interface.h">
       <Filter>96. Interface\SFX</Filter>
     </ClInclude>
@@ -681,10 +677,6 @@
       <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Edit_Meteo.cpp" />
-    <ClCompile Include="..\Private\Edit_MapObject_Test.cpp" />
-    <ClCompile Include="Level_SFX.cpp">
-      <Filter>01. Level\ScreenEffect</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\SFX_Interface.cpp">
       <Filter>96. Interface\SFX</Filter>
     </ClCompile>

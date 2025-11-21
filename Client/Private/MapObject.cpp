@@ -60,8 +60,8 @@ void CMapObject::Late_Update(_float fTimeDelta)
 
 void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
-	//if (!m_IsRender)
-	//	return;
+	if (!m_IsRender)
+		return;
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 

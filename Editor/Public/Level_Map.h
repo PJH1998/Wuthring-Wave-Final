@@ -32,7 +32,6 @@ public:
 
 	void Ready_Map_Load_Prototype(const _char* pModelName);
 	void Ready_Debris_Prototype(const _char* pModelName);
-	void Logo_Test();
 private:
 	HRESULT Ready_Static_Component();
 	void Ready_Event();
