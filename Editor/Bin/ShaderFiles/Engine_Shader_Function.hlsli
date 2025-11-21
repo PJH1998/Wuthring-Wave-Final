@@ -358,5 +358,14 @@ float Noise(float2 St)
     return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
-
+float3 ToneMap(float3 vInput)
+{
+    float fA = 2.51f;
+    float fB = 0.03f;
+    float fC = 2.41f;
+    float fD = 0.59f;
+    float fE = 0.14f;
+    
+    return saturate((vInput * (fA * vInput + fB)) / (vInput * (fC * vInput + fD) + fE));
+}
 #endif //Engine_Shader_Function_h__
