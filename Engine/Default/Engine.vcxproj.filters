@@ -370,7 +370,7 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\Material">
       <UniqueIdentifier>{d12e14ea-3ebd-47d6-8607-ccec1cf635e1}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance\Animation_Inst">
       <UniqueIdentifier>{5c49a93a-c744-4a48-a72f-9eb9a1b57be2}</UniqueIdentifier>
     </Filter>
@@ -760,12 +760,12 @@
     <ClInclude Include="..\Public\ModelAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClInclude>
-	  <ClInclude Include="..\Public\Resource_Manager.h">
-		  <Filter>01. Utility\96. Resource\Manager</Filter>
-	  </ClInclude>
-	  <ClInclude Include="..\Public\Material.h">
-		  <Filter>01. Utility\04. Component\Material</Filter>
-	  </ClInclude>
+    <ClInclude Include="..\Public\Resource_Manager.h">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Material.h">
+      <Filter>01. Utility\04. Component\Material</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Animation_Inst.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
     </ClInclude>
@@ -1136,7 +1136,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Material.cpp">
       <Filter>01. Utility\04. Component\Material</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\Animation_Inst.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
     </ClCompile>
@@ -1213,7 +1213,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_RadialBlur.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Client\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

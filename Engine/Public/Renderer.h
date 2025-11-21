@@ -28,6 +28,7 @@ public:
 	ID3D11ShaderResourceView* Get_CurrentSceneSRV() { return m_pCurrentSceneSRV; }
 	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
 	void				SettingSSS(_bool IsOn) { m_IsSSS = IsOn; }
+	void				SettingHDR(_float fExposure) { m_fExposure = fExposure; }
 	void				Setting_LUT(_uint iIndex, _float fIntensity, _bool IsDynamicLUT) { m_iLUT_Index = iIndex, m_fLutLerpIntensity = fIntensity, m_IsDynamicLUT = IsDynamicLUT; }
 	void				Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut);
 	void				Render_ShadowMap();
@@ -88,8 +89,9 @@ private:
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
 	_bool									m_IsFog = { true };
+	_bool									m_IsSSS = { true };
 
-	_bool									m_IsSSS = { false };
+	_float									m_fExposure = {};
 
 #ifdef _DEBUG
 	list<class CComponent*>					m_DebugComponents;
