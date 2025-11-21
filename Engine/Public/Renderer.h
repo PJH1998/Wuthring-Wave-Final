@@ -134,7 +134,7 @@ private:
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();
-
+	void						Render_NonStatic();
 #ifdef _DEBUG
 	void						Render_Debug();
 #endif

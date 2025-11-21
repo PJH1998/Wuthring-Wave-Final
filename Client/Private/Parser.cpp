@@ -319,7 +319,6 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
 	{
-		return;
 		_uint NameLength;
 
 		_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -353,8 +352,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
-				Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
+			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+				, PROTOTYPE::GAMEOBJECT, &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
@@ -377,7 +376,6 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Meteo") != std::string::npos) 
 	{
-		return;
 		CMapObject_Meteo::MAP_LOAD Desc{};
 		
 		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))

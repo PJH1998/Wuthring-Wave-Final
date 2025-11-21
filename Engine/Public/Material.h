@@ -14,6 +14,8 @@ public:
 
 	HRESULT						Bind_Resource(class CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect);
 	HRESULT						Bind_Resource(class CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
+	HRESULT						Bind_Resource(class CShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, _uint iTextureIndex);
+	HRESULT						Bind_Resource(class CShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType);
 	HRESULT						Clear_Resource(class CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 
 private:

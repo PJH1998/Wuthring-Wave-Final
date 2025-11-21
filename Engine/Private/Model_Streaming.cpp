@@ -50,7 +50,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	//return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
+	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
 }
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType)
@@ -58,38 +58,18 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	//return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
+	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
 }
 
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 {
 	if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::LOADED)
 	{
-		//m_Meshes[iLODIndex]->Bind_Resources(iMeshIndex);
 		m_pModelPrototype->m_Meshes[iLODIndex]->Render(iMeshIndex);
 		return S_OK;
 	}
 	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
 		m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
-	//모델 매니저에 해당하는 LOD단계 요청할것.
-	//m_pGameInstance
-	//준비된 것 중 제일 높은 LOD 단계 렌더시키기.
-
-
-	//LOD단계가 준비가 안돼있으면 어쩔 수 없이 버퍼를 다시 바인딩 하므로 렉이 살짝 먹을듯? 아니면 Real_Late_Renedr 함수를 만들어서 늦어진 친구들을 다시 렌더하는 걸 만들어?
-	_uint RenderLOD = m_pModelPrototype->m_iMaxLOD;
-	for (_uint i = 0; i < m_pModelPrototype->m_iMaxLOD - 1; ++i)
-	{
-		if (m_pModelPrototype->m_Meshes[i]->IsLoaded() == LOADSTATE::LOADED)
-		{
-			RenderLOD = i;
-			break;
-		}
-	}
-	if (m_pModelPrototype->m_Meshes[RenderLOD]->Is_Overed(iMeshIndex))
-		return S_OK;
-	m_pModelPrototype->m_Meshes[RenderLOD]->Bind_Resources(iMeshIndex);
-	m_pModelPrototype->m_Meshes[RenderLOD]->Render(iMeshIndex);
 	return S_OK;
 }
 

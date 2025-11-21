@@ -70,7 +70,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
 			m_pModelCom->Request_LOD(m_iLODIndex);
 
-		m_pGameInstance->Add_Render_StaticObject(this, m_pModelCom->Get_ReadyLOD());
+		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
 		return;
 	}
 	_bool HasNormal = { true };

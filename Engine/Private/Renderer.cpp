@@ -186,6 +186,7 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
+	Render_NonStatic();
 	//if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 	//	CRASH("Render Fail");
 	//m_pGameInstance->RenderBufferPool(0);
@@ -1018,6 +1019,12 @@ void CRenderer::Render_UI()
 void CRenderer::Render_Fade()
 {
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::FADE));
+}
+
+void CRenderer::Render_NonStatic()
+{
+	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONSTATIC));
 }
 
 #ifdef _DEBUG
