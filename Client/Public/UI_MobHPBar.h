@@ -14,7 +14,9 @@ public:
 		UI_MOBINFO_DESC		tInfoDesc = {};
 
 		_float		fCurElapsedTime = 0.f;
+		_float		fCurStackedTime = 0.f;
 		_bool		isUpdatedThisFrame = false;
+		_bool		isPendingFlick = false;
 	}UI_MOBRT_DESC;
 
 private:
@@ -72,8 +74,8 @@ private:
 
 private:
 	// HP 주기 효과용
-	const _float			m_fMaxRTTime = 1.5f;
-	const _float			m_fMinRTTime = 0.5f;
+	const _float			m_fMaxRTTime = 4.f;
+	const _float			m_fMinRTTime = 1.f;
 
 	array<_float4, 3>		m_arrColorPresets;
 

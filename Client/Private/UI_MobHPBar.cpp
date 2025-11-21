@@ -90,7 +90,7 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 	//	isActiveMobHPBar = !isActiveMobHPBar;
 
 
-	static _float fTmpHP = 50.f;
+	static _float fTmpHP = 70.f;
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
 		fTmpHP -= 10.f;
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
@@ -117,7 +117,7 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 			_float3 fTestOffset = { 0.f, -10.f * i, 0.f};
 		
 			tTmpDesc.vMobPos = fTestOffset;
-			tTmpDesc.fMobCurHP = fTmpHP; //50.f;
+			tTmpDesc.fMobCurHP = (i == 2)? fTmpHP : 50.f;
 			tTmpDesc.fMobMaxHP = 100.f;
 
 			tTmpDesc.iObjKey = i;
@@ -181,7 +181,7 @@ void CUI_MobHPBar::PreAssign_Presets()
 {
 	_float4 vGreenHB  = { 0.188f, 1.000f, 0.608f, 1.000f };
 	_float4 vYellowHB = { 0.973f, 1.000f, 0.188f, 1.000f };
-	_float4 vRedHB    = { 1.000f, 0.227f, 0.188f, 1.000f };
+	_float4 vRedHB    = { 1.000f, 0.037f, 0.188f, 1.000f };
 
 	m_arrColorPresets[HPC_GREEN]	= vGreenHB;
 	m_arrColorPresets[HPC_YELLOW]	= vYellowHB;
@@ -218,6 +218,7 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 			{
 				mobRTInfo.isUpdatedThisFrame = true;
 				mobRTInfo.fCurElapsedTime += fTimeDelta;
+				mobRTInfo.fCurStackedTime += fTimeDelta;
 				mobRTInfo.tInfoDesc = mobInfo;
 
 				isFind_CachedData = true;
@@ -232,7 +233,7 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 			pDesc.tInfoDesc = mobInfo;
 			pDesc.isUpdatedThisFrame = true;
 			pDesc.fCurElapsedTime = 0.f;
-
+			pDesc.fCurStackedTime = 0.f;
 			m_vecMobInfo_RT.push_back(pDesc);
 		}
 	}
@@ -269,8 +270,7 @@ void CUI_MobHPBar::Update_Instances()
 
 		Calc_ApplyTargetPos(floatingUI);
 
-		if (floatingUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
-			floatingUI->Get_UIDesc().strUIName == L"InstHPBar")
+		if (floatingUI->Get_UIDesc().strUIName == L"InstHPBar")
 			Calc_CamDistScale(floatingUI, fDistancecPivot);
 
 	}
@@ -527,7 +527,8 @@ void CUI_MobHPBar::Calc_HBEff()
 		const _float fElapsedLifetime = m_vecMobInfo_RT[i].fCurElapsedTime;		// 인스턴스 별 경과 시간
 		const _float fHPRatio = fInstCurHP / fInstMaxHP;						// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
 		
-		const _float fFillTime	= 0.2f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
+		const _float fFillTime	= 0.27f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
+		const _float fFlickStartHPRatio = 0.5f;		// 체력이 얼마나 남았을 때 부터 깜빡임을 시작할 건지 
 
 		// 1. 시간에 따른 HB 관리
 		const _float fCurHBTime = fMinHBTime + (fMaxHBTime - fMinHBTime) * fHPRatio;	// 계산된 현재 주기
@@ -543,7 +544,7 @@ void CUI_MobHPBar::Calc_HBEff()
 			XMVectorLerp(
 				XMLoadFloat4(&m_arrColorPresets[HPC_RED]), 
 				XMLoadFloat4(&m_arrColorPresets[HPC_YELLOW]), 
-				fHPRatio / fColorBranchHP) :
+				fHPRatio / fColorBranchHP):
 			XMVectorLerp(
 				XMLoadFloat4(&m_arrColorPresets[HPC_YELLOW]),
 				XMLoadFloat4(&m_arrColorPresets[HPC_GREEN]), 
@@ -551,17 +552,43 @@ void CUI_MobHPBar::Calc_HBEff()
 			);
 		XMStoreFloat4(&vColorRate, vColorRate_Load);
 
-		_float fScaleRate = 1.f + fAlphaRate * 0.2f;	// 얼마나 커졌다 작아질건지
+		const _float fScaleMultiply = 2.5f;	//												<<<<<<<<<<<<<<<<<<<<
+		_float fScaleRate = 1.f + fAlphaRate * (fScaleMultiply - 1.f);	// 얼마나 커졌다 작아질건지			
 
+		_float fStackedTime = m_vecMobInfo_RT[i].fCurStackedTime;
+
+		const _float fCoordSpeedX = 1.5f; //                                    			<<<<<<<<<<<<<<<<<<<<
 
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
 		auto& targetVariantMat = vecVariantMat[i];
 		targetInst.vClipTexcoordX = { 0.f, fClipXRate };
-		
+
 		*reinterpret_cast<_float4*>(&targetVariantMat._11)	= vColorRate;
 		*reinterpret_cast<_float4*>(&targetVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._31) = (1.f - fAlphaRate);
+		*reinterpret_cast<_float*>(&targetVariantMat._31)	= fAlphaRate;
+		*reinterpret_cast<_float*>(&targetVariantMat._32)	= fScaleRate;
+		*reinterpret_cast<_float*>(&targetVariantMat._33)	= fStackedTime;
+		*reinterpret_cast<_float*>(&targetVariantMat._34)	= fCoordSpeedX;
+
+		
+		// 체력이 특정 이상일 때에는 애니메이션 반영 없이 그대로
+		if (fHPRatio > fFlickStartHPRatio)
+		{
+			targetInst.vClipTexcoordX = { 0.f, 1.f };
+			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;		// alpha
+			//*reinterpret_cast<_float*>(&targetVariantMat._32) = 2.f;		// scale
+			//m_vecMobInfo_RT[i].fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
+		}
+		else if (!m_vecMobInfo_RT[i].isPendingFlick)	// 체력이 내려갔지만 다음 계산상의 alpha가 1이 되기 전에는 계속 1이어야 함
+		{
+			if (fAlphaRate >= 0.95f)
+				m_vecMobInfo_RT[i].isPendingFlick = true;
+
+			targetInst.vClipTexcoordX = { 0.f, 1.f };
+			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;
+		}
+
 		
 		// END : 시간 초기화 관리
 		if (m_vecMobInfo_RT[i].fCurElapsedTime >= fCurHBTime)
