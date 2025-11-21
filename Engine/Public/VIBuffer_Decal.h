@@ -17,6 +17,7 @@ public:
 
 	HRESULT				Update_Buffer(const vector<VTXINSTANCE_DECAL>& Datas);
 	void				Clear();
+
 private:
 	ID3D11Buffer*	m_pVBInstance = { nullptr };
 

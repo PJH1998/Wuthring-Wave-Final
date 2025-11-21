@@ -86,6 +86,7 @@ struct PS_OUT_LIGHT
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
     float4 vPBR : SV_TARGET5;
+    float4 vSSS : SV_TARGET6;
 };
 
 

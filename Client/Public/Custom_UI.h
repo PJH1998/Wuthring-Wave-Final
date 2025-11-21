@@ -173,6 +173,8 @@ protected:
 	vector<function<void()>>	m_vecFunctions[ENUM_CLASS(UI_EVENT_TYPE::END)] = {};
 
 
+	_bool					m_isClone = false;
+
 protected:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐싱하여 그것을 사용. HOVER 등의 비용을 낮추기 위함
 #ifdef KSTA_ON_TRANSFORM_CACHING
 	_float					m_cachingTimeElapsed = {};

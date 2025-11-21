@@ -77,7 +77,14 @@ private:
 	void						Load_FXRect_FromJson(const _string& strFilePath, const _string& RectTag, LEVEL eLevel);
 	void						Load_FXDecal_FromJson(const _string& strFilePath, const _string& DecalTag, LEVEL eLevel);
 	void						Load_FXDecal_Data_FromJson(const _string& strFilePath);
+	void						Load_FXRadial_FromJson(const _string& strFilePath, const _string& RadialTag, LEVEL eLevel);
 #pragma endregion
+
+#pragma region SFX
+public:
+	void						Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex);
+#pragma endregion
+
 public:
 	HRESULT						Initialize();
 

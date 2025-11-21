@@ -64,13 +64,22 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vColor			= { 0.961f, 0.957f, 0.937f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_PROGRESS)] = tDesc;
+
 	// - BossName (보스 이름용 색상)
 	tDesc.vColor			= { 0.827f, 0.364f, 0.435f, 1.0f };
 	tDesc.vOutlineColor		= { 0.203f, 0.188f, 0.192f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_BOSSNAME)] = tDesc;
+	// - PlayerHP (플레이어 체력 표시용 색상)
+	tDesc.vColor			= { 0.600f, 0.600f, 0.600f, 1.0f };
+	tDesc.vOutlineColor		= { 0.900f, 0.900f, 0.900f, 0.5f };
+	tDesc.fFontOutlineWidth = 4.f;
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_PLAYERHP)] = tDesc;
 
 
-	// 필요한 색상이 있다면 ENUM 및 여기에 프리셋 추가..
+
+
+
+	// 필요한 색상이 있다면 ENUM 추가 및 여기에 프리셋 추가 후 사용하면 됩니다.
 
 
 

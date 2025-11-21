@@ -28,15 +28,18 @@ public:
 	virtual		void		Reset() {}
 
 protected:
+	_bool					m_IsPlay = {};
 	_float4x4				m_ViewMatrix = {};
 	_float4x4				m_ProjMatrix = {};
 
-	CVIBuffer_Rect*			m_pVIBuffer_Rect = { nullptr };
-	CShader*				m_pShader = { nullptr };
+	_float2					m_vWinSize = {};
+
+protected:
+	void					Setting_Scale(_float fSizeX, _float fSizeY);
+	void					Setting_Pos(_float fPosX, _float fPosY);
 
 private:
 	HRESULT					Ready_Components();
-
 public:
 	virtual CGameObject*	Clone(void* pArg) PURE;
 	virtual void			Free() override;

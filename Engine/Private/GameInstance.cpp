@@ -30,6 +30,7 @@
 #include "VolumetricFog.h"
 #include "HZB.h"
 #include "SFX_Hub.h"
+#include "Resource_Manager.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -516,13 +517,21 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
+void CGameInstance::SettingSSS(_bool IsOn)
+{
+	m_pRenderer->SettingSSS(IsOn);
+}
 ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
 	return m_pRenderer->Get_CurrentSceneSRV();
 }
-void CGameInstance::Set_LUT_Index(_uint iIndex)
+void CGameInstance::Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut)
 {
-	m_pRenderer->Set_LUT_Index(iIndex);
+	m_pRenderer->Get_Current_LutSetting(pOutIndex, pOutIntensity, pOutIsDnyamicLut);
+}
+void CGameInstance::Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut)
+{
+	m_pRenderer->Setting_LUT(iIndex, fLutLerpIntensity, IsDynamicLut);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
@@ -1044,6 +1053,18 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 }
 #endif
 #pragma endregion
+
+#pragma region RESOURCE_MANAGER
+void CGameInstance::Load_Resource(const _char* pFolderPath)
+{
+	m_pResource_Manager->Load_Resource(pFolderPath);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResourceTag)
+{
+	return m_pResource_Manager->Get_Resource(strResourceTag);
+}
+#pragma endregion
+
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {

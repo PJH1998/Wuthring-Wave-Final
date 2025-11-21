@@ -271,9 +271,6 @@
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\_Parents\_SubParents\Button">
-      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\Child_Containers\Logo">
       <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
     </Filter>
@@ -285,9 +282,6 @@
     </Filter>
     <Filter Include="03. GameObject\ScreenEffect">
       <UniqueIdentifier>{b5df649a-e4d1-43c6-b342-18893db5d4eb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\ScreenEffect\SonoraChange">
-      <UniqueIdentifier>{24de9e9e-5f87-4471-aa01-33e4aeb85975}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\Galbrena">
       <UniqueIdentifier>{37f8d84d-0c30-4aa8-8b5f-cbba31abfb3d}</UniqueIdentifier>
@@ -304,12 +298,42 @@
     <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
       <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\ScreenEffect\AugustaSFX">
+    <Filter Include="03. GameObject\UI\Props">
+      <UniqueIdentifier>{8c9a1f14-85fc-4d35-a23b-1f3f8c1f59d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Props\LockOn">
+      <UniqueIdentifier>{22797b79-8c21-4ea5-9d22-9a9802b9e0f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\Prefab">
+      <UniqueIdentifier>{34600685-47b1-42f2-b974-889fc885b2e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX">
+      <UniqueIdentifier>{bf6092de-8048-45b0-9d06-2dd49e894a82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX\SonoraChange">
+      <UniqueIdentifier>{24de9e9e-5f87-4471-aa01-33e4aeb85975}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX\AugustaUltiBegin">
       <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Props\Parry">
+      <UniqueIdentifier>{90653342-d458-4ed1-884c-ffa807da4208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Props\Interact">
+      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\NPC">
       <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Props\MobHPBar">
+      <UniqueIdentifier>{2070fc30-04c0-4684-8025-4587fbef7c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Radial">
+      <UniqueIdentifier>{8d374cac-4c3e-4492-8daa-51e35e3449b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX\GalbrenaUlti">
+      <UniqueIdentifier>{32b72cfb-8e3e-47d5-ab33-2805cf83a753}</UniqueIdentifier>
+   	</Filter>
     <Filter Include="03. GameObject\Actor\NPC\DummyCell">
       <UniqueIdentifier>{8b8d53a6-3e7d-4e7d-b055-aff0ed90d33e}</UniqueIdentifier>
     </Filter>
@@ -728,7 +752,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Button_Interact.h">
-      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+      <Filter>03. GameObject\UI\Props\Interact</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
@@ -749,11 +773,8 @@
     <ClInclude Include="..\Public\Mouse.h">
       <Filter>03. GameObject\Mouse</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\ScreenEffect.h">
-      <Filter>03. GameObject\ScreenEffect</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\SonoraChange.h">
-      <Filter>03. GameObject\ScreenEffect\SonoraChange</Filter>
+      <Filter>03. GameObject\ScreenEffect\SFX\SonoraChange</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Galbrena.h">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
@@ -797,6 +818,9 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_LockOn.h">
+      <Filter>03. GameObject\UI\Props\LockOn</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\RoverGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
@@ -809,14 +833,23 @@
     <ClInclude Include="..\Public\Client_CharacterEnum.h">
       <Filter>99. Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\AugustaSFX.h">
-      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Parry.h">
+      <Filter>03. GameObject\UI\Props\Parry</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaAirAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\ScreenEffect.h">
+      <Filter>03. GameObject\ScreenEffect\SFX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Augusta_UltiPostSFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Augusta_UltiSFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\RoverAirJump.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
@@ -830,8 +863,32 @@
     <ClInclude Include="..\public\DummyNPC.h">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Effect_Radial.h">
+      <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaDarkWing.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundQTE.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Slash.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SFX_Prefab.h">
+      <Filter>03. GameObject\ScreenEffect\Prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Star.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaUlti_SFX_Circle.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_PostSFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>      
+    <ClInclude Include="..\public\UI_MobHPBar.h">
+      <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
     </ClInclude>
     <ClInclude Include="..\public\DummyCell.h">
       <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
@@ -1225,7 +1282,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Button_Interact.cpp">
-      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+      <Filter>03. GameObject\UI\Props\Interact</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
@@ -1246,11 +1303,8 @@
     <ClCompile Include="..\Private\Mouse.cpp">
       <Filter>03. GameObject\Mouse</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\ScreenEffect.cpp">
-      <Filter>03. GameObject\ScreenEffect</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\SonoraChange.cpp">
-      <Filter>03. GameObject\ScreenEffect\SonoraChange</Filter>
+      <Filter>03. GameObject\ScreenEffect\SFX\SonoraChange</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Galbrena.cpp">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
@@ -1291,6 +1345,9 @@
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_LockOn.cpp">
+      <Filter>03. GameObject\UI\Props\LockOn</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\RoverGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
@@ -1300,11 +1357,11 @@
     <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\AugustaSFX.cpp">
-      <Filter>03. GameObject\ScreenEffect\AugustaSFX</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Parry.cpp">
+      <Filter>03. GameObject\UI\Props\Parry</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
@@ -1318,8 +1375,41 @@
     <ClCompile Include="..\private\DummyNPC.cpp">
       <Filter>03. GameObject\Actor\NPC</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Effect_Radial.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Radial</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\GalbrenaDarkWing.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundQTE.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ScreenEffect.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Augusta_UltiSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Slash.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SFX_Prefab.cpp">
+      <Filter>03. GameObject\ScreenEffect\Prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Star.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaUlti_SFX_Circle.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>      
+    <ClCompile Include="..\private\UI_MobHPBar.cpp">
+      <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
     </ClCompile>
     <ClCompile Include="..\private\DummyCell.cpp">
       <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
@@ -1379,9 +1469,6 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl">
-      <Filter>96. ShaderFiles</Filter>
-    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
@@ -1389,6 +1476,15 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Sonora.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxInstance_AnimMesh.hlsl">

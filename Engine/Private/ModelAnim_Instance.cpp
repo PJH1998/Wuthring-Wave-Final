@@ -239,8 +239,15 @@ HRESULT CModelAnim_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreT
 			return E_FAIL;
 	}
 
-	if (FAILED(Ready_Mesh(InputFile)))
-		return E_FAIL;
+	if (m_iNumMeshType < 2)
+	{
+		if (FAILED(Ready_Mesh(InputFile)))
+			return E_FAIL;
+	}
+	else
+	{
+
+	}
 	if (FAILED(Ready_Material(pFilePath)))
 		return E_FAIL;
 	InputFile.close();
@@ -394,18 +401,7 @@ _bool CModelAnim_Instance::Update_RootMotion(const _string& strAnimationName, CT
 	if (iter == m_Animations.end())
 		return false;
 
-	// 1. 이전 애니메이션 체크해서 동일하지 않은 경우 Clear
-	//if (m_strPreAnimation != strAnimationName)
-	//{
-	//	m_isChangeAnimation = true;
-	//	m_strPreAnimation = strAnimationName;
-	//	Clear_Animation(strAnimationName);
-	//}
-
 	// 2. 현재 애니메이션의 Track Position 업데이트
-
-	// 3. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	//_matrix RootMatrix = XMMatrixIdentity();
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, pTrackPosition, isRootMotion, &m_RootMatrix);
 
 	// 6. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
@@ -443,10 +439,6 @@ void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName,
 	if (nullptr == pPaddingIndices)
 	{
 		// 종류로 구분되는 mesh가 아닌경우(머리, 얼굴, 몸통 등 부위를 조합하는 경우가 아닐 때, mesh가 한 개, 혹은 여러 개의 모음집일 경우)
-		//for (_uint i = 0; i < m_iNumMeshes; ++i)
-		//{
-		//	m_pVtxInstanceDatas[i].push_back(m_VtxInstanceDatas[iInstanceIndex]);
-		//}
 	}
 	else
 	{

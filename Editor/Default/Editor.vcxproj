@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\public\Animator_UI.h" />
+    <ClInclude Include="..\public\AugustaBlur.h" />
     <ClInclude Include="..\public\Augusta_SFX.h" />
     <ClInclude Include="..\Public\Camera_Interface.h" />
     <ClInclude Include="..\Public\ASM_Interface.h" />
@@ -193,9 +194,14 @@
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
     <ClInclude Include="..\Public\Effect_Mesh.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
+    <ClInclude Include="..\Public\Effect_Radial.h" />
     <ClInclude Include="..\Public\Effect_Rect.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
     <ClInclude Include="..\Public\Event_Scene_Edit.h" />
+    <ClInclude Include="..\public\Galbrena_Blur.h" />
+    <ClInclude Include="..\Public\Galbrena_SFX.h" />
+    <ClInclude Include="..\Public\Galbrena_SFX_Circle.h" />
+    <ClInclude Include="..\public\Galbrena_SFX_Star.h" />
     <ClInclude Include="..\Public\Interface_Edit.h" />
     <ClInclude Include="..\Public\Level_Animation.h" />
     <ClInclude Include="..\Public\Level_Camera.h" />
@@ -217,6 +223,7 @@
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\Public\Editor_Define_UI.h" />
+    <ClInclude Include="..\Public\Radial_Controller.h" />
     <ClInclude Include="..\Public\Rect_Controller.h" />
     <ClInclude Include="..\Public\EditorProp.h" />
     <ClInclude Include="..\Public\Sequencer.h" />
@@ -240,6 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Animator_UI.cpp" />
+    <ClCompile Include="..\private\AugustaBlur.cpp" />
     <ClCompile Include="..\private\Augusta_SFX.cpp" />
     <ClCompile Include="..\Private\Camera_Interface.cpp" />
     <ClCompile Include="..\Private\ASM_Interface.cpp" />
@@ -272,7 +280,12 @@
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Effect_Mesh.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
+    <ClCompile Include="..\Private\Effect_Radial.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp" />
+    <ClCompile Include="..\private\Galbrena_Blur.cpp" />
+    <ClCompile Include="..\Private\Galbrena_SFX.cpp" />
+    <ClCompile Include="..\Private\Galbrena_SFX_Circle.cpp" />
+    <ClCompile Include="..\private\Galbrena_SFX_Star.cpp" />
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
     <ClCompile Include="..\Private\Level_Camera.cpp" />
@@ -293,6 +306,7 @@
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
+    <ClCompile Include="..\Private\Radial_Controller.cpp" />
     <ClCompile Include="..\Private\Rect_Controller.cpp" />
     <ClCompile Include="..\Private\EditorProp.cpp" />
     <ClCompile Include="..\Private\Sequencer.cpp" />

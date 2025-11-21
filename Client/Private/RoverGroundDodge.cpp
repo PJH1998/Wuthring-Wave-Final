@@ -65,6 +65,9 @@ void CRoverGroundDodge::OnEnter(void* pArg)
 	
 	pGameInstance->OnShake(Desc);
 
+	// 8. Effect
+	m_pRover->Spawn_Effect(TEXT("Common_Limit"));
+
 }
 
 void CRoverGroundDodge::OnUpdate(_float fTimeDelta)

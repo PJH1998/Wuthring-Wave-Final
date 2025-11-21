@@ -322,7 +322,7 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     Out.vPosition = float4(ndc.xy, z_ndc, 1.0f);
 
     Out.vTexcoord = In.vTexcoord;
-    Out.vWorldPos = float4(pixelPos, 0, 1); // 디버깅용(스크린 px)
+    Out.vWorldPos = float4(pixelPos, 0, 1);
     Out.vProjPos = Out.vPosition;
 
     // for Pixel Shaders

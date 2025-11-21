@@ -13,7 +13,11 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+
+//SFX
+#ifdef _DEBUG
 #include "SonoraChange.h"
+#endif
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -25,6 +29,8 @@ HRESULT CLevel_GamePlay::Initialize()
 {
 	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+
+	m_pGameInstance->Setting_LUT(0, 0.25f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -40,6 +46,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
 		CRASH("Test");
 	
+
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
 	m_pGameInstance->Render_ShadowMap();
@@ -59,8 +66,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_CameraNF();
 
 	m_pGameInstance->SettingFog(true);
-	m_pGameInstance->Set_LUT_Index(0);
-
+	
 
 	Ready_UI();
 	Ready_Layer_Player();
@@ -387,20 +393,28 @@ void CLevel_GamePlay::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-			CRASH("Failed to Add RootUI to UI_Manager.");
+	//	if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
+	//		CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
 		CRASH("Failed Ready Button_Interact");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+	//	CRASH("Failed Ready LockOn");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+	//	CRASH("Failed Ready Parry");
 
 	// _UI
 }
@@ -414,9 +428,22 @@ void CLevel_GamePlay::Ready_Mouse()
 
 void CLevel_GamePlay::Ready_SFX()
 {
+	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::GAMEPLAY));
+
+#pragma region SFX
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
-		CRASH("h");
+		CRASH("Failed Add Pool SONORA_CHANGE");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
+	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
+	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
+	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiStar"), 1)))
+	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
+
+#pragma endregion
 }
 
 #ifdef _DEBUG
@@ -435,24 +462,67 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
-		CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-		Desc.fEffectTime = 3.f;
-		Desc.fRadialTime = 2.f;
-		Desc.fFadeTime = 2.f;
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+		//Desc.fEffectTime = 3.f;
+		//Desc.fRadialTime = 1.f;
+		//Desc.fFadeTime = 1.f;
+		  
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
-	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
 	{
-		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
-
-		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
-
-		ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
-
-		m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_IsSSS = !m_IsSSS;
+		m_pGameInstance->SettingSSS(m_IsSSS);
+	}
+
+
+	ImGui::Begin("SHADER");
+
+	//if (ImGui::CollapsingHeader("SSS"))
+	//{
+	//	ImGui::Checkbox("IsSSS", &m_IsSSS);
+	
+	//}
+	if (ImGui::CollapsingHeader("LUT"))
+	{
+		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
+		{
+			for (_uint i = 0; i < 7; ++i)
+			{
+
+#ifdef _DEBUG
+				if (ImGui::Selectable(to_string(i).c_str()))
+				{
+					m_iLUT_Index = i;
+				}
+#endif // _DEBUG
+			}
+
+			ImGui::EndCombo();
+		}
+
+		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
+		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+	}
+
+	ImGui::End();
+	//if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	//{
+	//	ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+	//	ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+	//	ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
+
+	//	m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+	//}
 }
 #endif
 

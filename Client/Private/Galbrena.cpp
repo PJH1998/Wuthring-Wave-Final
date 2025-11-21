@@ -66,6 +66,9 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	m_pQTEColliderCom->Set_Position(vPos);
 
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
+	m_fCameraOriginOffset = 1.2f;
+	m_fCameraOffset = 1.2f;
     return S_OK;
 }
 
@@ -116,14 +119,16 @@ void CGalbrena::Update(_float fTimeDelta)
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
+
+	_bool IsSelect = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+
 	if (!m_IsQTE)
 	{
 		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
 		// 6. Camera 갱신 => 위치 따라오게
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
 	}
 	else
 	{
@@ -188,7 +193,19 @@ void CGalbrena::Render()
 		if(FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
 
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		_bool HasNormal = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		_bool HasMask = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			HasMask = true;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
+			CRASH("Ready g_HasSkinMask Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -267,10 +284,19 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 		case CHARACTER_TRANSITIONTYPE::IDLE:
 		{
 			// 애니메이션 변경할 값.
-			GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+			GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::QTE:
+		{
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
+			break;
+		}
+
 	}
 
 	// 상태 변수 초기화
@@ -415,7 +441,7 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 // Hit 판정.
 void CGalbrena::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit)
+	if (nullptr == pArg || m_IsHit || m_IsQTE)
 		return;
 
 	_uint iFlag = {};
@@ -484,6 +510,17 @@ void CGalbrena::Bind_QTE(_bool IsQTE)
 		GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
 	}
+}
+
+void CGalbrena::Reset_QTECamera()
+{
+	m_fCameraOffset = m_fCameraOriginOffset;
+}
+
+void CGalbrena::Bind_QTECamera()
+{
+	m_fCameraOriginOffset = m_fCameraOffset;
+	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
 

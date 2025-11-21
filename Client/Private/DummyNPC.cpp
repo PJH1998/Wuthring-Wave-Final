@@ -140,7 +140,7 @@ void CDummyNPC::Ready_InstanceCells(DUMMYNPC_DESC* pDesc)
 		CellDesc.iInstanceIndex = i;
 		
 		CellDesc.vStartPos = vPosition;
-		CellDesc.vStartPos.z -= i * 1.f;
+		CellDesc.vStartPos.x -= i * 1.f;
 		CellDesc.fTrackPos = m_pGameInstance->Rand(0.f, 30.f);
 		CellDesc.iNumMeshType = 0;
 		CellDesc.fSpeedPerSec = 10.f;

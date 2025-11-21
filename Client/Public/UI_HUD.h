@@ -39,7 +39,9 @@ public:
 private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_Presets();
+
 	HRESULT					Ready_BossUINameText();
+	HRESULT					Ready_PlayerHPText();
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
@@ -59,8 +61,12 @@ private:
 
 	void					Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots);
 	void					Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots);
+	void					Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots);
 	
 	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
+
+private:
+	void					Update_Text_PlayerHP();
 
 private:
 	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});

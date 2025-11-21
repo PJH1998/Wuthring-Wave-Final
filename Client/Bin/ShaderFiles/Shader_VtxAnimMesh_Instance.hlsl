@@ -19,8 +19,11 @@ float g_fFlowRate = 0.f;
 
 //matrix g_BoneMatrices[512];
 row_major matrix g_OffsetMatrices[512];
+StructuredBuffer<uint> g_MeshLocalBoneIndecies;
+
 bool g_HasNormal = false;
 uint g_iNumBones;
+float g_fTest = 10.f;
 
 cbuffer GlobalConstants
 {
@@ -60,12 +63,23 @@ VS_OUT VS_MAIN(VS_IN In)
     uint ibaseIndex = In.iBaseIndex * g_iNumBones;
     matrix_rm matBone, matBW, matVP;
     
-    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
+    float3 w3 = In.vBlendWeight.xyz;
+    float fWeightW = saturate(1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z));
+
+    float4 vReplaceW = float4(w3, fWeightW);
+    float sumW = vReplaceW.x + vReplaceW.y + vReplaceW.z + vReplaceW.w;
+    vReplaceW /= max(sumW, 1e-6f);
+    
+    uint4 iMeshLocalBoneIndecies = uint4(
+        g_MeshLocalBoneIndecies[In.vBlendIndex.x],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.y],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.z],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
     matBone =
-    mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.x)]) * In.vBlendWeight.x +
-    mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.y)]) * In.vBlendWeight.y +
-    mul(g_OffsetMatrices[In.vBlendIndex.z], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.z)]) * In.vBlendWeight.z +
-    mul(g_OffsetMatrices[In.vBlendIndex.w], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.w)]) * fWeightW;
+    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.x], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.x)]) * vReplaceW.x +
+    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.y], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.y)]) * vReplaceW.y +
+    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.z], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.z)]) * vReplaceW.z +
+    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.w], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.w)]) * vReplaceW.w;
     
     float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
     vPosition = mul(vPosition, In.TransformMatrix);
@@ -81,7 +95,13 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, In.TransformMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = Out.vPosition;
-
+    //if (In.vBlendIndex.x >= g_iNumBones ||
+    //   In.vBlendIndex.y >= g_iNumBones ||
+    //   In.vBlendIndex.z >= g_iNumBones ||
+    //   In.vBlendIndex.w >= g_iNumBones)
+    //{
+    //    Out.vProjPos.z *= g_fTest;
+    //}
     return Out;
 }
 
@@ -111,6 +131,12 @@ PS_OUT PS_MAIN(PS_IN In)
 
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
+    
+    //if (In.vProjPos.z > 1.f)
+    //{
+    //    In.vProjPos.z *= 0.1f;
+    //    Out.vDiffuse = float4(1.f, 0.f, 0.f, 1.f);
+    //}
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;

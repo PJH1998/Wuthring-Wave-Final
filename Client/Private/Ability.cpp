@@ -714,6 +714,10 @@ void CAbility::Print_CoolTime()
 	}
 	cout << "Cool Down End" << endl;
 }
+void CAbility::Clear_CoolTime()
+{
+	m_mapSkillCooldowns.clear();
+}
 #else
 void CAbility::Debug_FullCost(_bool IsAll)
 {
@@ -724,12 +728,10 @@ void CAbility::Debug_FullCost(_bool IsAll)
 	{
 		for (_uint i = 1; i < iEnd; ++i)
 		{
-
 			if (i == 3 || i == 4)
 				continue;
 
 			m_Costs[i] = m_fCostMax;
-
 		}
 	}
 	else
@@ -738,6 +740,9 @@ void CAbility::Debug_FullCost(_bool IsAll)
 		{
 			m_Costs[i] = m_fCostMax;
 		}
+
+		// 풀로 채우기.
+		m_CharacterInfo.fHarmonyGauge = m_CharacterInfo.fMaxHarmonyGauge;
 	}
 }
 
@@ -759,6 +764,11 @@ void CAbility::Print_CoolTime()
 		cout << pair.first << " : " << pair.second << endl;
 	}
 	cout << "Cool Down End" << endl;
+}
+
+void CAbility::Clear_CoolTime()
+{
+	m_mapSkillCooldowns.clear();
 }
 #endif // _DEBUG
 
