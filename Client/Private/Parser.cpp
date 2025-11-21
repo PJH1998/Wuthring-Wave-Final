@@ -603,7 +603,6 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 
 	strEffectPath = strDefaultPath;
 	strEffectPath += "/FXDecal/";
-	return;
 	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
 	{
 		if (entry.is_regular_file())
