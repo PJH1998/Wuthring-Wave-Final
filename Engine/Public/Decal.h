@@ -39,7 +39,6 @@ private:
 	_float3						m_vEmiisiveLuminance = {};
 	CVIBuffer_Decal*			m_pVIBuffer_Decal = { nullptr };
 
-
 private:
 	HRESULT						Bind_Resources(CShader* pShader);
 

@@ -67,6 +67,7 @@ namespace Engine
 		_matrix WorldMatrix;
 		_float fLifeTime;
 		_float4 vColor;
+		_float fEmissiveIntensity;
 	}DECAL_DATA;
 
 	typedef struct tagNotify

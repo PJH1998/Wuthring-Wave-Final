@@ -400,7 +400,7 @@ PS_OUT_BACKBUFFER PS_BLOOM(PS_IN In)
     
     float4 vColor = g_BloomTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    float4 vResult = vOriginColor + (vColor * 0.4f);
+    float4 vResult = vOriginColor + (vColor * 0.4f); //g_fExposure);
     
     //Out.vColor = vResult;
     Out.vColor = float4(ToneMap(vResult.xyz), 1.f);
