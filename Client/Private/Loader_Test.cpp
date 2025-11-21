@@ -663,7 +663,7 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Parry));
 
-	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarExtended.json"; // ksta
+	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
 
 

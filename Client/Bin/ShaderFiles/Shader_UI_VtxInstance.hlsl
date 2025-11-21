@@ -33,6 +33,7 @@ float g_UIScale = 1.f; // UI Scaler
 
 
 
+
 // Variant UI Variables
 #define UIFLAG_ERROR                0           // 플래그를 주지 않았을 때의 초기값
 #define UIFLAG_COOLDOWN_CIRCLE      1           // 반시계방향으로 나타나는 쿨타임 구현용
@@ -41,7 +42,8 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_PLAYER_TRANSMIT      4  
 #define UIFLAG_SIMPLEMASK           5
 #define UIFLAG_ACTIVEFEEDBACK       6
-#define UIFLAG_END                  7
+#define UIFLAG_ENEMY_HP             7
+#define UIFLAG_END                  8
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -880,7 +882,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             Out.vColor = vAppliedColor;
             return Out;
-        }
+        } break;
         case UIFLAG_ACTIVEFEEDBACK :    // 6
         {
             // ==============================
@@ -904,7 +906,48 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             Out.vColor.a = vAppliedColor.a * lerp(1.f - fStartAlpha, 0.f, fDeltaX);
             
             return Out;
-        }
+        } break;
+        case UIFLAG_ENEMY_HP :          // 7
+        {
+            // ==============================
+            // * [7] Dynamic Enemy HP
+            // ==============================
+            // * matrix info [size : dynamic] (per mobs)
+            // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
+            // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
+            // [ALPHA] 
+            // ==============================
+            vector vColor1 = In.mExtra0.xyzw;
+            vector vColor2 = In.mExtra1.xyzw;
+            float fAlpha = saturate(In.mExtra2.x);
+            
+            // 9sector.. 
+            float2 vSize = {
+                length(g_WorldMatrix[0].xyz) * g_UIScale,
+                length(g_WorldMatrix[1].xyz) * g_UIScale,
+            };
+            
+            float2 border = g_SectorBorder * g_UIScale;
+            float2 localPos = In.vTexcoord * vSize;
+                
+            //float2 resultUV = Calc_NineSectorUV(localPos, vSize, border, g_ImageSize); // calced
+            //float2 finalUV;
+            //finalUV.x = lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, resultUV.x);
+            //finalUV.y = lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, resultUV.y);
+            Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            // =====
+            
+                        
+            //Out.vColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
+            //return Out;
+            
+            //Out.vColor.rgb = vColor.rgb;
+            Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
+            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength) * (1 - fAlpha);
+            
+            //Out.vColor.rgba = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            return Out;
+        } break;
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);

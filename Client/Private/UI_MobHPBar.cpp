@@ -31,11 +31,11 @@ HRESULT CUI_MobHPBar::Initialize_Clone(void* pArg)
 
 	Ready_Components(pArg);
 	//__super::Ready_Events();
-	Ready_Presets();
-	
+	PreAssign_Presets();
+
 
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
-	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarExtended.json";
+	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json";
 	Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
 
@@ -81,28 +81,8 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	//CCustom_UI* pHpInstUI = Find_ChildObject(L"수정필요, 자식오브젝트 이름");
-	//auto instDesc = pHpInstUI->Get_UIDesc().vecInstanceDescs;
-	//
-	//instDesc.resize(m_vecMobInfo.size());		// 주시중인 몹 갯수만큼 인스턴스 갯수 변경
 
-
-	
-	// 인스턴싱으로 불러오는 건 가능함. 이동도 가능함.
-	// 근데 거리에 따른 Scale 조절 시에, 중점이 기준이 아닌 인스턴스들은
-	// 각자의 중점에 따라 Scale이 조절되기에 한 부모가 Scale 조절되는 느낌이 아닌 지들 제각각 따로놀듯이 조절이 될 텐데
-	// 이거 처리는 어떻게 하는가
-
-
-
-	// 1. 이건 인스턴싱된 걸 움직이는게 아닌데
-	// 후계산이 다 된 combined transform 을 조작하거나
-	// 2. 이걸 인스턴싱에 적용한다? 그게 더 현실성 있을 듯
-	// 부모의 combined transform 을 기준으로 역산한 뒤, 반영하고, 재계산하거나 하면 될 것 같음
-
-
-
-
+	// 이 단계에서 정보들 받아온다고 가정
 #pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
 
 	//static _bool isActiveMobHPBar = false;
@@ -110,32 +90,42 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 	//	isActiveMobHPBar = !isActiveMobHPBar;
 
 
+	static _float fTmpHP = 50.f;
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+		fTmpHP -= 10.f;
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+		fTmpHP += 10.f;
+
+	std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+
 	//if (isActiveMobHPBar)
 	//{
 		UI_MOBINFO_DESC tTmpDesc = {};
-
-		const _uint iNumTestMobs = 3;
-
+		
+		const _uint iNumTestMobs = 5;
+		
 		for (_uint i = 0; i < iNumTestMobs; i++)
 		{
+			if (i == 3)
+				continue;
 			//_float3 fTestOffset = {
 			//	m_pGameInstance->Rand(-10.f, 10.f),
 			//	m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
 			//	m_pGameInstance->Rand(-10.f, 10.f)
 			//};
-
+		
 			_float3 fTestOffset = { 0.f, -10.f * i, 0.f};
-
+		
 			tTmpDesc.vMobPos = fTestOffset;
-			tTmpDesc.fMobCurHP = 50.f;
-			tTmpDesc.fMobCurHP = 70.f;
+			tTmpDesc.fMobCurHP = fTmpHP; //50.f;
+			tTmpDesc.fMobMaxHP = 100.f;
 
+			tTmpDesc.iObjKey = i;
+		
 			m_pGameSystem->Update_MobStatus(tTmpDesc);
 		}
 	//}
-
 #pragma endregion
-
 
 
 	__super::Update(fTimeDelta);
@@ -145,6 +135,10 @@ void CUI_MobHPBar::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CachedData(fTimeDelta);
+
+
 
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
@@ -173,17 +167,84 @@ void CUI_MobHPBar::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	//m_vecMobKeys.push_back(tDesc.pMonsterKey);
 }
 
-void CUI_MobHPBar::Ready_Presets()
-{
-
-}
-
 void CUI_MobHPBar::PreAssign_ChildUIs()
 {
-	m_pUI_HPFrame	= Find_ChildObject(L"InstHPFrame");
-	m_pUI_HPBar		= Find_ChildObject(L"InstHPBar");
-	m_pUI_SAFrame	= Find_ChildObject(L"InstSAFrame");
-	m_pUI_SABar		= Find_ChildObject(L"InstSABar");
+	//m_pUI_HPFrame	= Find_ChildObject(L"InstHPFrame");
+	//m_pUI_HPBar		= Find_ChildObject(L"InstHPBar");
+	//m_pUI_SAFrame	= Find_ChildObject(L"InstSAFrame");
+	//m_pUI_SABar		= Find_ChildObject(L"InstSABar");
+
+	m_pUI_HB		= Find_ChildObject(L"InstHPBar");
+}
+
+void CUI_MobHPBar::PreAssign_Presets()
+{
+	_float4 vGreenHB  = { 0.188f, 1.000f, 0.608f, 1.000f };
+	_float4 vYellowHB = { 0.973f, 1.000f, 0.188f, 1.000f };
+	_float4 vRedHB    = { 1.000f, 0.227f, 0.188f, 1.000f };
+
+	m_arrColorPresets[HPC_GREEN]	= vGreenHB;
+	m_arrColorPresets[HPC_YELLOW]	= vYellowHB;
+	m_arrColorPresets[HPC_RED]		= vRedHB;
+}
+
+void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
+{
+	// 여기서, 받아온 정보들을 기반으로 캐싱,
+	// vecMobHB 에 저장되어있는지 확인 후 있다면 그쪽에 push
+	
+	//m_vecMobRTInfo 이거 전부 false로 돌리고,
+	//m_vecMobInfo 검사하며 없으면 추가, 있으면 갱신하며 true로 돌리기
+	//	
+	//이후 만약 안 돌려졌으면 그건 제거하기
+
+
+	// 캐시된 정보들, 업데이트 여부 초기값으로
+	for (auto& mobRT : m_vecMobInfo_RT)
+		mobRT.isUpdatedThisFrame = false;
+
+	// 업데이트를 위한 순회
+	for (auto& mobInfo : m_vecMobInfo)
+	{
+		// 캐시에서 찾으면	: 생존 시간 및 정보의 갱신
+		// 캐시에 없으면	: 정보 추가
+		_bool isFind_CachedData = false;
+		for (auto& mobRTInfo : m_vecMobInfo_RT)
+		{
+			UI_MOBINFO_DESC& pCachedMobInfo = mobRTInfo.tInfoDesc;
+
+			// 찾음! -> 정보 갱신
+			if (pCachedMobInfo.iObjKey == mobInfo.iObjKey)
+			{
+				mobRTInfo.isUpdatedThisFrame = true;
+				mobRTInfo.fCurElapsedTime += fTimeDelta;
+				mobRTInfo.tInfoDesc = mobInfo;
+
+				isFind_CachedData = true;
+				break;
+			}
+		}
+
+		// 못찾음! -> 추가
+		if (!isFind_CachedData)
+		{
+			UI_MOBRT_DESC pDesc = {};
+			pDesc.tInfoDesc = mobInfo;
+			pDesc.isUpdatedThisFrame = true;
+			pDesc.fCurElapsedTime = 0.f;
+
+			m_vecMobInfo_RT.push_back(pDesc);
+		}
+	}
+
+	// 캐시에 남아있는데 갱신도 안됨! -> 제거 
+	m_vecMobInfo_RT.erase(
+		remove_if(m_vecMobInfo_RT.begin(), m_vecMobInfo_RT.end(),
+			[](const auto& mobRT)
+			{
+				return mobRT.isUpdatedThisFrame == false;
+			}),	
+		m_vecMobInfo_RT.end());
 }
 
 void CUI_MobHPBar::Update_Instances()
@@ -192,10 +253,12 @@ void CUI_MobHPBar::Update_Instances()
 
 
 	vector<CCustom_UI*> vecFloatingUIs = {};
-	vecFloatingUIs.push_back(m_pUI_HPFrame);
-	vecFloatingUIs.push_back(m_pUI_HPBar);
-	vecFloatingUIs.push_back(m_pUI_SAFrame);
-	vecFloatingUIs.push_back(m_pUI_SABar);
+	//vecFloatingUIs.push_back(m_pUI_HPFrame);
+	//vecFloatingUIs.push_back(m_pUI_HPBar);
+	//vecFloatingUIs.push_back(m_pUI_SAFrame);
+	//vecFloatingUIs.push_back(m_pUI_SABar);
+	vecFloatingUIs.push_back(m_pUI_HB);
+
 
 	for (auto& floatingUI : vecFloatingUIs)
 	{
@@ -209,7 +272,10 @@ void CUI_MobHPBar::Update_Instances()
 		if (floatingUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
 			floatingUI->Get_UIDesc().strUIName == L"InstHPBar")
 			Calc_CamDistScale(floatingUI, fDistancecPivot);
+
 	}
+
+	Calc_HBEff();
 }
 
 void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
@@ -270,116 +336,100 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 			/* vecInstDesc[i].vSInstTrans.z +*/ vCalcedDeltaPos.z,
 			/* vecInstDesc[i].vSInstTrans.w  */ 1.f
 		};
-
-
-		// 만약 SA 없는 적이라면 SA 바 가림.
-		if (pTargetUI->Get_UIDesc().strUIName == L"InstSAFrame" ||
-			pTargetUI->Get_UIDesc().strUIName == L"InstSABar")
-		{
-			if (m_vecMobInfo[i].isHaveSA)
-				vecInstDesc[i].vClipTexcoordX = { 0.f, 1.f };
-			else
-				vecInstDesc[i].vClipTexcoordX = { 0.f, 0.f };
-		}
 	}
 
 	// apply desc. finally.
 	pTargetUI->Set_UIDesc(targetDesc);
-	
-	
-	
 
+#pragma region old variant (bar type hp)
 
 	// calc variant desc.
-	vector<_float4x4> vecVariantMat = {};
-
-
-	_float4 vVariantColor = { 1.f, 0.f, 1.f, 1.f };
-	_float4 vVariantEndColor = { 0.f, 1.f, 1.f, 1.f };
-	_float4 vVariantTmpColor = { 1.f, 1.f, 0.f, 1.f };
-
-	_float4 vTransparentColor = { 0.f, 0.f, 0.f, 0.f };
-
-	_float4 vHPBarColor		= { 0.816f, 0.302f, 0.231f, 0.900f };
-	_float4 vHPBarGradColor	= { 0.820f, 0.361f, 0.231f, 0.900f };
-	_float4 vHPBgColor		= { 0.500f, 0.500f, 0.500f, 0.800f };
-	_float4 vSABarColor		= { 0.900f, 0.900f, 0.900f, 0.900f };
-	_float4 vSABgColor		= { 0.500f, 0.500f, 0.500f, 0.800f };
-
-	const _float4 vHPColor1 = { 1.f, .7f, .1f, 1.f };
-	const _float4 vHPColor2 = { 1.f, .2f, .0f, 1.f };
-	const _float4 vHPBackColor1 = { .8f, .8f, .8f, 1.f };
-
-	const _float4 vSAColor = { 1.f, 1.f, 1.f, 1.f };   // before armor break
-	const _float4 vSABreakColor = { .9f, .8f, .3f, 1.f };
-	const _float4 vSABackColor = { 1.f, 1.f, 1.f, .3f };   // after armor break
-
-	vecVariantMat.resize(m_vecMobInfo.size());
-
-	if (pTargetUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
-		pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")
-	{
-		if (pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")		// HP Bar
-			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
-			{
-				//_float fMobMaxHP = m_pGameSystem->Get_MonsterInfo(m_vecMobKeys[i].c_str())->fMaxHp;
-				_float fMobCurHP = m_vecMobInfo[i].fMobCurHP;
-				_float fMobMaxHP = m_vecMobInfo[i].fMobMaxHP;
-
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPColor1;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPColor2;
-				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = fMobCurHP / fMobMaxHP; // m_vecMobInfo[i].fMobCurHP/ m_vecMobInfo[i].fMobMaxHP;
-			}
-		else														// HP BG
-			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
-			{
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPBackColor1;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPBackColor1;
-				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
-			}
-
-	}
-	else
-	{
-		if (pTargetUI->Get_UIDesc().strUIName == L"InstSABar")		// SA Bar
-			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
-			{
-				_float fMobCurSA = m_vecMobInfo[i].fMobCurSA;
-				_float fMobMaxSA = m_vecMobInfo[i].fMobMaxSA;
-
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSAColor;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSAColor;
-				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = fMobCurSA / fMobMaxSA; // m_vecMobInfo[i].fMobCurSA / m_vecMobInfo[i].fMobMaxSA;
-			}
-		else														// SA BG
-			for (_uint i = 0; i < m_vecMobInfo.size(); i++)
-			{
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSABackColor;
-				*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSABackColor;
-				*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
-			}
-	}
+	//vector<_float4x4> vecVariantMat = {};
+	//
+	//
+	//_float4 vVariantColor = { 1.f, 0.f, 1.f, 1.f };
+	//_float4 vVariantEndColor = { 0.f, 1.f, 1.f, 1.f };
+	//_float4 vVariantTmpColor = { 1.f, 1.f, 0.f, 1.f };
+	//
+	//_float4 vTransparentColor = { 0.f, 0.f, 0.f, 0.f };
+	//
+	//_float4 vHPBarColor		= { 0.816f, 0.302f, 0.231f, 0.900f };
+	//_float4 vHPBarGradColor	= { 0.820f, 0.361f, 0.231f, 0.900f };
+	//_float4 vHPBgColor		= { 0.500f, 0.500f, 0.500f, 0.800f };
+	//_float4 vSABarColor		= { 0.900f, 0.900f, 0.900f, 0.900f };
+	//_float4 vSABgColor		= { 0.500f, 0.500f, 0.500f, 0.800f };
+	//
+	//const _float4 vHPColor1 = { 1.f, .7f, .1f, 1.f };
+	//const _float4 vHPColor2 = { 1.f, .2f, .0f, 1.f };
+	//const _float4 vHPBackColor1 = { .8f, .8f, .8f, 1.f };
+	//
+	//const _float4 vSAColor = { 1.f, 1.f, 1.f, 1.f };   // before armor break
+	//const _float4 vSABreakColor = { .9f, .8f, .3f, 1.f };
+	//const _float4 vSABackColor = { 1.f, 1.f, 1.f, .3f };   // after armor break
+	//
+	//vecVariantMat.resize(m_vecMobInfo.size());
+	//
+	//if (pTargetUI->Get_UIDesc().strUIName == L"InstHPFrame" ||
+	//	pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")
+	//{
+	//	if (pTargetUI->Get_UIDesc().strUIName == L"InstHPBar")		// HP Bar
+	//		for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+	//		{
+	//			//_float fMobMaxHP = m_pGameSystem->Get_MonsterInfo(m_vecMobKeys[i].c_str())->fMaxHp;
+	//			_float fMobCurHP = m_vecMobInfo[i].fMobCurHP;
+	//			_float fMobMaxHP = m_vecMobInfo[i].fMobMaxHP;
+	//
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPColor1;
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPColor2;
+	//			*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = fMobCurHP / fMobMaxHP; // m_vecMobInfo[i].fMobCurHP/ m_vecMobInfo[i].fMobMaxHP;
+	//		}
+	//	else														// HP BG
+	//		for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+	//		{
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vHPBackColor1;
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vHPBackColor1;
+	//			*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
+	//		}
+	//
+	//}
+	//else
+	//{
+	//	if (pTargetUI->Get_UIDesc().strUIName == L"InstSABar")		// SA Bar
+	//		for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+	//		{
+	//			_float fMobCurSA = m_vecMobInfo[i].fMobCurSA;
+	//			_float fMobMaxSA = m_vecMobInfo[i].fMobMaxSA;
+	//
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSAColor;
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSAColor;
+	//			*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = fMobCurSA / fMobMaxSA; // m_vecMobInfo[i].fMobCurSA / m_vecMobInfo[i].fMobMaxSA;
+	//		}
+	//	else														// SA BG
+	//		for (_uint i = 0; i < m_vecMobInfo.size(); i++)
+	//		{
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSABackColor;
+	//			*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSABackColor;
+	//			*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 1.f;
+	//		}
+	//}
 
 	// create variant matrix.
-	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-		vecVariantMat,
-		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-		true
-	};
-	
+	//CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+	//	vecVariantMat,
+	//	ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+	//	true
+	//};
+
 	// apply variant desc.
-	pTargetUI->Set_VariantUIDesc(tVariantDesc);
+	//pTargetUI->Set_VariantUIDesc(tVariantDesc);  
+#pragma endregion
+
 }
 
 void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance)
 {
 	const _float fMaxScaleFactor = 0.6f;
 
-
-
-
-	// 이제 여기서 어케함? 인스턴스별로 크기 조절해줘야하는데
-	// 아마 각자 인스턴스의 위치별 중점을 기준으로 줄어들꺼라 또 틀어질 듯
 
 	auto targetDesc = pTargetUI->Get_UIDesc();
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
@@ -450,6 +500,91 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 		// apply inst desc.
 		pTargetUI->Set_UIDesc(targetDesc);
 	}
+}
+
+void CUI_MobHPBar::Calc_HBEff()
+{
+	// 여기서 variant desc 재정의 및  변수 전달, 색상 수정 ㅇㅇ
+
+	auto targetDesc = m_pUI_HB->Get_UIDesc();	// for Normal Desc
+	auto& vecInstDesc = targetDesc.vecInstanceDescs;
+
+	vector<_float4x4> vecVariantMat = {};		// for Variant Desc
+	vecVariantMat.resize(vecInstDesc.size());
+
+	// 갯수만큼 수정,
+
+	for (_uint i = 0; i < m_vecMobInfo_RT.size(); i++)
+	{
+		// 변수 도출용
+		const _float fInstCurHP = m_vecMobInfo_RT[i].tInfoDesc.fMobCurHP;		// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
+		const _float fInstMaxHP = m_vecMobInfo_RT[i].tInfoDesc.fMobMaxHP;		// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
+		const _float fMinHBTime = m_fMinRTTime;	// 최대 주기값
+		const _float fMaxHBTime = m_fMaxRTTime;	// 최소 주기값
+		const _float fColorBranchHP = 0.4f;	// 색상이 변할 기준점
+
+		// >> 게산에 쓸 것 
+		const _float fElapsedLifetime = m_vecMobInfo_RT[i].fCurElapsedTime;		// 인스턴스 별 경과 시간
+		const _float fHPRatio = fInstCurHP / fInstMaxHP;						// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
+		
+		const _float fFillTime	= 0.2f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
+
+		// 1. 시간에 따른 HB 관리
+		const _float fCurHBTime = fMinHBTime + (fMaxHBTime - fMinHBTime) * fHPRatio;	// 계산된 현재 주기
+
+		// 2. 각 인스턴스에 적용할 최종 계산된 변수
+		_float fClipXRate = (fElapsedLifetime / fFillTime > 1.f) ? 1 : fElapsedLifetime / fFillTime;	// 얼마나 가릴건지. 0 부터 fFillTime 까를 0~1로
+		_float fAlphaRate = (fElapsedLifetime <= fFillTime )?				// 얼마나 보였다 사라질건지
+			fElapsedLifetime / fFillTime :									// filltime 도달 전 알파
+			(fCurHBTime - fElapsedLifetime) / (fCurHBTime - fFillTime);	// filltime 도달 후 알파
+
+		_float4 vColorRate = {};				// 시간 경과에 따라 어떤 색으로 변할건지
+		_vector vColorRate_Load = (fHPRatio < fColorBranchHP) ?
+			XMVectorLerp(
+				XMLoadFloat4(&m_arrColorPresets[HPC_RED]), 
+				XMLoadFloat4(&m_arrColorPresets[HPC_YELLOW]), 
+				fHPRatio / fColorBranchHP) :
+			XMVectorLerp(
+				XMLoadFloat4(&m_arrColorPresets[HPC_YELLOW]),
+				XMLoadFloat4(&m_arrColorPresets[HPC_GREEN]), 
+				(fHPRatio - fColorBranchHP) / (1.f - fColorBranchHP)
+			);
+		XMStoreFloat4(&vColorRate, vColorRate_Load);
+
+		_float fScaleRate = 1.f + fAlphaRate * 0.2f;	// 얼마나 커졌다 작아질건지
+
+
+		// 3. 실질 적용부
+		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
+		auto& targetVariantMat = vecVariantMat[i];
+		targetInst.vClipTexcoordX = { 0.f, fClipXRate };
+		
+		*reinterpret_cast<_float4*>(&targetVariantMat._11)	= vColorRate;
+		*reinterpret_cast<_float4*>(&targetVariantMat._21)	= vColorRate;
+		*reinterpret_cast<_float*>(&targetVariantMat._31) = (1.f - fAlphaRate);
+		
+		// END : 시간 초기화 관리
+		if (m_vecMobInfo_RT[i].fCurElapsedTime >= fCurHBTime)
+			m_vecMobInfo_RT[i].fCurElapsedTime = 0.f;
+	}
+
+
+
+
+
+	//UIFLAG_ENEMY_HP
+
+	// 그 후 해당 desc에 할당
+
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
+		true
+	};
+
+	targetDesc.vecInstanceDescs = vecInstDesc;
+	m_pUI_HB->Set_UIDesc(targetDesc);
+	m_pUI_HB->Set_VariantUIDesc(tVariantDesc);
 }
 
 CUI_MobHPBar* CUI_MobHPBar::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -106,7 +106,7 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 
 	if (m_tUIDesc.isInstance)
-		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
+		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(m_tUIDesc.vecInstanceDescs);
 
     for (auto& child : m_vecChildObjects)
         child->Late_Update(fTimeDelta);
