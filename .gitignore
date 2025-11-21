@@ -67,3 +67,5 @@ EngineSDK/*
 !Engine/ThirdPartyLib/freetyped.pdb
 Editor/Bin/Resource/BTtest
 Client/Bin/Resource/Map/Test/*
+Client/Bin/Resource/Map/MapData/Heaven2/*
+Client/Bin/Resource/Map/MapData/Heaven3/*
