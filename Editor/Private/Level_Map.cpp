@@ -16,7 +16,6 @@
 #include"Edit_MonsterSpawnor.h"
 #include"Edit_Meteo.h"
 #include"Model_Streaming.h"
-#include"Edit_MapObject_Test.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
