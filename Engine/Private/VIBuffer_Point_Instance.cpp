@@ -103,7 +103,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	
 		for (size_t i = 0; i < m_iNumInstance; i++)
 		{
-			VTXINSTACNE_FXMESH* pInstanceVertices = static_cast<VTXINSTACNE_FXMESH*>(m_pVBInstanceVertices);
+			VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
 
 			_float fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
 
@@ -137,9 +137,12 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 			_float fPosX = fRadius * cosf(fAngle);
 			_float fPosZ = fRadius * sinf(fAngle);
 
+			//설정한 Range 값으로 위아래 범위 랜덤잡아주기.
+			_float fPosY = m_pGameInstance->Rand(-(pPointDesc->vRange.y * 0.5f), pPointDesc->vRange.y * 0.5f);
+
 			pInstanceVertices[i].vTranslation = _float4(
 				pPointDesc->vCenter.x + fPosX,
-				pPointDesc->vCenter.y,                   //센터값일단 평평하게 설정, 랜덤값 주고싶으면 값 하나 더 받아와야함.
+				pPointDesc->vCenter.y + fPosY,                 
 				pPointDesc->vCenter.z + fPosZ,
 				1.f
 			);

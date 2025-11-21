@@ -115,6 +115,7 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pVIBufferCom->Reset_CS_Option();
 
 	m_pVIBufferCom->Reset_UAV(m_pComputeShader);
+	m_pTransformCom->Set_WorldMatrix(XMMatrixIdentity());
 
 	if (m_isActivate && !m_IsRoot)
 	{
@@ -144,17 +145,32 @@ void CParticle::Default_Transform(_fmatrix WorldMatrix)
 		_vector vUp = XMVector3Normalize(ObjectMatrix.r[1]);
 		_vector vLook = XMVector3Normalize(ObjectMatrix.r[2]);
 
+
 		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
 
-		m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		_vector vScale = {};
+		_vector vTrans = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, m_OffsetMatrix);
+
+		_matrix OffsetSpawnMatrix = XMMatrixScalingFromVector(vScale) * XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+		m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * OffsetSpawnMatrix);
 
 		m_pVIBufferCom->Bind_CS_Pivot(vRight, vUp, vLook);
 	}
 	else
 	{
+		_vector vScale = {};
+		_vector vTrans = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, m_OffsetMatrix);
+
 		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
 
-		m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		_matrix OffsetSpawnMatrix = XMMatrixScalingFromVector(vScale) * XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+		m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * OffsetSpawnMatrix);
 	}
 }
 

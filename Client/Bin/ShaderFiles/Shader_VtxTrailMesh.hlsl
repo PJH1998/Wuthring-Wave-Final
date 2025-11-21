@@ -347,7 +347,7 @@ PS_OUT PS_Y_OUT(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDiffuse *= g_Alpha;
+    Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
 
@@ -396,7 +396,7 @@ PS_OUT PS_Y_IN(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDiffuse *= g_Alpha;
+    Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
 
@@ -472,7 +472,7 @@ PS_OUT PS_TraillTestA(PS_IN In)
 //if (fWeight >= g_fEmissiveThreshold)
 //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDiffuse *= g_Alpha;
+    Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
 
