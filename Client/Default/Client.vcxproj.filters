@@ -1397,7 +1397,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh_Skinning.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh_Skining.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

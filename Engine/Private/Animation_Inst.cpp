@@ -113,6 +113,18 @@ HRESULT CAnimation_Inst::Initialize(ifstream& InputFile, const vector<class CBon
 		m_Channels.push_back(pChannel);
 	}
 
+	//auto iter = find_if(m_Channels.begin(), m_Channels.end(), [](CChannel* pChannel) {
+	//	return pChannel->Get_BoneIndex() == 1;
+	//	});
+	//if (iter != m_Channels.end())
+	//{
+	//	// 문제되는 채널 찾기
+	//	vector<KEYFRAME>* temp = (*iter)->Get_KeyframesPtr();
+	//	for (auto& tKeyFrame : *temp)
+	//	{
+	//		tKeyFrame.vScale = _float3(1.f, 1.f, 1.f);
+	//	}
+	//}
 	m_CurrentFrameIndices.resize(m_iNumChannels);
 
 	return S_OK;

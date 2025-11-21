@@ -58,19 +58,14 @@ VS_OUT VS_MAIN(VS_IN In)
     VS_OUT Out = (VS_OUT) 0;
     
     uint ibaseIndex = In.iBaseIndex * g_iNumBones;
-    row_major matrix matBone, matBW, matVP;
-    
-    uint iX = max(In.vBlendIndex.x, g_iNumBlendWeightsToUse);
-    uint iY = max(In.vBlendIndex.y, g_iNumBlendWeightsToUse);
-    uint iZ = max(In.vBlendIndex.z, g_iNumBlendWeightsToUse);
-    uint iW = max(In.vBlendIndex.w, g_iNumBlendWeightsToUse);
+    matrix_rm matBone, matBW, matVP;
     
     float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
     matBone =
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.x)] * g_OffsetMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.y)] * g_OffsetMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.z)] * g_OffsetMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.w)] * g_OffsetMatrices[In.vBlendIndex.w] * fWeightW;
+    mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.x)]) * In.vBlendWeight.x +
+    mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.y)]) * In.vBlendWeight.y +
+    mul(g_OffsetMatrices[In.vBlendIndex.z], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.z)]) * In.vBlendWeight.z +
+    mul(g_OffsetMatrices[In.vBlendIndex.w], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.w)]) * fWeightW;
     
     float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
     vPosition = mul(vPosition, In.TransformMatrix);

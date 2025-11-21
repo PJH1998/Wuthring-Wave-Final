@@ -16,10 +16,7 @@ public:
 		BUFFER_BONE_CHANNEL = 6,
 		BUFFER_ANIM_LOCALMATRIX = 7,
 		BUFFER_INSTANCECB = 8,
-		BUFFER_PRE_RIGHT = 9,
-		BUFFER_PRE_UP = 10,
-		BUFFER_PRE_LOOK = 11,
-		BUFFER_PRE_POS = 12,
+		BUFFER_PRETRANSFORM = 9,
 		BUFFER_END
 	};
 
@@ -30,8 +27,9 @@ public:
 		SRV_ANIM_INFO = 1,
 		SRV_BONE_CHANNEL = 2,
 		SRV_BONE_PARENT = 3,
-		SRV_ANIM_LOCALMATRIX = 4,
-		SRV_FINAL_BONEMATRIX = 5,
+		SRV_ANIM_INFOCB = 4,
+		SRV_ANIM_LOCALMATRIX = 5,
+		SRV_FINAL_BONEMATRIX = 6,
 		SRV_END
 	};
 
@@ -45,7 +43,7 @@ public:
 	{
 		_uint			iNumBones;
 		_uint			iNumInstance;
-		_uint			iTemp;
+		_uint			iMaxDepth;
 		_float			fTempFloat;
 	}INSTANCECB;
 
