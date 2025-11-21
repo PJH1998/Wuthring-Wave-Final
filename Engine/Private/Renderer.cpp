@@ -32,6 +32,8 @@ HRESULT CRenderer::Initialize(_uint iNumThread)
 	m_fWinSizeX = ( ViewPort.Width );
 	m_fWinSizeY = ( ViewPort.Height );
 
+	m_fExposure = 0.6f;
+
 	if (FAILED(Ready_RT()))
 		return E_FAIL;
 	if (FAILED(Ready_MRT()))
@@ -152,7 +154,7 @@ void CRenderer::Render()
 	Render_Bloom();		
 	Render_BloomCombined();
 	Render_DistortionObject();
-	Render_Blend();
+	Render_Blend(); 
 	Render_Fog();
 	Render_Distortion();
 	Render_ScreenEffect();
@@ -450,7 +452,8 @@ void CRenderer::Render_Light()
 		CRASH("Failed Bind RT_Normal");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
 		CRASH("Failed Bind RT_Depth");
-
+	if(FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSS"), m_pShader, "g_SkinMaskTexture")))
+		CRASH("Failed Bind RT_SSS");
 	//Toon Ramp Texture
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;
@@ -491,11 +494,11 @@ void CRenderer::Render_Combined()
 
 	ID3D11ShaderResourceView* pDiffuse = m_IsSSS ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSSBlur_Y")) : m_pGameInstance->Get_RT_SRV(TEXT("RT_LightDiffuse"));
 
-	if (FAILED(m_pShader->Bind_Texture("g_LightDiffuseTexture", pDiffuse)))
+	if (FAILED(m_pShader->Bind_Value("g_fExposure", &m_fExposure, sizeof(_float))))
 		CRASH("Render Fail");
 
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightDiffuse"), m_pShader, "g_LightDiffuseTexture")))
-	//	CRASH("Render Fail");
+	if (FAILED(m_pShader->Bind_Texture("g_LightDiffuseTexture", pDiffuse)))
+		CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightSpecular"), m_pShader, "g_LightSpecularTexture")))
 		CRASH("Render Fail");
@@ -835,7 +838,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Emissive*/
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Emissive"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Emissive"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Lut */
@@ -843,11 +846,11 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SSAO */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSAO"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSAO"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Distortion */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT , _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Dof */
@@ -859,11 +862,11 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Combine */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Combine"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Combine"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SFX */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SFX"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SFX"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SSS */
@@ -871,18 +874,16 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightDiffuse */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDiffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDiffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightSpecular */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightSpecular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightSpecular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightAmbient */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAmbient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAmbient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
-
-
 
 #ifdef _DEBUG
 	/* RenderTarget Debug */

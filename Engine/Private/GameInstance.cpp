@@ -521,6 +521,10 @@ void CGameInstance::SettingSSS(_bool IsOn)
 {
 	m_pRenderer->SettingSSS(IsOn);
 }
+void CGameInstance::SettingHDR(_float fExposure)
+{
+	m_pRenderer->SettingHDR(fExposure);
+}
 ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
 	return m_pRenderer->Get_CurrentSceneSRV();

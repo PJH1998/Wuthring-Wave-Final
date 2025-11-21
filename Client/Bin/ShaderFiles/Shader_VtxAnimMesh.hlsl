@@ -291,6 +291,7 @@ PS_OUT PS_GALBRENA(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+
         Out.vSSS.a = 1.f; // test
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
