@@ -62,55 +62,6 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
 	//if (!m_IsRender)
 	//	return;
-
-	//_uint iLODIndex = m_iLODIndex;
-	//if (m_iNumLOD <= iLODIndex)
-	//	iLODIndex = m_iNumLOD;
-
-	//ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
-	//m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
-	//m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
-	//m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
-
-	//_uint iNumMesh = m_pModelComArray[iLODIndex]->Get_NumMesh();
-
-	//for (_uint i = 0; i < iNumMesh; ++i)
-	//{
-	//	_bool HasNormal = { true };
-	//	_bool HasMask = { true };
-
-	//	if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect)))
-	//	{
-	//		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
-	//		HasMask = false;
-	//	}
-	//	if (HasMask)
-	//	{
-	//		m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
-
-	//		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect)))
-	//			HasNormal = false;
-	//	}
-	//	else
-	//	{
-	//		m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0, pEffect);
-
-	//		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0, pEffect)))
-	//			HasNormal = false;
-	//	}
-
-	//	m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
-	//	m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
-	//	m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
-	//	
-	//	m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
-
-	//	// Clear Pre Resource
-	//	m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
-	//	m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
-	//	m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
-	//}
-
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
@@ -118,8 +69,8 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 	{
 		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
 			m_pModelCom->Request_LOD(m_iLODIndex);
-		//여기에 어떤 LOD인덱스 부분에 넣을건지도 넣어야됨.
-		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
+
+		m_pGameInstance->Add_Render_StaticObject(this, m_pModelCom->Get_ReadyLOD());
 		return;
 	}
 	_bool HasNormal = { true };
@@ -208,30 +159,8 @@ void CMapObject::Ready_Component(void* pArg)
 	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
-	_wstring Test = Model;
-	Test.pop_back();
-	Test.pop_back();
-	Test.pop_back();
-	Test.pop_back();
-	Test.pop_back();
-	m_pModelComArray.resize(V);
-		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), Test,
-		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-		CRASH("FAILED");
-	
-	//for (_uint i = 0; i < V; ++i)
-	//{
-	//	_wstring ModelCom = Model;
-	//	ModelCom.pop_back();
-	//	ModelCom += to_wstring(i);
 
-	//	_char ModelName[MAX_PATH] = {};
-	//	sprintf_s(ModelName, "Com_Model%d", i);
-	//	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
-	//		StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-	//		CRASH("FAILED");
 
-	//}
 		// DeferredShader
 		if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
 			TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -245,8 +174,21 @@ void CMapObject::Ready_Component(void* pArg)
 		if (!m_pBoundingBox)
 			CRASH("Failed");
 
+		_wstring ModelName = Model;
+		ModelName.pop_back();
+		ModelName.pop_back();
+		ModelName.pop_back();
+		ModelName.pop_back();
+		ModelName.pop_back();
+
+		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelName,
+			TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+			CRASH("FAILED");
+
 		if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
 		{
+
+
 			CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
 			RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
 			XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
@@ -254,7 +196,7 @@ void CMapObject::Ready_Component(void* pArg)
 			XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 			RigidbodyDesc.eType = EMotionType::Static;
 			RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-			//RigidbodyDesc.pModel = m_pModelCom;
+			RigidbodyDesc.pModel = m_pModelCom;
 			//RigidbodyDesc.pModel = m_pModelComArray[0];
 
 			//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
@@ -264,9 +206,8 @@ void CMapObject::Ready_Component(void* pArg)
 			//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 			//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
 
-			//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-			//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
-
+			Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+				TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 		}
 		else
 		{

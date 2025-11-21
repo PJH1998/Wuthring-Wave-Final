@@ -347,6 +347,7 @@ public:
 	void						RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
 	void						Clear_BufferPool();
 	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
+	void						Destroy_RigidData();
 #pragma endregion
 
 

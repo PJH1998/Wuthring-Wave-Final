@@ -21,6 +21,8 @@ HRESULT CMesh_Streaming::Initialize_Prototype(_uint iNumMeshes)
 	m_iNumMeshes = iNumMeshes;
 	m_Desc = new vector<CModel_Manager::SHARED_DATA_DESC>;
 	//모델매니저에서 버퍼 풀 주소 받기.
+	m_vecIndices = new vector<_uint>[m_iNumMeshes];
+	m_vecVertexPos = new vector<_float3>[m_iNumMeshes];
 	return S_OK;
 }
 
@@ -112,6 +114,18 @@ HRESULT CMesh_Streaming::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 	return S_OK;
 }
 
+void CMesh_Streaming::Set_RigidData(vector<_float3>& vecVertexPos, vector<_uint>& vecIndices, _uint iMeshIndex)
+{
+	m_vecIndices[iMeshIndex] = vecIndices;
+	m_vecVertexPos[iMeshIndex] = move(vecVertexPos);
+}
+
+void CMesh_Streaming::Destroy_RigidData()
+{
+	Safe_Delete_Array(m_vecVertexPos);
+	Safe_Delete_Array(m_vecIndices);
+}
+
 CMesh_Streaming* CMesh_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumMeshes)
 {
 	CMesh_Streaming* pInstance = new CMesh_Streaming(pDevice, pContext);
@@ -145,4 +159,6 @@ void CMesh_Streaming::Free()
 	Safe_Release(m_pSharedIB);
 	if (!m_isClone)
 		Safe_Delete(m_Desc);
+	Safe_Delete_Array(m_vecVertexPos);
+	Safe_Delete_Array(m_vecIndices);
 }

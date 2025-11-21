@@ -25,7 +25,7 @@ public:
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 
 	void							Ready_BoundingBox(_float* pMinPos, _float* pMaxPos);
-
+	HRESULT							Bind_Buffer(ID3D11DeviceContext* pDeferredContext, _uint iLODIndex);
 	atomic<LOADSTATE>& Get_MeshState(_uint iLODIndex) { return m_pModelPrototype->m_LodState[iLODIndex]; }
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc(_uint iLODIndex);
@@ -42,7 +42,13 @@ public:
 	_uint							Get_LastLODIndex();
 	void							Request_LOD(_uint iLODIndex);
 	_uint							Get_ReadyLOD();
+
+	void							Set_RigidData(vector<_float3>& vecVertexPos, vector<_uint>& vecIndices,_uint iMeshIndex);
+	vector<_float3>					Get_VerticesPos(_uint iIndex) { return m_pModelPrototype->m_Meshes[0]->Get_VerticesPos(iIndex); }
+	vector<_uint>					Get_Indices(_uint iIndex) { return m_pModelPrototype->m_Meshes[0]->Get_Indices(iIndex); }
+	void							Destroy_RigidData() { m_pModelPrototype->m_Meshes[0]->Destroy_RigidData(); }
 private:
+
 	_uint									m_iNumMeshes[4] = { 0,0,0,0 };
 	class CMesh_Streaming*					m_Meshes[4] = { nullptr,nullptr,nullptr,nullptr };
 

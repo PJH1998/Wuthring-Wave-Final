@@ -1088,6 +1088,11 @@ void CGameInstance::SetUp_Data(class CModel_Streaming* pModel, const _string& pF
 	m_pModel_Manager->SetUp_Data(pModel, pFilePath, iLODIndex);
 }
 
+void CGameInstance::Destroy_RigidData()
+{
+	m_pModel_Manager->Destroy_RigidData();
+}
+
 #pragma region SFX_HUB
 HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {

@@ -652,8 +652,8 @@ void CRenderer::Render_Static()
 			pObjects.clear();
 		//m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
-		//for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
-		//	m_pGameInstance->Occlusion_Culling(pObjects);
+		/*for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
+			m_pGameInstance->Occlusion_Culling(pObjects);*/
 		//m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
 		m_iCullStack.exchange(0, memory_order_release);
 		m_isCompleteFrustumCull.exchange(false, memory_order_release);

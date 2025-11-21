@@ -214,6 +214,8 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 						//if (entry2.path().string().find("Instance") == std::string::npos)
 					{
 						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
+						if (entry2.path().parent_path().stem().string().find("24BS") != string::npos)
+							int a = 0;
 							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
 								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
 								CRASH("Prototype Create Failed");
@@ -266,6 +268,8 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 			Read_Map_Dat(eLevel, strFilePath);
 		}
 	}
+	m_pGameInstance->Destroy_RigidData();
+
 }
 
 #pragma region SPAWNER
@@ -307,7 +311,6 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 	if (pFilePath.find("Instance") != std::string::npos)
 	{
-		return;
 		for (_uint i = 0; i < m_MapInstanceData.size(); ++i)
 		{
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
@@ -478,19 +481,16 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 					switch (pDesc.eObjectType)
 					{
 					case OBJECTTYPE::SONORA:
-						return;
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA:
-						return;
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 			
 					case OBJECTTYPE::NONSONORA_FLOOR:
-						return;
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;

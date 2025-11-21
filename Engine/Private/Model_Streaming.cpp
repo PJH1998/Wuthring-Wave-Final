@@ -134,6 +134,11 @@ void CModel_Streaming::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 
 }
 
+HRESULT CModel_Streaming::Bind_Buffer(ID3D11DeviceContext* pDeferredContext, _uint iLODIndex)
+{
+	return m_pModelPrototype->m_Meshes[iLODIndex]->Bind_Resources(0, pDeferredContext);
+}
+
 vector<CModel_Manager::SHARED_DATA_DESC>* CModel_Streaming::Get_MeshDesc(_uint iLODIndex)
 {
 	auto vector = m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc();
@@ -144,7 +149,7 @@ vector<CModel_Manager::SHARED_DATA_DESC>* CModel_Streaming::Get_MeshDesc(_uint i
 void CModel_Streaming::RequestModel(_uint iLODIndex)
 {
 	m_pGameInstance->SetUp_Data(this, m_ModelPath, 0);
-	//m_pGameInstance->SetUp_Data(this, m_ModelPath, m_iMaxLOD);
+	m_pGameInstance->SetUp_Data(this, m_ModelPath, m_iMaxLOD);
 }
 
 _bool CModel_Streaming::Is_RenderTimeOver(_uint iLODIndex)
@@ -286,6 +291,11 @@ _uint CModel_Streaming::Get_ReadyLOD()
 		}
 	}
 	return RenderLOD;
+}
+
+void CModel_Streaming::Set_RigidData(vector<_float3>& vecVertexPos, vector<_uint>& vecIndices, _uint iMeshIndex)
+{
+	m_pModelPrototype->m_Meshes[0]->Set_RigidData(vecVertexPos, vecIndices, iMeshIndex);
 }
 
 CModel_Streaming* CModel_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath)

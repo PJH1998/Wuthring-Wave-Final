@@ -27,8 +27,14 @@ public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc() { return m_Desc; }
 	_uint									  Get_MeshNum() { return m_iNumMeshes; }
 	_bool									  Is_Overed(_uint iMeshIndex) { return iMeshIndex >= m_iNumMeshes; }
+	void							Set_RigidData(vector<_float3>& vecVertexPos, vector<_uint>& vecIndices, _uint iMeshIndex);
+	vector<_float3>					Get_VerticesPos(_uint iMeshIndex){ return m_vecVertexPos[iMeshIndex]; }
+	vector<_uint>					Get_Indices(_uint iMeshIndex) { return m_vecIndices[iMeshIndex]; }
+	void							Destroy_RigidData();
 private:
-	//애매함.
+	vector<_float3>* m_vecVertexPos;
+	vector<_uint>* m_vecIndices;
+
 	vector<CModel_Manager::SHARED_DATA_DESC>* m_Desc;
 	atomic<LOADSTATE> m_LoadState = { LOADSTATE::NOTLOADED };
 	_uint m_iNumMeshes = {};

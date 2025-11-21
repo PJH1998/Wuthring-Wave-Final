@@ -266,17 +266,26 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel, const _string& pFilePath
 		File.read(reinterpret_cast<_char*>(Datas.LoadData[i].VertexData.data()), sizeof(VTXMESH) * iNumVertices);
 
 		Datas.LoadData[i].IndexData.resize(Datas.LoadData[i].iNumIndices);
+		//얘 필요
 		File.read(reinterpret_cast<_char*>(Datas.LoadData[i].IndexData.data()), sizeof(_uint) * Datas.LoadData[i].iNumIndices);
 
+		vector<_float3> vVertexPos;
 		for (size_t j = 0; j < iNumVertices; ++j)
 		{
+			//얘가 필요
 			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vPosition, XMVector3TransformCoord(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vPosition), PreMatrix));
+			vVertexPos.push_back(Datas.LoadData[i].VertexData[j].vPosition);
 			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vNormal, XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vNormal), PreMatrix));
 			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vTangent, XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vTangent), PreMatrix));
 			XMStoreFloat3(&Datas.LoadData[i].VertexData[j].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&Datas.LoadData[i].VertexData[j].vBinormal), PreMatrix));
 		}
+		if (iLODIndex == 0)
+		{
+			Datas.pModel->Set_RigidData(vVertexPos, Datas.LoadData[i].IndexData, i);
+		}
 	}
-	
+
+
 	{
 		lock_guard<mutex> lock(m_StagingMutex);
 		m_StagingData.push_back(move(Datas));
@@ -363,6 +372,12 @@ void CModel_Manager::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC
 	m_pBufferPool[iLODIndex]->Bind_BufferPool(pDC);
 }
 
+void CModel_Manager::Destroy_RigidData()
+{
+	for (auto& pModel : m_ModelPrototypes)
+		pModel.second->Destroy_RigidData();
+}
+
 void CModel_Manager::LoadLastLOD()
 {
 	for (auto& pModel : m_ModelPrototypes)
@@ -396,13 +411,6 @@ void CModel_Manager::LoadLastLOD()
 			PoolBox.back = 1;
 
 			m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
-			//m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-			//memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
-			//m_pContext->Unmap(m_pStagingBuffer, 0);
-
-			//PoolBox = { 0,0,0,VertexSize,1,1 };
-			//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
-			//	0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 
 			_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
@@ -419,13 +427,6 @@ void CModel_Manager::LoadLastLOD()
 			PoolBox.back = 1;
 
 			m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(), 0, &PoolBox, Data.LoadData[i].IndexData.data(), 0, 0);
-			/*m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-			memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
-			m_pContext->Unmap(m_pStagingBuffer, 0);*/
-
-			//PoolBox = { 0,0,0,IndexSize,1,1 };
-			//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
-			//	0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 			SHARED_DATA_DESC Desc{};
 			Desc.IndexOffset = IndexOffSet / sizeof(_uint);

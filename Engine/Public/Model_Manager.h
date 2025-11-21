@@ -74,7 +74,7 @@ public:
 	_uint Render_ObjectsNum(_uint iLODIndex);
 	void Bind_SharedBuffer(_uint iLODIndex,ID3D11DeviceContext** pDC, _uint iNumThread);
 	void Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
-	void SetUp_Models();
+	void Destroy_RigidData();
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
