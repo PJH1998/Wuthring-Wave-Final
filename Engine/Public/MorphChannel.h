@@ -3,6 +3,10 @@
 
 NS_BEGIN(Engine)
 
+// 역할 : Morphing Channel == Mesh가 가지고 있는 Shape Key와 매칭됩니다.
+// Morphing Channel Name == Mesh Shape Key Name
+// TrackPosition에 따라서 Weights를 변경합니다.
+// TrackPosition으로 받은 
 class CMorphChannel final : public CBase
 {
 private:
@@ -15,10 +19,7 @@ public:
 
 	_float Get_CurrentWeight(_float fCurrentTrackPosition); // 현재 시간에 맞는 가중치(Weight) 반환
 	_float Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex); // 현재 시간에 맞는 가중치(Weight) 반환
-#ifdef _DEBUG
-public:
 	const _char* Get_Name() const { return m_szName; }
-#endif // _DEBUG
 
 
 

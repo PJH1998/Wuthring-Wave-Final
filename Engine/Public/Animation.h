@@ -42,7 +42,7 @@ public:
 	_bool			Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
 
 	_bool	        Bind_MorphChannels(const vector<string>& modelShapeKeys);
-	_bool			Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights, _float* pFacialTrackPosition = nullptr);
+	_bool			Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights);
 private:
 	_char									m_szName[MAX_PATH] = {};
 	_float									m_fDuration = {};

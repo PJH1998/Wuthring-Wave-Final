@@ -43,6 +43,7 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition)
 	return v0 + (v1 - v0) * ratio;  // Linear 보간
 }
 
+// 이걸 바꿔서 Mesh에 업데이트 해 주어야한다.
 _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex)
 {
 	if (0.f == fCurrentTrackPosition)
@@ -85,6 +86,7 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCu
 
 	return 0.f;
 }
+
 
 //_float CMorphChannel::Get_CurrentWeight(_float fTrackPosition, _uint* pCurrentFrameIndex)
 //{
@@ -172,6 +174,10 @@ HRESULT CMorphChannel::Initialize(ifstream& InputFile)
 	return S_OK;
 }
 
+// Channel의 Update_TransformationMatrix를 참고.
+// 1. guswo 
+// 1. 모든 메쉬정보를 받아와서 ShapeKey를 탐색.
+// 2. 
 void CMorphChannel::Update_ShapeKeys(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex, vector<_float>& InOutWeights, _int iTargetIndex)
 {
 	// 예외 처리: 타겟 인덱스가 유효하지 않으면 중단

@@ -4,7 +4,7 @@
 #include "Bone.h"
 #include "ShapeKey.h"
 #include "Shader.h"
-
+#include "ComputeShader.h"
 
 #include"VIBuffer_Cube.h"
 
@@ -17,21 +17,41 @@ CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer { Prototype }
     , m_VertexPositions { Prototype.m_VertexPositions }
     , m_Indices { Prototype.m_Indices }
-	, m_pMorphNormalSRV { Prototype.m_pMorphNormalSRV }
-	, m_pMorphPosSRV{ Prototype.m_pMorphPosSRV }
-	, m_ShapeKeys(Prototype.m_ShapeKeys)
+	, m_eModelType { Prototype.m_eModelType }
+	, m_iMaterialIndex {Prototype.m_iMaterialIndex}
+	, m_iNumBones{ Prototype.m_iNumBones }
+	, m_BoneIndices{ Prototype.m_BoneIndices }
+	, m_OffsetMatrices{ Prototype.m_OffsetMatrices }
+	, m_ShapeKeys{ Prototype.m_ShapeKeys }
 	, m_iNumAnimMeshes { Prototype.m_iNumAnimMeshes}
 	, m_pRestPoseVertices { Prototype.m_pRestPoseVertices }
+	, m_Buffers { Prototype.m_Buffers }
+	, m_SRVs { Prototype.m_SRVs }
 {
-	Safe_AddRef(m_pMorphPosSRV);
-	Safe_AddRef(m_pMorphNormalSRV);
+	//for (auto& pKey : m_ShapeKeys)
+	//	Safe_AddRef(pKey);
 
-	for (auto& pKey : m_ShapeKeys)
-		Safe_AddRef(pKey);
+	////  Prototype 생성 Buffer와 Instance 생성 Buffer 시점이 다르기 때문에 nullptr 체크를 해줍니다.
+	//for (auto& pBuffer : m_Buffers)
+	//{
+	//	if (nullptr != pBuffer)
+	//		Safe_AddRef(pBuffer);
+	//}
+
+	//for (auto& pSRV : m_SRVs)
+	//{
+	//	if (nullptr != pSRV)
+	//		Safe_AddRef(pSRV);
+	//}
+
+	//// size만 재설정.
+	//m_UAVs.resize(Prototype.m_UAVs.size()); 
 }
 
 HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
+	m_eModelType = eType;
+
     if (MODELTYPE::NONANIM == eType)
     {
         if (FAILED(Ready_Mesh_NonAnim(PreTransformMatrix, InputFile)))
@@ -49,8 +69,17 @@ HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>&
 	}
 	else if (MODELTYPE::CHARACTER == eType)
 	{
+		// 1. 파일에서 데이터 읽어오기.
 		if (FAILED(Ready_Mesh_Character(Bones, PreTransformMatrix, InputFile)))
 			return E_FAIL;
+
+		//// 1. CHARACTER 형태만 Shared Buffer로 Buffer들을 소유합니다.
+		//if (FAILED(Ready_SharedBuffers()))
+		//	return E_FAIL;
+
+
+		//if (FAILED(Ready_InstanceBuffers()))
+		//	return E_FAIL;
 	}
 
     return S_OK;
@@ -58,6 +87,13 @@ HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>&
 
 HRESULT CMesh::Initialize_Clone(void* pArg)
 {
+	// Model Type이 캐릭터인 경우만. Instance Buffer를 생성.
+	/*if (MODELTYPE::CHARACTER == m_eModelType)
+	{
+		if (FAILED(Ready_InstanceBuffers()))
+			return E_FAIL;
+	}*/
+
     return S_OK;
 }
 
@@ -126,8 +162,39 @@ void CMesh::Update_Morph_CPU(const vector<_float>& vShapeKeyWeights)
 
 	memcpy(MappedSubResource.pData, vTempVertices.data(), sizeof(VTXANIMMESH) * m_iNumVertices);
 	m_pContext->Unmap(m_pVB, 0);
-	
 }
+
+void CMesh::Compute_Morph(CComputeShader* pMorphComputeShaderCom, ID3D11ShaderResourceView* pWeightSRV)
+{
+	// CHARACTER Type이 아니거나, Shared, Instance Buffer가 준비되지 않았다면 리턴.
+	if (m_eModelType != MODELTYPE::CHARACTER) return;
+	if (!m_IsSharedReady || !m_IsInstanceReady) return;
+
+	// 1. 상수 버퍼(CB) 업데이트 (정점 개수 등)
+	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+	if (SUCCEEDED(m_pContext->Map(m_Buffers[BUF_MORPH_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
+	{
+		MORPH_CBINFO* pInfo = static_cast<MORPH_CBINFO*>(MappedSubResource.pData);
+		pInfo->iNumVertices = m_iNumVertices;
+		pInfo->iNumActiveMorphs = m_iNumAnimMeshes; // CModel에서 받아오거나 ShapeKeys 사이즈로 설정
+		// ※ 주의: pWeightSRV에 담긴 개수와 일치해야 함. 보통 Model의 전체 Key 개수.
+
+		m_pContext->Unmap(m_Buffers[BUF_MORPH_INFOCB], 0);
+	}
+
+
+	pMorphComputeShaderCom->Set_SRV("g_BaseVertices", m_SRVs[BUF_BASE_VERTICES]);
+	pMorphComputeShaderCom->Set_SRV("g_AllMorphDeltas", m_SRVs[BUF_MORPH_DELTAS]);
+	pMorphComputeShaderCom->Set_SRV("g_MorphWeights", pWeightSRV); // 외부에서 주입!
+	pMorphComputeShaderCom->Set_UAV("g_OutVertices", m_UAVs[BUF_MORPH_OUTPUT]);
+	pMorphComputeShaderCom->Set_ConstantBuffer("MorphInfoCB", m_Buffers[BUF_MORPH_INFOCB]);
+
+	// 3. Dispatch => 스레드 그룹 계산
+	_uint iGroupX = (m_iNumVertices + pMorphComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1) / pMorphComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
+	pMorphComputeShaderCom->Dispatch(iGroupX, 1, 1); // UnBind 자동으로 수행.
+}
+
+
 
 #ifdef _DEBUG
 
@@ -162,24 +229,44 @@ _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float*
 #endif
 
 // 
-HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones)
+HRESULT CMesh::Bind_BoneMatrices(CShader* pShaderCom, const _char* pConstantName, const vector<class CBone*>& Bones)
 {
     for (size_t i = 0; i < m_iNumBones; ++i)
     {
         XMStoreFloat4x4(&m_BoneMatrices[i], XMLoadFloat4x4(&m_OffsetMatrices[i]) * XMLoadFloat4x4(Bones[m_BoneIndices[i]]->Get_CombinedTransformationMatrix()));
     }
 
-    return pShader->Bind_Matrices(pConstantName, m_BoneMatrices, m_iNumBones);
+    return pShaderCom->Bind_Matrices(pConstantName, m_BoneMatrices, m_iNumBones);
 }
 
-HRESULT CMesh::Bind_MorphSRV(CShader* pShaderCom)
+HRESULT CMesh::Bind_MorphedResult(CShader* pShaderCom)
 {
-	if (FAILED(pShaderCom->Bind_SRV("g_MorphDeltaPositions", m_pMorphPosSRV)))
+	if (MODELTYPE::CHARACTER != m_eModelType) return E_FAIL;
+	if (!m_IsInstanceReady) return E_FAIL;
+
+	if (FAILED(pShaderCom->Bind_SRV("g_MorphedVertices", m_SRVs[BUF_MORPH_OUTPUT])))
 		return E_FAIL;
 
-	if (FAILED(pShaderCom->Bind_SRV("g_MorphDeltaNormals", m_pMorphNormalSRV)))
-		return E_FAIL;
+	/*if (MODELTYPE::CHARACTER == m_eModelType)
+	{
+		if (FAILED(pShaderCom->Bind_SRV("g_MorphedPosBuffer", m_SRVs[SRV_OUT_MORPH_POS])))
+			return E_FAIL;
+
+		if (FAILED(pShaderCom->Bind_SRV("g_MorphedNormalBuffer", m_SRVs[SRV_OUT_MORPH_NORMAL])))
+			return E_FAIL;
+	}
+	else
+	{
+		if (FAILED(pShaderCom->Bind_SRV("g_MorphedPosBuffer", m_SRVs[SRV_ORIGIN_POS])))
+			return E_FAIL;
+
+		if (FAILED(pShaderCom->Bind_SRV("g_MorphedNormalBuffer", m_SRVs[SRV_ORIGIN_NORMAL])))
+			return E_FAIL;
+	}*/
+
+	return S_OK;
 }
+
 
 HRESULT CMesh::Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile)
 {
@@ -397,7 +484,6 @@ HRESULT CMesh::Ready_Mesh_Character(const vector<class CBone*>& Bones, _fmatrix 
 
 		// 7. ShapeKey를 등록.
 		m_ShapeKeys.emplace_back(pShapeKey);
-		//m_ShapeKeys.emplace(strKeyName, pShapeKey);
 	}
 
 
@@ -446,11 +532,11 @@ HRESULT CMesh::Ready_Mesh_Character(const vector<class CBone*>& Bones, _fmatrix 
 
 	D3D11_BUFFER_DESC   VBDesc = {};
 	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
-	//VBDesc.Usage = D3D11_USAGE_DEFAULT;
-	VBDesc.Usage = D3D11_USAGE_DYNAMIC; // 수정 가능.
+	VBDesc.Usage = D3D11_USAGE_DEFAULT;
+	//VBDesc.Usage = D3D11_USAGE_DYNAMIC; // 수정 가능.
 	VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	//VBDesc.CPUAccessFlags = 0;
-	VBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	VBDesc.CPUAccessFlags = 0;
+	//VBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	VBDesc.MiscFlags = 0;
 	VBDesc.StructureByteStride = m_iVertexStride;
 
@@ -487,9 +573,7 @@ HRESULT CMesh::Ready_Mesh_Character(const vector<class CBone*>& Bones, _fmatrix 
 #pragma endregion
 
 
-	if (FAILED(Ready_MorphBuffers()))
-		return E_FAIL;
-
+	
     return S_OK;
 }
 
@@ -516,7 +600,7 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile, 
 		XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
 		XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
 
-		// Mesh Shape??Container
+		// Mesh ShapeContainer
 		m_VertexPositions.push_back(pVertices[i].vPosition);
 #ifdef _DEBUG
 
@@ -578,75 +662,197 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile, 
 	return S_OK;
 }
 
-// VtxAnimMesh에 추가할 MorphBuffer
-HRESULT CMesh::Ready_MorphBuffers()
+
+// Prototype에서 Shared Buffers 생성. => 모든 복제체가 하나의 Buffer를 공유합니다. (SRV 겠지요)
+HRESULT CMesh::Ready_SharedBuffers_ForMorph()
 {
+	// 0. 이미 처리했다면?
+	if (m_IsSharedReady)
+		return E_FAIL;
 
-	if (m_ShapeKeys.empty()) return S_OK;
+	// 1. 예외 처리.
+	if (m_iNumVertices == 0 || m_pRestPoseVertices == nullptr)
+		return E_FAIL;
 
-	_uint iTotalDataCount = m_iNumAnimMeshes * m_iNumVertices;
+	// 0. 생성 이전 vector 초기화
+	m_Buffers.resize(BUFFER_TYPE::BUF_END);
+	m_SRVs.resize(BUFFER_TYPE::BUF_END);
+	m_UAVs.resize(BUFFER_TYPE::BUF_END);
 
-	// 1. Flattening (직렬화)용 임시 메모리 할당
-	_float3* pFlatDeltaPos = new _float3[iTotalDataCount];
-	_float3* pFlatDeltaNormal = new _float3[iTotalDataCount];
+	// 2. Base Vertex Buffer 생성 (t0)
+	if (FAILED(Create_BaseVertexBuffer()))
+		return E_FAIL;
 
-	ZeroMemory(pFlatDeltaPos, sizeof(_float3) * iTotalDataCount);
-	ZeroMemory(pFlatDeltaNormal, sizeof(_float3) * iTotalDataCount);
+	// 3. Morph Delta Buffer 생성 (t1)
+	if (FAILED(Create_DeltaBuffer()))
+		return E_FAIL;
 
-	// 2. CShapeKey 순회하며 데이터 복사
-	for (_uint i = 0; i < m_ShapeKeys.size(); ++i)
-	{
-		const vector<_float3>& vecPos = m_ShapeKeys[i]->Get_DeltaPositions();
-		const vector<_float3>& vecNormal = m_ShapeKeys[i]->Get_DeltaNormals();
+	m_IsSharedReady = true;
 
-		_uint iOffset = i * m_iNumVertices;
+	return S_OK;
+}
 
-		memcpy(&pFlatDeltaPos[iOffset], vecPos.data(), sizeof(_float3) * m_iNumVertices);
-	
-		// Normal 데이터가 존재한다면 복사
-		if (!vecNormal.empty() && vecNormal.size() == m_iNumVertices)
-			memcpy(&pFlatDeltaNormal[iOffset], vecNormal.data(), sizeof(_float3) * m_iNumVertices);
-		
-	}
 
-	// 3. D3D11 Buffer & SRV 생성 (이전과 동일)
+
+// Clone에서 Instance Buffers 생성 => 모든 복제체는 고유의 CB와 UAV를 소유해야 합니다.
+HRESULT CMesh::Ready_InstanceBuffers_ForMorph()
+{
+	// 0. 이미 처리했다면?
+	if (m_IsInstanceReady) return E_FAIL;
+	if (m_eModelType != MODELTYPE::CHARACTER) return S_OK;
+
+	// 1. Output Buffer (결과 저장용) 생성.
 	D3D11_BUFFER_DESC BufferDesc;
 	ZeroMemory(&BufferDesc, sizeof(D3D11_BUFFER_DESC));
-	BufferDesc.ByteWidth = sizeof(_float3) * iTotalDataCount;
-	BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-	BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	BufferDesc.ByteWidth = sizeof(BASE_VERTEX_INFO) * m_iNumVertices; // 구조체 크기 24
+	BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	BufferDesc.StructureByteStride = sizeof(_float3);
+	BufferDesc.StructureByteStride = sizeof(BASE_VERTEX_INFO);
 
-	D3D11_SUBRESOURCE_DATA InitData;
+	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_Buffers[BUF_MORPH_OUTPUT])))
+		return E_FAIL;
 
-	// (1) Position Buffer
-	InitData.pSysMem = pFlatDeltaPos;
-	ID3D11Buffer* pPosBuffer = nullptr;
-	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, &InitData, &pPosBuffer))) return E_FAIL;
+	// 2. UAV 생성 (Compute Shader 용 u0)
+	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc;
+	ZeroMemory(&UAVDesc, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC));
+	UAVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	UAVDesc.Buffer.NumElements = m_iNumVertices;
 
-	// Position SRV
+	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_Buffers[BUF_MORPH_OUTPUT], &UAVDesc, &m_UAVs[BUF_MORPH_OUTPUT])))
+		return E_FAIL;
+
+	// 3. SRV 생성 (나중에 Vertex Shader에서 읽을 때 필요)
 	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
 	ZeroMemory(&SRVDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
 	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
 	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-	SRVDesc.Buffer.NumElements = iTotalDataCount;
+	SRVDesc.Buffer.NumElements = m_iNumVertices;
 
-	if (FAILED(m_pDevice->CreateShaderResourceView(pPosBuffer, &SRVDesc, &m_pMorphPosSRV))) return E_FAIL;
-	Safe_Release(pPosBuffer);
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_Buffers[BUF_MORPH_OUTPUT], &SRVDesc, &m_SRVs[BUF_MORPH_OUTPUT])))
+		return E_FAIL;
 
-	// (2) Normal Buffer
-	InitData.pSysMem = pFlatDeltaNormal;
-	ID3D11Buffer* pNormalBuffer = nullptr;
-	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, &InitData, &pNormalBuffer))) return E_FAIL;
+	// 4. Morph Info Constant Buffer 생성 (b0)
+	// - 메쉬마다 정점 개수가 다르므로 메쉬가 가지고 있는 게 편함
+	D3D11_BUFFER_DESC CBDesc;
+	ZeroMemory(&CBDesc, sizeof(D3D11_BUFFER_DESC));
+	CBDesc.ByteWidth = sizeof(MORPH_CBINFO);
+	CBDesc.Usage = D3D11_USAGE_DYNAMIC;
+	CBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	CBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	// Normal SRV
-	if (FAILED(m_pDevice->CreateShaderResourceView(pNormalBuffer, &SRVDesc, &m_pMorphNormalSRV))) return E_FAIL;
-	Safe_Release(pNormalBuffer);
+	if (FAILED(m_pDevice->CreateBuffer(&CBDesc, nullptr, &m_Buffers[BUF_MORPH_INFOCB])))
+		return E_FAIL;
 
-	// 4. 임시 메모리 해제
-	Safe_Delete_Array(pFlatDeltaPos);
-	Safe_Delete_Array(pFlatDeltaNormal);
+	m_IsInstanceReady = true;
+
+	return S_OK;
+}
+
+HRESULT CMesh::Create_BaseVertexBuffer()
+{
+
+	// 1. 기존 버텍스 버퍼. 정점 정보.
+	vector<BASE_VERTEX_INFO> vBaseVertices(m_iNumVertices);
+
+	for (_uint i = 0; i < m_iNumVertices; ++i)
+	{
+		vBaseVertices[i].vPosition = m_pRestPoseVertices[i].vPosition;
+		vBaseVertices[i].vNormal = m_pRestPoseVertices[i].vNormal;
+	}
+
+	// 2. 버퍼 생성.
+	D3D11_BUFFER_DESC BufferDesc;
+	ZeroMemory(&BufferDesc, sizeof(D3D11_BUFFER_DESC));
+	BufferDesc.ByteWidth = sizeof(BASE_VERTEX_INFO) * m_iNumVertices;
+	BufferDesc.Usage = D3D11_USAGE_IMMUTABLE; // 읽기 전용, 절대 안 바뀜
+	BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	BufferDesc.StructureByteStride = sizeof(BASE_VERTEX_INFO);
+
+	// 3. 데이터 바인딩
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(D3D11_SUBRESOURCE_DATA));
+	InitData.pSysMem = vBaseVertices.data();
+
+	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, &InitData, &m_Buffers[BUF_BASE_VERTICES])))
+		return E_FAIL;
+
+	// 4. SRV 생성
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+	ZeroMemory(&SRVDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	SRVDesc.Buffer.NumElements = m_iNumVertices;
+
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_Buffers[BUF_BASE_VERTICES], &SRVDesc, &m_SRVs[BUF_BASE_VERTICES])))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT CMesh::Create_DeltaBuffer()
+{
+	if (m_ShapeKeys.empty()) return S_OK; // 쉐이프키 없으면 패스
+
+	// 1. 최대 쉐이프키 개수 정의
+	_uint iMaxGlobalKeys = 0;
+	for (auto& pKey : m_ShapeKeys)
+		iMaxGlobalKeys = max(iMaxGlobalKeys, pKey->Get_GlobalWeightIndex());
+
+	iMaxGlobalKeys += 1; // 인덱스는 0부터 시작하므로 개수는 +1
+	_uint iTotalDataCount = iMaxGlobalKeys * m_iNumVertices;
+
+	// 2. 데이터 패킹 (Flattening)
+	// 기본값 0으로 초기화 (빈 공간은 Delta가 0이어야 합니다.)
+	vector<MORPH_DELTA_INFO> vDeltas(iTotalDataCount, { {0.f,0.f,0.f}, {0.f,0.f,0.f} });
+
+	for (auto& pKey : m_ShapeKeys)
+	{
+		_uint iGlobalIndex = pKey->Get_GlobalWeightIndex();
+		_uint iStartOffset = iGlobalIndex * m_iNumVertices;
+
+		const auto& srcPos = pKey->Get_DeltaPositions();
+		const auto& srcNormal = pKey->Get_DeltaNormals();
+
+		_bool bHasNormal = !srcNormal.empty();
+
+		for (_uint i = 0; i < m_iNumVertices; ++i)
+		{
+			// => 구조체 멤버 vDPoseDelta, vNormalDelta에 값 대입.
+			vDeltas[iStartOffset + i].vPosDelta = srcPos[i];
+			if (bHasNormal)
+				vDeltas[iStartOffset + i].vNormalDelta = srcNormal[i];
+		}
+	}
+
+	// 3. 버퍼 생성.
+	D3D11_BUFFER_DESC BufferDesc;
+	ZeroMemory(&BufferDesc, sizeof(D3D11_BUFFER_DESC));
+	BufferDesc.ByteWidth = sizeof(MORPH_DELTA_INFO) * static_cast<_uint>(vDeltas.size());
+	BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	BufferDesc.StructureByteStride = sizeof(MORPH_DELTA_INFO);
+
+	// 4. 데이터 바인딩
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(D3D11_SUBRESOURCE_DATA));
+	InitData.pSysMem = vDeltas.data();
+
+	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, &InitData, &m_Buffers[BUF_MORPH_DELTAS])))
+		return E_FAIL;
+
+	// 5. SRV 생성
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+	ZeroMemory(&SRVDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	SRVDesc.Buffer.NumElements = static_cast<_uint>(vDeltas.size());
+
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_Buffers[BUF_MORPH_DELTAS], &SRVDesc, &m_SRVs[BUF_MORPH_DELTAS])))
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -689,12 +895,21 @@ void CMesh::Free()
 	if (!m_isClone)
 		Safe_Delete_Array(m_pRestPoseVertices);
 
-	// 2. 가지고 있는 ShapeKey 객체들 해제.
-	Safe_Release(m_pMorphPosSRV);
-	Safe_Release(m_pMorphNormalSRV);
-
 	for (auto& pShapeKey : m_ShapeKeys)
 		Safe_Release(pShapeKey);
+
+	/* GPU Buffer 내용 제거 */
+	for (auto& pBuffer : m_Buffers)
+		Safe_Release(pBuffer);
+	m_Buffers.clear();
+
+	for (auto& pSRV : m_SRVs)
+		Safe_Release(pSRV);
+	m_SRVs.clear();
+
+	for (auto& pUAV : m_UAVs)
+		Safe_Release(pUAV);
+	m_UAVs.clear();
 
 	m_ShapeKeys.clear();
 }

@@ -316,7 +316,7 @@ _bool CAnimation::Bind_MorphChannels(const vector<string>& modelShapeKeys)
 	return true;
 }
 
-_bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights, _float* pFacialTrackPosition)
+_bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights)
 {
 
 	if (modelWeights.empty()) return false;
@@ -333,7 +333,6 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 		if (iTargetIndex >= modelWeights.size()) continue;
 
 		// 현재 시간 가중치 계산
-		//_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition);
 		_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[i]);
 
 		// 모델의 해당 인덱스에 가중치 적용

@@ -11,6 +11,7 @@ public:
 		LEVEL eLevel = {};
 		_wstring strShaderTag = {};
 		_wstring strComputeShaderTag = {};
+		_wstring strMorphComputeShaderTag = {};
 		_wstring strModelTag = {};
 		_string strModelDatPath = {};
 
@@ -94,6 +95,7 @@ private:
 	class CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
+	class CComputeShader* m_pMorphComputeShaderCom = { nullptr };
 
 	class CTransform* m_pParentTransform = { nullptr };
 	const _float4x4* m_pSocketMatrix = { nullptr };

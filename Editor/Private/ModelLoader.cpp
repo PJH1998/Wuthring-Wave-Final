@@ -141,6 +141,7 @@ HRESULT CModelLoader::Save_Dat_Anim(const _char* pFileName)
 	return S_OK;
 }
 
+
 HRESULT CModelLoader::Save_Dat_Character(const _char* pFileName)
 {
 	if (nullptr == m_pAIScene)
@@ -393,15 +394,6 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 				if (k < pChannel->mNumRotationKeys)
 				{
 					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
-					//_string temp = "MO1AnjinMd00601";
-					//if (0 == temp.compare(pChannel->mNodeName.C_Str()))
-					//{
-					//	vRotation.x = 0.f;
-					//	vRotation.y = 0.f;
-					//	vRotation.z = 0.f;
-					//	vRotation.w = 1.f;
-					//}
-					//else
 					{
 						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
 						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
@@ -535,7 +527,6 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 		// 1. MorphMeshChannels 채널을 확인하고 있다면 데이터를 저장합니다.
 		if (pAnimation->mNumMorphMeshChannels > 0)
 		{
-			// [최적화] 중복 방지 및 자동 정렬을 위해 map 사용
 			// Key: 쉐이프키 이름 ("Smile"), Value: 해당 키의 시간별 변화량 목록
 			map<string, vector<KEYFRAME_CURVE>> mapMorphCurves;
 
@@ -574,7 +565,7 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 						//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
 						//fWeight = max(0.0f, min(fWeight, 1.0f)); // 안전장치
 
-						// 맵에 데이터 추가 (자동으로 이름별로 분류됨)
+						// 맵에 데이터 추가 (자동으로 이름별로 분류됨) // .psa는 가중치가 안나온다?..
 						KEYFRAME_CURVE KeyFrame = {};
 						KeyFrame.fTrackPosition = static_cast<_float>(MorphKey.mTime);
 						KeyFrame.fValue = fWeight;

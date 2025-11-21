@@ -20,22 +20,24 @@ float g_fFlowRate = 0.f;
 matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
 
+
+// 렌더링 파이프 라인으로 넘겨질 최종 정점 정보.
+struct OutputVertex
+{
+    float3 vPosition;
+    float3 vNormal;
+};
+
+
 cbuffer GlobalConstants
 {
     int g_iNumBlendWeightsToUse = 2; 
 }
 
-cbuffer cbMorphInfo : register(b2)
-{
-    float g_MorphWeights[100]; // C++의 m_ShapeKeyWeights와 매칭
-    int g_NumShapeKeys; // 활성화된 쉐이프 키 개수
-    int g_TotalVerts; // 메쉬의 전체 정점 개수 (인덱싱 계산용)
-    float2 g_Padding_Morph; // 16byte 정렬용
-};
-
-// [추가] Delta 데이터를 담은 구조화 버퍼 (C++에서 SRV로 바인딩)
-StructuredBuffer<float3> g_MorphDeltaPositions : register(t10);
-StructuredBuffer<float3> g_MorphDeltaNormals : register(t11);
+// Delta 데이터를 담은 구조화 버퍼 C++에서 SRV로 바인딩 => 메시별로 바인딩 됩니다.
+StructuredBuffer<OutputVertex> g_MorphedVertices : register(t20);
+//StructuredBuffer<float3> g_MorphDeltaPositions : register(t20);
+//StructuredBuffer<float3> g_MorphDeltaNormals : register(t21);
 
 struct VS_IN
 {
@@ -46,8 +48,7 @@ struct VS_IN
     uint4 vBlendIndex : BLENDINDEX;
     float4 vBlendWeight : BLENDWEIGHT;
     float2 vTexcoord : TEXCOORD0;
-    
-    uint iVertexID : SV_VertexID;
+    uint iVertexID : SV_VERTEXID; // AutoMatically VertexID
 };
 
 struct VS_OUT
@@ -64,32 +65,13 @@ VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
 
-    // 1. [Morphing] 뼈대 계산 전에 얼굴부터 변형시킵니다.
-    float3 vMorphedPos = In.vPosition;
-    float3 vMorphedNormal = In.vNormal;
-    // Tangent도 필요하다면 추가 (StructuredBuffer 필요)
-
-    // 활성화된 쉐이프 키 개수만큼 반복
-    for (int i = 0; i < g_NumShapeKeys; ++i)
-    {
-        float fWeight = g_MorphWeights[i];
-
-        // 가중치가 없으면 계산 스킵 (성능 최적화)
-        if (fWeight <= 0.001f)
-            continue;
-
-        // 버퍼 인덱스 계산: (ShapeKeyIndex * 전체정점수) + 내정점번호
-        // 예: 2번 표정의 100번째 정점 = (2 * 3000) + 100 = 6100번지
-        uint iBufferIndex = (i * g_TotalVerts) + In.iVertexID;
-
-        // 기본 위치에 (변화량 * 가중치) 누적
-        vMorphedPos += g_MorphDeltaPositions[iBufferIndex] * fWeight;
-        vMorphedNormal += g_MorphDeltaNormals[iBufferIndex] * fWeight;
-    }
+    // 0. 정점 정보를 교체합니다.
+    OutputVertex MorphedVert = g_MorphedVertices[In.iVertexID];
     
-    // Morphed Normal 정규화
-    vMorphedNormal = normalize(vMorphedNormal);
-
+    // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing]
+    float3 vMorphedPos = MorphedVert.vPosition;
+    float3 vMorphedNormal = MorphedVert.vNormal;
+    
 
     // 2. [Skinning] 변형된 얼굴(vMorphedPos)을 기준으로 뼈대를 움직입니다.
     matrix matBone = (matrix) 0;
@@ -117,6 +99,63 @@ VS_OUT VS_MAIN(VS_IN In)
 
     return Out;
 }
+
+//VS_OUT VS_MAIN(VS_IN In)
+//{
+//    VS_OUT Out = (VS_OUT) 0;
+
+//    // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing]
+//    float3 vMorphedPos = In.vPosition;
+//    float3 vMorphedNormal = In.vNormal;
+
+//    // 활성화된 쉐이프 키 개수만큼 반복
+//    for (int i = 0; i < g_NumShapeKeys; ++i)
+//    {
+//        float fWeight = g_MorphWeights[i];
+
+//        // 가중치가 없으면 계산 스킵 
+//        if (fWeight <= 0.001f)
+//            continue;
+        
+//        // Buffer에 대한 인덱스?
+//        uint iBufferIndex = (i * g_TotalVerts) + In.iVertexID; // VertexID는 강제 배분됨.
+        
+
+//        // 기본 위치에 (변화량 * 가중치) 누적
+//        vMorphedPos += g_MorphDeltaPositions[iBufferIndex] * fWeight;
+//        vMorphedNormal += g_MorphDeltaNormals[iBufferIndex] * fWeight;
+//    }
+    
+//    // Morphed Normal 정규화
+//    vMorphedNormal = normalize(vMorphedNormal);
+
+
+//    // 2. [Skinning] 변형된 얼굴(vMorphedPos)을 기준으로 뼈대를 움직입니다.
+//    matrix matBone = (matrix) 0;
+//    matBone += g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x;
+//    matBone += g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y;
+//    matBone += g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z;
+//    matBone += g_BoneMatrices[In.vBlendIndex.w] * In.vBlendWeight.w;
+
+//    // 애니메이션 행렬 적용 (vMorphedPos 사용!)
+//    vector vPosition = mul(float4(vMorphedPos, 1.f), matBone);
+//    vector vNormal = mul(float4(vMorphedNormal, 0.f), matBone);
+//    vector vTangent = mul(float4(In.vTangent, 0.f), matBone); // Tangent는 Morph 안 했으므로 In.vTangent 사용 (약식)
+//    vector vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
+
+//    // 3. [WVP Transformation] 화면 좌표로 변환
+//    matrix matWVP = mul(g_WorldMatrix, g_ViewMatrix);
+//    matWVP = mul(matWVP, g_ProjMatrix);
+    
+//    Out.vPosition = mul(vPosition, matWVP);
+//    Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
+//    Out.vTangent = normalize(mul(vTangent, g_WorldMatrix));
+//    Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
+//    Out.vTexcoord = In.vTexcoord;
+//    Out.vProjPos = mul(vPosition, matWVP);
+
+//    return Out;
+//}
 
 struct PS_IN
 {

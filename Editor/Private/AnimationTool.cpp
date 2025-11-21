@@ -825,6 +825,7 @@ void CAnimationTool::LoadDat()
 			if (isCharacter)
 			{
 				_float fSize = 0.01f; // Blender에서 크기가 100배 작음.
+				//_float fSize = 0.0001f; // Blender에서 크기가 100배 작음.
 				PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
 				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str());
 			}
@@ -1079,11 +1080,12 @@ void CAnimationTool::Render_Model_Detail()
 			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter");
 			Desc.IsFacial = true;
 		}
-			
 		else 
 			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
 
-        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
+        //Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
+        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter");
+        Desc.strMorphComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph");
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));
         memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
