@@ -74,6 +74,11 @@ void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		_fmatrix SpawnMatrix = XMLoadFloat4x4(pDesc->pObjectMatrixPtr);
 		Default_Transform(SpawnMatrix, pDesc->OffsetMatrix);
 	}
+	else if (m_isActivate)
+	{
+		_fmatrix Spawnmatrix = XMMatrixIdentity();
+		Default_Transform(Spawnmatrix, pDesc->OffsetMatrix);
+	}
 }
 
 void CEffect_Decal::Default_Transform(_fmatrix SpawnMatrix, _fmatrix OffsetMatrix)

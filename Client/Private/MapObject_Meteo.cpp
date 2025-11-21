@@ -32,6 +32,7 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 
 void CMapObject_Meteo::Priority_Update(_float fTimeDelta)
 {
+	m_pModelCom->Request_LOD(0);
 }
 
 void CMapObject_Meteo::Update(_float fTimeDelta)
@@ -44,48 +45,57 @@ void CMapObject_Meteo::Late_Update(_float fTimeDelta)
 {
 	if (m_IsTriggerd)
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+	
+	//if (m_IsTriggerd)
+	//	if (FAILED(m_pGameInstance->Add_Render_StaticObject(this, 0)))
+
 			return;
 }
 
 void CMapObject_Meteo::Render()
 {
-	_uint iLODIndex = 0;
+	_uint m_iLODIndex = 0;
+	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
+
+	_bool HasNormal = { true };
+	_bool HasMask = { true };
+	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	_uint iNumMesh = m_pModelComArray[iLODIndex]->Get_NumMesh();
-
+	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		_bool HasNormal = { true };
-		_bool HasMask = { true };
-
-		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
+			return;
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
 		{
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
 			HasMask = false;
 		}
+
 		if (HasMask)
 		{
-			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE);
 
-			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0);
 
-			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0)))
 				HasNormal = false;
 		}
-
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-		m_pShaderCom->Begin(m_iShaderPassIndex);
 
-		m_pModelComArray[iLODIndex]->Render(i);
+		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
 
@@ -126,7 +136,6 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
-	pDesc->iLevel;
 
 	m_farchY = pDesc->fArchY;
 	m_fDuration = pDesc->fDuration;
@@ -137,25 +146,32 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
-	m_pModelComArray.resize(V);
+	_wstring WModelName = Model;
+	WModelName.pop_back();
+	WModelName.pop_back();
+	WModelName.pop_back();
+	WModelName.pop_back();
+	WModelName.pop_back();
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), WModelName,
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("FAILED");
+	//m_pModelComArray.resize(V);
 
-	for (_uint i = 0; i < V; ++i)
-	{
-		_wstring ModelCom = Model;
-		ModelCom.pop_back();
-		ModelCom += to_wstring(i);
+	//for (_uint i = 0; i < V; ++i)
+	//{
+	//	_wstring ModelCom = Model;
+	//	ModelCom.pop_back();
+	//	ModelCom += to_wstring(i);
 
-		_char ModelName[MAX_PATH] = {};
-		sprintf_s(ModelName, "Com_Model%d", i);
-		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-			CRASH("FAILED");
-	}
+	//	_char ModelName[MAX_PATH] = {};
+	//	sprintf_s(ModelName, "Com_Model%d", i);
+	//	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
+	//		StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+	//		CRASH("FAILED");
+	//}
 
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))

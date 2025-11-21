@@ -24,6 +24,7 @@
 #include "Behavior_Tree.h"
 #include "AnimMachine.h"
 #include "VIBuffer_Spectrum.h"
+#include"Model_Streaming.h"
 #include "VIBuffer_Rect_Instance.h"
 // ==================
 

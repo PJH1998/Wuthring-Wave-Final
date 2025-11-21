@@ -36,7 +36,8 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta)override;
 	virtual		void			Update(_float fTimeDelta)override;
 	virtual		void			Late_Update(_float fTimeDelta)override;
-	virtual		void			Render() override;
+	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	
 	virtual		void			Render_Shadow()override;
 
 	void Create_Particles();
@@ -50,7 +51,8 @@ private:
 	_uint m_iShaderPassIndex = {};
 	vector<CModel*> m_pModelComArray;
 	CModel* m_pBoneModel = { nullptr };
-	CShader* m_pShaderCom = { nullptr };
+	CDeferredShader* m_pShaderCom = { nullptr };
+	class CModel_Streaming* m_pModelCom;
 
 	_bool m_IsDestroy = { false };
 

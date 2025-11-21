@@ -15,6 +15,7 @@
 #include"Mesh_Instance.h"
 #include"Edit_MonsterSpawnor.h"
 #include"Edit_Meteo.h"
+#include"Model_Streaming.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -37,10 +38,10 @@ HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
 
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4000, 4000,4000));
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
 
-	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
 	//ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
@@ -106,15 +107,6 @@ HRESULT CLevel_Map::Initialize()
 
 	m_SaveObjects["MonsterSpawnor"].push_back(m_pPickedSpawnor);
 	Safe_AddRef(m_pPickedSpawnor);
-
-	//CEdit_TriggerBox::TRIGGER Tri;
-	//Tri.iLevel = m_iLevel;
-	//Tri.vExtends = _float3(20.f, 20.f, 20.f);
-	//_matrix Mat = XMMatrixIdentity();
-	//_float4x4 TT;
-	//XMStoreFloat4x4(&TT, Mat);
-	//Tri.WorldMatrix = &TT;
-	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
 	return S_OK;
 }
 
@@ -421,6 +413,7 @@ void CLevel_Map::Menu_Model_Load()
 
 					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 						, m_iLevel, TEXT("Layer_MapObject"), &Desc);
+
 				}
 			}
 
@@ -813,7 +806,7 @@ void CLevel_Map::Menu_Save_Load()
 									pDesc.iLevel = m_iLevel;
 
 									m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-										, m_iLevel, TEXT("Layer_Test"), &pDesc);
+										, m_iLevel, TEXT("Layer_MapObject"), &pDesc);
 									});
 
 							}
@@ -917,6 +910,11 @@ void CLevel_Map::Load_Objects()
 
 				_wstring key = L"Prototype_Component_Model_" + namePart;
 
+				//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+				//	CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
+				//	continue;
+
+				//continue;
 
 
 
@@ -948,6 +946,8 @@ void CLevel_Map::Load_Objects()
 					}
 					else
 					{
+
+
 						m_PrototypeNames.push_back(LastVersionName + to_wstring(Lastversion));
 						m_ModelPaths.push_back(LastVersionPath);
 					}
@@ -976,7 +976,7 @@ void CLevel_Map::Load_Objects()
 	}
 
     m_pGameInstance->Wait_Thread_End();
-    //
+
     //for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
     //{
     //    m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
@@ -987,7 +987,7 @@ void CLevel_Map::Load_Objects()
     //{
     //    m_pPreViewObject->Add_Model(m_FoliageNames[i]);
     //}
-    //
+
     m_pGameInstance->Wait_Thread_End();
 
 }
@@ -1214,6 +1214,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
 
+	// DeferredShader_Map
+	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_DeferredShader_Map"),
+		CDeferredShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements, TEXT("Shader_Map")))))
+		CRASH("DeferredShader_Map");
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements));
 
@@ -1246,6 +1251,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
 		CEdit_MapObject_Destruction::Create(m_pDevice, m_pContext));
+	m_pGameInstance->LoadLastLOD();
 
     return S_OK;
 }

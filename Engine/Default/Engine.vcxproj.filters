@@ -370,7 +370,7 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\Material">
       <UniqueIdentifier>{d12e14ea-3ebd-47d6-8607-ccec1cf635e1}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance\Animation_Inst">
       <UniqueIdentifier>{5c49a93a-c744-4a48-a72f-9eb9a1b57be2}</UniqueIdentifier>
     </Filter>
@@ -749,18 +749,23 @@
     <ClInclude Include="..\public\ScreenBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BufferPool.h" />
+    <ClInclude Include="..\Public\Model_Manager.h" />
+    <ClInclude Include="..\Public\FreeList.h" />
+    <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\Mesh_Streaming.h" />
     <ClInclude Include="..\public\RadialBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ModelAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClInclude>
-	  <ClInclude Include="..\Public\Resource_Manager.h">
-		  <Filter>01. Utility\96. Resource\Manager</Filter>
-	  </ClInclude>
-	  <ClInclude Include="..\Public\Material.h">
-		  <Filter>01. Utility\04. Component\Material</Filter>
-	  </ClInclude>
+    <ClInclude Include="..\Public\Resource_Manager.h">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Material.h">
+      <Filter>01. Utility\04. Component\Material</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Animation_Inst.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
     </ClInclude>
@@ -1115,6 +1120,11 @@
     <ClCompile Include="..\private\ScreenBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\BufferPool.cpp" />
+    <ClCompile Include="..\Private\Model_Manager.cpp" />
+    <ClCompile Include="..\Private\FreeList.cpp" />
+    <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\private\RadialBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClCompile>
@@ -1126,7 +1136,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Material.cpp">
       <Filter>01. Utility\04. Component\Material</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\Animation_Inst.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
     </ClCompile>
@@ -1203,7 +1213,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_RadialBlur.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Client\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

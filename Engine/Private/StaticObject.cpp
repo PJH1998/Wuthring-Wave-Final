@@ -17,6 +17,14 @@ _float CStaticObject::Compute_Distance(const _fvector& vCamPos)
     return XMVectorGetX(XMVector3Length(vCamPos - m_pTransformCom->Get_State(STATE::POSITION)));
 }
 
+_uint CStaticObject::IsMaxLOD(_uint iLODIndex)
+{
+	if (m_iNumLOD <= iLODIndex)
+		return m_iNumLOD;
+	else
+		return iLODIndex;
+}
+
 void CStaticObject::Sync_Sectors()
 {
 	if (nullptr == m_pBoundingBox)
