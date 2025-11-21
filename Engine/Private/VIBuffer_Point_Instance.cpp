@@ -151,7 +151,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 			_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
-			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+ 			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
 		}
 	}
 
@@ -381,7 +381,7 @@ HRESULT CVIBuffer_Point_Instance::Render()
 	return S_OK;
 }
 
-void CVIBuffer_Point_Instance::Bind_CS_Option(PARTICLE_DefaultCB* OptionCBDesc)
+void CVIBuffer_Point_Instance::Bind_CS_Pivot(_vector vRight, _vector vUp, _vector vLook)
 {
 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
@@ -389,10 +389,14 @@ void CVIBuffer_Point_Instance::Bind_CS_Option(PARTICLE_DefaultCB* OptionCBDesc)
 
 	PARTICLE_DefaultCB* pCB = static_cast<PARTICLE_DefaultCB*>(SubResource.pData);
 
-	if (OptionCBDesc != nullptr)
-	{
-		pCB->vPivot = OptionCBDesc->vPivot;
-	}
+	_vector vWorldDir = (vRight * m_vPivot.x) + (vUp * m_vPivot.y) + (vLook * m_vPivot.z);
+
+	_float3 WorldDir = {};
+	XMStoreFloat3(&WorldDir, vWorldDir);
+
+	pCB->vPivot.x = WorldDir.x;
+	pCB->vPivot.y = WorldDir.y;
+	pCB->vPivot.z = WorldDir.z;
 
 	m_pContext->Unmap(m_pOptionCBBuffer, 0);
 }
@@ -464,6 +468,19 @@ void CVIBuffer_Point_Instance::Reset_UAV(class CComputeShader* pCShader)
 	//	pData[i];
 	//}
 
+}
+
+void CVIBuffer_Point_Instance::Reset_CS_Option()
+{
+	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+
+	m_pContext->Map(m_pOptionCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+
+	PARTICLE_DefaultCB* pCB = static_cast<PARTICLE_DefaultCB*>(SubResource.pData);
+
+	pCB->vPivot = m_vPivot;
+
+	m_pContext->Unmap(m_pOptionCBBuffer, 0);
 }
 
 CVIBuffer_Point_Instance* CVIBuffer_Point_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const INSTANCE_DESC* pDesc)

@@ -59,7 +59,6 @@ void CEffect_Decal::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
 }
 
 void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
