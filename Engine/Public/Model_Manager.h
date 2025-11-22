@@ -43,7 +43,11 @@ public:
 		_uint iLifeCount = {};
 	}DELETE_DATA;
 
-
+	typedef struct tagPaddingDesc {
+		class CModel_Streaming* pModel = { nullptr };
+		_uint iLODIndex;
+		_uint iDelayFrame;
+	}PEDDING_DATA;
 private:
 	CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CModel_Manager() = default;
@@ -93,6 +97,7 @@ private:
 	vector<SHARED_DATA_DESC> m_Data;
 	vector<MODEL_DATA> m_StagingData;
 	vector<MODEL_DATA> m_DataPool;
+	vector<PEDDING_DATA> m_DelayedNotice;
 	_float4x4 m_PreTransformMatrix = {};
 	map<_uint, vector<class CStaticObject*>> m_RenderObjects;
 	mutex m_StagingMutex;

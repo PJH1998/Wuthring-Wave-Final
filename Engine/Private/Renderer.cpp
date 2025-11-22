@@ -657,9 +657,14 @@ void CRenderer::Render_Static()
 			pObjects.clear();
 		//m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
-		//for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
-		//	m_pGameInstance->Occlusion_Culling(pObjects);
-		//m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
+
+		vector<CStaticObject*> m_Temp;
+		for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
+			m_Temp.insert(m_Temp.end(), pObjects.begin(), pObjects.end());
+
+		/*for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
+			m_pGameInstance->Occlusion_Culling(pObjects);*/
+		m_pGameInstance->Occlusion_Culling(m_Temp);
 		m_iCullStack.exchange(0, memory_order_release);
 		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
@@ -1409,6 +1414,8 @@ void CRenderer::Free()
 	Safe_Release(m_pSubResource);
 	
 	Safe_Release(m_pDevice);
+	m_pContext->ClearState();
+	m_pContext->Flush();
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 }

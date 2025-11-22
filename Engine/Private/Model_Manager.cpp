@@ -37,6 +37,7 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	m_RenderObjects[2].reserve(500);
 	m_RenderObjects[3].reserve(500);
 
+	m_DelayedNotice.reserve(200);
 	return S_OK;
 }
 
@@ -44,22 +45,42 @@ void CModel_Manager::Update(_float fTimeDelta)
 {
 	m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
 	m_iCurrentLoadCnt = 0;
-	for (_uint i = 0; i < m_DeleteList.size(); ++i)
+	//for (_uint i = 0; i < m_DeleteList.size(); ++i)
+	//{
+	//	auto& Data = m_DeleteList[i];
+	//	Data.iLifeCount--;
+	//	if (Data.iLifeCount <= 0)
+	//	{
+	//		m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
+	//		m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
+	//		if (i != m_DeleteList.size() - 1)
+	//			m_DeleteList[i] = m_DeleteList.back();
+	//		m_DeleteList.pop_back();
+	//	}
+	//	else
+	//		i++;
+	//}
+
+	if (!m_DelayedNotice.empty())
 	{
-		auto& Data = m_DeleteList[i];
-		Data.iLifeCount--;
-		if (Data.iLifeCount <= 0)
+		for (_uint i = 0; i < m_DelayedNotice.size();)
 		{
-			m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
-			m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
-			if (i != m_DeleteList.size() - 1)
-				m_DeleteList[i] = m_DeleteList.back();
-			m_DeleteList.pop_back();
+			if (m_DelayedNotice[i].iDelayFrame >= 2)
+			{
+				m_DelayedNotice[i].pModel->Get_MeshState(m_DelayedNotice[i].iLODIndex).store(LOADSTATE::LOADED);
+				m_DelayedNotice[i].pModel = nullptr;
+				
+				m_DelayedNotice[i] = m_DelayedNotice.back();
+				m_DelayedNotice.pop_back();
+			}
+			else
+			{
+				m_DelayedNotice[i].iDelayFrame++;
+				i++;
+			}
 		}
-		else
-			i++;
 	}
-	
+
 	if (!m_StagingData.empty())
 	{
 		vector<MODEL_DATA> pTempVector;
@@ -94,21 +115,12 @@ void CModel_Manager::Update(_float fTimeDelta)
 				m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
 
 				D3D11_MAPPED_SUBRESOURCE StagingDesc{};
-				/*m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-				memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
-				m_pContext->Unmap(m_pStagingBuffer, 0);*/
-
-				///*D3D11_BOX */PoolBox = { 0,0,0,VertexSize,1,1 };
-				//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
-				//	0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
-
 
 				_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
 				_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
 				if (IndexOffSet == -1)
 					CRASH("Failed");
-
 
 				PoolBox.left = IndexOffSet;
 				PoolBox.top = 0;
@@ -119,14 +131,6 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 				m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(), 0, &PoolBox, Data.LoadData[i].IndexData.data(), 0, 0);
 
-				//m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-				//memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
-				//m_pContext->Unmap(m_pStagingBuffer, 0);
-
-				/*PoolBox = { 0,0,0,IndexSize,1,1 };
-				m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
-					0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);*/
-
 				SHARED_DATA_DESC Desc{};
 				Desc.IndexOffset = IndexOffSet / sizeof(_uint);
 				Desc.IndexSize = IndexSize;
@@ -136,7 +140,10 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 				pData->push_back(Desc);
 			}
-			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
+			PEDDING_DATA PeddingData{};
+			PeddingData.pModel = Data.pModel;
+			PeddingData.iLODIndex = Data.iLODIndex;
+			m_DelayedNotice.push_back(PeddingData);
 		}
 		Release_Vector(pTempVector);
 	}
@@ -144,40 +151,39 @@ void CModel_Manager::Update(_float fTimeDelta)
 	if (m_ModelPrototypes[m_iCurrentLevel].empty())
 		return;
 
-
 	if (m_iSearchIndex == m_ModelPrototypes[m_iCurrentLevel].end())
 		m_iSearchIndex = m_ModelPrototypes[m_iCurrentLevel].begin();
 	_uint iCheckCount = { 0 };
-	while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes[m_iCurrentLevel].end())
-	{
-		CModel_Streaming* pModel = m_iSearchIndex->second;
-		for (_uint i = 0; i < 3; ++i)
-		{
-			if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
-			{
-				if (pModel->Get_MeshDesc(0)[i].empty())
-					continue;
-				vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
-				if (pMeshVector->empty())
-					continue;
-				for (auto& pDesc : *pMeshVector)
-				{
-					DELETE_DATA Data{};
-					Data.iLifeCount = 3;
-					Data.iLODIndex = i;
-					Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
-					Data.IndexSize = pDesc.IndexSize;
-					Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
-					Data.VertexSize = pDesc.VertexSize;
+	//while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes[m_iCurrentLevel].end())
+	//{
+	//	CModel_Streaming* pModel = m_iSearchIndex->second;
+	//	for (_uint i = 0; i < 3; ++i)
+	//	{
+	//		if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
+	//		{
+	//			if (pModel->Get_MeshDesc(0)[i].empty())
+	//				continue;
+	//			vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
+	//			if (pMeshVector->empty())
+	//				continue;
+	//			for (auto& pDesc : *pMeshVector)
+	//			{
+	//				DELETE_DATA Data{};
+	//				Data.iLifeCount = 3;
+	//				Data.iLODIndex = i;
+	//				Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
+	//				Data.IndexSize = pDesc.IndexSize;
+	//				Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
+	//				Data.VertexSize = pDesc.VertexSize;
 
-					m_DeleteList.push_back(Data);
-				}
-				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
-			}
-		}
-		m_iSearchIndex++;
-		iCheckCount++;
-	}
+	//				m_DeleteList.push_back(Data);
+	//			}
+	//			pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
+	//		}
+	//	}
+	//	m_iSearchIndex++;
+	//	iCheckCount++;
+	//}
 
 }
 
@@ -528,9 +534,9 @@ void CModel_Manager::Free()
 			Safe_Release(pObject);
 	m_RenderObjects.clear();
 
-	m_DeleteList.clear();
-	m_StagingData.clear();
+	//m_DeleteList.clear();
+	//m_StagingData.clear();
 	for (auto& pData : m_DataPool)
 		pData.pModel = nullptr;
-	m_DataPool.clear();
+	//m_DataPool.clear();
 }

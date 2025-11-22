@@ -128,8 +128,13 @@ vector<CModel_Manager::SHARED_DATA_DESC>* CModel_Streaming::Get_MeshDesc(_uint i
 
 void CModel_Streaming::RequestModel(_uint iLODIndex)
 {
-	m_pGameInstance->SetUp_Data(this, m_ModelPath, 0);
-	m_pGameInstance->SetUp_Data(this, m_ModelPath, m_iMaxLOD);
+	//m_pGameInstance->SetUp_Data(this, m_ModelPath, 0);
+	//m_pGameInstance->SetUp_Data(this, m_ModelPath, m_iMaxLOD);
+
+	for (_uint i = 0; i <= m_iMaxLOD; ++i)
+	{
+		m_pGameInstance->SetUp_Data(this, m_ModelPath, i);
+	}
 }
 
 _bool CModel_Streaming::Is_RenderTimeOver(_uint iLODIndex)
