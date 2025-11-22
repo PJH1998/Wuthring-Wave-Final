@@ -107,6 +107,7 @@
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
+    <ClInclude Include="..\public\ScreenSpaceReflection.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
     <ClInclude Include="..\public\SFX.h" />
@@ -238,6 +239,7 @@
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
+    <ClCompile Include="..\private\ScreenSpaceReflection.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />
     <ClCompile Include="..\private\SFX.cpp" />
