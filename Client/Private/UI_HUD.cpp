@@ -903,7 +903,9 @@ void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
 
 void CUI_HUD::Update_Text_PlayerHP()
 {
-	CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_Player_HP"));
+	CUI_Text* pTargetText = dynamic_cast<CUI_Text*>(m_pTextUI_PlayerHP);
+	if (!pTargetText)
+		return;
 
 	auto& playerHPDesc = pTargetText->Get_TextUIDesc();
 
@@ -1250,7 +1252,7 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 
 
     // ĳ���Ϳ� ���� Ű ���̵� ���̱� ���� �б�
-    CCustom_UI* pKeyButtonUI = Find_ChildObject(L"Inst_KeyButton");
+    CCustom_UI* pKeyButtonUI = m_pUI_KeyButton;
     auto keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
     switch (m_iSelectedCHIndex)

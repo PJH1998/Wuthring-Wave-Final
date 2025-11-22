@@ -1,7 +1,5 @@
 ﻿#include "ClientPch.h"
-
 #include "UI_MobHPBar.h"
-#include "Animator_UI.h"
 
 #include "GameSystem.h"
 
@@ -91,12 +89,15 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 
 
 	static _float fTmpHP = 70.f;
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		fTmpHP -= 10.f;
+	_bool isHitTmp = false;
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+		fTmpHP -= 10.f;
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
 		fTmpHP += 10.f;
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		isHitTmp = true;
 
-	std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+	//std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
 
 	//if (isActiveMobHPBar)
 	//{
@@ -119,6 +120,7 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 			tTmpDesc.vMobPos = fTestOffset;
 			tTmpDesc.fMobCurHP = (i == 2)? fTmpHP : 50.f;
 			tTmpDesc.fMobMaxHP = 100.f;
+			tTmpDesc.isAtkedCurFrame = isHitTmp;
 
 			tTmpDesc.iObjKey = i;
 		
@@ -177,6 +179,7 @@ void CUI_MobHPBar::PreAssign_ChildUIs()
 	m_pUI_Frame		= Find_ChildObject(L"InstHPFrame");
 	m_pUI_Line		= Find_ChildObject(L"InstHPLine");
 	m_pUI_HB		= Find_ChildObject(L"InstHPBar");
+	m_pUI_HB_Inv	= Find_ChildObject(L"InstHPBar_Inv");
 }
 
 void CUI_MobHPBar::PreAssign_Presets()
@@ -201,6 +204,9 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 	//m_vecMobInfo 검사하며 없으면 추가, 있으면 갱신하며 true로 돌리기
 	//	
 	//이후 만약 안 돌려졌으면 그건 제거하기
+	
+	const _float fAtkedResetTime = 0.5f;
+
 
 
 	// 캐시된 정보들, 업데이트 여부 초기값으로
@@ -225,6 +231,27 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 				mobRTInfo.fCurStackedTime += fTimeDelta;
 				mobRTInfo.tInfoDesc = mobInfo;
 
+				for (_uint i = 0; i < mobRTInfo.isTimerActived.size(); i++)	// 타이머 활성화중이면 시간 갱신. 지정된 시간을 넘으면 종료
+				{
+					if (mobRTInfo.isTimerActived[i])		// 피격 피드백 진행중임?
+					{
+						mobRTInfo.fAtkedElapsedTime[i] += fTimeDelta;					// 지정된 시간을 넘기지 않았으면 갱신
+
+						if (mobRTInfo.fAtkedElapsedTime[i] >= m_fMaxAtkedTimer)			// 지정된 시간을 넘기면 종료
+						{
+							mobRTInfo.fAtkedElapsedTime[i] = 0.f;
+							mobRTInfo.isTimerActived[i] = false;
+						}
+					}
+				}
+				
+				if (mobRTInfo.tInfoDesc.isAtkedCurFrame)								// 피격 감지 시 랜덤한거 피드백 타이머 시작
+				{
+					_uint iRand = (_uint)m_pGameInstance->Rand(0.f, 1.999f);			// ?? : 기준 변경 필요할수도.
+					//mobRTInfo.fAtkedElapsedTime[iRand] = 0.f;
+					mobRTInfo.isTimerActived[iRand] = true;
+				}
+
 				isFind_CachedData = true;
 				break;
 			}
@@ -242,7 +269,7 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 		}
 	}
 
-	// 캐시에 남아있는데 갱신도 안됨! -> 제거 
+	// 캐시에 남아있는데 갱신도 안됨! -> 제거
 	m_vecMobInfo_RT.erase(
 		remove_if(m_vecMobInfo_RT.begin(), m_vecMobInfo_RT.end(),
 			[](const auto& mobRT)
@@ -250,6 +277,7 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 				return mobRT.isUpdatedThisFrame == false;
 			}),	
 		m_vecMobInfo_RT.end());
+
 }
 
 void CUI_MobHPBar::Update_Instances()
@@ -264,6 +292,7 @@ void CUI_MobHPBar::Update_Instances()
 	//vecFloatingUIs.push_back(m_pUI_SAFrame);
 	//vecFloatingUIs.push_back(m_pUI_SABar);
 	vecFloatingUIs.push_back(m_pUI_HB);
+	vecFloatingUIs.push_back(m_pUI_HB_Inv);
 	vecFloatingUIs.push_back(m_pUI_Line);
 	vecFloatingUIs.push_back(m_pUI_Frame);
 
@@ -514,14 +543,18 @@ void CUI_MobHPBar::Calc_HBEff()
 	// 여기서 variant desc 재정의 및  변수 전달, 색상 수정 ㅇㅇ
 
 	auto targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
+	auto targetInvDesc = m_pUI_HB_Inv->Get_UIDesc();		// for Normal Desc
 	auto targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
 	auto targetLineDesc = m_pUI_Line->Get_UIDesc();	// for Line Normal Desc
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
+	auto& vecInvInstDesc = targetInvDesc.vecInstanceDescs;
 	auto& vecBGInstDesc = targetBGDesc.vecInstanceDescs;
 	auto& vecLineInstDesc = targetLineDesc.vecInstanceDescs;
 
 	vector<_float4x4> vecVariantMat = {};		// for Variant Desc
 	vecVariantMat.resize(vecInstDesc.size());
+	vector<_float4x4> vecInvVariantMat = {};		// for Variant Desc
+	vecInvVariantMat.resize(vecInvInstDesc.size());
 	vector<_float4x4> vecLineVariantMat = {};		// for BG Variant Desc
 	vecLineVariantMat.resize(vecLineInstDesc.size());
 	vector<_float4x4> vecBGVariantMat = {};		// for BG Variant Desc
@@ -543,16 +576,30 @@ void CUI_MobHPBar::Calc_HBEff()
 		const _float fHPRatio = fInstCurHP / fInstMaxHP;						// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
 		
 		const _float fFillTime	= 0.35f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
-		const _float fFlickStartHPRatio = 0.5f;		// 체력이 얼마나 남았을 때 부터 깜빡임을 시작할 건지 
+		//const _float fFlickStartHPRatio = 0.5f;		// 체력이 얼마나 남았을 때 부터 깜빡임을 시작할 건지 
 
 		// 1. 시간에 따른 HB 관리
 		const _float fCurHBTime = fMinHBTime + (fMaxHBTime - fMinHBTime) * fHPRatio;	// 계산된 현재 주기
 
 		// 2. 각 인스턴스에 적용할 최종 계산된 변수
-		_float fClipXRate = (fElapsedLifetime / fFillTime > 1.f) ? 1 : fElapsedLifetime / fFillTime;	// 얼마나 가릴건지. 0 부터 fFillTime 까를 0~1로
+		//_float fClipXRate = (fElapsedLifetime / fFillTime > 1.f) ? 1 : fElapsedLifetime / fFillTime;	// 얼마나 가릴건지. 0 부터 fFillTime 까를 0~1로
+		
+
+		array<_float, 2>	arrClipXRate = {};
+		for (_uint j = 0; j < arrClipXRate.size(); j++)		// 내부적으로 계산된 각 웨이브 별 델타타임을 기준으로 계산
+			arrClipXRate[j] = (m_vecMobInfo_RT[i].fAtkedElapsedTime[j] / fFillTime > 1.f) ? 1 : m_vecMobInfo_RT[i].fAtkedElapsedTime[j] / fFillTime;	
+		array<_float, 2>	arrAlphaRate = {};
+		for (_uint j = 0; j < arrAlphaRate.size(); j++)		// 내부적으로 계산된 각 웨이브 별 델타타임을 기준으로 계산
+			arrAlphaRate[j] = (m_vecMobInfo_RT[i].fAtkedElapsedTime[j] <= fFillTime) ?				// 얼마나 보였다 사라질건지
+				m_vecMobInfo_RT[i].fAtkedElapsedTime[j] / fFillTime :									// filltime 도달 전 알파
+				(m_fMaxAtkedTimer - m_vecMobInfo_RT[i].fAtkedElapsedTime[j]) / (m_fMaxAtkedTimer - fFillTime);		// filltime 도달 후 알파
+
+		//if (i == 2)
+		//	std::cout << "[arrAlphaRate] [0] : " << arrAlphaRate[0] << ", \t[1] : " << arrAlphaRate[1] << std::endl;
+
 		_float fAlphaRate = (fElapsedLifetime <= fFillTime )?				// 얼마나 보였다 사라질건지
 			fElapsedLifetime / fFillTime :									// filltime 도달 전 알파
-			(fCurHBTime - fElapsedLifetime) / (fCurHBTime - fFillTime);	// filltime 도달 후 알파
+			(fCurHBTime - fElapsedLifetime) / (fCurHBTime - fFillTime);		// filltime 도달 후 알파
 
 		_float4 vColorRate = {};				// 시간 경과에 따라 어떤 색으로 변할건지
 		_vector vColorRate_Load = (fHPRatio < fColorBranchHP) ?
@@ -579,52 +626,62 @@ void CUI_MobHPBar::Calc_HBEff()
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
 		auto& targetVariantMat = vecVariantMat[i];
+		auto& targetInvInst = vecInvInstDesc[i];		// 적용 할 인스턴스의 데이터
+		auto& targetInvVariantMat = vecInvVariantMat[i];
 		auto& targetLineInst = vecLineInstDesc[i];
 		auto& targetLineVariantMat = vecLineVariantMat[i];
 		auto& targetBGInst = vecBGInstDesc[i];
 		auto& targetBGVariantMat = vecBGVariantMat[i];
 
-		targetInst.vClipTexcoordX = { 0.f, fClipXRate };
+		targetInst.vClipTexcoordX = { 0.f, arrClipXRate[0] };
+		targetInvInst.vClipTexcoordX = { 0.f, arrClipXRate[1] };
 
-		*reinterpret_cast<_float4*>(&targetVariantMat._11)	= vColorRate;
-		*reinterpret_cast<_float4*>(&targetVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._31)	= fAlphaRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._32)	= fScaleRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._33)	= fStackedTime;
-		*reinterpret_cast<_float*>(&targetVariantMat._34)	= fCoordSpeedX;
+		*reinterpret_cast<_float4*>(&targetVariantMat._11)		= vColorRate;
+		*reinterpret_cast<_float4*>(&targetVariantMat._21)		= vColorRate;
+		*reinterpret_cast<_float*>(&targetVariantMat._31)		= arrAlphaRate[0];
+		*reinterpret_cast<_float*>(&targetVariantMat._32)		= fScaleRate;
+		*reinterpret_cast<_float*>(&targetVariantMat._33)		= fStackedTime;
+		*reinterpret_cast<_float*>(&targetVariantMat._34)		= fCoordSpeedX;
 
-		*reinterpret_cast<_float4*>(&targetLineVariantMat._11) = vColorRate;
-		*reinterpret_cast<_float4*>(&targetLineVariantMat._21) = vColorRate;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._31) = 0.5f + fAlphaRate * 0.5f;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._32) = 0.5f;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._33) = fStackedTime;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._34) = fCoordSpeedX;
+		*reinterpret_cast<_float4*>(&targetInvVariantMat._11)	= vColorRate;
+		*reinterpret_cast<_float4*>(&targetInvVariantMat._21)	= vColorRate;
+		*reinterpret_cast<_float*>(&targetInvVariantMat._31)	= arrAlphaRate[1];
+		*reinterpret_cast<_float*>(&targetInvVariantMat._32)	= fScaleRate;
+		*reinterpret_cast<_float*>(&targetInvVariantMat._33)	= fStackedTime;
+		*reinterpret_cast<_float*>(&targetInvVariantMat._34)	= fCoordSpeedX;
 
-		*reinterpret_cast<_float4*>(&targetBGVariantMat._11) = m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float4*>(&targetBGVariantMat._21) = m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 0.5f + fAlphaRate * 0.5f;// fAlphaRate;
-		*reinterpret_cast<_float*>(&targetBGVariantMat._32) = fScaleRate;
-		*reinterpret_cast<_float*>(&targetBGVariantMat._33) = fStackedTime;
-		*reinterpret_cast<_float*>(&targetBGVariantMat._34) = fCoordSpeedX;
+		*reinterpret_cast<_float4*>(&targetLineVariantMat._11)	= vColorRate;
+		*reinterpret_cast<_float4*>(&targetLineVariantMat._21)	= vColorRate;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._31)	= 0.5f + fAlphaRate * 0.5f;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._32)	= 0.7f;					// 기본 선의 굵기
+		*reinterpret_cast<_float*>(&targetLineVariantMat._33)	= fStackedTime;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._34)	= fCoordSpeedX;
+
+		*reinterpret_cast<_float4*>(&targetBGVariantMat._11)	= m_arrColorPresets[HRC_BACKGROUND];
+		*reinterpret_cast<_float4*>(&targetBGVariantMat._21)	= m_arrColorPresets[HRC_BACKGROUND];
+		*reinterpret_cast<_float*>(&targetBGVariantMat._31)		= 0.5f + fAlphaRate * 0.5f;// fAlphaRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._32)		= fScaleRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._33)		= fStackedTime;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._34)		= fCoordSpeedX;
 
 		// 체력이 특정 이상일 때에는 애니메이션 반영 없이 그대로
-		if (fHPRatio > fFlickStartHPRatio)
-		{
-			targetInst.vClipTexcoordX = { 0.f, 1.f };
-			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;		// alpha
-			*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;		// alpha
-
-			//m_vecMobInfo_RT[i].fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
-		}
-		else if (!m_vecMobInfo_RT[i].isPendingFlick)	// 체력이 내려갔지만 다음 계산상의 alpha가 1이 되기 전에는 계속 1이어야 함
-		{
-			if (fAlphaRate >= 0.95f)
-				m_vecMobInfo_RT[i].isPendingFlick = true;
-
-			targetInst.vClipTexcoordX = { 0.f, 1.f };
-			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;
-			*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;
-		}
+		//if (fHPRatio > fFlickStartHPRatio)
+		//{
+		//	targetInst.vClipTexcoordX = { 0.f, 1.f };
+		//	*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;		// alpha
+		//	*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;		// alpha
+		//
+		//	//m_vecMobInfo_RT[i].fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
+		//}
+		//else if (!m_vecMobInfo_RT[i].isPendingFlick)	// 체력이 내려갔지만 다음 계산상의 alpha가 1이 되기 전에는 계속 1이어야 함
+		//{
+		//	if (fAlphaRate >= 0.95f)
+		//		m_vecMobInfo_RT[i].isPendingFlick = true;
+		//
+		//	targetInst.vClipTexcoordX = { 0.f, 1.f };
+		//	*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;
+		//	*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;
+		//} 
 
 		
 		// END : 시간 초기화 관리
@@ -645,6 +702,11 @@ void CUI_MobHPBar::Calc_HBEff()
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
 		true
 	};
+	CCustom_UI::VARIANTREADY_UI_DESC tInvVariantDesc = {
+		vecInvVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
+		true
+	};
 	CCustom_UI::VARIANTREADY_UI_DESC tLineVariantDesc = {
 		vecLineVariantMat,
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
@@ -660,11 +722,14 @@ void CUI_MobHPBar::Calc_HBEff()
 	m_pUI_HB->Set_UIDesc(targetDesc);
 	m_pUI_HB->Set_VariantUIDesc(tVariantDesc);
 
-	targetDesc.vecInstanceDescs = vecLineInstDesc;
+	targetInvDesc.vecInstanceDescs = vecInvInstDesc;
+	m_pUI_HB_Inv->Set_UIDesc(targetInvDesc);
+	m_pUI_HB_Inv->Set_VariantUIDesc(tInvVariantDesc);
+
+	targetLineDesc.vecInstanceDescs = vecLineInstDesc;
 	m_pUI_Line->Set_UIDesc(targetLineDesc);
 	m_pUI_Line->Set_VariantUIDesc(tLineVariantDesc);
 
-	targetDesc.vecInstanceDescs = vecBGInstDesc;
 	m_pUI_Frame->Set_UIDesc(targetBGDesc);
 	m_pUI_Frame->Set_VariantUIDesc(tBGVariantDesc);
 }

@@ -16,6 +16,9 @@ public:
 		_float		fCurElapsedTime = 0.f;
 		_float		fCurStackedTime = 0.f;
 
+		array<_float, 2>	fAtkedElapsedTime = {};
+		array<_bool, 2>		isTimerActived = {};
+		
 		_bool		isUpdatedThisFrame = false;
 		_bool		isPendingFlick = false;
 	}UI_MOBRT_DESC;
@@ -59,6 +62,7 @@ private:
 	//CCustom_UI*		m_pUI_SAFrame		= nullptr;
 	//CCustom_UI*		m_pUI_SABar			= nullptr;
 	CCustom_UI*			m_pUI_HB			= nullptr;
+	CCustom_UI*			m_pUI_HB_Inv		= nullptr;
 	CCustom_UI*			m_pUI_Line			= nullptr;
 	CCustom_UI*			m_pUI_Frame			= nullptr;
 
@@ -79,6 +83,8 @@ private:
 	// HP 주기 효과용
 	const _float			m_fMaxRTTime = 4.f;
 	const _float			m_fMinRTTime = 1.f;
+
+	const _float			m_fMaxAtkedTimer = 0.5f;
 
 	array<_float4, 4>		m_arrColorPresets;
 
