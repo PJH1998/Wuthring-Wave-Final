@@ -39,6 +39,7 @@ public:
 	HRESULT						Update_InstanceData(VTXINSTANCE_ANIMMESH* pMatrices, _uint iNumRenderCount);
 private:
 	ID3D11Buffer*					m_pBoneLocalIdxBuf = { nullptr };
+	ID3D11ShaderResourceView*		m_pBoneLocalIdxSRV = { nullptr };
 	_uint							m_iMaterialIndex = {};
 	_uint							m_iNumBones = {};
 	_uint							m_iNumMaxInstance = {};

@@ -76,10 +76,10 @@ VS_OUT VS_MAIN(VS_IN In)
         g_MeshLocalBoneIndecies[In.vBlendIndex.z],
         g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
     matBone =
-    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.x], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.x)]) * vReplaceW.x +
-    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.y], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.y)]) * vReplaceW.y +
-    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.z], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.z)]) * vReplaceW.z +
-    mul(g_OffsetMatrices[iMeshLocalBoneIndecies.w], g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.w)]) * vReplaceW.w;
+    mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
+    mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
+    mul(g_OffsetMatrices[In.vBlendIndex.z], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.z)]) * vReplaceW.z +
+    mul(g_OffsetMatrices[In.vBlendIndex.w], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.w)]) * vReplaceW.w;
     
     float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
     vPosition = mul(vPosition, In.TransformMatrix);
