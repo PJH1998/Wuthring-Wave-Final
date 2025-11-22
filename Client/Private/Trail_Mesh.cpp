@@ -284,6 +284,10 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_vLifeTime.x, sizeof(_float))))
 		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_vLifeTime, sizeof(_float2))))
+		return E_FAIL;
+
     return S_OK;
 }
 

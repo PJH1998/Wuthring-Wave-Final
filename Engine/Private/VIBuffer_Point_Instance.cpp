@@ -155,6 +155,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
  			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+			pSRV[i].fDelay = pPointDesc->fDelay.y * (i + 1);
 		}
 	}
 
