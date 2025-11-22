@@ -40,8 +40,8 @@ struct AnimationInfoCB
 {
     float fTrackPosition;
     uint iAnimIndex;
-    bool IsRibAnimUsed;
-    uint iRibbonAnimIndex;
+    bool bTemp1;
+    uint iTemp2;
 };
 
 // --- Resources (CModel::Ready_GPU_Buffers에서 생성한 버퍼들) ---

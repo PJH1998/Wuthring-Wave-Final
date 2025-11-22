@@ -517,7 +517,7 @@ void CCorosaurus::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& 
 		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
 	}
 #ifdef _DEBUG
-	cout << "On Hit! (Corro)" << endl;
+	cout << "On Hit! (Coro)" << endl;
 #endif // _DEBUG
 }
 

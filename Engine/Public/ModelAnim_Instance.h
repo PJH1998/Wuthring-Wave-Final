@@ -91,6 +91,8 @@ public:
 	HRESULT								Bind_ConstantBuffers(class CShader* pShader);
 	HRESULT								Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	//_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
+	
+	//루트모션 & 인스턴스 객체 track 갱신
 	_bool								Update_RootMotion(const _string& strAnimationName, class CTransform* pTransform, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	//충돌 상호작용 이후 최종 매트릭스 업데이트
 	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices = nullptr, _uint iExtra = 0);
@@ -156,7 +158,7 @@ private:
 	//인스턴스에 사용되는 매쉬 부위 개수
 	_uint									m_iNumMeshType = {};
 	//메쉬 종류에 따른 패딩 위치
-	vector<_uint>							m_MeshTypeCounts;
+	vector<_uint>							m_MeshTypeOffsets;
 	vector<vector<VTXINSTANCE_ANIMMESH>>		m_pVtxInstanceDatas;
 	_bool m_isRibAnimation = { false };
 
@@ -166,8 +168,9 @@ private:
 	void							Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
 
 private:
-	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex);
+	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex, _bool isFirst, vector<CBone*>& Temp);
 	HRESULT							Ready_Mesh(ifstream& InputFile);
+	HRESULT							Ready_Parts(const _char* pFolderPath, vector<_string>* strMeshTypes, vector<CBone*>& Temp);
 	HRESULT							Ready_Material(const _char* pFilePath);
 	HRESULT							Ready_Animation(const _char* pFilePath);
 

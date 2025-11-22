@@ -8,7 +8,6 @@ class CShader;
 NS_END
 
 NS_BEGIN(Client)
-class CAttackVolume;
 
 class CCoro_Rock final : public CPartObject
 {
@@ -34,11 +33,13 @@ public:
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
 
+public:
+	void Change_Layer(_uint iLayer);
+
 private:
 	CRigidbody* m_pRigidBodyCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
-	CAttackVolume* m_pAttackVolume = { nullptr };
 
 	const _float4x4* m_pSocketMatrix = { nullptr };
 #ifdef _DEBUG
@@ -50,6 +51,8 @@ private:
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(CORO_ROCK_DESC* pDesc);
+
+	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
 	static CCoro_Rock* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

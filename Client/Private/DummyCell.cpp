@@ -31,7 +31,8 @@ HRESULT CDummyCell::Initialize_Clone(void* pArg)
 	m_iInstanceIndex = pDesc->iInstanceIndex;
 	m_fTrackPos = pDesc->fTrackPos;
 	m_fRootMotionRate = 1.f;
-
+	m_isRootMotion = true;
+	m_isRootMotionTranslate = true;
 	if (pDesc->iNumMeshType > 0)
 	{
 		m_MeshTypeIndices.reserve(pDesc->iNumMeshType);

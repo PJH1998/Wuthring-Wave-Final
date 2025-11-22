@@ -94,22 +94,22 @@ void CNPCInstancing::Ready_Component(NPC_DESC* pDesc)
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-		CRASH("DummyNPC/Com_Shader");
+		CRASH("NPCInstancing/Com_Shader");
 
 	// Com_ComputeShader
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
 		, pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
-		CRASH("DummyNPC/Com_ComputeShader");
+		CRASH("NPCInstancing/Com_ComputeShader");
 
 	// Com_ComputeShaderCombining
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
 		, pDesc->wstrCombiningPrototypeTag, TEXT("Com_ComputeShaderCombining"), reinterpret_cast<CComponent**>(&m_pSkinningCom), nullptr)))
-		CRASH("DummyNPC/Com_ComputeShaderCombining");
+		CRASH("NPCInstancing/Com_ComputeShaderCombining");
 
 	// Com_ModelInstance
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelInstanceCom), nullptr)))
-		CRASH("DummyNPC/Com_Model");
+		CRASH("NPCInstancing/Com_Model");
 }
 
 void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
@@ -152,6 +152,12 @@ void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
 		m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), pDesc->wstrObjectPrototypeTag, ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &CellDesc);
 		
 	}
+}
+
+void CNPCInstancing::Update_AnimationState(const _string& strAnimName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPos, _uint* pPaddingIndices)
+{
+
+	m_pModelInstanceCom->Update_AnimationState(strAnimName, WorldMatrix, iInstanceIndex, pTrackPos, pPaddingIndices);
 }
 
 CNPCInstancing* CNPCInstancing::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -1,10 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "AnimationDummy.h"
-#include "ElectroPredator.h"
-#include "FS_Scythe.h"
 #include "GameSystem.h"
-#include "Ggobul.h"
-#include "HavocWarrior.h"
 #include "Level_Test.h"
 #include "MapObject.h"
 #pragma region MONSTER
@@ -16,7 +12,6 @@
 #include "Corosaurus.h"
 #include "PatternDummy.h"
 #pragma endregion
-#include "GameSystem.h"
 #include "Player.h"
 #include "ShadowMap.h"
 #include "SkyBox.h"
@@ -67,7 +62,7 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
+	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
 

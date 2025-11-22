@@ -32,7 +32,7 @@ CModelAnim_Instance::CModelAnim_Instance(const CModelAnim_Instance& Prototype)
 	m_isRibAnimation { Prototype.m_isRibAnimation },
 	m_iNumInstance { Prototype.m_iNumInstance },
 	m_iNumMeshType{ Prototype.m_iNumMeshType },
-	m_MeshTypeCounts { Prototype.m_MeshTypeCounts },
+	m_MeshTypeOffsets { Prototype.m_MeshTypeOffsets },
 	m_iNumBones { Prototype.m_iNumBones }
 	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
@@ -215,13 +215,14 @@ HRESULT CModelAnim_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreT
 	else
 		m_iNumMeshType = static_cast<_uint>(strMeshTypes->size());
 
-	m_MeshTypeCounts.resize(m_iNumMeshType, 0);
+	m_MeshTypeOffsets.resize(m_iNumMeshType, 0);
 	
 	m_iNumInstance = iNumInstance;
-
+	vector<CBone*> Temp;
 	if (m_iNumMeshType > 1 && nullptr != strMeshTypes)
 	{
-
+		if (FAILED(Ready_Parts(pFilePath, strMeshTypes, Temp)))
+			return E_FAIL;
 	}
 	else
 	{
@@ -231,19 +232,14 @@ HRESULT CModelAnim_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreT
 			MSG_BOX("Failed Open : Model");
 			return E_FAIL;
 		}
-
+		_bool isFirst = m_Bones.empty();
 		if (MODELTYPE::ANIM == m_eType)
 		{
-			if (FAILED(Ready_Bone(InputFile, -1)))
+			if (FAILED(Ready_Bone(InputFile, -1, isFirst, Temp)))
 				return E_FAIL;
 			m_iNumBones = static_cast<_uint>(m_Bones.size());
 
 			if (FAILED(Ready_Animation(pFilePath)))
-				return E_FAIL;
-		}
-		else if (MODELTYPE::ECO == m_eType)
-		{
-			if (FAILED(Ready_Bone(InputFile, -1)))
 				return E_FAIL;
 		}
 
@@ -282,15 +278,16 @@ HRESULT CModelAnim_Instance::Initialize_Clone(void* pArg)
 			/*m_pVtxInstanceDatas.resize(m_iNumMeshes);
 			for (_uint i = 0; i < m_iNumMeshes; i++)
 			{
-				m_pVtxInstanceDatas[i].resize(m_MeshTypeCounts[i]);
+				m_pVtxInstanceDatas[i].resize(m_MeshTypeOffsets[i]);
 			}*/
 		}
 		else
 		{
 			m_pVtxInstanceDatas.resize(m_iNumMeshType);
+
 			for (_uint i = 0; i < m_iNumMeshType; i++)
 			{
-				m_pVtxInstanceDatas[i].resize(m_MeshTypeCounts[i]);
+				m_pVtxInstanceDatas[i].reserve(m_iNumMeshes);
 			}
 		}
 	}
@@ -414,6 +411,7 @@ _bool CModelAnim_Instance::Update_RootMotion(const _string& strAnimationName, CT
 		//return true; // 애니메이션 종료
 	}
 
+	//루트모션 작업 수정 필요(현재 작동 x)
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
 	else
@@ -447,7 +445,7 @@ void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName,
 	{
 		for (_uint i = 0; i < m_iNumMeshType; ++i)
 		{
-			m_pVtxInstanceDatas[(pPaddingIndices[i] + m_MeshTypeCounts[i])].push_back(m_VtxInstanceDatas[iInstanceIndex]);
+			m_pVtxInstanceDatas[(pPaddingIndices[i] + m_MeshTypeOffsets[i])].push_back(m_VtxInstanceDatas[iInstanceIndex]);
 		}
 	}
 }
@@ -719,8 +717,9 @@ void CModelAnim_Instance::Compute_RootAnimation(_float fRootMotionRate, _bool is
 	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
 }
 
-HRESULT CModelAnim_Instance::Ready_Bone(ifstream& InputFile, _int iParentIndex)
+HRESULT CModelAnim_Instance::Ready_Bone(ifstream& InputFile, _int iParentIndex, _bool isFirst, vector<CBone*>& Temp)
 {
+
 	_uint iNumChild = {};
 	InputFile.read(reinterpret_cast<_char*>(&iNumChild), sizeof(_uint));
 	_uint iLength = {};
@@ -735,19 +734,32 @@ HRESULT CModelAnim_Instance::Ready_Bone(ifstream& InputFile, _int iParentIndex)
 	if (nullptr == pBone)
 		return E_FAIL;
 
-	m_Bones.push_back(pBone);
-
-	_int iIndex = m_Bones.size() - 1;
-	// Root Bone Index 저장
-	if (0 == strcmp(szName, "Root"))
-		m_iRootBoneIndex = iIndex;
-
-	for (size_t i = 0; i < iNumChild; ++i)
+	if(isFirst)
 	{
-		if (FAILED(Ready_Bone(InputFile, iIndex)))
-			return E_FAIL;
-	}
+		m_Bones.push_back(pBone);
 
+		_int iIndex = m_Bones.size() - 1;
+		// Root Bone Index 저장
+		if (0 == strcmp(szName, "Root"))
+			m_iRootBoneIndex = iIndex;
+
+		for (size_t i = 0; i < iNumChild; ++i)
+		{
+			if (FAILED(Ready_Bone(InputFile, iIndex, isFirst, Temp)))
+				return E_FAIL;
+		}
+	}
+	else
+	{
+		Temp.push_back(pBone);
+		_int iIndex = Temp.size() - 1;
+		for (size_t i = 0; i < iNumChild; ++i)
+		{
+			if (FAILED(Ready_Bone(InputFile, iIndex, isFirst, Temp)))
+				return E_FAIL;
+		}
+
+	}
 	return S_OK;
 }
 
@@ -761,6 +773,81 @@ HRESULT CModelAnim_Instance::Ready_Mesh(ifstream& InputFile)
 		ASSERT_CRASH(pMesh);
 		m_Meshes.push_back(pMesh);
 	}
+
+	return S_OK;
+}
+
+HRESULT CModelAnim_Instance::Ready_Parts(const _char* pFolderPath, vector<_string>* strMeshTypes, vector<CBone*>& Temp)
+{
+	vector<_string> FilePaths;
+	_uint iPaddingIndex{};
+	_uint iTypeIndex{};
+	//예시: NPC폴더까지 경로를 입력해서 하위 폴더를 검색, 애니메이션 폴더는 스킵
+	for (const auto& entry: std::filesystem::directory_iterator(pFolderPath))
+	{
+		_string strFilePath = entry.path().string();
+		_string strFileName = entry.path().filename().string();
+
+		_bool isExist = false;
+		//strMeshTypes에 기입된 순서대로 만들기 (애니메이션 포함된 모델 우선)
+		for (auto& strTypeName : *strMeshTypes)
+		{
+			//mesh타입을 폴더로 지정, 
+			if (strTypeName == strFileName)
+			{
+				//타입에 맞는 폴더 하위의 모든 모델 파일 경로 가져오기
+				for (const auto& FileEntry : std::filesystem::directory_iterator(strFilePath))
+				{
+					if(FileEntry.path().extension() == ".dat")
+					{
+						_string strModelPath = FileEntry.path().string();
+						FilePaths.push_back(strModelPath);
+						++iPaddingIndex;
+					}
+				}
+				
+				isExist = true;
+				if (++iTypeIndex < m_MeshTypeOffsets.size())
+					m_MeshTypeOffsets[iTypeIndex] = iPaddingIndex;
+				
+			}
+		}
+		if (!isExist)
+			return E_FAIL;
+	}
+
+	//가져올 모델개수만큼 반복, 뼈는 읽어오기만 하고 폐기
+	for (auto& strModelPath : FilePaths)
+	{
+		ifstream InputFile(strModelPath, ios::binary);
+		if (false == InputFile.is_open())
+		{
+			MSG_BOX("Failed Open : Model");
+			return E_FAIL;
+		}
+		_bool isFirst = m_Bones.empty();
+		if (MODELTYPE::ANIM == m_eType)
+		{
+			if (FAILED(Ready_Bone(InputFile, -1, isFirst, Temp)))
+				return E_FAIL;
+			for (auto& pBone : Temp)
+				Safe_Release(pBone);
+			Temp.clear();
+		}
+
+		if (FAILED(Ready_Mesh(InputFile)))
+			return E_FAIL;
+
+		InputFile.close();
+
+	}
+
+	//애니메이션, 머터리얼은 통합해서 만들어두기
+	if (FAILED(Ready_Animation(pFolderPath)))
+		return E_FAIL;
+
+	if (FAILED(Ready_Material(pFolderPath)))
+		return E_FAIL;
 
 	return S_OK;
 }

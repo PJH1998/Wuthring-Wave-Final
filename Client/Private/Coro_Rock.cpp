@@ -64,6 +64,11 @@ void CCoro_Rock::Render()
 	}
 }
 
+void CCoro_Rock::Change_Layer(_uint iLayer)
+{
+	m_pRigidBodyCom->Change_Layer(iLayer);
+}
+
 HRESULT CCoro_Rock::Bind_Resources()
 {
 	return S_OK;
@@ -71,6 +76,33 @@ HRESULT CCoro_Rock::Bind_Resources()
 
 void CCoro_Rock::Ready_Component(CORO_ROCK_DESC* pDesc)
 {
+	//Rigidbody
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK);
+	RigidbodyDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_Enter(iLayer, pDesc, Manifold);
+		});
+}
+
+void CCoro_Rock::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+#ifdef _DEBUG
+		cout << "On Hit! (Coro Rock)" << endl;
+#endif // _DEBUG
+
+	}
 }
 
 CCoro_Rock* CCoro_Rock::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -106,5 +138,4 @@ void CCoro_Rock::Free()
 	Safe_Release(m_pRigidBodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
-	Safe_Release(m_pAttackVolume);
 }

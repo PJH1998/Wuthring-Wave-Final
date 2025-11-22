@@ -9,6 +9,8 @@ NS_BEGIN(Client)
 class CNPCInstancing final : public CActor
 {
 public:
+	enum MESHTYPE {BODY, HEAD, HAIR, END};
+
 	typedef struct tagNPCDesc : public CActor::ACTOR_DESC
 	{
 		_wstring wstrObjectPrototypeTag;
@@ -46,6 +48,8 @@ private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(NPC_DESC* pDesc);
 	void		Ready_InstanceCells(NPC_DESC* pDesc);
+
+	void Update_AnimationState(const _string& strAnimName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPos, _uint* pPaddingIndices);
 
 public:
 	static CNPCInstancing* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
