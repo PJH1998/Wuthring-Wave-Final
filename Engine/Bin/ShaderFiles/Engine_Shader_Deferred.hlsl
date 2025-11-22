@@ -675,8 +675,6 @@ PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
         
     float4 vLook = normalize(float4(vViewPos.xyz, 0.f));
     
-//    vLook *= -1.f;
-    
     float4 vReflect = normalize(float4(reflect(vLook.xyz, vNormal.xyz), 0.f));
     
     float4 vReflectColor = 0.f;
@@ -726,7 +724,6 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
    
     if (fShadow != 1.f)
     {
-    
     switch (g_DebugCSMIndex)
     {
         case 0:
