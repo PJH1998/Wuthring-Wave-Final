@@ -50,6 +50,8 @@ private:
 	aiMesh* FindMeshByMorphChannelName(const aiString& strMorphChannelName); // 메쉬 찾기 함수
 	aiNode* Find_Node(aiNode* pNode, const _string& strNodeName);
 
+	void SimplifyChannel(const aiNodeAnim* pChannel, std::vector<KEYFRAME>& outKeys, float epsilon = 0.001f);
+
 private:
 	HRESULT				Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType);
 	HRESULT				Save_Bone(ofstream& OutPut, const aiNode* pNode);

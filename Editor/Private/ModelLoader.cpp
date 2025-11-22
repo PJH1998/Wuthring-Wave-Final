@@ -419,6 +419,196 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 	return S_OK;
 }
 
+//HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
+//{
+//
+//	if (nullptr == m_pAIScene)
+//		return E_FAIL;
+//
+//	_char szDirPath[MAX_PATH] = {};
+//	_char szFileName[MAX_PATH] = {};
+//	_splitpath_s(pFileName, nullptr, 0, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
+//
+//	_char szAnimFilePath[MAX_PATH] = {};
+//	strcpy_s(szAnimFilePath, szDirPath);
+//	strcat_s(szAnimFilePath, "Animation/");
+//	strcat_s(szAnimFilePath, szFileName);
+//	strcat_s(szAnimFilePath, "_Anim.dat");
+//
+//	filesystem::path dir = filesystem::path(szAnimFilePath).parent_path();
+//	if (!dir.empty() && !filesystem::exists(dir))
+//		filesystem::create_directories(dir);
+//
+//	ofstream file(szAnimFilePath, ios::binary);
+//
+//	if (false == file.is_open())
+//	{
+//		MSG_BOX("Animation Save Fail");
+//		return E_FAIL;
+//	}
+//
+//	_uint iNumAnimations = m_pAIScene->mNumAnimations;
+//	// Num Animation
+//	file.write(reinterpret_cast<const _char*>(&iNumAnimations), sizeof(_uint));
+//
+//	for (size_t i = 0; i < iNumAnimations; ++i)
+//	{
+//		aiAnimation* pAnimation = m_pAIScene->mAnimations[i];
+//		aiString strName = pAnimation->mName;
+//
+//		// 2. Main Animation 정보 저장
+//		_uint iLength = strName.length;
+//		// Animation Name
+//		file.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
+//		file.write(strName.data, iLength);
+//
+//
+//		_float fDuration = pAnimation->mDuration;
+//		// Animation Duration
+//		file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
+//
+//		_float fTickPerSecond = pAnimation->mTicksPerSecond;
+//		// Animation TickPerSecond
+//		file.write(reinterpret_cast<const _char*>(&fTickPerSecond), sizeof(_float));
+//
+//		_uint iNumChannels = pAnimation->mNumChannels;
+//		// Num Channel
+//		//file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
+//
+//		// 3. Channel 정보 저장.
+//		for (size_t j = 0; j < iNumChannels; ++j)
+//		{
+//			aiNodeAnim* pChannel = pAnimation->mChannels[j];
+//			aiString strChannelName = pChannel->mNodeName;
+//			_uint iChannelNameLength = strChannelName.length;
+//
+//			// Channel(Bone) Name
+//			file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
+//			file.write(strChannelName.data, iChannelNameLength);
+//
+//			_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+//			// Num KeyFrame
+//			file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+//
+//			_float3 vScale = {};
+//			_float4 vRotation = {};
+//			_float3 vTranslation = {};
+//
+//			for (size_t k = 0; k < iNumKeyFrame; ++k)
+//			{
+//				KEYFRAME KeyFrame = {};
+//				if (k < pChannel->mNumScalingKeys)
+//				{
+//					KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
+//					memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
+//				}
+//				if (k < pChannel->mNumRotationKeys)
+//				{
+//					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
+//
+//					{
+//						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+//						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+//						vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+//						vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+//					}
+//				}
+//				if (k < pChannel->mNumPositionKeys)
+//				{
+//					KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
+//					memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+//				}
+//				KeyFrame.vScale = vScale;
+//				KeyFrame.vRotation = vRotation;
+//				KeyFrame.vTranslation = vTranslation;
+//				file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+//			}
+//		}
+//
+//		// 1. MorphMeshChannels 채널을 확인하고 있다면 데이터를 저장합니다.
+//		if (pAnimation->mNumMorphMeshChannels > 0)
+//		{
+//			// Key: 쉐이프키 이름 ("Smile"), Value: 해당 키의 시간별 변화량 목록
+//			map<string, vector<KEYFRAME_CURVE>> mapMorphCurves;
+//
+//			for (size_t i = 0; i < pAnimation->mNumMorphMeshChannels; ++i)
+//			{
+//				aiMeshMorphAnim* pMorphChannel = pAnimation->mMorphMeshChannels[i];
+//
+//				// 1. 채널 이름으로 타겟 메쉬 찾기
+//				aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
+//				if (nullptr == pTargetMesh) continue;
+//
+//				// 2. [최적화 로직] 시간(Keys)을 기준으로 먼저 순회합니다.
+//				//    Assimp는 "시간 -> 활성화된 쉐이프키 목록" 순서로 저장되어 있기 때문입니다.
+//				for (_uint keyIdx = 0; keyIdx < pMorphChannel->mNumKeys; ++keyIdx)
+//				{
+//					const aiMeshMorphKey& MorphKey = pMorphChannel->mKeys[keyIdx];
+//
+//					// 이 시간대(Time)에 변화가 있는 모든 쉐이프 키들을 순회
+//					for (unsigned int v = 0; v < MorphKey.mNumValuesAndWeights; ++v)
+//					{
+//						// mValues[v]는 쉐이프 키의 인덱스입니다.
+//						_uint iShapeIdx = MorphKey.mValues[v];
+//
+//						// 인덱스 안전 검사
+//						if (iShapeIdx >= pTargetMesh->mNumAnimMeshes) continue;
+//
+//						// 인덱스로부터 쉐이프 키 이름("Smile") 추출
+//						aiAnimMesh* pAnimMesh = pTargetMesh->mAnimMeshes[iShapeIdx];
+//						string strShapeKeyName = pAnimMesh->mName.C_Str();
+//
+//						// "Basis" 등 불필요한 키 제외
+//						if (strShapeKeyName == "Basis" || strShapeKeyName.empty()) continue;
+//
+//						// 가중치 처리
+//						_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
+//						//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
+//						//fWeight = max(0.0f, min(fWeight, 1.0f)); // 안전장치
+//
+//						// 맵에 데이터 추가 (자동으로 이름별로 분류됨) // .psa는 가중치가 안나온다?..
+//						KEYFRAME_CURVE KeyFrame = {};
+//						KeyFrame.fTrackPosition = static_cast<_float>(MorphKey.mTime);
+//						KeyFrame.fValue = fWeight;
+//
+//						mapMorphCurves[strShapeKeyName].push_back(KeyFrame);
+//					}
+//				}
+//			}
+//
+//			// 3. 정리된 데이터를 파일에 저장
+//			_uint iTotalCurves = mapMorphCurves.size();
+//			file.write(reinterpret_cast<const _char*>(&iTotalCurves), sizeof(_uint));
+//
+//			for (auto& Pair : mapMorphCurves)
+//			{
+//				string strCurveName = Pair.first;     // 이름
+//				auto& vecKeys = Pair.second;          // 키프레임들
+//
+//				// 이름 저장
+//				_uint iNameLen = strCurveName.length();
+//				file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
+//				file.write(strCurveName.data(), iNameLen);
+//
+//				// 키 개수 및 데이터 저장
+//				_uint iNumKeys = vecKeys.size();
+//				file.write(reinterpret_cast<const _char*>(&iNumKeys), sizeof(_uint));
+//				file.write(reinterpret_cast<const _char*>(vecKeys.data()), sizeof(KEYFRAME_CURVE) * iNumKeys);
+//			}
+//		}
+//		else
+//		{
+//			_uint iZero = 0;
+//			file.write(reinterpret_cast<const _char*>(&iZero), sizeof(_uint));
+//		}
+//
+//	}
+//
+//	file.close();
+//
+//	return S_OK;
+//}
+
 HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 {
 
@@ -462,6 +652,7 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 		file.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
 		file.write(strName.data, iLength);
 
+
 		_float fDuration = pAnimation->mDuration;
 		// Animation Duration
 		file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
@@ -474,6 +665,17 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 		// Num Channel
 		file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
 
+		_bool bIsRibbonAnim = { false };
+
+		_char szAnimationName[MAX_PATH] = {};
+		strcpy_s(szAnimationName, strName.C_Str());
+		_char* pAnimationName = { nullptr };
+		strtok_s(szAnimationName, "|", &pAnimationName);
+
+		_string strAnimName = pAnimationName;
+
+		bIsRibbonAnim = (strAnimName.find("Rib_") == 0);;
+
 		// 3. Channel 정보 저장.
 		for (size_t j = 0; j < iNumChannels; ++j)
 		{
@@ -485,42 +687,60 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 			file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
 			file.write(strChannelName.data, iChannelNameLength);
 
-			_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
-			// Num KeyFrame
-			file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
-
 			_float3 vScale = {};
 			_float4 vRotation = {};
 			_float3 vTranslation = {};
 
-			for (size_t k = 0; k < iNumKeyFrame; ++k)
+			if (bIsRibbonAnim)
 			{
-				KEYFRAME KeyFrame = {};
-				if (k < pChannel->mNumScalingKeys)
-				{
-					KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
-					memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
-				}
-				if (k < pChannel->mNumRotationKeys)
-				{
-					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
+				// Simplify 1.0 수준으로 키프레임 제거 (허용 오차 0.001 정도)
+				vector<KEYFRAME> simplifiedKeys;
+				SimplifyChannel(pChannel, simplifiedKeys, 0.001f);  // 허용 오차 조절 가능
 
-					{
-						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
-						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
-						vRotation.z = pChannel->mRotationKeys[k].mValue.z;
-						vRotation.w = pChannel->mRotationKeys[k].mValue.w;
-					}
-				}
-				if (k < pChannel->mNumPositionKeys)
+				_uint iNumKeyFrame = simplifiedKeys.size();
+				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+
+				for (const auto& key : simplifiedKeys)
 				{
-					KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
-					memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+					file.write(reinterpret_cast<const _char*>(&key), sizeof(KEYFRAME));
 				}
-				KeyFrame.vScale = vScale;
-				KeyFrame.vRotation = vRotation;
-				KeyFrame.vTranslation = vTranslation;
-				file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+			}
+			else
+			{
+				// 일반 애니메이션 → 모든 키 그대로 저장
+				_uint iNumKeyFrame = max(pChannel->mNumPositionKeys,
+					max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+
+				for (size_t k = 0; k < iNumKeyFrame; ++k)
+				{
+					KEYFRAME KeyFrame = {};
+					if (k < pChannel->mNumScalingKeys)
+					{
+						KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
+						memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
+					}
+					if (k < pChannel->mNumRotationKeys)
+					{
+						KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
+
+						{
+							vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+							vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+							vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+							vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+						}
+					}
+					if (k < pChannel->mNumPositionKeys)
+					{
+						KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
+						memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+					}
+					KeyFrame.vScale = vScale;
+					KeyFrame.vRotation = vRotation;
+					KeyFrame.vTranslation = vTranslation;
+					file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+				}
 			}
 		}
 
@@ -803,7 +1023,7 @@ void CModelLoader::Save_File()
 
 	IGFD::FileDialogConfig config;
 
-	config.path = "../../Client/Bin/Resource/";
+	config.path = "../../Client/Bin/Resource/Model/";
 	config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 
 	ImGuiFileDialog::Instance()->OpenDialog("Save Model", "Export File", ".dat", config);
@@ -907,6 +1127,142 @@ aiNode* CModelLoader::Find_Node(aiNode* pNode, const _string& strNodeName)
 	}
 
 	return nullptr;
+}
+
+void CModelLoader::SimplifyChannel(const aiNodeAnim* pChannel, vector<KEYFRAME>& outKeys, float epsilon)
+{
+	if (!pChannel || (pChannel->mNumPositionKeys + pChannel->mNumRotationKeys + pChannel->mNumScalingKeys) <= 2)
+	{
+		// 키가 2개 이하면 무조건 보존 (첫/마지막 키는 필수)
+		_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+		_float3 vScale = { 1,1,1 };
+		_float4 vRotation = { 0,0,0,1 };
+		_float3 vTranslation = { 0,0,0 };
+
+		for (size_t k = 0; k < iNumKeyFrame; ++k)
+		{
+			KEYFRAME KeyFrame = {};
+			if (k < pChannel->mNumScalingKeys)
+			{
+				KeyFrame.fTrackPosition = static_cast<_float>(pChannel->mScalingKeys[k].mTime);
+				memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
+			}
+			if (k < pChannel->mNumRotationKeys)
+			{
+				KeyFrame.fTrackPosition = static_cast<_float>(pChannel->mRotationKeys[k].mTime);
+				vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+				vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+				vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+				vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+			}
+			if (k < pChannel->mNumPositionKeys)
+			{
+				KeyFrame.fTrackPosition = static_cast<_float>(pChannel->mPositionKeys[k].mTime);
+				memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+			}
+
+			KeyFrame.vScale = vScale;
+			KeyFrame.vRotation = vRotation;
+			KeyFrame.vTranslation = vTranslation;
+			outKeys.push_back(KeyFrame);
+		}
+		return;
+	}
+
+
+	vector<KEYFRAME> tempKeys;
+	_float3 vScale = { 1,1,1 };
+	_float4 vRotation = { 0,0,0,1 };
+	_float3 vTranslation = { 0,0,0 };
+
+	_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+
+	for (size_t k = 0; k < iNumKeyFrame; ++k)
+	{
+		KEYFRAME KeyFrame = {};
+
+		if (k < pChannel->mNumScalingKeys)
+		{
+			KeyFrame.fTrackPosition = static_cast<_float>(pChannel->mScalingKeys[k].mTime);
+			memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
+		}
+		if (k < pChannel->mNumRotationKeys)
+		{
+			KeyFrame.fTrackPosition = static_cast<_float>(pChannel->mRotationKeys[k].mTime);
+			vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+			vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+			vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+			vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+		}
+		if (k < pChannel->mNumPositionKeys)
+		{
+			KeyFrame.fTrackPosition = static_cast<_float>(pChannel->mPositionKeys[k].mTime);
+			memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+		}
+
+		KeyFrame.vScale = vScale;
+		KeyFrame.vRotation = vRotation;
+		KeyFrame.vTranslation = vTranslation;
+		tempKeys.push_back(KeyFrame);
+	}
+
+	// 2. Simplify 1.0 수준으로 키 제거
+	outKeys.push_back(tempKeys[0]);  // 첫 키는 무조건 보존
+
+	for (size_t i = 1; i < tempKeys.size() - 1; ++i)
+	{
+		const KEYFRAME& prev = outKeys.back();
+		const KEYFRAME& curr = tempKeys[i];
+		const KEYFRAME& next = tempKeys[i + 1];
+
+		// Translation 변화량 계산
+		XMVECTOR vPrev = XMLoadFloat3(&prev.vTranslation);
+		XMVECTOR vCurr = XMLoadFloat3(&curr.vTranslation);
+		XMVECTOR vNext = XMLoadFloat3(&next.vTranslation);
+
+		XMVECTOR delta1 = XMVectorSubtract(vCurr, vPrev);
+		XMVECTOR delta2 = XMVectorSubtract(vNext, vCurr);
+
+		_float dist1 = XMVectorGetX(XMVector3Length(delta1));
+		_float dist2 = XMVectorGetX(XMVector3Length(delta2));
+		_float totalMove = dist1 + dist2;
+
+		// Rotation 변화량 (쿼터니언 dot)
+		XMVECTOR q1 = XMLoadFloat4(&prev.vRotation);
+		XMVECTOR q2 = XMLoadFloat4(&curr.vRotation);
+		XMVECTOR dotVec = XMVector4Dot(q1, q2);
+		float dot = XMVectorGetX(dotVec);
+		dot = fabsf(dot);
+		if (dot > 1.0f) dot = 1.0f;
+		float angleDiff = acosf(dot) * 2.0f;  // 라디안 → 대략 각도
+
+		// Scale 변화량
+		XMVECTOR sPrev = XMLoadFloat3(&prev.vScale);
+		XMVECTOR sCurr = XMLoadFloat3(&curr.vScale);
+		XMVECTOR sNext = XMLoadFloat3(&next.vScale);
+
+		XMVECTOR scaleDelta1 = XMVectorSubtract(sCurr, sPrev);
+		XMVECTOR scaleDelta2 = XMVectorSubtract(sNext, sCurr);
+		_float scaleChange = XMVectorGetX(XMVector3Length(XMVectorAdd(scaleDelta1, scaleDelta2)));
+
+		// 변화가 미미하면 curr 키 제거 (Simplify 1.0 수준)
+		if (totalMove < 0.02f && angleDiff < 0.1f)
+		{
+			// 제거하고 다음 키로 넘어감
+			continue;
+		}
+		else
+		{
+			outKeys.push_back(curr);
+		}
+	}
+
+	// 마지막 키는 무조건 보존
+	if (!tempKeys.empty())
+		outKeys.push_back(tempKeys.back());
+
+
+
 }
 
 HRESULT CModelLoader::Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType)
