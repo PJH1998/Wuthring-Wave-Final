@@ -1134,6 +1134,10 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 {
 	m_pSFX_Hub->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
 }
+void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
+{
+	m_pSFX_Hub->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+}
 #endif
 #pragma endregion
 

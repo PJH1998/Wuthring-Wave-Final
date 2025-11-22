@@ -10,6 +10,7 @@
 #include "ScreenBlur.h"
 #include "RadialBlur.h"
 #include "SubsurfaceScattering.h"
+#include "ScreenSpaceReflection.h"
 
 CSFX_Hub::CSFX_Hub(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -151,6 +152,11 @@ void CSFX_Hub::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLen
 	CMotionBlur* pSFX = static_cast<CMotionBlur*>(Find_SFX(SFX_TYPE::MOTION));
 	pSFX->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
 }
+void CSFX_Hub::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
+{
+	CScreenSpaceReflection* pSSR = static_cast<CScreenSpaceReflection*>(Find_SFX(SFX_TYPE::SSR));
+	pSSR->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+}
 #endif
 
 CSFX* CSFX_Hub::Find_SFX(SFX_TYPE eType)
@@ -190,6 +196,10 @@ HRESULT CSFX_Hub::Ready_SFX()
 	CSubsurfaceScattering* pSSS = CSubsurfaceScattering::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
 	ASSERT_CRASH(pSSS);
 	m_SFXs.emplace(SFX_TYPE::SSS, pSSS);
+
+	CScreenSpaceReflection* pSSR = CScreenSpaceReflection::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pSSR);
+	m_SFXs.emplace(SFX_TYPE::SSR, pSSR);
 
 	return S_OK;
 }

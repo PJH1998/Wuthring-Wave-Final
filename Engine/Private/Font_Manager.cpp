@@ -66,6 +66,7 @@ HRESULT CFont_Manager::Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePat
 
 _bool CFont_Manager::Reset_AtlasTexture(FTCUSTOM_FONT* pFont, _uint newW, _uint newH)
 {
+	Safe_Release(pFont->pSampler);
 	Safe_Release(pFont->pAtlasSRV);
 	Safe_Release(pFont->pAtlasTex);
 

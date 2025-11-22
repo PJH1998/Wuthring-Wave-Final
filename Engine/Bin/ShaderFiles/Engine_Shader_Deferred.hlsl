@@ -100,6 +100,12 @@ float4 g_fRimIntensity = 0.8f;
 //SFX
 float g_fEffectIntensity;
 
+//SSR
+float g_fMinStepSize;
+float g_fMaxStepSize;
+float g_fStartOffset;
+
+
 //DEBUG
 bool g_IsStylized;
 
@@ -164,14 +170,12 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float4 vLightColor = vLightDiffuse + vLightSpecular + vLightAmbient;
     
+    Out.vColor = float4(vLightColor.xyz, 1.f);
     
     if (any(vPBRDesc.z))
     {
-        Out.vColor = float4(vLightColor.xyz, 1.f);
         return Out;
     }
-    
-    Out.vColor = float4(ToneMap(vLightColor.xyz * g_fExposure), 1.f);
     
     float fSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord).r;
     Out.vColor *= fSSao;
@@ -437,17 +441,18 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
-    vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (false == g_IsDynamicLUT)
+    
+    bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
+    if(false == IsDynamic)
+        vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
+    
+    if (false == g_IsDynamicLUT && true == IsDynamic)
     {
-        bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
-        if(IsDynamic)
-        {
-            Out.vColor = vOriginColor;
-
-            return Out;
-        }
+        Out.vColor = vOriginColor;
+    
+        return Out;
     }
     
     float2 vUV;
@@ -660,8 +665,63 @@ PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
+    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
+    vNormal = normalize(mul(vNormal, g_CamViewMatrix));
     
+    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (vViewPos.z == 0.f || g_iStep <= 0 || g_fMaxDistance <= g_fStartOffset)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
+        
+    float4 vLook = normalize(float4(vViewPos.xyz, 0.f));
+    
+    float4 vReflect = normalize(float4(reflect(vLook.xyz, vNormal.xyz), 0.f));
+    
+    float4 vReflectColor = 0.f;
+
+    bool IsHit = false;
+    
+    float fOffsetSize = g_fStartOffset;
+    
+    [unroll]
+    for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
+    {
+        float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
+       
+        float4 vProjPos = mul(vLay, g_CamProjMatrix);
+        
+        vProjPos /= vProjPos.w;
+
+        if (false == IsInNDC(vProjPos))
+            break;
+        
+        float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
+        
+        float fDepth = g_DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+                             
+        if (fDepth <= vLay.z || fDepth == 0.f)
+        {
+            IsHit = true;
+            vReflectColor = g_BackBufferTexture.Sample(DefaultSampler, vTexcoord);
+            break;
+        }
+        
+        float fOffsetRatio = saturate( i / g_iStep);
+        
+        fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
+    }
+    
+    if(IsHit)
+        Out.vColor =  float4(lerp(vOriginColor.xyz, vReflectColor.xyz, 0.5f), 1.f);
+    else
+        Out.vColor = vOriginColor;
+        
     return Out;
 }
 
@@ -677,7 +737,6 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
    
     if (fShadow != 1.f)
     {
-    
     switch (g_DebugCSMIndex)
     {
         case 0:
@@ -709,8 +768,7 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_SHADOW_MAP(PS_IN In)
     float fShadow = 0.f;
    
     fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, g_DebugCSMIndex), 1.f);
-    
-    
+   
     //fShadow = g_ShadowMap.Sample(DefaultSampler, float3(In.vTexcoord, 0.f));
     
     float4 vColor = 1.f;

@@ -173,6 +173,8 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 	}
 	--m_iMaxLOD;
 
+
+
 	return S_OK;
 }
 

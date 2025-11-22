@@ -222,9 +222,6 @@ void CRendererCS::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pDevice);
-	Safe_Release(m_pContext);
-	Safe_Release(m_pComputeShader);
 
 	for (auto& Pair : m_Buffers)
 		Safe_Release(Pair.second.second);
@@ -244,5 +241,9 @@ void CRendererCS::Free()
 	for(auto& pUAV : m_UAV.second)
 		Safe_Release(pUAV);
 	m_UAV.second.clear();
+
+	Safe_Release(m_pComputeShader);
+	Safe_Release(m_pDevice);
+	Safe_Release(m_pContext);
 
 }
