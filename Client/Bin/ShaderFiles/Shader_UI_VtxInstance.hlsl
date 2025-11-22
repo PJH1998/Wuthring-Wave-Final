@@ -327,8 +327,8 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
             // texcoord pushing
             #ifdef SCROLL_HP
             vFinalTexcoord.x -= fElapsedTime * fCoordSpeed * 1.f;
-            vFinalExtra3.xy = In.vTexcoord;
             #endif
+            vFinalExtra3.xy = In.vTexcoord;
             
         } break;
     }
@@ -988,23 +988,31 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             float2 clipY    = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
                                     lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
             
+            float2 fixedUV_Flip     = float2(1.0f - fixedUV.x, fixedUV.y);
+            
             if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
                 fixedUV.y < clipY.x || fixedUV.y > clipY.y)
-                discard;
+                Out.vColor.a = 0.f;         // 추가적으로 그릴 수 있으니 discard 가 아닌, 알파로
             
             // =====
 
             float fEdgeAlphaWidth = 0.2f;
             
             
+            float4 OriginColor = g_Texture.Sample(DefaultSampler, fixedUV);
+            float4 FlippedColor = g_Texture.Sample(DefaultSampler, fixedUV_Flip);
+            
+            
+            
+            
             //Out.vColor.rgb = vColor.rgb;
             Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
             Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength) * fAlpha;
             
-            #ifdef SCROLL_HP
+            //#ifdef SCROLL_HP
             float fEdgeAlpha = saturate(min(vOriginCoord.x /fEdgeAlphaWidth, (1.0f - vOriginCoord.x) / fEdgeAlphaWidth));
             Out.vColor.a *= fEdgeAlpha;
-            #endif
+            //#endif
             
             //Out.vColor.rgba = g_Texture.Sample(DefaultSampler, In.vTexcoord);
             return Out;

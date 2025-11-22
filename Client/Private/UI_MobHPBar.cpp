@@ -174,8 +174,9 @@ void CUI_MobHPBar::PreAssign_ChildUIs()
 	//m_pUI_SAFrame	= Find_ChildObject(L"InstSAFrame");
 	//m_pUI_SABar		= Find_ChildObject(L"InstSABar");
 
-	m_pUI_HB		= Find_ChildObject(L"InstHPBar");
 	m_pUI_Frame		= Find_ChildObject(L"InstHPFrame");
+	m_pUI_Line		= Find_ChildObject(L"InstHPLine");
+	m_pUI_HB		= Find_ChildObject(L"InstHPBar");
 }
 
 void CUI_MobHPBar::PreAssign_Presets()
@@ -263,6 +264,7 @@ void CUI_MobHPBar::Update_Instances()
 	//vecFloatingUIs.push_back(m_pUI_SAFrame);
 	//vecFloatingUIs.push_back(m_pUI_SABar);
 	vecFloatingUIs.push_back(m_pUI_HB);
+	vecFloatingUIs.push_back(m_pUI_Line);
 	vecFloatingUIs.push_back(m_pUI_Frame);
 
 
@@ -513,11 +515,15 @@ void CUI_MobHPBar::Calc_HBEff()
 
 	auto targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
 	auto targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
+	auto targetLineDesc = m_pUI_Line->Get_UIDesc();	// for Line Normal Desc
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 	auto& vecBGInstDesc = targetBGDesc.vecInstanceDescs;
+	auto& vecLineInstDesc = targetLineDesc.vecInstanceDescs;
 
 	vector<_float4x4> vecVariantMat = {};		// for Variant Desc
 	vecVariantMat.resize(vecInstDesc.size());
+	vector<_float4x4> vecLineVariantMat = {};		// for BG Variant Desc
+	vecLineVariantMat.resize(vecLineInstDesc.size());
 	vector<_float4x4> vecBGVariantMat = {};		// for BG Variant Desc
 	vecBGVariantMat.resize(vecBGInstDesc.size());
 
@@ -573,6 +579,8 @@ void CUI_MobHPBar::Calc_HBEff()
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
 		auto& targetVariantMat = vecVariantMat[i];
+		auto& targetLineInst = vecLineInstDesc[i];
+		auto& targetLineVariantMat = vecLineVariantMat[i];
 		auto& targetBGInst = vecBGInstDesc[i];
 		auto& targetBGVariantMat = vecBGVariantMat[i];
 
@@ -585,9 +593,16 @@ void CUI_MobHPBar::Calc_HBEff()
 		*reinterpret_cast<_float*>(&targetVariantMat._33)	= fStackedTime;
 		*reinterpret_cast<_float*>(&targetVariantMat._34)	= fCoordSpeedX;
 
+		*reinterpret_cast<_float4*>(&targetLineVariantMat._11) = vColorRate;
+		*reinterpret_cast<_float4*>(&targetLineVariantMat._21) = vColorRate;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._31) = 0.5f + fAlphaRate * 0.5f;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._32) = 0.5f;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._33) = fStackedTime;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._34) = fCoordSpeedX;
+
 		*reinterpret_cast<_float4*>(&targetBGVariantMat._11) = m_arrColorPresets[HRC_BACKGROUND];
 		*reinterpret_cast<_float4*>(&targetBGVariantMat._21) = m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;// fAlphaRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 0.5f + fAlphaRate * 0.5f;// fAlphaRate;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._32) = fScaleRate;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._33) = fStackedTime;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._34) = fCoordSpeedX;
@@ -598,7 +613,7 @@ void CUI_MobHPBar::Calc_HBEff()
 			targetInst.vClipTexcoordX = { 0.f, 1.f };
 			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;		// alpha
 			*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;		// alpha
-			//*reinterpret_cast<_float*>(&targetVariantMat._32) = 2.f;		// scale
+
 			//m_vecMobInfo_RT[i].fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
 		}
 		else if (!m_vecMobInfo_RT[i].isPendingFlick)	// 체력이 내려갔지만 다음 계산상의 alpha가 1이 되기 전에는 계속 1이어야 함
@@ -630,6 +645,11 @@ void CUI_MobHPBar::Calc_HBEff()
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
 		true
 	};
+	CCustom_UI::VARIANTREADY_UI_DESC tLineVariantDesc = {
+		vecLineVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
+		true
+	};
 	CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
 		vecBGVariantMat,
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
@@ -639,6 +659,10 @@ void CUI_MobHPBar::Calc_HBEff()
 	targetDesc.vecInstanceDescs = vecInstDesc;
 	m_pUI_HB->Set_UIDesc(targetDesc);
 	m_pUI_HB->Set_VariantUIDesc(tVariantDesc);
+
+	targetDesc.vecInstanceDescs = vecLineInstDesc;
+	m_pUI_Line->Set_UIDesc(targetLineDesc);
+	m_pUI_Line->Set_VariantUIDesc(tLineVariantDesc);
 
 	targetDesc.vecInstanceDescs = vecBGInstDesc;
 	m_pUI_Frame->Set_UIDesc(targetBGDesc);

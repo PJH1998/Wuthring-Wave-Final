@@ -15,6 +15,7 @@ public:
 
 		_float		fCurElapsedTime = 0.f;
 		_float		fCurStackedTime = 0.f;
+
 		_bool		isUpdatedThisFrame = false;
 		_bool		isPendingFlick = false;
 	}UI_MOBRT_DESC;
@@ -58,6 +59,7 @@ private:
 	//CCustom_UI*		m_pUI_SAFrame		= nullptr;
 	//CCustom_UI*		m_pUI_SABar			= nullptr;
 	CCustom_UI*			m_pUI_HB			= nullptr;
+	CCustom_UI*			m_pUI_Line			= nullptr;
 	CCustom_UI*			m_pUI_Frame			= nullptr;
 
 	vector<UI_MOBINFO_DESC>		m_vecMobInfo = {};			// 프레임에서 받아온 정보들이 담긴 컨테이너
