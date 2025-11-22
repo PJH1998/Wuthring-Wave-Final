@@ -21,9 +21,9 @@ CModel_Streaming::CModel_Streaming(const CModel_Streaming& Prototype)
 	for (_uint i = 0; i < 4; ++i)
 		m_iNumMeshes[i] = Prototype.m_iNumMeshes[i];
 
-	for (_uint i = 0; i < 4; ++i)
-		if (Prototype.m_Meshes[i])
-			m_Meshes[i] = dynamic_cast<CMesh_Streaming*>(Prototype.m_Meshes[i]->Clone(nullptr));
+	//for (_uint i = 0; i < 4; ++i)
+	//	if (Prototype.m_Meshes[i])
+	//		m_Meshes[i] = dynamic_cast<CMesh_Streaming*>(Prototype.m_Meshes[i]->Clone(nullptr));
 
 	for (auto& pMaterial : m_Materials)
 		Safe_AddRef(pMaterial);
@@ -47,7 +47,7 @@ HRESULT CModel_Streaming::Initialize_Clone(void* pArg)
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
@@ -55,7 +55,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
@@ -75,7 +75,7 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 
 HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return E_FAIL;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
@@ -83,7 +83,7 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 
 HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
@@ -152,8 +152,6 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 
 		if (entry.path().extension() != ".dat")
 			continue;
-
-		//_string DatFile = entry.path().string();
 
 		ifstream File(entry.path(), ios::binary);
 		if (!File.is_open())
@@ -241,7 +239,7 @@ HRESULT CModel_Streaming::Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVert
 
 _bool CModel_Streaming::Is_Overed(_uint iLODIndex, _uint iMeshIndex)
 {
-	return m_Meshes[iLODIndex]->Is_Overed(iMeshIndex);
+	return m_pModelPrototype->m_Meshes[iLODIndex]->Is_Overed(iMeshIndex);
 }
 
 _uint CModel_Streaming::Get_LastLODIndex()
