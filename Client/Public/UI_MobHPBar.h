@@ -82,11 +82,11 @@ private:
 private:
 	// HP 주기 효과용
 	const _float			m_fMaxRTTime = 4.f;
-	const _float			m_fMinRTTime = 1.f;
+	const _float			m_fMinRTTime = 0.5f;
 
 	const _float			m_fMaxAtkedTimer = 0.5f;
 
-	array<_float4, 4>		m_arrColorPresets;
+	array<_float4, 4>		m_arrColorPresets = {};
 
 
 public:

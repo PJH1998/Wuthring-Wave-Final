@@ -195,7 +195,7 @@ namespace Client
 
 		//const char* pMonsterKey = {};
 
-		_uint	iObjKey = {};		// 오브젝트의 고유한 키. 죽은 애가 바로 다음 프레임에 같은 키로 살아나고 그런 상황이 생기는 게 아닌 이상, 살아 있는 동안만 구분되면 됨.
+		uintptr_t	iMonsterPtrKey = {};		// 오브젝트의 고유한 키. reinterpret_cast 필요
 
 		_bool	isAtkedCurFrame = false;
 

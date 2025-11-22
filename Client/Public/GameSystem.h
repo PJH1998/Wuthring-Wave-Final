@@ -98,9 +98,15 @@ public:
 	// 패리 UI가 살아있는 도중, 패리에 성공했음을 보냅니다. (원 즉시제거, 이펙트 이미지 출력)
 	void		Enable_Parried();
 
-	// (미완성) 몬스터 HP바 표시를 위한 정보를 할당합니다. / &tDesc : 필요 정보 구조체
-	// 살아 있는 동안, 매 프레임 호출이 필요합니다.
+	// 몬스터 HP바 표시를 위한 정보를 할당합니다. / &tDesc : 필요 정보 구조체
+	// 살아 있는 동안 매 프레임 호출이 필요하며, 요구 구조체 내의 iMonsterPtrKey 는 몹 주소를 reinterpret_cast 를 통해 할당해주시면 됩니다.
 	void		Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
+
+	// [WIP] 탭 유틸리티 UI를 켭니다. 마우스 커서 락 해제 필요.(wip)
+	void		Show_TabUtilityUI();
+	// [WIP] 탭 유틸리티 UI를 끄라는 요청을 보내며 (애니메이션 재생을 위함), 선택한 유틸리티를 반환합니다.
+	//       반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
+	_uint		HideNGet_TabUtilityUI();
 #pragma endregion
 
 #pragma region PLAYER STATUS

@@ -154,4 +154,13 @@ namespace Client
 
 		END 
 	};
+
+	enum class UI_TAB_UTILITY : unsigned int {
+		GRAPPLE,
+		SENSOR,
+		FLIGHT,
+		LEVITATOR,
+
+		NOTHING
+	};
 }

@@ -59,6 +59,7 @@
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
+#include "UI_TabUtility.h"
 #pragma endregion
 
 
@@ -651,20 +652,23 @@ HRESULT CLoader_Test::Load_UI()
 	// * Json Parse                 // for pre-loading textures
 	// UI_HUD
 	//_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
-	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
+	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
 
-	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
+	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
-	_string strFilePath_UI_LockOn = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json"; // ksta
+	_string strFilePath_UI_LockOn = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_LockOn));
 
-	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json"; // ksta
+	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Parry));
 
-	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json"; // ksta
+	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
+	
+	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
 
 
 	for (auto& treeDesc : vecDescs)
@@ -747,6 +751,8 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
 		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+
+	// Custom UI (Props)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
@@ -759,6 +765,11 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
 		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
+		CUI_TabUtility::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+
+
 
 	// ==============================
 	cout << "[Loader_Test][UI Custom] Prototype" << endl;

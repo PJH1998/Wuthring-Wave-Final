@@ -42,6 +42,11 @@ public:
 
 	void				Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
 
+	void				Show_TabUtilityUI();
+	_uint				HideNGet_TabUtilityUI();
+
+
+
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };

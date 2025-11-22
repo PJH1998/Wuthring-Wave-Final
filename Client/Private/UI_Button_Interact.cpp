@@ -134,7 +134,7 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_FadeIn");
 
-	m_IsGoindDisabled = false;
+	m_IsGoinDisabled = false;
 	m_fDisableTimer = 0.f;
 	m_iAnimOrder = 0;
 
@@ -170,14 +170,14 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 	_bool isHoverExit	= pEventTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT));
 	_bool isClickEnter	= pEventTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER));
 
-	if (isClickEnter && !m_IsGoindDisabled)
+	if (isClickEnter && !m_IsGoinDisabled)
 	{
 		pPressedUI->SetActivate(true);
 		static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Pressed_Trigger");
-		m_IsGoindDisabled = true;
+		m_IsGoinDisabled = true;
 		cout << "[UI_Button_Interact::Update_MouseFeedback] || Click Enter" << endl;
 	}
-	else if (!m_IsGoindDisabled)
+	else if (!m_IsGoinDisabled)
 	{
 		if (isHoverEnter)
 		{
@@ -194,7 +194,7 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 
 	
 
-	if (m_IsGoindDisabled)
+	if (m_IsGoinDisabled)
 		m_fDisableTimer += fTimeDelta;;
 
 	const _float fDisableTime = 0.3f;

@@ -243,6 +243,16 @@ void CGameSystem::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	m_pUI_ControlHelper->Update_MobStatus(tDesc);
 }
 
+void CGameSystem::Show_TabUtilityUI()
+{
+	m_pUI_ControlHelper->Show_TabUtilityUI();
+}
+
+_uint CGameSystem::HideNGet_TabUtilityUI()
+{
+	return m_pUI_ControlHelper->HideNGet_TabUtilityUI();
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);

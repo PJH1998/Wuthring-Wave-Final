@@ -478,6 +478,10 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
 		CRASH("Failed Ready MobHPBar");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
+		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
+		CRASH("Failed Ready TabUtility");
+
 	// _UI
 }
 
@@ -625,7 +629,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 	// interact
-#pragma region KSTA_UITEST_INTERACT
+#pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
 	static _uint iInteractIndex = 0;
 	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
@@ -663,7 +667,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
 #pragma endregion
-
 
 
 #pragma region [NUMPAD .] KSTA_UITEST_LOCKON
@@ -725,6 +728,43 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	//		m_pGameSystem->Update_MobStatus(tTmpDesc);
 	//	}
 	//}
+
+#pragma endregion
+
+#pragma region [NUMPAD 3] KSTA_UITEST_TABUTILITY
+	static _bool isTabUtilityActive = false;
+	_uint iTabUtilitySelectedIndex = UINT_MAX;
+	_bool isTabUtilityHided = false;
+	
+	if (!isTabUtilityActive &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Show_TabUtilityUI();
+		isTabUtilityActive = true;
+	}
+	else if (isTabUtilityActive &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	{
+		iTabUtilitySelectedIndex = m_pGameSystem->HideNGet_TabUtilityUI();
+		isTabUtilityActive = false;
+		isTabUtilityHided = true;
+	}
+
+
+	_string strSelectedUtilityName = {};
+	if (isTabUtilityHided)
+	{
+		switch (iTabUtilitySelectedIndex)
+		{
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
+		}
+
+		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
+	}
 
 #pragma endregion
 

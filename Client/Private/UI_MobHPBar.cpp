@@ -4,8 +4,7 @@
 #include "GameSystem.h"
 
 
-#define KSTA_UITEST_MOBHPPOS
-
+//#define KSTA_CUSTOMTEST
 
 CUI_MobHPBar::CUI_MobHPBar(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Image(pDevice, pContext)
@@ -88,6 +87,7 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 	//	isActiveMobHPBar = !isActiveMobHPBar;
 
 
+#ifdef KSTA_CUSTOMTEST
 	static _float fTmpHP = 70.f;
 	_bool isHitTmp = false;
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
@@ -101,31 +101,35 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 
 	//if (isActiveMobHPBar)
 	//{
-		UI_MOBINFO_DESC tTmpDesc = {};
-		
-		const _uint iNumTestMobs = 5;
-		
-		for (_uint i = 0; i < iNumTestMobs; i++)
-		{
-			if (i == 3)
-				continue;
-			//_float3 fTestOffset = {
-			//	m_pGameInstance->Rand(-10.f, 10.f),
-			//	m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
-			//	m_pGameInstance->Rand(-10.f, 10.f)
-			//};
-		
-			_float3 fTestOffset = { 0.f, -10.f * i, 0.f};
-		
-			tTmpDesc.vMobPos = fTestOffset;
-			tTmpDesc.fMobCurHP = (i == 2)? fTmpHP : 50.f;
-			tTmpDesc.fMobMaxHP = 100.f;
-			tTmpDesc.isAtkedCurFrame = isHitTmp;
+	UI_MOBINFO_DESC tTmpDesc = {};
 
-			tTmpDesc.iObjKey = i;
-		
-			m_pGameSystem->Update_MobStatus(tTmpDesc);
-		}
+	const _uint iNumTestMobs = 5;
+
+	for (_uint i = 0; i < iNumTestMobs; i++)
+	{
+		if (i == 3)
+			continue;
+		//_float3 fTestOffset = {
+		//	m_pGameInstance->Rand(-10.f, 10.f),
+		//	m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
+		//	m_pGameInstance->Rand(-10.f, 10.f)
+		//};
+
+		_float3 fTestOffset = { 0.f, -10.f * i, 0.f };
+
+		tTmpDesc.vMobPos = fTestOffset;
+		tTmpDesc.fMobCurHP = (i == 2) ? fTmpHP : 50.f;
+		tTmpDesc.fMobMaxHP = 100.f;
+		tTmpDesc.isAtkedCurFrame = isHitTmp;
+
+		tTmpDesc.iMonsterPtrKey = i;
+
+		m_pGameSystem->Update_MobStatus(tTmpDesc);
+	}
+#endif // KSTA_TEST
+
+
+
 	//}
 #pragma endregion
 
@@ -224,7 +228,7 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 			UI_MOBINFO_DESC& pCachedMobInfo = mobRTInfo.tInfoDesc;
 
 			// 찾음! -> 정보 갱신
-			if (pCachedMobInfo.iObjKey == mobInfo.iObjKey)
+			if (pCachedMobInfo.iMonsterPtrKey == mobInfo.iMonsterPtrKey)
 			{
 				mobRTInfo.isUpdatedThisFrame = true;
 				mobRTInfo.fCurElapsedTime += fTimeDelta;
@@ -277,7 +281,6 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 				return mobRT.isUpdatedThisFrame == false;
 			}),	
 		m_vecMobInfo_RT.end());
-
 }
 
 void CUI_MobHPBar::Update_Instances()

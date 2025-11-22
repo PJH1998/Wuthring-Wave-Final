@@ -113,6 +113,7 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	hr = m_pDevice->CreateSamplerState(&smp, &pFontInfo->pSampler);
 	if (FAILED(hr))
 	{
+		Safe_Release(pFontInfo->pSampler);
 		Safe_Release(pFontInfo->pAtlasSRV);
 		Safe_Release(pFontInfo->pAtlasTex);
 		return hr;

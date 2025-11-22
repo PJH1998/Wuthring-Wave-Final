@@ -20,7 +20,7 @@ public: // 생성/복제
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 public:
-	void			Req_OffInteract()	{ m_IsGoindDisabled = true; }
+	void			Req_OffInteract()	{ m_IsGoinDisabled = true; }
 
 private:
 	void			PreAssign_ChildUIs();
@@ -35,7 +35,7 @@ private:
 	CCustom_UI*		m_pUI_Interact_Normal = nullptr;
 
 
-	_bool			m_IsGoindDisabled = false;
+	_bool			m_IsGoinDisabled = false;
 	_float			m_fDisableTimer = 0.f;
 
 	_uint			m_iAnimOrder = 0;
