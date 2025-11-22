@@ -164,14 +164,12 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float4 vLightColor = vLightDiffuse + vLightSpecular + vLightAmbient;
     
+    Out.vColor = float4(vLightColor.xyz, 1.f);
     
     if (any(vPBRDesc.z))
     {
-        Out.vColor = float4(vLightColor.xyz, 1.f);
         return Out;
     }
-    
-    Out.vColor = float4(ToneMap(vLightColor.xyz * g_fExposure), 1.f);
     
     float fSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord).r;
     Out.vColor *= fSSao;
@@ -437,17 +435,18 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
-    vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (false == g_IsDynamicLUT)
+    
+    bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
+    if(false == IsDynamic)
+        vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
+    
+    if (false == g_IsDynamicLUT && true == IsDynamic)
     {
-        bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
-        if(IsDynamic)
-        {
-            Out.vColor = vOriginColor;
-
-            return Out;
-        }
+        Out.vColor = vOriginColor;
+    
+        return Out;
     }
     
     float2 vUV;
@@ -660,8 +659,58 @@ PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
+    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
+    vNormal = normalize(mul(vNormal, g_CamViewMatrix));
     
+    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (vViewPos.z == 0.f)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
+        
+    float4 vLook = normalize(float4(vViewPos.xyz, 0.f));
+    
+//    vLook *= -1.f;
+    
+    float4 vReflect = normalize(float4(reflect(vLook.xyz, vNormal.xyz), 0.f));
+    
+    float4 vReflectColor = 0.f;
+
+    bool IsHit = false;
+    
+    for (int i = 1; i <= 10; ++i)
+    {
+        float4 vDir = vViewPos + float4((vReflect.xyz * i * 15.f), 0.f);
+       
+        float4 vProjPos = mul(vDir, g_CamProjMatrix);
+        
+        vProjPos /= vProjPos.w;
+        
+        if (false == IsInNDC(vProjPos))
+            break;;
+        
+        float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
+        
+        float fDepth = g_DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+                             
+        if (fDepth <= vDir.z || fDepth == 0.f)
+        {
+            IsHit = true;
+            vReflectColor = g_BackBufferTexture.Sample(DefaultSampler, vTexcoord);
+            break;
+        }
+    }
+    
+    if(IsHit)
+        Out.vColor =  float4(lerp(vOriginColor.xyz, vReflectColor.xyz, 0.5f), 1.f);
+    else
+        Out.vColor = vOriginColor;
+        
     return Out;
 }
 

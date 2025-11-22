@@ -120,6 +120,8 @@ private:
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_SSS();
+	void						Render_SSR();
+
 	void						Render_Combined();
 	void						Render_NonLight();
 	void						Render_Emissive();	// 단독 Emissive

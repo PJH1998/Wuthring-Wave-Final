@@ -146,8 +146,6 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 	_bool IsNameSave = { true };
 	_string LastModelPath;
 	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
-		if (m_iMaxLOD >= 4)
-			CRASH("??");
 
 		if (!entry.is_regular_file())
 			continue;
@@ -171,6 +169,8 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 			LastModelPath = m_ModelPath = entry.path().string();
 	}
 	--m_iMaxLOD;
+
+
 
 	return S_OK;
 }

@@ -43,6 +43,7 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 	m_eObjectType = pDesc->eObjectType;
 	m_IsRender = m_pGameSystem->Add_To_Management(m_eObjectType, this, &m_SonoroMode);
 	return S_OK;
+
 }
 
 void CMapObject_NonSonoro::Priority_Update(_float fTimeDelta)
