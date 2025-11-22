@@ -383,6 +383,9 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\SSS">
       <UniqueIdentifier>{e98527a6-6b5a-432f-8e18-5d7e2048d4fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\SSR">
+      <UniqueIdentifier>{1d22ec99-b1b4-4f75-a716-665728fad5fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -773,6 +776,9 @@
     <ClInclude Include="..\public\SubsurfaceScattering.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\ScreenSpaceReflection.h">
+      <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1138,6 +1144,9 @@
     </ClCompile>
     <ClCompile Include="..\private\SubsurfaceScattering.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ScreenSpaceReflection.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

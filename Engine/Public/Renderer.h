@@ -62,9 +62,8 @@ private:
 	atomic<_uint>								m_iDoubleBufferIndex = {};
 	atomic<_uint>								m_iCullStack = {};
 	atomic<_bool>								m_isCompleteFrustumCull = { false };
-	list<class CGameObject*>					m_ShadowMapObjects;
 	_uint										m_iNumPreRenderObject = {};
-
+	list<class CGameObject*>					m_ShadowMapObjects;
 
 	class CShader*							m_pShader = { nullptr };
 	class CVIBuffer_Rect*					m_pVIBuffer = { nullptr };
@@ -84,7 +83,7 @@ private:
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
 	_bool									m_IsFog = { true };
-	_bool									m_IsSSS = { true };
+	_bool									m_IsSSS = { false };		// 카툰이라 큰 차이가 없음,,
 
 	_float									m_fExposure = {};
 

@@ -142,9 +142,11 @@ void CRenderer::Render()
 
 	Render_Light();
 	Render_SSS();
+
 	Render_Combined();
 	
 	Render_Outline();
+
 	
 	Render_NonLight();
 	Render_LUT();
