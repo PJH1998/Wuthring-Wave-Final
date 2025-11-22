@@ -14,6 +14,8 @@
 //#include "UI_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
+#include "UI_MobHPBar.h"
+#include "UI_TabUtility.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -204,6 +206,40 @@ void CUI_ControlHelper::Enable_Parried()
 		return;
 
 	static_cast<CUI_Parry*>(pRootUI)->Enable_Parried();
+}
+
+void CUI_ControlHelper::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_MobHPBar");
+
+	if (!pRootUI)	// 만들어진 적 없으면 리턴
+		return;
+
+	if (pRootUI && !pRootUI->IsActivate())	// 풀링 꺼져있으면 켬
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+
+	static_cast<CUI_MobHPBar*>(pRootUI)->Update_MobStatus(tDesc);
+}
+
+void CUI_ControlHelper::Show_TabUtilityUI()
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_TabUtility");
+
+	if (!pRootUI)	// 만들어진 적 없으면 리턴
+		return;
+
+	if (pRootUI && !pRootUI->IsActivate())	// 풀링 꺼져있으면 켬
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_TabUtility", _fmatrix(), nullptr);
+}
+
+_uint CUI_ControlHelper::HideNGet_TabUtilityUI()
+{
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_TabUtility");
+
+	if (!pRootUI)
+		return ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+	return static_cast<CUI_TabUtility*>(pRootUI)->Req_OffTabUI();
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

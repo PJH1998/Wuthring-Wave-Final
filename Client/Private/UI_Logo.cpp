@@ -35,7 +35,7 @@ HRESULT CUI_Logo::Initialize_Clone(void* pArg)
 	_wstring strFilePath =
 		L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Logo.json";
 	Load_ChildObjects(strFilePath);
-
+	PreAssign_ChildUIs();
 
 	vector<_wstring> vecAnimFilePaths = {
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_InitialShow.json",		// [SectorA_Main]
@@ -63,17 +63,13 @@ HRESULT CUI_Logo::Initialize_Clone(void* pArg)
 	Create_ChildText();
 
 
-	CCustom_UI* pMainLogoUI = Find_ChildObject(L"SectorA_Main");
-	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(pMainLogoUI->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(m_pUI_MainLogo->Get_Component(L"Com_Animator_UI"));
 	pAnimator_MainLogo->Change_Animation(L"Logo_Initialize");
-	CCustom_UI* pSmallLogoUI = Find_ChildObject(L"SectorLT_SmallLogo");
-	CAnimator_UI* pAnimator_SmallLogo = static_cast<CAnimator_UI*>(pSmallLogoUI->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_SmallLogo = static_cast<CAnimator_UI*>(m_pUI_SmallLogo->Get_Component(L"Com_Animator_UI"));
 	pAnimator_SmallLogo->Change_Animation(L"Logo_LT_Initialize");
-	CCustom_UI* pButtonLogoUI = Find_ChildObject(L"SectorB_Button");
-	CAnimator_UI* pAnimator_ButtonLogo = static_cast<CAnimator_UI*>(pButtonLogoUI->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_ButtonLogo = static_cast<CAnimator_UI*>(m_pUI_ButtonLogo->Get_Component(L"Com_Animator_UI"));
 	pAnimator_ButtonLogo->Change_Animation(L"Logo_B_Initialize");
-	CCustom_UI* pBackLogoUI = Find_ChildObject(L"SectorA_MainBack");
-	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(pBackLogoUI->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(m_pUI_BackLogo->Get_Component(L"Com_Animator_UI"));
 	pAnimator_BackLogo->Change_Animation(L"Logo_AB_Initialize");
 
 	m_isClone = true;
@@ -119,18 +115,21 @@ void CUI_Logo::Render()
 	//cout << "[CUI_Logo::Render] Render Called! : " << i << endl;
 }
 
+void CUI_Logo::PreAssign_ChildUIs()
+{
+	m_pUI_MainLogo		= Find_ChildObject(L"SectorA_Main");
+	m_pUI_SmallLogo		= Find_ChildObject(L"SectorLT_SmallLogo");
+	m_pUI_ButtonLogo	= Find_ChildObject(L"SectorB_Button");
+	m_pUI_BackLogo		= Find_ChildObject(L"SectorA_MainBack");
+}
+
 void CUI_Logo::Update_AnimControl(_float fTimeDelta)
 {
 	// 1초 경과 시 최초 애니메이션을 재생.
-
-	CCustom_UI* pMainLogoUI = Find_ChildObject(L"SectorA_Main");
-	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(pMainLogoUI->Get_Component(L"Com_Animator_UI"));
-	CCustom_UI* pSmallLogoUI = Find_ChildObject(L"SectorLT_SmallLogo");
-	CAnimator_UI* pAnimator_SmallLogo = static_cast<CAnimator_UI*>(pSmallLogoUI->Get_Component(L"Com_Animator_UI"));
-	CCustom_UI* pButtonLogoUI = Find_ChildObject(L"SectorB_Button");
-	CAnimator_UI* pAnimator_ButtonLogo = static_cast<CAnimator_UI*>(pButtonLogoUI->Get_Component(L"Com_Animator_UI"));
-	CCustom_UI* pBackLogoUI = Find_ChildObject(L"SectorA_MainBack");
-	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(pBackLogoUI->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(m_pUI_MainLogo->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_SmallLogo = static_cast<CAnimator_UI*>(m_pUI_SmallLogo->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_ButtonLogo = static_cast<CAnimator_UI*>(m_pUI_ButtonLogo->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(m_pUI_BackLogo->Get_Component(L"Com_Animator_UI"));
 
 	if		(m_fTimeElapsed >= 1.f &&
 			m_iAnimOrder == 0)
@@ -170,7 +169,7 @@ void CUI_Logo::Create_ChildText()
 		L"UI_Text_Interact"
 	);
 
-	CCustom_UI* pAttacher = this->Find_ChildObject(L"SectorB_Button");
+	CCustom_UI* pAttacher = m_pUI_ButtonLogo;
 	auto fontDesc = pFont->Get_UIDesc();
 	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 

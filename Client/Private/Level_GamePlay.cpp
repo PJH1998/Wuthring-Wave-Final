@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+#include "UI_Parry.h"
 
 //SFX
 #ifdef _DEBUG
@@ -112,44 +113,40 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 	
 
 	// UI Test. Delete it.
-#pragma region UI TEST (INTERACTION)
+#pragma region [NUMPAD .] KSTA_UITEST_LOCKON
+	CCustom_UI* pRootUILockOn = m_pGameSystem->Find_RootUI(L"UI_LockOn");
 
-	//static _uint iInteractIndex = 0;
-	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
-	//
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
-	//{
-	//	switch (iInteractIndex)
-	//	{
-	//	case TEST_INTERACT0:
-	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	case TEST_INTERACT1:
-	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	}
-	//}
-	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
-	//{
-	//	m_pGameSystem->Hide_InteractUI(true);
-	//}
-	//
-	//
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
-	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		!pRootUILockOn->IsActivate())
+		m_pGameSystem->Attach_LockOnUI(nullptr);
+	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		pRootUILockOn->IsActivate())
+		m_pGameSystem->Detach_LockOnUI();
 #pragma endregion
 
+
+#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
+	{
+		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
+			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
+
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
+	}
+#pragma endregion
+
+
+#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
+	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
+	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+		!isTargetAlive)
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+		isTargetAlive)
+		pTargetMobHPBarUI->SetActivate(false);
+#pragma endregion
 }
 
 void CLevel_GamePlay::Render()
@@ -411,13 +408,17 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
 		CRASH("Failed Ready Button_Interact");
 
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
-	//	iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
-	//	CRASH("Failed Ready LockOn");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
+		iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+		CRASH("Failed Ready LockOn");
 
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
-	//	iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
-	//	CRASH("Failed Ready Parry");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+		CRASH("Failed Ready Parry");
+	
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_MobHPBar"),
+		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
+		CRASH("Failed Ready MobHPBar");
 
 	// _UI
 }

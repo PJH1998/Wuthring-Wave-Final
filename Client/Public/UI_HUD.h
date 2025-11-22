@@ -32,6 +32,8 @@ public:
 	virtual void			Render()								override;
 
 public:
+	void					PreAssign_ChildUIs();
+
 	void					Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
 	void					Toggle_BossStatusUI(_bool isOn) { m_isOn_BossStatus = isOn; }
 
@@ -70,6 +72,48 @@ private:
 
 private:
 	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
+
+private:
+	CCustom_UI* m_pUI_SectorT_BossStatus = nullptr;
+	CCustom_UI* m_pUI_SectorB_Status = nullptr;
+	CCustom_UI* m_pUI_Skill[3] = { };
+	CCustom_UI* m_pUI_Change[3] = { };
+
+	CCustom_UI* m_pUI_Skill_ReadyFrame = nullptr;
+	CCustom_UI* m_pUI_Skill_BG = nullptr;
+	CCustom_UI* m_pUI_SectorRB_SkillIcons = nullptr;
+	CCustom_UI* m_pUI_Feedback = nullptr;
+	CCustom_UI* m_pUI_HPBar = nullptr;
+	CCustom_UI* m_pUI_BossHPBar = nullptr;
+	CCustom_UI* m_pUI_BossSABar = nullptr;
+	CCustom_UI* m_pUI_KeyButton = nullptr;
+
+	CCustom_UI* m_pUI_Group_Rover = nullptr;
+	CCustom_UI* m_pUI_Group_Augusta = nullptr;
+	CCustom_UI* m_pUI_Group_Galbrena = nullptr;
+
+	CCustom_UI* m_pUI_Frame_Rover_Dark = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta = nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Augusta_OtherEnergy = nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Augusta_UltMode = nullptr;
+	CCustom_UI* m_pUI_Frame_Galbrena = nullptr;
+	CCustom_UI* m_pUI_Frame_Galbrena_Icon = nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Galbrena_RageMode = nullptr;
+
+	CCustom_UI* m_pUI_Icon_ElementDark = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementThunder = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementFire = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementGuage = nullptr;
+
+	CCustom_UI* m_pUI_EnergyInstItems = nullptr;
+
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_SwordEnergy = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_CenterPointEnergy = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_UltModeEnergy = nullptr;
+
+	CCustom_UI* m_pTextUI_PlayerHP = nullptr;
+	CCustom_UI* m_pTextUI_BossName = nullptr;
+
 
 private:
 	class CGameSystem*		m_pGameSystem = { nullptr };

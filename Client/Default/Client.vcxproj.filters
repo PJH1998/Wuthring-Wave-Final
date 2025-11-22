@@ -94,15 +94,6 @@
     <Filter Include="03. GameObject\UI\_Parents">
       <UniqueIdentifier>{1681211d-9f83-450e-accb-f92ebf1a5186}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers">
-      <UniqueIdentifier>{c2cc41b8-823a-4ba0-9c80-c969b92bedad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\HUD">
-      <UniqueIdentifier>{5722860c-32aa-4818-9bb3-f6f8c726f814}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\EscMenu">
-      <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\_Shader">
       <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
     </Filter>
@@ -253,9 +244,6 @@
     <Filter Include="03. GameObject\MapObject\Sonoro">
       <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\Loading">
-      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\MapObject\Spawner">
       <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
     </Filter>
@@ -270,9 +258,6 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\Logo">
-      <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Camera\Scene">
       <UniqueIdentifier>{7828bcb1-9620-4f71-a71f-17f6ecc3a739}</UniqueIdentifier>
@@ -298,12 +283,6 @@
     <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
       <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Props">
-      <UniqueIdentifier>{8c9a1f14-85fc-4d35-a23b-1f3f8c1f59d0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Props\LockOn">
-      <UniqueIdentifier>{22797b79-8c21-4ea5-9d22-9a9802b9e0f7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\ScreenEffect\Prefab">
       <UniqueIdentifier>{34600685-47b1-42f2-b974-889fc885b2e7}</UniqueIdentifier>
     </Filter>
@@ -316,23 +295,47 @@
     <Filter Include="03. GameObject\ScreenEffect\SFX\AugustaUltiBegin">
       <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Props\Parry">
-      <UniqueIdentifier>{90653342-d458-4ed1-884c-ffa807da4208}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Props\Interact">
-      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\NPC">
       <UniqueIdentifier>{89f5c136-1114-450b-b493-6f82c0e2d018}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Props\MobHPBar">
-      <UniqueIdentifier>{2070fc30-04c0-4684-8025-4587fbef7c5e}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\Radial">
       <UniqueIdentifier>{8d374cac-4c3e-4492-8daa-51e35e3449b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\ScreenEffect\SFX\GalbrenaUlti">
       <UniqueIdentifier>{32b72cfb-8e3e-47d5-ab33-2805cf83a753}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop">
+      <UniqueIdentifier>{8c9a1f14-85fc-4d35-a23b-1f3f8c1f59d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\LockOn">
+      <UniqueIdentifier>{22797b79-8c21-4ea5-9d22-9a9802b9e0f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Parry">
+      <UniqueIdentifier>{90653342-d458-4ed1-884c-ffa807da4208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Interact">
+      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\MobHPBar">
+      <UniqueIdentifier>{2070fc30-04c0-4684-8025-4587fbef7c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\TabUtility">
+      <UniqueIdentifier>{ad945ee6-0c89-4fc8-9f83-5943ca4fd1ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child">
+      <UniqueIdentifier>{c2cc41b8-823a-4ba0-9c80-c969b92bedad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\HUD">
+      <UniqueIdentifier>{5722860c-32aa-4818-9bb3-f6f8c726f814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\EscMenu">
+      <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\Loading">
+      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\Logo">
+      <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
     </Filter>
     <Filter Include="02. Level\Heaven">
       <UniqueIdentifier>{add52591-9010-461b-ac56-3065ef68c97c}</UniqueIdentifier>
@@ -430,7 +433,7 @@
       <Filter>02. Level\Loader\Test</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_HUD.h">
-      <Filter>03. GameObject\UI\Child_Containers\HUD</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Button.h">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
@@ -713,7 +716,7 @@
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h">
-      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Loading</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AoEDoT.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
@@ -755,7 +758,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Button_Interact.h">
-      <Filter>03. GameObject\UI\Props\Interact</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\Interact</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
@@ -768,7 +771,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Logo.h">
-      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Logo</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\SceneCamera.h">
       <Filter>03. GameObject\Camera\Scene</Filter>
@@ -822,7 +825,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_LockOn.h">
-      <Filter>03. GameObject\UI\Props\LockOn</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\LockOn</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\RoverGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
@@ -840,7 +843,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Parry.h">
-      <Filter>03. GameObject\UI\Props\Parry</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\Parry</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaAirAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
@@ -891,7 +894,10 @@
       <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_MobHPBar.h">
-      <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\MobHPBar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_TabUtility.h">
+      <Filter>03. GameObject\UI\Containers_Prop\TabUtility</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Heaven.h">
       <Filter>02. Level\Heaven</Filter>
@@ -976,7 +982,7 @@
       <Filter>02. Level\Loader\Test</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_HUD.cpp">
-      <Filter>03. GameObject\UI\Child_Containers\HUD</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Button.cpp">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
@@ -1249,7 +1255,7 @@
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp">
-      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Loading</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AoEDoT.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
@@ -1288,7 +1294,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Button_Interact.cpp">
-      <Filter>03. GameObject\UI\Props\Interact</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\Interact</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
@@ -1301,7 +1307,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Logo.cpp">
-      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Logo</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\SceneCamera.cpp">
       <Filter>03. GameObject\Camera\Scene</Filter>
@@ -1352,7 +1358,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_LockOn.cpp">
-      <Filter>03. GameObject\UI\Props\LockOn</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\LockOn</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
@@ -1367,7 +1373,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Parry.cpp">
-      <Filter>03. GameObject\UI\Props\Parry</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\Parry</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
@@ -1415,7 +1421,10 @@
       <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_MobHPBar.cpp">
-      <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\MobHPBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_TabUtility.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\TabUtility</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_Heaven.cpp">
       <Filter>02. Level\Heaven</Filter>

@@ -35,6 +35,7 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json";
 	Load_ChildObjects(strFilePath);
+	PreAssign_ChildUIs();
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -45,32 +46,28 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/ParryA_Eff_Play.json",
 
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Parry_ApprCirc_Play.json",
+
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Parry_Activated_Initialize.json",	// 이거로 애니메이션 조작하는거 추가해야함
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Parry_Activated_Play.json",
 	};
 	Load_Animations(vecAnimFilePaths);
 
-	//CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
-	//static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
-	//static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
-
-	CCustom_UI* pCircle_Appr	= Find_ChildObject(L"ParryCircle_Approach");
-	CCustom_UI* pSectorAMain	= Find_ChildObject(L"SectorA_Parry");
-	CCustom_UI* pSectorAEff		= Find_ChildObject(L"SectorA_ParryEffect");
-
-	CAnimator_UI* pAnim_Circle_Appr		= static_cast<CAnimator_UI*>(pCircle_Appr->Get_Component(L"Com_Animator_UI"));
-	CAnimator_UI* pAnim_SectorAMain	= static_cast<CAnimator_UI*>(pSectorAMain->Get_Component(L"Com_Animator_UI"));
-	CAnimator_UI* pAnim_SectorAEff		= static_cast<CAnimator_UI*>(pSectorAEff->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_Circle_Appr		= static_cast<CAnimator_UI*>(m_pCircle_Appr		->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_SectorAMain		= static_cast<CAnimator_UI*>(m_pSectorA			->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_SectorAEff		= static_cast<CAnimator_UI*>(m_pSectorAEff		->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_SectorACircEff	= static_cast<CAnimator_UI*>(m_pSectorACircEff	->Get_Component(L"Com_Animator_UI"));
 
 
 	// 최초에 비활성화 애니메이션. + 위치 비고정형 UI이기 떄문에 애니메이션에서 위치는 적용 안되도록.
 	pAnim_Circle_Appr->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 	pAnim_SectorAMain->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 	pAnim_SectorAEff->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
+	pAnim_SectorACircEff->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 
 	pAnim_SectorAMain->Change_Animation(L"ParryA_Main_Initialize");
 	pAnim_SectorAEff->Change_Animation(L"ParryA_Eff_Initialize");
+	pAnim_SectorACircEff->Change_Animation(L"Parry_Activated_Initialize");
 
-
-	//m_vOriginScale = m_pTransformCom->Get_Scaled();
 	Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
 	m_pTargetPos = nullptr;
@@ -104,13 +101,6 @@ void CUI_Parry::Update(_float fTimeDelta)
 		return;
 #endif // KSTA_UITEST_PARRY_TOZERO
 
-	// UI를 타겟 위치로.
-	// 단일 UI까지는 CPU로 돌려도 될듯
-	CCustom_UI* pCircle_Appr = Find_ChildObject(L"ParryCircle_Approach");
-	CCustom_UI* pCircle_Stat = Find_ChildObject(L"ParryCircle_Static");
-
-	CCustom_UI* pSectorA = Find_ChildObject(L"SectorA_Parry");
-	CCustom_UI* pSectorAEff = Find_ChildObject(L"SectorA_ParryEffect");
 
 #ifndef KSTA_UITEST_PARRY_TOZERO
 	_float3 vTargetPos = *m_pTargetPos; // _float3(0.f, -10.f, 0.f); // ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
@@ -120,8 +110,9 @@ void CUI_Parry::Update(_float fTimeDelta)
 	_float3 vTargetPos = _float3(0.f, -10.f, 0.f);
 #endif // KSTA_UITEST_PARRY_TOZERO
 
-	Update_ApplyTargetPos(pSectorA, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
-	Update_ApplyTargetPos(pSectorAEff, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pSectorA, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pSectorAEff, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pSectorACircEff, vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
 
 
 	// 시간 갱신
@@ -162,11 +153,9 @@ void CUI_Parry::Late_Update(_float fTimeDelta)
 		return;
 #endif // KSTA_UITEST_PARRY_TOZERO
 
-
-	CCustom_UI* pSectorAMain = Find_ChildObject(L"SectorA_Parry");
-	CCustom_UI* pSectorAEff = Find_ChildObject(L"SectorA_ParryEffect");
-	Update_CamDistScale(pSectorAMain, 40.f);
-	Update_CamDistScale(pSectorAEff, 40.f);
+	Update_CamDistScale(m_pSectorA, 40.f);
+	Update_CamDistScale(m_pSectorAEff, 40.f);
+	Update_CamDistScale(m_pSectorACircEff, 40.f);
 
 	//Update_CamDistScale(this, 40.f);
 
@@ -192,13 +181,10 @@ void CUI_Parry::Render()
 void CUI_Parry::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	// pooling 꺼내질 시 초기화
-	CCustom_UI* pCircle_Appr = Find_ChildObject(L"ParryCircle_Approach");
-	CCustom_UI* pSectorAMain = Find_ChildObject(L"SectorA_Parry");
-	CCustom_UI* pSectorAEff = Find_ChildObject(L"SectorA_ParryEffect");
 
-	CAnimator_UI* pAnim_Circle_Appr = static_cast<CAnimator_UI*>(pCircle_Appr->Get_Component(L"Com_Animator_UI"));
-	CAnimator_UI* pAnim_pSectorAMain = static_cast<CAnimator_UI*>(pSectorAMain->Get_Component(L"Com_Animator_UI"));
-	CAnimator_UI* pAnim_pSectorAEff = static_cast<CAnimator_UI*>(pSectorAEff->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_Circle_Appr = static_cast<CAnimator_UI*>(m_pCircle_Appr->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_pSectorAMain = static_cast<CAnimator_UI*>(m_pSectorA->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_pSectorAEff = static_cast<CAnimator_UI*>(m_pSectorAEff->Get_Component(L"Com_Animator_UI"));
 
 	// 패링용 애니메이션 진행
 	pAnim_pSectorAMain->Change_Animation(L"ParryA_Main_Play", true);
@@ -216,20 +202,28 @@ void CUI_Parry::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CUI_Parry::Enable_Parried()
 {
-	CCustom_UI* pCircle_Appr = Find_ChildObject(L"ParryCircle_Approach");
-	CCustom_UI* pSectorAMain = Find_ChildObject(L"SectorA_Parry");
-	CCustom_UI* pSectorAEff = Find_ChildObject(L"SectorA_ParryEffect");
-
-	CAnimator_UI* pAnim_Circle_Appr = static_cast<CAnimator_UI*>(pCircle_Appr->Get_Component(L"Com_Animator_UI"));
-	CAnimator_UI* pAnim_pSectorAMain = static_cast<CAnimator_UI*>(pSectorAMain->Get_Component(L"Com_Animator_UI"));
-	CAnimator_UI* pAnim_pSectorAEff = static_cast<CAnimator_UI*>(pSectorAEff->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_Circle_Appr		= static_cast<CAnimator_UI*>(m_pCircle_Appr->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_pSectorAMain	= static_cast<CAnimator_UI*>(m_pSectorA->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_pSectorAEff		= static_cast<CAnimator_UI*>(m_pSectorAEff->Get_Component(L"Com_Animator_UI"));
+	CAnimator_UI* pAnim_pSectorACircEff	= static_cast<CAnimator_UI*>(m_pSectorACircEff->Get_Component(L"Com_Animator_UI"));
 
 	// 패링 애니메이션 제거, 이펙트 애니메이션 진행
 	pAnim_pSectorAMain->Change_Animation(L"ParryA_Main_Initialize", true);	// Circle_Appr 은 pSectorAMain 의 자식이기에 같이 비활성화됨.
 	pAnim_pSectorAEff->Change_Animation(L"ParryA_Eff_Play", true);
+	pAnim_pSectorACircEff->Change_Animation(L"Parry_Activated_Play", true);
 
 	m_isParried = true;
 	m_fElapsedTime = 0.f;
+}
+
+void CUI_Parry::PreAssign_ChildUIs()
+{
+	m_pCircle_Appr		= Find_ChildObject(L"ParryCircle_Approach");
+	m_pCircle_Stat		= Find_ChildObject(L"ParryCircle_Static");
+
+	m_pSectorA			= Find_ChildObject(L"SectorA_Parry");
+	m_pSectorAEff		= Find_ChildObject(L"SectorA_ParryEffect");
+	m_pSectorACircEff	= Find_ChildObject(L"SectorA_ParryCircEff");
 }
 
 void CUI_Parry::Ready_Presets()
