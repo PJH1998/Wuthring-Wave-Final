@@ -325,7 +325,10 @@ void CEdit_MapObject::Render()
             if (m_pMaskTextureCom[i])
                 m_pMaskTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture");
             else
-                m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			{
+				HasMask = false;
+				m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			}
             if (m_pMaskDiffuseTextureCom[i])
                 m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
         }

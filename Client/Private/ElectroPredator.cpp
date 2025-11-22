@@ -204,11 +204,15 @@ void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Is
 
 void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 {
-	//if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
-	//	return;
-	//
-	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+	
+	PREFAB_INFO Desc = {};
+	Desc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	Desc.pModelPtr = m_pModelCom;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &Desc);
 }
 
 void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)

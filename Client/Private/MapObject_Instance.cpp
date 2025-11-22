@@ -23,7 +23,7 @@ HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	Ready_Component(pArg);
-
+	m_iLODIndex = 0;
 	//나중에 풀때기 흔드는 거 하려면 업데이트가 필요해서 임시 조치.
 	//m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	//AddRef();
