@@ -17,7 +17,6 @@ public:
 	const vector<KEYFRAME_CURVE>& Get_KeyframeCurves() const { return m_KeyFrames; }
 	_uint Get_NumKeyframes() const { return m_iNumKeyFrame; }
 
-	_float Get_CurrentWeight(_float fCurrentTrackPosition); // 현재 시간에 맞는 가중치(Weight) 반환
 	_float Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex); // 현재 시간에 맞는 가중치(Weight) 반환
 	const _char* Get_Name() const { return m_szName; }
 

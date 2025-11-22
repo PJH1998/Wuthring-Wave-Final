@@ -68,7 +68,7 @@ VS_OUT VS_MAIN(VS_IN In)
     // 0. 정점 정보를 교체합니다.
     OutputVertex MorphedVert = g_MorphedVertices[In.iVertexID];
     
-    // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing]
+    // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing
     float3 vMorphedPos = MorphedVert.vPosition;
     float3 vMorphedNormal = MorphedVert.vNormal;
     

@@ -514,6 +514,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     {
         // 리본 SRT 가져오기
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        //ribbonSRT.translation.xyz *= 0.01f; // Blender에서 RibAnimation 추출시 크기 변경됨.
         
         // (기존 코드와 동일한 리본 가산 로직 사용, 대상만 actionSRT -> finalSRT로 변경)
         float4 finalScale = ribbonSRT.scale * finalSRT.scale;

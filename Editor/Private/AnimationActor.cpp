@@ -699,6 +699,6 @@ void CAnimationActor::Free()
 	Safe_Release(m_pSpringCamera);
 
 	m_ChildActors.clear();
-	m_pChildActor == nullptr;
+	m_pChildActor = nullptr;
 
 }

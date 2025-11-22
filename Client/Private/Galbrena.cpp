@@ -188,18 +188,23 @@ void CGalbrena::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
-    for (_uint i = 0; i < iNumMeshes - 1; i++)
+    for (_uint i = 0; i < iNumMeshes; i++)
     {
-		if(FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			continue;
+		//m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
 
         m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i)))
+			CRASH("Bind Morph Result Failed");
+
         if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
             CRASH("Ready Shader Begin Failed");
+
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
@@ -808,6 +813,10 @@ void CGalbrena::Bind_Resources()
 void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 {
     // 1. Components
+    /*if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
+        , pDesc->shaderData.second, TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+        CRASH("Shader");*/
+
     if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
         , pDesc->shaderData.second, TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         CRASH("Shader");
@@ -818,6 +827,10 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
 		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->facialComputeShaderData.first)
+		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
@@ -846,8 +859,10 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
+    //for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+    //    m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::GALBRENA);
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::GALBRENA);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
 }
 
 void CGalbrena::Ready_Positions(const CHARACTER_DESC* pDesc)

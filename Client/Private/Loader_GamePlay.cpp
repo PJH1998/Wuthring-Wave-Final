@@ -389,7 +389,8 @@ HRESULT CLoader_GamePlay::Load_Rover()
 HRESULT CLoader_GamePlay::Load_Galbrena()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/GalbrenaFacial/Galbrena.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 0.01f;
 	_float fSize = 0.0001f;

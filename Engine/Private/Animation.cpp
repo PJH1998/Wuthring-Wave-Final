@@ -95,6 +95,21 @@ void CAnimation::Sort_AnimNotify()
 	});
 }
 
+
+void CAnimation::Reset_Status()
+{
+	m_fCurrentTrackPosition = 0.f;
+	m_iNotifyIndex = 0;
+
+	// Bone Channel 캐싱 인덱스 초기화
+	if (!m_CurrentFrameIndices.empty())
+		fill(m_CurrentFrameIndices.begin(), m_CurrentFrameIndices.end(), 0); // 0으로 채워서 처음부터 다시 검색하게 함
+
+	// Morph Channel 캐싱 인덱스 초기화
+	if (!m_CurrentMorphCurveIndicies.empty())
+		fill(m_CurrentMorphCurveIndicies.begin(), m_CurrentMorphCurveIndicies.end(), 0); // 0번 키프레임부터 다시 찾도록 리셋
+}
+
 HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
 {
 #pragma region 기존 애니메이션 내용 저장.
@@ -129,7 +144,7 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	// 추가 작업.
 	if (eModelType == MODELTYPE::CHARACTER)
 	{
-		// 1. Morph Mesh Curves 개수를 받아옵니다.
+		// 1. Morph Mesh Curves 개수를 받아옵니다. => 	ModelLoader의 iTotalCurves와 동일.
 		InputFile.read(reinterpret_cast<_char*>(&m_iNumMorphCurves), sizeof(_uint));
 
 		// 2. Morph Mesh Curves 정보를 가져옵니다.
@@ -324,19 +339,26 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 	// 모든 가중치 0으로 초기화
 	fill(modelWeights.begin(), modelWeights.end(), 0.0f);
 
+	// MorphMeshChannel[i] -> m_MorphKeyIndices[i] = 들어있는 값(modelWeights의 인덱스)
 	for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
 	{
 		_int iTargetIndex = m_MorphKeyIndicies[i];
 
-		// 매핑된 대상이 없다면? 스킵
+		// 매핑된 대상이 없다면? 스킵합니다.
 		if (iTargetIndex == -1) continue;
 		if (iTargetIndex >= modelWeights.size()) continue;
 
 		// 현재 시간 가중치 계산
 		_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[i]);
 
-		// 모델의 해당 인덱스에 가중치 적용
+		// 매핑된 타겟인덱스에 가중치 부여.
 		modelWeights[iTargetIndex] = fWeight;
+		//_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[i]);
+		//_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[iTargetIndex]);
+
+		// 모델의 해당 인덱스에 가중치 적용
+		//modelWeights[iTargetIndex] = fWeight;
+		//modelWeights[i] = fWeight;
 	}
 
 	return true;

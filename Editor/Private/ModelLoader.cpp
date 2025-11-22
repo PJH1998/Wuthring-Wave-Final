@@ -419,6 +419,199 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 	return S_OK;
 }
 
+HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
+{
+	if (nullptr == m_pAIScene)
+		return E_FAIL;
+
+	_char szDirPath[MAX_PATH] = {};
+	_char szFileName[MAX_PATH] = {};
+	_splitpath_s(pFileName, nullptr, 0, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
+
+	_char szAnimFilePath[MAX_PATH] = {};
+	strcpy_s(szAnimFilePath, szDirPath);
+	strcat_s(szAnimFilePath, "Animation/");
+	strcat_s(szAnimFilePath, szFileName);
+	strcat_s(szAnimFilePath, "_MorphAnim.dat");
+
+	filesystem::path dir = filesystem::path(szAnimFilePath).parent_path();
+	if (!dir.empty() && !filesystem::exists(dir))
+		filesystem::create_directories(dir);
+
+	ofstream file(szAnimFilePath, ios::binary);
+
+	if (false == file.is_open())
+	{
+		MSG_BOX("Animation Save Fail");
+		return E_FAIL;
+	}
+
+	_uint iNumAnimations = m_pAIScene->mNumAnimations;
+	// Num Animation
+	file.write(reinterpret_cast<const _char*>(&iNumAnimations), sizeof(_uint));
+
+	for (size_t i = 0; i < iNumAnimations; ++i)
+	{
+		aiAnimation* pAnimation = m_pAIScene->mAnimations[i];
+		aiString strName = pAnimation->mName;
+
+		// 2. Main Animation 정보 저장
+		_uint iLength = strName.length;
+
+
+		// Animation Name
+		file.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
+		file.write(strName.data, iLength);
+
+
+		_float fDuration = pAnimation->mDuration;
+		// Animation Duration
+		file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
+
+		_float fTickPerSecond = pAnimation->mTicksPerSecond;
+		// Animation TickPerSecond
+		file.write(reinterpret_cast<const _char*>(&fTickPerSecond), sizeof(_float));
+
+		_uint iNumChannels = pAnimation->mNumChannels;
+		// Num Channel
+		file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
+
+		// 3. Channel 정보 저장.
+		for (size_t j = 0; j < iNumChannels; ++j)
+		{
+			aiNodeAnim* pChannel = pAnimation->mChannels[j];
+			aiString strChannelName = pChannel->mNodeName;
+			_uint iChannelNameLength = strChannelName.length;
+
+			// Channel(Bone) Name
+			file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
+			file.write(strChannelName.data, iChannelNameLength);
+
+			_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+			// Num KeyFrame
+			file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+
+			_float3 vScale = {};
+			_float4 vRotation = {};
+			_float3 vTranslation = {};
+
+			for (size_t k = 0; k < iNumKeyFrame; ++k)
+			{
+				KEYFRAME KeyFrame = {};
+				if (k < pChannel->mNumScalingKeys)
+				{
+					KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
+					memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
+				}
+				if (k < pChannel->mNumRotationKeys)
+				{
+					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
+
+					{
+						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+						vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+						vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+					}
+				}
+				if (k < pChannel->mNumPositionKeys)
+				{
+					KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
+					memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+				}
+				KeyFrame.vScale = vScale;
+				KeyFrame.vRotation = vRotation;
+				KeyFrame.vTranslation = vTranslation;
+				file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+			}
+		}
+
+		// 1. MorphMeshChannels 채널을 확인하고 있다면 데이터를 저장합니다. => 무조건 하나만 나옴 Object가 하나라.
+		if (pAnimation->mNumMorphMeshChannels > 0)
+		{
+			// Key: 쉐이프키 이름 ("Smile"), Value: 해당 키의 시간별 변화량 목록
+			map<string, vector<KEYFRAME_CURVE>> mapMorphCurves;
+
+			for (size_t i = 0; i < pAnimation->mNumMorphMeshChannels; ++i)
+			{
+				aiMeshMorphAnim* pMorphChannel = pAnimation->mMorphMeshChannels[i];
+
+				// 1. 채널 이름으로 타겟 메쉬 찾기
+				aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
+				if (nullptr == pTargetMesh) continue;
+
+				// 2. 시간(Keys)을 기준으로 먼저 순회합니다. Assimp는 시간 -> 활성화된 쉐이프키 목록 순서로 저장
+				// 183 TrackPosition 이면. 1 TrackPosition => 105 ShapeKey 이렇게 저장됨. Assimp 에는.
+				for (_uint keyIdx = 0; keyIdx < pMorphChannel->mNumKeys; ++keyIdx)
+				{
+					// ShapeKey 목록을 순회.
+					const aiMeshMorphKey& MorphKey = pMorphChannel->mKeys[keyIdx];
+
+					// 이 시간대에 변화가 있는 모든 쉐이프 키들을 순회
+					for (unsigned int v = 0; v < MorphKey.mNumValuesAndWeights; ++v)
+					{
+						// mValues[v] == 쉐이프키 인덱스.
+						_uint iShapeIdx = MorphKey.mValues[v];
+
+						// 인덱스
+						if (iShapeIdx >= pTargetMesh->mNumAnimMeshes) continue;
+
+						// 인덱스로부터 쉐이프 키 이름("Smile") 추출
+						aiAnimMesh* pAnimMesh = pTargetMesh->mAnimMeshes[iShapeIdx];
+						string strShapeKeyName = pAnimMesh->mName.C_Str();
+
+						// "Basis" 등 불필요한 키 제외
+						if (strShapeKeyName == "Basis" || strShapeKeyName.empty()) continue;
+
+						// 가중치 처리 => Weight는 
+						_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
+						//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
+						//fWeight = max(0.0f, min(fWeight, 1.0f));
+
+						// 맵에 데이터 추가 
+						KEYFRAME_CURVE KeyFrame = {};
+						KeyFrame.fTrackPosition = static_cast<_float>(MorphKey.mTime);
+						KeyFrame.fValue = fWeight;
+
+						mapMorphCurves[strShapeKeyName].push_back(KeyFrame);
+					}
+				}
+			}
+
+			// 3. 정리된 데이터를 파일에 저장
+			_uint iTotalCurves = static_cast<_uint>(mapMorphCurves.size());
+			file.write(reinterpret_cast<const _char*>(&iTotalCurves), sizeof(_uint));
+
+			// 4. 맵을 순회. 
+			for (auto& Pair : mapMorphCurves)
+			{
+				string strCurveName = Pair.first;     // 이름
+				auto& vecKeys = Pair.second;          // 키프레임들
+
+				// 이름 저장
+				_uint iNameLen = static_cast<_uint>(strCurveName.length());
+				file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
+				file.write(strCurveName.data(), iNameLen);
+
+				// 키 개수 및 데이터 저장
+				_uint iNumKeys = static_cast<_uint>(vecKeys.size());
+				file.write(reinterpret_cast<const _char*>(&iNumKeys), sizeof(_uint));
+				file.write(reinterpret_cast<const _char*>(vecKeys.data()), sizeof(KEYFRAME_CURVE) * iNumKeys);
+			}
+		}
+		else
+		{
+			_uint iZero = 0;
+			file.write(reinterpret_cast<const _char*>(&iZero), sizeof(_uint));
+		}
+
+	}
+
+	file.close();
+
+	return S_OK;
+}
+
 //HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 //{
 //
@@ -433,7 +626,7 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 //	strcpy_s(szAnimFilePath, szDirPath);
 //	strcat_s(szAnimFilePath, "Animation/");
 //	strcat_s(szAnimFilePath, szFileName);
-//	strcat_s(szAnimFilePath, "_Anim.dat");
+//	strcat_s(szAnimFilePath, "_MorphAnim.dat");
 //
 //	filesystem::path dir = filesystem::path(szAnimFilePath).parent_path();
 //	if (!dir.empty() && !filesystem::exists(dir))
@@ -473,7 +666,18 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 //
 //		_uint iNumChannels = pAnimation->mNumChannels;
 //		// Num Channel
-//		//file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
+//		file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
+//
+//		_bool bIsRibbonAnim = { false };
+//
+//		_char szAnimationName[MAX_PATH] = {};
+//		strcpy_s(szAnimationName, strName.C_Str());
+//		_char* pAnimationName = { nullptr };
+//		strtok_s(szAnimationName, "|", &pAnimationName);
+//
+//		_string strAnimName = pAnimationName;
+//
+//		bIsRibbonAnim = (strAnimName.find("Rib_") == 0);;
 //
 //		// 3. Channel 정보 저장.
 //		for (size_t j = 0; j < iNumChannels; ++j)
@@ -486,42 +690,60 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 //			file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
 //			file.write(strChannelName.data, iChannelNameLength);
 //
-//			_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
-//			// Num KeyFrame
-//			file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
-//
 //			_float3 vScale = {};
 //			_float4 vRotation = {};
 //			_float3 vTranslation = {};
 //
-//			for (size_t k = 0; k < iNumKeyFrame; ++k)
+//			if (bIsRibbonAnim)
 //			{
-//				KEYFRAME KeyFrame = {};
-//				if (k < pChannel->mNumScalingKeys)
-//				{
-//					KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
-//					memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
-//				}
-//				if (k < pChannel->mNumRotationKeys)
-//				{
-//					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
+//				// Simplify 1.0 수준으로 키프레임 제거 (허용 오차 0.001 정도)
+//				vector<KEYFRAME> simplifiedKeys;
+//				SimplifyChannel(pChannel, simplifiedKeys, 0.001f);  // 허용 오차 조절 가능
 //
-//					{
-//						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
-//						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
-//						vRotation.z = pChannel->mRotationKeys[k].mValue.z;
-//						vRotation.w = pChannel->mRotationKeys[k].mValue.w;
-//					}
-//				}
-//				if (k < pChannel->mNumPositionKeys)
+//				_uint iNumKeyFrame = static_cast<_uint>(simplifiedKeys.size());
+//				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+//
+//				for (const auto& key : simplifiedKeys)
 //				{
-//					KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
-//					memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+//					file.write(reinterpret_cast<const _char*>(&key), sizeof(KEYFRAME));
 //				}
-//				KeyFrame.vScale = vScale;
-//				KeyFrame.vRotation = vRotation;
-//				KeyFrame.vTranslation = vTranslation;
-//				file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+//			}
+//			else
+//			{
+//				// 일반 애니메이션 → 모든 키 그대로 저장
+//				_uint iNumKeyFrame = max(pChannel->mNumPositionKeys,
+//					max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+//				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+//
+//				for (size_t k = 0; k < iNumKeyFrame; ++k)
+//				{
+//					KEYFRAME KeyFrame = {};
+//					if (k < pChannel->mNumScalingKeys)
+//					{
+//						KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
+//						memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
+//					}
+//					if (k < pChannel->mNumRotationKeys)
+//					{
+//						KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
+//
+//						{
+//							vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+//							vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+//							vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+//							vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+//						}
+//					}
+//					if (k < pChannel->mNumPositionKeys)
+//					{
+//						KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
+//						memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+//					}
+//					KeyFrame.vScale = vScale;
+//					KeyFrame.vRotation = vRotation;
+//					KeyFrame.vTranslation = vTranslation;
+//					file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+//				}
 //			}
 //		}
 //
@@ -539,8 +761,7 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 //				aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
 //				if (nullptr == pTargetMesh) continue;
 //
-//				// 2. [최적화 로직] 시간(Keys)을 기준으로 먼저 순회합니다.
-//				//    Assimp는 "시간 -> 활성화된 쉐이프키 목록" 순서로 저장되어 있기 때문입니다.
+//				//    Assimp는 쉐이프키 목록" 순서로 저장되어 있기 때문입니다.
 //				for (_uint keyIdx = 0; keyIdx < pMorphChannel->mNumKeys; ++keyIdx)
 //				{
 //					const aiMeshMorphKey& MorphKey = pMorphChannel->mKeys[keyIdx];
@@ -608,225 +829,6 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 //
 //	return S_OK;
 //}
-
-HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
-{
-
-	if (nullptr == m_pAIScene)
-		return E_FAIL;
-
-	_char szDirPath[MAX_PATH] = {};
-	_char szFileName[MAX_PATH] = {};
-	_splitpath_s(pFileName, nullptr, 0, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
-
-	_char szAnimFilePath[MAX_PATH] = {};
-	strcpy_s(szAnimFilePath, szDirPath);
-	strcat_s(szAnimFilePath, "Animation/");
-	strcat_s(szAnimFilePath, szFileName);
-	strcat_s(szAnimFilePath, "_Anim.dat");
-
-	filesystem::path dir = filesystem::path(szAnimFilePath).parent_path();
-	if (!dir.empty() && !filesystem::exists(dir))
-		filesystem::create_directories(dir);
-
-	ofstream file(szAnimFilePath, ios::binary);
-
-	if (false == file.is_open())
-	{
-		MSG_BOX("Animation Save Fail");
-		return E_FAIL;
-	}
-
-	_uint iNumAnimations = m_pAIScene->mNumAnimations;
-	// Num Animation
-	file.write(reinterpret_cast<const _char*>(&iNumAnimations), sizeof(_uint));
-
-	for (size_t i = 0; i < iNumAnimations; ++i)
-	{
-		aiAnimation* pAnimation = m_pAIScene->mAnimations[i];
-		aiString strName = pAnimation->mName;
-
-		// 2. Main Animation 정보 저장
-		_uint iLength = strName.length;
-		// Animation Name
-		file.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
-		file.write(strName.data, iLength);
-
-
-		_float fDuration = pAnimation->mDuration;
-		// Animation Duration
-		file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
-
-		_float fTickPerSecond = pAnimation->mTicksPerSecond;
-		// Animation TickPerSecond
-		file.write(reinterpret_cast<const _char*>(&fTickPerSecond), sizeof(_float));
-
-		_uint iNumChannels = pAnimation->mNumChannels;
-		// Num Channel
-		file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
-
-		_bool bIsRibbonAnim = { false };
-
-		_char szAnimationName[MAX_PATH] = {};
-		strcpy_s(szAnimationName, strName.C_Str());
-		_char* pAnimationName = { nullptr };
-		strtok_s(szAnimationName, "|", &pAnimationName);
-
-		_string strAnimName = pAnimationName;
-
-		bIsRibbonAnim = (strAnimName.find("Rib_") == 0);;
-
-		// 3. Channel 정보 저장.
-		for (size_t j = 0; j < iNumChannels; ++j)
-		{
-			aiNodeAnim* pChannel = pAnimation->mChannels[j];
-			aiString strChannelName = pChannel->mNodeName;
-			_uint iChannelNameLength = strChannelName.length;
-
-			// Channel(Bone) Name
-			file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
-			file.write(strChannelName.data, iChannelNameLength);
-
-			_float3 vScale = {};
-			_float4 vRotation = {};
-			_float3 vTranslation = {};
-
-			if (bIsRibbonAnim)
-			{
-				// Simplify 1.0 수준으로 키프레임 제거 (허용 오차 0.001 정도)
-				vector<KEYFRAME> simplifiedKeys;
-				SimplifyChannel(pChannel, simplifiedKeys, 0.001f);  // 허용 오차 조절 가능
-
-				_uint iNumKeyFrame = simplifiedKeys.size();
-				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
-
-				for (const auto& key : simplifiedKeys)
-				{
-					file.write(reinterpret_cast<const _char*>(&key), sizeof(KEYFRAME));
-				}
-			}
-			else
-			{
-				// 일반 애니메이션 → 모든 키 그대로 저장
-				_uint iNumKeyFrame = max(pChannel->mNumPositionKeys,
-					max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
-				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
-
-				for (size_t k = 0; k < iNumKeyFrame; ++k)
-				{
-					KEYFRAME KeyFrame = {};
-					if (k < pChannel->mNumScalingKeys)
-					{
-						KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime;
-						memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
-					}
-					if (k < pChannel->mNumRotationKeys)
-					{
-						KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
-
-						{
-							vRotation.x = pChannel->mRotationKeys[k].mValue.x;
-							vRotation.y = pChannel->mRotationKeys[k].mValue.y;
-							vRotation.z = pChannel->mRotationKeys[k].mValue.z;
-							vRotation.w = pChannel->mRotationKeys[k].mValue.w;
-						}
-					}
-					if (k < pChannel->mNumPositionKeys)
-					{
-						KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime;
-						memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
-					}
-					KeyFrame.vScale = vScale;
-					KeyFrame.vRotation = vRotation;
-					KeyFrame.vTranslation = vTranslation;
-					file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
-				}
-			}
-		}
-
-		// 1. MorphMeshChannels 채널을 확인하고 있다면 데이터를 저장합니다.
-		if (pAnimation->mNumMorphMeshChannels > 0)
-		{
-			// Key: 쉐이프키 이름 ("Smile"), Value: 해당 키의 시간별 변화량 목록
-			map<string, vector<KEYFRAME_CURVE>> mapMorphCurves;
-
-			for (size_t i = 0; i < pAnimation->mNumMorphMeshChannels; ++i)
-			{
-				aiMeshMorphAnim* pMorphChannel = pAnimation->mMorphMeshChannels[i];
-
-				// 1. 채널 이름으로 타겟 메쉬 찾기
-				aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
-				if (nullptr == pTargetMesh) continue;
-
-				// 2. [최적화 로직] 시간(Keys)을 기준으로 먼저 순회합니다.
-				//    Assimp는 "시간 -> 활성화된 쉐이프키 목록" 순서로 저장되어 있기 때문입니다.
-				for (_uint keyIdx = 0; keyIdx < pMorphChannel->mNumKeys; ++keyIdx)
-				{
-					const aiMeshMorphKey& MorphKey = pMorphChannel->mKeys[keyIdx];
-
-					// 이 시간대(Time)에 변화가 있는 모든 쉐이프 키들을 순회
-					for (unsigned int v = 0; v < MorphKey.mNumValuesAndWeights; ++v)
-					{
-						// mValues[v]는 쉐이프 키의 인덱스입니다.
-						_uint iShapeIdx = MorphKey.mValues[v];
-
-						// 인덱스 안전 검사
-						if (iShapeIdx >= pTargetMesh->mNumAnimMeshes) continue;
-
-						// 인덱스로부터 쉐이프 키 이름("Smile") 추출
-						aiAnimMesh* pAnimMesh = pTargetMesh->mAnimMeshes[iShapeIdx];
-						string strShapeKeyName = pAnimMesh->mName.C_Str();
-
-						// "Basis" 등 불필요한 키 제외
-						if (strShapeKeyName == "Basis" || strShapeKeyName.empty()) continue;
-
-						// 가중치 처리
-						_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
-						//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
-						//fWeight = max(0.0f, min(fWeight, 1.0f)); // 안전장치
-
-						// 맵에 데이터 추가 (자동으로 이름별로 분류됨) // .psa는 가중치가 안나온다?..
-						KEYFRAME_CURVE KeyFrame = {};
-						KeyFrame.fTrackPosition = static_cast<_float>(MorphKey.mTime);
-						KeyFrame.fValue = fWeight;
-
-						mapMorphCurves[strShapeKeyName].push_back(KeyFrame);
-					}
-				}
-			}
-
-			// 3. 정리된 데이터를 파일에 저장
-			_uint iTotalCurves = mapMorphCurves.size();
-			file.write(reinterpret_cast<const _char*>(&iTotalCurves), sizeof(_uint));
-
-			for (auto& Pair : mapMorphCurves)
-			{
-				string strCurveName = Pair.first;     // 이름
-				auto& vecKeys = Pair.second;          // 키프레임들
-
-				// 이름 저장
-				_uint iNameLen = strCurveName.length();
-				file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
-				file.write(strCurveName.data(), iNameLen);
-
-				// 키 개수 및 데이터 저장
-				_uint iNumKeys = vecKeys.size();
-				file.write(reinterpret_cast<const _char*>(&iNumKeys), sizeof(_uint));
-				file.write(reinterpret_cast<const _char*>(vecKeys.data()), sizeof(KEYFRAME_CURVE) * iNumKeys);
-			}
-		}
-		else
-		{
-			_uint iZero = 0;
-			file.write(reinterpret_cast<const _char*>(&iZero), sizeof(_uint));
-		}
-
-	}
-
-	file.close();
-
-	return S_OK;
-}
 
 HRESULT CModelLoader::Save_Dat_NonAnim(const _char* pFileName)
 {

@@ -7,45 +7,13 @@ CMorphChannel::CMorphChannel()
 {
 }
 
-_float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition)
-{
-	if (m_KeyFrames.empty())
-		return 0.f;
-
-	if (m_KeyFrames.size() == 1)
-		return m_KeyFrames[0].fValue;
-
-	if (fCurrentTrackPosition >= m_KeyFrames.back().fTrackPosition)
-		return m_KeyFrames.back().fValue;
-
-	// 첫 키프레임 전이면 첫 값
-	if (fCurrentTrackPosition <= m_KeyFrames[0].fTrackPosition)
-		return m_KeyFrames[0].fValue;
-
-	// 현재 구간 찾기.
-	auto it = std::lower_bound(m_KeyFrames.begin(), m_KeyFrames.end(), fCurrentTrackPosition,
-		[](const KEYFRAME_CURVE& a, _float time) { return a.fTrackPosition < time; });
-
-	if (it == m_KeyFrames.begin())
-		return m_KeyFrames[0].fValue;
-	if (it == m_KeyFrames.end())
-		return m_KeyFrames.back().fValue;
-
-	auto next = it;
-	auto prev = std::prev(it);
-
-	_float t0 = prev->fTrackPosition;
-	_float t1 = next->fTrackPosition;
-	_float v0 = prev->fValue;
-	_float v1 = next->fValue;
-
-	_float ratio = (fCurrentTrackPosition - t0) / (t1 - t0);
-	return v0 + (v1 - v0) * ratio;  // Linear 보간
-}
 
 // 이걸 바꿔서 Mesh에 업데이트 해 주어야한다.
 _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex)
 {
+	if (m_iNumKeyFrame == 2) // 키프레임이 2개라면 가중치 0.f 반환.
+		return 0.f;
+
 	if (0.f == fCurrentTrackPosition)
 		*pCurrentFrameIndex = 0;
 
@@ -55,7 +23,7 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCu
 	}
 	else
 	{
-		// 4. 인덱스 캐싱 로직
+		// 인덱스 캐싱 로직
 
 #ifdef _DEBUG
 		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
@@ -65,23 +33,13 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCu
 		while (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fCurrentTrackPosition)
 			++*pCurrentFrameIndex;
 
-		// 5. 보간(Interpolation) 계산
-		_uint iNextIndex = *pCurrentFrameIndex + 1;
+		// 보간 계산.
+		_float fLeftWeight = m_KeyFrames[*pCurrentFrameIndex].fValue; // 키프레임에 값이 잘못들어간거 같은데?
+		_float fRightWeight = m_KeyFrames[*pCurrentFrameIndex + 1].fValue;
+		_float fRatio = (fCurrentTrackPosition - m_KeyFrames[*pCurrentFrameIndex].fTrackPosition) / (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition - m_KeyFrames[*pCurrentFrameIndex].fTrackPosition);
+		_float fLerpWeight = fLeftWeight + (fRightWeight - fLeftWeight) * fRatio;
 
-		// [크래시 지점 방지] 위에서 *pCurrentFrameIndex 범위를 잡았으므로 안전하게 접근 가능
-		const KEYFRAME_CURVE& PrevKey = m_KeyFrames[*pCurrentFrameIndex];
-		const KEYFRAME_CURVE& NextKey = m_KeyFrames[iNextIndex];
-		_float t0 = PrevKey.fTrackPosition;
-		_float t1 = NextKey.fTrackPosition;
-		_float v0 = PrevKey.fValue;
-		_float v1 = NextKey.fValue;
-
-		if (t1 - t0 < 1e-5f)
-			return v0;
-
-		_float ratio = (fCurrentTrackPosition - t0) / (t1 - t0);
-
-		return v0 + (v1 - v0) * ratio;
+		return fLerpWeight;
 	}
 
 	return 0.f;

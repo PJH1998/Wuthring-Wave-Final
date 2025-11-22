@@ -897,6 +897,7 @@ void CMesh::Free()
 
 	for (auto& pShapeKey : m_ShapeKeys)
 		Safe_Release(pShapeKey);
+	m_ShapeKeys.clear();
 
 	/* GPU Buffer 내용 제거 */
 	for (auto& pBuffer : m_Buffers)
@@ -911,5 +912,6 @@ void CMesh::Free()
 		Safe_Release(pUAV);
 	m_UAVs.clear();
 
-	m_ShapeKeys.clear();
+	
+		
 }

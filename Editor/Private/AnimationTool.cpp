@@ -824,9 +824,9 @@ void CAnimationTool::LoadDat()
 			// Character를 설정했으면 Character로 Load Dat
 			if (isCharacter)
 			{
-				_float fSize = 0.01f; // Blender에서 크기가 100배 작음.
+				//_float fSize = 0.01f; // Blender에서 크기가 100배 작음.
 				//_float fSize = 0.0001f; // Blender에서 크기가 100배 작음.
-				PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
+				//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
 				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str());
 			}
 				

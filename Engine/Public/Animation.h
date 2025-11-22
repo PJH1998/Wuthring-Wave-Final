@@ -29,6 +29,7 @@ public:
 
 	void				Sort_Notify();
 	void				Sort_AnimNotify();
+	void				Reset_Status();
 
 public:
 	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
@@ -65,7 +66,7 @@ private:
 	_uint							m_iNumMorphCurves = { }; // 기본 0
 	vector<class CMorphChannel*>	m_MorphMeshChannels;
 
-	vector<_uint>					m_CurrentMorphCurveIndicies;
+	vector<_uint>					m_CurrentMorphCurveIndicies; // 채널들에 대한 Index 관리.
 
 	// 매핑 테이블 => 현재 MorphChannel[i]가 Model의 ShapeKeyWeights의 몇번째 인덱스인지 저장.
 	vector<_int> 					m_MorphKeyIndicies; 

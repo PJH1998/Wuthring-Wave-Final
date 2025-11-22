@@ -413,7 +413,8 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
        
         // 2. Ribbon Animation의 SRT 가져오기
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        ribbonSRT.translation.xyz *= 0.01f; // 임시로 0.01배 설정하기.
+        //ribbonSRT.translation.xyz *= 0.01f; // 임시로 0.01배 설정하기. => 싹다 1로.
+        // => Blender에서 PSA Import 할때 Translation Scale을 0.01배하면된다. => 뭔가 빠다리남.
         
         // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;

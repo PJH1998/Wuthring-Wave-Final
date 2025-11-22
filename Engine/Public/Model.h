@@ -116,6 +116,10 @@ public:
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
 										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
+	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTrackPosition);
@@ -161,7 +165,7 @@ private:
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
 
-	_float								m_fPreScale = { 0.01f }; // RootMotionRate에 곱해줄 값.
+	_float								m_fPreScale = {}; // RootMotionRate에 곱해줄 값.
 
 	BoundingBox*						m_pBoundingBox = { nullptr };
 
@@ -178,7 +182,6 @@ private:
 	vector<_float>			   m_ShapeKeyWeights;
 
 	map<_string, _uint>		   m_ShapeKeyIndices;
-	map<_string, vector<SHAPEKEYINFO>> m_ShapeKeys; // Shape key 정보
 	
 	
 	// ImGui에서 이 리스트만 쭉 뿌리면 블렌더와 똑같은 목록이 나옵니다.

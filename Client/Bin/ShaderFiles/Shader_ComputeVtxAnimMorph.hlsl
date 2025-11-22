@@ -45,7 +45,6 @@ cbuffer MorphInfoCB : register(b0)
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
 {
-    
     // 1. 현재 스레드가 처리할 정점 인덱스.
     uint iVertexID = dispatchThreadID.x;
     
