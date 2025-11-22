@@ -204,9 +204,11 @@ void CRenderer::Render()
 
 	Render_Light();
 	Render_SSS();
+
 	Render_Combined();
 	
 	Render_Outline();
+
 	
 	Render_NonLight();
 	Render_LUT();
@@ -1367,7 +1369,11 @@ void CRenderer::Free()
 #endif
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
+	{
+		m_pDeferredContext[i]->ClearState();
+		m_pDeferredContext[i]->Flush();
 		Safe_Release(m_pDeferredContext[i]);
+	}
 	Safe_Delete_Array(m_pDeferredContext);
 
 	for (auto& Pair : m_Effects)

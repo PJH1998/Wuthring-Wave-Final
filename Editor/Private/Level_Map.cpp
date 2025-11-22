@@ -834,13 +834,15 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/Box/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
 
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;

@@ -105,10 +105,19 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	//기본 초기화
 	m_vLifeTime.x = 0.f;
+	if (m_IsPivot)
+		m_pVIBufferCom->Reset_CS_Option();
+
+	m_pVIBufferCom->Reset_UAV(m_pComputeShader);
+	m_pTransformCom->Set_WorldMatrix(XMMatrixIdentity());
 
 	if (m_isActivate && !m_IsRoot)
 	{
 		//뼈에 안붙을 얘면 프리팹이 계산해서 던져준 월드매트릭스 그대로 사용해도 됨.
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+		m_OffsetMatrix = pDesc->OffsetMatrix;
+
 		Default_Transform(WorldMatrix);
 	}
 	else if (m_isActivate && m_IsRoot)
@@ -118,13 +127,11 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
 		m_OffsetMatrix = pDesc->OffsetMatrix;
 	}
-
-     m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 }
 
 void CParticle::Default_Transform(_fmatrix WorldMatrix)
 {
-	if (!m_IsRoot)
+	/*if (!m_IsRoot)
 	{
 		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
 
@@ -140,6 +147,41 @@ void CParticle::Default_Transform(_fmatrix WorldMatrix)
 		PARTICLE_DefaultCB Desc = {};
 		XMStoreFloat3(&Desc.vPivot, vLook);
 		m_pVIBufferCom->Bind_CS_Option(&Desc);
+	}*/
+	if (m_IsPivot)
+	{
+		_matrix ObjectMatrix = XMLoadFloat4x4(m_pObjectMatrixPtr);
+
+		_vector vRight = XMVector3Normalize(ObjectMatrix.r[0]);
+		_vector vUp = XMVector3Normalize(ObjectMatrix.r[1]);
+		_vector vLook = XMVector3Normalize(ObjectMatrix.r[2]);
+
+
+		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+		_vector vScale = {};
+		_vector vTrans = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, m_OffsetMatrix);
+
+		_matrix OffsetSpawnMatrix = XMMatrixScalingFromVector(vScale) * XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+		m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * OffsetSpawnMatrix);
+
+		m_pVIBufferCom->Bind_CS_Pivot(vRight, vUp, vLook);
+	}
+	else
+	{
+		_vector vScale = {};
+		_vector vTrans = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, m_OffsetMatrix);
+
+		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+		_matrix OffsetSpawnMatrix = XMMatrixScalingFromVector(vScale) * XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+		m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * OffsetSpawnMatrix);
 	}
 
 	//계속 붙으면서 Pivot 갱신도 필요하다면..?허허
