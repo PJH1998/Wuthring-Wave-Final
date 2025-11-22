@@ -40,7 +40,6 @@ void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
     _splitpath_s(pFilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
     _string PasingDir = FileDir;
-	m_pGameInstance->Load_Resource("../Bin/Resource/Map/");
     Read_Map_Prototype(PasingDir, eLevel);
 	m_LoadingMap[eLevel].push_back(pFilePath);
 }
@@ -214,8 +213,6 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 						//if (entry2.path().string().find("Instance") == std::string::npos)
 					{
 						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
-						if (entry2.path().parent_path().stem().string().find("24BS") != string::npos)
-							int a = 0;
 							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
 								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
 								CRASH("Prototype Create Failed");
@@ -354,24 +351,6 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
 				, PROTOTYPE::GAMEOBJECT, &Desc);
-
-			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
-			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
-			//	vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower, TriggerIndex = Desc.iTriggerIndex]() mutable {
-			//	CMapObject_Destruction::MAP_LOAD pDesc{};
-			//	strcpy_s(pDesc.ModelName, ModelName.c_str());
-			//	pDesc.iShaderPassIndex = ShaderPass;
-			//	pDesc.WorldMatrix = &Matrix;
-			//	pDesc.iLevel = ENUM_CLASS(eLevel);
-			//	pDesc.m_vImpulsePos = vImpulsePos;
-			//	pDesc.m_vImpulsePower = vImpulsePower;
-			//	pDesc.vBoundingPos = BoundingPos;
-			//	pDesc.vBoundingExtends = BoundingExtends;
-			//	pDesc.iTriggerIndex = TriggerIndex;
-			//	m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"), pDesc.iLevel, TEXT("Layer_Destruction"), &pDesc);
-			//	/*m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-			//		, PROTOTYPE::GAMEOBJECT, &pDesc);*/
-			//	});
 		}
 	}
 	else if (pFilePath.find("Meteo") != std::string::npos) 
@@ -439,31 +418,6 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
 			_wstring ModelName = StringToWString(Desc.ModelName);
-
-			//Desc.iLevel = ENUM_CLASS(eLevel);
-			//
-			//switch (Desc.eObjectType)
-			//{
-			//case OBJECTTYPE::SONORA:
-			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-			//		, Desc.iLevel, TEXT("Layer_Sonoro"), &Desc);
-			//	break;
-			//
-			//case OBJECTTYPE::NONSONORA:
-			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-			//		, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
-			//	break;
-			//
-			//case OBJECTTYPE::NONSONORA_FLOOR:
-			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-			//		, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
-			//	break;
-			//
-			//default:
-			//	m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject")
-			//		, PROTOTYPE::GAMEOBJECT, &Desc);
-			//	break;
-			//}
 
 			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
 				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {

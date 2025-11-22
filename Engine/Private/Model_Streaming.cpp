@@ -47,7 +47,7 @@ HRESULT CModel_Streaming::Initialize_Clone(void* pArg)
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
@@ -55,7 +55,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
@@ -75,7 +75,7 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 
 HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return E_FAIL;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
@@ -83,7 +83,7 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 
 HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
 {
-	if (iMeshIndex >= m_Meshes[iLODIndex]->Get_MeshDesc()->size())
+	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
 	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
@@ -146,16 +146,12 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 	_bool IsNameSave = { true };
 	_string LastModelPath;
 	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
-		if (m_iMaxLOD >= 4)
-			CRASH("??");
 
 		if (!entry.is_regular_file())
 			continue;
 
 		if (entry.path().extension() != ".dat")
 			continue;
-
-		//_string DatFile = entry.path().string();
 
 		ifstream File(entry.path(), ios::binary);
 		if (!File.is_open())

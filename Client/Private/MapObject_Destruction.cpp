@@ -280,10 +280,5 @@ void CMapObject_Destruction::Free()
 	Safe_Release(m_pBoneModel);
 	Safe_Release(m_pGameSystem);
 	Safe_Delete(m_pBoundingBox);
-
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-	m_pModelComArray.clear();
-
-
+	Safe_Release(m_pModelCom);
 }

@@ -103,7 +103,13 @@ CMaterial* CMaterial::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 void CMaterial::Free()
 {
 	__super::Free();
-
+	for (auto& Pair : m_SRVs)
+	{
+		for (auto& pSRV : Pair)
+			Safe_Release(pSRV);
+		Pair.clear();
+	}
+	m_SRVs->clear();
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);

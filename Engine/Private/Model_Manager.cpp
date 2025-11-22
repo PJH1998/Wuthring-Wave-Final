@@ -383,8 +383,8 @@ void CModel_Manager::LoadLastLOD()
 	for (auto& pModel : m_ModelPrototypes)
 	{
 		pModel.second->RequestModel();
-		for (_uint i = 0; i < 4; ++i)
-			pModel.second->Get_SharedBuffers(i, m_pBufferPool[i]->Get_VertexBuffer(), m_pBufferPool[i]->Get_IndexBuffer());
+		//for (_uint i = 0; i < 4; ++i)
+		//	pModel.second->Get_SharedBuffers(i, m_pBufferPool[i]->Get_VertexBuffer(), m_pBufferPool[i]->Get_IndexBuffer());
 	}
 
 	m_pGameInstance->Wait_Thread_End();
@@ -493,6 +493,8 @@ void CModel_Manager::Free()
 	__super::Free();
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pGameInstance);
+
 	for (_uint i = 0; i < 4; ++i)
 		Safe_Release(m_pBufferPool[i]);
 	Safe_Release(m_pStagingBuffer);
@@ -501,10 +503,13 @@ void CModel_Manager::Free()
 		Safe_Release(pPair.second);
 	m_ModelPrototypes.clear();
 
-	Safe_Release(m_pGameInstance);
 
 	for (auto& Pair: m_RenderObjects)
 		for (auto& pObject : Pair.second)
 			Safe_Release(pObject);
 	m_RenderObjects.clear();
+
+	m_DeleteList.clear();
+	m_StagingData.clear();
+	m_DataPool.clear();
 }

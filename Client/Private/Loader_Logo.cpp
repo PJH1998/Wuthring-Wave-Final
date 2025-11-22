@@ -49,6 +49,8 @@ HRESULT CLoader_Logo::Load_Texture()
 
 HRESULT CLoader_Logo::Load_Model()
 {
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Logo/");
+
 	m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo/", m_eCurLevel);
 
 	cout << "Model" << endl;

@@ -54,7 +54,6 @@ private:
 private:
 	CShader* m_pShaderCom = { nullptr };
 
-	vector<CModel*> m_pModelComArray;
 	//CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
 	class CModel_Streaming* m_pModelCom;
