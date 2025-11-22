@@ -8,8 +8,8 @@ CScreenSpaceReflection::CScreenSpaceReflection(ID3D11Device* pDevice, ID3D11Devi
 
 HRESULT CScreenSpaceReflection::Initialize()
 {
-	if(FAILED(__super::Initialize()))
-		return E_FAIL:
+	if (FAILED(__super::Initialize()))
+		return E_FAIL;
 
 	return S_OK;
 }

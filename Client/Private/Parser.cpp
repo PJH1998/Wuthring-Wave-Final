@@ -4,8 +4,8 @@
 
 #include "Trigger_Box.h"
 #include "MapObject_Destruction.h"
-#include"MapObject_Instance.h"
-#include"MapObject_Meteo.h"
+#include "MapObject_Instance.h"
+#include "MapObject_Meteo.h"
 #include "Spawner.h"
 
 #include "Effect_Prefab.h"
