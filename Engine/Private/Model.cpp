@@ -8,6 +8,7 @@
 #include "Animation.h"
 #include "Channel.h"
 #include "ComputeShader.h"
+#include "Model_Streaming.h"
 
 CModel::CModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CComponent { pDevice, pContext }
@@ -1186,6 +1187,8 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 
 	return S_OK;
 }
+
+
 
 HRESULT CModel::Ready_Material(const _char* pFilePath)
 {

@@ -26,7 +26,7 @@ public:
 
 private:
 	vector<ID3D11InputLayout*>	m_InputLayouts;
-
+	mutex m_Mutex;
 public:
 	static		CDeferredShader*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* strFilePath, const D3D11_INPUT_ELEMENT_DESC* Elements, _uint iNumElements, const _wstring& strEffectTag);
 	virtual		CComponent*	Clone(void* pArg);

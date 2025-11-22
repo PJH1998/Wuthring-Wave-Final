@@ -40,7 +40,7 @@ void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
     _splitpath_s(pFilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
     _string PasingDir = FileDir;
-
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/");
     Read_Map_Prototype(PasingDir, eLevel);
 	m_LoadingMap[eLevel].push_back(pFilePath);
 }
@@ -174,6 +174,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				_string ModelName = Name;
 				ModelName.pop_back();
 
+
 				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
 					if (entry2.path().string().find("MapData") != std::string::npos)
 						continue;
@@ -212,11 +213,19 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 					else
 						//if (entry2.path().string().find("Instance") == std::string::npos)
 					{
-						m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
+						if (entry2.path().parent_path().stem().string().find("24BS") != string::npos)
+							int a = 0;
+							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
+								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
+								CRASH("Prototype Create Failed");
+							//});
+
+	/*					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
 							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
 								CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
 								CRASH("Prototype Create Failed");
-							});
+							});*/
 						break;
 					}
 					//프로토타입 생성
@@ -229,6 +238,8 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 
 void CParser::Clone_MapObjects(LEVEL eLevel)
 {
+	m_pGameInstance->LoadLastLOD();
+
 	if (m_LoadingMap[eLevel].empty())
 		MSG_BOX("Map Clone Failed");
 
@@ -257,6 +268,8 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 			Read_Map_Dat(eLevel, strFilePath);
 		}
 	}
+	m_pGameInstance->Destroy_RigidData();
+
 }
 
 #pragma region SPAWNER
@@ -319,6 +332,12 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 			File.read(Desc.ModelName, NameLength);
 			_string Name = Desc.ModelName;
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			strcpy_s(Desc.ModelName, Name.c_str());
 			OBJECTTYPE Type;
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
@@ -333,8 +352,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
-				Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
+			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+				, PROTOTYPE::GAMEOBJECT, &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,

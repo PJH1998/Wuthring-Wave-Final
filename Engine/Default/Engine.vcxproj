@@ -18,12 +18,10 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  
   <ItemGroup>
     <ClInclude Include="..\Public\Animation.h" />
-    <ClInclude Include="..\Public\Animation_Inst.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="..\Public\Animation_Inst.h" />
     <ClInclude Include="..\Public\AnimMachine.h" />
     <ClInclude Include="..\Public\AnimNotify.h" />
     <ClInclude Include="..\Public\AnimState.h" />
@@ -35,6 +33,7 @@
     <ClInclude Include="..\public\Bloom.h" />
     <ClInclude Include="..\public\Blur.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\BufferPool.h" />
     <ClInclude Include="..\Public\CollideComponent.h" />
     <ClInclude Include="..\public\CSM.h" />
     <ClInclude Include="..\Public\BT_Action.h" />
@@ -75,6 +74,7 @@
     <ClInclude Include="..\Public\EventBus.h" />
     <ClInclude Include="..\Public\Font_Manager.h" />
     <ClInclude Include="..\Public\FreeCamera.h" />
+    <ClInclude Include="..\Public\FreeList.h" />
     <ClInclude Include="..\Public\Frustrum.h" />
     <ClInclude Include="..\Public\GameInstance.h" />
     <ClInclude Include="..\Public\GameObject.h" />
@@ -90,17 +90,14 @@
     <ClInclude Include="..\Public\Light_Manager.h" />
     <ClInclude Include="..\Public\Material.h" />
     <ClInclude Include="..\Public\Mesh.h" />
-    <ClInclude Include="..\Public\MeshAnim_Instance.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="..\Public\MeshAnim_Instance.h" />
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
-    <ClInclude Include="..\Public\ModelAnim_Instance.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Streaming.h" />
+    <ClInclude Include="..\Public\ModelAnim_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\Public\Model_Manager.h" />
+    <ClInclude Include="..\Public\Model_Streaming.h" />
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
@@ -157,12 +154,10 @@
     <ClInclude Include="..\Public\VIBuffer_Spectrum.h" />
     <ClInclude Include="..\public\VolumetricFog.h" />
   </ItemGroup>
+
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp" />
-    <ClCompile Include="..\Private\Animation_Inst.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\Private\Animation_Inst.cpp" />
     <ClCompile Include="..\Private\AnimMachine.cpp" />
     <ClCompile Include="..\Private\AnimState.cpp" />
     <ClCompile Include="..\private\AnimTransition.cpp" />
@@ -173,6 +168,7 @@
     <ClCompile Include="..\private\Bloom.cpp" />
     <ClCompile Include="..\private\Blur.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\Private\BufferPool.cpp" />
     <ClCompile Include="..\Private\CollideComponent.cpp" />
     <ClCompile Include="..\private\CSM.cpp" />
     <ClCompile Include="..\Private\BT_Action.cpp" />
@@ -210,6 +206,7 @@
     <ClCompile Include="..\Private\EventBus.cpp" />
     <ClCompile Include="..\Private\Font_Manager.cpp" />
     <ClCompile Include="..\Private\FreeCamera.cpp" />
+    <ClCompile Include="..\Private\FreeList.cpp" />
     <ClCompile Include="..\Private\Frustrum.cpp" />
     <ClCompile Include="..\Private\GameInstance.cpp" />
     <ClCompile Include="..\Private\GameObject.cpp" />
@@ -225,17 +222,14 @@
     <ClCompile Include="..\Private\Light_Manager.cpp" />
     <ClCompile Include="..\Private\Material.cpp" />
     <ClCompile Include="..\Private\Mesh.cpp" />
-    <ClCompile Include="..\Private\MeshAnim_Instance.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\Private\MeshAnim_Instance.cpp" />
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
-    <ClCompile Include="..\Private\ModelAnim_Instance.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
+    <ClCompile Include="..\Private\ModelAnim_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\Private\Model_Manager.cpp" />
+    <ClCompile Include="..\Private\Model_Streaming.cpp" />
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
@@ -292,14 +286,15 @@
     <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp" />
     <ClCompile Include="..\private\VolumetricFog.cpp" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="..\..\Editor\Default\Editor.vcxproj.filters" />
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
   </ItemGroup>
+  
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_DOF.hlsl" />
@@ -319,6 +314,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Deferred.hlsl" />
   </ItemGroup>
+
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

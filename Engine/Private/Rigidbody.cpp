@@ -168,7 +168,7 @@ const JPH::Array<Vec3> CRigidbody::ConvertToArrayVec3(CModel* pModel)
 	return Vertices;
 }
 
-const JPH::Array<Float3> CRigidbody::ConvertToArrayFloat3(CModel* pModel, const _float3& vScale, _uint iIndex)
+const JPH::Array<Float3> CRigidbody::ConvertToArrayFloat3(CModel_Streaming* pModel, const _float3& vScale, _uint iIndex)
 {
 	JPH::Array<Float3> Vertices;
 
@@ -184,7 +184,7 @@ const JPH::Array<Float3> CRigidbody::ConvertToArrayFloat3(CModel* pModel, const 
 	return Vertices;
 }
 
-const JPH::Array<IndexedTriangle> CRigidbody::ConvertToArrayTri(CModel* pModel, _uint iIndex)
+const JPH::Array<IndexedTriangle> CRigidbody::ConvertToArrayTri(CModel_Streaming* pModel, _uint iIndex)
 {
 	JPH::Array<IndexedTriangle> Indices;
 
@@ -200,8 +200,10 @@ void CRigidbody::Make_MeshShape(void* pArg)
 {
 	MESHBODY_DESC* pDesc = static_cast<MESHBODY_DESC*>(pArg);
 
-	m_iNumMesh = pDesc->pModel->Get_NumMesh();
-
+	
+	//m_iNumMesh = pDesc->pModel->Get_NumMesh();
+	m_iNumMesh = pDesc->pModel->Get_NumMesh(0);
+	
 	m_ppMeshBodies = new Body*[m_iNumMesh];
 	m_pMeshBodyIDs = new BodyID[m_iNumMesh];
 

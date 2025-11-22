@@ -16,18 +16,21 @@ void CResource_Manager::Load_Resource(const _char* pFolderPath)
 	for (const auto& Entry : filesystem::recursive_directory_iterator(pFolderPath))
 	{
 		// Folder
-		if (true == Entry.is_directory())
-		{
-			Load_Resource(Entry.path().string().c_str());
-		}
-		// File
-		else if(true == Entry.is_regular_file())
+		//if (true == Entry.is_directory())
+		//{
+		//	Load_Resource(Entry.path().string().c_str());
+		//}
+		//// File
+		//else 
+		//if (Entry.path().extension() != ".dds" || Entry.path().extension() != ".png")
+		//	continue;
+		if(true == Entry.is_regular_file())
 		{
 			_string strFilePath = Entry.path().string();
 			_string strResourceTag = Entry.path().stem().string();
 			// 이미 존재할 경우 CRASH
 			if (nullptr != Find_Resource(strResourceTag))
-				CRASH(strResourceTag);
+				continue;
 
 			HRESULT hr;
 			ID3D11ShaderResourceView* pSRV = { nullptr };
