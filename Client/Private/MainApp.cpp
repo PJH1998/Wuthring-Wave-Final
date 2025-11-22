@@ -8,6 +8,7 @@
 
 #include "Level_Logo.h"
 #include "Level_GamePlay.h"
+#include "Level_Heaven.h"
 #include "Level_Test.h"
 #include "Level_Test_UI.h"
 
@@ -99,6 +100,9 @@ void CMainApp::Post_Update()
 				break;
 			case LEVEL::GAMEPLAY:
 				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
+				break;
+			case LEVEL::HEAVEN:
+				pLevel = CLevel_Heaven::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
@@ -224,6 +228,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	// Shader_VtxMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxMesh");
+
+	// Shader_VtxMesh_Instance
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements))))
 		CRASH("Shader_VtxMesh");
 
 	// DeferredShader_Map

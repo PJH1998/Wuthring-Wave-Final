@@ -108,6 +108,7 @@ HRESULT CDecal::Add_DecalData(const DECAL_DATA& Decal)
 
 	Data.vLifeTime = _float2(0.f, Decal.fLifeTime);
 	Data.vColor = Decal.vColor;
+	Data.fEmissiveIntensity = Decal.fEmissiveIntensity == 0.f ? 1.f : Decal.fEmissiveIntensity;
 
 	DECAL_INSTANCE Pair = make_pair(Decal.eType, Data);
 

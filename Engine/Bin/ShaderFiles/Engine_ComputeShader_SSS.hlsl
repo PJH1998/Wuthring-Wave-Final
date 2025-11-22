@@ -15,6 +15,10 @@ Texture2D<float4> g_DepthTexture : register(t3);
 
 RWTexture2D<float4> OutputTexture : register(u0);
 
+const static int2 g_vSize = int2(1920, 1080);
+
+const static float g_fBlurWieght[5] = { 0.15f, 0.2f, 0.3f, 0.2f, 0.15f };
+
 groupshared int2 vInSize;
 
 groupshared float4 vSharedDiffuseX[THREAD_Y][THREAD_X + (2 * BLUR_RADIUS)];
@@ -47,8 +51,8 @@ void SSSBlur_X(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
         if (LeftID.x < 0)
             LeftID.x = 0;
 
-        if (RightID.x >= (int) vInSize.x)
-            RightID.x = (int) vInSize.x - 1;
+        if (RightID.x >= (int) g_vSize.x)
+            RightID.x = (int) g_vSize.x - 1;
             
         vSharedDiffuseX[GTID.y][GTID.x] = g_DiffuseTexture.Load(int3(LeftID));
         vSharedNormalX[GTID.y][GTID.x] = g_NormalTexture.Load(int3(LeftID));
@@ -82,20 +86,23 @@ void SSSBlur_X(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
     float fGaussianSigma = (float) iRadius / 3.f;
     
     float4 vOriginNormal = vSharedNormalX[GTID.y][GTID.x + iRadius];
+    vOriginNormal = normalize(vOriginNormal * 2.f - 1.f);
     
     for (int i = -iRadius; i <= iRadius; ++i)
     {
         int iIndexX = GTID.x + iRadius + i;
         
-        float4 vSampleColor = vSharedDiffuseX[GTID.y][iIndexX];
+        float4 vSampleColor = vSharedDiffuseX[GTID.y][iIndexX]; 
         float fSampleDepth = fSharedDepthX[GTID.y][iIndexX];
         float4 vSampleNormal = vSharedNormalX[GTID.y][iIndexX];
         float fSampleStrength = fSharedStrengthX[GTID.y][iIndexX];
         
-        float fNormalWeight = pow(saturate(dot(vOriginNormal.xyz, vSampleNormal.xyz)), 5.f);
+        vSampleNormal = normalize(vSampleNormal * 2.f - 1.f);
+        
+        float fNormalWeight = (saturate(dot(vOriginNormal.xyz, vSampleNormal.xyz)));
         float fDepthWeight = 1.f;
         float fStrengthWeight = min(fCenterStrength, fSampleStrength);
-        float fGaussianWeight = exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
+        float fGaussianWeight = g_fBlurWieght[i + iRadius]; //exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
 
         float fWeight = fNormalWeight * fDepthWeight * fStrengthWeight * fGaussianWeight;
         
@@ -140,8 +147,8 @@ void SSSBlur_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
         if (LeftID.y < 0)
             LeftID.y = 0;
 
-        if (RightID.y >= (int) vInSize.y)
-            RightID.y = (int) vInSize.y - 1;
+        if (RightID.y >= (int) g_vSize.y)
+            RightID.y = (int) g_vSize.y - 1;
             
         vSharedDiffuseY[GTID.y][GTID.x] = g_DiffuseTexture.Load(int3(LeftID));
         vSharedNormalY[GTID.y][GTID.x] = g_NormalTexture.Load(int3(LeftID));
@@ -175,7 +182,7 @@ void SSSBlur_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
     float fGaussianSigma = (float) iRadius / 3.f;
     
     float4 vOriginNormal = vSharedNormalY[GTID.y + iRadius][GTID.x];
-    vOriginNormal = vOriginNormal * 2.f - 1.f;
+    vOriginNormal = normalize(vOriginNormal * 2.f - 1.f);
     
     for (int i = -iRadius; i <= iRadius; ++i)
     {
@@ -183,15 +190,16 @@ void SSSBlur_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
         
         float4 vSampleColor = vSharedDiffuseY[iIndexY][GTID.x];
         float4 vSampleNormal = vSharedNormalY[iIndexY][GTID.x];
-        vSampleNormal = vSampleNormal * 2.f - 1.f;
-    
+
         float fSampleDepth = fSharedDepthY[iIndexY][GTID.x];
         float fSampleStrength = fSharedStrengthY[iIndexY][GTID.x];
         
-        float fNormalWeight = pow(saturate(dot(vOriginNormal.xyz, vSampleNormal.xyz)), 5.f);
+        vSampleNormal = normalize(vSampleNormal * 2.f - 1.f);
+        
+        float fNormalWeight = (saturate(dot(vOriginNormal.xyz, vSampleNormal.xyz)));
         float fDepthWeight = 1.f;
         float fStrengthWeight = min(fCenterStrength, fSampleStrength);
-        float fGaussianWeight = exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
+        float fGaussianWeight = g_fBlurWieght[i + iRadius]; //exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
 
         float fWeight = fNormalWeight * fDepthWeight * fStrengthWeight * fGaussianWeight;
         

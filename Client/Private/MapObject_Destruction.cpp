@@ -33,10 +33,12 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 
 	m_iNumLOD = m_pModelComArray.size() - 1;
 
-	//m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
-	//if (!m_pBoundingBox)
-	//	CRASH("Failed");
-	//m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
+	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
+	if (!m_pBoundingBox)
+		CRASH("Failed");
+
+	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
+
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_vImpulsePos = pDesc->m_vImpulsePos;
 	m_vImpulsePower = pDesc->m_vImpulsePower;
@@ -54,8 +56,6 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 
 void CMapObject_Destruction::Priority_Update(_float fTimeDelta)
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
-		m_IsDestroy = false;
 }
 
 void CMapObject_Destruction::Update(_float fTimeDelta)
@@ -64,63 +64,69 @@ void CMapObject_Destruction::Update(_float fTimeDelta)
 
 void CMapObject_Destruction::Late_Update(_float fTimeDelta)
 {
-	if (!m_IsDestroy)
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+
 }
 
-void CMapObject_Destruction::Render()
+void CMapObject_Destruction::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
 	if (m_IsDestroy)
 		return;
 
-	_uint DrawModel = m_iLODIndex;
-	//_uint DrawModel = 0;
+	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
 
-	if (DrawModel > m_iNumLOD)
-		DrawModel = m_iNumLOD;
-
-	Bind_Resources();
-
-	for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
+	if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
 	{
+		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
+			m_pModelCom->Request_LOD(m_iLODIndex);
 
-		_bool HasNormal = { true };
-		_bool HasMask = { true };
+		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
+		return;
+	}
+	_bool HasNormal = { true };
+	_bool HasMask = { true };
+	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
 
-		if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
+
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+
+	//m_pModelCom->Bind_Buffer(pDeferredContext,m_iLODIndex);
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
+			return;
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
+		{
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
 			HasMask = false;
-
+		}
 
 		if (HasMask)
 		{
-			m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
 
-			if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
 
-			if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
 				HasNormal = false;
 		}
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
 
-		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
 
-		m_pShaderCom->Begin(m_iShaderPassIndex);
-
-		m_pModelComArray[DrawModel]->Render(i);
-
-		// TODO
-		// Clear 함수 변경 필요
-		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+		m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
 	}
 }
-
 
 void CMapObject_Destruction::Render_Shadow()
 {
@@ -135,31 +141,16 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 	
 	MultiByteToWideChar(CP_ACP, 0, pDesc->ModelName, -1, Name, strlen(pDesc->ModelName));
 	lstrcat(Model, Name);
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
-	m_pModelComArray.resize(V);
+	_wstring WModelName = Model;
 
-	for (_uint i = 0; i < V; ++i)
-	{
-		_wstring ModelCom = Model;
-		ModelCom.pop_back();
-		ModelCom += to_wstring(i);
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), WModelName,
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("FAILED");
 
-		_char ModelName[MAX_PATH] = {};
-		sprintf_s(ModelName, "Com_Model%d", i);
-
-		if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-			CRASH("FAILED");
-	}
 
 	_wstring BoneName = Name;
-	BoneName.pop_back();
-	BoneName.pop_back();
-	BoneName.pop_back();
-	BoneName.pop_back();
-	BoneName += TEXT("Bone");
+	BoneName += TEXT("_Bone");
 
 	strcpy_s(m_BoneModelName, WStringToString(BoneName).c_str());
 
@@ -169,15 +160,12 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 
 	m_pBoneModel->Update_BoneMatrix_Map();
 
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+	// DeferredShader
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-		return E_FAIL;
+		CRASH("FAILED");
 
 	_string ModelName = pDesc->ModelName;
-	ModelName.pop_back();
-	ModelName.pop_back();
-	ModelName.pop_back();
-	ModelName.pop_back();
 
 	for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
 	{
@@ -191,8 +179,9 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 		ss << std::setw(3) << std::setfill('0') << i - 2;
 
 		// 3. 스트림의 문자열을 Name에 추가
+		Name += "_";
 		Name += ss.str(); // ss.str()이 "000", "001", ..., "010", ..., "100" 등을 반환
-		Name += "_LOD0";
+		//Name += "_LOD0";
 		CMapObject_Destruction_Debris::MAP_LOAD Desc;
 		Desc.iLevel = pDesc->iLevel;
 		Desc.iShaderPassIndex = 0;
@@ -255,9 +244,6 @@ void CMapObject_Destruction::Spawn_Particles()
 
 void CMapObject_Destruction::Bind_Resources()
 {
-	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
-	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
-	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 }
 
 CMapObject_Destruction* CMapObject_Destruction::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

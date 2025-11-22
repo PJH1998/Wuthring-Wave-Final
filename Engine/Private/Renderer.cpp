@@ -32,6 +32,8 @@ HRESULT CRenderer::Initialize(_uint iNumThread)
 	m_fWinSizeX = ( ViewPort.Width );
 	m_fWinSizeY = ( ViewPort.Height );
 
+	m_fExposure = 0.6f;
+
 	if (FAILED(Ready_RT()))
 		return E_FAIL;
 	if (FAILED(Ready_MRT()))
@@ -76,6 +78,43 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 	return S_OK;
 }
 
+//HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
+//{
+//	if (8 == m_iCullStack.load(memory_order_acquire))
+//	{
+//		cout << "Cut!" << endl;
+//		return S_OK;
+//	}
+//
+//	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
+//	{
+//		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+//		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
+//	}
+//
+//	return S_OK;
+//}
+//
+//HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+//{
+//	if (8 == m_iCullStack.load(memory_order_acquire))
+//		return S_OK;
+//
+//	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
+//	{
+//		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+//		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
+//		m_iCullStack.fetch_add(1, memory_order_release);
+//	}
+//
+//	if (8 <= m_iCullStack.load(memory_order_acquire))
+//	{
+//		m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
+//		m_isCompleteFrustumCull.exchange(true, memory_order_release);
+//	}
+//	
+//	return S_OK;
+//}
 HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
 	if (8 == m_iCullStack.load(memory_order_acquire))
@@ -87,13 +126,24 @@ HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
+		m_StaticObjects[iWriteIndex][pRenderObject->Get_LOD()].push_back(pRenderObject);
 	}
 
 	return S_OK;
 }
 
-HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex)
+{
+	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
+	{
+		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		m_StaticObjects[iWriteIndex][iNumLODIndex].push_back(pRenderObject);
+	}
+
+	return S_OK;
+}
+
+HRESULT CRenderer::Add_Render_StaticObject(vector<class CStaticObject*>* Container)
 {
 	if (8 == m_iCullStack.load(memory_order_acquire))
 		return S_OK;
@@ -101,19 +151,23 @@ HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& C
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
+		for (_uint i = 0; i < 4; ++i)
+			m_StaticObjects[iWriteIndex][i].insert(m_StaticObjects[iWriteIndex][i].end(), Container[i].begin(), Container[i].end());
 		m_iCullStack.fetch_add(1, memory_order_release);
 	}
 
 	if (8 <= m_iCullStack.load(memory_order_acquire))
 	{
-		m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
+		//m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
 		m_isCompleteFrustumCull.exchange(true, memory_order_release);
 	}
-	
+
 	return S_OK;
 }
-
+HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex)
+{
+	return m_pRenderer->Add_Render_StaticObject(pRenderObject, iNumLODIndex);
+}
 HRESULT CRenderer::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	{
@@ -129,20 +183,32 @@ void CRenderer::Render()
 	//m_pGameInstance->Wait_Thread_End();
 
 	m_iCurTime = (++m_iCurTime) % m_iInterval;
-
+	
 	Render_Priority();
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
+	Render_NonStatic();
+	//if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+	//	CRASH("Render Fail");
+	//m_pGameInstance->RenderBufferPool(0);
+	//m_pGameInstance->RenderBufferPool(1);
+	//m_pGameInstance->RenderBufferPool(2);
+	//m_pGameInstance->RenderBufferPool(3);
+	////모델 내부에서 LOD단계가 없을 때 다시 바인딩해야하기 때문에 Real_Late_Render같은 거로 내보낸 뒤 해당 LOD단계 렌더에서 다시 렌더시킬것.
+	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
+	//m_pGameInstance->End_MRT();
 	Render_Decal();
 	Render_SSAO();			
 	Render_Dynamic();
 
 	Render_Light();
 	Render_SSS();
+
 	Render_Combined();
 	
 	Render_Outline();
+
 	
 	Render_NonLight();
 	Render_LUT();
@@ -152,7 +218,7 @@ void CRenderer::Render()
 	Render_Bloom();		
 	Render_BloomCombined();
 	Render_DistortionObject();
-	Render_Blend();
+	Render_Blend(); 
 	Render_Fog();
 	Render_Distortion();
 	Render_ScreenEffect();
@@ -266,11 +332,232 @@ void CRenderer::Render_ShadowMap()
 	m_pGameInstance->End_ShadowMap();
 }
 
+void CRenderer::Render_LOD(_uint iLODIndex)
+{
+	/*size_t iNumObjects = max(1, m_StaticObjects[iReadIndex][iLODIndex].size() / m_iNumThread);
+		for (_uint i = 0; i < m_iNumThread; ++i)
+		{
+			_uint iStartIndex = i * iNumObjects;
+			_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex][iLODIndex].size());
+			if (i == m_iNumThread - 1)
+				//iEndIndex = m_pGameInstance->Render_ObjectsNum(iLODIndex);
+				iEndIndex = m_StaticObjects[iReadIndex][iLODIndex].size();
+
+			m_pGameInstance->Add_Render_Work([this, iLODIndex, iStartIndex, iEndIndex, iReadIndex, i]() {
+				//쓰레드 개수로 분할해서 해야한다ㅇㅇ
+				if (iStartIndex < iEndIndex)
+				{
+					m_pDeferredContext[i]->ClearState();
+					Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
+					m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
+					m_pGameInstance->Bind_SharedBuffer(iLODIndex, m_pDeferredContext[i]);
+					for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
+					{
+						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Set_LOD(iLODIndex);
+						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Render(m_pDeferredContext[i], i);
+						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Set_RenderTime(iLODIndex, m_pGameInstance->Get_PlayTime());
+					}
+
+					ID3D11CommandList* pCL = { nullptr };
+					m_pDeferredContext[i]->FinishCommandList(false, &pCL);
+					Merge_CommandList(pCL, i);
+				}
+
+				{
+					lock_guard<mutex> lock(m_RenderAddMutex);
+					m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+				}
+				m_CV.notify_one();
+				});
+		}
+		*/
+
+	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+
+	// Static Object Render
+	for (_uint iLOD = 0; iLOD < 4; ++iLOD)
+	//_uint iLOD = 0;
+	{
+		size_t iNumObjects = max(1, m_StaticObjects[iReadIndex][iLOD].size() / m_iNumThread);
+		for (_uint i = 0; i < m_iNumThread; ++i)
+		{
+			_uint iStartIndex = i * iNumObjects;
+			_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex][iLOD].size());
+			if (i == m_iNumThread - 1)
+				//iEndIndex = m_pGameInstance->Render_ObjectsNum(iLOD);
+				iEndIndex = m_StaticObjects[iReadIndex][iLOD].size();
+
+			m_pGameInstance->Add_Render_Work([this, iLOD, iStartIndex, iEndIndex, iReadIndex, i]() {
+				//쓰레드 개수로 분할해서 해야한다ㅇㅇ
+				if (iStartIndex < iEndIndex)
+				{
+					m_pDeferredContext[i]->ClearState();
+					Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
+					m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
+					m_pGameInstance->Bind_SharedBuffer(iLOD, m_pDeferredContext[i]);
+					for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
+					{
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Set_LOD(iLOD);
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Render(m_pDeferredContext[i], i);
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Set_RenderTime(iLOD, m_pGameInstance->Get_PlayTime());
+					}
+
+					ID3D11CommandList* pCL = { nullptr };
+					m_pDeferredContext[i]->FinishCommandList(false, &pCL);
+					Merge_CommandList(pCL, i);
+				}
+
+				{
+					lock_guard<mutex> lock(m_RenderAddMutex);
+					m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+				}
+				m_CV.notify_one();
+				});
+		}
+		//이거 지호형한테 물어볼것. 얘 떄문에 프레임 떨어지는 건지 체크 하고싶음.
+		{
+			unique_lock<mutex> lock(m_RenderAddMutex);
+			m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
+			m_iNumEndThread.store(0, memory_order_release);
+		}
+		// CommandLists Execute
+		for (auto& pCL : m_CommandLists)
+		{
+			if (nullptr != pCL)
+			{
+				m_pContext->ExecuteCommandList(pCL, true);
+				Safe_Release(pCL);
+			}
+		}
+	}
+
+}
+
+void CRenderer::Render_LOD_Weight()
+{
+	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+
+
+	const _float fLODWeights[4] = { 3.f,2.f,1.f,0.5f };
+
+	_float dTotalRenderCost = 0.f;
+	_float dLODCost[4] = { 0.f };
+
+	_uint iAssignedThreads[4] = { 0 };
+	_uint iUsedThreads = { 0 };
+	for (_uint i = 0; i < 4; ++i)
+	{
+		size_t ObjCnt = m_StaticObjects[iReadIndex][i].size();
+		if (ObjCnt > 0)
+		{
+			dLODCost[i] = static_cast<_float>(ObjCnt) * fLODWeights[i];
+			dTotalRenderCost += dLODCost[i];
+		}
+	}
+	if (dTotalRenderCost == 0.f)
+		return;
+
+	for (_uint i = 0; i < 4; ++i)
+	{
+		if (dLODCost[i] > 0)
+		{
+			_float RenderRatio = dLODCost[i] / dTotalRenderCost;
+
+			_uint ThreadCnt = (RenderRatio * m_iNumThread);
+			if (ThreadCnt == 0 && m_StaticObjects[iReadIndex][i].size() > 0)
+				ThreadCnt = 1;
+			iAssignedThreads[i] = ThreadCnt;
+			iUsedThreads += ThreadCnt;
+		}
+	}
+
+	if (iUsedThreads < m_iNumThread && m_StaticObjects[iReadIndex][0].size() > 0)
+	{
+		iAssignedThreads[0] += (m_iNumThread - iUsedThreads);
+	}
+
+
+	_uint iGlobalThreadIdx = 0;
+
+	m_iNumEndThread.store(0);
+
+	for (_uint iLOD = 0; iLOD < 4; ++iLOD)
+	{
+		_uint iThreadCntForThisLOD = iAssignedThreads[iLOD];
+
+		_uint iTotalObjects = m_StaticObjects[iReadIndex][iLOD].size();
+		_uint iNumObjPerThread = max(1, iTotalObjects / max(1, iThreadCntForThisLOD));
+
+		for (_uint i = 0; i < iThreadCntForThisLOD; ++i)
+		{
+			if (iGlobalThreadIdx >= m_iNumThread)
+				break;
+
+			_uint iStartIndex = i * iNumObjPerThread;
+			_uint iEndIndex = min((i + 1) * iNumObjPerThread, iTotalObjects);
+
+			if (i == iThreadCntForThisLOD - 1)
+				iEndIndex = iTotalObjects;
+
+			_float fPlayTime = m_pGameInstance->Get_PlayTime();
+
+			if (iStartIndex < iEndIndex)
+			{
+				m_pGameInstance->Add_Render_Work([this, iLOD, iStartIndex, iEndIndex, iReadIndex, iGlobalThreadIdx, fPlayTime]() {
+					auto pDC = m_pDeferredContext[iGlobalThreadIdx];
+					pDC->ClearState();
+					Setting_Viewport(pDC, m_fWinSizeX, m_fWinSizeY);
+					m_pGameInstance->SetUp_MRT(pDC, TEXT("MRT_Object"));
+					m_pGameInstance->Bind_SharedBuffer(iLOD, pDC);
+
+					for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
+					{
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Set_LOD(iLOD);
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Render(pDC, iGlobalThreadIdx);
+						m_StaticObjects[iReadIndex][iLOD][iIndex]->Set_RenderTime(iLOD, fPlayTime);
+					}
+
+
+					ID3D11CommandList* pCL = nullptr;
+					pDC->FinishCommandList(false, &pCL);
+					Merge_CommandList(pCL, iGlobalThreadIdx);
+					{
+						lock_guard<mutex> lock(m_RenderAddMutex);
+						m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+						m_CV.notify_one();
+					}
+					});
+				iGlobalThreadIdx++;
+			}
+		}
+	}
+
+	if (iGlobalThreadIdx > 0)
+	{
+		unique_lock<mutex> lock(m_RenderAddMutex);
+		m_CV.wait(lock, [&]() { return m_iNumEndThread.load() == iGlobalThreadIdx; });
+	}
+
+	for (_uint i = 0; i < iGlobalThreadIdx; ++i)
+	{
+		// 1차원 배열로 관리한다고 가정 (Merge_CommandList 수정 필요할 수 있음)
+		if (m_CommandLists[i])
+		{
+			m_pContext->ExecuteCommandList(m_CommandLists[i], true);
+			Safe_Release(m_CommandLists[i]);
+			m_CommandLists[i] = nullptr;
+		}
+	}
+}
+
 void CRenderer::Clear_Resource()
 {
 	m_ShadowMapObjects.clear();
-	m_StaticObjects[0].clear();
-	m_StaticObjects[1].clear();
+	//m_StaticObjects[0].clear();
+	//m_StaticObjects[1].clear();
+	for (auto& Test : m_StaticObjects)
+		for (auto& TT : Test)
+			TT.clear();
 }
 
 void CRenderer::Render_Priority()
@@ -320,67 +607,65 @@ void CRenderer::Render_Static()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 		CRASH("Render Fail");
+	{
+
+		//// Buffer Index
+		//_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+
+		//// Static Object Render
+		//size_t iNumObjects = max(1, m_StaticObjects[iReadIndex].size() / m_iNumThread);
+		//for (_uint i = 0; i < m_iNumThread; ++i)
+		//{
+		//	_uint iStartIndex = i * iNumObjects;
+		//	_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex].size());
+		//	if (i == m_iNumThread - 1)
+		//		iEndIndex = m_pGameInstance->Render_ObjectsNum(0);
+		//	//iEndIndex = m_StaticObjects[iReadIndex].size();
+
+		//	m_pGameInstance->Add_Render_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
+		//		//쓰레드 개수로 분할해서 해야한다ㅇㅇ
+		//		if (iStartIndex < iEndIndex)
+		//		{
+		//			m_pDeferredContext[i]->ClearState();
+		//			Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
+		//			m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
+		//			//for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
+		//			//	m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
+
+		//			ID3D11CommandList* pCL = { nullptr };
+		//			m_pDeferredContext[i]->FinishCommandList(false, &pCL);
+		//			Merge_CommandList(pCL, i);
+		//		}
+		//		{
+		//			lock_guard<mutex> lock(m_RenderAddMutex);
+		//			m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+		//		}
+		//		m_CV.notify_one();
+		//		});
+		//}
+	}
 
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
-	// Static Object Render
-	size_t iNumObjects = max(1, m_StaticObjects[iReadIndex].size() / m_iNumThread);
-	for (_uint i = 0; i < m_iNumThread; ++i)
-	{
-		_uint iStartIndex = i * iNumObjects;
-		_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex].size());
-		if (i == m_iNumThread - 1)
-			iEndIndex = m_StaticObjects[iReadIndex].size();
-		
-		m_pGameInstance->Add_Render_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
-	
-			if (iStartIndex < iEndIndex)
-			{
-				m_pDeferredContext[i]->ClearState();
-				Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
-				m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
-				for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
-					m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
-				
-				ID3D11CommandList* pCL = { nullptr };
-				m_pDeferredContext[i]->FinishCommandList(false, &pCL);
-				Merge_CommandList(pCL, i);
-			}
-			{
-				lock_guard<mutex> lock(m_RenderAddMutex);
-				m_iNumEndThread.fetch_add(1, memory_order_relaxed);
-			}
-			m_CV.notify_one();
-		});
-	}
-	{
-		unique_lock<mutex> lock(m_RenderAddMutex);
-		m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
-		m_iNumEndThread.store(0, memory_order_release);
-	}
-
-	// CommandLists Execute
-	for (auto& pCL : m_CommandLists)
-	{
-		if (nullptr != pCL)
-		{
-			m_pContext->ExecuteCommandList(pCL, true);
-			Safe_Release(pCL);
-		}
-	}
-
+	//Render_LOD(0);
+	Render_LOD_Weight();
 	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
-		m_StaticObjects[iReadIndex].clear();
+		for (auto& pObjects : m_StaticObjects[iReadIndex])
+			pObjects.clear();
+		//m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
-		m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
+		/*for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
+			m_pGameInstance->Occlusion_Culling(pObjects);*/
+		//m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
 		m_iCullStack.exchange(0, memory_order_release);
 		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
 
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
+	m_pGameInstance->Clear_BufferPool();
+	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 
 	m_pGameInstance->End_MRT();
 }
@@ -450,7 +735,8 @@ void CRenderer::Render_Light()
 		CRASH("Failed Bind RT_Normal");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
 		CRASH("Failed Bind RT_Depth");
-
+	if(FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSS"), m_pShader, "g_SkinMaskTexture")))
+		CRASH("Failed Bind RT_SSS");
 	//Toon Ramp Texture
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;
@@ -491,11 +777,11 @@ void CRenderer::Render_Combined()
 
 	ID3D11ShaderResourceView* pDiffuse = m_IsSSS ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSSBlur_Y")) : m_pGameInstance->Get_RT_SRV(TEXT("RT_LightDiffuse"));
 
-	if (FAILED(m_pShader->Bind_Texture("g_LightDiffuseTexture", pDiffuse)))
+	if (FAILED(m_pShader->Bind_Value("g_fExposure", &m_fExposure, sizeof(_float))))
 		CRASH("Render Fail");
 
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightDiffuse"), m_pShader, "g_LightDiffuseTexture")))
-	//	CRASH("Render Fail");
+	if (FAILED(m_pShader->Bind_Texture("g_LightDiffuseTexture", pDiffuse)))
+		CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_LightSpecular"), m_pShader, "g_LightSpecularTexture")))
 		CRASH("Render Fail");
@@ -740,6 +1026,12 @@ void CRenderer::Render_Fade()
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::FADE));
 }
 
+void CRenderer::Render_NonStatic()
+{
+	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONSTATIC));
+}
+
 #ifdef _DEBUG
 void CRenderer::Render_Debug()
 {
@@ -835,7 +1127,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Emissive*/
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Emissive"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Emissive"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Lut */
@@ -843,11 +1135,11 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SSAO */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSAO"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSAO"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Distortion */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT , _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Dof */
@@ -859,11 +1151,11 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Combine */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Combine"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Combine"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SFX */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SFX"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SFX"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SSS */
@@ -871,18 +1163,16 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightDiffuse */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDiffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDiffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightSpecular */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightSpecular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightSpecular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightAmbient */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAmbient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAmbient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
-
-
 
 #ifdef _DEBUG
 	/* RenderTarget Debug */
@@ -1079,7 +1369,11 @@ void CRenderer::Free()
 #endif
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
+	{
+		m_pDeferredContext[i]->ClearState();
+		m_pDeferredContext[i]->Flush();
 		Safe_Release(m_pDeferredContext[i]);
+	}
 	Safe_Delete_Array(m_pDeferredContext);
 
 	for (auto& Pair : m_Effects)

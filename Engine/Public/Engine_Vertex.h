@@ -205,11 +205,13 @@ namespace Engine
 		_float4		vTranslationInv;
 		_float2		vLifeTime;
 		_float4		vColor;
+
+		_float		fEmissiveIntensity;
 	}VTXINSTANCE_DECAL;
 
 	typedef struct tagVertexDecal
 	{
-		static const _uint iNumElements = { 11 };
+		static const _uint iNumElements = { 12 };
 		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
@@ -224,7 +226,8 @@ namespace Engine
 			{ "INVWORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 112, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 128, D3D11_INPUT_PER_INSTANCE_DATA, 1 },				//LifeTime
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 136, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 136, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT, 1, 152,D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 		};
 	}VTX_DECAL;
 

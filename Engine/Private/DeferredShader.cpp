@@ -71,11 +71,13 @@ HRESULT CDeferredShader::Initialize_Clone(void* pArg)
 
 HRESULT CDeferredShader::Begin(_uint iPassIndex, ID3D11DeviceContext* pDC, ID3DX11Effect* pEffect)
 {
-	if (FAILED(pEffect->GetTechniqueByIndex(0)->GetPassByIndex(iPassIndex)->Apply(0, pDC)))
-		return E_FAIL;
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		if (FAILED(pEffect->GetTechniqueByIndex(0)->GetPassByIndex(iPassIndex)->Apply(0, pDC)))
+			return E_FAIL;
 
-	pDC->IASetInputLayout(m_InputLayouts[iPassIndex]);
-
+		pDC->IASetInputLayout(m_InputLayouts[iPassIndex]);
+	}
 	return S_OK;
 }
 

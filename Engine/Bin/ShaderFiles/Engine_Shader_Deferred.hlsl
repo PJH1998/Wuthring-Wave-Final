@@ -6,10 +6,13 @@ const int  g_iLutIndex = 0;
 float g_fLutLerpIntensity = 0.25f;
 bool g_IsDynamicLUT = false;
 
+float g_fExposure = 0.6f;
 
 float g_fLightFar;
 
 Texture2D g_Texture;
+
+Texture2D g_SkinMaskTexture;
 
 //OBJECTS
 Texture2D g_DiffuseTexture; // Color
@@ -160,20 +163,20 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         discard;
     
     float4 vLightColor = vLightDiffuse + vLightSpecular + vLightAmbient;
-    vLightColor.a = 1.f;
     
-    Out.vColor = vLightColor;
     
     if (any(vPBRDesc.z))
+    {
+        Out.vColor = float4(vLightColor.xyz, 1.f);
         return Out;
-        
+    }
+    
+    Out.vColor = float4(ToneMap(vLightColor.xyz * g_fExposure), 1.f);
+    
     float fSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord).r;
     Out.vColor *= fSSao;
         
-///////// Shadow Begin /////////
-    
     Out.vColor.a = 1.f;
-///////// Shadow End /////////
 
     return Out;
 }
@@ -220,18 +223,48 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     
     float4 vAmbientColor = 0.f;
     
+    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    float fViewZ = vViewPos.z;
+
+    float fShadowMap = 1.f;
+    
+    float fShadowNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
+    
     if (vPBRDesc.z)
     {
-        float fToonShade = smoothstep(-0.3f, 0.f, NdotL);
+        //float fToonShade = lerp(0.5f, 1.f, smoothstep(-0.4f, -0.2f, NdotL));
+
+        if (g_HasShadowMap)
+        {
+            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.9f, 1.f);
+        }
+        
+        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
         
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
+        float3 vRim = (fRimPower * vRimColor);
+        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
+        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
         
-        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fToonShade));
-        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fToonShade)) + (fRimPower * vRimColor);
-        Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
-        Out.vLightSpecular = float4(vLightSpecular, 1.f);
-        vAmbientColor = vDiffuse;
-        vAmbient = g_vDynamicMtrlAmbient;
+        if (false == IsSkin)      // 금속 부분만 PBR 처리
+        {
+          
+            Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
+            Out.vLightSpecular = float4(vLightSpecular, 1.f);
+            
+            vAmbientColor = vDiffuse;
+            vAmbient = g_vDynamicMtrlAmbient;
+        }
+        else
+        {
+            float3 vOrigin = vDiffuse.xyz * fShadowMap;
+            
+            Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, 0.6f), 1.f);
+            Out.vLightSpecular = float4(lerp(vRim, vLightSpecular, 0.6f), 1.f);
+            
+            vAmbientColor = vDiffuse;
+            vAmbient = g_vDynamicMtrlAmbient * 0.6f;
+        }
     }
     else
     {
@@ -263,13 +296,14 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         Out.vLightSpecular = float4(vLightSpecular, 1.f);
         
 //        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fFinalShadow);
-        vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
+        //vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
+        
+        vAmbientColor = vDiffuse;
         vAmbient = g_vStaticMtrlAmbient;
     }
     
-    Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient.xyz), 1.f);
     
-    Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
+    Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient.xyz), 1.f);
     
     return Out;
 }
@@ -362,11 +396,14 @@ PS_OUT_BACKBUFFER PS_BLOOM(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
-    vector vOriginColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vOriginColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    vector vColor = g_BloomTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vColor = g_BloomTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = vOriginColor + (vColor * 0.4f);
+    float4 vResult = vOriginColor + (vColor * 0.4f); //g_fExposure);
+    
+    //Out.vColor = vResult;
+    Out.vColor = float4(ToneMap(vResult.xyz), 1.f);
     
     return Out;
 }
@@ -619,6 +656,15 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    
+    
+    return Out;
+}
+
 PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
@@ -860,5 +906,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MOTION_BLUR();
+    }
+    
+    pass SSR
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SSR();
     }
 }
