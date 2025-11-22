@@ -241,6 +241,8 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\Level_Heaven.h" />
+    <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
@@ -452,6 +454,7 @@
     <ClCompile Include="..\private\HavocWarrior.cpp" />
     <ClCompile Include="..\Private\HitState.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
+    <ClCompile Include="..\Private\Level_Heaven.cpp" />
     <ClCompile Include="..\Private\Level_Loading.cpp" />
     <ClCompile Include="..\Private\Level_Logo.cpp" />
     <ClCompile Include="..\Private\Level_Test.cpp" />
@@ -460,6 +463,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
+    <ClCompile Include="..\Private\Loader_Heaven.cpp" />
     <ClCompile Include="..\Private\Loader_Logo.cpp" />
     <ClCompile Include="..\Private\Loader_Test.cpp" />
     <ClCompile Include="..\private\Loader_Test_UI.cpp">

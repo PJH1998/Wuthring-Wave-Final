@@ -349,6 +349,7 @@ public:
 	void						Clear_BufferPool();
 	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void						Destroy_RigidData();
+	void						Model_Manager_Change_Level(_uint iLevel);
 #pragma endregion
 
 

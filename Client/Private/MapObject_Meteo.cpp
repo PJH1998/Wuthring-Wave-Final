@@ -211,9 +211,6 @@ void CMapObject_Meteo::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-	//Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pModelCom);
 
-	m_pModelComArray.clear();
 }

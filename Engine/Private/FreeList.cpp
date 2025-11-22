@@ -96,5 +96,5 @@ CFreeList* CFreeList::Create(_uint iMemorySize)
 void CFreeList::Free()
 {
 	__super::Free();
-
+	m_FreeBlocks.clear();
 }

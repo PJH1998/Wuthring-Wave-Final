@@ -12,8 +12,10 @@ CModel_Manager::CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CModel_Manager::Initialize()
+HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 {
+	m_iMaxLevel = iMaxLevel;
+	m_ModelPrototypes = new unordered_map<_string, class CModel_Streaming*>[iMaxLevel];
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
 	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
@@ -29,34 +31,56 @@ HRESULT CModel_Manager::Initialize()
 
 	if (FAILED(m_pDevice->CreateBuffer(&StagingDesc, nullptr, &m_pStagingBuffer)))
 		CRASH("Failed");
-	m_iSearchIndex = m_ModelPrototypes.begin();
+	m_iSearchIndex = m_ModelPrototypes[0].begin();
 	m_RenderObjects[0].reserve(500);
 	m_RenderObjects[1].reserve(500);
 	m_RenderObjects[2].reserve(500);
 	m_RenderObjects[3].reserve(500);
+
+	m_DelayedNotice.reserve(200);
 	return S_OK;
 }
 
 void CModel_Manager::Update(_float fTimeDelta)
 {
 	m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
-	iCurrentLoadCnt = 0;
-	for (_uint i = 0; i < m_DeleteList.size(); ++i)
+	m_iCurrentLoadCnt = 0;
+	//for (_uint i = 0; i < m_DeleteList.size(); ++i)
+	//{
+	//	auto& Data = m_DeleteList[i];
+	//	Data.iLifeCount--;
+	//	if (Data.iLifeCount <= 0)
+	//	{
+	//		m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
+	//		m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
+	//		if (i != m_DeleteList.size() - 1)
+	//			m_DeleteList[i] = m_DeleteList.back();
+	//		m_DeleteList.pop_back();
+	//	}
+	//	else
+	//		i++;
+	//}
+
+	if (!m_DelayedNotice.empty())
 	{
-		auto& Data = m_DeleteList[i];
-		Data.iLifeCount--;
-		if (Data.iLifeCount <= 0)
+		for (_uint i = 0; i < m_DelayedNotice.size();)
 		{
-			m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
-			m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
-			if (i != m_DeleteList.size() - 1)
-				m_DeleteList[i] = m_DeleteList.back();
-			m_DeleteList.pop_back();
+			if (m_DelayedNotice[i].iDelayFrame >= 2)
+			{
+				m_DelayedNotice[i].pModel->Get_MeshState(m_DelayedNotice[i].iLODIndex).store(LOADSTATE::LOADED);
+				m_DelayedNotice[i].pModel = nullptr;
+				
+				m_DelayedNotice[i] = m_DelayedNotice.back();
+				m_DelayedNotice.pop_back();
+			}
+			else
+			{
+				m_DelayedNotice[i].iDelayFrame++;
+				i++;
+			}
 		}
-		else
-			i++;
 	}
-	
+
 	if (!m_StagingData.empty())
 	{
 		vector<MODEL_DATA> pTempVector;
@@ -91,21 +115,12 @@ void CModel_Manager::Update(_float fTimeDelta)
 				m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
 
 				D3D11_MAPPED_SUBRESOURCE StagingDesc{};
-				/*m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-				memcpy(StagingDesc.pData, Data.LoadData[i].VertexData.data(), VertexSize);
-				m_pContext->Unmap(m_pStagingBuffer, 0);*/
-
-				///*D3D11_BOX */PoolBox = { 0,0,0,VertexSize,1,1 };
-				//m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(),
-				//	0, VertexOffset, 0, 0, m_pStagingBuffer, 0, &PoolBox);
-
 
 				_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
 				_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
 				if (IndexOffSet == -1)
 					CRASH("Failed");
-
 
 				PoolBox.left = IndexOffSet;
 				PoolBox.top = 0;
@@ -116,14 +131,6 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 				m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(), 0, &PoolBox, Data.LoadData[i].IndexData.data(), 0, 0);
 
-				//m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
-				//memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
-				//m_pContext->Unmap(m_pStagingBuffer, 0);
-
-				/*PoolBox = { 0,0,0,IndexSize,1,1 };
-				m_pContext->CopySubresourceRegion(m_pBufferPool[Data.iLODIndex]->Get_IndexBuffer(),
-					0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);*/
-
 				SHARED_DATA_DESC Desc{};
 				Desc.IndexOffset = IndexOffSet / sizeof(_uint);
 				Desc.IndexSize = IndexSize;
@@ -133,48 +140,50 @@ void CModel_Manager::Update(_float fTimeDelta)
 
 				pData->push_back(Desc);
 			}
-			Data.pModel->Get_MeshState(Data.iLODIndex).store(LOADSTATE::LOADED);
+			PEDDING_DATA PeddingData{};
+			PeddingData.pModel = Data.pModel;
+			PeddingData.iLODIndex = Data.iLODIndex;
+			m_DelayedNotice.push_back(PeddingData);
 		}
 		Release_Vector(pTempVector);
 	}
 
-	if (m_ModelPrototypes.empty())
+	if (m_ModelPrototypes[m_iCurrentLevel].empty())
 		return;
 
-
-	if (m_iSearchIndex == m_ModelPrototypes.end())
-		m_iSearchIndex = m_ModelPrototypes.begin();
+	if (m_iSearchIndex == m_ModelPrototypes[m_iCurrentLevel].end())
+		m_iSearchIndex = m_ModelPrototypes[m_iCurrentLevel].begin();
 	_uint iCheckCount = { 0 };
-	while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes.end())
-	{
-		CModel_Streaming* pModel = m_iSearchIndex->second;
-		for (_uint i = 0; i < 3; ++i)
-		{
-			if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
-			{
-				if (pModel->Get_MeshDesc(0)[i].empty())
-					continue;
-				vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
-				if (pMeshVector->empty())
-					continue;
-				for (auto& pDesc : *pMeshVector)
-				{
-					DELETE_DATA Data{};
-					Data.iLifeCount = 3;
-					Data.iLODIndex = i;
-					Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
-					Data.IndexSize = pDesc.IndexSize;
-					Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
-					Data.VertexSize = pDesc.VertexSize;
+	//while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes[m_iCurrentLevel].end())
+	//{
+	//	CModel_Streaming* pModel = m_iSearchIndex->second;
+	//	for (_uint i = 0; i < 3; ++i)
+	//	{
+	//		if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
+	//		{
+	//			if (pModel->Get_MeshDesc(0)[i].empty())
+	//				continue;
+	//			vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
+	//			if (pMeshVector->empty())
+	//				continue;
+	//			for (auto& pDesc : *pMeshVector)
+	//			{
+	//				DELETE_DATA Data{};
+	//				Data.iLifeCount = 3;
+	//				Data.iLODIndex = i;
+	//				Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
+	//				Data.IndexSize = pDesc.IndexSize;
+	//				Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
+	//				Data.VertexSize = pDesc.VertexSize;
 
-					m_DeleteList.push_back(Data);
-				}
-				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
-			}
-		}
-		m_iSearchIndex++;
-		iCheckCount++;
-	}
+	//				m_DeleteList.push_back(Data);
+	//			}
+	//			pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
+	//		}
+	//	}
+	//	m_iSearchIndex++;
+	//	iCheckCount++;
+	//}
 
 }
 
@@ -183,7 +192,7 @@ HRESULT CModel_Manager::RegisterPrototype(const _char* pFilePath, CModel_Streami
 	if (!pModel)
 		CRASH("Failed");
 
-	m_ModelPrototypes.emplace(pFilePath, pModel);
+	m_ModelPrototypes[m_iCurrentLevel].emplace(pFilePath, pModel);
 	Safe_AddRef(pModel);
 
 	return S_OK;
@@ -198,13 +207,13 @@ void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFileP
 	if (LoadState != LOADSTATE::NOTLOADED)
 		return;
 
-	if (iCurrentLoadCnt > 5)
+	if (m_iCurrentLoadCnt > 5)
 		return;
 
 	LOADSTATE ExpectedState = LOADSTATE::NOTLOADED;
 	if (LoadState.compare_exchange_strong(ExpectedState, LOADSTATE::LOADING))
 	{
-		iCurrentLoadCnt++;
+		m_iCurrentLoadCnt++;
 		//파일 경로 전체는 모델 매니저에 저장. 파일 이름(뒤에 LOD가 붙어야하니까)은 모델에 저장?
 		m_pGameInstance->Add_Work([=, lModel = pModel, lFilePath = pFilePath, liLODIndex = iLODIndex, Matrix = XMLoadFloat4x4(&m_PreTransformMatrix)]() {
 			LoadData(lModel, lFilePath, liLODIndex, Matrix);
@@ -374,13 +383,26 @@ void CModel_Manager::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC
 
 void CModel_Manager::Destroy_RigidData()
 {
-	for (auto& pModel : m_ModelPrototypes)
+	for (auto& pModel : m_ModelPrototypes[m_iCurrentLevel])
 		pModel.second->Destroy_RigidData();
+}
+
+void CModel_Manager::Clear_Resource(_uint iLevel)
+{
+	for (auto& pPair : m_ModelPrototypes[iLevel])
+		Safe_Release(pPair.second);
+	m_ModelPrototypes[iLevel].clear();
+}
+
+void CModel_Manager::Change_Level(_uint iLevel)
+{
+	m_iCurrentLevel = iLevel;
+	m_iSearchIndex = m_ModelPrototypes[iLevel].begin();
 }
 
 void CModel_Manager::LoadLastLOD()
 {
-	for (auto& pModel : m_ModelPrototypes)
+	for (auto& pModel : m_ModelPrototypes[m_iCurrentLevel])
 	{
 		pModel.second->RequestModel();
 		for (_uint i = 0; i < 4; ++i)
@@ -475,11 +497,11 @@ void CModel_Manager::Add_To_RenderTest(vector<class CStaticObject*>* Container)
 	}
 }
 
-CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,_uint iMaxLevel)
 {
 	CModel_Manager* pInstance = new CModel_Manager(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize()))
+	if (FAILED(pInstance->Initialize(iMaxLevel)))
 	{
 		MSG_BOX("Failed to Create : Model_Manager");
 		Safe_Release(pInstance);
@@ -493,18 +515,28 @@ void CModel_Manager::Free()
 	__super::Free();
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pGameInstance);
+
+	for (_uint i = 0; i < m_iMaxLevel; ++i)
+	{
+		for (auto& pPair : m_ModelPrototypes[i])
+			Safe_Release(pPair.second);
+		m_ModelPrototypes[i].clear();
+	}
+	Safe_Delete_Array(m_ModelPrototypes);
+
 	for (_uint i = 0; i < 4; ++i)
 		Safe_Release(m_pBufferPool[i]);
 	Safe_Release(m_pStagingBuffer);
-
-	for(auto& pPair: m_ModelPrototypes)
-		Safe_Release(pPair.second);
-	m_ModelPrototypes.clear();
-
-	Safe_Release(m_pGameInstance);
 
 	for (auto& Pair: m_RenderObjects)
 		for (auto& pObject : Pair.second)
 			Safe_Release(pObject);
 	m_RenderObjects.clear();
+
+	//m_DeleteList.clear();
+	//m_StagingData.clear();
+	for (auto& pData : m_DataPool)
+		pData.pModel = nullptr;
+	//m_DataPool.clear();
 }

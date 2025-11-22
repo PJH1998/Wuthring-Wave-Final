@@ -6,6 +6,7 @@
 // ========Loader========
 #include "Loader_Logo.h"
 #include "Loader_GamePlay.h"
+#include "Loader_Heaven.h"
 #include "Loader_Test.h"
 #include "Loader_Test_UI.h"
 //#include "Loader_Lord.h"
@@ -111,6 +112,9 @@ HRESULT CLevel_Loading::Ready_LoadingThread()
         break;
 	case LEVEL::GAMEPLAY:
 		m_pLoader = CLoader_GamePlay::Create(m_pDevice, m_pContext);
+		break;
+	case LEVEL::HEAVEN:
+		m_pLoader = CLoader_Heaven::Create(m_pDevice, m_pContext);
 		break;
 	case LEVEL::TEST:
 		m_pLoader = CLoader_Test::Create(m_pDevice, m_pContext);

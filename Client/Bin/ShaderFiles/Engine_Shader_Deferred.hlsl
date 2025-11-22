@@ -656,6 +656,15 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    
+    
+    return Out;
+}
+
 PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
@@ -897,5 +906,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MOTION_BLUR();
+    }
+    
+    pass SSR
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SSR();
     }
 }

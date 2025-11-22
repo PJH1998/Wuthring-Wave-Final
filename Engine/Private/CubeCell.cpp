@@ -90,10 +90,6 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 				{
 					if (Container)
 						Container[pObject->Get_LOD()].push_back(pObject);
-					//else
-					//	m_pGameInstance->Add_To_RenderTest(m_iLODIndex, pObject);
-					//m_pGameInstance->Add_Render_StaticObject(pObject);
-					//Safe_AddRef(pObject);
 				}
 				// Leaf는 Local Container에 담은 후 병합
 				else
@@ -109,12 +105,6 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 				if(0 == m_iDepth)
 				{
 					// Thread
-					//m_pGameInstance->Add_Work([&, vCamPos]() {
-					//		vector<CStaticObject*> Container[4];
-					//		pCell->Update(vCamPos, Container);
-					//		m_pGameInstance->Add_To_RenderTest(Container);
-					//		//m_pGameInstance->Add_Render_StaticObject(Container);
-					//	});
 					m_pGameInstance->Add_Work([=, Cell = pCell, CamPos = vCamPos]() {
 						vector<CStaticObject*> Container[4];
 						Container[0].reserve(1000);
@@ -122,7 +112,6 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 						Container[2].reserve(1000);
 						Container[3].reserve(1000);
 						Cell->Update(CamPos, Container);
-						//m_pGameInstance->Add_To_RenderTest(Container);
 						m_pGameInstance->Add_Render_StaticObject(Container);
 						});
 				}

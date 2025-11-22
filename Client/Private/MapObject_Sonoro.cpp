@@ -28,7 +28,7 @@ HRESULT CMapObject_Sonoro::Initialize_Clone(void* pArg)
 	//_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
 	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
-	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
+	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	Sync_Sectors();
@@ -156,26 +156,9 @@ void CMapObject_Sonoro::Ready_Component(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
-	m_pModelComArray.resize(V);
-
-	for (_uint i = 0; i < V; ++i)
-	{
-		_wstring ModelCom = Model;
-		ModelCom.pop_back();
-		ModelCom += to_wstring(i);
-
-		_char ModelName[MAX_PATH] = {};
-		sprintf_s(ModelName, "Com_Model%d", i);
-		//if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
-		//	StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-		//	CRASH("FAILED");
-
-	}
 	// DeferredShader
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -207,7 +190,7 @@ void CMapObject_Sonoro::Ready_Component(void* pArg)
 		RigidbodyDesc.eShape = SHAPE::MESH;
 		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 		RigidbodyDesc.eType = EMotionType::Static;
-		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
 		RigidbodyDesc.pModel = m_pModelCom;
 		//RigidbodyDesc.pModel = m_pModelComArray[0];
 
@@ -257,9 +240,5 @@ void CMapObject_Sonoro::Free()
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pGameSystem);
-
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-
-	m_pModelComArray.clear();
+	Safe_Release(m_pModelCom);
 }

@@ -16,6 +16,7 @@ float g_Soft = 0.3f; //툴에서 받아올 수 있게 해주자.
 int g_Dir; //안쓰는중
 float g_Time;
 float g_Alpha;
+float2 g_LifeTime;
 int g_MaskFlag; // 0이면 R로, 1이면 알파로
 
 float g_DistortionWeight;
@@ -347,7 +348,7 @@ PS_OUT PS_Y_OUT(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDiffuse *= g_Alpha;
+    Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
 
@@ -396,7 +397,7 @@ PS_OUT PS_Y_IN(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDiffuse *= g_Alpha;
+    Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
 
@@ -472,7 +473,7 @@ PS_OUT PS_TraillTestA(PS_IN In)
 //if (fWeight >= g_fEmissiveThreshold)
 //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-    Out.vDiffuse *= g_Alpha;
+    Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
 
@@ -489,26 +490,15 @@ PS_OUT PS_TraillDissolve(PS_IN In)
 
     float MaskR = max(max(Mask.r, Mask.g), Mask.b);
 
-    if (MaskR < 0.3f)
+    if (MaskR < 0.15f)
         discard;
 
     float Dissolve = g_DissolveTexture.Sample(DefaultSampler, UV).r;
+    
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
 
-    if (Dissolve < 0.5f || Dissolve - g_Time < 0.f)
+    if (Dissolve - fRatio < 0.f)
         discard;
-
-//float fY = 1.f - g_MaskSweep;
-//float fVisibleY;
-
-//fVisibleY = 1.f - step(fY, UV.y);
-
-//float fVisibleX;
-
-//float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.x);
-
-//float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, 1 - In.vTexcoord.x);
-
-//fVisibleX = fTailFad * fHeadFad;
 
     float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
 
@@ -516,22 +506,16 @@ PS_OUT PS_TraillDissolve(PS_IN In)
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;
 
-//float fAlpha = fVisibleY * fVisibleX * MaskR;
-
-//if (fAlpha < 0.2f)
-//    discard;
-
-//Out.vDiffuse = float4(vColor.rgb, fAlpha);
-
     Out.vDiffuse = vColor;
 
-//float fWeight = Luminance(Out.vDiffuse.xyz);
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
-//if (fWeight >= g_fEmissiveThreshold)
-//    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-
-    Out.vDiffuse *= g_Alpha;
-
+    Out.vDiffuse.a *= g_Alpha;
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
     return Out;
 }
 
@@ -689,7 +673,7 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
     Out.vDiffuse = float4(vColor.rgb, fAge);
     Out.vDiffuse.a *= g_Alpha;
 
-    if (Out.vDiffuse.a <= 0.f)
+    if (Out.vDiffuse.a < 0.1f)
         discard;
 
    float fWeight = Luminance(Out.vDiffuse.xyz);
@@ -735,7 +719,7 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
     Out.vDiffuse = float4(vColor.rgb, fAge);
     Out.vDiffuse.a *= g_Alpha;
     
-    if(Out.vDiffuse.a  <= 0.f)
+    if (Out.vDiffuse.a < 0.1f)
         discard;
 
     float fWeight = Luminance(Out.vDiffuse.xyz);

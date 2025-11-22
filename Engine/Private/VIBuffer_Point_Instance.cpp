@@ -103,7 +103,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	
 		for (size_t i = 0; i < m_iNumInstance; i++)
 		{
-			VTXINSTACNE_FXMESH* pInstanceVertices = static_cast<VTXINSTACNE_FXMESH*>(m_pVBInstanceVertices);
+			VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
 
 			_float fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
 
@@ -137,9 +137,12 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 			_float fPosX = fRadius * cosf(fAngle);
 			_float fPosZ = fRadius * sinf(fAngle);
 
+			//설정한 Range 값으로 위아래 범위 랜덤잡아주기.
+			_float fPosY = m_pGameInstance->Rand(-(pPointDesc->vRange.y * 0.5f), pPointDesc->vRange.y * 0.5f);
+
 			pInstanceVertices[i].vTranslation = _float4(
 				pPointDesc->vCenter.x + fPosX,
-				pPointDesc->vCenter.y,                   //센터값일단 평평하게 설정, 랜덤값 주고싶으면 값 하나 더 받아와야함.
+				pPointDesc->vCenter.y + fPosY,                 
 				pPointDesc->vCenter.z + fPosZ,
 				1.f
 			);
@@ -151,7 +154,8 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 			_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
-			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+ 			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+			pSRV[i].fDelay = pPointDesc->fDelay.y * (i + 1);
 		}
 	}
 
@@ -381,7 +385,7 @@ HRESULT CVIBuffer_Point_Instance::Render()
 	return S_OK;
 }
 
-void CVIBuffer_Point_Instance::Bind_CS_Option(PARTICLE_DefaultCB* OptionCBDesc)
+void CVIBuffer_Point_Instance::Bind_CS_Pivot(_vector vRight, _vector vUp, _vector vLook)
 {
 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
@@ -389,10 +393,14 @@ void CVIBuffer_Point_Instance::Bind_CS_Option(PARTICLE_DefaultCB* OptionCBDesc)
 
 	PARTICLE_DefaultCB* pCB = static_cast<PARTICLE_DefaultCB*>(SubResource.pData);
 
-	if (OptionCBDesc != nullptr)
-	{
-		pCB->vPivot = OptionCBDesc->vPivot;
-	}
+	_vector vWorldDir = (vRight * m_vPivot.x) + (vUp * m_vPivot.y) + (vLook * m_vPivot.z);
+
+	_float3 WorldDir = {};
+	XMStoreFloat3(&WorldDir, vWorldDir);
+
+	pCB->vPivot.x = WorldDir.x;
+	pCB->vPivot.y = WorldDir.y;
+	pCB->vPivot.z = WorldDir.z;
 
 	m_pContext->Unmap(m_pOptionCBBuffer, 0);
 }
@@ -464,6 +472,19 @@ void CVIBuffer_Point_Instance::Reset_UAV(class CComputeShader* pCShader)
 	//	pData[i];
 	//}
 
+}
+
+void CVIBuffer_Point_Instance::Reset_CS_Option()
+{
+	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+
+	m_pContext->Map(m_pOptionCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+
+	PARTICLE_DefaultCB* pCB = static_cast<PARTICLE_DefaultCB*>(SubResource.pData);
+
+	pCB->vPivot = m_vPivot;
+
+	m_pContext->Unmap(m_pOptionCBBuffer, 0);
 }
 
 CVIBuffer_Point_Instance* CVIBuffer_Point_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const INSTANCE_DESC* pDesc)

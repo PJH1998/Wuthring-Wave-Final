@@ -92,7 +92,7 @@ void SSSBlur_X(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
     {
         int iIndexX = GTID.x + iRadius + i;
         
-        float4 vSampleColor = vSharedDiffuseX[GTID.y][iIndexX];
+        float4 vSampleColor = vSharedDiffuseX[GTID.y][iIndexX]; 
         float fSampleDepth = fSharedDepthX[GTID.y][iIndexX];
         float4 vSampleNormal = vSharedNormalX[GTID.y][iIndexX];
         float fSampleStrength = fSharedStrengthX[GTID.y][iIndexX];
