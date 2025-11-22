@@ -6,6 +6,7 @@ class CModel;
 class CShader;
 class CRigidbody;
 class CTexture;
+class CModel_Streaming;
 NS_END
 
 
@@ -69,7 +70,7 @@ protected:
 protected:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
-
+	CModel_Streaming* m_pModelCom2 = { nullptr };
 	vector<CModel*> m_pModelComArray;
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CEdit_MapObject* m_pParent = { nullptr };

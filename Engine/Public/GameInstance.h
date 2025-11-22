@@ -130,7 +130,9 @@ public:
 public:
 	HRESULT						Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 	HRESULT						Add_Render_StaticObject(class CStaticObject* pObject);
-	HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	//HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	HRESULT						Add_Render_StaticObject(vector<class CStaticObject*>* Container);
+	HRESULT						Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex);
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
@@ -332,6 +334,24 @@ public:
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 #pragma endregion
 
+#pragma region MODEL_STREAMING
+public:
+	HRESULT						RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
+	void						RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
+	void						RenderBufferPool(_uint iLODIndex);
+	void						LoadLastLOD();
+	void						Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
+	void						Add_To_RenderTest(vector<class CStaticObject*>* Container);
+	_uint						Render_ObjectsNum(_uint iLODIndex);
+	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread);
+	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
+	void						RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
+	void						Clear_BufferPool();
+	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
+	void						Destroy_RigidData();
+#pragma endregion
+
+
 #pragma region SFX_HUB
 	HRESULT						Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	HRESULT						End_SFX();
@@ -389,6 +409,7 @@ private:
 	class CShadowMap*			m_pShadowMap = { nullptr };
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 	class CVolumetricFog*		m_pVF = { nullptr };
+	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
 	class CResource_Manager*	m_pResource_Manager = { nullptr };
 

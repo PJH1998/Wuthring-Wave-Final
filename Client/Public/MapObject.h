@@ -44,12 +44,14 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 	virtual		BoundingBox* Get_BoundingBox()override;
+	virtual		void					Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)override;
 
 private:
 	CDeferredShader*		m_pShaderCom = { nullptr };
 	CShader*					m_pShadowShaderCom = { nullptr };
 	CRigidbody*			m_pRigidbodyCom = { nullptr };
 	vector<CModel*>		m_pModelComArray;
+	class CModel_Streaming* m_pModelCom;
 
 	_uint						m_iShaderPassIndex = {};
 	class CGameSystem* m_pGameSystem = { nullptr };

@@ -334,6 +334,12 @@
     <Filter Include="03. GameObject\ScreenEffect\SFX\GalbrenaUlti">
       <UniqueIdentifier>{32b72cfb-8e3e-47d5-ab33-2805cf83a753}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Level\Heaven">
+      <UniqueIdentifier>{add52591-9010-461b-ac56-3065ef68c97c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Level\Loader\Heaven">
+      <UniqueIdentifier>{f672b5af-69df-45ee-9c9f-31768c941e46}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -883,9 +889,15 @@
     </ClInclude>
     <ClInclude Include="..\public\GalbrenaUlti_PostSFX.h">
       <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
-    </ClInclude>      
+    </ClInclude>
     <ClInclude Include="..\public\UI_MobHPBar.h">
       <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Heaven.h">
+      <Filter>02. Level\Heaven</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader_Heaven.h">
+      <Filter>02. Level\Loader\Heaven</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1401,9 +1413,15 @@
     </ClCompile>
     <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp">
       <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
-    </ClCompile>      
+    </ClCompile>
     <ClCompile Include="..\private\UI_MobHPBar.cpp">
       <Filter>03. GameObject\UI\Props\MobHPBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Heaven.cpp">
+      <Filter>02. Level\Heaven</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader_Heaven.cpp">
+      <Filter>02. Level\Loader\Heaven</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

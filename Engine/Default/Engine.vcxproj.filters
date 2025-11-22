@@ -383,6 +383,9 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\SSS">
       <UniqueIdentifier>{e98527a6-6b5a-432f-8e18-5d7e2048d4fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\SSR">
+      <UniqueIdentifier>{1d22ec99-b1b4-4f75-a716-665728fad5fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -749,6 +752,11 @@
     <ClInclude Include="..\public\ScreenBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BufferPool.h" />
+    <ClInclude Include="..\Public\Model_Manager.h" />
+    <ClInclude Include="..\Public\FreeList.h" />
+    <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\Mesh_Streaming.h" />
     <ClInclude Include="..\public\RadialBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClInclude>
@@ -772,6 +780,9 @@
     </ClInclude>
     <ClInclude Include="..\public\SubsurfaceScattering.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\ScreenSpaceReflection.h">
+      <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1115,6 +1126,11 @@
     <ClCompile Include="..\private\ScreenBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\BufferPool.cpp" />
+    <ClCompile Include="..\Private\Model_Manager.cpp" />
+    <ClCompile Include="..\Private\FreeList.cpp" />
+    <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\private\RadialBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClCompile>
@@ -1138,6 +1154,9 @@
     </ClCompile>
     <ClCompile Include="..\private\SubsurfaceScattering.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ScreenSpaceReflection.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

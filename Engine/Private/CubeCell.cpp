@@ -70,8 +70,8 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 	{
 		// LOD SetUp
 		// Low Depth (Cell 단위)
-		if(m_iDepth >= 3)
-			Compute_Cell_LOD(vCamPos);
+		//if(m_iDepth >= 3)
+		Compute_Cell_LOD(vCamPos);
 
 		for (auto& pObject : m_Objects)
 		{
@@ -79,17 +79,25 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 				continue;
 			if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
 			{
-				if (m_iDepth <= 3)
-					m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
-				pObject->Set_LOD(0);
+				//if (m_iDepth <= 3)
+				m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
+				//pObject->Set_LOD(0);
+				m_iLODIndex = pObject->IsMaxLOD(m_iLODIndex);
+				pObject->Set_LOD(m_iLODIndex);
+
 				// Root는 각 객체 Push
 				if (0 == m_iDepth)
 				{
-					m_pGameInstance->Add_Render_StaticObject(pObject);
+					if (Container)
+						Container[pObject->Get_LOD()].push_back(pObject);
+					//else
+					//	m_pGameInstance->Add_To_RenderTest(m_iLODIndex, pObject);
+					//m_pGameInstance->Add_Render_StaticObject(pObject);
+					//Safe_AddRef(pObject);
 				}
 				// Leaf는 Local Container에 담은 후 병합
 				else
-					Container->push_back(pObject);
+					Container[pObject->Get_LOD()].push_back(pObject);
 			}
 		}
 
@@ -101,10 +109,21 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 				if(0 == m_iDepth)
 				{
 					// Thread
-					m_pGameInstance->Add_Work([&, vCamPos]() {
-							vector<CStaticObject*> Container;
-							pCell->Update(vCamPos, &Container);
-							m_pGameInstance->Add_Render_StaticObject(Container);
+					//m_pGameInstance->Add_Work([&, vCamPos]() {
+					//		vector<CStaticObject*> Container[4];
+					//		pCell->Update(vCamPos, Container);
+					//		m_pGameInstance->Add_To_RenderTest(Container);
+					//		//m_pGameInstance->Add_Render_StaticObject(Container);
+					//	});
+					m_pGameInstance->Add_Work([=, Cell = pCell, CamPos = vCamPos]() {
+						vector<CStaticObject*> Container[4];
+						Container[0].reserve(1000);
+						Container[1].reserve(1000);
+						Container[2].reserve(1000);
+						Container[3].reserve(1000);
+						Cell->Update(CamPos, Container);
+						//m_pGameInstance->Add_To_RenderTest(Container);
+						m_pGameInstance->Add_Render_StaticObject(Container);
 						});
 				}
 				else
@@ -172,8 +191,8 @@ _bool CCubeCell::isIn(const _float* pMinMax)
 void CCubeCell::Compute_Cell_LOD(const _fvector& vCamPos)
 {
 	_int iLODCnt = m_iLODCnt.load(memory_order_acquire);
-	if (iLODCnt > MAX_LOD)
-		return;
+	/*if (iLODCnt > MAX_LOD)
+		return;*/
 
 	_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat3(&m_pBoundingBox->Center) - vCamPos));
 	m_iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
@@ -183,8 +202,8 @@ void CCubeCell::Compute_Cell_LOD(const _fvector& vCamPos)
 _uint CCubeCell::Compute_Object_LOD(CStaticObject* pObject, const _fvector& vCamPos)
 {
 	_int iLODCnt = m_iLODCnt.load(memory_order_acquire);
-	if (iLODCnt > MAX_LOD)
-		return m_iLODIndex;
+	/*if (iLODCnt > MAX_LOD)
+		return m_iLODIndex;*/
 
 	_vector vCenter = XMLoadFloat3(&pObject->Get_BoundingBox()->Center);
 	_float fDistance = XMVectorGetX(XMVector3Length(vCenter - vCamPos));

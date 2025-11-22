@@ -25,9 +25,9 @@ HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
 	Ready_Component(pArg);
 
 	//나중에 풀때기 흔드는 거 하려면 업데이트가 필요해서 임시 조치.
-	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
-	Sync_Sectors();
-	AddRef();
+	//m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
+	//AddRef();
+	//Sync_Sectors();
     return S_OK;
 }
 
@@ -44,59 +44,58 @@ void CMapObject_Instance::Update(_float fTimeDelta)
 
 void CMapObject_Instance::Late_Update(_float fTimeDelta)
 {
-	//m_pGameInstance->Add_Render_StaticObject(this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CMapObject_Instance::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
+void CMapObject_Instance::Render()
 {
 	_uint iLODIndex = m_iLODIndex;
 	if (m_iNumLOD <= iLODIndex)
 		iLODIndex = m_iNumLOD;
 
-	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map_Instance"), iIndex);
-	//m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
-	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
-	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+	//m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	_uint iNumMesh = m_pModelComArray[iLODIndex]->Get_NumMesh();
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
-		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect)))
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
 		{
-			//m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
+			//m_pModelCom->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK);
 			HasMask = false;
 		}
 		if (HasMask)
 		{
-			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0, pEffect);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
 
-			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0, pEffect)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 				HasNormal = false;
 		}
 
-		//m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
-		//m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
-		m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4), pEffect);
-		m_pShaderCom->Bind_Value("g_fRaidan", &m_fTotalTime, sizeof(_float), pEffect);
-		m_pShaderCom->Begin(0, pDeferredContext, pEffect);
-		
-		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
+		//m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		//m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4));
+		m_pShaderCom->Bind_Value("g_fRaidan", &m_fTotalTime, sizeof(_float));
+		m_pShaderCom->Begin(m_iShaderPassIndex);
+
+		m_pModelCom->Render(i);
 
 		// Clear Pre Resource
-		//m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
-		//m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
-		//m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
+		//m_pModelCom->Clear_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		//m_pModelCom->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		//m_pModelCom->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK);
 	}
 }
 
@@ -107,47 +106,31 @@ void CMapObject_Instance::Render_Shadow()
 void CMapObject_Instance::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-	//m_iSaveIndex = pDesc->iSaveIndex;
-
-	/*CMesh_Instance::MESH_INST_DESC Desc{};
-	Desc.iNumInstance = pDesc->iNumInstance;
-	Desc.pTransformMatrix = pDesc->InstanceWorldMatrix;*/
 
 	_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
 	ProtoName += StringToWString(pDesc->ModelName);
 
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_vDiffuseColor = pDesc->vDiffuseColor;
-	m_pModelComArray.resize(V);
-
-	for (_uint i = 0; i < V; ++i)
-	{
-		//_wstring ModelCom = Model;
-		//ModelCom.pop_back();
-		//ModelCom += to_wstring(i);
 
 		_char ModelName[MAX_PATH] = {};
-		sprintf_s(ModelName, "Com_Model%d", i);
+		sprintf_s(ModelName, "Com_Model%d", 0);
 		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ProtoName,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 			CRASH("FAILED");
 
-
-	}
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
 
 	// DeferredShader
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map_Instance"),
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh_Instance"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 
 	// ShadowShader
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
-		TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
-		CRASH("FAILED");
+	//if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh_Instance"),
+	//	TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
+	//	CRASH("FAILED");
 
 	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
 	if (!m_pBoundingBox)
@@ -205,9 +188,5 @@ void CMapObject_Instance::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
-
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-
-	m_pModelComArray.clear();
+	Safe_Release(m_pModelCom);
 }

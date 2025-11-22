@@ -16,8 +16,11 @@ private:
 public:
 	HRESULT				Initialize(_uint iNumThread);
 	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
+	//HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
+	//HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
-	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject, _uint iNumLODIndex);
+	HRESULT				Add_Render_StaticObject(vector<class CStaticObject*>* Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void				Render();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
@@ -29,7 +32,8 @@ public:
 	void				Setting_LUT(_uint iIndex, _float fIntensity, _bool IsDynamicLUT) { m_iLUT_Index = iIndex, m_fLutLerpIntensity = fIntensity, m_IsDynamicLUT = IsDynamicLUT; }
 	void				Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut);
 	void				Render_ShadowMap();
-
+	void				Render_LOD(_uint iLODIndex);
+	void				Render_LOD_Weight();
 	void				Clear_Resource();
 
 #ifdef _DEBUG
@@ -58,13 +62,13 @@ private:
 
 	// Culling
 	list<class CGameObject*>					m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
-	vector<class CStaticObject*>				m_StaticObjects[2];
+	//vector<class CStaticObject*>				m_StaticObjects[2];
+	vector<class CStaticObject*>				m_StaticObjects[2][4];
 	atomic<_uint>								m_iDoubleBufferIndex = {};
 	atomic<_uint>								m_iCullStack = {};
 	atomic<_bool>								m_isCompleteFrustumCull = { false };
-	list<class CGameObject*>					m_ShadowMapObjects;
 	_uint										m_iNumPreRenderObject = {};
-
+	list<class CGameObject*>					m_ShadowMapObjects;
 
 	class CShader*							m_pShader = { nullptr };
 	class CVIBuffer_Rect*					m_pVIBuffer = { nullptr };
@@ -84,7 +88,7 @@ private:
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
 	_bool									m_IsFog = { true };
-	_bool									m_IsSSS = { true };
+	_bool									m_IsSSS = { false };		// 카툰이라 큰 차이가 없음,,
 
 	_float									m_fExposure = {};
 
@@ -131,7 +135,7 @@ private:
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();
-
+	void						Render_NonStatic();
 #ifdef _DEBUG
 	void						Render_Debug();
 #endif
