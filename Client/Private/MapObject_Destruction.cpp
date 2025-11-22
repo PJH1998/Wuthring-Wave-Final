@@ -31,7 +31,7 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 	if (FAILED(Ready_Component(pArg)))
 		return E_FAIL;
 
-	m_iNumLOD = m_pModelComArray.size() - 1;
+	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 
 	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
 	if (!m_pBoundingBox)

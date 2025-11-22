@@ -12,8 +12,10 @@ CModel_Manager::CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CModel_Manager::Initialize()
+HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 {
+	m_iMaxLevel = iMaxLevel;
+	m_ModelPrototypes = new unordered_map<_string, class CModel_Streaming*>[iMaxLevel];
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
 	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
@@ -29,18 +31,19 @@ HRESULT CModel_Manager::Initialize()
 
 	if (FAILED(m_pDevice->CreateBuffer(&StagingDesc, nullptr, &m_pStagingBuffer)))
 		CRASH("Failed");
-	m_iSearchIndex = m_ModelPrototypes.begin();
+	m_iSearchIndex = m_ModelPrototypes[0].begin();
 	m_RenderObjects[0].reserve(500);
 	m_RenderObjects[1].reserve(500);
 	m_RenderObjects[2].reserve(500);
 	m_RenderObjects[3].reserve(500);
+
 	return S_OK;
 }
 
 void CModel_Manager::Update(_float fTimeDelta)
 {
 	m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
-	iCurrentLoadCnt = 0;
+	m_iCurrentLoadCnt = 0;
 	for (_uint i = 0; i < m_DeleteList.size(); ++i)
 	{
 		auto& Data = m_DeleteList[i];
@@ -138,14 +141,14 @@ void CModel_Manager::Update(_float fTimeDelta)
 		Release_Vector(pTempVector);
 	}
 
-	if (m_ModelPrototypes.empty())
+	if (m_ModelPrototypes[m_iCurrentLevel].empty())
 		return;
 
 
-	if (m_iSearchIndex == m_ModelPrototypes.end())
-		m_iSearchIndex = m_ModelPrototypes.begin();
+	if (m_iSearchIndex == m_ModelPrototypes[m_iCurrentLevel].end())
+		m_iSearchIndex = m_ModelPrototypes[m_iCurrentLevel].begin();
 	_uint iCheckCount = { 0 };
-	while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes.end())
+	while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes[m_iCurrentLevel].end())
 	{
 		CModel_Streaming* pModel = m_iSearchIndex->second;
 		for (_uint i = 0; i < 3; ++i)
@@ -183,7 +186,7 @@ HRESULT CModel_Manager::RegisterPrototype(const _char* pFilePath, CModel_Streami
 	if (!pModel)
 		CRASH("Failed");
 
-	m_ModelPrototypes.emplace(pFilePath, pModel);
+	m_ModelPrototypes[m_iCurrentLevel].emplace(pFilePath, pModel);
 	Safe_AddRef(pModel);
 
 	return S_OK;
@@ -198,13 +201,13 @@ void CModel_Manager::RequestData(CModel_Streaming* pModel, const _string& pFileP
 	if (LoadState != LOADSTATE::NOTLOADED)
 		return;
 
-	if (iCurrentLoadCnt > 5)
+	if (m_iCurrentLoadCnt > 5)
 		return;
 
 	LOADSTATE ExpectedState = LOADSTATE::NOTLOADED;
 	if (LoadState.compare_exchange_strong(ExpectedState, LOADSTATE::LOADING))
 	{
-		iCurrentLoadCnt++;
+		m_iCurrentLoadCnt++;
 		//파일 경로 전체는 모델 매니저에 저장. 파일 이름(뒤에 LOD가 붙어야하니까)은 모델에 저장?
 		m_pGameInstance->Add_Work([=, lModel = pModel, lFilePath = pFilePath, liLODIndex = iLODIndex, Matrix = XMLoadFloat4x4(&m_PreTransformMatrix)]() {
 			LoadData(lModel, lFilePath, liLODIndex, Matrix);
@@ -374,17 +377,30 @@ void CModel_Manager::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC
 
 void CModel_Manager::Destroy_RigidData()
 {
-	for (auto& pModel : m_ModelPrototypes)
+	for (auto& pModel : m_ModelPrototypes[m_iCurrentLevel])
 		pModel.second->Destroy_RigidData();
+}
+
+void CModel_Manager::Clear_Resource(_uint iLevel)
+{
+	for (auto& pPair : m_ModelPrototypes[iLevel])
+		Safe_Release(pPair.second);
+	m_ModelPrototypes[iLevel].clear();
+}
+
+void CModel_Manager::Change_Level(_uint iLevel)
+{
+	m_iCurrentLevel = iLevel;
+	m_iSearchIndex = m_ModelPrototypes[iLevel].begin();
 }
 
 void CModel_Manager::LoadLastLOD()
 {
-	for (auto& pModel : m_ModelPrototypes)
+	for (auto& pModel : m_ModelPrototypes[m_iCurrentLevel])
 	{
 		pModel.second->RequestModel();
-		//for (_uint i = 0; i < 4; ++i)
-		//	pModel.second->Get_SharedBuffers(i, m_pBufferPool[i]->Get_VertexBuffer(), m_pBufferPool[i]->Get_IndexBuffer());
+		for (_uint i = 0; i < 4; ++i)
+			pModel.second->Get_SharedBuffers(i, m_pBufferPool[i]->Get_VertexBuffer(), m_pBufferPool[i]->Get_IndexBuffer());
 	}
 
 	m_pGameInstance->Wait_Thread_End();
@@ -475,11 +491,11 @@ void CModel_Manager::Add_To_RenderTest(vector<class CStaticObject*>* Container)
 	}
 }
 
-CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CModel_Manager* CModel_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,_uint iMaxLevel)
 {
 	CModel_Manager* pInstance = new CModel_Manager(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize()))
+	if (FAILED(pInstance->Initialize(iMaxLevel)))
 	{
 		MSG_BOX("Failed to Create : Model_Manager");
 		Safe_Release(pInstance);
@@ -495,14 +511,17 @@ void CModel_Manager::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
+	for (_uint i = 0; i < m_iMaxLevel; ++i)
+	{
+		for (auto& pPair : m_ModelPrototypes[i])
+			Safe_Release(pPair.second);
+		m_ModelPrototypes[i].clear();
+	}
+	Safe_Delete_Array(m_ModelPrototypes);
+
 	for (_uint i = 0; i < 4; ++i)
 		Safe_Release(m_pBufferPool[i]);
 	Safe_Release(m_pStagingBuffer);
-
-	for(auto& pPair: m_ModelPrototypes)
-		Safe_Release(pPair.second);
-	m_ModelPrototypes.clear();
-
 
 	for (auto& Pair: m_RenderObjects)
 		for (auto& pObject : Pair.second)
@@ -511,5 +530,7 @@ void CModel_Manager::Free()
 
 	m_DeleteList.clear();
 	m_StagingData.clear();
+	for (auto& pData : m_DataPool)
+		pData.pModel = nullptr;
 	m_DataPool.clear();
 }

@@ -46,7 +46,7 @@ HRESULT CLevel_Manager::Clear_CurrentLevel_Resources(_uint iNextLevel)
 
 	// Level 생성 시점에 해당 레벨을 CurrentLevel로 갖고 있는다.
 	m_iCurrentLevel = iNextLevel;
-
+	m_pGameInstance->Model_Manager_Change_Level(m_iCurrentLevel);
 	return hr;
 }
 

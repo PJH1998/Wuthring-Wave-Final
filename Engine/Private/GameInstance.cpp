@@ -133,7 +133,7 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pVF = CVolumetricFog::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pVF);
 
-	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext);
+	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
 	ASSERT_CRASH(m_pModel_Manager);
 
 	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
@@ -1095,6 +1095,11 @@ void CGameInstance::Destroy_RigidData()
 	m_pModel_Manager->Destroy_RigidData();
 }
 
+void CGameInstance::Model_Manager_Change_Level(_uint iLevel)
+{
+	m_pModel_Manager->Change_Level(iLevel);
+}
+
 #pragma region SFX_HUB
 HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
@@ -1161,6 +1166,8 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 	if (FAILED(m_pPrototype_Manager->Clear_Resource(iLevelID)))
 		return E_FAIL;
 
+	if (m_pModel_Manager)
+		m_pModel_Manager->Clear_Resource(iLevelID);
 	return S_OK;
 }
 

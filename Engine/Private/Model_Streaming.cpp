@@ -21,9 +21,9 @@ CModel_Streaming::CModel_Streaming(const CModel_Streaming& Prototype)
 	for (_uint i = 0; i < 4; ++i)
 		m_iNumMeshes[i] = Prototype.m_iNumMeshes[i];
 
-	for (_uint i = 0; i < 4; ++i)
-		if (Prototype.m_Meshes[i])
-			m_Meshes[i] = dynamic_cast<CMesh_Streaming*>(Prototype.m_Meshes[i]->Clone(nullptr));
+	//for (_uint i = 0; i < 4; ++i)
+	//	if (Prototype.m_Meshes[i])
+	//		m_Meshes[i] = dynamic_cast<CMesh_Streaming*>(Prototype.m_Meshes[i]->Clone(nullptr));
 
 	for (auto& pMaterial : m_Materials)
 		Safe_AddRef(pMaterial);
@@ -237,7 +237,7 @@ HRESULT CModel_Streaming::Get_SharedBuffers(_uint iLODIndex, ID3D11Buffer* pVert
 
 _bool CModel_Streaming::Is_Overed(_uint iLODIndex, _uint iMeshIndex)
 {
-	return m_Meshes[iLODIndex]->Is_Overed(iMeshIndex);
+	return m_pModelPrototype->m_Meshes[iLODIndex]->Is_Overed(iMeshIndex);
 }
 
 _uint CModel_Streaming::Get_LastLODIndex()
