@@ -27,7 +27,7 @@ public:
 
 private:
 	enum ATK_SOCKET { HEAD0, TAIL, END };
-	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, BURST, ATTACK8, ATK_END };
+	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK8, BURST, ATK_END };
 	enum CORO_SHADER {TAIL2, TAIL1, LEG, HEAD, BODY};
 private:
 	explicit CCorosaurus(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

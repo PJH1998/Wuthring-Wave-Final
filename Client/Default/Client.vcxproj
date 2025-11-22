@@ -196,6 +196,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\Coro_Rock.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
     <ClInclude Include="..\Public\Client_CharacterEnum.h" />
@@ -255,6 +256,8 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
     <ClInclude Include="..\Public\Mouse.h" />
+    <ClInclude Include="..\Public\NPCCell.h" />
+    <ClInclude Include="..\Public\NPCInstancing.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PatternDummy.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
@@ -402,6 +405,7 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\Coro_Rock.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
@@ -485,6 +489,8 @@
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Mouse.cpp" />
+    <ClCompile Include="..\Private\NPCCell.cpp" />
+    <ClCompile Include="..\Private\NPCInstancing.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PatternDummy.cpp" />

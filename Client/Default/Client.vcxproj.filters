@@ -333,7 +333,7 @@
     </Filter>
     <Filter Include="03. GameObject\ScreenEffect\SFX\GalbrenaUlti">
       <UniqueIdentifier>{32b72cfb-8e3e-47d5-ab33-2805cf83a753}</UniqueIdentifier>
-   	</Filter>
+    </Filter>
     <Filter Include="03. GameObject\Actor\NPC\DummyCell">
       <UniqueIdentifier>{8b8d53a6-3e7d-4e7d-b055-aff0ed90d33e}</UniqueIdentifier>
     </Filter>
@@ -342,6 +342,12 @@
     </Filter>
     <Filter Include="02. Level\Loader\Heaven">
       <UniqueIdentifier>{f672b5af-69df-45ee-9c9f-31768c941e46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\NPCCell">
+      <UniqueIdentifier>{e12d60a7-524c-464e-bf51-4329d399d574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\CoroSaurus\Weapon">
+      <UniqueIdentifier>{323146fd-c508-439b-bc38-b85f0b22e928}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -905,6 +911,15 @@
     <ClInclude Include="..\public\DummyCell.h">
       <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\NPCInstancing.h">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\NPCCell.h">
+      <Filter>03. GameObject\Actor\NPC\NPCCell</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Coro_Rock.h">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1431,6 +1446,15 @@
     </ClCompile>
     <ClCompile Include="..\private\DummyCell.cpp">
       <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\NPCInstancing.cpp">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\NPCCell.cpp">
+      <Filter>03. GameObject\Actor\NPC\NPCCell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Coro_Rock.cpp">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

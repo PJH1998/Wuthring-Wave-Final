@@ -645,8 +645,8 @@ HRESULT CLoader_Test::Load_NPC()
 {
 	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) /** XMMatrixRotationY(XMConvertToRadians(180.f))*/;
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimInstanceTest"),
-		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, 30, 
-			"../../Client/Bin/Resource/Model/Monster/HavocWarrior/HavocWarrior.dat"))))
+		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, 50, 
+			"../../Client/Bin/Resource/Model/Monster/HavocWarrior/HavocWarrior.dat", nullptr))))
 		CRASH("Prototype Create Failed");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),

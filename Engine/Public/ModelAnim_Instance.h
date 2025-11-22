@@ -93,7 +93,7 @@ public:
 	//_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	_bool								Update_RootMotion(const _string& strAnimationName, class CTransform* pTransform, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	//충돌 상호작용 이후 최종 매트릭스 업데이트
-	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices = nullptr);
+	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices = nullptr, _uint iExtra = 0);
 	// Compute Shader
 	void								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom);
 	void								FetchModelMatrices_FromCompute(class CComputeShader* pComputeShaderCom);

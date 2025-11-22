@@ -65,10 +65,10 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
+	Ready_CoroSaurus();
+	//Ready_Spawner();
 	Ready_AnimInstanceTest();
 
     Ready_Effect();
@@ -452,7 +452,7 @@ void CLevel_Test::Ready_AnimInstanceTest()
 	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
 	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_AnimInstanceTest"));
 	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_DummyCell");
-	NPCDesc.vStartPositions = _float3(3.f, -6.f, 2.f);
+	NPCDesc.vStartPositions = _float3(18.f, -6.f, 2.f);
 	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);

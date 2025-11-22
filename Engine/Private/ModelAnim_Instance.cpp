@@ -216,41 +216,44 @@ HRESULT CModelAnim_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreT
 		m_iNumMeshType = static_cast<_uint>(strMeshTypes->size());
 
 	m_MeshTypeCounts.resize(m_iNumMeshType, 0);
-	ifstream InputFile(pFilePath, ios::binary);
-	if (false == InputFile.is_open())
-	{
-		MSG_BOX("Failed Open : Model");
-		return E_FAIL;
-	}
+	
 	m_iNumInstance = iNumInstance;
 
-	if (MODELTYPE::ANIM == m_eType)
+	if (m_iNumMeshType > 1 && nullptr != strMeshTypes)
 	{
-		if (FAILED(Ready_Bone(InputFile, -1)))
-			return E_FAIL;
-		m_iNumBones = static_cast<_uint>(m_Bones.size());
 
-		if (FAILED(Ready_Animation(pFilePath)))
-			return E_FAIL;
-	}
-	else if (MODELTYPE::ECO == m_eType)
-	{
-		if (FAILED(Ready_Bone(InputFile, -1)))
-			return E_FAIL;
-	}
-
-	if (m_iNumMeshType < 2)
-	{
-		if (FAILED(Ready_Mesh(InputFile)))
-			return E_FAIL;
 	}
 	else
 	{
+		ifstream InputFile(pFilePath, ios::binary);
+		if (false == InputFile.is_open())
+		{
+			MSG_BOX("Failed Open : Model");
+			return E_FAIL;
+		}
 
+		if (MODELTYPE::ANIM == m_eType)
+		{
+			if (FAILED(Ready_Bone(InputFile, -1)))
+				return E_FAIL;
+			m_iNumBones = static_cast<_uint>(m_Bones.size());
+
+			if (FAILED(Ready_Animation(pFilePath)))
+				return E_FAIL;
+		}
+		else if (MODELTYPE::ECO == m_eType)
+		{
+			if (FAILED(Ready_Bone(InputFile, -1)))
+				return E_FAIL;
+		}
+
+		if (FAILED(Ready_Mesh(InputFile)))
+			return E_FAIL;
+
+		if (FAILED(Ready_Material(pFilePath)))
+			return E_FAIL;
+		InputFile.close();
 	}
-	if (FAILED(Ready_Material(pFilePath)))
-		return E_FAIL;
-	InputFile.close();
 
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
@@ -420,12 +423,12 @@ _bool CModelAnim_Instance::Update_RootMotion(const _string& strAnimationName, CT
 	return bIsAnimationEnd;
 }
 
-void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices)
+void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices, _uint iExtra)
 {
 	m_AnimCBInfos[iInstanceIndex].fTrackPosition = *pTrackPosition;
 	m_AnimCBInfos[iInstanceIndex].iAnimindex = m_AnimationNameToIndex[strAnimationName];
 	m_AnimCBInfos[iInstanceIndex].IsRibAnimUsed = false;
-	m_AnimCBInfos[iInstanceIndex].iRibbonAnimIndex = 0;
+	m_AnimCBInfos[iInstanceIndex].iRibbonAnimIndex = iExtra;
 
 	//_matrix FixedWorldMatrix = XMLoadFloat4x4(&m_PreTransformMatrix) * WorldMatrix;
 
