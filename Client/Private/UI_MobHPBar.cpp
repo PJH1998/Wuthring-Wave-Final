@@ -175,17 +175,20 @@ void CUI_MobHPBar::PreAssign_ChildUIs()
 	//m_pUI_SABar		= Find_ChildObject(L"InstSABar");
 
 	m_pUI_HB		= Find_ChildObject(L"InstHPBar");
+	m_pUI_Frame		= Find_ChildObject(L"InstHPFrame");
 }
 
 void CUI_MobHPBar::PreAssign_Presets()
 {
-	_float4 vGreenHB  = { 0.188f, 1.000f, 0.608f, 1.000f };
-	_float4 vYellowHB = { 0.973f, 1.000f, 0.188f, 1.000f };
-	_float4 vRedHB    = { 1.000f, 0.037f, 0.188f, 1.000f };
+	_float4 vGreenHB		= { 0.188f, 1.000f, 0.608f, 1.000f };
+	_float4 vYellowHB		= { 0.973f, 1.000f, 0.188f, 1.000f };
+	_float4 vRedHB			= { 1.000f, 0.037f, 0.188f, 1.000f };
+	_float4 vBackgroundHB   = { 0.200f, 0.200f, 0.200f, 1.000f };
 
-	m_arrColorPresets[HPC_GREEN]	= vGreenHB;
-	m_arrColorPresets[HPC_YELLOW]	= vYellowHB;
-	m_arrColorPresets[HPC_RED]		= vRedHB;
+	m_arrColorPresets[HPC_GREEN]		= vGreenHB;
+	m_arrColorPresets[HPC_YELLOW]		= vYellowHB;
+	m_arrColorPresets[HPC_RED]			= vRedHB;
+	m_arrColorPresets[HRC_BACKGROUND]	= vBackgroundHB;
 }
 
 void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
@@ -252,6 +255,7 @@ void CUI_MobHPBar::Update_Instances()
 {
 	const _float fDistancecPivot = 10.f;
 
+	PreAssign_Presets(); // FORR RUNTIME TEST, TEMP
 
 	vector<CCustom_UI*> vecFloatingUIs = {};
 	//vecFloatingUIs.push_back(m_pUI_HPFrame);
@@ -259,6 +263,7 @@ void CUI_MobHPBar::Update_Instances()
 	//vecFloatingUIs.push_back(m_pUI_SAFrame);
 	//vecFloatingUIs.push_back(m_pUI_SABar);
 	vecFloatingUIs.push_back(m_pUI_HB);
+	vecFloatingUIs.push_back(m_pUI_Frame);
 
 
 	for (auto& floatingUI : vecFloatingUIs)
@@ -270,7 +275,7 @@ void CUI_MobHPBar::Update_Instances()
 
 		Calc_ApplyTargetPos(floatingUI);
 
-		if (floatingUI->Get_UIDesc().strUIName == L"InstHPBar")
+		//if (floatingUI->Get_UIDesc().strUIName == L"InstHPBar")
 			Calc_CamDistScale(floatingUI, fDistancecPivot);
 
 	}
@@ -506,11 +511,15 @@ void CUI_MobHPBar::Calc_HBEff()
 {
 	// 여기서 variant desc 재정의 및  변수 전달, 색상 수정 ㅇㅇ
 
-	auto targetDesc = m_pUI_HB->Get_UIDesc();	// for Normal Desc
+	auto targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
+	auto targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
+	auto& vecBGInstDesc = targetBGDesc.vecInstanceDescs;
 
 	vector<_float4x4> vecVariantMat = {};		// for Variant Desc
 	vecVariantMat.resize(vecInstDesc.size());
+	vector<_float4x4> vecBGVariantMat = {};		// for BG Variant Desc
+	vecBGVariantMat.resize(vecBGInstDesc.size());
 
 	// 갯수만큼 수정,
 
@@ -527,7 +536,7 @@ void CUI_MobHPBar::Calc_HBEff()
 		const _float fElapsedLifetime = m_vecMobInfo_RT[i].fCurElapsedTime;		// 인스턴스 별 경과 시간
 		const _float fHPRatio = fInstCurHP / fInstMaxHP;						// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
 		
-		const _float fFillTime	= 0.27f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
+		const _float fFillTime	= 0.35f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
 		const _float fFlickStartHPRatio = 0.5f;		// 체력이 얼마나 남았을 때 부터 깜빡임을 시작할 건지 
 
 		// 1. 시간에 따른 HB 관리
@@ -559,9 +568,14 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		const _float fCoordSpeedX = 1.5f; //                                    			<<<<<<<<<<<<<<<<<<<<
 
+
+
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
 		auto& targetVariantMat = vecVariantMat[i];
+		auto& targetBGInst = vecBGInstDesc[i];
+		auto& targetBGVariantMat = vecBGVariantMat[i];
+
 		targetInst.vClipTexcoordX = { 0.f, fClipXRate };
 
 		*reinterpret_cast<_float4*>(&targetVariantMat._11)	= vColorRate;
@@ -571,12 +585,19 @@ void CUI_MobHPBar::Calc_HBEff()
 		*reinterpret_cast<_float*>(&targetVariantMat._33)	= fStackedTime;
 		*reinterpret_cast<_float*>(&targetVariantMat._34)	= fCoordSpeedX;
 
-		
+		*reinterpret_cast<_float4*>(&targetBGVariantMat._11) = m_arrColorPresets[HRC_BACKGROUND];
+		*reinterpret_cast<_float4*>(&targetBGVariantMat._21) = m_arrColorPresets[HRC_BACKGROUND];
+		*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;// fAlphaRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._32) = fScaleRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._33) = fStackedTime;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._34) = fCoordSpeedX;
+
 		// 체력이 특정 이상일 때에는 애니메이션 반영 없이 그대로
 		if (fHPRatio > fFlickStartHPRatio)
 		{
 			targetInst.vClipTexcoordX = { 0.f, 1.f };
 			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;		// alpha
+			*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;		// alpha
 			//*reinterpret_cast<_float*>(&targetVariantMat._32) = 2.f;		// scale
 			//m_vecMobInfo_RT[i].fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
 		}
@@ -587,6 +608,7 @@ void CUI_MobHPBar::Calc_HBEff()
 
 			targetInst.vClipTexcoordX = { 0.f, 1.f };
 			*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;
+			*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;
 		}
 
 		
@@ -608,10 +630,19 @@ void CUI_MobHPBar::Calc_HBEff()
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
 		true
 	};
+	CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
+		vecBGVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ENEMY_HP),
+		true
+	};
 
 	targetDesc.vecInstanceDescs = vecInstDesc;
 	m_pUI_HB->Set_UIDesc(targetDesc);
 	m_pUI_HB->Set_VariantUIDesc(tVariantDesc);
+
+	targetDesc.vecInstanceDescs = vecBGInstDesc;
+	m_pUI_Frame->Set_UIDesc(targetBGDesc);
+	m_pUI_Frame->Set_VariantUIDesc(tBGVariantDesc);
 }
 
 CUI_MobHPBar* CUI_MobHPBar::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

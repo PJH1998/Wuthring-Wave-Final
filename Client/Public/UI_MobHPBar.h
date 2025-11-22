@@ -20,7 +20,7 @@ public:
 	}UI_MOBRT_DESC;
 
 private:
-	enum HP_COLOR { HPC_GREEN, HPC_YELLOW, HPC_RED, HPC_END};
+	enum HP_COLOR { HPC_GREEN, HPC_YELLOW, HPC_RED, HRC_BACKGROUND, HPC_END};
 
 public:
 	explicit CUI_MobHPBar(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -58,8 +58,9 @@ private:
 	//CCustom_UI*		m_pUI_SAFrame		= nullptr;
 	//CCustom_UI*		m_pUI_SABar			= nullptr;
 	CCustom_UI*			m_pUI_HB			= nullptr;
+	CCustom_UI*			m_pUI_Frame			= nullptr;
 
-	vector<UI_MOBINFO_DESC>		m_vecMobInfo = {};		// 프레임에서 받아온 정보들이 담긴 컨테이너
+	vector<UI_MOBINFO_DESC>		m_vecMobInfo = {};			// 프레임에서 받아온 정보들이 담긴 컨테이너
 	vector<UI_MOBRT_DESC>		m_vecMobInfo_RT = {};		// 실질적인 몬스터 정보를 들고 있는 컨테이너
 
 	// 0.	이전 프레임의 정보를 담은 컨테이너의 모든 isUpdatedThisFrame 을 false 로 돌림
@@ -77,7 +78,7 @@ private:
 	const _float			m_fMaxRTTime = 4.f;
 	const _float			m_fMinRTTime = 1.f;
 
-	array<_float4, 3>		m_arrColorPresets;
+	array<_float4, 4>		m_arrColorPresets;
 
 
 public:
