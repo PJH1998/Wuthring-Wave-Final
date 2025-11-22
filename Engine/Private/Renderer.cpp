@@ -808,14 +808,8 @@ void CRenderer::Render_SSR()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"))))
 		CRASH("Render Fail");
 	
-	if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
-		CRASH("Render Fail");
-
-	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSR))))
-		CRASH("Render Fail")
-
-	m_pVIBuffer->Bind_Resources();
-	m_pVIBuffer->Render();
+	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::SSR, m_pVIBuffer, m_pShader)))
+		return;
 
 	m_pGameInstance->End_MRT();
 
@@ -1393,6 +1387,7 @@ void CRenderer::Free()
 		m_pDeferredContext[i]->Flush();
 		Safe_Release(m_pDeferredContext[i]);
 	}
+	
 	Safe_Delete_Array(m_pDeferredContext);
 
 	for (auto& Pair : m_Effects)
@@ -1411,17 +1406,11 @@ void CRenderer::Free()
 		m_RenderObjects[i].clear();
 	}
 
-	for (auto& pDubble: m_RenderObjects)
-	{
-		for (auto& pObject : pDubble)
-		{
-			Safe_Release(pObject);
-		}
-		pDubble.clear();
-	}
-	m_RenderObjects->clear();
-
 	m_ShadowMapObjects.clear();
+
+	for (auto& pCL : m_CommandLists)
+		Safe_Release(pCL);
+	m_CommandLists.clear();
 
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer);

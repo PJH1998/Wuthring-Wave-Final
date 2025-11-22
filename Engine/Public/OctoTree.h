@@ -19,10 +19,10 @@ public:
 	void		Update();
 
 private:
-	class CGameInstance*	m_pGameInstance = { nullptr };
+	class CGameInstance*			m_pGameInstance = { nullptr };
 	_uint							m_iDepth = {};
 
-	class CCubeCell*			m_pRootCell = { nullptr };
+	class CCubeCell*				m_pRootCell = { nullptr };
 
 public:
 	static		COctoTree*		Create();

@@ -366,6 +366,7 @@ public:
 
 #ifdef _DEBUG
 	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
+	void					Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset);
 #endif
 #pragma endregion
 

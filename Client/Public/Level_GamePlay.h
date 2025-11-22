@@ -46,6 +46,10 @@ private:
 	_bool	m_IsDyanmicLUT = { false };
 	_bool	m_IsSSS = { true };
 	_float	m_fExposure = { 0.6f };
+
+	_float m_fMinStep = { 5.f };
+	_float m_fMaxStep = { 20.f };
+	_float m_fStart = { 10.f };
 #endif
 
 private:
