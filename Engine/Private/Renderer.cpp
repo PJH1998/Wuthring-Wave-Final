@@ -1386,6 +1386,16 @@ void CRenderer::Free()
 		m_RenderObjects[i].clear();
 	}
 
+	for (auto& pDubble: m_RenderObjects)
+	{
+		for (auto& pObject : pDubble)
+		{
+			Safe_Release(pObject);
+		}
+		pDubble.clear();
+	}
+	m_RenderObjects->clear();
+
 	m_ShadowMapObjects.clear();
 
 	Safe_Release(m_pShader);

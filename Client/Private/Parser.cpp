@@ -524,6 +524,12 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 		//파일 정보
 		_string extension = entry.path().extension().string();
 
+
+		//if (entry.path().extension() != ".json")
+		//	continue;
+		//npos 가 !=이 있는건지 ==가 있는건지는 매일 헷갈리니 알아볼것.
+		//if((entry.path().string().find("FXDecal") != string::npos))
+
 		if (extension == ".json")
 		{
 			_string strParticleVBTag = entry.path().stem().string();
@@ -603,7 +609,7 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 
 	strEffectPath = strDefaultPath;
 	strEffectPath += "/FXDecal/";
-	return;
+
 	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
 	{
 		if (entry.is_regular_file())
