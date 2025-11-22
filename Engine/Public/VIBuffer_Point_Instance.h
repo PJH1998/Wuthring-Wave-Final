@@ -53,10 +53,12 @@ public:
 	virtual HRESULT Bind_Resources() override;
 	virtual HRESULT Render() override;
 
-	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // 바꿀 일 있을 경우 여기에 값 추가해서 바꿔줘야함.
+	void Bind_CS_Pivot(_vector vRight, _vector vUp, _vector vLook); // 바꿀 일 있을 경우 여기에 값 추가해서 바꿔줘야함.
 	void Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc = nullptr);
 	void Bind_CSResources(class CComputeShader* pCShader);
 	void Reset_UAV(class CComputeShader* pCShader);
+	void Reset_CS_Option();
+
 
 //public:
 //	void Spread(_float fTimeDelta);
@@ -64,7 +66,7 @@ public:
 //	void Rotation(_float fTimeDelta);
 
 private:
-	_float3					m_vPivot = {};			//어차피 컴셰로 계산하는데 필요없어보임.
+	_float3					m_vPivot = {};		
 	_float*					m_pSpeeds = {};
 	_bool					m_isLoop = {};
 

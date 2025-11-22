@@ -8,6 +8,7 @@
 
 #include "Level_Logo.h"
 #include "Level_GamePlay.h"
+#include "Level_Heaven.h"
 #include "Level_Test.h"
 #include "Level_Test_UI.h"
 
@@ -99,6 +100,9 @@ void CMainApp::Post_Update()
 				break;
 			case LEVEL::GAMEPLAY:
 				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
+				break;
+			case LEVEL::HEAVEN:
+				pLevel = CLevel_Heaven::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
