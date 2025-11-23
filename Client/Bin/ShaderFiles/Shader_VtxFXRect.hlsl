@@ -224,7 +224,7 @@ PS_OUT PS_TESTA(PS_IN In)
     
    //if (Out.vDiffuse.a < 0.1f)
    //    discard;
-    if (Out.vDiffuse.a <= 0.0f)
+    if (Out.vDiffuse.a <= 0.05f)
         discard;
    
 

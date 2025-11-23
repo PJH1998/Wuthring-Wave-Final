@@ -164,11 +164,15 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 
 void CCorosaurus::Effect_Active(const _wstring& wStrEffectTag)
 {
-	/*if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);*/
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
 }
 
 void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)

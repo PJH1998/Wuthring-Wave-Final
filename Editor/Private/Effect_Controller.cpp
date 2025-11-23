@@ -468,6 +468,7 @@ void CEffect_Controller::Prefab_Tab()
                                 m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
                                 m_pParticle_Controller->Remove_Desc(m_strChildrenTag);
+								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
 
                                 Reset_ChildrenInfo();
                             }
@@ -477,6 +478,7 @@ void CEffect_Controller::Prefab_Tab()
                                 m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
                                 m_pMesh_Controller->Remove_Desc(m_strChildrenTag);
+								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
 
                                 Reset_ChildrenInfo();
                             }
@@ -486,6 +488,7 @@ void CEffect_Controller::Prefab_Tab()
                                 m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
                                 m_pTrailMesh_Controller->Remove_Desc(m_strChildrenTag);
+								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
 
                                 Reset_ChildrenInfo();
                             }
@@ -495,6 +498,7 @@ void CEffect_Controller::Prefab_Tab()
 								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
 								m_pRect_Controller->Remove_Desc(m_strChildrenTag);
+								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
 
 								Reset_ChildrenInfo();
 							}
@@ -504,6 +508,7 @@ void CEffect_Controller::Prefab_Tab()
 								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
 								m_pDecal_Controller->Remove_Desc(m_strChildrenTag);
+								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
 
 								Reset_ChildrenInfo();
 							}
@@ -513,6 +518,7 @@ void CEffect_Controller::Prefab_Tab()
 								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
 								m_pRadial_Controller->Remove_Desc(m_strChildrenTag);
+								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
 
 								Reset_ChildrenInfo();
 							}
@@ -1390,6 +1396,7 @@ void CEffect_Controller::Radial_To_Json(json& Radial, CEffect_Radial::RADIAL_DES
 {
 	Radial["MyTag"] = WStringToString(pRadialDesc->strMyTag);
 	Radial["MyType"] = pRadialDesc->eMyType;
+	Radial["PositionFlag"] = pRadialDesc->PositionFlag;
 
 	Radial["LifeTime"] = pRadialDesc->fLifeTime;
 

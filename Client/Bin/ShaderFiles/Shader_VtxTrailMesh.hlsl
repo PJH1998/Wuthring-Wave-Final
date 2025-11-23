@@ -508,6 +508,11 @@ PS_OUT PS_TraillDissolve(PS_IN In)
 
     Out.vDiffuse = vColor;
 
+    if (Dissolve - fRatio <= 0.1f)
+    {
+        Out.vDiffuse.rgb *= 3.f;
+    }
+    
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
