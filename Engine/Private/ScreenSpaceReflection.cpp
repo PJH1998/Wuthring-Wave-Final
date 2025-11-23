@@ -30,6 +30,9 @@ HRESULT CScreenSpaceReflection::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShad
 	if (FAILED(pShader->Bind_Texture("g_BackBufferTexture", m_pGameInstance->Get_CurrentSceneSRV())))
 		CRASH("Render Fail");
 
+	if (FAILED(pShader->Bind_Texture("g_EnvMapTexture", m_pGameInstance->Get_EnvMap(0))))
+		CRASH("Render Fail");
+
 	if (FAILED(pShader->Bind_Value("g_fMinStepSize", &m_fMinStepSize, sizeof(_float))))
 		CRASH("Failed Bind g_fMinStepSize");
 	if (FAILED(pShader->Bind_Value("g_fMaxStepSize", &m_fMaxStepSize, sizeof(_float))))

@@ -70,6 +70,7 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 	}
 	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
 		m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
+
 	return S_OK;
 }
 

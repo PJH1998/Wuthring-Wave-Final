@@ -38,6 +38,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
 	virtual		void			Render_Shadow() override;
+	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold){};
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};

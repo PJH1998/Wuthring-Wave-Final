@@ -21,6 +21,7 @@ public:
 public:
 	HRESULT			Initialize(const LIGHT_DESC& LightDesc);
 	HRESULT			Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT			Render_EnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
 
 private:
 	CGameInstance*	m_pGameInstance = { nullptr };

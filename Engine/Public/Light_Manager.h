@@ -22,6 +22,7 @@ public:
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Clear_Light();
 	HRESULT					Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT					Render_EnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
 
 private:
 	map<_wstring, CLight*>		m_Lights;
