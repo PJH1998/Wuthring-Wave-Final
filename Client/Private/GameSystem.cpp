@@ -243,9 +243,9 @@ void CGameSystem::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	m_pUI_ControlHelper->Update_MobStatus(tDesc);
 }
 
-void CGameSystem::Show_TabUtilityUI()
+void CGameSystem::Show_TabUtilityUI(_uint iCurSelectedUtilityIndex)
 {
-	m_pUI_ControlHelper->Show_TabUtilityUI();
+	m_pUI_ControlHelper->Show_TabUtilityUI(iCurSelectedUtilityIndex);
 }
 
 _uint CGameSystem::HideNGet_TabUtilityUI()

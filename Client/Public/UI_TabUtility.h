@@ -6,6 +6,11 @@ NS_BEGIN(Client)
 class CUI_TabUtility final : public CCustom_UI
 {
 public:
+	typedef struct tTabUtilityUIIDesc {
+		_uint iCharSelectedUtilityIndex = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+	} UI_TABUTIL_DESC;
+
+public:
 	explicit CUI_TabUtility(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CUI_TabUtility(const CUI_TabUtility& Prototype);
 	virtual ~CUI_TabUtility() = default;
@@ -25,6 +30,7 @@ public:
 	_uint			Req_OffTabUI()	{ m_IsGoinDisabled = true; return m_iSelectedIndex; }
 
 private:
+	void			Update_InitialCheck_SelectedUtility();			// 여기서 캐릭터 현재 선택중인 게 뭔지 받아옴
 	void			Update_MouseSelection();
 
 	void			Update_GoinDisable(_float fTimeDelta);
@@ -33,6 +39,7 @@ private:
 	HRESULT			Ready_Components(void* pArg);
 
 	void			PreAssign_ChildUIs();
+	void			PreAssign_Presets();
 	void			Create_ChildText();
 
 private:
@@ -41,22 +48,33 @@ private:
 	CCustom_UI*			m_pUI_Back			= { nullptr };
 	CCustom_UI*			m_pUI_Hover			= { nullptr };
 	CCustom_UI*			m_pUI_Arrow			= { nullptr };
+	CCustom_UI*			m_pUI_GuideCircle	= { nullptr };
 
 	CCustom_UI*			m_pUI_InstHover		= { nullptr };
+	CCustom_UI*			m_pUI_InstSelected	= { nullptr };
 
-	CTransform*			m_pTransformCom_UIArrow			= { nullptr };
+	CCustom_UI*			m_pUI_CHSelectedIcon= { nullptr };
+
+	CCustom_UI*			m_pTextUI_Selected	= { nullptr };		// 텍스트가 바뀔 때 마다 Update_Alignment 호출 필요
+
+
+	CTransform*			m_pTransformCom_UIArrow		= { nullptr };
 
 
 	class CGameSystem*	m_pGameSystem		= { nullptr };
 
 private:
 	_uint				m_iSelectedIndex	= ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+	_uint				m_iCharSelectedIndex= ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
 
 	_bool				m_IsGoinDisabled	= false;
 	_float				m_fDisableTimer		= 0.f;
 	_uint				m_iAnimOrder		= 0;
 
+	_bool				m_isFirstCheckedSelectedUtil = false;
 	_bool				m_isFirstCheckedIndex	= false;
+
+	array<array<_float2, 2>, 5>	m_arrCoordPresets = {};
 
 public:
 	static CUI_TabUtility*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

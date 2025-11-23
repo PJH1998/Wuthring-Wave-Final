@@ -218,6 +218,19 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 void CUI_Text::Update_Description(_float fTimeDelta)
 {
 
+
+#ifdef _DEBUG
+
+	if (m_tUIDesc.strUIName == L"UI_Text_TabUtility")
+		int i = 10;
+
+#endif
+
+
+
+
+
+
 	// m_tTextDesc 갱신
 
 	const _wstring& text = m_tTextDesc.strText;
@@ -317,41 +330,50 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 #endif // KSTA_ON_TRANSFORM_CACHING
 
 }
-
 void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 {
-	// 인자가 기본값이라면 현재 타입으로,
-	// 임의값이라면 해당 타입으로 정렬합니다.
-
+	// 인자가 기본값이 아니면 정렬 타입 갱신
 	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
 		m_eTextAlignmentType = eAlignmentType;
 
-	if (m_tTextDesc.vecInstanceDescs.empty())		// 텍스트가 없으면 계산X
+	auto& insts = m_tTextDesc.vecInstanceDescs;
+	if (insts.empty())
 		return;
 
-	_uint iTextLength = m_tTextDesc.strText.size();
-	m_tTextDesc.vecInstanceDescs.resize(iTextLength);	// 글자 수에 맞게 인스턴스 재정의
+	// 폰트에서 패딩 가져오기 (x 방향 보정용)
+	_float pad = 0.f;
+	if (auto pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag))
+		pad = (_float)pFont->iPadding * m_tTextDesc.fScale;
 
-	const auto& firstInst = m_tTextDesc.vecInstanceDescs.front();
-	const auto& lastInst = m_tTextDesc.vecInstanceDescs.back();
+	const auto& firstInst = insts.front();
+	const auto& lastInst = insts.back();
 
-	_float fTotalVisualWidth = (lastInst.vSInstTrans.x + lastInst.vSInstRight.x) - firstInst.vSInstTrans.x;	// (문자열의 오른쪽 끝 좌표 - 왼쪽 끝 좌표)
+	// "보이는" 글자 영역 기준 좌/우/중앙
+	const _float fVisualLeft = firstInst.vSInstTrans.x + pad;
+	const _float fVisualRight = lastInst.vSInstTrans.x + lastInst.vSInstRight.x - pad;
+	const _float fVisualCenter = (fVisualLeft + fVisualRight) * 0.5f;
+	const _float fVisualWidth = fVisualRight - fVisualLeft;
 
-	_float fOffsetX = 0.f;
+	_float delta = 0.f;
 	switch (m_eTextAlignmentType)
 	{
-	case Client::TEXT_ALIGN_TYPE::LEFT:
-		fOffsetX = 0.f;
-		break;
-	case Client::TEXT_ALIGN_TYPE::CENTER:
-		fOffsetX = fTotalVisualWidth * 0.5f;
-		break;
-	case Client::TEXT_ALIGN_TYPE::RIGHT:
-		fOffsetX = fTotalVisualWidth;
-		break;
+	case Client::TEXT_ALIGN_TYPE::LEFT:			delta = m_vOriginScreenPos.x - fVisualLeft;		break;
+	case Client::TEXT_ALIGN_TYPE::CENTER:		delta = m_vOriginScreenPos.x - fVisualCenter;	break;
+	case Client::TEXT_ALIGN_TYPE::RIGHT:		delta = m_vOriginScreenPos.x - fVisualRight;	break;
+	default:																					return;
 	}
 
-	m_tTextDesc.vScreenPos.x = m_vOriginScreenPos.x - fOffsetX;
+	for (auto& inst : insts)				// align에 따른 전체 이동
+		inst.vSInstTrans.x += delta;
+
+	m_tTextDesc.vScreenPos.x += delta;
+}
+
+void CUI_Text::Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType)
+{
+	m_tTextDesc.strText = strText;
+	Update_Description(0.f);
+	Update_Alignment(eAlignmentType);
 }
 
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

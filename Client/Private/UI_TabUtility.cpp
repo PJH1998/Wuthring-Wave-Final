@@ -2,6 +2,8 @@
 #include "Animator_UI.h"
 
 #include "UI_TabUtility.h"
+#include "UI_Text.h"
+#include "GameSystem.h"
 
 #define	 IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
 #define	 FLOAT2_LENGTH(x)								(XMVectorGetX(XMVector2Length(XMLoadFloat2(x))))
@@ -16,6 +18,7 @@ CUI_TabUtility::CUI_TabUtility(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 CUI_TabUtility::CUI_TabUtility(const CUI_TabUtility& Prototype)
 	: CCustom_UI(Prototype)
+	, m_pGameSystem(CGameSystem::GetInstance())
 {
 }
 
@@ -30,11 +33,13 @@ HRESULT CUI_TabUtility::Initialize_Clone(void* pArg)
 
 	Ready_Components(pArg);
 	//__super::Ready_Events();
+	PreAssign_Presets();
 
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json";
 	Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
+	Create_ChildText();
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -72,7 +77,8 @@ void CUI_TabUtility::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
-
+	
+	Update_InitialCheck_SelectedUtility();
 	Update_MouseSelection();
 	Update_GoinDisable(fTimeDelta);
 
@@ -102,11 +108,72 @@ void CUI_TabUtility::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	static_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Initialize", true);
 	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Show", true);
 
+
+	m_iCharSelectedIndex = static_cast<UI_TABUTIL_DESC*>(pArg)->iCharSelectedUtilityIndex;
+
 	m_IsGoinDisabled = false;
 	m_fDisableTimer = 0.f;
 	m_iAnimOrder = 0;
 	m_isActivate = true;
 	m_isFirstCheckedIndex = false;
+	m_isFirstCheckedSelectedUtil = false;
+}
+
+void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
+{
+	if (m_isFirstCheckedSelectedUtil)
+		return;
+	m_isFirstCheckedSelectedUtil = true;		// UI On 시 1회만 체크
+
+
+	// 테스트용 체크는 test level 에서 하고, 
+	// 여기서는 그냥 받아온 정보를 기반으로 선택 및 UI 인스턴스 거르기만 하도록
+
+	// 최초 정보는 그냥 desc로 받아오도록?
+
+
+	// selected indicator
+	auto targetDesc = m_pUI_InstSelected->Get_UIDesc();
+	auto& targetInstDesc = targetDesc.vecInstanceDescs;
+
+	for (_uint i = 0; i < targetInstDesc.size(); i++)		// 현재 인덱스에 해당하는 인스턴스만 보이게 하고, 나머지는 가림.
+	{
+		targetInstDesc[i].vClipTexcoordX = (m_iCharSelectedIndex == i) ?
+			_float2{ 0.f, 1.f } :
+			_float2{ 0.f, 0.f };
+	}
+
+	m_pUI_InstSelected->Set_UIDesc(targetDesc);
+
+
+	// selected icon on center
+	targetDesc = m_pUI_CHSelectedIcon->Get_UIDesc();
+	targetInstDesc = targetDesc.vecInstanceDescs;
+
+	targetInstDesc[0].vSInstCoordX = m_arrCoordPresets[m_iCharSelectedIndex][0]; // 현재 인덱스에 해당하는 coord로 변경.
+	targetInstDesc[0].vSInstCoordY = m_arrCoordPresets[m_iCharSelectedIndex][1];
+
+	m_pUI_CHSelectedIcon->Set_UIDesc(targetDesc);
+
+
+	// Text on Center
+	CUI_Text* pTargetText = dynamic_cast<CUI_Text*>(m_pTextUI_Selected);
+
+	_wstring strSelectedUtilityName = {};
+	switch (m_iCharSelectedIndex)
+	{
+	case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = L"로프";		break;
+	case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = L"스캔";		break;
+	case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = L"활공";		break;
+	case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = L"컨트롤";		break;
+	case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = L"미선택";		break;
+	}
+
+	pTargetText->Change_Text(strSelectedUtilityName, TEXT_ALIGN_TYPE::CENTER);
+
+
+
+	//std::cout << "[CUI_TabUtility::Update_InitialCheck_SelectedUtility] ScPos X : " << pTargetText->Get_TextUIDesc().vScreenPos.x << "\t, Y : " << pTargetText->Get_TextUIDesc().vScreenPos.x << std::endl;
 }
 
 void CUI_TabUtility::Update_MouseSelection()
@@ -155,7 +222,7 @@ void CUI_TabUtility::Update_MouseSelection()
 	if (iPrevSelectedIndex != m_iSelectedIndex)
 		isIndexChanged = true;
 
-	// [3] Util 갱신에 따른 애니메이션 재생3 및 인스턴스 선택
+	// [3] Util 갱신에 따른 애니메이션 재생 및 인스턴스 선택
 	if ((!m_isFirstCheckedIndex && (fDistFromCenter >= 200.f)) ||							// 최초 1회 커서위치에 따른 확인
 		isIndexChanged && !(m_iSelectedIndex == ENUM_CLASS(UI_TAB_UTILITY::NOTHING)))		// 다른 무언가로 선택이 바뀜.
 	{
@@ -202,6 +269,7 @@ void CUI_TabUtility::Update_GoinDisable(_float fTimeDelta)
 	{
 		static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hide");
 		m_iAnimOrder++;
+		m_isFirstCheckedSelectedUtil = false;
 	}
 }
 
@@ -216,15 +284,59 @@ void CUI_TabUtility::PreAssign_ChildUIs()
 	m_pUI_Back			= Find_ChildObject(L"SectorA_Back");
 	m_pUI_Hover			= Find_ChildObject(L"SectorA_Hover");
 	m_pUI_Arrow			= Find_ChildObject(L"SectorA_Arrow");
+	m_pUI_GuideCircle	= Find_ChildObject(L"SectorA_GuideCircle");
 
 	m_pUI_InstHover		= Find_ChildObject(L"Switch_Hover");
+	m_pUI_InstSelected	= Find_ChildObject(L"Switch_Select");
+
+	m_pUI_CHSelectedIcon= Find_ChildObject(L"Icon_CurSkill");
+
 
 	m_pTransformCom_UIArrow = dynamic_cast<CTransform*>(m_pUI_Arrow->Get_Component(L"Com_Transform"));
+}
+
+void CUI_TabUtility::PreAssign_Presets()
+{
+	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::GRAPPLE)]	= {_float2(0.00f, 0.25f), _float2(0.50f, 0.75f)}; 
+	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::SENSOR)]	= {_float2(0.75f, 1.00f), _float2(0.25f, 0.50f)}; 
+	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::FLIGHT)]	= {_float2(0.25f, 0.50f), _float2(0.75f, 1.00f)}; 
+	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::LEVITATOR)]= {_float2(0.25f, 0.50f), _float2(0.50f, 0.75f)}; 
+	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::NOTHING)]	= {_float2(0.75f, 1.00f), _float2(0.75f, 1.00f)};
 }
 
 void CUI_TabUtility::Create_ChildText()
 {
 	// 나중에 현재 선택된 게 뭔지 텍스트도 추가? 
+
+
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f/* + 6.f*/, g_iWinSizeY / 2.f + 50.f },
+		L"",	// 상호작용 글씨
+		TEXT_COLOR_TYPE::TT_NORMAL,
+		0.5f,
+		L"UI_Text_TabUtility"
+	);
+
+	CCustom_UI* pAttacher = m_pUI_GuideCircle;
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
+
+	m_pTextUI_Selected = pFont;
 }
 
 CUI_TabUtility* CUI_TabUtility::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

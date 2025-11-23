@@ -731,21 +731,23 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
-#pragma region [NUMPAD 3] KSTA_UITEST_TABUTILITY
+#pragma region [TAB	] KSTA_UITEST_TABUTILITY
 	static _bool isTabUtilityActive = false;
-	_uint iTabUtilitySelectedIndex = UINT_MAX;
+	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+	//_uint iTabUtilitySelectedIndex = UINT_MAX;
 	_bool isTabUtilityHided = false;
 	
 	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Show_TabUtilityUI();
+		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
 		isTabUtilityActive = true;
 	}
 	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
 	{
-		iTabUtilitySelectedIndex = m_pGameSystem->HideNGet_TabUtilityUI();
+		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
 		isTabUtilityActive = false;
 		isTabUtilityHided = true;
 	}
@@ -754,7 +756,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	_string strSelectedUtilityName = {};
 	if (isTabUtilityHided)
 	{
-		switch (iTabUtilitySelectedIndex)
+		switch (iTmpSelectedUtility)
 		{
 		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
 		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;

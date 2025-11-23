@@ -978,9 +978,6 @@
     <ClCompile Include="..\private\Level_Test_UI.cpp">
       <Filter>02. Level\Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Loader_Test_UI.cpp">
-      <Filter>02. Level\Loader\Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\UI_HUD.cpp">
       <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
     </ClCompile>
@@ -1431,6 +1428,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Loader_Heaven.cpp">
       <Filter>02. Level\Loader\Heaven</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Loader_Test_UI.cpp">
+      <Filter>02. Level\Loader\Test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

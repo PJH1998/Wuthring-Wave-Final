@@ -221,15 +221,22 @@ void CUI_ControlHelper::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	static_cast<CUI_MobHPBar*>(pRootUI)->Update_MobStatus(tDesc);
 }
 
-void CUI_ControlHelper::Show_TabUtilityUI()
+void CUI_ControlHelper::Show_TabUtilityUI(_uint iCurSelectedUtilityIndex)
 {
 	CCustom_UI* pRootUI = Find_RootUI(L"UI_TabUtility");
 
 	if (!pRootUI)	// 만들어진 적 없으면 리턴
 		return;
 
+
+	CUI_TabUtility::UI_TABUTIL_DESC tDesc = {};
+	tDesc.iCharSelectedUtilityIndex = iCurSelectedUtilityIndex;
+
+
 	if (pRootUI && !pRootUI->IsActivate())	// 풀링 꺼져있으면 켬
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_TabUtility", _fmatrix(), nullptr);
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_TabUtility", _fmatrix(), &tDesc);
+	else
+		pRootUI->Reset(_fmatrix(), &tDesc);
 }
 
 _uint CUI_ControlHelper::HideNGet_TabUtilityUI()
