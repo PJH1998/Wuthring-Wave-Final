@@ -52,6 +52,9 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	if (m_tUIDesc.strUIName == L"ParryCircle_Activated" &&
+		m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha < 1.f)
+		int i = 10;
 
 #ifdef _DEBUG
 	if (m_tUIDesc.strUIName == L"SectorA_LockOn")
@@ -103,7 +106,7 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 
 	if (m_tUIDesc.isInstance)
-		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
+		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(m_tUIDesc.vecInstanceDescs);
 
     for (auto& child : m_vecChildObjects)
         child->Late_Update(fTimeDelta);

@@ -40,7 +40,7 @@ void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
     _splitpath_s(pFilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
     _string PasingDir = FileDir;
-	m_pGameInstance->Load_Resource("../Bin/Resource/Map/");
+	m_pGameInstance->Model_Manager_Change_Level(ENUM_CLASS(eLevel));
     Read_Map_Prototype(PasingDir, eLevel);
 	m_LoadingMap[eLevel].push_back(pFilePath);
 }
@@ -214,8 +214,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 						//if (entry2.path().string().find("Instance") == std::string::npos)
 					{
 						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
-						if (entry2.path().parent_path().stem().string().find("24BS") != string::npos)
-							int a = 0;
+
 							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
 								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
 								CRASH("Prototype Create Failed");

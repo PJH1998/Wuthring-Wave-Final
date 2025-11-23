@@ -37,6 +37,7 @@
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
+#include "UI_MobHPBar.h"
 
 #include "Mouse.h"
 #pragma endregion
@@ -121,11 +122,13 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1111_dest_Fix/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
+
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
+
+
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel);
 
 
@@ -490,6 +493,16 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
+	_string strFilePath_UI_LockOn = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_LockOn));
+
+	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Parry));
+
+	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
+
+
 	for (auto& treeDesc : vecDescs)
 	{
 		for (auto& infoDesc : treeDesc.vecUIInfoDescs)
@@ -497,9 +510,6 @@ HRESULT CLoader_GamePlay::Load_UI()
 			const   _wstring    strFilePath = infoDesc.tUIDesc.strFilePath;
 			const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
 			const   _uint       iNumFiles = infoDesc.tUIDesc.iNumFiles;
-
-			if (strFileName == L"T_JiabeilinaEnergyBgCombined")
-				int i = 10;
 
 			infoDesc.tUIDesc.strFilePath;
 			if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
@@ -574,13 +584,15 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
-	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
-	//	CUI_LockOn::Create(m_pDevice, m_pContext))))
-	//	OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
-	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
-	//	CUI_Parry::Create(m_pDevice, m_pContext))))
-	//	OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
-
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
+		CUI_LockOn::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
+		CUI_Parry::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
+		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;

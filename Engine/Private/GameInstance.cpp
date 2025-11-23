@@ -34,8 +34,6 @@
 #include "SFX_Hub.h"
 #include "Resource_Manager.h"
 
-#define KSTA_DEBUG_ENABLEFONTMGR
-
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -55,10 +53,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
@@ -133,7 +129,7 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pVF = CVolumetricFog::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pVF);
 
-	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext);
+	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
 	ASSERT_CRASH(m_pModel_Manager);
 
 	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
@@ -156,32 +152,21 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Priority_Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 
 	m_pObject_Manager->Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
-	
+
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Late_Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pDecal_Manager->Update(fTimeDelta);
 
 	m_pSequence_Manager->Update(fTimeDelta);
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
-
-
 
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
@@ -1097,6 +1082,11 @@ void CGameInstance::Destroy_RigidData()
 	m_pModel_Manager->Destroy_RigidData();
 }
 
+void CGameInstance::Model_Manager_Change_Level(_uint iLevel)
+{
+	m_pModel_Manager->Change_Level(iLevel);
+}
+
 #pragma region SFX_HUB
 HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
@@ -1131,6 +1121,10 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 {
 	m_pSFX_Hub->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
 }
+void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
+{
+	m_pSFX_Hub->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+}
 #endif
 #pragma endregion
 
@@ -1163,6 +1157,8 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 	if (FAILED(m_pPrototype_Manager->Clear_Resource(iLevelID)))
 		return E_FAIL;
 
+	if (m_pModel_Manager)
+		m_pModel_Manager->Clear_Resource(iLevelID);
 	return S_OK;
 }
 
@@ -1194,10 +1190,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	Safe_Release(m_pFont_Manager);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
-
 	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);

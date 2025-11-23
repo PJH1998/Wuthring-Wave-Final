@@ -158,7 +158,7 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
     ASSERT_CRASH(pArg);
     CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
 
-    const   _wstring    strFilePath = pDesc->strFilePath;
+    const   _wstring	 strFilePath = pDesc->strFilePath;
     const   _wstring	strFileName = pDesc->strFileName;
     const   _uint       iNumFiles   = pDesc->iNumFiles;
 

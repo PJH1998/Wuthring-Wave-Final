@@ -32,12 +32,13 @@ public: // 생성/복제
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
 private:
+	void			PreAssign_ChildUIs();
 	void			Ready_Presets();
 
 private:
-	//class CGameSystem*		m_pGameSystem = { nullptr };
-	//CTransform*		m_pTargetTransform = { nullptr };
-	_float3*				m_pTargetPos = { nullptr };
+	CCustom_UI*		m_pLockOnUI = nullptr;
+
+	_float3*		m_pTargetPos = { nullptr };
 
 public:
 	static CUI_LockOn*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

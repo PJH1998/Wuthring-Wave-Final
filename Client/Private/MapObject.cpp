@@ -38,8 +38,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 	Sync_Sectors();
 
-	/*if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
-		return E_FAIL;*/
+	//if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
+	//	return E_FAIL;
 
 	return S_OK;
 }
@@ -251,7 +251,7 @@ void CMapObject::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
-
+	Safe_Release(m_pModelCom);
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);
 

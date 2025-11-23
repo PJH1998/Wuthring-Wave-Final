@@ -32,7 +32,7 @@ public:
 
 	void						Load_Map(const _char* pFilePath);
 	void						Ready_Map_Prototype(const _char* pFilePath);
-
+	void						Copy_MapObject();
 	void						SetPrototypes(_uint iLevel);
 private:
 	_bool m_IsCreateProto = { false };

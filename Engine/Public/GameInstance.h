@@ -349,6 +349,7 @@ public:
 	void						Clear_BufferPool();
 	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void						Destroy_RigidData();
+	void						Model_Manager_Change_Level(_uint iLevel);
 #pragma endregion
 
 
@@ -365,6 +366,7 @@ public:
 
 #ifdef _DEBUG
 	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
+	void					Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset);
 #endif
 #pragma endregion
 
