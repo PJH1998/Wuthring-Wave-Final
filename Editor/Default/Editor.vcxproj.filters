@@ -480,6 +480,7 @@
     <ClInclude Include="..\public\Galbrena_Blur.h">
       <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Water.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -710,6 +711,7 @@
     <ClCompile Include="..\private\Galbrena_Blur.cpp">
       <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

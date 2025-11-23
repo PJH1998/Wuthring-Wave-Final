@@ -899,6 +899,7 @@
     <ClInclude Include="..\Public\Loader_Heaven.h">
       <Filter>02. Level\Loader\Heaven</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Water.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1423,6 +1424,7 @@
     <ClCompile Include="..\Private\Loader_Heaven.cpp">
       <Filter>02. Level\Loader\Heaven</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1494,6 +1496,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Water.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

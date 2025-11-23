@@ -23,6 +23,9 @@ public:
 		OBJECTTYPE eObjectType;
 		_float3 vBoundingPos;
 		_float3 vBoundingExtends;
+		CEdit_MapObject* pCopyObject = { nullptr };
+		_bool IsChild = { false };
+		CEdit_MapObject* pParent = { nullptr };
 	}MAP_LOAD;
 
 	typedef struct tagMapSave
@@ -66,7 +69,9 @@ protected:
 	void About_Parent();
 	void About_Transform();
 	void About_Texture();
+	void Copy_MapObject(_bool IsChild = false, CEdit_MapObject* pParent = nullptr);
 
+	void SetCopyData(CEdit_MapObject* pParent);
 protected:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
