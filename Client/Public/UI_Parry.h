@@ -28,11 +28,20 @@ public:
 	void			Enable_Parried();
 	
 private:
+	void			PreAssign_ChildUIs();
 	void			Ready_Presets();
 	void			Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos);
 	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
 	 
 private:
+	CCustom_UI*		m_pCircle_Appr		= nullptr;
+	CCustom_UI*		m_pCircle_Stat		= nullptr;
+
+	CCustom_UI*		m_pSectorA			= nullptr;
+	CCustom_UI*		m_pSectorAEff		= nullptr;
+	CCustom_UI*		m_pSectorACircEff	= nullptr;
+
+
 	_float			m_fElapsedTime = 0.f;
 	_bool			m_isParried = false;
 

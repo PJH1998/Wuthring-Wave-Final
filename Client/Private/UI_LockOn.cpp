@@ -43,6 +43,7 @@ HRESULT CUI_LockOn::Initialize_Clone(void* pArg)
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json";
 	Load_ChildObjects(strFilePath);
+	PreAssign_ChildUIs();
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -51,9 +52,9 @@ HRESULT CUI_LockOn::Initialize_Clone(void* pArg)
 	};
 	Load_Animations(vecAnimFilePaths);
 
-	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
-	static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
-	static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
+
+	static_cast<CAnimator_UI*>(m_pLockOnUI->Get_Component(L"Com_Animator_UI"))->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
+	static_cast<CAnimator_UI*>(m_pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
 
 	Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
@@ -89,9 +90,6 @@ void CUI_LockOn::Update(_float fTimeDelta)
 #endif // KSTA_UITEST_LOCKON_TOZERO
 
 	// 타겟 위치 반영
-	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
-
-
 	_matrix matCamView = m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW);
 	_matrix matCamProj = m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ);
 
@@ -127,7 +125,7 @@ void CUI_LockOn::Update(_float fTimeDelta)
 #endif
 	
 	_vector vPos = XMVectorSet(vScreenPos.x, -vScreenPos.y, 0.f, 1.f);
-	static_cast<CTransform*>(pLockOnUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
+	static_cast<CTransform*>(m_pLockOnUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
 
 
 	__super::Update(fTimeDelta);
@@ -164,14 +162,18 @@ void CUI_LockOn::Render()
 void CUI_LockOn::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	// 최초에는 안보이게 가리기
-
-	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
-	static_cast<CAnimator_UI*>(pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Show", true);
+	static_cast<CAnimator_UI*>(m_pLockOnUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Show", true);
 
 	if (pArg != nullptr)
 		m_pTargetPos = static_cast<UI_LOCKON_DESC*>(pArg)->pTargetPos;
 	
 	m_isActivate = true;
+}
+
+void CUI_LockOn::PreAssign_ChildUIs()
+{
+	m_pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
+
 }
 
 void CUI_LockOn::Ready_Presets()

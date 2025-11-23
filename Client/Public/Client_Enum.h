@@ -40,14 +40,16 @@ namespace Client
 		NONE, CLICK_ENTER, CLICKING, CLICK_EXIT, HOVER_ENTER, HOVERING, HOVER_EXIT, SCROLL, END
 	};
 
-	enum class UI_VARIANT_FLAG {			// * UI용 짬통셰이더 플래그 지정용
+	enum class UI_VARIANT_FLAG {			// * UI용 짬통셰이더 플래그 지정용. 필요할때마다 만들고 여기에 추가한다.
 		UIFLAG_ERROR,				// default. outputs magenta
 		UIFLAG_COOLDOWN_CIRCLE,		// 원형 쿨타임 (skill)
 		UIFLAG_COOLDOWN_RECT,		// 사각형 쿨타임 (partyframe)
-		UIFLAG_PLAYER_HP,
-		UIFLAG_PLAYER_TRANSMIT,
-		UIFLAG_SIMPLEMASK,
-		UIFLAG_ACTIVEFEEDBACK,
+		UIFLAG_PLAYER_HP,			// 플레이어 체력바용
+		UIFLAG_PLAYER_TRANSMIT,		// 공명 회로 일렁임
+		UIFLAG_SIMPLEMASK,			// 단순 마스킹용
+		UIFLAG_ACTIVEFEEDBACK,		// 조작 피드백 (스케일 커지며 사라지는 것)
+		UIFLAG_ENEMY_HP,			// 적 체력바용
+
 		UIFLAG_END
 	};
 
@@ -151,5 +153,14 @@ namespace Client
 		RIGHT, 
 
 		END 
+	};
+
+	enum class UI_TAB_UTILITY : unsigned int {
+		GRAPPLE,
+		SENSOR,
+		FLIGHT,
+		LEVITATOR,
+
+		NOTHING
 	};
 }
