@@ -16,17 +16,29 @@ CMeshAnim_Instance::CMeshAnim_Instance(const CMeshAnim_Instance& Prototype)
     , m_VertexPositions { Prototype.m_VertexPositions }
     , m_Indices { Prototype.m_Indices }
 	, m_iNumMaxInstance{ Prototype.m_iNumMaxInstance }
+	, m_OffsetMatrices{ Prototype.m_OffsetMatrices }
+	, m_iNumBones{ Prototype.m_iNumBones }
+	, m_iMaterialIndex { Prototype.m_iMaterialIndex }
+	, m_pBoneLocalIdxBuf{ Prototype.m_pBoneLocalIdxBuf }
+	, m_pBoneLocalIdxSRV{ Prototype.m_pBoneLocalIdxSRV }
 {
+	if (nullptr == m_pBoneLocalIdxBuf)
+		CRASH("Bone Local Index Buffer is nullptr");
+	Safe_AddRef(m_pBoneLocalIdxBuf);
+	if (nullptr == m_pBoneLocalIdxSRV)
+		CRASH("Bone Local Index SRV is nullptr");
+	Safe_AddRef(m_pBoneLocalIdxSRV);
 }
 
-HRESULT CMeshAnim_Instance::Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance)
+HRESULT CMeshAnim_Instance::Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance, _uint iMatPadding)
 {
 	m_iNumInstance = m_iNumMaxInstance = iNumInstance;
 	m_iNumVertexBuffers = 2;
-    if (FAILED(Ready_Mesh_Anim(Bones, PreTransformMatrix, InputFile)))
+    if (FAILED(Ready_Mesh_Anim(Bones, PreTransformMatrix, InputFile, iMatPadding)))
         return E_FAIL;
     
 #pragma region INSTANCE
+	m_iNumIndexPerInstance = m_iNumIndices;
 	m_iInstanceVertexStride = sizeof(VTXINSTANCE_ANIMMESH);
 	m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
 	m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -108,6 +120,13 @@ HRESULT CMeshAnim_Instance::Bind_BoneMatrices(CShader* pShader, const _char* pCo
     return pShader->Bind_Matrices(pConstantName, m_BoneMatrices, m_iNumBones);
 }
 
+HRESULT CMeshAnim_Instance::Bind_OffsetMatrix(CShader* pShader, const _char* pConstantName)
+{
+	if(FAILED(pShader->Bind_Texture("g_MeshLocalBoneIndecies", m_pBoneLocalIdxSRV)))
+		return E_FAIL;
+	return pShader->Bind_Matrices(pConstantName, m_OffsetMatrices.data(), m_OffsetMatrices.size());
+}
+
 HRESULT CMeshAnim_Instance::Update_InstanceData(VTXINSTANCE_ANIMMESH* pInstanceDatas, _uint iNumRenderCount)
 {
 	if (iNumRenderCount > m_iNumMaxInstance)
@@ -133,7 +152,7 @@ HRESULT CMeshAnim_Instance::Update_InstanceData(VTXINSTANCE_ANIMMESH* pInstanceD
 	return S_OK;
 }
 
-HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile)
+HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iMatPadding)
 {
     VTXANIMMESH* pVertices = { nullptr };
     _uint* pIndices = { nullptr };
@@ -145,6 +164,7 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
     m_iNumIndices = m_iNumIndices * 3;
     pIndices = new _uint[m_iNumIndices];
     InputFile.read(reinterpret_cast<_char*>(&m_iMaterialIndex), sizeof(_uint));
+	m_iMaterialIndex += iMatPadding;
     InputFile.read(reinterpret_cast<_char*>(&m_iNumBones), sizeof(_uint));
 
     for (size_t i = 0; i < m_iNumBones; ++i)
@@ -162,13 +182,13 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
         if (iter == Bones.end())
             return E_FAIL;
 
-        m_BoneIndices.push_back(iter - Bones.begin());
-
+		//m_BoneIndices[iter - Bones.begin()] = i;
+		m_BoneIndices.push_back(iter - Bones.begin());
         // OffsetMatrix
         _float4x4 OffsetMatrix = {};
         InputFile.read(reinterpret_cast<_char*>(&OffsetMatrix), sizeof(_float4x4));
-        XMStoreFloat4x4(&OffsetMatrix, XMMatrixTranspose(XMLoadFloat4x4(&OffsetMatrix)));
-        m_OffsetMatrices.push_back(OffsetMatrix);
+		XMStoreFloat4x4(&OffsetMatrix, XMMatrixTranspose(XMLoadFloat4x4(&OffsetMatrix)));
+		m_OffsetMatrices.push_back(OffsetMatrix);
     }
 
     if (0 == m_iNumBones)
@@ -224,14 +244,28 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
     Safe_Delete_Array(pIndices);
 #pragma endregion
 
+	D3D11_BUFFER_DESC BoneLocalIdxBufDesc = {};
+	BoneLocalIdxBufDesc.ByteWidth = sizeof(_uint) * m_BoneIndices.size();
+	BoneLocalIdxBufDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	BoneLocalIdxBufDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	BoneLocalIdxBufDesc.CPUAccessFlags = 0;
+	BoneLocalIdxBufDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	BoneLocalIdxBufDesc.StructureByteStride = sizeof(_uint);
+	D3D11_SUBRESOURCE_DATA subresourceData = {};
+	subresourceData.pSysMem = m_BoneIndices.data();
+	if (FAILED(m_pDevice->CreateBuffer(&BoneLocalIdxBufDesc, &subresourceData, &m_pBoneLocalIdxBuf)))
+		return E_FAIL;
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_pBoneLocalIdxBuf, nullptr, &m_pBoneLocalIdxSRV)))
+		return E_FAIL;
+
     return S_OK;
 }
 
-CMeshAnim_Instance* CMeshAnim_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance)
+CMeshAnim_Instance* CMeshAnim_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance, _uint iMatPadding)
 {
 	CMeshAnim_Instance* pInstance = new CMeshAnim_Instance(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize_Prototype(Bones, PreTransformMatrix, InputFile, iNumInstance)))
+	if (FAILED(pInstance->Initialize_Prototype(Bones, PreTransformMatrix, InputFile, iNumInstance, iMatPadding)))
 	{
 		MSG_BOX("Failed to Create : Mesh");
 		Safe_Release(pInstance);
@@ -256,4 +290,7 @@ CComponent* CMeshAnim_Instance::Clone(void* pArg)
 void CMeshAnim_Instance::Free()
 {
 	__super::Free();
+
+	Safe_Release(m_pBoneLocalIdxSRV);
+	Safe_Release(m_pBoneLocalIdxBuf);
 }

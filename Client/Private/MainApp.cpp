@@ -292,6 +292,10 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_SFX_Burst.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_ScreenEffect");
+	// Shader_VtxAnimMesh_Instance
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh_Instance.hlsl"), VTXANIMMESH_INSTANCE::Elements, VTXANIMMESH_INSTANCE::iNumElements))))
+		CRASH("Shader_VtxAnimMesh_Instance");
 
 	// Shader_SFX_GalbrenaUlti_Instance
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst_Instance"),
@@ -324,19 +328,34 @@ void CMainApp::Ready_Prototype_ForStatic()
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute NonRibAnimMesh Shader");
 
-	//Shader_ComputeShader_Particle
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxInstance_AnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute Instance_AnimMesh Shader");
+	string strEntryParticle = "main";
 	SHADER_MACRO eShaderMacroParticle = {
-		{"THREAD_X", "64" }
+	{"THREAD_X", "64" }
+	,{"THREAD_Y", "1" }
+	,{"THREAD_Z", "1" }
+	, { NULL, NULL }
+	};
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
+	//Skinning Format
+	eShaderMacro = {
+		{"THREAD_X", "128" }
 		,{"THREAD_Y", "1" }
 		,{"THREAD_Z", "1" }
 		, { NULL, NULL }
 	};
-	string strEntryParticle = "main";
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
-		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh_Skining.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute Instance_AnimMesh Shader");
 #pragma endregion
 
 #pragma region COLLIDER
+
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))
