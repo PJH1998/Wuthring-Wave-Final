@@ -39,7 +39,10 @@ HRESULT CUI_TabUtility::Initialize_Clone(void* pArg)
 	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json";
 	Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
-	Create_ChildText();
+
+	Create_ChildText_CurUtil();
+	Create_ChildText_IsUsing();
+
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -178,6 +181,10 @@ void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
 
 void CUI_TabUtility::Update_MouseSelection()
 {
+	if (m_IsGoinDisabled)
+		return;
+
+
 	POINT PointMousePos = m_pGameInstance->Get_MousePoint();
 	_float2 vMousePos = {							// Center Aligned.
 		PointMousePos.x - g_iWinSizeX * 0.5f,
@@ -226,8 +233,6 @@ void CUI_TabUtility::Update_MouseSelection()
 	if ((!m_isFirstCheckedIndex && (fDistFromCenter >= 200.f)) ||							// 최초 1회 커서위치에 따른 확인
 		isIndexChanged && !(m_iSelectedIndex == ENUM_CLASS(UI_TAB_UTILITY::NOTHING)))		// 다른 무언가로 선택이 바뀜.
 	{
-		m_isFirstCheckedIndex = true;
-
 		dynamic_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Show", true);
 		
 		auto targetDesc = m_pUI_InstHover->Get_UIDesc();
@@ -244,12 +249,63 @@ void CUI_TabUtility::Update_MouseSelection()
 	}
 	else if (isIndexChanged && (m_iSelectedIndex == ENUM_CLASS(UI_TAB_UTILITY::NOTHING)))	// 선택 해제함 (커서가 화면 중앙으로 감)
 		dynamic_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Hide");
+
+
+
+
+
+	// [+] 현재 사용중인 유틸 선택 시 사용 중 텍스트 출력 및 중앙 아이콘 변화
+
+	if (m_isFirstCheckedIndex ||
+		isIndexChanged)
+	{
+		// 유틸명 텍스트 변화
+		_wstring strSelectedUtilityName = {};
+		switch (m_iSelectedIndex)
+		{
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = L"로프";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = L"스캔";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = L"활공";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = L"컨트롤";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = L"미선택";		break;
+		}
+
+		static_cast<CUI_Text*>(m_pTextUI_Selected)->Change_Text(strSelectedUtilityName, TEXT_ALIGN_TYPE::CENTER);
+
+
+
+		// 아이콘 변화
+		auto iconDesc = m_pUI_CHSelectedIcon->Get_UIDesc();
+		auto& iconInstDesc = iconDesc.vecInstanceDescs;
+
+		iconInstDesc[0].vSInstCoordX = m_arrCoordPresets[m_iSelectedIndex][0]; // 현재 인덱스에 해당하는 coord로 변경.
+		iconInstDesc[0].vSInstCoordY = m_arrCoordPresets[m_iSelectedIndex][1];
+
+		m_pUI_CHSelectedIcon->Set_UIDesc(iconDesc);
+
+
+
+		// 사용 중 텍스트 변화
+		_wstring strIsUsingText = {};
+
+		if ((m_iCharSelectedIndex == m_iSelectedIndex) &&
+			(m_iSelectedIndex != ENUM_CLASS(UI_TAB_UTILITY::NOTHING)))
+			m_pTextUI_IsUsing->SetActivate(true);
+		else
+			m_pTextUI_IsUsing->SetActivate(false);
+	}
+		
+
+
+
+	m_isFirstCheckedIndex = true;
 }
 
 void CUI_TabUtility::Update_GoinDisable(_float fTimeDelta)
 {
 	if (!m_IsGoinDisabled)
 		return;
+
 
 	const _float fMaxDisableTimer = 0.5f;
 	
@@ -269,7 +325,7 @@ void CUI_TabUtility::Update_GoinDisable(_float fTimeDelta)
 	{
 		static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hide");
 		m_iAnimOrder++;
-		m_isFirstCheckedSelectedUtil = false;
+		//m_isFirstCheckedSelectedUtil = false;
 	}
 }
 
@@ -303,16 +359,14 @@ void CUI_TabUtility::PreAssign_Presets()
 	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::LEVITATOR)]= {_float2(0.25f, 0.50f), _float2(0.50f, 0.75f)}; 
 	m_arrCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::NOTHING)]	= {_float2(0.75f, 1.00f), _float2(0.75f, 1.00f)};
 }
-
-void CUI_TabUtility::Create_ChildText()
+											
+void CUI_TabUtility::Create_ChildText_CurUtil()
 {
-	// 나중에 현재 선택된 게 뭔지 텍스트도 추가? 
-
-
+	//
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f/* + 6.f*/, g_iWinSizeY / 2.f + 50.f },
 		L"",	// 상호작용 글씨
-		TEXT_COLOR_TYPE::TT_NORMAL,
+		TEXT_COLOR_TYPE::TT_TABUTIL,
 		0.5f,
 		L"UI_Text_TabUtility"
 	);
@@ -322,7 +376,6 @@ void CUI_TabUtility::Create_ChildText()
 	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
-	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
@@ -338,6 +391,39 @@ void CUI_TabUtility::Create_ChildText()
 
 	m_pTextUI_Selected = pFont;
 }
+
+void CUI_TabUtility::Create_ChildText_IsUsing()
+{
+	//
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f/* + 6.f*/, g_iWinSizeY / 2.f - 120.f },
+		L"사용 중",
+		TEXT_COLOR_TYPE::TT_TITLE,
+		0.4f,
+		L"UI_Text_TabUtilityUsing"
+	);
+
+	CCustom_UI* pAttacher = m_pUI_GuideCircle;
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
+
+	m_pTextUI_IsUsing = pFont;
+}
+
 
 CUI_TabUtility* CUI_TabUtility::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

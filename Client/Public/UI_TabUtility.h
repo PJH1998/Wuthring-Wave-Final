@@ -40,7 +40,9 @@ private:
 
 	void			PreAssign_ChildUIs();
 	void			PreAssign_Presets();
-	void			Create_ChildText();
+
+	void			Create_ChildText_CurUtil();
+	void			Create_ChildText_IsUsing();
 
 private:
 	// 매 프레임 돌릴만한 건 캐싱..
@@ -56,6 +58,7 @@ private:
 	CCustom_UI*			m_pUI_CHSelectedIcon= { nullptr };
 
 	CCustom_UI*			m_pTextUI_Selected	= { nullptr };		// 텍스트가 바뀔 때 마다 Update_Alignment 호출 필요
+	CCustom_UI*			m_pTextUI_IsUsing	= { nullptr };		// 텍스트가 바뀔 때 마다 Update_Alignment 호출 필요
 
 
 	CTransform*			m_pTransformCom_UIArrow		= { nullptr };
