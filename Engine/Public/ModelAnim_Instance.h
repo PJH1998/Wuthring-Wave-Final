@@ -59,6 +59,7 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
+	const vector<_uint>&				Get_MeshOffset() { return m_MeshTypeOffsets; };
 	const _uint							Get_NumInstance() const { return m_iNumInstance; }
 
 #ifdef _DEBUG

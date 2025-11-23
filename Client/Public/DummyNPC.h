@@ -9,12 +9,13 @@ NS_BEGIN(Client)
 class CDummyNPC final : public CActor
 {
 public:
+	enum MESHTYPE { BODY, FACE, HAIR, END };
+
 	typedef struct tagDummyNPCDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vStartPositions;
 		_wstring wstrObjectPrototypeTag;
 		_wstring wstrSkinningPrototypeTag;
-		vector<vector<_uint>> MeshTypes;
 
 	}DUMMYNPC_DESC;
 
@@ -39,8 +40,12 @@ public:
 	virtual void Hit_Judge(void* pArg = nullptr) {};// 임시
 
 private:
-	CModelAnim_Instance* m_pModelInstanceCom = { nullptr };
-	CComputeShader* m_pSkinningCom = { nullptr };
+	CModelAnim_Instance*	m_pModelInstanceCom = { nullptr };
+	CComputeShader*			m_pSkinningCom = { nullptr };
+	vector<_uint>			m_MeshTypePadding;
+
+	_float					m_fFaceSize{};
+	_uint					m_iFacePaddingCount{};
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(DUMMYNPC_DESC* pDesc);

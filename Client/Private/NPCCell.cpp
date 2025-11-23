@@ -65,10 +65,10 @@ void CNPCCell::Late_Update(_float fTimeDelta)
 
 	if (m_pUpdateAnimStateFunc)
 	{
-		if(m_MeshTypeIndices.empty())
-			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, nullptr);
+		if (m_MeshTypeIndices.empty())
+			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, nullptr, m_iFaceIndex);
 		else
-			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, m_MeshTypeIndices.data());
+			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, m_MeshTypeIndices.data(), m_iFaceIndex);
 	}
 }
 

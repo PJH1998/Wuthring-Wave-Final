@@ -12,8 +12,8 @@ public:
 	typedef struct tagDummyCellDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_float3 vStartPos = {};
-		function<void(const _string&, CTransform*, _float, _float*, _bool, _bool, _bool, _float)> pUpdateRootFunc;
-		function<void(const _string&, _fmatrix, _uint, _float*, _uint*)> pUpdateAnimStateFunc;
+		function<_bool(const _string&, CTransform*, _float, _float*, _bool, _bool, _bool, _float)> pUpdateRootFunc;
+		function<void(const _string&, _fmatrix, _uint, _float*, _uint*, _uint)> pUpdateAnimStateFunc;
 		_uint iInstanceIndex;
 		_uint iNumMeshType;
 		_uint* iMeshTypes;
@@ -37,8 +37,8 @@ private:
 	CCollider* m_pColliderCom = { nullptr };
 
 	_uint m_iInstanceIndex = {};
-	function<void(const _string&, CTransform*, _float, _float*, _bool, _bool, _bool, _float)> m_pUpdateRootFunc;
-	function<void(const _string&, _fmatrix, _uint, _float*, _uint*)> m_pUpdateAnimStateFunc;
+	function<_bool(const _string&, CTransform*, _float, _float*, _bool, _bool, _bool, _float)> m_pUpdateRootFunc;
+	function<void(const _string&, _fmatrix, _uint, _float*, _uint*, _uint)> m_pUpdateAnimStateFunc;
 	vector<_uint> m_MeshTypeIndices;
 
 	_string m_strAnimationTag;
@@ -47,6 +47,7 @@ private:
 	_bool m_isRootMotionRotate{};
 	_bool m_isRootMotionTranslate{};
 	_float m_fRootMotionRate{};
+	_uint m_iFaceIndex{};
 private:
 	void Ready_Component(DUMMYCELL_DESC* pDesc);
 

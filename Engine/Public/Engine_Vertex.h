@@ -261,6 +261,7 @@ typedef struct tagVertexInstanceAnimMesh
 		_float4		vLook;
 		_float4		vTranslation;
 		_uint		iBaseIndex;		//인스턴스의 뼈 팔레트 시작 패딩 인덱스
+		//_uint		iTexIndex;		//임시: 텍스처 매핑 인덱스(얼굴)
 	}VTXINSTANCE_ANIMMESH;
 
 	typedef struct tagVertexAnimMeshInstance

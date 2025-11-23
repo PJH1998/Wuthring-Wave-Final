@@ -18,6 +18,7 @@ CMeshAnim_Instance::CMeshAnim_Instance(const CMeshAnim_Instance& Prototype)
 	, m_iNumMaxInstance{ Prototype.m_iNumMaxInstance }
 	, m_OffsetMatrices{ Prototype.m_OffsetMatrices }
 	, m_iNumBones{ Prototype.m_iNumBones }
+	, m_iMaterialIndex { Prototype.m_iMaterialIndex }
 	, m_pBoneLocalIdxBuf{ Prototype.m_pBoneLocalIdxBuf }
 	, m_pBoneLocalIdxSRV{ Prototype.m_pBoneLocalIdxSRV }
 {
@@ -29,11 +30,11 @@ CMeshAnim_Instance::CMeshAnim_Instance(const CMeshAnim_Instance& Prototype)
 	Safe_AddRef(m_pBoneLocalIdxSRV);
 }
 
-HRESULT CMeshAnim_Instance::Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance)
+HRESULT CMeshAnim_Instance::Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance, _uint iMatPadding)
 {
 	m_iNumInstance = m_iNumMaxInstance = iNumInstance;
 	m_iNumVertexBuffers = 2;
-    if (FAILED(Ready_Mesh_Anim(Bones, PreTransformMatrix, InputFile)))
+    if (FAILED(Ready_Mesh_Anim(Bones, PreTransformMatrix, InputFile, iMatPadding)))
         return E_FAIL;
     
 #pragma region INSTANCE
@@ -151,7 +152,7 @@ HRESULT CMeshAnim_Instance::Update_InstanceData(VTXINSTANCE_ANIMMESH* pInstanceD
 	return S_OK;
 }
 
-HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile)
+HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iMatPadding)
 {
     VTXANIMMESH* pVertices = { nullptr };
     _uint* pIndices = { nullptr };
@@ -163,6 +164,7 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
     m_iNumIndices = m_iNumIndices * 3;
     pIndices = new _uint[m_iNumIndices];
     InputFile.read(reinterpret_cast<_char*>(&m_iMaterialIndex), sizeof(_uint));
+	m_iMaterialIndex += iMatPadding;
     InputFile.read(reinterpret_cast<_char*>(&m_iNumBones), sizeof(_uint));
 
     for (size_t i = 0; i < m_iNumBones; ++i)
@@ -259,11 +261,11 @@ HRESULT CMeshAnim_Instance::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _
     return S_OK;
 }
 
-CMeshAnim_Instance* CMeshAnim_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance)
+CMeshAnim_Instance* CMeshAnim_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance, _uint iMatPadding)
 {
 	CMeshAnim_Instance* pInstance = new CMeshAnim_Instance(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize_Prototype(Bones, PreTransformMatrix, InputFile, iNumInstance)))
+	if (FAILED(pInstance->Initialize_Prototype(Bones, PreTransformMatrix, InputFile, iNumInstance, iMatPadding)))
 	{
 		MSG_BOX("Failed to Create : Mesh");
 		Safe_Release(pInstance);

@@ -17,13 +17,22 @@ float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
 
-//matrix g_BoneMatrices[512];
+struct AnimCellInfoCB
+{
+    float fTrackPosition;
+    uint iAnimIndex;
+    bool bTemp1;
+    uint iTexIndex;
+};
+
 row_major matrix g_OffsetMatrices[512];
 StructuredBuffer<uint> g_MeshLocalBoneIndecies;
+StructuredBuffer<AnimCellInfoCB> g_AnimCellInfoCB;
 
 bool g_HasNormal = false;
 uint g_iNumBones;
-float g_fTest = 10.f;
+uint g_iTexPaddingCount = 1;
+float g_fFaceSize = 1.f;
 
 cbuffer GlobalConstants
 {
@@ -95,13 +104,56 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, In.TransformMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = Out.vPosition;
-    //if (In.vBlendIndex.x >= g_iNumBones ||
-    //   In.vBlendIndex.y >= g_iNumBones ||
-    //   In.vBlendIndex.z >= g_iNumBones ||
-    //   In.vBlendIndex.w >= g_iNumBones)
-    //{
-    //    Out.vProjPos.z *= g_fTest;
-    //}
+    return Out;
+}
+
+VS_OUT VS_FACE(VS_IN In)
+{
+    VS_OUT Out = (VS_OUT) 0;
+    
+    uint ibaseIndex = In.iBaseIndex * g_iNumBones;
+    matrix_rm matBone, matBW, matVP;
+    
+    float3 w3 = In.vBlendWeight.xyz;
+    float fWeightW = saturate(1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z));
+
+    float4 vReplaceW = float4(w3, fWeightW);
+    float sumW = vReplaceW.x + vReplaceW.y + vReplaceW.z + vReplaceW.w;
+    vReplaceW /= max(sumW, 1e-6f);
+    
+    uint4 iMeshLocalBoneIndecies = uint4(
+        g_MeshLocalBoneIndecies[In.vBlendIndex.x],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.y],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.z],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
+    matBone =
+    mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
+    mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
+    mul(g_OffsetMatrices[In.vBlendIndex.z], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.z)]) * vReplaceW.z +
+    mul(g_OffsetMatrices[In.vBlendIndex.w], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.w)]) * vReplaceW.w;
+    
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    vPosition = mul(vPosition, In.TransformMatrix);
+    float4 vNormal = mul(float4(In.vNormal, 0.f), matBone);
+    float4 vTangent = mul(float4(In.vTangent, 0.f), matBone);
+    float4 vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
+    
+    matVP = mul(g_ViewMatrix, g_ProjMatrix);
+    
+    Out.vPosition = mul(vPosition, matVP);
+    Out.vNormal = normalize(mul(vNormal, In.TransformMatrix));
+    Out.vTangent = normalize(mul(vTangent, In.TransformMatrix));
+    Out.vBinormal = normalize(mul(vBinormal, In.TransformMatrix));
+    // index = lengthy * paddingy + paddingx
+    int iIndexX = g_AnimCellInfoCB[In.iBaseIndex].iTexIndex % g_iTexPaddingCount;
+    int iIndexY = g_AnimCellInfoCB[In.iBaseIndex].iTexIndex / g_iTexPaddingCount;
+    float2 vTexCoordRemap = In.vTexcoord * g_fFaceSize;
+    
+    vTexCoordRemap.x -= (1 - iIndexX) * g_fFaceSize;
+    vTexCoordRemap.y -= (1 - iIndexY) * g_fFaceSize;
+    
+    Out.vTexcoord = vTexCoordRemap;
+    Out.vProjPos = Out.vPosition;
     return Out;
 }
 
@@ -619,9 +671,9 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_FACE();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_NPCFACE();
+        PixelShader = compile ps_5_0 PS_MAIN();
     }
 
     //pass Rover // 5

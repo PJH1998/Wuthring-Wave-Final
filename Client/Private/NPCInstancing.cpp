@@ -64,7 +64,11 @@ void CNPCInstancing::Render()
 		m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelInstanceCom->Bind_OffsetMatrices(m_pShaderCom, "g_OffsetMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+
+		if (i >= m_MeshTypePadding[MESHTYPE::FACE] && i < m_MeshTypePadding[MESHTYPE::HAIR])
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::FACE));
+		else
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
 
 		m_pModelInstanceCom->Render(i);
 	}
@@ -86,6 +90,8 @@ HRESULT CNPCInstancing::Bind_Resources()
 {
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	m_pShaderCom->Bind_Value("g_fFaceSize", &m_fFaceSize, sizeof(_float));
+	m_pShaderCom->Bind_Value("g_iTexPaddingCount", &m_iFacePaddingCount, sizeof(_uint));
 	return S_OK;
 }
 
@@ -121,6 +127,8 @@ void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
 	_float3 vPosition{};
 	XMStoreFloat3(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 	_uint iNumCells = m_pModelInstanceCom->Get_NumInstance();
+	m_MeshTypePadding = m_pModelInstanceCom->Get_MeshOffset();
+
 	for (_uint i = 0; i < iNumCells; i++)
 	{
 		CDummyCell::DUMMYCELL_DESC CellDesc = {};
@@ -128,8 +136,8 @@ void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
 			_bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate) {
 				m_pModelInstanceCom->Update_RootMotion(strAnimationName, pTransform, fTimeDelta, pTrackPos, isRootMotion, isRootMotionRotate, isRootMotionTranslate, fRootMotionRate);
 			};
-		CellDesc.pUpdateAnimStateFunc = [this](const _string& strAnimName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPos, _uint* pPaddingIndices) {
-			m_pModelInstanceCom->Update_AnimationState(strAnimName, WorldMatrix, iInstanceIndex, pTrackPos, pPaddingIndices);
+		CellDesc.pUpdateAnimStateFunc = [this](const _string& strAnimName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPos, _uint* pPaddingIndices, _uint iPadding) {
+			m_pModelInstanceCom->Update_AnimationState(strAnimName, WorldMatrix, iInstanceIndex, pTrackPos, pPaddingIndices, iPadding);
 			};
 
 #ifdef _DEBUG

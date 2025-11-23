@@ -28,6 +28,8 @@ HRESULT CDummyNPC::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_InstanceCells(pDesc);
 
+	m_fFaceSize = 1.f / 3;
+	m_iFacePaddingCount = 3;
 	return S_OK;
 }
 
@@ -60,12 +62,18 @@ void CDummyNPC::Render()
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
 	m_pModelInstanceCom->Bind_ConstantBuffers(m_pShaderCom);
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		
+
 		m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelInstanceCom->Bind_OffsetMatrices(m_pShaderCom, "g_OffsetMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		if (i >= m_MeshTypePadding[MESHTYPE::FACE] && i < m_MeshTypePadding[MESHTYPE::HAIR])
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::FACE));
+		else
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
 
 		m_pModelInstanceCom->Render(i);
 	}
@@ -87,6 +95,8 @@ HRESULT CDummyNPC::Bind_Resources()
 {
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	m_pShaderCom->Bind_Value("g_fFaceSize", &m_fFaceSize, sizeof(_float));
+	m_pShaderCom->Bind_Value("g_iTexPaddingCount", &m_iFacePaddingCount, sizeof(_uint));
 	return S_OK;
 }
 
@@ -122,15 +132,25 @@ void CDummyNPC::Ready_InstanceCells(DUMMYNPC_DESC* pDesc)
 	_float3 vPosition{};
 	XMStoreFloat3(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 	_uint iNumCells = m_pModelInstanceCom->Get_NumInstance();
+	m_MeshTypePadding = m_pModelInstanceCom->Get_MeshOffset();
+	_float eps = XMVectorGetX(g_XMEpsilon);
 	for (_uint i = 0; i < iNumCells; i++)
 	{
+		vector<_uint> MeshType(m_MeshTypePadding.size());
+		for (_uint j = 0; j < MeshType.size() - 1; ++j)
+		{
+			MeshType[j] = static_cast<_uint>(m_pGameInstance->Rand(m_MeshTypePadding[j], m_MeshTypePadding[j + 1] - eps)) - m_MeshTypePadding[j];
+		}
+		auto iter = MeshType.end() - 1;
+		(*iter) = static_cast<_uint>(m_pGameInstance->Rand(m_MeshTypePadding.back(), m_pModelInstanceCom->Get_NumMesh())) - m_MeshTypePadding.back();
+
 		CDummyCell::DUMMYCELL_DESC CellDesc = {};
 		CellDesc.pUpdateRootFunc = [this](const _string& strAnimationName, CTransform* pTransform, _float fTimeDelta, _float* pTrackPos, 
 			_bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate) {
-				m_pModelInstanceCom->Update_RootMotion(strAnimationName, pTransform, fTimeDelta, pTrackPos, isRootMotion, isRootMotionRotate, isRootMotionTranslate, fRootMotionRate);
+				return m_pModelInstanceCom->Update_RootMotion(strAnimationName, pTransform, fTimeDelta, pTrackPos, isRootMotion, isRootMotionRotate, isRootMotionTranslate, fRootMotionRate);
 			};
-		CellDesc.pUpdateAnimStateFunc = [this](const _string& strAnimName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPos, _uint* pPaddingIndices) {
-			m_pModelInstanceCom->Update_AnimationState(strAnimName, WorldMatrix, iInstanceIndex, pTrackPos, pPaddingIndices);
+		CellDesc.pUpdateAnimStateFunc = [this](const _string& strAnimName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPos, _uint* pPaddingIndices, _uint iExtra) {
+			m_pModelInstanceCom->Update_AnimationState(strAnimName, WorldMatrix, iInstanceIndex, pTrackPos, pPaddingIndices, iExtra);
 			};
 
 #ifdef _DEBUG
@@ -145,11 +165,11 @@ void CDummyNPC::Ready_InstanceCells(DUMMYNPC_DESC* pDesc)
 		CellDesc.iNumMeshType = 0;
 		CellDesc.fSpeedPerSec = 10.f;
 		CellDesc.fRotationPerSec = XMConvertToRadians(90.f);
-		//if (pDesc->MeshTypes.size() > i)
-		//{
-		//	CellDesc.iNumMeshType = static_cast<_uint>(pDesc->MeshTypes[i].size());
-		//	CellDesc.iMeshTypes = pDesc->MeshTypes[i].data();
-		//}
+		if (false == m_MeshTypePadding.empty())
+		{
+			CellDesc.iNumMeshType = static_cast<_uint>(MeshType.size());
+			CellDesc.iMeshTypes = MeshType.data();
+		}
 		m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), pDesc->wstrObjectPrototypeTag, ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &CellDesc);
 		
 	}

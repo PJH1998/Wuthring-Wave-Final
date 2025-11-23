@@ -33,9 +33,10 @@ HRESULT CDummyCell::Initialize_Clone(void* pArg)
 	m_fRootMotionRate = 1.f;
 	m_isRootMotion = true;
 	m_isRootMotionTranslate = true;
+	m_iFaceIndex = m_pGameInstance->Rand(0.f, 9.f - XMVectorGetX(g_XMEpsilon));
 	if (pDesc->iNumMeshType > 0)
 	{
-		m_MeshTypeIndices.reserve(pDesc->iNumMeshType);
+		m_MeshTypeIndices.resize(pDesc->iNumMeshType);
 		memcpy(m_MeshTypeIndices.data(), pDesc->iMeshTypes, sizeof(_uint) * pDesc->iNumMeshType);
 	}
 
@@ -49,8 +50,9 @@ void CDummyCell::Priority_Update(_float fTimeDelta)
 
 void CDummyCell::Update(_float fTimeDelta)
 {
+	_bool isAnimFinished{};
 	if(m_pUpdateRootFunc)
-		m_pUpdateRootFunc(m_strAnimationTag, m_pTransformCom, fTimeDelta, &m_fTrackPos, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+		isAnimFinished = m_pUpdateRootFunc(m_strAnimationTag, m_pTransformCom, fTimeDelta, &m_fTrackPos, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
 
 	if (m_pColliderCom)
 	{
@@ -67,9 +69,9 @@ void CDummyCell::Late_Update(_float fTimeDelta)
 	if (m_pUpdateAnimStateFunc)
 	{
 		if(m_MeshTypeIndices.empty())
-			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, nullptr);
+			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, nullptr, m_iFaceIndex);
 		else
-			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, m_MeshTypeIndices.data());
+			m_pUpdateAnimStateFunc(m_strAnimationTag, m_pTransformCom->Get_WorldMatrix(), m_iInstanceIndex, &m_fTrackPos, m_MeshTypeIndices.data(), m_iFaceIndex);
 	}
 }
 

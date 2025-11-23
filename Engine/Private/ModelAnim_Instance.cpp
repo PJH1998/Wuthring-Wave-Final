@@ -283,9 +283,9 @@ HRESULT CModelAnim_Instance::Initialize_Clone(void* pArg)
 		}
 		else
 		{
-			m_pVtxInstanceDatas.resize(m_iNumMeshType);
+			m_pVtxInstanceDatas.resize(m_iNumMeshes);
 
-			for (_uint i = 0; i < m_iNumMeshType; i++)
+			for (_uint i = 0; i < m_iNumMeshes; i++)
 			{
 				m_pVtxInstanceDatas[i].reserve(m_iNumMeshes);
 			}
@@ -344,6 +344,8 @@ HRESULT CModelAnim_Instance::Bind_ConstantBuffers(CShader* pShader)
 	if (FAILED(pShader->Bind_Value("g_iNumBones", &m_iNumBones, sizeof(_uint))))
 		return E_FAIL;
 	if (FAILED(pShader->Bind_Texture("g_CombinedBoneMatrices", m_SRVs[SRV_FINAL_BONEMATRIX])))
+		return E_FAIL;
+	if (FAILED(pShader->Bind_Texture("g_AnimCellInfoCB", m_SRVs[SRV_ANIM_INFOCB])))
 		return E_FAIL;
 	return S_OK;
 }
@@ -769,7 +771,7 @@ HRESULT CModelAnim_Instance::Ready_Mesh(ifstream& InputFile)
 
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
-		CMeshAnim_Instance* pMesh = CMeshAnim_Instance::Create(m_pDevice, m_pContext, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, m_iNumInstance);
+		CMeshAnim_Instance* pMesh = CMeshAnim_Instance::Create(m_pDevice, m_pContext, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, m_iNumInstance, m_Materials.size());
 		ASSERT_CRASH(pMesh);
 		m_Meshes.push_back(pMesh);
 	}
@@ -787,7 +789,8 @@ HRESULT CModelAnim_Instance::Ready_Parts(const _char* pFolderPath, vector<_strin
 	{
 		_string strFilePath = entry.path().string();
 		_string strFileName = entry.path().filename().string();
-
+		if (strFileName == "Animation")
+			continue;
 		_bool isExist = false;
 		//strMeshTypes에 기입된 순서대로 만들기 (애니메이션 포함된 모델 우선)
 		for (auto& strTypeName : *strMeshTypes)
@@ -809,7 +812,7 @@ HRESULT CModelAnim_Instance::Ready_Parts(const _char* pFolderPath, vector<_strin
 				isExist = true;
 				if (++iTypeIndex < m_MeshTypeOffsets.size())
 					m_MeshTypeOffsets[iTypeIndex] = iPaddingIndex;
-				
+				break;
 			}
 		}
 		if (!isExist)
@@ -838,16 +841,19 @@ HRESULT CModelAnim_Instance::Ready_Parts(const _char* pFolderPath, vector<_strin
 		if (FAILED(Ready_Mesh(InputFile)))
 			return E_FAIL;
 
+		if (FAILED(Ready_Material(strModelPath.c_str())))
+			return E_FAIL;
 		InputFile.close();
 
 	}
-
+	m_iNumBones = static_cast<_uint>(m_Bones.size());
+	m_iNumMeshes = static_cast<_uint>(m_Meshes.size());
+	m_iNumMaterials = static_cast<_uint>(m_Materials.size());
 	//애니메이션, 머터리얼은 통합해서 만들어두기
 	if (FAILED(Ready_Animation(pFolderPath)))
 		return E_FAIL;
 
-	if (FAILED(Ready_Material(pFolderPath)))
-		return E_FAIL;
+
 
 	return S_OK;
 }
@@ -902,7 +908,8 @@ HRESULT CModelAnim_Instance::Ready_Animation(const _char* pFilePath)
 	_char szFilePath[MAX_PATH] = {};
 	strcpy_s(szFilePath, szDrivePath);
 	strcat_s(szFilePath, szDirPath);
-	strcat_s(szFilePath, "Animation/");
+	strcat_s(szFilePath, szFileName);
+	strcat_s(szFilePath, "/Animation/");
 	strcat_s(szFilePath, szFileName);
 	strcat_s(szFilePath, "_Anim.dat");
 

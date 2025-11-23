@@ -9,7 +9,7 @@ NS_BEGIN(Client)
 class CNPCInstancing final : public CActor
 {
 public:
-	enum MESHTYPE {BODY, HEAD, HAIR, END};
+	enum MESHTYPE {BODY, HAIR, FACE, END};
 
 	typedef struct tagNPCDesc : public CActor::ACTOR_DESC
 	{
@@ -44,6 +44,10 @@ public:
 private:
 	CModelAnim_Instance* m_pModelInstanceCom = { nullptr };
 	CComputeShader* m_pSkinningCom = { nullptr };
+	vector<_uint>			m_MeshTypePadding;
+
+	_float					m_fFaceSize{};
+	_uint					m_iFacePaddingCount{};
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(NPC_DESC* pDesc);
