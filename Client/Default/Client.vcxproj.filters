@@ -97,9 +97,6 @@
     <Filter Include="03. GameObject\UI\_Shader">
       <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. Level\UI">
-      <UniqueIdentifier>{42d34b8c-5305-4308-a1e3-60659450ace7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
     </Filter>

@@ -482,6 +482,8 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
+
+	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
 }
 
@@ -731,13 +733,13 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
-#pragma region [TAB	] KSTA_UITEST_TABUTILITY
+#pragma region [TAB] KSTA_UITEST_TABUTILITY
 	static _bool isTabUtilityActive = false;
 	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
 
 	//_uint iTabUtilitySelectedIndex = UINT_MAX;
 	_bool isTabUtilityHided = false;
-	
+
 	if (!isTabUtilityActive &&
 		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
 	{

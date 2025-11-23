@@ -201,16 +201,20 @@ void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey,
 	m_strMonsterKey		= pMonsterKey;
 
 	// 텍스트 객체에, 출력될 텍스트를 변경
-	CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
-	if (nullptr != pTargetText)
-	{
-		auto& bossNameDesc = pTargetText->Get_TextUIDesc();
 
-		bossNameDesc.strText = strUIBosssName;
-		//pTargetText->Set_TextUIDesc(bossNameDesc);
-		pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
-		pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
-	}
+	CUI_Text* pTargetText = static_cast<CUI_Text*>(m_pTextUI_BossName);
+	pTargetText->Change_Text(strUIBosssName, TEXT_ALIGN_TYPE::CENTER);
+
+
+	//CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
+	//if (nullptr != pTargetText)
+	//{
+	//	auto& bossNameDesc = pTargetText->Get_TextUIDesc();
+	//
+	//	bossNameDesc.strText = strUIBosssName;
+	//	//pTargetText->Set_TextUIDesc(bossNameDesc);
+	//	pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
+	//}
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)

@@ -38,6 +38,7 @@
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
+#include "UI_TabUtility.h"
 
 #include "Mouse.h"
 #pragma endregion
@@ -502,6 +503,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
 
+	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -593,6 +597,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
 		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
+		CUI_TabUtility::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;

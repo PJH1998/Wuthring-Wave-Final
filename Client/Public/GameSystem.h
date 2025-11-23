@@ -62,6 +62,7 @@ public:
 
 #pragma region [UI] CONTROL_HELPER
 	// UI 꺼내쓰기용. 혹 수정 필요시 말해주세요.
+	void		PreAssign_TargetUIs();	// Initialize for UI caching. call after ui load.
 
 	// 기존 GameInstance 에서는 번거롭게 캐스팅 필요하던 걸, 편하게 가져오도록 캐스팅 내장시켜서 재정의.
 	class CCustom_UI*	Find_RootUI(_wstring strName);
