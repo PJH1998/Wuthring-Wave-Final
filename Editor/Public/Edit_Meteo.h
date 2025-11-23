@@ -64,7 +64,7 @@ private:
 	_int m_iTriggerActiveIndex = {};
 
 private:
-	CModel* m_pModelCom = { nullptr };
+	CModel_Streaming* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
 	vector<CModel*> m_pModelComArray;

@@ -82,6 +82,31 @@ _bool CMap_Interface::Set_LOD(vector<CModel*>& pModelArray, _uint* iLODIndex)
     return Result;
 }
 
+_bool CMap_Interface::Set_LOD(_uint* iLODIndex,_uint* iMaxLODIndex)
+{
+	ImGuiID LODId = ImGui::GetID("LOD_Level_Streaming");
+	ImGui::BeginChildFrame(LODId, ImVec2(100, 200));
+
+	_bool Result = { false };
+
+	_char LOD_Index[10] = {};
+
+	for (_uint i = 0; i <= *iMaxLODIndex; ++i)
+	{
+
+		sprintf_s(LOD_Index, "LOD%d", i);
+		if (ImGui::Button(LOD_Index))
+		{
+			*iLODIndex = i;
+			Result = true;
+			break;
+		}
+	}
+	ImGui::EndChildFrame();
+
+	return Result;
+}
+
 void CMap_Interface::Set_Transform(CTransform* pTransform)
 {
     m_pGameInstance->Use_Gizmo(pTransform);
