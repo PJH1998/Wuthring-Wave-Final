@@ -215,21 +215,9 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	return S_OK;
 }
 
+
 void CUI_Text::Update_Description(_float fTimeDelta)
 {
-
-
-#ifdef _DEBUG
-
-	if (m_tUIDesc.strUIName == L"UI_Text_TabUtility")
-		int i = 10;
-
-#endif
-
-
-
-
-
 
 	// m_tTextDesc 갱신
 
@@ -240,6 +228,18 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 	auto* pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	if (!pFont) return;
 	const _uint iPadding = pFont->iPadding;
+
+
+	_uint tempPrevCode = 0;
+	_int tempAdvance = 0;
+	for (auto ch : text)
+	{
+		if (ch == L'\n') { tempPrevCode = 0; continue; }
+		m_pGameInstance->Get_GlyphAndAdvance(m_tTextDesc.strFontTag, ch, tempPrevCode, tempAdvance);
+		tempPrevCode = ch;
+	}
+
+
 
 	_float penX = 0.f;
 	_float penY = 0.f;
