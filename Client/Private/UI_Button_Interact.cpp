@@ -59,7 +59,9 @@ HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 
 	Create_ChildText();
+	m_pGameInstance->Add_RootUI(L"UI_Interact", this);
 
+	m_isClone = true;
 
 	return S_OK;
 }
@@ -139,8 +141,6 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iAnimOrder = 0;
 
 	m_isActivate = true;
-	m_isClone = true;
-	m_pGameInstance->Add_RootUI(L"UI_Interact", this);
 
 	//if ( FAILED (static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Focused_Default")))
 	//	CRASH("");
@@ -208,7 +208,6 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 		m_iAnimOrder == 1)
 	{
 		m_isActivate = false;
-		m_pGameInstance->Remove_RootUI(L"UI_Interact");
 		m_iAnimOrder = 2;
 	}
 	 
@@ -267,9 +266,10 @@ CGameObject* CUI_Button_Interact::Clone(void* pArg)
 void CUI_Button_Interact::Free()
 {
 	Safe_Release(m_pGameSystem);
+	if (m_isClone)
+	    m_pGameInstance->Remove_RootUI(L"UI_Interact");
 
 	__super::Free();
-
 
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);

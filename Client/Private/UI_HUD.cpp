@@ -254,7 +254,7 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 {
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f - 477.f},
-		L"테스트용 이름입니다.",	// 상호작용 글씨
+		L"",	// 상호작용 글씨
 		TEXT_COLOR_TYPE::TT_BOSSNAME,
 		0.4f,
 		L"UI_Text_HUD_BossName"
@@ -294,7 +294,7 @@ HRESULT CUI_HUD::Ready_PlayerHPText()
 {
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f + 496.f },
-		L"이건테스트에요",	// 현재체력/최대체력 표시
+		L"0/0",	// 현재체력/최대체력 표시
 		TEXT_COLOR_TYPE::TT_PLAYERHP,
 		0.22f,
 		L"UI_Text_Player_HP"
