@@ -203,6 +203,5 @@ void CMapObject_Destruction_Debris::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pRigidbodyCom);
-
 	Safe_Release(m_pModelCom);
 }

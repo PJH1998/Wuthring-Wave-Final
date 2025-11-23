@@ -305,6 +305,8 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 		prevCode = ch;
 	}
 
+	m_tTextDesc.vecInstanceDescs.resize(instIndex);
+
 	m_tUIDesc.vecInstanceDescs = m_tTextDesc.vecInstanceDescs;
 
 #ifdef KSTA_ON_TRANSFORM_CACHING

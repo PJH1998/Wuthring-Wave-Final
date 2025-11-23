@@ -167,7 +167,10 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
 
-				m_isActivate = true;
+		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+		m_pBoneMatrixPtr = nullptr;
+
+		m_isActivate = true;
 	}
 }
 

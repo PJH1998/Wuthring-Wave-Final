@@ -252,6 +252,7 @@
     <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
+    <ClInclude Include="..\Public\MapObject_Water.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
     <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\Particle.h" />
@@ -347,6 +348,7 @@
     <ClInclude Include="..\public\UI_MobHPBar.h" />
     <ClInclude Include="..\public\UI_Parry.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
+    <ClInclude Include="..\public\UI_TabUtility.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -479,6 +481,7 @@
     <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
+    <ClCompile Include="..\Private\MapObject_Water.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
@@ -544,6 +547,7 @@
     <ClCompile Include="..\private\UI_MobHPBar.cpp" />
     <ClCompile Include="..\private\UI_Parry.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
+    <ClCompile Include="..\private\UI_TabUtility.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -603,6 +607,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxInstance_PointParticle.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Water.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl" />

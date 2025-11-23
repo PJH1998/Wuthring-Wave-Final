@@ -30,7 +30,7 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 	Ready_Component(pArg);
-	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
+	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
@@ -43,6 +43,7 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 	m_eObjectType = pDesc->eObjectType;
 	m_IsRender = m_pGameSystem->Add_To_Management(m_eObjectType, this, &m_SonoroMode);
 	return S_OK;
+
 }
 
 void CMapObject_NonSonoro::Priority_Update(_float fTimeDelta)
@@ -196,26 +197,9 @@ void CMapObject_NonSonoro::Ready_Component(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
-	m_pModelComArray.resize(V);
-
-	for (_uint i = 0; i < V; ++i)
-	{
-		_wstring ModelCom = Model;
-		ModelCom.pop_back();
-		ModelCom += to_wstring(i);
-
-		_char ModelName[MAX_PATH] = {};
-		sprintf_s(ModelName, "Com_Model%d", i);
-		/*if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-			CRASH("FAILED");*/
-
-	}
 	// DeferredShader
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -297,9 +281,6 @@ void CMapObject_NonSonoro::Free()
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pGameSystem);
+	Safe_Release(m_pModelCom);
 
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-
-	m_pModelComArray.clear();
 }

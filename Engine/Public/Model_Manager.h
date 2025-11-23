@@ -43,13 +43,17 @@ public:
 		_uint iLifeCount = {};
 	}DELETE_DATA;
 
-
+	typedef struct tagPaddingDesc {
+		class CModel_Streaming* pModel = { nullptr };
+		_uint iLODIndex;
+		_uint iDelayFrame;
+	}PEDDING_DATA;
 private:
 	CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CModel_Manager() = default;
 
 public:
-	HRESULT						Initialize();
+	HRESULT						Initialize(_uint iMaxLevel);
 	void						Update(_float fTimeDelta);
 
 
@@ -75,6 +79,10 @@ public:
 	void Bind_SharedBuffer(_uint iLODIndex,ID3D11DeviceContext** pDC, _uint iNumThread);
 	void Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
 	void Destroy_RigidData();
+
+	void Clear_Resource(_uint iLevel);
+	void Change_Level(_uint iLevel);
+
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
@@ -85,10 +93,11 @@ private:
 	ID3D11Buffer* m_pStagingBuffer = { nullptr };
 
 	//모델을 갖고있기 vs 메쉬를 갖고있기
-	unordered_map<_string, class CModel_Streaming*> m_ModelPrototypes;
+	unordered_map<_string, class CModel_Streaming*>* m_ModelPrototypes;
 	vector<SHARED_DATA_DESC> m_Data;
 	vector<MODEL_DATA> m_StagingData;
 	vector<MODEL_DATA> m_DataPool;
+	vector<PEDDING_DATA> m_DelayedNotice;
 	_float4x4 m_PreTransformMatrix = {};
 	map<_uint, vector<class CStaticObject*>> m_RenderObjects;
 	mutex m_StagingMutex;
@@ -100,9 +109,11 @@ private:
 	_double m_fTotalPlayTime = {};
 	vector<DELETE_DATA> m_DeleteList;
 
-	_uint iCurrentLoadCnt = {};
+	_uint m_iCurrentLoadCnt = {};
+	_uint m_iCurrentLevel = {};
+	_uint m_iMaxLevel = {};
 public:
-	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iMaxLevel);
 	virtual void				Free() override;
 };
 

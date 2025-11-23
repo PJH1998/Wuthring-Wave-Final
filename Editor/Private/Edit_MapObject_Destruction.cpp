@@ -1,5 +1,4 @@
-﻿#include "MapObject_Destruction.h"
-#include"EditorPch.h"
+﻿#include"EditorPch.h"
 #include "Edit_MapObject_Destruction.h"
 #include "Edit_MapObject_Destruction_Piece.h"
 #include"Level_Map.h"

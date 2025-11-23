@@ -389,7 +389,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor" ,"Meteo"};
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor" ,"Meteo","Water" };
 	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
     {
 		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -424,6 +424,9 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     ImGui::SameLine();
     ImGui::Checkbox("Custom Tex", &m_TexMode);
+
+	if (ImGui::Button("Copy"))
+		Copy_MapObject();
 
     if (ImGui::Button("Destroy"))
         m_isActivate = false;
@@ -505,6 +508,24 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	//m_pGameInstance->Wait_Thread_End();
 	m_pModelCom = m_pModelComArray[0];
+
+	if (pDesc->pCopyObject)
+		SetCopyData(pDesc->pCopyObject);
+
+	if (pDesc->IsChild)
+	{
+		MAP_CREATE event(m_ModelName, this);
+		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
+		pDesc->pParent->Add_Child(this);
+		_float fDistance = 0;
+		_vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), pDesc->pParent->m_pTransformCom->Get_WorldMatrix_Inv());
+		_vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), pDesc->pParent->m_pTransformCom->Get_WorldMatrix_Inv()));
+		{
+			MAP_PICK event(this, fDistance);
+
+			m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+		}
+	}
 	return S_OK;
 }
 
@@ -1114,6 +1135,32 @@ void CEdit_MapObject::About_Texture()
         ImGui::End();
     }
 
+}
+
+void CEdit_MapObject::Copy_MapObject(_bool IsChild, CEdit_MapObject* pParent)
+{
+	MAP_LOAD Desc{};
+	Desc.eObjectType = m_eObjectType;
+	Desc.iLevel = m_iLevel;
+	Desc.iShaderPassIndex = m_iShaderPassIndex;
+	strcpy_s(Desc.ModelName, m_ModelName);
+	_float4x4 WorldPos;
+	XMStoreFloat4x4(&WorldPos, m_pTransformCom->Get_WorldMatrix());
+	Desc.WorldMatrix = &WorldPos;
+	Desc.pCopyObject = this;
+	Desc.IsChild = IsChild;
+
+	if (Desc.IsChild)
+		Desc.pParent = pParent;
+
+	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+		, m_iLevel, TEXT("Layer_MapObject"), &Desc);
+}
+
+void CEdit_MapObject::SetCopyData(CEdit_MapObject* pParent)
+{
+	for (auto& pChild : pParent->m_ChildObjects)
+		pChild->Copy_MapObject(true, this);
 }
 
 CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

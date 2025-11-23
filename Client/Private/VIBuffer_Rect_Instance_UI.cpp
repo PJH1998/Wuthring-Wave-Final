@@ -128,7 +128,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Clone(void* pArg)
 	return S_OK;
 }	
 
-void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SINGLE_INST_DESC>& vecDescs)
+void CVIBuffer_Rect_Instance_UI::Update_Instances(vector<SINGLE_INST_DESC>& vecDescs)
 {
  	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
