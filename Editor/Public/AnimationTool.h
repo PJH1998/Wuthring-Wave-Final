@@ -8,11 +8,12 @@ class CAnimationTool final : public CBase
 private:
 	enum class MODE : _uint
 	{
-		CONVERT_FBX_TO_DAT = 0, 
-		LOAD_DAT = 1, 
-		CREATE_ACTOR = 2,
-		EDIT_ANIMATION = 3, 
-		SAVE_STATE = 4,
+		CONVERT_GLTF_TO_DAT = 0,
+		CONVERT_FBX_TO_DAT = 1, 
+		LOAD_DAT = 2, 
+		CREATE_ACTOR = 3,
+		EDIT_ANIMATION = 4, 
+		SAVE_STATE = 5,
 		END
 	};
 
@@ -85,6 +86,7 @@ private:
 	ID3D11DeviceContext* m_pContext = { nullptr };
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
+	class CGltfLoader* m_pGltfLoader = { nullptr };
 	class CAnimNotifyTool* m_pAnimNotifyTool = { nullptr };
 	class CEffect_Controller* m_pEffectController = { nullptr };
 

@@ -12,6 +12,8 @@ CLevel_Animation::CLevel_Animation(ID3D11Device* pDevice, ID3D11DeviceContext* p
 HRESULT CLevel_Animation::Initialize()
 {
     m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
+	
+
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
@@ -47,6 +49,8 @@ HRESULT CLevel_Animation::Initialize()
 void CLevel_Animation::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Anim"));
+
+	//m_pGltfLoader->Update();
 
 }
 

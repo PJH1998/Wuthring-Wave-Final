@@ -112,8 +112,6 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
 	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);*/
 
 	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
-
-
 }
 
 const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
@@ -293,7 +291,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 
 	if (MODELTYPE::CHARACTER == m_eType)
 	{
-		//m_fPreScale = 1.f; // Character의 경우 Blender에서 Animation 이동량이 0.01배 되서 들어올 것이므로 1.f처리. 
+		m_fPreScale = 0.01f; // Character의 경우 Blender에서 Animation 이동량이 0.01배 되서 들어올 것이므로 1.f처리. 
 		// Animation의 경우는 FilePath를 이용해서 새로운 FileStream을 생성해서 읽어들임.
 		if (FAILED(Ready_CharacterModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
@@ -1011,6 +1009,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 		pAnimCBInfo->iRibbonAnimIndex = m_AnimationNameToIndex[strRibAnimationName];
 	}
 
+	IsRibAnimUsed = false;
 	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
@@ -1240,6 +1239,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
 
+
 	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
@@ -1289,6 +1289,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	XMStoreFloat4(&m_vPreRootPosition, vConvertedTranslation);
 	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
 }
+
 
 HRESULT CModel::Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
 {

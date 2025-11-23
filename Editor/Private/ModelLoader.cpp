@@ -534,20 +534,21 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 
 			for (size_t i = 0; i < pAnimation->mNumMorphMeshChannels; ++i)
 			{
-				aiMeshMorphAnim* pMorphChannel = pAnimation->mMorphMeshChannels[i];
+				aiMeshMorphAnim* pMeshMorphAnim = pAnimation->mMorphMeshChannels[i];
 
-				// 1. 채널 이름으로 타겟 메쉬 찾기
-				aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
+				// 1. 채널 이름으로 타겟 메쉬 찾기 => 그냥 다 똑같으므로. m_pAIScene의 첫번째 메시 가져오기.
+				//aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMorphChannel->mName);
+				aiMesh* pTargetMesh = m_pAIScene->mMeshes[0];
 				if (nullptr == pTargetMesh) continue;
 
 				// 2. 시간(Keys)을 기준으로 먼저 순회합니다. Assimp는 시간 -> 활성화된 쉐이프키 목록 순서로 저장
 				// 183 TrackPosition 이면. 1 TrackPosition => 105 ShapeKey 이렇게 저장됨. Assimp 에는.
-				for (_uint keyIdx = 0; keyIdx < pMorphChannel->mNumKeys; ++keyIdx)
+				for (_uint keyIdx = 0; keyIdx < pMeshMorphAnim->mNumKeys; ++keyIdx)
 				{
 					// ShapeKey 목록을 순회.
-					const aiMeshMorphKey& MorphKey = pMorphChannel->mKeys[keyIdx];
+					const aiMeshMorphKey& MorphKey = pMeshMorphAnim->mKeys[keyIdx];
 
-					// 이 시간대에 변화가 있는 모든 쉐이프 키들을 순회
+					// 이 시간대에 변화가 있는 모든 쉐이프 키들을 순회 
 					for (unsigned int v = 0; v < MorphKey.mNumValuesAndWeights; ++v)
 					{
 						// mValues[v] == 쉐이프키 인덱스.
@@ -564,7 +565,9 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 						if (strShapeKeyName == "Basis" || strShapeKeyName.empty()) continue;
 
 						// 가중치 처리 => Weight는 
-						_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
+						_float fWeight = static_cast<_float>(MorphKey.mWeights[v]); // 메시 ShapeKey에 대한 가중치 저장.
+						
+						//_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
 						//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
 						//fWeight = max(0.0f, min(fWeight, 1.0f));
 

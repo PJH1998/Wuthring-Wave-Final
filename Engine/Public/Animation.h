@@ -79,6 +79,9 @@ private:
 
 
 private:
+	HRESULT Ready_NormalAnimations(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
+	HRESULT Ready_CharacterAnimations(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
+
 
 public:
 	static CAnimation* Create(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);

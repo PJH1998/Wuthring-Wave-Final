@@ -210,7 +210,7 @@
     </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Radial_Controller\Radial">
       <UniqueIdentifier>{606c33d5-720d-4502-82fe-1a443a9678bc}</UniqueIdentifier>
-    </Filter>  
+    </Filter>
     <Filter Include="03. GameObject\SFX\Augusta\Slash">
       <UniqueIdentifier>{c319f2a6-687e-46aa-8a56-e1e6c61087c2}</UniqueIdentifier>
     </Filter>
@@ -462,6 +462,9 @@
     <ClInclude Include="..\Public\Effect_Radial.h">
       <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GltfLoader.h">
+      <Filter>02. ModelLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -679,6 +682,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Radial.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GltflLoader.cpp">
+      <Filter>02. ModelLoader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

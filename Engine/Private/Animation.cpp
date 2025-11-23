@@ -112,58 +112,18 @@ void CAnimation::Reset_Status()
 
 HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
 {
-#pragma region 기존 애니메이션 내용 저장.
-	_uint iLength = {};
-	InputFile.read(reinterpret_cast<_char*>(&iLength), sizeof(_uint));
-	_char szAnimationName[MAX_PATH] = {};
-	InputFile.read(szAnimationName, iLength);
+	// 얘넨 이름도 그대로쓰네?..
 
-	_char* pAnimationName = { nullptr };
-	strtok_s(szAnimationName, "|", &pAnimationName);
-	if (0 == strcmp(pAnimationName, ""))
-		strcpy_s(m_szName, szAnimationName);
-	else
-		strcpy_s(m_szName, pAnimationName);
-
-	InputFile.read(reinterpret_cast<_char*>(&m_fDuration), sizeof(_float));
-	InputFile.read(reinterpret_cast<_char*>(&m_fTickPerSecond), sizeof(_float));
-
-	InputFile.read(reinterpret_cast<_char*>(&m_iNumChannels), sizeof(_uint));
-
-	for (_uint i = 0; i < m_iNumChannels; ++i)
+	if (MODELTYPE::ANIM == eModelType) // .fbx로 임포트한 경우?
 	{
-		CChannel* pChannel = CChannel::Create(InputFile, Bones);
-		if (nullptr == pChannel)
+		if (FAILED(Ready_NormalAnimations(InputFile, Bones, eModelType)))
 			return E_FAIL;
-		m_Channels.push_back(pChannel);
 	}
-
-	m_CurrentFrameIndices.resize(m_iNumChannels);
-	
-
-	// 추가 작업.
-	if (eModelType == MODELTYPE::CHARACTER)
+	else if (MODELTYPE::CHARACTER == eModelType)
 	{
-		// 1. Morph Mesh Curves 개수를 받아옵니다. => 	ModelLoader의 iTotalCurves와 동일.
-		InputFile.read(reinterpret_cast<_char*>(&m_iNumMorphCurves), sizeof(_uint));
-
-		// 2. Morph Mesh Curves 정보를 가져옵니다.
-		for (_uint i = 0; i < m_iNumMorphCurves; ++i)
-		{
-			CMorphChannel* pMorphChannel = CMorphChannel::Create(InputFile);
-			if (nullptr == pMorphChannel)
-				return E_FAIL;
-
-			m_MorphMeshChannels.push_back(pMorphChannel);
-		}
-
-		m_CurrentMorphCurveIndicies.resize(m_iNumMorphCurves);
-
+		if (FAILED(Ready_CharacterAnimations(InputFile, Bones, eModelType)))
+			return E_FAIL;
 	}
-#pragma endregion
-
-	
-
 	return S_OK;
 }
 
@@ -362,6 +322,91 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 	}
 
 	return true;
+}
+
+HRESULT CAnimation::Ready_NormalAnimations(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
+{
+
+#pragma region 기존 애니메이션 내용 저장.
+	_uint iLength = {};
+	InputFile.read(reinterpret_cast<_char*>(&iLength), sizeof(_uint));
+	_char szAnimationName[MAX_PATH] = {};
+	InputFile.read(szAnimationName, iLength);
+
+	_char* pAnimationName = { nullptr };
+	strtok_s(szAnimationName, "|", &pAnimationName);
+	if (0 == strcmp(pAnimationName, ""))
+		strcpy_s(m_szName, szAnimationName);
+	else
+		strcpy_s(m_szName, pAnimationName);
+
+	InputFile.read(reinterpret_cast<_char*>(&m_fDuration), sizeof(_float));
+	InputFile.read(reinterpret_cast<_char*>(&m_fTickPerSecond), sizeof(_float));
+
+	InputFile.read(reinterpret_cast<_char*>(&m_iNumChannels), sizeof(_uint));
+
+	for (_uint i = 0; i < m_iNumChannels; ++i)
+	{
+		CChannel* pChannel = CChannel::Create(InputFile, Bones);
+		if (nullptr == pChannel)
+			return E_FAIL;
+		m_Channels.push_back(pChannel);
+	}
+
+	m_CurrentFrameIndices.resize(m_iNumChannels);
+
+	return S_OK;
+}
+
+HRESULT CAnimation::Ready_CharacterAnimations(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
+{
+#pragma region 기존 애니메이션 내용 저장.
+	_uint iLength = {};
+	InputFile.read(reinterpret_cast<_char*>(&iLength), sizeof(_uint));
+	_char szAnimationName[MAX_PATH] = {};
+	InputFile.read(szAnimationName, iLength);
+	
+	// .gltf의 경우 애니메이션 이름이 그대로 저장됨.
+	strcpy_s(m_szName, szAnimationName);
+
+	InputFile.read(reinterpret_cast<_char*>(&m_fDuration), sizeof(_float));
+	InputFile.read(reinterpret_cast<_char*>(&m_fTickPerSecond), sizeof(_float));
+
+	InputFile.read(reinterpret_cast<_char*>(&m_iNumChannels), sizeof(_uint));
+
+	for (_uint i = 0; i < m_iNumChannels; ++i)
+	{
+		CChannel* pChannel = CChannel::Create(InputFile, Bones);
+		if (nullptr == pChannel)
+			return E_FAIL;
+		m_Channels.push_back(pChannel);
+	}
+
+	m_CurrentFrameIndices.resize(m_iNumChannels);
+
+
+	// 추가 작업.
+	if (eModelType == MODELTYPE::CHARACTER)
+	{
+		// 1. Morph Mesh Curves 개수를 받아옵니다. => 	ModelLoader의 iTotalCurves와 동일.
+		InputFile.read(reinterpret_cast<_char*>(&m_iNumMorphCurves), sizeof(_uint));
+
+		// 2. Morph Mesh Curves 정보를 가져옵니다.
+		for (_uint i = 0; i < m_iNumMorphCurves; ++i)
+		{
+			CMorphChannel* pMorphChannel = CMorphChannel::Create(InputFile);
+			if (nullptr == pMorphChannel)
+				return E_FAIL;
+
+			m_MorphMeshChannels.push_back(pMorphChannel);
+		}
+
+		m_CurrentMorphCurveIndicies.resize(m_iNumMorphCurves);
+
+	}
+#pragma endregion
+
+	return S_OK;
 }
 
 CAnimation* CAnimation::Create(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType)
