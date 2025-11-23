@@ -19,7 +19,7 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-	m_pGameInstance->Add_Probe(_float3(0.f, 5.f, 0.f), 500.f);
+//	m_pGameInstance->Add_Probe(_float3(0.f, 5.f, 0.f), 500.f);
 
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
 
@@ -43,7 +43,7 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
 
-	m_pGameInstance->Bake_EnvMaps();
+//	m_pGameInstance->Bake_EnvMaps();
 
     return S_OK;
 }

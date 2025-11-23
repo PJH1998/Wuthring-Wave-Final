@@ -38,7 +38,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 	Sync_Sectors();
 
-	m_pGameInstance->Add_EnvMap_StaticObject(this);
+	// Env Map Bake
+	//m_pGameInstance->Add_EnvMap_StaticObject(this);
 
 	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;

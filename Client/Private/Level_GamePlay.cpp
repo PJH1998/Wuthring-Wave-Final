@@ -31,7 +31,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
-	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
+//	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
 
 	m_pGameInstance->Setting_LUT(0, 0.25f, false);
 
@@ -91,7 +91,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Mouse();
 	Ready_SFX();
 
-	m_pGameInstance->Bake_EnvMaps();
+//	m_pGameInstance->Bake_EnvMaps();
 
 	return S_OK;
 }

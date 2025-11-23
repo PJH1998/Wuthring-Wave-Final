@@ -31,7 +31,8 @@ HRESULT CSkyBox::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc->strModelTags);
 
-	m_pGameInstance->Add_EnvMap_SkyBox(this);
+	//Env Map Bake
+	//m_pGameInstance->Add_EnvMap_SkyBox(this);
 
     return S_OK;
 }
