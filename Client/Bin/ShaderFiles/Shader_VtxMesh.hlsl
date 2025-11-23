@@ -97,13 +97,15 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    if(length(vDiffuse) == 0.f)
+        vDiffuse = 1.f;
+    
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
 
     if (g_HasMask)
     {
         Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
         Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
-
     }
     else
     {

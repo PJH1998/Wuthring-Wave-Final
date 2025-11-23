@@ -318,14 +318,21 @@ void CEdit_MapObject::Render()
             if (m_pDiffuseTextureCom[i])
                 m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0);
 
-            if (m_pNormalTextureCom[i])
-                if (FAILED(m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture")))
-                    HasNormal = false;
+			if (m_pNormalTextureCom[i])
+			{
+				if (FAILED(m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture")))
+					HasNormal = false;
+			}
+			else
+				HasNormal = false;
 
             if (m_pMaskTextureCom[i])
                 m_pMaskTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture");
-            else
+			else
+			{
+				HasMask = false;
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			}
             if (m_pMaskDiffuseTextureCom[i])
                 m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
         }
