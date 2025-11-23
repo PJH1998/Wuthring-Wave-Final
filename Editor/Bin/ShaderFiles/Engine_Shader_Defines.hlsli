@@ -20,7 +20,7 @@ float g_fGlobalStaticRoughness = 0.75f;
 const static uint g_iStep = 0; //20; Test
 const static float g_fMaxDistance = 400.f;
 
-float Luminance(float3 vColor)
+float Luminance(float3 vColor) 
 {
     float fWeight;
     

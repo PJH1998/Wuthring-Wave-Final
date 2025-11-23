@@ -32,7 +32,7 @@ public:
 	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
 	virtual		void			Render_OutLine() override;
-
+	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 	// Pooling Spawn CallBack
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 

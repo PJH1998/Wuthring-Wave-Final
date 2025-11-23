@@ -92,6 +92,14 @@ HRESULT CLight_Manager::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	return S_OK;
 }
 
+HRESULT CLight_Manager::Render_EnvMap(CShader* pShader, CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding)
+{
+	for (auto& Pair : m_Lights)
+		Pair.second->Render_EnvMap(pShader, pVIBuffer, pBounding);
+
+	return S_OK;
+}
+
 CLight_Manager* CLight_Manager::Create()
 {
 	return new CLight_Manager();
