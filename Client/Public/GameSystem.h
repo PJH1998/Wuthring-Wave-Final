@@ -29,7 +29,7 @@ public:
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
 	//============================Effect
 
-	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion

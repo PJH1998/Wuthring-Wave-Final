@@ -27,7 +27,7 @@ private:
 public:
 #pragma region MAP
 	// File Model
-	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 #pragma endregion
 
@@ -49,7 +49,7 @@ private:
 
 
 private:
-	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);
+	void							Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Read_Map_Dat(LEVEL eLevel, const _string pFilePath);
 
 #pragma region EffectLoad

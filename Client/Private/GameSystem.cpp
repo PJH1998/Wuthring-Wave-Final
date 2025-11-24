@@ -68,9 +68,9 @@ void CGameSystem::Load_Sequence(const _char* pFolderPath)
 	m_pParser->Load_Sequence(pFolderPath);
 }
 
-void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
+void CGameSystem::Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
-	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
+	return m_pParser->Ready_Prototype_Map(pDataFilePath, eLevel, pModelFilePath);
 }
 
 void CGameSystem::Clone_MapObjects(LEVEL eLevel)
