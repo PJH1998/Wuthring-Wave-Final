@@ -9,21 +9,15 @@ NS_END
 
 NS_BEGIN(Client)
 
-class CSkyBox_Rect final : public CGameObject
+class CLogo_SkyBox final : public CGameObject
 {
-public:
-	typedef struct tagSkyBoxRectDesc {
-		_vector				vPosition;
-		_vector				vRotateQuaternion;
-		_float2				vScale;
-		_float3				vColor;
-		vector<_wstring>	strTextureTags;
-	}SKYBOX_RECT_DESC;
+private:
+	enum class SKYBOX { BACK, MID, FRONT, END};
 
 private:
-	CSkyBox_Rect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CSkyBox_Rect(const CSkyBox_Rect& Prototype);
-	virtual ~CSkyBox_Rect() = default;
+	CLogo_SkyBox(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CLogo_SkyBox(const CLogo_SkyBox& Prototype);
+	virtual ~CLogo_SkyBox() = default;
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -35,17 +29,26 @@ public:
 	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 
 private:
+	_vector						m_vPosition = {};
+	_vector						m_vRotateQuaternion = {};
+	_float2						m_vScale = { _float2(1.f, 1.f) };
+
 	CShader*					m_pShader = { nullptr };
 	CVIBuffer_Rect*				m_pVIBuffer = { nullptr };
-	vector<CTexture*>			m_SkyTextures;
+	CTexture*					m_pSkyTextures[ENUM_CLASS(SKYBOX::END)];
+
+#ifdef _DEBUG
+	_float3						m_vDebugPosition = {};
+	_float3						m_vYawPitchRoll = {};
+#endif
 
 private:
 	HRESULT						Ready_Components();
 
 public:
-	static CSkyBox_Rect*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual CGameObject*	Clone(void* pArg) override;
-	virtual void			Free() override;
+	static CLogo_SkyBox*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual CGameObject*		Clone(void* pArg) override;
+	virtual void				Free() override;
 };
 
 NS_END

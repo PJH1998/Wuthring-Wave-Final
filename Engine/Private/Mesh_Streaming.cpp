@@ -12,7 +12,7 @@ CMesh_Streaming::CMesh_Streaming(const CMesh_Streaming& Prototype)
 	m_pSharedIB{Prototype.m_pSharedIB},
 	m_Desc{ Prototype.m_Desc }
 #ifdef _DEBUG
-	, m_pBoundingBox{Prototype.m_pBoundingBox }
+	,m_pBoundingBox{Prototype.m_pBoundingBox }
 #endif
 {
 	Safe_AddRef(m_pSharedVB);

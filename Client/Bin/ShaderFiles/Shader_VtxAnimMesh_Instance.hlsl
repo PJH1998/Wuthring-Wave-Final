@@ -175,6 +175,7 @@ struct PS_OUT
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
     float4 vPBR : SV_TARGET5;
+    float4 vSSS : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -195,6 +196,10 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
     
     return Out;
 }
@@ -217,6 +222,10 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    
     return Out;
 }
 
@@ -237,6 +246,9 @@ PS_OUT PS_NPCFACE(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -289,6 +301,10 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    
     return Out;
 }
 
@@ -329,8 +345,6 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 //    
 //    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
 //    
-//    //Test
-//    Out.vPBR.a = 1.f;
 //
 //    vNormal.xyz = vNormal * 0.5f + 0.5f;
 //    
@@ -380,8 +394,6 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 //    
 //    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
 //    
-//    //Test
-//    Out.vPBR.a = 1.f;
 //
 //    vNormal.xyz = vNormal * 0.5f + 0.5f;
 //    
@@ -431,8 +443,6 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 //    
 //    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
 //    
-//    //Test
-//    Out.vPBR.a = 1.f;
 //
 //    vNormal.xyz = vNormal * 0.5f + 0.5f;
 //    

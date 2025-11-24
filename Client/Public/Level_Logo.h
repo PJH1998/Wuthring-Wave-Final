@@ -19,8 +19,8 @@ private:
 	void							Ready_Layer_LogoMaleRover();
 	void							Ready_Layer_LogoFemaleRover();
 
-	void Ready_UI();
-
+	void							Ready_UI();
+	void							Ready_SkyBox();
 private:
 	class CGameSystem*		m_pGameSystem = { nullptr };
 	LEVEL							m_eCurLevel = { LEVEL::LOGO };
