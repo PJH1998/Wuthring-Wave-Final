@@ -15,18 +15,25 @@ CModel_Streaming::CModel_Streaming(const CModel_Streaming& Prototype)
 	m_pModelPrototype{Prototype.m_pModelPrototype},
 	m_iNumMaterials{ Prototype.m_iNumMaterials }
 	, m_iMaxLOD{ Prototype.m_iMaxLOD },
-	m_ModelPath{ Prototype.m_ModelPath },
-	m_Materials{ Prototype.m_Materials }
+	m_ModelPath{ Prototype.m_ModelPath }
 {
 	for (_uint i = 0; i < 4; ++i)
+	{
 		m_iNumMeshes[i] = Prototype.m_iNumMeshes[i];
+		m_Materials[i] = Prototype.m_Materials[i];
+	}
 
+	for (_uint i = 0; i < 4; ++i)
+	{
+		for (auto& pMaterial : m_Materials[i])
+			Safe_AddRef(pMaterial);
+	}
 	//for (_uint i = 0; i < 4; ++i)
 	//	if (Prototype.m_Meshes[i])
 	//		m_Meshes[i] = dynamic_cast<CMesh_Streaming*>(Prototype.m_Meshes[i]->Clone(nullptr));
 
-	for (auto& pMaterial : m_Materials)
-		Safe_AddRef(pMaterial);
+	/*for (auto& pMaterial : m_Materials)
+		Safe_AddRef(pMaterial);*/
 	Safe_AddRef(m_pModelPrototype);
 }
 
@@ -50,7 +57,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
+	return m_Materials[iLODIndex][iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
 }
 
 HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType)
@@ -58,7 +65,7 @@ HRESULT CModel_Streaming::Bind_Materials(CShader* pShader, const _char* pConstan
 	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
+	return m_Materials[iLODIndex][iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType);
 }
 
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
@@ -70,6 +77,7 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex)
 	}
 	else if (m_pModelPrototype->Get_MeshState(iLODIndex) == LOADSTATE::NOTLOADED)
 		m_pGameInstance->RequestData(this, m_pModelPrototype->m_ModelPath, iLODIndex);
+
 	return S_OK;
 }
 
@@ -78,7 +86,7 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return E_FAIL;
 
-	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
+	return m_Materials[iLODIndex][iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
 }
 
 HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iLODIndex, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
@@ -86,7 +94,7 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 	if (iMeshIndex >= m_pModelPrototype->m_Meshes[iLODIndex]->Get_MeshDesc()->size())
 		return S_OK;
 
-	return m_Materials[iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
+	return m_Materials[iLODIndex][iMeshIndex]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
 }
 
 HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex, ID3D11DeviceContext* pDC)
@@ -173,6 +181,8 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 	}
 	--m_iMaxLOD;
 
+
+
 	return S_OK;
 }
 
@@ -182,36 +192,46 @@ HRESULT CModel_Streaming::Ready_Material()
 	_char szMaterialDrivePath[MAX_PATH] = {};
 	_char szMaterialDirPath[MAX_PATH] = {};
 	_char szMaterialFileName[MAX_PATH] = {};
+	//여기서 마지막 글자 떼고 0부터 마지막 숫자까지 for문 돌리기.
 	_splitpath_s(m_ModelPath.c_str(), szMaterialDrivePath, MAX_PATH, szMaterialDirPath, MAX_PATH, szMaterialFileName, MAX_PATH, nullptr, 0);
+	_uint V = szMaterialFileName[strlen(szMaterialFileName) - 1] - '0' + 1;
 
-	strcpy_s(szMaterialFilePath, szMaterialDrivePath);
-	strcat_s(szMaterialFilePath, szMaterialDirPath);
-	strcat_s(szMaterialFilePath, "Mat/");
-	strcat_s(szMaterialFilePath, szMaterialFileName);
-	strcat_s(szMaterialFilePath, ".json");
-
-	ifstream MaterialFile(szMaterialFilePath);
-	if (false == MaterialFile.is_open())
+	for (_uint i = 0; i < V; ++i)
 	{
-		MSG_BOX("Failed Open : Material");
-		return E_FAIL;
-	}
+		_string MaterialName = szMaterialFileName;
+		MaterialName.pop_back();
+		_char szLodMaterialFileName[MAX_PATH] = {};
+		strcat_s(szLodMaterialFileName, MaterialName.c_str());
+		strcat_s(szLodMaterialFileName, to_string(i).c_str());
+		strcpy_s(szMaterialFilePath, szMaterialDrivePath);
+		strcat_s(szMaterialFilePath, szMaterialDirPath);
+		strcat_s(szMaterialFilePath, "Mat/");
+		strcat_s(szMaterialFilePath, szLodMaterialFileName);
+		strcat_s(szMaterialFilePath, ".json");
 
-	json MaterialsData;
-	MaterialFile >> MaterialsData;
 
-	m_iNumMaterials = MaterialsData["NumMaterial"];
-
-	for (auto& MaterialData : MaterialsData["Materials"])
-	{
-		CMaterial* pMeshMaterial = CMaterial::Create(m_pDevice, m_pContext, MaterialData);
-		if (nullptr == pMeshMaterial)
+		ifstream MaterialFile(szMaterialFilePath);
+		if (false == MaterialFile.is_open())
+		{
+			MSG_BOX("Failed Open : Material");
 			return E_FAIL;
+		}
 
-		m_Materials.push_back(pMeshMaterial);
+		json MaterialsData;
+		MaterialFile >> MaterialsData;
+
+		m_iNumMaterials = MaterialsData["NumMaterial"];
+
+		for (auto& MaterialData : MaterialsData["Materials"])
+		{
+			CMaterial* pMeshMaterial = CMaterial::Create(m_pDevice, m_pContext, MaterialData);
+			if (nullptr == pMeshMaterial)
+				return E_FAIL;
+
+			m_Materials[i].push_back(pMeshMaterial);
+		}
+		MaterialFile.close();
 	}
-
-	MaterialFile.close();
 
 	if (!m_ModelPath.empty())
 	{
@@ -279,6 +299,25 @@ void CModel_Streaming::Set_RigidData(vector<_float3>& vecVertexPos, vector<_uint
 	m_pModelPrototype->m_Meshes[0]->Set_RigidData(vecVertexPos, vecIndices, iMeshIndex);
 }
 
+#ifdef _DEBUG
+
+_bool CModel_Streaming::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
+{
+	_float fDistance = {};
+	_float fMin = FLT_MAX;
+	if (m_pModelPrototype->m_Meshes[0]->Is_Picked(vRayPos, vRayDir, &fDistance) && fMin > fDistance)
+		fMin = fDistance;
+
+	if (fMin < FLT_MAX)
+	{
+		*pDistance = fMin;
+		return true;
+	}
+
+	return false;
+}
+#endif
+
 CModel_Streaming* CModel_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath)
 {
 	CModel_Streaming* pInstance = new CModel_Streaming(pDevice, pContext);
@@ -312,10 +351,14 @@ void CModel_Streaming::Free()
 		Safe_Release(m_pModelPrototype);
 	m_pModelPrototype = nullptr;
 	for (_uint i = 0; i < 4; ++i)
+	{
 		if (m_Meshes[i])
 			Safe_Release(m_Meshes[i]);
 
-	for (auto& pMat : m_Materials)
-		Safe_Release(pMat);
-	m_Materials.clear();
+		for (auto& pMaterial : m_Materials[i])
+			Safe_Release(pMaterial);
+	}
+
+	//for (auto& pMat : m_Materials)
+	//	Safe_Release(pMat);
 }

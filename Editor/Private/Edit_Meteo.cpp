@@ -27,6 +27,7 @@ HRESULT CEdit_Meteo::Initialize_Clone(void* pArg)
 
 	_char Tag[MAX_PATH] = "Meteo";
 	MAP_CREATE event(Tag, this);
+	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 
 	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
@@ -133,51 +134,48 @@ void CEdit_Meteo::Late_Update(_float fTimeDelta)
 
 void CEdit_Meteo::Render()
 {
-	_uint DrawModel = m_iLODIndex;
-	//_uint DrawModel = 0;
+	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
+
+	_bool HasNormal = { true };
+	_bool HasMask = { true };
+	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	if (DrawModel > m_iNumLOD)
-		DrawModel = m_iNumLOD;
-
-	for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
+	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
+			return;
 
-		_bool HasNormal = { true };
-		_bool HasMask = { true };
-
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
 		{
-			if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-			{
-				m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-				HasMask = false;
-			}
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			HasMask = false;
+		}
 
+		if (HasMask)
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE);
 
-			if (HasMask)
-			{
-				m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL)))
+				HasNormal = false;
+		}
+		else
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0);
 
-				if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-					HasNormal = false;
-			}
-			else
-			{
-				m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
-
-				if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-					HasNormal = false;
-			}
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = false;
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
 		m_pShaderCom->Begin(m_iShaderPassIndex);
-
-		m_pModelComArray[DrawModel]->Render(i);
+		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
 
@@ -256,28 +254,22 @@ void CEdit_Meteo::Ready_Components(void* pArg)
 	lstrcat(Model, Name);
 	_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
 
-	m_pModelComArray.resize(V);
+	_wstring ModelCom = Model;
 
-	for (_uint i = 0; i < V; ++i)
-	{
-		_wstring ModelCom = Model;
-		ModelCom.pop_back();
-		ModelCom += to_wstring(i);
+	ModelCom.pop_back();
+	ModelCom.pop_back();
+	ModelCom.pop_back();
+	ModelCom.pop_back();
+	ModelCom.pop_back();
 
-		_char ModelName[MAX_PATH] = {};
-		sprintf_s(ModelName, "Com_Model%d", i);
-		if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-			CRASH("FAILED");
-
-	}
-	//m_pGameInstance->Wait_Thread_End();
+	if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
+		TEXT("Com_Test"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("FAILED");
+	m_pModelCom->Ready_BoundingBox();
 
 	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("Failed");
-	m_pModelCom = m_pModelComArray[0];
-	m_iNumLOD = m_pModelComArray.size() - 1;
 }
 
 CEdit_Meteo* CEdit_Meteo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -309,13 +301,8 @@ CGameObject* CEdit_Meteo::Clone(void* pArg)
 void CEdit_Meteo::Free()
 {
 	__super::Free();
-	m_pModelCom = nullptr;
-
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pMapInterface);
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
+	Safe_Release(m_pModelCom);
 	Safe_Release(m_pRigidbodyCom);
-
-	m_pModelComArray.clear();
 }

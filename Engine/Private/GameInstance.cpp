@@ -29,6 +29,7 @@
 #include "Decal_Manager.h"
 #include "VolumetricFog.h"
 #include "HZB.h"
+#include "EnvironmentMap.h"
 
 #include"Model_Manager.h"
 #include "SFX_Hub.h"
@@ -134,6 +135,10 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pSFX_Hub);
+
+	m_pEnvMap = CEnvironmentMap::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pEnvMap);
+
 	m_pResource_Manager = CResource_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pResource_Manager);
 
@@ -570,6 +575,10 @@ HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& 
 HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
+}
+HRESULT CGameInstance::Render_LightEnvMap(CShader* pShader, CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding)
+{
+	return m_pLight_Manager->Render_EnvMap(pShader, pVIBuffer, pBounding);
 }
 #ifdef _DEBUG
 LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
@@ -1121,6 +1130,30 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 {
 	m_pSFX_Hub->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
 }
+void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
+{
+	m_pSFX_Hub->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+}
+HRESULT CGameInstance::Add_Probe(_float3 vCenter, _float fRange)
+{
+	return m_pEnvMap->Add_Probe(vCenter, fRange);
+}
+void CGameInstance::Bake_EnvMaps()
+{
+	m_pEnvMap->Bake_EnvMaps();
+}
+void CGameInstance::Add_EnvMap_SkyBox(CGameObject* pSkyBox)
+{
+	m_pEnvMap->Add_EnvMap_SkyBox(pSkyBox);
+}
+void CGameInstance::Add_EnvMap_StaticObject(CStaticObject* pStaticObject)
+{
+	m_pEnvMap->Add_EnvMap_StaticObject(pStaticObject);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_EnvMap(_uint iIndex)
+{
+	return m_pEnvMap->Get_EnvMap(iIndex);
+}
 #endif
 #pragma endregion
 
@@ -1168,6 +1201,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
+	m_pEnvMap->Clear();
 	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
@@ -1209,6 +1243,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pSFX_Hub);
+	Safe_Release(m_pEnvMap);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);

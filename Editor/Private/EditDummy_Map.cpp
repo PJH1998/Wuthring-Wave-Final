@@ -83,15 +83,15 @@ HRESULT CEditDummy_Map::Ready_Component(_fmatrix PreTransformMatrix)
 	m_pShaderCom = CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements);
 	ASSERT_CRASH(m_pShaderCom);
 
-	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.eShape = SHAPE::MESH;
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	//RigidbodyDesc.pModel = m_pModelCom;
+	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+	//RigidbodyDesc.eShape = SHAPE::MESH;
+	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//RigidbodyDesc.eType = EMotionType::Static;
+	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	////RigidbodyDesc.pModel = m_pModelCom;
 
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
 	return S_OK;
 }

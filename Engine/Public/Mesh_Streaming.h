@@ -31,6 +31,12 @@ public:
 	vector<_float3>					Get_VerticesPos(_uint iMeshIndex){ return m_vecVertexPos[iMeshIndex]; }
 	vector<_uint>					Get_Indices(_uint iMeshIndex) { return m_vecIndices[iMeshIndex]; }
 	void							Destroy_RigidData();
+
+#ifdef _DEBUG
+	void							Ready_BoundingBox();
+	BoundingBox* Get_BoundingBox() { return m_pBoundingBox; }
+	_bool Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
+#endif
 private:
 	vector<_float3>* m_vecVertexPos;
 	vector<_uint>* m_vecIndices;
@@ -44,6 +50,11 @@ private:
 	_uint m_iVertexStride = sizeof(VTXMESH);
 	DXGI_FORMAT m_eIndexFormat = DXGI_FORMAT_R32_UINT;
 	D3D11_PRIMITIVE_TOPOLOGY m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+#ifdef _DEBUG
+	BoundingBox* m_pBoundingBox = { nullptr };
+#endif
+
 public:
 	static CMesh_Streaming* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumMeshes);
 	virtual void Free()override;

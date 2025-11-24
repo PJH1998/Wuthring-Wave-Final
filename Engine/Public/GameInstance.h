@@ -156,6 +156,7 @@ public:
 	void						Set_Active(const _wstring& strLightTag, _bool isActive);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, class BoundingBox* pBounding);
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
 #endif
@@ -366,7 +367,16 @@ public:
 
 #ifdef _DEBUG
 	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
+	void					Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset);
 #endif
+#pragma endregion
+
+#pragma region ENVIRONMENT_MAP
+	HRESULT						Add_Probe(_float3 vCenter, _float fRange);
+	void						Bake_EnvMaps();
+	void						Add_EnvMap_SkyBox(CGameObject* pSkyBox);
+	void						Add_EnvMap_StaticObject(CStaticObject* pStaticObject);
+	ID3D11ShaderResourceView*	Get_EnvMap(_uint iIndex);
 #pragma endregion
 
 #pragma region RESOURCE_MANAGER
@@ -412,6 +422,7 @@ private:
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+	class CEnvironmentMap*		m_pEnvMap = { nullptr };
 	class CResource_Manager*	m_pResource_Manager = { nullptr };
 
 	_uint						m_iNumLevel = {};

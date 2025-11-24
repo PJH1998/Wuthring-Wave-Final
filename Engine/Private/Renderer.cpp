@@ -207,9 +207,9 @@ void CRenderer::Render()
 
 	Render_Combined();
 	
+	Render_SSR();
 	Render_Outline();
 
-	
 	Render_NonLight();
 	Render_LUT();
 	Render_Effect();
@@ -782,9 +782,6 @@ void CRenderer::Render_Combined()
 
 	ID3D11ShaderResourceView* pDiffuse = m_IsSSS ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSSBlur_Y")) : m_pGameInstance->Get_RT_SRV(TEXT("RT_LightDiffuse"));
 
-	if (FAILED(m_pShader->Bind_Value("g_fExposure", &m_fExposure, sizeof(_float))))
-		CRASH("Render Fail");
-
 	if (FAILED(m_pShader->Bind_Texture("g_LightDiffuseTexture", pDiffuse)))
 		CRASH("Render Fail");
 
@@ -811,6 +808,18 @@ void CRenderer::Render_Combined()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
+void CRenderer::Render_SSR()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::SSR, m_pVIBuffer, m_pShader)))
+		return;
+
+	m_pGameInstance->End_MRT();
+
+	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine"));
+}
 
 void CRenderer::Render_Outline()
 {
@@ -832,7 +841,7 @@ void CRenderer::Render_Outline()
 
 void CRenderer::Render_NonLight()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONLIGHT));
@@ -850,6 +859,10 @@ void CRenderer::Render_LUT()
 	
 	if (FAILED(m_pSubResource->Bind_LUT_Texture(m_pShader, m_iLUT_Index)))
 		return;
+
+	if (FAILED(m_pShader->Bind_Value("g_fExposure", &m_fExposure, sizeof(_float))))
+		CRASH("Render Fail");
+
 
 	if (FAILED(m_pShader->Bind_Value("g_fLutLerpIntensity", &m_fLutLerpIntensity, sizeof(_float))))
 		CRASH("Failed to Bind LutIntensity");
@@ -1128,7 +1141,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Back_Buffer */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BackBuffer"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BackBuffer"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Emissive*/
@@ -1240,7 +1253,7 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 
 #pragma region MRT_OUTLINE
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_BackBuffer"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_Combine"))))
 		ASSERT_CRASH(false);
 	if(FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_Depth"))))
 		ASSERT_CRASH(false);
@@ -1379,6 +1392,7 @@ void CRenderer::Free()
 		m_pDeferredContext[i]->Flush();
 		Safe_Release(m_pDeferredContext[i]);
 	}
+	
 	Safe_Delete_Array(m_pDeferredContext);
 
 	for (auto& Pair : m_Effects)
@@ -1397,17 +1411,11 @@ void CRenderer::Free()
 		m_RenderObjects[i].clear();
 	}
 
-	for (auto& pDubble: m_RenderObjects)
-	{
-		for (auto& pObject : pDubble)
-		{
-			Safe_Release(pObject);
-		}
-		pDubble.clear();
-	}
-	m_RenderObjects->clear();
-
 	m_ShadowMapObjects.clear();
+
+	for (auto& pCL : m_CommandLists)
+		Safe_Release(pCL);
+	m_CommandLists.clear();
 
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer);

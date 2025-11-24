@@ -47,22 +47,26 @@ public:
 	vector<_float3>					Get_VerticesPos(_uint iIndex) { return m_pModelPrototype->m_Meshes[0]->Get_VerticesPos(iIndex); }
 	vector<_uint>					Get_Indices(_uint iIndex) { return m_pModelPrototype->m_Meshes[0]->Get_Indices(iIndex); }
 	void							Destroy_RigidData() { m_pModelPrototype->m_Meshes[0]->Destroy_RigidData(); }
+#ifdef _DEBUG
+	void							Ready_BoundingBox() { m_pModelPrototype->m_Meshes[0]->Ready_BoundingBox(); }
+	BoundingBox* Get_BoundingBox() { return m_pModelPrototype->m_Meshes[0]->Get_BoundingBox(); }
+	_bool								Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
+#endif
 private:
 
 	_uint									m_iNumMeshes[4] = { 0,0,0,0 };
 	class CMesh_Streaming*					m_Meshes[4] = { nullptr,nullptr,nullptr,nullptr };
 
 	_uint									m_iNumMaterials = {};
-	vector<class CMaterial*>	m_Materials;
+	//vector<class CMaterial*> m_Materials;
+	vector<class CMaterial*> m_Materials[4];
 	atomic<LOADSTATE>						m_LodState[4] = { LOADSTATE::NOTLOADED,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED ,LOADSTATE::NOTLOADED };
 
 	_float									m_fRenderTime[4] = { 0.f,0.f,0.f,0.f };
 	_string m_ModelPath;
 	_uint m_iMaxLOD = { 0 };
 	CModel_Streaming* m_pModelPrototype = { nullptr };
-	//메쉬를 최대 4개만 가지게 한 뒤에
-	//LOD데이터를 로드할 때 메쉬 맨 처음 데이터가 메쉬 수. 각 데이터 읽을 때마다 그 데이터 크기만큼 FreeList에 할당, 각 메쉬별주소도 저장.
-	//각 메쉬별 데이터를 메쉬 안에 전달 그 수만큼 할당? 할당과 파괴를 도중에 하는건 안됨. 벡터 전달??
+
 public:
 	static		CModel_Streaming* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath);
 	virtual		CComponent* Clone(void* pArg);

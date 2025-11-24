@@ -55,6 +55,7 @@ private:
 	class CEdit_TriggerBox* m_pPickedTriggerBox = { nullptr };
 	class CEdit_MonsterSpawnor* m_pPickedSpawnor = { nullptr };
 	class CEdit_Meteo* m_pPickedMeteo = { nullptr };
+	class CEdit_MapObject_Water* m_pPickedWater = { nullptr };
 	unordered_set< _string> m_szPrototypeName;
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };

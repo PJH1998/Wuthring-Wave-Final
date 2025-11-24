@@ -19,6 +19,8 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
+//	m_pGameInstance->Add_Probe(_float3(0.f, 5.f, 0.f), 500.f);
+
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
 
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
@@ -40,6 +42,8 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SettingFog(true);
 
 	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
+
+//	m_pGameInstance->Bake_EnvMaps();
 
     return S_OK;
 }
@@ -69,7 +73,10 @@ void CLevel_Logo::Update(_float fTimeDelta)
 }
 
 void CLevel_Logo::Render()
-{
+{ 
+#ifdef _DEBUG
+	DEBUG_FUNCTION();
+#endif
 }
 
 void CLevel_Logo::Ready_Camera()
@@ -146,6 +153,21 @@ void CLevel_Logo::Ready_UI()
 }
 
 
+#ifdef _DEBUG
+void CLevel_Logo::DEBUG_FUNCTION()
+{
+	ImGui::Begin("SHADER");
+	if (ImGui::CollapsingHeader("SSR"))
+	{
+		ImGui::InputFloat("MIN_STEP", &m_fMinStep, 1.f, 2.f);
+		ImGui::InputFloat("MAX_STEP", &m_fMaxStep, 1.f, 2.f);
+		ImGui::InputFloat("STARTOFFSET", &m_fStart, 1.f, 2.f);
+
+		m_pGameInstance->Set_SSR(m_fMinStep, m_fMaxStep, m_fStart);
+	}
+	ImGui::End();
+}
+#endif
 CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CLevel_Logo* pInstance = new CLevel_Logo(pDevice, pContext);
@@ -162,7 +184,7 @@ CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 void CLevel_Logo::Free()
 {
 	//m_pGameInstance->Clear_RootUI();
-
+	    
     __super::Free();
 
 	Safe_Release(m_pGameSystem);

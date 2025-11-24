@@ -31,6 +31,9 @@ HRESULT CSkyBox::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc->strModelTags);
 
+	//Env Map Bake
+	//m_pGameInstance->Add_EnvMap_SkyBox(this);
+
     return S_OK;
 }
 
@@ -73,6 +76,24 @@ void CSkyBox::Render_Shadow()
 
 void CSkyBox::Render_OutLine()
 {
+}
+
+void CSkyBox::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
+{
+	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vCenter) + XMVectorSet(0.f, -10.f, 0.f, 0.f));
+
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", &ViewMatrix);
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", &ProjMatrix);
+
+	m_pShaderCom->Bind_Value("g_fCloudSpeed", &m_fTimeAcc, sizeof(_float));
+
+	for (_uint i = 0; i < m_iNumModels; ++i)
+	{
+		m_pModelCom[i]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", 0, TEXTURETYPE::DIFFUSE);
+		m_pShaderCom->Begin(i);
+		m_pModelCom[i]->Render(0);
+	}
 }
 
 void CSkyBox::Ready_Component(const vector<_wstring>& strModelTags)

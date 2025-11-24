@@ -31,6 +31,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
+//	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
+
 	m_pGameInstance->Setting_LUT(0, 0.25f, false);
 
 	//TEST
@@ -52,7 +54,6 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	m_pGameInstance->Render_ShadowMap();
 
-	
 	m_pGameInstance->Begin_DownSampleShadowMap();
 
 	LIGHT_DESC LightDesc{};
@@ -84,10 +85,13 @@ HRESULT CLevel_GamePlay::Initialize()
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
+
 	Ready_Effect();
 	Ready_Skybox();
 	Ready_Mouse();
 	Ready_SFX();
+
+//	m_pGameInstance->Bake_EnvMaps();
 
 	return S_OK;
 }
@@ -535,37 +539,42 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 
 
 	ImGui::Begin("SHADER");
-
-	if (ImGui::CollapsingHeader("HDR"))
+	if (ImGui::CollapsingHeader("SSR"))
 	{
+		ImGui::InputFloat("MIN_STEP", &m_fMinStep, 1.f, 2.f);
+		ImGui::InputFloat("MAX_STEP", &m_fMaxStep, 1.f, 2.f);
+		ImGui::InputFloat("STARTOFFSET", &m_fStart, 1.f, 2.f);
 
-		ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
-		
-		m_pGameInstance->SettingHDR(m_fExposure);
-	
+		m_pGameInstance->Set_SSR(m_fMinStep, m_fMaxStep, m_fStart);
 	}
-	if (ImGui::CollapsingHeader("LUT"))
-	{
-		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
-		{
-			for (_uint i = 0; i < 7; ++i)
-			{
+	//if (ImGui::CollapsingHeader("HDR"))
+	//{
 
-#ifdef _DEBUG
-				if (ImGui::Selectable(to_string(i).c_str()))
-				{
-					m_iLUT_Index = i;
-				}
-#endif // _DEBUG
-			}
+	//	ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
+	//	
+	//	m_pGameInstance->SettingHDR(m_fExposure);
+	//
+	//}
+	//if (ImGui::CollapsingHeader("LUT"))
+	//{
+	//	if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
+	//	{
+	//		for (_uint i = 0; i < 7; ++i)
+	//		{
 
-			ImGui::EndCombo();
-		}
+	//			if (ImGui::Selectable(to_string(i).c_str()))
+	//			{
+	//				m_iLUT_Index = i;
+	//			}
+	//		}
 
-		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
-		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
-	}
+	//		ImGui::EndCombo();
+	//	}
+
+	//	ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
+	//	ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+	//	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+	//}
 
 	ImGui::End();
 	//if (ImGui::CollapsingHeader("MOTION_BLUR"))

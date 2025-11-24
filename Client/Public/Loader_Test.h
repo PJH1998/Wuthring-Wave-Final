@@ -28,6 +28,8 @@ private:
 	HRESULT				Load_Galbrena();
 	HRESULT				Load_Action();
 
+	HRESULT				Load_NPC();
+
 	HRESULT				Load_UI();
 	HRESULT				Load_Font();
 

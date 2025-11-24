@@ -16,6 +16,7 @@
 #include"Edit_MonsterSpawnor.h"
 #include"Edit_Meteo.h"
 #include"Model_Streaming.h"
+#include"Edit_MapObject_Water.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -38,7 +39,7 @@ HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
 
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4000, 4000,4000));
+	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4000, 4000,4000));
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
 
@@ -241,6 +242,10 @@ void CLevel_Map::Menu_Object()
 		if(m_pPickedMeteo)
 			m_pPickedMeteo->Set_ImGuiOption();
 		break;
+	case static_cast<_uint>(OBJECTTYPE::WATER):
+		if (m_pPickedWater)
+			m_pPickedWater->Set_ImGuiOption();
+		break;
 	default:
 		if (m_pPickedObject)
 			m_pPickedObject->Set_ImGuiOption();
@@ -340,6 +345,34 @@ void CLevel_Map::Menu_Model_Load()
 
 			if (ImGui::Selectable(FileName))
 			{
+				auto iter = m_szPrototypeName.find(m_ModelPaths[i]);
+				if (iter == m_szPrototypeName.end())
+				{
+					m_szPrototypeName.insert(m_ModelPaths[i]);
+
+					_string NoVersionName = FileName;
+					NoVersionName.pop_back();
+
+					//뒤 숫자 떼고 0부터 숫자까지 만들기. 이미 맨 뒤에 .dat 붙어있음.
+
+					_uint V = FileName[strlen(FileName) - 1] - '0' + 1;
+					_wstring PrototypeName;
+
+					PrototypeName = L"Prototype_Component_Model_";
+					PrototypeName += StringToWString(NoVersionName);
+					//m_pGameInstance->Load_Resource(FileDir);
+
+					PrototypeName.pop_back();
+					PrototypeName.pop_back();
+					PrototypeName.pop_back();
+					PrototypeName.pop_back();
+
+					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+						CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
+						CRASH("Prototype Create Failed");
+					m_pGameInstance->LoadLastLOD();
+				}
+
 				if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::METEO)
 				{
 					CEdit_Meteo::MAP_LOAD Desc{};
@@ -369,40 +402,25 @@ void CLevel_Map::Menu_Model_Load()
 					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
 						, m_iLevel, TEXT("Layer_MapObject_Destruction"), &Desc);
 				}
+				else if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::WATER)
+				{
+					_string WaterName = FileName;
+					if (WaterName.find("Wat") == string::npos)
+						return;
+					CEdit_MapObject_Water::MAP_LOAD Desc{};
+					Desc.iLevel = m_iLevel;
+					Desc.iShaderPassIndex = 0;
+					strcpy_s(Desc.ModelName, FileName);
+					Desc.vDiffuseColor = _float4(1.f, 1.f, 1.f, 1.f);
+					_float4x4 DefaultMatrix{};
+					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					Desc.WorldMatrix = DefaultMatrix;
+
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Water")
+						, m_iLevel, TEXT("Layer_MapObject_Water"), &Desc);
+				}
 				else
 				{
-					auto iter = m_szPrototypeName.find(m_ModelPaths[i]);
-					if (iter == m_szPrototypeName.end())
-					{
-						m_szPrototypeName.insert(m_ModelPaths[i]);
-
-						_string NoVersionName = FileName;
-						NoVersionName.pop_back();
-
-						//뒤 숫자 떼고 0부터 숫자까지 만들기. 이미 맨 뒤에 .dat 붙어있음.
-
-						_uint V = FileName[strlen(FileName) - 1] - '0' + 1;
-
-						for (_uint i = 0; i < V; ++i)
-						{
-							_wstring PrototypeName = L"Prototype_Component_Model_";
-							PrototypeName += StringToWString(NoVersionName);
-							PrototypeName += to_wstring(i);
-
-							_string VersionPath = FileDir;
-							VersionPath += NoVersionName;
-							VersionPath += to_string(i);
-							VersionPath += ".dat";
-
-							m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = VersionPath]() {
-
-								if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
-									CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)), Path.c_str()))))
-									CRASH("Prototype Create Failed");
-								});
-						}
-						m_pGameInstance->Wait_Thread_End();
-					}
 					CEdit_MapObject::MAP_LOAD Desc{};
 					_float4x4 DefaultMatrix{};
 					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
@@ -438,7 +456,7 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","Sonoro_Floor","Meteo"};
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water" };
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {
         for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -523,6 +541,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Spawn"), event);
 				else if (Pair.first.find("Meteo") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Meteo"), event);
+				else if (Pair.first.find("Water") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Water"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -777,7 +797,6 @@ void CLevel_Map::Menu_Save_Load()
 						}
                         else
                         {
-
                             CEdit_MapObject::MAP_LOAD Desc{};
 							//경로 돌면서 하나하나 일일히 찾아서 경로 찾은 다음에 있는 거랑 비교한 후 없으면 프로토타입 만들기.
 
@@ -835,11 +854,11 @@ void CLevel_Map::Load_Objects()
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
@@ -857,6 +876,7 @@ void CLevel_Map::Load_Objects()
     _wstring LastVersionName;
     _string LastVersionPath;
 
+	m_pGameInstance->Load_Resource(m_FolderPath.c_str());
     //마지막 폴더 못읽음. 프로토타입 안생김.
 	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
 		if (entry.is_regular_file()) {
@@ -1041,31 +1061,26 @@ void CLevel_Map::Ready_Map_Load_Prototype(const _char* pModelName)
 			_string NoVersionName = FileName;
 			NoVersionName.pop_back();
 
-			//뒤 숫자 떼고 0부터 숫자까지 만들기. 이미 맨 뒤에 .dat 붙어있음.
-
 			_uint V = FileName[strlen(FileName) - 1] - '0' + 1;
+			_wstring PrototypeName;
 
-			for (_uint i = 0; i < V; ++i)
-			{
-				_wstring PrototypeName = L"Prototype_Component_Model_";
-				PrototypeName += StringToWString(NoVersionName);
-				PrototypeName += to_wstring(i);
+			PrototypeName = L"Prototype_Component_Model_";
+			PrototypeName += StringToWString(NoVersionName);
 
-				_string VersionPath = FileDir;
-				VersionPath += NoVersionName;
-				VersionPath += to_string(i);
-				VersionPath += ".dat";
+			PrototypeName.pop_back();
+			PrototypeName.pop_back();
+			PrototypeName.pop_back();
+			PrototypeName.pop_back();
 
-				m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = VersionPath]() {
-					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
-						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)), Path.c_str()))))
-						CRASH("Prototype Create Failed");
-					});
-			}
-			break;
+			m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = FileDir]() {
+				if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
+					CModel_Streaming::Create(m_pDevice, m_pContext, Path))))
+					CRASH("Prototype Create Failed");
+				});
 		}
 	}
 	m_pGameInstance->Wait_Thread_End();
+	m_pGameInstance->LoadLastLOD();
 }
 
 void CLevel_Map::Ready_Debris_Prototype(const _char* pModelName)
@@ -1228,6 +1243,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
 
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Water"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Water.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
         CVIBuffer_Point::Create(m_pDevice, m_pContext));
 
@@ -1242,6 +1260,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo"),
 		CEdit_Meteo::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Water"),
+		CEdit_MapObject_Water::Create(m_pDevice, m_pContext));
 	
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
@@ -1279,8 +1300,6 @@ void CLevel_Map::Ready_Event()
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 				{
-
-
 					m_pPickedObject->Set_ShaderPass(3);
 
 					if (m_pPickedDestructObject)
@@ -1315,6 +1334,10 @@ void CLevel_Map::Ready_Event()
 						m_pPickedMeteo->Set_ShaderPass(0);
 						//m_pPickedMeteo = nullptr;
 					}
+				}
+				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
+				{
+					m_pPickedWater->Set_ShaderPass(3);
 				}
 			}
 		}
@@ -1363,6 +1386,11 @@ void CLevel_Map::Ready_Event()
 			{
 				m_SaveObjects["Map_Object_Meteo"].push_back(m_pPickedMeteo);
 				Safe_AddRef(m_pPickedMeteo);
+			}
+			else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
+			{
+				m_SaveObjects["Map_Object_Water"].push_back(m_pPickedWater);
+				Safe_AddRef(m_pPickedWater);
 			}
 		}
 
@@ -1467,6 +1495,7 @@ void CLevel_Map::Free()
     m_pPickedLightObject = nullptr;
 	m_pPickedDestructObject = nullptr;
 	m_pPickedTriggerBox = nullptr;
+	m_pPickedWater = nullptr;
 
     Safe_Release(m_pPreViewObject);
 	Safe_Release(m_pBrush);
