@@ -23,12 +23,13 @@ HRESULT CNPCCell::Initialize_Clone(void* pArg)
 
 	DUMMYCELL_DESC* pDesc = static_cast<DUMMYCELL_DESC*>(pArg);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vStartPos), 1.f));
-	//Ready_Component(pDesc);
+	Ready_Component(pDesc);
 
 	m_pUpdateRootFunc = pDesc->pUpdateRootFunc;
 	m_pUpdateAnimStateFunc = pDesc->pUpdateAnimStateFunc;
-	m_strAnimationTag = pDesc->szAnimationTag;
+	m_strAnimationTag = m_strOriginAnimationTag = pDesc->szAnimationTag;
 	m_iInstanceIndex = pDesc->iInstanceIndex;
+	m_iFaceIndex = m_iOriginFaceIndex = pDesc->iFaceIndex;
 	m_fTrackPos = pDesc->fTrackPos;
 	m_fRootMotionRate = 1.f;
 
@@ -48,8 +49,14 @@ void CNPCCell::Priority_Update(_float fTimeDelta)
 
 void CNPCCell::Update(_float fTimeDelta)
 {
+	_bool isAnimFinished{};
 	if(m_pUpdateRootFunc)
-		m_pUpdateRootFunc(m_strAnimationTag, m_pTransformCom, fTimeDelta, &m_fTrackPos, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+		isAnimFinished = m_pUpdateRootFunc(m_strAnimationTag, m_pTransformCom, fTimeDelta, &m_fTrackPos, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+	if (isAnimFinished && m_CollideTrigger)
+	{
+		m_CollideTrigger = false;
+		m_strAnimationTag = m_strOriginAnimationTag;
+	}
 
 	if (m_pColliderCom)
 	{
@@ -86,6 +93,31 @@ void CNPCCell::Ready_Component(DUMMYCELL_DESC* pDesc)
 	Add_Component(ENUM_CLASS(LEVEL::STATIC),TEXT("Prototype_Component_Collider"),
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
+	m_pColliderCom->Set_Gravity(true);
+	//if(pDesc->isCollide)
+	//{
+	//	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	//		OnCollide_Enter(iLayer, pDesc, Manifold);
+	//		});
+	//}
+	m_tCallBack.pTransform = m_pTransformCom;
+	m_pColliderCom->Set_Desc(&m_tCallBack);
+
+}
+
+void CNPCCell::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		if (false == m_CollideTrigger)
+		{
+			m_CollideTrigger = true;
+			//m_strAnimationTag = 어깨빵 애니메이션
+#ifdef _DEBUG
+			cout << m_iInstanceIndex << " 어깨빵!" << endl;
+#endif // _DEBUG
+		}
+	}
 }
 
 CNPCCell* CNPCCell::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -119,4 +151,5 @@ void CNPCCell::Free()
 	__super::Free();
 
 	Safe_Release(m_pColliderCom);
+	Safe_Release(m_pRigidbodyCom);
 }
