@@ -157,11 +157,11 @@ namespace Client
 	};
 
 	enum class UI_TAB_UTILITY : unsigned int {
-		GRAPPLE,
-		SENSOR,
-		FLIGHT,
-		LEVITATOR,
+		GRAPPLE,		// 그래플
+		SENSOR,			// 스캔
+		FLIGHT,			// 활공
+		LEVITATOR,		// 컨트롤
 
-		NOTHING
+		NOTHING			// UI OFF 시 아무것도 선택되지 않음
 	};
 }
