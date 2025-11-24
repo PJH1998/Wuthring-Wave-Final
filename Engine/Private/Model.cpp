@@ -35,7 +35,9 @@ CModel::CModel(const CModel& Prototype)
 	pMax{Prototype.pMax},
 	m_ShapeKeyNames { Prototype.m_ShapeKeyNames },
 	m_ShapeKeyIndices{ Prototype.m_ShapeKeyIndices},
-	m_fPreScale { Prototype.m_fPreScale }
+	m_fPreScale { Prototype.m_fPreScale },
+	m_ConversionMatrix { Prototype.m_ConversionMatrix }
+
 	
 	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
@@ -281,6 +283,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
 
 	m_fPreScale = 0.01f; // 기본
+	_matrix matConversion = XMMatrixIdentity();
 
 	ifstream InputFile(pFilePath, ios::binary);
 	if (false == InputFile.is_open())
@@ -291,6 +294,8 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 
 	if (MODELTYPE::CHARACTER == m_eType)
 	{
+		matConversion = XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
+		XMStoreFloat4x4(&m_ConversionMatrix, matConversion);
 		m_fPreScale = 0.01f; // Character의 경우 Blender에서 Animation 이동량이 0.01배 되서 들어올 것이므로 1.f처리. 
 		// Animation의 경우는 FilePath를 이용해서 새로운 FileStream을 생성해서 읽어들임.
 		if (FAILED(Ready_CharacterModel(PreTransformMatrix, pFilePath, InputFile)))
@@ -298,11 +303,14 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	}
 	else if (MODELTYPE::ANIM == m_eType)
 	{
+		matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
+		XMStoreFloat4x4(&m_ConversionMatrix, matConversion);
 		if (FAILED(Ready_AnimModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
 	}
 	else if (MODELTYPE::ECO == m_eType)
 	{
+
 		if (FAILED(Ready_EchoModel(PreTransformMatrix, pFilePath, InputFile)))
 			return E_FAIL;
 	}
@@ -388,13 +396,15 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
-HRESULT CModel::Bind_MorphedResult(CShader* pShader, _uint iMeshIndex)
+
+HRESULT CModel::Bind_MorphedResult(CShader* pShader, _uint iMeshIndex, const _char* pConstantName)
 {
 	if (iMeshIndex >= m_Meshes.size())
 		return E_FAIL;
 
-	return m_Meshes[iMeshIndex]->Bind_MorphedResult(pShader);
+	return m_Meshes[iMeshIndex]->Bind_MorphedResult(pShader, pConstantName);
 }
+
 
 //HRESULT CModel::Bind_MorphWeights(CShader* pShader)
 //{
@@ -1009,7 +1019,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 		pAnimCBInfo->iRibbonAnimIndex = m_AnimationNameToIndex[strRibAnimationName];
 	}
 
-	IsRibAnimUsed = false;
+	IsRibAnimUsed = true;
 	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
@@ -1044,14 +1054,15 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+	
+	// 9. Unmap으로 마무리합니다.  
+	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
-
-	// 9. Unmap으로 마무리합니다.  
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
 void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo)
@@ -1240,7 +1251,9 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
 
 
-	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
+	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
+	_matrix matConversion = XMLoadFloat4x4(&m_ConversionMatrix);
+	//_matrix matConversion =  XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
 	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환

@@ -94,7 +94,7 @@ public:
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect);
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	HRESULT							Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
-	HRESULT							Bind_MorphedResult(class CShader* pShader, _uint iMeshIndex); // Mesh의 Morph 연산을 바인딩합니다.
+	HRESULT							Bind_MorphedResult(class CShader* pShader, _uint iMeshIndex, const _char* pConstantName); // Mesh의 Morph 연산을 바인딩합니다.
 	//HRESULT							Bind_MorphWeights(class CShader* pShader);
 	//HRESULT							Bind_MorphSRV(class CShader* pShader, _uint iMeshIndex);
 	HRESULT							Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
@@ -180,11 +180,9 @@ private:
 #pragma region FACIAL
 	vector<_string> 		   m_ShapeKeyNames;
 	vector<_float>			   m_ShapeKeyWeights;
-
 	map<_string, _uint>		   m_ShapeKeyIndices;
-	
-	
-	// ImGui에서 이 리스트만 쭉 뿌리면 블렌더와 똑같은 목록이 나옵니다.
+
+	_float4x4				   m_ConversionMatrix = {};
 	
 #pragma endregion
 

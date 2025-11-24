@@ -38,7 +38,6 @@ public:
 
 public:
 	void Update_Morph_CPU(const vector<_float>& vShapeKeyWeights);
-
 	void Compute_Morph(class CComputeShader* pMorphComputeShaderCom, ID3D11ShaderResourceView* pWeightSRV);
 #ifdef _DEBUG
 	_bool							Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
@@ -46,7 +45,7 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShaderCom, const _char* pConstantName, const vector<class CBone*>& Bones);
-	HRESULT						Bind_MorphedResult(class CShader* pShaderCom);
+	HRESULT						Bind_MorphedResult(class CShader* pShaderCom, const _char* pConstantName);
 
 public:
 	HRESULT						Ready_SharedBuffers_ForMorph();   // Prototype 에서만 생성 => Add Ref
@@ -93,6 +92,8 @@ private:
 private:
 	HRESULT						Create_BaseVertexBuffer();
 	HRESULT						Create_DeltaBuffer();
+
+	
 
 
 

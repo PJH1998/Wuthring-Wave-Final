@@ -158,6 +158,13 @@ HRESULT CShader::Bind_SRV(const _char* pConstantName, ID3D11ShaderResourceView* 
 	return pSRVariable->SetResource(pSRV);
 }
 
+void CShader::UndBind_All_VS_SRV()
+{
+	// VS 최대 SRV 슬롯 개수가 128개.
+	ID3D11ShaderResourceView* nullSRV[128] = {nullptr,};
+	m_pContext->VSSetShaderResources(0, 128, nullSRV);
+}
+
 #ifdef _DEBUG
 const char* CShader::Get_PassName(_uint iNumPass)
 {

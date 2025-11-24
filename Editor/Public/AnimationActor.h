@@ -41,8 +41,6 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
-
-	
 	virtual void Render_Shadow() override;
 
 	
@@ -84,6 +82,8 @@ public:
 	
 	void Child_Render();
 	void Render_Detail();
+
+	void Print_WorldMatrix();
 
 	void Set_AnimationSpeed(_float fSpeed) { m_fAnimationSpeed = fSpeed; }
 	

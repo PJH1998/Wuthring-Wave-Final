@@ -218,6 +218,10 @@ void CAnimationActor::Render()
 		Render_Facial();
 	else
 		Render_Default();
+
+#ifdef _DEBUG
+	Print_WorldMatrix();
+#endif // _DEBUG
 }
 
 void CAnimationActor::Render_Shadow()
@@ -477,6 +481,13 @@ void CAnimationActor::Render_Detail()
 	ImGui::End();
 	ImGui::PopID();  // ID 팝
 }
+void CAnimationActor::Print_WorldMatrix()
+{
+	_float4x4 matWorld = {};
+	XMStoreFloat4x4(&matWorld, m_pTransformCom->Get_WorldMatrix());
+
+	OutPutDebugMatrix(TEXT("AnimActor World Matrix : "), matWorld);
+}
 #endif
 
 // 1. 행렬 
@@ -556,50 +567,6 @@ HRESULT CAnimationActor::Ready_Camera()
 	return S_OK;
 }
 
-//void CAnimationActor::Render_Facial()
-//{
-//	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
-//	for (_uint i = 0; i < iNumMeshes; i++)
-//	{
-//		// 1. 재질 기존 유지.
-//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-//			return;
-//		//CRASH("Ready Diffuse Texture Failed");
-//
-//		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
-//		//    return E_FAIL;
-//
-//
-//		// 2. 뼈 행렬 (기존 유지)
-//		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
-//			CRASH("Ready Bone Matrices Failed");
-//
-//		//_uint iPassIndex = 2; // 기본값: 1번 (AnimPass - 뼈대만)
-//		_uint iPassIndex = 1; // 기본값: 1번 (AnimPass - 뼈대만)
-//
-//		if (m_pModelCom->Is_MeshMorphable(i))
-//		{
-//			// Morph 능력이 있다면 데이터 바인딩 시도
-//			if (SUCCEEDED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
-//				iPassIndex = 2; // 성공하면 2번 (MorphAnimPass - 얼굴+뼈대)
-//		}
-//
-//		// 3. 메쉬별 Morph SRV, 정점 개수 바인딩
-//		if (FAILED(m_pModelCom->Bind_MorphSRV(m_pShaderCom, i)))
-//			CRASH("Bind Morph SRV Failed");
-//
-//		if (FAILED(m_pModelCom->Bind_MorphWeights(m_pShaderCom)))
-//			CRASH("Bind Morph SRV Failed");
-//
-//
-//		if (FAILED(m_pShaderCom->Begin(iPassIndex)))
-//			CRASH("Ready Shader Begin Failed");
-//
-//		// Render 단위가 Mesh 단위 => Binding Buffer도 Mesh 단위로.
-//		if (FAILED(m_pModelCom->Render(i))) 
-//			CRASH("Ready Render Failed");
-//	}
-//}
 
 
 void CAnimationActor::Render_Facial()
@@ -609,7 +576,7 @@ void CAnimationActor::Render_Facial()
 	{
 		// 1. 재질 기존 유지.
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			return;
+			continue;
 		//CRASH("Ready Diffuse Texture Failed");
 
 		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
@@ -619,7 +586,7 @@ void CAnimationActor::Render_Facial()
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 	
-		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i)))
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
 			CRASH("Bind Morph Result Failed");
 
 		if (FAILED(m_pShaderCom->Begin(2)))
@@ -628,7 +595,19 @@ void CAnimationActor::Render_Facial()
 		// Render 단위가 Mesh 단위 => Binding Buffer도 Mesh 단위로.
 		if (FAILED(m_pModelCom->Render(i)))
 			CRASH("Ready Render Failed");
+
+
+		m_pShaderCom->UndBind_All_VS_SRV();
 	}
+
+	// 매프레임 Compute Shader에서 사용해야 하므로 바인딩 해제.
+
+	
+	
+
+
+
+
 }
 
 

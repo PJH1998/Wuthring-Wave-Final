@@ -196,6 +196,7 @@ void CMesh::Compute_Morph(CComputeShader* pMorphComputeShaderCom, ID3D11ShaderRe
 
 
 
+
 #ifdef _DEBUG
 
 _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
@@ -239,30 +240,14 @@ HRESULT CMesh::Bind_BoneMatrices(CShader* pShaderCom, const _char* pConstantName
     return pShaderCom->Bind_Matrices(pConstantName, m_BoneMatrices, m_iNumBones);
 }
 
-HRESULT CMesh::Bind_MorphedResult(CShader* pShaderCom)
+// Bind => Compute Shader 연산 결과를 Skinning Shader에 바인딩해줍니다.
+HRESULT CMesh::Bind_MorphedResult(CShader* pShaderCom, const _char* pConstantName)
 {
 	if (MODELTYPE::CHARACTER != m_eModelType) return E_FAIL;
 	if (!m_IsInstanceReady) return E_FAIL;
 
-	if (FAILED(pShaderCom->Bind_SRV("g_MorphedVertices", m_SRVs[BUF_MORPH_OUTPUT])))
+	if (FAILED(pShaderCom->Bind_SRV(pConstantName, m_SRVs[BUF_MORPH_OUTPUT])))
 		return E_FAIL;
-
-	/*if (MODELTYPE::CHARACTER == m_eModelType)
-	{
-		if (FAILED(pShaderCom->Bind_SRV("g_MorphedPosBuffer", m_SRVs[SRV_OUT_MORPH_POS])))
-			return E_FAIL;
-
-		if (FAILED(pShaderCom->Bind_SRV("g_MorphedNormalBuffer", m_SRVs[SRV_OUT_MORPH_NORMAL])))
-			return E_FAIL;
-	}
-	else
-	{
-		if (FAILED(pShaderCom->Bind_SRV("g_MorphedPosBuffer", m_SRVs[SRV_ORIGIN_POS])))
-			return E_FAIL;
-
-		if (FAILED(pShaderCom->Bind_SRV("g_MorphedNormalBuffer", m_SRVs[SRV_ORIGIN_NORMAL])))
-			return E_FAIL;
-	}*/
 
 	return S_OK;
 }
