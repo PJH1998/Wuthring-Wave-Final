@@ -476,7 +476,7 @@ HRESULT CGltfLoader::Save_Animation_Character(const _char* pFileName)
 	// 3. 데이터 저장 루프
 	for (auto& Pair : mapAnimGroups)
 	{
-		// [중요 변경점] TimeScale 계산을 공통 영역으로 이동
+		// TimeScale 계산을 공통 영역으로 이동
 		// Main이 없으면 Morph에서라도 기본 정보를 가져와야 함.
 		aiAnimation* pBaseAnim = Pair.second.pMainAnim ? Pair.second.pMainAnim : Pair.second.pMorphAnim;
 		if (!pBaseAnim) continue; // 둘 다 없으면 스킵
@@ -519,11 +519,10 @@ HRESULT CGltfLoader::Save_Animation_Character(const _char* pFileName)
 				file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
 				file.write(strChannelName.data, iChannelNameLength);
 
-				// [핵심 변경] 키프레임 개수를 '전체 프레임 수'로 고정합니다.
+				//  키프레임 개수를 '전체 프레임 수'로 고정합니다.
 				// 이제 원본 키 개수와 상관없이 24FPS로 꽉 채운 데이터를 씁니다.
 				file.write(reinterpret_cast<const _char*>(&iTotalFrameCount), sizeof(_uint));
 
-				// [Resampling Loop]
 				// 인덱스(k)가 아니라 0프레임부터 끝 프레임까지 시간을 순회합니다.
 				for (_uint iFrame = 0; iFrame < iTotalFrameCount; ++iFrame)
 				{
@@ -534,27 +533,19 @@ HRESULT CGltfLoader::Save_Animation_Character(const _char* pFileName)
 
 					// 2. 현재 프레임이 원본 애니메이션의 어느 시간(Tick)에 해당하는지 역계산
 					// 공식: (현재프레임 / 목표FPS) * 원본TPS
-					double dCurrentTick = (static_cast<double>(iFrame) / static_cast<double>(fTargetFPS)) * fSourceFPS;
+					_float fCurrentTick = (static_cast<_float>(iFrame) / static_cast<_float>(fTargetFPS)) * fSourceFPS;
 
 					// 3. 해당 시간(dCurrentTick)의 값을 보간해서 가져옴 (인덱스 참조 X)
-					KeyFrame.vScale = GetScaleAtTime(pChannel, dCurrentTick);
-					KeyFrame.vRotation = GetRotationAtTime(pChannel, dCurrentTick);
-					KeyFrame.vTranslation = GetPositionAtTime(pChannel, dCurrentTick);
+					KeyFrame.vScale = GetScaleAtTime(pChannel, fCurrentTick);
+					KeyFrame.vRotation = GetRotationAtTime(pChannel, fCurrentTick);
+					KeyFrame.vTranslation = GetPositionAtTime(pChannel, fCurrentTick);
 
 					file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
 				}
 			}
 		}
 		else
-		{
-			// MainAnim이 없는 경우(Morph Only)에도 포맷 유지를 위해 더미 데이터를 쓸지, 
-			// 아니면 기존처럼 continue 할지 결정해야 합니다.
-			// 작성하신 로직상 Main이 없으면 'continue'를 했었으나, 
-			// 그러면 Morph 데이터도 저장이 안 됩니다.
-			// 여기서는 구조상 Main이 없으면 그냥 건너뛰되, 아래 Morph 저장은 실행되게 합니다.
-			// 만약 파일 포맷이 무조건 Main 정보를 요구한다면 0으로 채워서라도 써야 합니다.
-			// (현재는 Main이 없으면 Morph도 저장 안 되던 버그를 수정하기 위해 continue 제거)
-		}
+			continue;
 #pragma endregion
 
 #pragma region 3. Morph Animation 저장
@@ -893,8 +884,8 @@ _float4 CGltfLoader::GetRotationAtTime(aiNodeAnim* pNodeAnim, _float fTime)
 	aiQuatKey& KeyA = pNodeAnim->mRotationKeys[iIndex];
 	aiQuatKey& KeyB = pNodeAnim->mRotationKeys[iIndex + 1];
 
-	double dDelta = KeyB.mTime - KeyA.mTime;
-	float fFactor = (dDelta > 0.0) ? (float)((fTime - KeyA.mTime) / dDelta) : 0.0f;
+	_float fDelta = KeyB.mTime - KeyA.mTime;
+	_float fFactor = (fDelta > 0.0) ? static_cast<float>((fTime - KeyA.mTime) / fDelta) : 0.0f;
 	fFactor = max(0.0f, min(fFactor, 1.0f));
 
 	aiQuaternion out;
@@ -929,8 +920,8 @@ _float3 CGltfLoader::GetPositionAtTime(aiNodeAnim* pNodeAnim, _float fTime)
 	aiVectorKey& KeyA = pNodeAnim->mPositionKeys[iIndex];
 	aiVectorKey& KeyB = pNodeAnim->mPositionKeys[iIndex + 1];
 
-	double dDelta = KeyB.mTime - KeyA.mTime;
-	float fFactor = (dDelta > 0.0) ? (float)((fTime - KeyA.mTime) / dDelta) : 0.0f;
+	_float fDelta = KeyB.mTime - KeyA.mTime;
+	_float fFactor = (fDelta > 0.0) ? static_cast<float>((fTime - KeyA.mTime) / fDelta) : 0.0f;
 	fFactor = max(0.0f, min(fFactor, 1.0f));
 
 	aiVector3D out = KeyA.mValue + (KeyB.mValue - KeyA.mValue) * fFactor;
@@ -961,8 +952,8 @@ _float3 CGltfLoader::GetScaleAtTime(aiNodeAnim* pNodeAnim, _float fTime)
 	aiVectorKey& KeyA = pNodeAnim->mScalingKeys[iIndex];
 	aiVectorKey& KeyB = pNodeAnim->mScalingKeys[iIndex + 1];
 
-	double dDelta = KeyB.mTime - KeyA.mTime;
-	float fFactor = (dDelta > 0.0) ? (float)((fTime - KeyA.mTime) / dDelta) : 0.0f;
+	_float fDelta = KeyB.mTime - KeyA.mTime;
+	_float fFactor = (fDelta > 0.0) ? static_cast<float>((fTime - KeyA.mTime) / fDelta) : 0.0f;
 	fFactor = max(0.0f, min(fFactor, 1.0f));
 
 	aiVector3D out = KeyA.mValue + (KeyB.mValue - KeyA.mValue) * fFactor;

@@ -1004,7 +1004,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
  	pAnimCBInfo->fTrackPosition = fTrackPosition;
 	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
-	pAnimCBInfo->IsRibAnimUsed = false;
+	pAnimCBInfo->iRibAnimUsed = 0;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
@@ -1012,15 +1012,13 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 	{
-		IsRibAnimUsed = false;
+		pAnimCBInfo->iRibAnimUsed = 0;
 	}
 	else
 	{
-		IsRibAnimUsed = true;
+		pAnimCBInfo->iRibAnimUsed = 1;
 		pAnimCBInfo->iRibbonAnimIndex = m_AnimationNameToIndex[strRibAnimationName];
 	}
-
-	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
@@ -1079,7 +1077,7 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 	ANIMATIONFLY_CBINFO* pAnimCBInfo = static_cast<ANIMATIONFLY_CBINFO*>(MappedSubResource.pData);
 	pAnimCBInfo->fTrackPosition = fTrackPosition;
 	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
-	pAnimCBInfo->IsRibAnimUsed = false;
+	pAnimCBInfo->iRibAnimUsed = 0;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
@@ -1087,15 +1085,14 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 	{
-		IsRibAnimUsed = false;
+		pAnimCBInfo->iRibAnimUsed = 0;
 	}
 	else
 	{
-		IsRibAnimUsed = true;
+		pAnimCBInfo->iRibAnimUsed = 1;
 		pAnimCBInfo->iRibbonAnimIndex = m_AnimationNameToIndex[strRibAnimationName];
 	}
 
-	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
 	// Blend Enabled가 True 라면? 정보 바인딩.
 	if (gpuBlendInfo.IsBlendEnabled)
 	{
@@ -1190,7 +1187,7 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
 	pAnimCBInfo->fTrackPosition = fTrackPosition;
 	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
-	pAnimCBInfo->IsRibAnimUsed = false;
+	pAnimCBInfo->iRibAnimUsed = 0;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
