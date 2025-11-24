@@ -30,7 +30,7 @@ public:
 
 	void Create_TriggerBox();
 
-	void Ready_Map_Load_Prototype(const _char* pModelName);
+	void Ready_Map_Load_Prototype();
 	void Ready_Debris_Prototype(const _char* pModelName);
 private:
 	HRESULT Ready_Static_Component();

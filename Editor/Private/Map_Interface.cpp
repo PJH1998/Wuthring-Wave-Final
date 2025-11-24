@@ -413,8 +413,9 @@ void CMap_Interface::Load_Map_GUI()
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			m_IsCreateMap = true;
 			_string DatFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
+			m_pGameInstance->Load_Resource(m_szFilePath.c_str());
 			Ready_Map_Prototype(m_szFilePath.c_str());
-
+			m_pGameInstance->LoadLastLOD();
 			for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
 				if (entry.is_regular_file())
 				{
@@ -456,6 +457,7 @@ void CMap_Interface::Load_Map_GUI()
 							File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
 							_vector Pos = XMLoadFloat4(&Desc.vSourPos);
 							//_matrix Mat = XMMatrixTranslationFromVector();
+							Desc.iLevel = m_iLevel;
 							XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(Pos));
 							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo")
 								, m_iLevel, TEXT("Layer_Meteo"), &Desc);
@@ -651,6 +653,7 @@ void CMap_Interface::Ready_Map_Prototype(const _char* pFilePath)
 	_matrix PreTransformMatrix = XMMatrixIdentity();
 	_float fSize = 0.01f;
 	//_float fSize = 0.02f;
+	unordered_set<_wstring> m_ProtoNames;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 	for (const auto& entry : filesystem::recursive_directory_iterator(pFilePath)) {
 		if (entry.is_regular_file()) {
@@ -696,13 +699,28 @@ void CMap_Interface::Ready_Map_Prototype(const _char* pFilePath)
 				_wstring key = L"Prototype_Component_Model_" + namePart;
 
 
+				_wstring StreamName = PrototypeName;
 
+				StreamName.pop_back();
+				StreamName.pop_back();
+				StreamName.pop_back();
+				StreamName.pop_back();
+				StreamName.pop_back();
 
-				m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
-					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+				auto iter = m_ProtoNames.find(StreamName);
+				if(iter == m_ProtoNames.end())
+				{
+					m_ProtoNames.insert(StreamName);
+					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, StreamName,
+						CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
 						CRASH("Prototype Create Failed");
-					});
+				}
+
+				//m_pGameInstance->Add_Work([&, ProtoName = StreamName, Path = VersionPath]() {
+				//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+				//		CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+				//		CRASH("Prototype Create Failed");
+				//	});
 
 				if (entry.path().string().find("Foliage") != std::string::npos)
 				{
