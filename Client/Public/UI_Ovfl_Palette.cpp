@@ -75,11 +75,12 @@ void CUI_Ovfl_Palette::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	// is KeyDown
-	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
-		Trigger_ClickEvent();
-
 	Update_HoverEvent();
+
+
+	// is KeyDown
+	Trigger_ClickEvent();
+
 	
 	Update_GoinDisable(fTimeDelta);
 
@@ -228,12 +229,20 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 void CUI_Ovfl_Palette::Assign_TargetBlocksQueue(_uint iStartBlockIndex)
 {
 	// 클릭 시 트리거.
+	
 
+	// 재귀로 주변 탐색 진행 및 저장
+	fill(m_arrIsVisited.begin(), m_arrIsVisited.end(), false);
 	Calc_NearTarget(iStartBlockIndex);
 }
 
 _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
 {
+	if (m_arrIsVisited[iBlockIndex])
+		return false;
+
+	m_arrIsVisited[iBlockIndex] = true;
+
 	_uint iPaletteSizeX = m_iPaletteSizeX;
 	_uint iPaletteSizeY = m_iPaletteSizeY;
 	_uint iNumPalettes = m_iNumPalettes;
@@ -242,7 +251,7 @@ _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
 
 	if (iDepth == 0)
 	{
-		m_vecTargetsQueue.clear();
+		m_vecTargetsQueue.clear();		// 재귀 최초 시작 시 초기화
 		m_vecTargetsQueue.resize(1);
 
 		m_vecTargetsQueue[iDepth].push_back(m_arrPalettesInfo[iBlockIndex / iPaletteSizeX][iBlockIndex % iPaletteSizeX]);
@@ -298,7 +307,10 @@ _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
 	m_vecTargetsQueue[iDepth - 1] = vecTargetQueue;
 
 	for (auto& target : vecTargetQueue)
-		Calc_NearTarget(target.arrIndex[0] * iPaletteSizeX + target.arrIndex[1], iDepth);
+	{
+		_uint iCurIndex = target.arrIndex[0] * iPaletteSizeX + target.arrIndex[1];
+		Calc_NearTarget(iCurIndex, iDepth);
+	}
 
 	return true;
 }
@@ -342,16 +354,13 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 	vector<_float4x4> vecPaletteVariantMat = {};
 	vecPaletteVariantMat.resize(80);
 
-	CCustom_UI::VARIANTREADY_UI_DESC tPaletteVariantDesc = {
-		vecPaletteVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_OVFL_PALETTE),
-        true
-    };
-
 	for (_uint i = 0; i < m_arrPalettesInfo.size(); i++)
 		for (_uint j = 0; j < m_arrPalettesInfo[i].size(); j++)
 		{
-			_float4x4& targetMat = vecPaletteVariantMat[i * m_arrPalettesInfo.size() + j];
+			_uint iWidth = m_arrPalettesInfo[i].size();
+			_uint iHeight = m_arrPalettesInfo.size();
+
+			_float4x4& targetMat = vecPaletteVariantMat[i * iWidth + j];
 			
 			// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
 			// [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
@@ -363,6 +372,12 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 			*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isChanging);
 			*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
 		}
+
+	CCustom_UI::VARIANTREADY_UI_DESC tPaletteVariantDesc = {
+		vecPaletteVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_OVFL_PALETTE),
+		true
+	};
 
 	m_pUI_InstBlocks->Set_VariantUIDesc(tPaletteVariantDesc);
 }

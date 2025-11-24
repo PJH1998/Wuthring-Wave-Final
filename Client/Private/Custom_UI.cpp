@@ -209,6 +209,16 @@ _bool CCustom_UI::Check_OnInteract(_uint iEventInteractType, _uint iInstanceInde
         iInstanceIndex == m_iInputInstanceIndex)
         isSame_InstanceIndex = true;
 
+
+
+	if (m_tUIDesc.strUIName == L"FG_InstBlocks" &&
+		m_iInputState == 1 &&
+		isSame_InstanceIndex)
+		int i = 10;
+
+
+
+
     _bool isInteracted = (isSame_InteractType && isSame_InstanceIndex);
 
     return isInteracted;
@@ -265,10 +275,18 @@ _bool CCustom_UI::Check_IsInSpace()
 	}
 	else
 	{
+		// inst 도 combine 된 좌표 기준으로 확인 필요.
+		
 		for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
 		{
-			_float2 vPos = _float2{ m_tUIDesc.vecInstanceDescs[i].vSInstTrans.x, m_tUIDesc.vecInstanceDescs[i].vSInstTrans.y };
-			_float2 vSca = _float2{ m_tUIDesc.vecInstanceDescs[i].vSInstRight.x, m_tUIDesc.vecInstanceDescs[i].vSInstUp.y };
+			_float2 vPos = _float2{ 
+				m_tUIDesc.vecInstanceDescs[i].vSInstTrans.x + m_CombinedWorldMatrix._41,
+				m_tUIDesc.vecInstanceDescs[i].vSInstTrans.y + m_CombinedWorldMatrix._42
+			};
+			_float2 vSca = _float2{
+				m_tUIDesc.vecInstanceDescs[i].vSInstRight.x * m_CombinedWorldMatrix._11,
+				m_tUIDesc.vecInstanceDescs[i].vSInstUp.y	* m_CombinedWorldMatrix._22
+			};
 
 			if (ISINSPACE(tCursorPos, vPos, vSca))
 			{

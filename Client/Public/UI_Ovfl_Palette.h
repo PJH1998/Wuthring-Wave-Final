@@ -86,6 +86,7 @@ private:
 private:
 	array<_float4, 5>						m_arrColors = {};
 	array<array<UI_PALETTE_DESC, 10>, 8>	m_arrPalettesInfo = {};		
+	array<_bool, 80>						m_arrIsVisited = {};		// 재귀함수 도중 방문 여부 체크		
 	vector<vector<UI_PALETTE_DESC>>			m_vecTargetsQueue = {};
 
 

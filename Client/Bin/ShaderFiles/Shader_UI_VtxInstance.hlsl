@@ -1033,6 +1033,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // 현재 winsize 및 inst transform (pos, sca) 기준으로 uv를 적절히 슬라이싱하여 적용하고
             // 색상을 흑백화 및 컬러링해서 out. 하면 될 것 같기도? 아닌가
             // ==============================
+            
             float4  vCurrColor          = In.mExtra0.xyzw;
             float4  vDestColor          = In.mExtra1.xyzw;
             float2  vChangeStartPos     = In.mExtra2.xy;
@@ -1061,12 +1062,12 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                     vTargetColor = vCurrColor;
                     
                 Out.vColor.rgb = vTargetColor.rgb;
-                Out.vColor.a = vTargetColor.a * Out.vColor.a;
+                Out.vColor.a = 1.f;//vTargetColor.a * Out.vColor.a;
             }
             else            // 평시
             {
                 Out.vColor.rgb = vCurrColor.rgb;
-                Out.vColor.a = vCurrColor.a * Out.vColor.a;
+                Out.vColor.a = 1.f;//vCurrColor.a * Out.vColor.a;
             }   
             
             return Out;
