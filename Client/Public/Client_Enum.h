@@ -50,6 +50,8 @@ namespace Client
 		UIFLAG_ACTIVEFEEDBACK,		// 조작 피드백 (스케일 커지며 사라지는 것)
 		UIFLAG_ENEMY_HP,			// 적 체력바용
 
+		UIFLAG_OVFL_PALETTE,		// 팔레트
+
 		UIFLAG_END
 	};
 

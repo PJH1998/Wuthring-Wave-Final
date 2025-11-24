@@ -44,7 +44,9 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_ACTIVEFEEDBACK       6
 #define UIFLAG_ENEMY_HP             7
 
-#define UIFLAG_END                  8
+#define UIFLAG_OVFL_PALETTE         8
+
+#define UIFLAG_END                  9
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 

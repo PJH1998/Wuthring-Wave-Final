@@ -350,6 +350,7 @@
     <ClInclude Include="..\public\UI_LockOn.h" />
     <ClInclude Include="..\public\UI_Logo.h" />
     <ClInclude Include="..\public\UI_MobHPBar.h" />
+    <ClInclude Include="..\public\UI_Ovfl_Palette.h" />
     <ClInclude Include="..\public\UI_Parry.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_TabUtility.h" />
@@ -568,6 +569,7 @@
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
+    <ClCompile Include="..\public\UI_Ovfl_Palette.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>
