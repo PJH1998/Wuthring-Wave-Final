@@ -3,11 +3,11 @@
 
 NS_BEGIN(Engine)
 
-class CScreenSpaceReflection final : public CSFX
+class CWater final : public CSFX
 {
 private:
-	CScreenSpaceReflection(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual ~CScreenSpaceReflection() = default;
+	CWater(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual ~CWater() = default;
 
 public:
 	virtual HRESULT		Initialize() override;
@@ -26,17 +26,14 @@ private:
 	_float				m_fMinStepSize = {};
 	_float				m_fMaxStepSize = {};
 	_float				m_fStartOffset = {};
-	
-	//	//SSR
-	//	uint  g_iStep;
-	//float g_fMinStepSize;
-	//float g_fMaxStepSize;
-	//float g_fMaxDistance;
-	//float g_fStartOffset;
+
+	_float				m_fMaxDepth;
+	_float				m_fMinTickness;
+	_float				m_fMaxTickness;
 
 public:
-	static CScreenSpaceReflection*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual void					Free();
+	static CWater*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual void		Free();
 };
 
 NS_END

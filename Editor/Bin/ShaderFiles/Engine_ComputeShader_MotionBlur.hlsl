@@ -122,7 +122,7 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
         float2 vOffsetTex = vTexcoord + (vMotionScale * fRatio);
 
         float4 vSampleDepth = DepthTexture.SampleLevel(ClampSampler, vOffsetTex, 0);
-            
+
         if ((vSampleDepth.y + fSampleDepthBias) < vVelocity.z || vSampleDepth.z != 0.f)
             continue;
        
