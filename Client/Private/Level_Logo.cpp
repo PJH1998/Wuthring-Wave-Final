@@ -28,6 +28,7 @@ HRESULT CLevel_Logo::Initialize()
 	Ready_Layer_LogoFemaleRover();
 	Ready_UI();
 	Ready_Camera();
+	Ready_SkyBox();
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -150,6 +151,12 @@ void CLevel_Logo::Ready_UI()
 
 	cout << "[Level_Logo::Ready_UI] Logo UI Loaded!" << endl;
 	// _UI
+}
+
+void CLevel_Logo::Ready_SkyBox()
+{
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_LogoSkyBox"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_SkyBox"))))
+		CRASH("Failed to Add GameObject To Layer SkyBox");
 }
 
 

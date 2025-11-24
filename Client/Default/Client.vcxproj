@@ -248,6 +248,7 @@
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
+    <ClInclude Include="..\public\Logo_SkyBox.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\MapObject_Instance.h" />
@@ -320,7 +321,6 @@
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\public\SFX_Prefab.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
-    <ClInclude Include="..\public\SkyBox_Rect.h" />
     <ClInclude Include="..\public\SonoraChange.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
@@ -480,6 +480,7 @@
     <ClCompile Include="..\private\LogoFactory.cpp" />
     <ClCompile Include="..\Private\LogoFemaleRover.cpp" />
     <ClCompile Include="..\Private\LogoMaleRover.cpp" />
+    <ClCompile Include="..\private\Logo_SkyBox.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
@@ -515,7 +516,6 @@
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\private\SFX_Prefab.cpp" />
-    <ClCompile Include="..\private\SkyBox_Rect.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
