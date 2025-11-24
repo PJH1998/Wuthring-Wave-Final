@@ -804,6 +804,7 @@ HRESULT CLoader_Test::Load_UI()
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
+	
 	return S_OK;
 }
 

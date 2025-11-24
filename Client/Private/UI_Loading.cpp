@@ -62,7 +62,7 @@ HRESULT CUI_Loading::Initialize_Clone(void* pArg)
 }
 
 void CUI_Loading::Priority_Update(_float fTimeDelta)
-{
+{	
 	__super::Priority_Update(fTimeDelta);   // Nothing
 }
 
@@ -122,7 +122,7 @@ HRESULT CUI_Loading::Ready_Texts()
 	else if (strRandBGName == L"Bg_Lianxita36")
 	{
 		strTitleText = L"아틸리우스 협곡";
-		strDescriptionText = L"단단한 반석으로 이루어진 천연 협곡. 돌기둥이 늘어서 있으며 가파르고 협준하다. \n상퀴스 사냥 평원 내부로 들어가는 주요 통로로서, 일곱 언덕 사람들이 대대로 영웅의 왕 아틸리우스 석상의 증명 하에 사냥의 여정에 올랐다.";
+		strDescriptionText = L"단단한 반석으로 이루어진 천연 협곡. 돌기둥이 늘어서 있으며 가파르고 협준하다. \n상귀스 사냥 평원 내부로 들어가는 주요 통로로서, 일곱 언덕 사람들이 대대로 영웅의 왕 아틸리우스 석상의 증명 하에 사냥의 여정에 올랐다.";
 	}
 
 	//_wstring strTitleText = L"이건테스트용제목글자에요";
