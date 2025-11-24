@@ -128,6 +128,9 @@ HRESULT CShadowMap::End_ShadowMap()
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);
 
+	m_pBackBuffer = nullptr;
+	m_pOriginalDSV = nullptr;
+
 	return S_OK;
 }
 
@@ -157,21 +160,6 @@ void CShadowMap::Clear()
 	for (auto& pBounding : m_Boundings)
 		Safe_Delete(pBounding);
 	m_Boundings.clear();
-
-	/*
-	* 	vector<BoundingBox*>		m_Boundings;
-	* 
-	ID3D11UnorderedAccessView*	m_pDS_UAV = { nullptr };
-	ID3D11ShaderResourceView*	m_pDS_SRV= { nullptr };
-	CComputeShader*				m_pCS = { nullptr };
-	ID3D11Buffer*				m_pShadowMapBuffer = { nullptr };
-
-	ID3D11RenderTargetView*		m_pBackBuffer = { nullptr };
-	ID3D11DepthStencilView*		m_pOriginalDSV = { nullptr };
-
-	ID3D11DepthStencilView*		m_pShadowMapDSV = { nullptr };
-	ID3D11ShaderResourceView*	m_pShadowMapSRV = { nullptr };
-	*/
 	
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
@@ -182,6 +170,9 @@ void CShadowMap::Clear()
 
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);
+
+	m_pBackBuffer = nullptr;
+	m_pOriginalDSV = nullptr;
 
 	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
 		m_Matrices[i].clear();

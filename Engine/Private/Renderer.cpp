@@ -207,6 +207,7 @@ void CRenderer::Render()
 
 	Render_Combined();
 	
+	Render_Water();
 	Render_SSR();
 	Render_Outline();
 
@@ -808,12 +809,22 @@ void CRenderer::Render_Combined()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
+void CRenderer::Render_Water()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+		CRASH("Render Fail");
+
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::WATER));
+
+	m_pGameInstance->End_MRT();
+}
+
 void CRenderer::Render_SSR()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"))))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::SSR, m_pVIBuffer, m_pShader)))
+	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::WATER, m_pVIBuffer, m_pShader)))
 		return;
 
 	m_pGameInstance->End_MRT();

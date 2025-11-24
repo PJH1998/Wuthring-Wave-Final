@@ -134,8 +134,14 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -181,20 +187,19 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     if(g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        Out.vSSS.a = 1.f; // test
     }
     
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
-
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -236,12 +241,9 @@ PS_OUT PS_ROVER(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        Out.vSSS.a = 1.f; // test
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
@@ -250,6 +252,8 @@ PS_OUT PS_ROVER(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -291,14 +295,10 @@ PS_OUT PS_GALBRENA(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-
-        Out.vSSS.a = 1.f; // test
+        
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
-
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = vNormal;
@@ -306,6 +306,8 @@ PS_OUT PS_GALBRENA(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -347,12 +349,8 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        Out.vSSS.a = 1.f; // test
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-    
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
@@ -361,6 +359,8 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -514,6 +514,7 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
         Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
         Out.vDepth.y = In.vProjPos.w;
         Out.vDepth.z = 1.f;
+    
         Out.vPBR.z = 1.f;
     }
     else
