@@ -766,7 +766,6 @@
     <ClInclude Include="..\public\UI_Button_Interact.h">
       <Filter>03. GameObject\UI\Containers_Prop\Interact</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClInclude>
@@ -911,7 +910,6 @@
     <ClInclude Include="..\Public\Loader_Heaven.h">
       <Filter>02. Level\Loader\Heaven</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Water.h" />
     <ClInclude Include="..\public\DummyCell.h">
       <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
     </ClInclude>
@@ -923,6 +921,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\Coro_Rock.h">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Water.h">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1312,7 +1316,6 @@
     <ClCompile Include="..\private\UI_Button_Interact.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\Interact</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClCompile>
@@ -1451,7 +1454,6 @@
     <ClCompile Include="..\private\Loader_Test_UI.cpp">
       <Filter>02. Level\Loader\Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Water.cpp" />
     <ClCompile Include="..\private\DummyCell.cpp">
       <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
     </ClCompile>
@@ -1463,6 +1465,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Coro_Rock.cpp">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Water.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1537,8 +1545,6 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Water.hlsl">
-    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxInstance_AnimMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
@@ -1546,6 +1552,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh_Skining.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Water.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
