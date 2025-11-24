@@ -4,8 +4,8 @@
 
 #include "Trigger_Box.h"
 #include "MapObject_Destruction.h"
-#include"MapObject_Instance.h"
-#include"MapObject_Meteo.h"
+#include "MapObject_Instance.h"
+#include "MapObject_Meteo.h"
 #include "Spawner.h"
 
 #include "Effect_Prefab.h"
@@ -19,6 +19,8 @@
 #include "Sequence.h"
 #include "Effect_Radial.h"
 
+#include "SFX_Prefab.h"
+
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
 	m_pDevice { pDevice }, m_pContext { pContext }
@@ -28,7 +30,7 @@ CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pGameInstance);
 }
 
-void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
+void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
     _char FileDrive[MAX_PATH] = {};
     _char FileDir[MAX_PATH] = {};
@@ -38,16 +40,17 @@ void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
     _splitpath_s(pFilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
     _string PasingDir = FileDir;
-
-    Read_Map_Prototype(PasingDir, eLevel);
+	m_pGameInstance->Model_Manager_Change_Level(ENUM_CLASS(eLevel));
+	Read_Map_Prototype(PasingDir, eLevel, pModelFilePath);
 	m_LoadingMap[eLevel].push_back(pFilePath);
 }
 
-void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
+void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
 	//넘어오는 건 폴더 경로.
 	_string ProjectPath = filesystem::current_path().parent_path().parent_path().string();
-	ProjectPath += "/Client/Bin/Resource/Map";
+	ProjectPath += "/Client/Bin/Resource/Map/";
+	ProjectPath += pModelFilePath;
 	_float fSize = 0.01f;
 	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
@@ -55,7 +58,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 	_wstring InstancePrototypeName = L"Prototype_Component_Model_Instance_";
 
 
-	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
+	for (const auto& entry : filesystem::directory_iterator(pDataFilePath)) {
 		if (!entry.is_regular_file())
 			continue;
 		if (entry.path().string().find("Prototype") == std::string::npos && entry.path().string().find("Instance") == std::string::npos
@@ -172,6 +175,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				_string ModelName = Name;
 				ModelName.pop_back();
 
+
 				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
 					if (entry2.path().string().find("MapData") != std::string::npos)
 						continue;
@@ -210,11 +214,18 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 					else
 						//if (entry2.path().string().find("Instance") == std::string::npos)
 					{
-						m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
+
+							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
+								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
+								CRASH("Prototype Create Failed");
+							//});
+
+	/*					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
 							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
 								CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
 								CRASH("Prototype Create Failed");
-							});
+							});*/
 						break;
 					}
 					//프로토타입 생성
@@ -227,6 +238,8 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 
 void CParser::Clone_MapObjects(LEVEL eLevel)
 {
+	m_pGameInstance->LoadLastLOD();
+
 	if (m_LoadingMap[eLevel].empty())
 		MSG_BOX("Map Clone Failed");
 
@@ -255,6 +268,8 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 			Read_Map_Dat(eLevel, strFilePath);
 		}
 	}
+	m_pGameInstance->Destroy_RigidData();
+
 }
 
 #pragma region SPAWNER
@@ -317,6 +332,12 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 			File.read(Desc.ModelName, NameLength);
 			_string Name = Desc.ModelName;
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			Name.pop_back();
+			strcpy_s(Desc.ModelName, Name.c_str());
 			OBJECTTYPE Type;
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
@@ -331,8 +352,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
-				Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
+			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+				, PROTOTYPE::GAMEOBJECT, &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
@@ -1348,6 +1369,60 @@ void CParser::Load_FXRadial_FromJson(const _string& strFilePath, const _string& 
 	{
 		MSG_BOX("Effect_Rect Load Fail");
 		return;
+	}
+}
+
+void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex)
+{
+	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().stem().string();
+
+			ifstream InputFile(filePath);
+			json PrefabJson;
+			InputFile >> PrefabJson;
+
+			CSFX_Prefab::SFX_PREFAB_DESC PrefabDesc = {};
+
+			vector<CSFX_Prefab::SFX_PREFAB_DATA> Children;
+			
+			
+			_wstring strPrototype = TEXT("Prototype_");
+			_wstring strPooling = TEXT("Pooling_");
+
+			for (auto& Data : PrefabJson["Children"])
+			{
+				CSFX_Prefab::SFX_PREFAB_DATA SFX_Data = {};
+				
+				SFX_Data.fStartTime = Data["StartTime"];
+				
+				_wstring strSfxTag = StringToWString(Data["Tag"]);
+				SFX_Data.strSfxTag = strPooling + strSfxTag;
+
+				m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
+					SFX_Data.strSfxTag, 1, nullptr);
+
+				Children.push_back(SFX_Data);
+			}
+			
+			if (Children.size() > 1)
+			{
+				sort(Children.begin(), Children.end(), [&](CSFX_Prefab::SFX_PREFAB_DATA pSour, CSFX_Prefab::SFX_PREFAB_DATA  pDest) {
+					return pSour.fStartTime < pDest.fStartTime; });
+			}
+
+			PrefabDesc.Children = &Children;
+
+			_wstring PoolingTag = StringToWString(PrefabJson["Tag"]);
+
+			m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
+				PoolingTag, 1, &PrefabDesc);
+
+			InputFile.close();
+		}
 	}
 }
 

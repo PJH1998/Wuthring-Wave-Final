@@ -47,8 +47,6 @@ void CRendererCS::Add_SRVData(const _char* pConstantName, ID3D11ShaderResourceVi
 
 	SRV_DATA Data = make_pair(pConstantName, pSRV);
 	
-	//Safe_AddRef(pSRV);
-
 	m_SRVs.push_back(Data);
 }
 
@@ -122,8 +120,6 @@ void CRendererCS::Clear(_uint iMipLevel)
 
 void CRendererCS::Clear_Resource()
 {
-	//for (auto& pSRV : m_SRVs)
-	//	Safe_Release(pSRV.second);
 	m_SRVs.clear();
 	m_SRVs.resize(0);
 }
@@ -226,17 +222,13 @@ void CRendererCS::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pDevice);
-	Safe_Release(m_pContext);
-	Safe_Release(m_pComputeShader);
 
 	for (auto& Pair : m_Buffers)
 		Safe_Release(Pair.second.second);
 	m_Buffers.clear();
 
-	//for (auto& SRV : m_SRVs)
-	//	Safe_Release(SRV.second);
-	//m_SRVs.clear();
+	m_SRVs.clear();
+	m_Samplers.clear();
 
 	for(auto& pTexture : m_Texture2Ds)
 		Safe_Release(pTexture);
@@ -249,5 +241,9 @@ void CRendererCS::Free()
 	for(auto& pUAV : m_UAV.second)
 		Safe_Release(pUAV);
 	m_UAV.second.clear();
+
+	Safe_Release(m_pComputeShader);
+	Safe_Release(m_pDevice);
+	Safe_Release(m_pContext);
 
 }

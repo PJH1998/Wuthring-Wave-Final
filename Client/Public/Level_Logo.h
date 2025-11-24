@@ -25,6 +25,18 @@ private:
 	class CGameSystem*		m_pGameSystem = { nullptr };
 	LEVEL							m_eCurLevel = { LEVEL::LOGO };
 
+#ifdef _DEBUG
+
+private:
+	_float m_fMinStep = { 5.f };
+	_float m_fMaxStep = { 20.f };
+	_float m_fStart = { 10.f };
+
+private:
+	void DEBUG_FUNCTION();
+
+#endif
+
 public:
 	static		CLevel_Logo*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

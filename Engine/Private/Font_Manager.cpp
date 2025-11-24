@@ -66,6 +66,7 @@ HRESULT CFont_Manager::Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePat
 
 _bool CFont_Manager::Reset_AtlasTexture(FTCUSTOM_FONT* pFont, _uint newW, _uint newH)
 {
+	Safe_Release(pFont->pSampler);
 	Safe_Release(pFont->pAtlasSRV);
 	Safe_Release(pFont->pAtlasTex);
 
@@ -73,7 +74,7 @@ _bool CFont_Manager::Reset_AtlasTexture(FTCUSTOM_FONT* pFont, _uint newW, _uint 
 }
 
 HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH)
-{
+	{
 	// 입력받은 크기에 맞게 빈 아틀라스를 만듭니다.
 
 	pFontInfo->iAtlasW = iAtlasW;
@@ -90,7 +91,9 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	HRESULT hr = m_pDevice->CreateTexture2D(&td, nullptr, &pFontInfo->pAtlasTex);
 	if (FAILED(hr))
+	{
 		return hr;
+	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC sd = {};
 	sd.Format = td.Format;
@@ -99,7 +102,10 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	hr = m_pDevice->CreateShaderResourceView(pFontInfo->pAtlasTex, &sd, &pFontInfo->pAtlasSRV);
 	if (FAILED(hr))
+	{
+		Safe_Release(pFontInfo->pAtlasTex);
 		return hr;
+	}
 
 	D3D11_SAMPLER_DESC smp = {};
 	smp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -107,7 +113,12 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	hr = m_pDevice->CreateSamplerState(&smp, &pFontInfo->pSampler);
 	if (FAILED(hr))
+	{
+		Safe_Release(pFontInfo->pSampler);
+		Safe_Release(pFontInfo->pAtlasSRV);
+		Safe_Release(pFontInfo->pAtlasTex);
 		return hr;
+	}
 
 	return S_OK;
 }
@@ -217,11 +228,36 @@ _bool CFont_Manager::Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _in
 	if (w <= 0 || h <= 0)
 		return true;
 
+	// 기본 유효성 검사
+	if (!m_pContext || !Font.pAtlasTex || !pSrc)
+		return false;
+
+	if (x < 0 || y < 0 || x + w > Font.iAtlasW || y + h > Font.iAtlasH)
+		return false;
+
+	const UINT bytesPerPixel = 1; // DXGI_FORMAT_R8_UNORM
+	const int absPitch = srcPitch < 0 ? -srcPitch : srcPitch;
+
+	// 버퍼가 최소 한 행을 담을 수 있는지 확인
+	if (absPitch < static_cast<int>(w * bytesPerPixel))
+		return false;
+
 	for (int row = 0; row < h; ++row)
 	{
+		// FreeType은 pitch가 음수일 수 있음(하단부터 위로 저장)
+		const uint8_t* pRow = nullptr;
+		if (srcPitch >= 0)
+		{
+			pRow = pSrc + static_cast<size_t>(row) * absPitch;
+		}
+		else
+		{
+			// 음수 pitch면 버퍼의 마지막 행에서 역방향으로 읽어야 함
+			pRow = pSrc + static_cast<size_t>(h - 1 - row) * absPitch;
+		}
+
 		D3D11_BOX box = { (UINT)x, (UINT)(y + row), 0, (UINT)(x + w), (UINT)(y + row + 1), 1 };
-		const void* pRow = pSrc + row * srcPitch;
-		m_pContext->UpdateSubresource(Font.pAtlasTex, 0, &box, pRow, w, 0);
+		m_pContext->UpdateSubresource(Font.pAtlasTex, 0, &box, pRow, static_cast<UINT>(absPitch), 0);
 	}
 	return true;
 }

@@ -255,5 +255,7 @@ void CComputeShader::Free()
     m_UAVs_To_Bind.clear();
     m_CBs_To_Bind.clear();
 
+	Clear_Resources();
+
     Safe_Release(m_pComputeShader);
 }

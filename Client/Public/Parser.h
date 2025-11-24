@@ -27,7 +27,7 @@ private:
 public:
 #pragma region MAP
 	// File Model
-	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 #pragma endregion
 
@@ -49,7 +49,7 @@ private:
 
 
 private:
-	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);
+	void							Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Read_Map_Dat(LEVEL eLevel, const _string pFilePath);
 
 #pragma region EffectLoad
@@ -79,6 +79,12 @@ private:
 	void						Load_FXDecal_Data_FromJson(const _string& strFilePath);
 	void						Load_FXRadial_FromJson(const _string& strFilePath, const _string& RadialTag, LEVEL eLevel);
 #pragma endregion
+
+#pragma region SFX
+public:
+	void						Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex);
+#pragma endregion
+
 public:
 	HRESULT						Initialize();
 

@@ -41,7 +41,7 @@ public:
 	virtual HRESULT Render() override;
 
 public:
-	void Update_Instances(_float fTimeDelta, vector<SINGLE_INST_DESC>& vecDescs);
+	void Update_Instances(vector<SINGLE_INST_DESC>& vecDescs);
 
 private:
 	_float3					m_vPivot = {};

@@ -26,12 +26,18 @@ HRESULT CSonoraChange::Initialize_Clone(void* pArg)
 
 	m_vRadialCenter = _float2(0.5f, 0.5f);
 
-	m_vRadialDistanceRange = _float2(1.f, 0.2f);
+	m_vRadialDistanceRange = _float2(1.f, 0.1f);
 
-	m_vRadialIntensityRange = _float2(0.f, -0.2f);
+	m_vRadialIntensityRange = _float2(0.f, -0.4f);
 
 	m_vFadeColor = _float3(1.f, 1.f, 1.f);
 	
+	if (FAILED(Ready_Components()))
+		return E_FAIL;
+
+	Setting_Scale(m_vWinSize.x, m_vWinSize.y);
+	Setting_Pos(m_vWinSize.x * 0.5f, m_vWinSize.y * 0.5f);
+
 	return S_OK;
 }
 
@@ -43,7 +49,7 @@ void CSonoraChange::Update(_float fTimeDelta)
 {
 	m_fCurrentTime += fTimeDelta;
 
-	_float fRadialRatio = SmoothStep(m_fRadialTime, m_fEffectTime, m_fCurrentTime);
+	_float fRadialRatio = SmoothStep(m_fRadialTime, m_vEffectTime.y, m_fCurrentTime);
 
 	if(fRadialRatio > 0.f)
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
@@ -51,11 +57,11 @@ void CSonoraChange::Update(_float fTimeDelta)
 	_float fRadialDistance = lerp(m_vRadialDistanceRange.x, m_vRadialDistanceRange.y, fRadialRatio);
 	_float fRadialIntensity = lerp(m_vRadialIntensityRange.x, m_vRadialIntensityRange.y, fRadialRatio);
 
-	m_fFadeIntensity = SmoothStep(m_fFadeTime, m_fEffectTime, m_fCurrentTime);
+	m_fFadeIntensity = SmoothStep(m_fFadeTime, m_vEffectTime.y, m_fCurrentTime);
 
 	m_pGameInstance->Setting_Radial(m_vRadialCenter, _float2(0.f, fRadialDistance), fRadialIntensity);
 	
-	if (m_fCurrentTime >= m_fEffectTime)
+	if (m_fCurrentTime >= m_vEffectTime.y)
 	{
 		m_isActivate = false;
 		m_pGameInstance->End_SFX();
@@ -73,7 +79,7 @@ void CSonoraChange::Render()
 	if (FAILED(Bind_ShaderResources()))
 		return;
 
-	m_pShader->Begin(ENUM_CLASS(SHADER_SCREENEFFECT::SONORA_CHANGE));
+	m_pShader->Begin(0);
 	m_pVIBuffer_Rect->Bind_Resources();
 	m_pVIBuffer_Rect->Render();
 }
@@ -85,9 +91,23 @@ void CSonoraChange::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	SONORA_CHANGE_DESC* pDesc = static_cast<SONORA_CHANGE_DESC*>(pArg);
 
-	m_fEffectTime = pDesc->fEffectTime;
+	m_vEffectTime.x = 0.f;
+	m_vEffectTime.y = pDesc->fEffectTime;
 	m_fRadialTime = pDesc->fRadialTime;
 	m_fFadeTime = pDesc->fFadeTime;
+}
+
+HRESULT CSonoraChange::Ready_Components()
+{
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer_Rect), nullptr)))
+		ASSERT_CRASH(m_pVIBuffer_Rect);
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Sonora"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
+		ASSERT_CRASH(m_pShader);
+
+	return S_OK;
 }
 
 HRESULT CSonoraChange::Bind_ShaderResources()
@@ -136,4 +156,6 @@ void CSonoraChange::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pVIBuffer_Rect);
+	Safe_Release(m_pShader);
 }

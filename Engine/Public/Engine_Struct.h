@@ -38,6 +38,14 @@ namespace Engine
 		_float4 vPosition;
 	}VF_LIGHT;
 
+	typedef struct tagENVIRONMENTMAP
+	{
+		_uint iIndex;
+		_float fRange;
+		_float2 Padding;
+		_float4 vPosition;
+	}ENV_MAP;
+
 	typedef struct tagShadowLightDesc
 	{
 		XMFLOAT4	vDirection;
@@ -67,6 +75,7 @@ namespace Engine
 		_matrix WorldMatrix;
 		_float fLifeTime;
 		_float4 vColor;
+		_float fEmissiveIntensity;
 	}DECAL_DATA;
 
 	typedef struct tagNotify

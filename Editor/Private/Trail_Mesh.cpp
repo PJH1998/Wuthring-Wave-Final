@@ -188,7 +188,7 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		//뼈에 붙을 얘면 프리팹이 넘겨준 정보 토대로 업데이트에서 갱신해주는 작업이 필요.
 		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
-		m_OffsetMatrix = WorldMatrix;
+		m_OffsetMatrix = pDesc->OffsetMatrix;
 	}
 }
 
@@ -325,6 +325,9 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_vLifeTime.x, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_vLifeTime, sizeof(_float2))))
 		return E_FAIL;
 
     return S_OK;

@@ -128,6 +128,9 @@ HRESULT CShadowMap::End_ShadowMap()
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);
 
+	m_pBackBuffer = nullptr;
+	m_pOriginalDSV = nullptr;
+
 	return S_OK;
 }
 
@@ -157,13 +160,19 @@ void CShadowMap::Clear()
 	for (auto& pBounding : m_Boundings)
 		Safe_Delete(pBounding);
 	m_Boundings.clear();
-
+	
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
 	Safe_Release(m_pDS_UAV);
 	Safe_Release(m_pDS_SRV);
 	Safe_Release(m_pCS);
 	Safe_Release(m_pShadowMapBuffer);
+
+	Safe_Release(m_pBackBuffer);
+	Safe_Release(m_pOriginalDSV);
+
+	m_pBackBuffer = nullptr;
+	m_pOriginalDSV = nullptr;
 
 	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
 		m_Matrices[i].clear();

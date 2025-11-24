@@ -162,8 +162,9 @@ void CElectroPredator::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-   		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_YELLOW));
+   		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 		m_pModelCom->Render(i);
 	}
@@ -203,11 +204,15 @@ void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Is
 
 void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 {
-	//if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
-	//	return;
-	//
-	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+	
+	PREFAB_INFO Desc = {};
+	Desc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	Desc.pModelPtr = m_pModelCom;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &Desc);
 }
 
 void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)

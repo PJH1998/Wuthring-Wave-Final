@@ -3,6 +3,8 @@
 
 NS_BEGIN(Engine)
 class CTexture;
+class CShader;
+class CVIBuffer_Rect;
 NS_END
 
 NS_BEGIN(Client)
@@ -24,10 +26,9 @@ public:
 	virtual		void		Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
+	CVIBuffer_Rect*			m_pVIBuffer_Rect = { nullptr };
+	CShader*				m_pShader = { nullptr };
 	CTexture*				m_pMaskTexture = { nullptr };	//Mask_300156
-	
-	_float2					m_vEffectTime = {};
-	_float					m_fCurrentTime = {};
 
 	_float3					m_vColor = { _float3(1.f, 1.f, 1.f) };
 	
@@ -37,15 +38,17 @@ private:
 	_float2					m_vScale = {};
 
 	_uint					m_iSFXLutIndex = {};
-	_float					m_fSFXLutIntensity = {};
+	_float2					m_vSFXLutIntensity = {};
+	_float					m_fCurrentLutIntensity = {};
 
 	_uint					m_iPrevLutIndex = {};
 	_float					m_fPrevLutIntensity = {};
 	_bool					m_PrevIsDynamicLUT = { };
 
-private:
-	HRESULT					Ready_Textures();
 
+private:
+	HRESULT					Ready_Components();
+	
 
 public:
 	static CAugusta_UltiSFX*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

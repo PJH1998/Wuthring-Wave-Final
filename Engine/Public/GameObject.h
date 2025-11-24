@@ -30,6 +30,7 @@ public:
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 	virtual		void			Render_OutLine();
+	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix);
 
 	// Pooling Spawn CallBack
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}

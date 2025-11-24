@@ -57,7 +57,7 @@ float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunc
     return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH); // 입사각에 따른 Specular 수치 ( 하프벡터와 Light가 비슷할수록 Specular Down )
 }
 
-float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness) // vViewDir = Look (WorldPos - CamPos)
+void Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness, out float3 vOutDiffuse, out float3 vOutSpecular) // vViewDir = Look (WorldPos - CamPos)
 {
     float3 vHalf = normalize(vViewDir + vLightDir);
     float NdotL = saturate(dot(vNormal, vLightDir));
@@ -74,16 +74,19 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     
     float NDF = Compute_NDF(NdotH, fRoughness);
     
-    float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
+    float3 vSpecular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
     float3 kd = (1.f - Fresnel) * (1.f - fMetallic);                            // Diffuse 색상에 기여하는 비율 ( 정면 일수록 Diffuse 색)
     
     float3 vDiffuse = kd * vAlbedo / PI;
     
-    return (vDiffuse + Specular) * NdotL;
+    vOutDiffuse = vDiffuse * NdotL;
+    vOutSpecular = vSpecular * NdotL;
+    
+    //return (vDiffuse + vSpecular) * NdotL;
 }
 
-float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness)
+void Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness, out float3 vOutDiffuse, out float3 vOutSpecular)
 {
     float3 vHalf = normalize(vViewDir + vLightDir);
     float NdotL = saturate(dot(vNormal, vLightDir));
@@ -100,13 +103,15 @@ float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, f
     
     float NDF = Compute_NDF(NdotH, fRoughness);
     
-    float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
+    float3 vSpecular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
     float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
     
     float3 vDiffuse = kd * vAlbedo / PI;
         
-    return (vDiffuse + Specular);
+    vOutDiffuse = vDiffuse;
+    vOutSpecular = vSpecular;
+    //return (vDiffuse + vSpecular);
 }
 
 float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
@@ -117,9 +122,11 @@ float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
     
     fRimPower *= saturate(NdotL);
     
-    fRimPower = max(0.2f, fRimPower);
+    fRimPower = smoothstep(0.5f, 1.f, fRimPower);
     
-    fRimPower = pow(fRimPower, 2.f);
+//    fRimPower = max(0.2f, fRimPower);
+    
+//    fRimPower = pow(fRimPower, 2.f);
     
     return fRimPower;
 }
@@ -353,5 +360,14 @@ float Noise(float2 St)
     return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
-
+float3 ToneMap(float3 vInput)
+{
+    float fA = 2.51f;
+    float fB = 0.03f;
+    float fC = 2.41f;
+    float fD = 0.59f;
+    float fE = 0.14f;
+    
+    return saturate((vInput * (fA * vInput + fB)) / (vInput * (fC * vInput + fD) + fE));
+}
 #endif //Engine_Shader_Function_h__

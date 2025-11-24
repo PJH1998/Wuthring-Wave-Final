@@ -15,6 +15,7 @@ CUI_Loading::CUI_Loading(const CUI_Loading& Prototype)
 	:CCustom_UI(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_Loading::Initialize_Prototype()
@@ -44,7 +45,7 @@ HRESULT CUI_Loading::Initialize_Clone(void* pArg)
 
 
 	// 랜덤하게 로딩 이미지 적용
-	_uint iNumBG = Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames.size();
+	_uint iNumBG = static_cast<_uint>(Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames.size());
 	m_iRandomBGIndex = static_cast<_uint>(m_pGameInstance->Rand(0.f, iNumBG - 0.001f));
 
 	_wstring strRandBGName = Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames[m_iRandomBGIndex];
@@ -61,15 +62,12 @@ HRESULT CUI_Loading::Initialize_Clone(void* pArg)
 }
 
 void CUI_Loading::Priority_Update(_float fTimeDelta)
-{
+{	
 	__super::Priority_Update(fTimeDelta);   // Nothing
 }
 
 void CUI_Loading::Update(_float fTimeDelta)
 {
-	Update_CombinedMatrix();
-	Update_CombinedDesc();
-
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
@@ -77,6 +75,9 @@ void CUI_Loading::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CombinedMatrix();
+	Update_CombinedDesc();
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
@@ -121,7 +122,7 @@ HRESULT CUI_Loading::Ready_Texts()
 	else if (strRandBGName == L"Bg_Lianxita36")
 	{
 		strTitleText = L"아틸리우스 협곡";
-		strDescriptionText = L"단단한 반석으로 이루어진 천연 협곡. 돌기둥이 늘어서 있으며 가파르고 협준하다. \n상퀴스 사냥 평원 내부로 들어가는 주요 통로로서, 일곱 언덕 사람들이 대대로 영웅의 왕 아틸리우스 석상의 증명 하에 사냥의 여정에 올랐다.";
+		strDescriptionText = L"단단한 반석으로 이루어진 천연 협곡. 돌기둥이 늘어서 있으며 가파르고 협준하다. \n상귀스 사냥 평원 내부로 들어가는 주요 통로로서, 일곱 언덕 사람들이 대대로 영웅의 왕 아틸리우스 석상의 증명 하에 사냥의 여정에 올랐다.";
 	}
 
 	//_wstring strTitleText = L"이건테스트용제목글자에요";
@@ -132,6 +133,7 @@ HRESULT CUI_Loading::Ready_Texts()
 	CUI_Text* pDescriptionText = m_pGameSystem->Create_FontToScreen(_float2{ 150.f, 920.f }, strDescriptionText, TEXT_COLOR_TYPE::TT_NORMAL, 0.3f, L"UI_Text_DescriptionTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pDescriptionText);
 
+	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_Text_TitleTest", pTitleText);
 	m_pGameInstance->Add_RootUI(L"UI_Text_DescriptionTest", pDescriptionText);
 
@@ -166,11 +168,16 @@ CGameObject* CUI_Loading::Clone(void* pArg)
 
 void CUI_Loading::Free()
 {
+	Safe_Release(m_pGameSystem);
+
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
 
-	m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
-	m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	if (m_isClone)
+	{
+		m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
+		m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	}
 
 	__super::Free();
 }

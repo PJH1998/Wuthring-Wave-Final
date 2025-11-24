@@ -9,6 +9,8 @@
 #include "MotionBlur.h"
 #include "ScreenBlur.h"
 #include "RadialBlur.h"
+#include "SubsurfaceScattering.h"
+#include "Water.h"
 
 CSFX_Hub::CSFX_Hub(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -150,6 +152,11 @@ void CSFX_Hub::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLen
 	CMotionBlur* pSFX = static_cast<CMotionBlur*>(Find_SFX(SFX_TYPE::MOTION));
 	pSFX->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
 }
+void CSFX_Hub::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
+{
+	CWater* pWater = static_cast<CWater*>(Find_SFX(SFX_TYPE::WATER));
+	pWater->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+}
 #endif
 
 CSFX* CSFX_Hub::Find_SFX(SFX_TYPE eType)
@@ -186,6 +193,14 @@ HRESULT CSFX_Hub::Ready_SFX()
 	ASSERT_CRASH(pRadialBlur);
 	m_SFXs.emplace(SFX_TYPE::RADIAL, pRadialBlur);
 
+	CSubsurfaceScattering* pSSS = CSubsurfaceScattering::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
+	ASSERT_CRASH(pSSS);
+	m_SFXs.emplace(SFX_TYPE::SSS, pSSS);
+
+	CWater* pWater = CWater::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pWater);
+	m_SFXs.emplace(SFX_TYPE::WATER, pWater);
+
 	return S_OK;
 }
 
@@ -200,7 +215,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	BlurDesc.iHeight = m_iWinSizeY;
 	BlurDesc.fDefinitionX = 16.f;
 	BlurDesc.fDefinitionY = 16.f;
-	BlurDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	BlurDesc.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	BlurDesc.iMipLevels = 1;
 	BlurDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
 
@@ -223,7 +238,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	BlurRCS.iHeight = m_iWinSizeY >> 1;
 	BlurRCS.fDefinitionX = 16.f;
 	BlurRCS.fDefinitionY = 16.f;
-	BlurRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	BlurRCS.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	BlurRCS.iMipLevels = 3;
 	BlurRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
@@ -266,6 +281,19 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_RadialBlur"), &BlurRCS)))
 		CRASH("Failed Add RCS_MotionBlur");
 #pragma endregion
+
+#pragma region SSS
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSS.hlsl");
+	BlurRCS.strEntryPoint = "SSSBlur_X";
+	BlurRCS.iWidth = m_iWinSizeX;
+	BlurRCS.iHeight = m_iWinSizeY;
+	BlurRCS.iMipLevels = 1;
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSSBlur_X"), &BlurRCS)))
+		CRASH("Failed Add RCS_SSSBlur_X");
+
+	BlurRCS.strEntryPoint = "SSSBlur_Y";
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSSBlur_Y"), &BlurRCS)))
+		CRASH("Failed Add RCS_SSSBlur_Y");
 #pragma endregion
 
 #pragma region DOWNSAMPLE
@@ -277,7 +305,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	DownSampleRCS.iHeight = m_iWinSizeY >> 1;
 	DownSampleRCS.fDefinitionX = 16.f;
 	DownSampleRCS.fDefinitionY = 16.f;
-	DownSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	DownSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	DownSampleRCS.iMipLevels = 3;
 	DownSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
@@ -300,7 +328,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	UpSampleRCS.iHeight = m_iWinSizeY;
 	UpSampleRCS.fDefinitionX = 16.f;
 	UpSampleRCS.fDefinitionY = 16.f;
-	UpSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	UpSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	UpSampleRCS.iMipLevels = 3;
 	UpSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 

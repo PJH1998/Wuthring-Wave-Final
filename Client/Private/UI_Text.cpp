@@ -195,6 +195,10 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
+	
+
+	m_vOriginScreenPos		= pDesc->vScreenPos;
+
 #ifdef KSTA_ON_TRANSFORM_CACHING
 	m_vecCachedUITransform.resize(pDesc->vecInstanceDescs.size());
 
@@ -211,6 +215,7 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	return S_OK;
 }
 
+
 void CUI_Text::Update_Description(_float fTimeDelta)
 {
 
@@ -223,6 +228,18 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 	auto* pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	if (!pFont) return;
 	const _uint iPadding = pFont->iPadding;
+
+
+	_uint tempPrevCode = 0;
+	_int tempAdvance = 0;
+	for (auto ch : text)
+	{
+		if (ch == L'\n') { tempPrevCode = 0; continue; }
+		m_pGameInstance->Get_GlyphAndAdvance(m_tTextDesc.strFontTag, ch, tempPrevCode, tempAdvance);
+		tempPrevCode = ch;
+	}
+
+
 
 	_float penX = 0.f;
 	_float penY = 0.f;
@@ -258,7 +275,7 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 
 
 
-		// ksta : 크기 설정!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// 크기 설정!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		inst.vSInstRight	=	{ m_tTextDesc.fScale * (pGlyph->sWidth), 0.f, 0.f ,0.f };
 		inst.vSInstUp		=	{ 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
 		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };
@@ -301,6 +318,8 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 		prevCode = ch;
 	}
 
+	m_tTextDesc.vecInstanceDescs.resize(instIndex);
+
 	m_tUIDesc.vecInstanceDescs = m_tTextDesc.vecInstanceDescs;
 
 #ifdef KSTA_ON_TRANSFORM_CACHING
@@ -311,34 +330,50 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 #endif // KSTA_ON_TRANSFORM_CACHING
 
 }
-
 void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 {
-	// 인자가 기본값이라면 현재 타입으로,
-	// 임의값이라면 해당 타입으로 정렬합니다.
-
-	if (m_tUIDesc.strUIName == L"UI_Text_HUD_BossName")
-		int i = 10;
-
+	// 인자가 기본값이 아니면 정렬 타입 갱신
 	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
 		m_eTextAlignmentType = eAlignmentType;
 
-	_float fAlignmentPixel = 0;
-	_float fOriginPosX = m_tTextDesc.vScreenPos.x;
+	auto& insts = m_tTextDesc.vecInstanceDescs;
+	if (insts.empty())
+		return;
 
-	for (auto& textInstDesc : m_tTextDesc.vecInstanceDescs)
-		fAlignmentPixel += (static_cast<_uint>(textInstDesc.vSInstRight.x) + 4.f);
+	// 폰트에서 패딩 가져오기 (x 방향 보정용)
+	_float pad = 0.f;
+	if (auto pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag))
+		pad = (_float)pFont->iPadding * m_tTextDesc.fScale;
 
-	_float fOffsetX = fAlignmentPixel * m_tTextDesc.fScale;
+	const auto& firstInst = insts.front();
+	const auto& lastInst = insts.back();
 
+	// "보이는" 글자 영역 기준 좌/우/중앙
+	const _float fVisualLeft = firstInst.vSInstTrans.x + pad;
+	const _float fVisualRight = lastInst.vSInstTrans.x + lastInst.vSInstRight.x - pad;
+	const _float fVisualCenter = (fVisualLeft + fVisualRight) * 0.5f;
+	const _float fVisualWidth = fVisualRight - fVisualLeft;
+
+	_float delta = 0.f;
 	switch (m_eTextAlignmentType)
 	{
-	case Client::TEXT_ALIGN_TYPE::LEFT:		fOffsetX *= 0.f;		break;
-	case Client::TEXT_ALIGN_TYPE::CENTER:	fOffsetX *= 0.5f;		break;
-	case Client::TEXT_ALIGN_TYPE::RIGHT:	fOffsetX *= 1.f;		break;
+	case Client::TEXT_ALIGN_TYPE::LEFT:			delta = m_vOriginScreenPos.x - fVisualLeft;		break;
+	case Client::TEXT_ALIGN_TYPE::CENTER:		delta = m_vOriginScreenPos.x - fVisualCenter;	break;
+	case Client::TEXT_ALIGN_TYPE::RIGHT:		delta = m_vOriginScreenPos.x - fVisualRight;	break;
+	default:																					return;
 	}
 
-	m_tTextDesc.vScreenPos.x = fOriginPosX - fOffsetX;
+	for (auto& inst : insts)				// align에 따른 전체 이동
+		inst.vSInstTrans.x += delta;
+
+	m_tTextDesc.vScreenPos.x += delta;
+}
+
+void CUI_Text::Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType)
+{
+	m_tTextDesc.strText = strText;
+	Update_Description(0.f);
+	Update_Alignment(eAlignmentType);
 }
 
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

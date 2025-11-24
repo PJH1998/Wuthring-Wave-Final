@@ -29,9 +29,11 @@
 #include "Decal_Manager.h"
 #include "VolumetricFog.h"
 #include "HZB.h"
-#include "SFX_Hub.h"
+#include "EnvironmentMap.h"
 
-#define KSTA_DEBUG_ENABLEFONTMGR
+#include"Model_Manager.h"
+#include "SFX_Hub.h"
+#include "Resource_Manager.h"
 
 
 IMPLEMENT_SINGLETON(CGameInstance)
@@ -52,10 +54,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
@@ -130,8 +130,17 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pVF = CVolumetricFog::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pVF);
 
+	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
+	ASSERT_CRASH(m_pModel_Manager);
+
 	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pSFX_Hub);
+
+	m_pEnvMap = CEnvironmentMap::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pEnvMap);
+
+	m_pResource_Manager = CResource_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pResource_Manager);
 
 	return S_OK;
 }
@@ -148,32 +157,21 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Priority_Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 
 	m_pObject_Manager->Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
-	
+
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	//m_pFont_Manager->Late_Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pDecal_Manager->Update(fTimeDelta);
 
 	m_pSequence_Manager->Update(fTimeDelta);
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
-
-
 
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
@@ -184,6 +182,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 
 	m_pVF->Update_VF(fTimeDelta);
+	m_pModel_Manager->Update(fTimeDelta);
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
 }
 
@@ -492,9 +491,13 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
-HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+//HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+//{
+//    return m_pRenderer->Add_Render_StaticObject(Container);
+//}
+HRESULT CGameInstance::Add_Render_StaticObject(vector<class CStaticObject*>* Container)
 {
-    return m_pRenderer->Add_Render_StaticObject(Container);
+	return m_pRenderer->Add_Render_StaticObject(Container);
 }
 HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
@@ -515,6 +518,14 @@ void CGameInstance::Render_ShadowMap()
 void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
+}
+void CGameInstance::SettingSSS(_bool IsOn)
+{
+	m_pRenderer->SettingSSS(IsOn);
+}
+void CGameInstance::SettingHDR(_float fExposure)
+{
+	m_pRenderer->SettingHDR(fExposure);
 }
 ID3D11ShaderResourceView* CGameInstance::Get_CurrentSceneSRV()
 {
@@ -564,6 +575,10 @@ HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& 
 HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
+}
+HRESULT CGameInstance::Render_LightEnvMap(CShader* pShader, CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding)
+{
+	return m_pLight_Manager->Render_EnvMap(pShader, pVIBuffer, pBounding);
 }
 #ifdef _DEBUG
 LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
@@ -1011,6 +1026,75 @@ HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureN
 	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
 }
 #pragma endregion
+HRESULT CGameInstance::RegisterPrototype(const _char* pFilePath, CModel_Streaming* pModel)
+{
+	return m_pModel_Manager->RegisterPrototype(pFilePath, pModel);
+}
+
+void CGameInstance::RequestData(CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex)
+{
+	m_pModel_Manager->RequestData(pModel, pFilePath, iLODIndex);
+}
+
+void CGameInstance::LoadLastLOD()
+{
+	m_pModel_Manager->LoadLastLOD();
+ }
+
+void CGameInstance::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
+{
+	m_pModel_Manager->Add_To_RenderTest(iLODIndex, pObject);
+}
+
+void CGameInstance::Add_To_RenderTest(vector<class CStaticObject*>* Container)
+{
+	m_pModel_Manager->Add_To_RenderTest(Container);
+}
+
+_uint CGameInstance::Render_ObjectsNum(_uint iLODIndex)
+{
+	return m_pModel_Manager->Render_ObjectsNum(iLODIndex);
+}
+
+void CGameInstance::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread)
+{
+	m_pModel_Manager->Bind_SharedBuffer(iLODIndex, pDC, iNumThread);
+}
+
+void CGameInstance::Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC)
+{
+	m_pModel_Manager->Bind_SharedBuffer(iLODIndex, pDC);
+}
+
+void CGameInstance::RenderBufferPool(_uint iLODIndex)
+{
+	m_pModel_Manager->RenderBufferPool(iLODIndex);
+}
+
+void CGameInstance::RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext)
+{
+	m_pModel_Manager->RenderBufferPool(iThreadIndex, iLODIndex, iStartIndex, iEndIndex, pContext);
+}
+
+void CGameInstance::Clear_BufferPool()
+{
+	m_pModel_Manager->Clear_BufferPool();
+}
+
+void CGameInstance::SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex)
+{
+	m_pModel_Manager->SetUp_Data(pModel, pFilePath, iLODIndex);
+}
+
+void CGameInstance::Destroy_RigidData()
+{
+	m_pModel_Manager->Destroy_RigidData();
+}
+
+void CGameInstance::Model_Manager_Change_Level(_uint iLevel)
+{
+	m_pModel_Manager->Change_Level(iLevel);
+}
 
 #pragma region SFX_HUB
 HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
@@ -1046,8 +1130,44 @@ void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float
 {
 	m_pSFX_Hub->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
 }
+void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
+{
+	m_pSFX_Hub->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+}
+HRESULT CGameInstance::Add_Probe(_float3 vCenter, _float fRange)
+{
+	return m_pEnvMap->Add_Probe(vCenter, fRange);
+}
+void CGameInstance::Bake_EnvMaps()
+{
+	m_pEnvMap->Bake_EnvMaps();
+}
+void CGameInstance::Add_EnvMap_SkyBox(CGameObject* pSkyBox)
+{
+	m_pEnvMap->Add_EnvMap_SkyBox(pSkyBox);
+}
+void CGameInstance::Add_EnvMap_StaticObject(CStaticObject* pStaticObject)
+{
+	m_pEnvMap->Add_EnvMap_StaticObject(pStaticObject);
+}
+HRESULT CGameInstance::Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName)
+{
+	return m_pEnvMap->Bind_EnvMapDatas(pShader, pTextureName, pBufferName, pHasEnvMapName, pNumEnvMapName);
+}
 #endif
 #pragma endregion
+
+#pragma region RESOURCE_MANAGER
+void CGameInstance::Load_Resource(const _char* pFolderPath)
+{
+	m_pResource_Manager->Load_Resource(pFolderPath);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResourceTag)
+{
+	return m_pResource_Manager->Get_Resource(strResourceTag);
+}
+#pragma endregion
+
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {
@@ -1066,6 +1186,8 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 	if (FAILED(m_pPrototype_Manager->Clear_Resource(iLevelID)))
 		return E_FAIL;
 
+	if (m_pModel_Manager)
+		m_pModel_Manager->Clear_Resource(iLevelID);
 	return S_OK;
 }
 
@@ -1079,6 +1201,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
+	m_pEnvMap->Clear();
 	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
@@ -1097,10 +1220,8 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	Safe_Release(m_pFont_Manager);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
-
+	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
@@ -1122,11 +1243,13 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pSFX_Hub);
+	Safe_Release(m_pEnvMap);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pModel_Manager);
+	
 	Safe_Release(m_pGraphic_Device);
-
 	Release();
 }
 

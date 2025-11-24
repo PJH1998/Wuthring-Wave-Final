@@ -36,7 +36,6 @@ public:
 	virtual		void			Update(_float fTimeDelta)override;
 	virtual		void			Late_Update(_float fTimeDelta)override;
 	virtual		void			Render()override;
-
 	void LerpPos(_float fTimeDelta);
 private:
 	void Ready_Components(void* pArg);
@@ -55,9 +54,9 @@ private:
 private:
 	CShader* m_pShaderCom = { nullptr };
 
-	vector<CModel*> m_pModelComArray;
 	//CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
+	class CModel_Streaming* m_pModelCom = { nullptr };
 private:
 	_uint m_iShaderPassIndex = {};
 	_bool m_IsRender = { true };

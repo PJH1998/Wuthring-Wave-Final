@@ -16,18 +16,24 @@ private:
 public:
 	HRESULT				Initialize(_uint iNumThread);
 	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
+	//HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
+	//HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
-	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject, _uint iNumLODIndex);
+	HRESULT				Add_Render_StaticObject(vector<class CStaticObject*>* Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void				Render();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	ID3D11ShaderResourceView* Get_CurrentSceneSRV() { return m_pCurrentSceneSRV; }
 	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
+	void				SettingSSS(_bool IsOn) { m_IsSSS = IsOn; }
+	void				SettingHDR(_float fExposure) { m_fExposure = fExposure; }
 	void				Setting_LUT(_uint iIndex, _float fIntensity, _bool IsDynamicLUT) { m_iLUT_Index = iIndex, m_fLutLerpIntensity = fIntensity, m_IsDynamicLUT = IsDynamicLUT; }
 	void				Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDynamicLut);
 	void				Render_ShadowMap();
-
+	void				Render_LOD(_uint iLODIndex);
+	void				Render_LOD_Weight();
 	void				Clear_Resource();
 
 #ifdef _DEBUG
@@ -56,13 +62,13 @@ private:
 
 	// Culling
 	list<class CGameObject*>					m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
-	vector<class CStaticObject*>				m_StaticObjects[2];
+	//vector<class CStaticObject*>				m_StaticObjects[2];
+	vector<class CStaticObject*>				m_StaticObjects[2][4];
 	atomic<_uint>								m_iDoubleBufferIndex = {};
 	atomic<_uint>								m_iCullStack = {};
 	atomic<_bool>								m_isCompleteFrustumCull = { false };
-	list<class CGameObject*>					m_ShadowMapObjects;
 	_uint										m_iNumPreRenderObject = {};
-
+	list<class CGameObject*>					m_ShadowMapObjects;
 
 	class CShader*							m_pShader = { nullptr };
 	class CVIBuffer_Rect*					m_pVIBuffer = { nullptr };
@@ -82,6 +88,10 @@ private:
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
 	_bool									m_IsFog = { true };
+	_bool									m_IsSSS = { false };		// 카툰이라 큰 차이가 없음,,
+
+	_float									m_fExposure = {};
+
 #ifdef _DEBUG
 	list<class CComponent*>					m_DebugComponents;
 	_bool									m_isRenderDebug = { true };
@@ -102,14 +112,18 @@ private:
 private:
 	void						Render_Priority();
 	void						Render_Shadow();
-	void						Render_Outline();
 	void						Render_NonBlend();	// 임시
 	void						Render_Static();
 	void						Render_Decal();
 	void						Render_SSAO();
 	void						Render_Dynamic();
 	void						Render_Light();
+	void						Render_SSS();
+
 	void						Render_Combined();
+	void						Render_Water();
+	void						Render_SSR();
+	void						Render_Outline();
 	void						Render_NonLight();
 	void						Render_Emissive();	// 단독 Emissive
 	void						Render_Effect();	// Backbuffer + Emissive + Distoriton
@@ -124,7 +138,7 @@ private:
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();
-
+	void						Render_NonStatic();
 #ifdef _DEBUG
 	void						Render_Debug();
 #endif

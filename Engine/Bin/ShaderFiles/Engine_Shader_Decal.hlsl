@@ -21,6 +21,7 @@ struct VS_IN
     row_major float4x4 WorldInv : INVWORLD;
     float2 vLifeTime :  TEXCOORD0;
     float4 vColor :     COLOR;
+    float fEmissiveIntenisity : TEXCOORD1;
 };
 
 struct VS_OUT
@@ -30,6 +31,7 @@ struct VS_OUT
     float4 vColor : COLOR;
     float2 vLifeTime : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float fEmissiveIntenisity : TEXCOORD2;
 };
 
 VS_OUT VS_MAIN(VS_IN In)
@@ -45,6 +47,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vLifeTime = In.vLifeTime;
     Out.vColor = In.vColor;
     Out.vProjPos = Out.vPosition;
+    Out.fEmissiveIntenisity = In.fEmissiveIntenisity;
     
     return Out;
 } 
@@ -56,6 +59,7 @@ struct PS_IN
     float4 vColor :     COLOR;
     float2 vLifeTime : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float fEmissiveIntenisity : TEXCOORD2;
 };
 
 struct PS_OUT
@@ -94,7 +98,9 @@ PS_OUT PS_MAIN(PS_IN In)
     {
         vDifffuse = g_DiffuseTexture.Sample(DefaultSampler, vDecalUV);
         if (any(vDifffuse.xyz))
+        {
             vDifffuse.a = max(max(vDifffuse.r, vDifffuse.b), vDifffuse.g);
+        }
         else
             discard;
     }
@@ -105,9 +111,9 @@ PS_OUT PS_MAIN(PS_IN In)
         if (CustomLuminance(vEmissive.xyz, g_EmissiveLuminance) > g_fEmissiveThreshold)
         {
             if (false == g_HasDiffuse)
-                Out.vEmissive = In.vColor;
+                Out.vEmissive = float4(In.vColor.xyz * In.fEmissiveIntenisity, In.vColor.a);
             else
-                Out.vEmissive = vDifffuse;
+                Out.vEmissive = float4(vDifffuse.xyz * In.fEmissiveIntenisity, vDifffuse.a);
         }
     }
     
@@ -128,6 +134,7 @@ PS_OUT PS_MAIN(PS_IN In)
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
     Out.vDiffuse.a -= fAlpha;
+    
     
     if(any(vEmissive.xyz))
     {

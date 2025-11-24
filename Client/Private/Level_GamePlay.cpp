@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+#include "UI_Parry.h"
 
 //SFX
 #ifdef _DEBUG
@@ -29,6 +30,8 @@ HRESULT CLevel_GamePlay::Initialize()
 {
 	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+
+//	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
 
 	m_pGameInstance->Setting_LUT(0, 0.25f, false);
 
@@ -51,13 +54,16 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	m_pGameInstance->Render_ShadowMap();
 
-	
 	m_pGameInstance->Begin_DownSampleShadowMap();
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
-	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-	LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
+
+	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
@@ -79,10 +85,13 @@ HRESULT CLevel_GamePlay::Initialize()
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
+
 	Ready_Effect();
 	Ready_Skybox();
 	Ready_Mouse();
 	Ready_SFX();
+
+//	m_pGameInstance->Bake_EnvMaps();
 
 	return S_OK;
 }
@@ -109,42 +118,79 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 	
 
 	// UI Test. Delete it.
-#pragma region UI TEST (INTERACTION)
+#pragma region [NUMPAD .] KSTA_UITEST_LOCKON
+	CCustom_UI* pRootUILockOn = m_pGameSystem->Find_RootUI(L"UI_LockOn");
 
-	//static _uint iInteractIndex = 0;
-	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
-	//
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
-	//{
-	//	switch (iInteractIndex)
-	//	{
-	//	case TEST_INTERACT0:
-	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	case TEST_INTERACT1:
-	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	}
-	//}
-	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
-	//{
-	//	m_pGameSystem->Hide_InteractUI(true);
-	//}
-	//
-	//
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
-	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		!pRootUILockOn->IsActivate())
+		m_pGameSystem->Attach_LockOnUI(nullptr);
+	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
+		pRootUILockOn->IsActivate())
+		m_pGameSystem->Detach_LockOnUI();
+#pragma endregion
+
+
+#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
+	{
+		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
+			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
+
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
+	}
+#pragma endregion
+
+
+#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
+	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
+	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+		!isTargetAlive)
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+		isTargetAlive)
+		pTargetMobHPBarUI->SetActivate(false);
+#pragma endregion
+
+
+#pragma region [TAB] KSTA_UITEST_TABUTILITY
+	static _bool isTabUtilityActive = false;
+	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+	//_uint iTabUtilitySelectedIndex = UINT_MAX;
+	_bool isTabUtilityHided = false;
+
+	if (!isTabUtilityActive &&
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
+		isTabUtilityActive = true;
+	}
+	else if (isTabUtilityActive &&
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
+	{
+		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
+		isTabUtilityActive = false;
+		isTabUtilityHided = true;
+	}
+
+
+	_string strSelectedUtilityName = {};
+	if (isTabUtilityHided)
+	{
+		switch (iTmpSelectedUtility)
+		{
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
+		}
+
+		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
+	}
+
 #pragma endregion
 
 }
@@ -393,21 +439,39 @@ void CLevel_GamePlay::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-			CRASH("Failed to Add RootUI to UI_Manager.");
+	//	if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
+	//		CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
 		CRASH("Failed Ready Button_Interact");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
+		iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+		CRASH("Failed Ready LockOn");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+		CRASH("Failed Ready Parry");
+	
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_MobHPBar"),
+		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
+		CRASH("Failed Ready MobHPBar");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
+		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
+		CRASH("Failed Ready TabUtility");
+
+
+	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
 }
 
@@ -420,17 +484,22 @@ void CLevel_GamePlay::Ready_Mouse()
 
 void CLevel_GamePlay::Ready_SFX()
 {
+	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::GAMEPLAY));
+
+#pragma region SFX
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
 		CRASH("Failed Add Pool SONORA_CHANGE");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiSFX"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Augusta_UltiSFX"), 1)))
-		CRASH("Failed Add Pool Augusta_UltiSFX");
-	
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Augusta_UltiPostSFX"), 1)))
-		CRASH("Failed Add Pool Augusta_UltiPostSFX");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
+	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
+	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
+	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiStar"), 1)))
+	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
+
+#pragma endregion
 }
 
 #ifdef _DEBUG
@@ -451,48 +520,73 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	{
 		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
 		//Desc.fEffectTime = 3.f;
-		//Desc.fRadialTime = 2.f;
-		//Desc.fFadeTime = 2.f;
-
-		//m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
-		
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_Augusta_UltiSFX"), XMMatrixIdentity(), nullptr);
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_Augusta_UltiPostSFX"), XMMatrixIdentity(), nullptr);
+		//Desc.fRadialTime = 1.f;
+		//Desc.fFadeTime = 1.f;
+		  
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
-	if (ImGui::CollapsingHeader("LUT"))
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
 	{
-		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
-		{
-			for (_uint i = 0; i < 7; ++i)
-			{
-
-#ifdef _DEBUG
-				if (ImGui::Selectable(to_string(i).c_str()))
-				{
-					m_iLUT_Index = i;
-				}
-#endif // _DEBUG
-			}
-
-			ImGui::EndCombo();
-		}
-
-		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
-		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
-	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
 	{
-		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
-
-		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
-
-		ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
-
-		m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+		m_IsSSS = !m_IsSSS;
+		m_pGameInstance->SettingSSS(m_IsSSS);
 	}
+
+
+	ImGui::Begin("SHADER");
+	if (ImGui::CollapsingHeader("SSR"))
+	{
+		ImGui::InputFloat("MIN_STEP", &m_fMinStep, 1.f, 2.f);
+		ImGui::InputFloat("MAX_STEP", &m_fMaxStep, 1.f, 2.f);
+		ImGui::InputFloat("STARTOFFSET", &m_fStart, 1.f, 2.f);
+
+		m_pGameInstance->Set_SSR(m_fMinStep, m_fMaxStep, m_fStart);
+	}
+	//if (ImGui::CollapsingHeader("HDR"))
+	//{
+
+	//	ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
+	//	
+	//	m_pGameInstance->SettingHDR(m_fExposure);
+	//
+	//}
+	//if (ImGui::CollapsingHeader("LUT"))
+	//{
+	//	if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
+	//	{
+	//		for (_uint i = 0; i < 7; ++i)
+	//		{
+
+	//			if (ImGui::Selectable(to_string(i).c_str()))
+	//			{
+	//				m_iLUT_Index = i;
+	//			}
+	//		}
+
+	//		ImGui::EndCombo();
+	//	}
+
+	//	ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
+	//	ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+	//	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+	//}
+
+	ImGui::End();
+	//if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	//{
+	//	ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+	//	ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+	//	ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
+
+	//	m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+	//}
 }
 #endif
 

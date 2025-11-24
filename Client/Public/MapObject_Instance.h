@@ -38,7 +38,7 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta) override;
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
-	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
 
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
@@ -47,9 +47,8 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 private:
-	CDeferredShader* m_pShaderCom = { nullptr };
+	CShader* m_pShaderCom = { nullptr };
 	CShader* m_pShadowShaderCom = { nullptr };
-	CRigidbody* m_pRigidbodyCom = { nullptr };
 	vector<CModel_Instance*>		m_pModelComArray;
 	CModel_Instance* m_pModelCom = { nullptr };
 	_uint						m_iShaderPassIndex = {};

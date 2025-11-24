@@ -13,6 +13,9 @@ public:
 	HRESULT				Initialize();
 
 public:
+	void				PreAssign_TargetUIs();
+
+public:
 	class CCustom_UI*	Find_RootUI(_wstring strName);
 	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
 
@@ -33,6 +36,40 @@ public:
 
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
+
+	void				Attach_LockOnUI(_float3* pTargetPos);
+	void				Detach_LockOnUI();
+
+	void				Attach_Parry(_float3* pTargetPos);
+	void				Enable_Parried();
+
+	void				Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
+
+	void				Show_TabUtilityUI(_uint iCurSelectedUtilityIndex);
+	_uint				HideNGet_TabUtilityUI();
+
+private:
+	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
+	CCustom_UI*			m_pUI_HUD_SectorR_PartyFrame		= { nullptr };
+	CCustom_UI*			m_pUI_HUD_SectorB_Status			= { nullptr };
+	CCustom_UI*			m_pUI_HUD_SectorA					= { nullptr };
+	CCustom_UI*			m_pUI_HUD_SectorRB_SkillIcons		= { nullptr };
+	CCustom_UI*			m_pUI_HUD_SectorT_BossStatus		= { nullptr };
+	CCustom_UI*			m_pRootUI_Interact					= { nullptr };
+	CCustom_UI*			m_pTextUI_Interact					= { nullptr };
+	CCustom_UI*			m_pUI_Interact_Normal				= { nullptr };
+	CCustom_UI*			m_pUI_Interact_Multiplier			= { nullptr };
+	CCustom_UI*			m_pUI_Interact_Pressed				= { nullptr };
+	CCustom_UI*			m_pUI_Interact_Focused				= { nullptr };
+	CCustom_UI*			m_pRootUI_LockOn					= { nullptr };
+	CCustom_UI*			m_pRootUI_Parry						= { nullptr };
+	CCustom_UI*			m_pRootUI_MobHPBar					= { nullptr };
+	CCustom_UI*			m_pRootUI_TabUtility				= { nullptr };
+
+
+
+
+		;
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };

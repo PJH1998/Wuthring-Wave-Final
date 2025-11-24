@@ -94,20 +94,8 @@
     <Filter Include="03. GameObject\UI\_Parents">
       <UniqueIdentifier>{1681211d-9f83-450e-accb-f92ebf1a5186}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers">
-      <UniqueIdentifier>{c2cc41b8-823a-4ba0-9c80-c969b92bedad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\HUD">
-      <UniqueIdentifier>{5722860c-32aa-4818-9bb3-f6f8c726f814}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\EscMenu">
-      <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\_Shader">
       <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02. Level\UI">
-      <UniqueIdentifier>{42d34b8c-5305-4308-a1e3-60659450ace7}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
@@ -253,9 +241,6 @@
     <Filter Include="03. GameObject\MapObject\Sonoro">
       <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\Loading">
-      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\MapObject\Spawner">
       <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
     </Filter>
@@ -270,12 +255,6 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\_Parents\_SubParents\Button">
-      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Child_Containers\Logo">
-      <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Camera\Scene">
       <UniqueIdentifier>{7828bcb1-9620-4f71-a71f-17f6ecc3a739}</UniqueIdentifier>
@@ -318,6 +297,57 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\Radial">
       <UniqueIdentifier>{8d374cac-4c3e-4492-8daa-51e35e3449b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX\GalbrenaUlti">
+      <UniqueIdentifier>{32b72cfb-8e3e-47d5-ab33-2805cf83a753}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop">
+      <UniqueIdentifier>{8c9a1f14-85fc-4d35-a23b-1f3f8c1f59d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\LockOn">
+      <UniqueIdentifier>{22797b79-8c21-4ea5-9d22-9a9802b9e0f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Parry">
+      <UniqueIdentifier>{90653342-d458-4ed1-884c-ffa807da4208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Interact">
+      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\MobHPBar">
+      <UniqueIdentifier>{2070fc30-04c0-4684-8025-4587fbef7c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\TabUtility">
+      <UniqueIdentifier>{ad945ee6-0c89-4fc8-9f83-5943ca4fd1ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child">
+      <UniqueIdentifier>{c2cc41b8-823a-4ba0-9c80-c969b92bedad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\HUD">
+      <UniqueIdentifier>{5722860c-32aa-4818-9bb3-f6f8c726f814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\EscMenu">
+      <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\Loading">
+      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Child\Logo">
+      <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\DummyCell">
+      <UniqueIdentifier>{8b8d53a6-3e7d-4e7d-b055-aff0ed90d33e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Level\Heaven">
+      <UniqueIdentifier>{add52591-9010-461b-ac56-3065ef68c97c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Level\Loader\Heaven">
+      <UniqueIdentifier>{f672b5af-69df-45ee-9c9f-31768c941e46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\NPCCell">
+      <UniqueIdentifier>{e12d60a7-524c-464e-bf51-4329d399d574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\CoroSaurus\Weapon">
+      <UniqueIdentifier>{323146fd-c508-439b-bc38-b85f0b22e928}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -409,7 +439,7 @@
       <Filter>02. Level\Loader\Test</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_HUD.h">
-      <Filter>03. GameObject\UI\Child_Containers\HUD</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Button.h">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
@@ -692,7 +722,7 @@
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h">
-      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Loading</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AoEDoT.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
@@ -734,9 +764,8 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Button_Interact.h">
-      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\Interact</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClInclude>
@@ -747,7 +776,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Logo.h">
-      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Logo</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\SceneCamera.h">
       <Filter>03. GameObject\Camera\Scene</Filter>
@@ -800,6 +829,9 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_LockOn.h">
+      <Filter>03. GameObject\UI\Containers_Prop\LockOn</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\RoverGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
@@ -814,6 +846,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Parry.h">
+      <Filter>03. GameObject\UI\Containers_Prop\Parry</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaAirAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
@@ -847,6 +882,51 @@
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Slash.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SFX_Prefab.h">
+      <Filter>03. GameObject\ScreenEffect\Prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_SFX_Star.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaUlti_SFX_Circle.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaUlti_PostSFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_MobHPBar.h">
+      <Filter>03. GameObject\UI\Containers_Prop\MobHPBar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_TabUtility.h">
+      <Filter>03. GameObject\UI\Containers_Prop\TabUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Heaven.h">
+      <Filter>02. Level\Heaven</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader_Heaven.h">
+      <Filter>02. Level\Loader\Heaven</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\DummyCell.h">
+      <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\NPCInstancing.h">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\NPCCell.h">
+      <Filter>03. GameObject\Actor\NPC\NPCCell</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Coro_Rock.h">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Water.h">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -921,11 +1001,8 @@
     <ClCompile Include="..\private\Level_Test_UI.cpp">
       <Filter>02. Level\Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Loader_Test_UI.cpp">
-      <Filter>02. Level\Loader\Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\UI_HUD.cpp">
-      <Filter>03. GameObject\UI\Child_Containers\HUD</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Button.cpp">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
@@ -1198,7 +1275,7 @@
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp">
-      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Loading</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AoEDoT.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
@@ -1237,9 +1314,8 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Button_Interact.cpp">
-      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+      <Filter>03. GameObject\UI\Containers_Prop\Interact</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClCompile>
@@ -1250,7 +1326,7 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Logo.cpp">
-      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+      <Filter>03. GameObject\UI\Containers_Child\Logo</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\SceneCamera.cpp">
       <Filter>03. GameObject\Camera\Scene</Filter>
@@ -1300,6 +1376,9 @@
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_LockOn.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\LockOn</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\RoverGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
@@ -1311,6 +1390,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Parry.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\Parry</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaAirAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
@@ -1341,6 +1423,54 @@
     </ClCompile>
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp">
       <Filter>03. GameObject\ScreenEffect\SFX\AugustaUltiBegin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Slash.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SFX_Prefab.cpp">
+      <Filter>03. GameObject\ScreenEffect\Prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_SFX_Star.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaUlti_SFX_Circle.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\GalbrenaUlti</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_MobHPBar.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\MobHPBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_TabUtility.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\TabUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Heaven.cpp">
+      <Filter>02. Level\Heaven</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader_Heaven.cpp">
+      <Filter>02. Level\Loader\Heaven</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Loader_Test_UI.cpp">
+      <Filter>02. Level\Loader\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\DummyCell.cpp">
+      <Filter>03. GameObject\Actor\NPC\DummyCell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\NPCInstancing.cpp">
+      <Filter>03. GameObject\Actor\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\NPCCell.cpp">
+      <Filter>03. GameObject\Actor\NPC\NPCCell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Coro_Rock.cpp">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Water.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1397,9 +1527,6 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl">
-      <Filter>96. ShaderFiles</Filter>
-    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
@@ -1409,6 +1536,25 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Sonora.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_SFX_Burst_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxInstance_AnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh_Skining.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Water.hlsl">
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshCharacter.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>

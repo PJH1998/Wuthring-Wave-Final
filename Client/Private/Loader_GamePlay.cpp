@@ -35,6 +35,11 @@
 #include "UI_HUD.h"
 #include "UI_Text_Damage.h"
 #include "UI_Button_Interact.h"
+#include "UI_LockOn.h"
+#include "UI_Parry.h"
+#include "UI_MobHPBar.h"
+#include "UI_TabUtility.h"
+
 #include "Mouse.h"
 #pragma endregion
 
@@ -65,9 +70,14 @@
 #pragma endregion
 
 #pragma region SFX
+#include "SFX_Prefab.h"
 #include "SonoraChange.h"
 #include "Augusta_UltiSFX.h"
 #include "Augusta_UltiPostSFX.h"
+#include "GalbrenaUlti_SFX_Slash.h"
+#include "GalbrenaUlti_SFX_Star.h"
+#include "GalbrenaUlti_SFX_Circle.h"
+#include "GalbrenaUlti_PostSFX.h"
 #pragma endregion
 
 
@@ -113,11 +123,14 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel, "Asphodel_Barrens");
 
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1111_dest_Fix/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel, "The_False_Sovereign");
+
+
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel, "Heaven");
 
 
 	// SkyBox
@@ -482,6 +495,19 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
+	_string strFilePath_UI_LockOn = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_LockOn));
+
+	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Parry));
+
+	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
+
+	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
+
+
 	for (auto& treeDesc : vecDescs)
 	{
 		for (auto& infoDesc : treeDesc.vecUIInfoDescs)
@@ -489,9 +515,6 @@ HRESULT CLoader_GamePlay::Load_UI()
 			const   _wstring    strFilePath = infoDesc.tUIDesc.strFilePath;
 			const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
 			const   _uint       iNumFiles = infoDesc.tUIDesc.iNumFiles;
-
-			if (strFileName == L"T_JiabeilinaEnergyBgCombined")
-				int i = 10;
 
 			infoDesc.tUIDesc.strFilePath;
 			if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
@@ -566,8 +589,18 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
-
-
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
+		CUI_LockOn::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
+		CUI_Parry::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
+		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
+		CUI_TabUtility::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
@@ -629,19 +662,43 @@ HRESULT CLoader_GamePlay::Load_ScreenEffect()
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Noise_12001.png"), 1))))
 		CRASH("Failed Add Prototype SFX_Noise");
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Texture_SFX_Star"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_11000_WP20002.png"), 1))))
+		CRASH("Failed Add Prototype SFX_Star");
+
 #pragma endregion
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"),
+		CSFX_Prefab::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Prefab");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
 		CSonoraChange::Create(m_pDevice, m_pContext))))
-		return E_FAIL;
+		CRASH("Failed Add Prototype SFX_SonoraChange");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiSFX"),
 		CAugusta_UltiSFX::Create(m_pDevice, m_pContext))))
-		return E_FAIL;
+		CRASH("Failed Add Prototype SFX_Augusta_UltiSFX");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
 		CAugusta_UltiPostSFX::Create(m_pDevice, m_pContext))))
-		return E_FAIL;
+		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
+
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
+		CGalbrenaUlti_SFX_Slash::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
+		CGalbrenaUlti_SFX_Star::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype_SFX_Galbrena_UltiStar");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiCircle"),
+		CGalbrenaUlti_SFX_Circle::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Galbrena_UltiCircle");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiPostSFX"),
+		CGalbrenaUlti_PostSFX::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype_SFX_Galbrena_UltiPostSFX");
 
 	return S_OK;
 }

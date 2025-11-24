@@ -50,7 +50,6 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_fAlpha = m_tDesc.fAlpha;
 	m_fColorGain = m_tDesc.fColorGain;
 	m_fColorGamma = m_tDesc.fColorGamma;
-
 	m_iDirFalg = m_tDesc.iDirFlag;
 	m_iMaskFlag = m_tDesc.iMaskFlag;
 
@@ -91,14 +90,14 @@ void CTrail_Mesh::Update(_float fTimeDelta)
 		m_fMaskSweep = 0.f;;
     }
 
-  //  if (m_fSweep >= 1.f + m_fSweepWitdh)
-  //  {
-  //      m_fSweep = 0.f;
-  //      m_isActivate = false;
-  //      m_fColorSweep = 0.f;
-		//m_fMaskSweep = 0.f;
-		//m_vLifeTime.x = 0.f;
-  //  }
+    if (m_fSweep >= 1.f + m_fSweepWitdh)
+    {
+        m_fSweep = 0.f;
+        m_isActivate = false;
+        m_fColorSweep = 0.f;
+		m_fMaskSweep = 0.f;
+		m_vLifeTime.x = 0.f;
+    }
 }
 
 void CTrail_Mesh::Late_Update(_float fTimeDelta)
@@ -147,7 +146,7 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		//뼈에 붙을 얘면 프리팹이 넘겨준 정보 토대로 업데이트에서 갱신해주는 작업이 필요.
 		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
-		m_OffsetMatrix = WorldMatrix;
+		m_OffsetMatrix = pDesc->OffsetMatrix;
 	}
 }
 
@@ -284,6 +283,9 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_vLifeTime.x, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_vLifeTime, sizeof(_float2))))
 		return E_FAIL;
 
     return S_OK;

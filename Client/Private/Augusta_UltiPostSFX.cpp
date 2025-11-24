@@ -10,7 +10,6 @@ CAugusta_UltiPostSFX::CAugusta_UltiPostSFX(const CAugusta_UltiPostSFX& Prototype
 	: CScreenEffect{ Prototype }
 	, m_fRadialLengthScale { Prototype.m_fRadialLengthScale }
 	, m_RadialData { Prototype.m_RadialData }
-	, m_vEffectTime { Prototype.m_vEffectTime }
 {
 }
 
@@ -44,14 +43,11 @@ HRESULT CAugusta_UltiPostSFX::Initialize_Clone(void* pArg)
 	if (FAILED(Ready_Buffer()))
 		return E_FAIL;
 
-	if (FAILED(Ready_Texture()))
+	if (FAILED(Ready_Components()))
 		return E_FAIL;
-
-	D3D11_MAPPED_SUBRESOURCE SubResource = {};
-	m_pContext->Map(m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
-	//memcpy(SubResource.pData, &m_SlashData, sizeof(SLASH_DATA));
-	memcpy(SubResource.pData, &m_RadialData, sizeof(RADIAL_DATA));
-	m_pContext->Unmap(m_pBuffer, 0);
+	
+	Setting_Scale(m_vWinSize.x, m_vWinSize.y);
+	Setting_Pos(m_vWinSize.x * 0.5f, m_vWinSize.y * 0.5f);
 
     return S_OK;
 }
@@ -70,11 +66,13 @@ void CAugusta_UltiPostSFX::Update(_float fTimeDelta)
 		return;
 	}
 
-	m_RadialData.fLengthScale = (m_fRadialLengthScale * (1.f - SmoothStep(m_vEffectTime.x, m_vEffectTime.y, m_fCurrentTime)));
+	_float fRatio = (1.f - SmoothStep(m_vEffectTime.x, m_vEffectTime.y, m_fCurrentTime));
+
+	m_RadialData.fLengthScale = (m_fRadialLengthScale * fRatio);
 
 	D3D11_MAPPED_SUBRESOURCE SubResource = {};
 	m_pContext->Map(m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
-	memcpy(SubResource.pData, &m_RadialData, sizeof(RADIAL_DATA));
+	memcpy(SubResource.pData, &m_RadialData, sizeof(SFX_RADIAL_DATA));
 	m_pContext->Unmap(m_pBuffer, 0);
 }
 
@@ -96,7 +94,7 @@ void CAugusta_UltiPostSFX::Render()
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		CRASH("Failed to Bind ProjMatrix");
 
-	if (FAILED(m_pShader->Bind_Value("vScreenSize", &m_vWinSize, sizeof(_float2))))
+	if (FAILED(m_pShader->Bind_Value("g_vScreenSize", &m_vWinSize, sizeof(_float2))))
 		CRASH("Failed to Bind vScreenSize");
 
 	if(FAILED(m_pNoiseTexture->Bind_Shader_Resource(m_pShader, "g_NoiseTexture")))
@@ -105,7 +103,7 @@ void CAugusta_UltiPostSFX::Render()
 	if (FAILED(m_pShader->Bind_Texture("g_SceneTexture", m_pGameInstance->Get_CurrentSceneSRV())))
 		CRASH("Failed to Bind SceneTexture");
 
-	m_pShader->Begin(ENUM_CLASS(SHADER_SCREENEFFECT::AUGUSTA_ULTI_POST));
+	m_pShader->Begin(ENUM_CLASS(SHADER_SFX_BURST::RADIAL_BLUR));
 
 	m_pContext->PSSetConstantBuffers(0, 1, &m_pBuffer);
 
@@ -120,8 +118,16 @@ void CAugusta_UltiPostSFX::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_RadialData.fLengthScale = m_fRadialLengthScale;
 }
 
-HRESULT CAugusta_UltiPostSFX::Ready_Texture()
+HRESULT CAugusta_UltiPostSFX::Ready_Components()
 {
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer_Rect), nullptr)))
+		ASSERT_CRASH(m_pVIBuffer_Rect);
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_SFX_Burst"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
+		ASSERT_CRASH(m_pShader);
+
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Texture_SFX_Noise"),
 		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pNoiseTexture), nullptr)))
 		ASSERT_CRASH(m_pNoiseTexture);
@@ -132,13 +138,19 @@ HRESULT CAugusta_UltiPostSFX::Ready_Texture()
 HRESULT CAugusta_UltiPostSFX::Ready_Buffer()
 {
 	D3D11_BUFFER_DESC BufferDesc = {};
-	BufferDesc.ByteWidth = sizeof(RADIAL_DATA);
+	BufferDesc.ByteWidth = sizeof(SFX_RADIAL_DATA);
 	BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_pBuffer)))
 		CRASH("Failed to Create : Constant Buffer");
+
+	D3D11_MAPPED_SUBRESOURCE SubResource = {};
+	m_pContext->Map(m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
+	//memcpy(SubResource.pData, &m_SlashData, sizeof(SLASH_DATA));
+	memcpy(SubResource.pData, &m_RadialData, sizeof(SFX_RADIAL_DATA));
+	m_pContext->Unmap(m_pBuffer, 0);
 
 	return S_OK;
 }
@@ -169,6 +181,8 @@ void CAugusta_UltiPostSFX::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pVIBuffer_Rect);
+	Safe_Release(m_pShader);
 	Safe_Release(m_pBuffer);
 	Safe_Release(m_pNoiseTexture);
 }

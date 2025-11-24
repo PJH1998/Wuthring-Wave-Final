@@ -362,11 +362,35 @@
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance">
       <UniqueIdentifier>{26ac64fc-251f-436e-b528-877d70a68300}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\96. Resource">
+      <UniqueIdentifier>{eaeef1d9-73ac-4384-a436-3538b5a0b152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\96. Resource\Manager">
+      <UniqueIdentifier>{c089c98e-a76d-4dcd-89ef-f6e5749ed7d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Material">
+      <UniqueIdentifier>{d12e14ea-3ebd-47d6-8607-ccec1cf635e1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance\Animation_Inst">
       <UniqueIdentifier>{5c49a93a-c744-4a48-a72f-9eb9a1b57be2}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance">
       <UniqueIdentifier>{ea694176-fb29-4956-86f4-868581b42cfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Rect\Instance">
+      <UniqueIdentifier>{295226f9-6a82-4c8a-b5c7-2befd237547d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\SSS">
+      <UniqueIdentifier>{e98527a6-6b5a-432f-8e18-5d7e2048d4fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\19.EnvironmentMap">
+      <UniqueIdentifier>{1746a0c5-a5dc-4846-9965-d94792c1d303}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\19.EnvironmentMap\Probe">
+      <UniqueIdentifier>{35e0b51f-8e80-4942-9ea0-c097861931a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Water">
+      <UniqueIdentifier>{1d22ec99-b1b4-4f75-a716-665728fad5fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\Model\Animation\MorphChannel">
       <UniqueIdentifier>{ffcb18d6-3f35-4e61-bb31-e24180b30d7f}</UniqueIdentifier>
@@ -740,11 +764,22 @@
     <ClInclude Include="..\public\ScreenBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BufferPool.h" />
+    <ClInclude Include="..\Public\Model_Manager.h" />
+    <ClInclude Include="..\Public\FreeList.h" />
+    <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\Mesh_Streaming.h" />
     <ClInclude Include="..\public\RadialBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ModelAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Resource_Manager.h">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Material.h">
+      <Filter>01. Utility\04. Component\Material</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Animation_Inst.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
@@ -752,12 +787,27 @@
     <ClInclude Include="..\Public\MeshAnim_Instance.h">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Rect\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SubsurfaceScattering.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Water.h">
+      <Filter>01. Utility\99. Renderer\SFX\Water</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\EnvironmentMap.h">
+      <Filter>01. Utility\19.EnvironmentMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Probe.h">
+      <Filter>01. Utility\19.EnvironmentMap\Probe</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\MorphChannel.h">
       <Filter>01. Utility\04. Component\Model\Animation\MorphChannel</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ShapeKey.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
-    </ClInclude>
+    </ClInclude> 
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1100,17 +1150,43 @@
     <ClCompile Include="..\private\ScreenBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\BufferPool.cpp" />
+    <ClCompile Include="..\Private\Model_Manager.cpp" />
+    <ClCompile Include="..\Private\FreeList.cpp" />
+    <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\private\RadialBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ModelAnim_Instance.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Resource_Manager.cpp">
+      <Filter>01. Utility\96. Resource\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Material.cpp">
+      <Filter>01. Utility\04. Component\Material</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Animation_Inst.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\Animation_Inst</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MeshAnim_Instance.cpp">
       <Filter>01. Utility\04. Component\ModelAnim_Instance\MeshAnim_Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Rect\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SubsurfaceScattering.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Water.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Water</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\EnvironmentMap.cpp">
+      <Filter>01. Utility\19.EnvironmentMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Probe.cpp">
+      <Filter>01. Utility\19.EnvironmentMap\Probe</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MorphChannel.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\MorphChannel</Filter>
@@ -1129,13 +1205,13 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
-    <None Include="..\..\Editor\Default\Editor.vcxproj.filters">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-    </None>
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Water.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
   </ItemGroup>
@@ -1180,6 +1256,12 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_RadialBlur.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_EnvMapDeferred.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

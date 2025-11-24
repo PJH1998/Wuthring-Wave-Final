@@ -22,7 +22,7 @@ private:
 
 public:
 	virtual HRESULT		Initialize(_uint iWinSizeX, _uint iWinSizeY);
-	virtual void		Update(_float fTimeDelta);
+	virtual void		Update(_float fTimeDelta) override;
 	virtual HRESULT		Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader) override;
 
 	virtual void		Enter();

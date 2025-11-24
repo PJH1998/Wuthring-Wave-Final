@@ -133,7 +133,7 @@ void CPooling_Manager::Wait_Thread_End()
 {
 	while (false == IsWorkFinish())
 	{
-
+		
 	}
 }
 

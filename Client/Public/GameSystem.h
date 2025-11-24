@@ -29,7 +29,7 @@ public:
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
 	//============================Effect
 
-	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
@@ -61,6 +61,10 @@ public:
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
+	// UI 꺼내쓰기용. 혹 수정 필요시 말해주세요.
+	void		PreAssign_TargetUIs();	// Initialize for UI caching. call after ui load.
+
+	// 기존 GameInstance 에서는 번거롭게 캐스팅 필요하던 걸, 편하게 가져오도록 캐스팅 내장시켜서 재정의.
 	class CCustom_UI*	Find_RootUI(_wstring strName);
 	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
 	
@@ -72,18 +76,39 @@ public:
 
 	// 보스 체력바에 필요한 정보를 할당합니다.
 	void		HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
-	// 보스 체력바를 토글합니다.
+	// 보스 체력바를 토글합니다. 정보 할당 없이 On 시도 시 Crash.
 	void		HUD_Toggle_BossStatusUI(_bool isOn);
 
-	// 상호작용 UI를 토글합니다. 인자는 On 시 들어갈 글자.
-	//void		Toggle_InteractUI(_bool isOn, _wstring strText = L"");
 	// 상호작용 UI를 켭니다. / strText : 출력될 글자.
 	void		Show_InteractUI(_wstring strText);
-	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 때처럼 사라질 것인지 여부
+	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 때처럼, 피드백 애니메이션 재생 후 사라질 것인지 여부
+	// (해당 함수 호출 없이 마우스 클릭으로도 끌 수 있습니다,)
 	void		Hide_InteractUI(_bool isPressedAs = false);
-	// 상호작용 UI가 마우스를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
+	// 상호작용 UI가 "마우스"를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
-	
+
+
+	// 락온 UI를 생성합니다. / *pTargetPos : 락온 대상의 위치 포인터.
+	void		Attach_LockOnUI(_float3* pTargetPos);
+	// 락온 UI를 해제합니다.
+	void		Detach_LockOnUI();
+
+	// 패리 UI를 생성합니다. / *pTargetPos : 락온 대상의 위치 포인터.
+	// (일단은 생성 후 약 0.35초 = 21프레임 를 원이 겹치는 시점으로 잡았습니다.)
+	void		Attach_Parry(_float3* pTargetPos);
+	// 패리 UI가 살아있는 도중, 패리에 성공했음을 보냅니다. (원 즉시제거, 이펙트 이미지 출력)
+	void		Enable_Parried();
+
+	// 몬스터 HP바 표시를 위한 정보를 할당합니다. / &tDesc : 필요 정보 구조체
+	// 살아 있는 동안 매 프레임 호출이 필요하며, 요구 구조체 내의 iMonsterPtrKey 는 몹 주소를 reinterpret_cast 를 통해 할당해주시면 됩니다.
+	void		Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
+
+	// 탭 유틸리티 UI를 켭니다. /  iCurSelectedUtilityIndex : 현재 선택중인 유틸리티 인덱스 (UI_TAB_UTILITY Enum을 따름)
+	// 마우스 커서 락 해제 필요.(wip)
+	void		Show_TabUtilityUI(_uint iCurSelectedUtilityIndex = ENUM_CLASS(UI_TAB_UTILITY::NOTHING));
+	// 탭 유틸리티 UI를 끄라는 요청을 보내며 (애니메이션 재생을 위함), 선택한 유틸리티를 반환합니다.
+	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
+	_uint		HideNGet_TabUtilityUI();
 #pragma endregion
 
 #pragma region PLAYER STATUS
@@ -113,13 +138,17 @@ public:
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
 #pragma endregion
 
+#pragma region SFX_PREFAB
+	void	Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex);
+#pragma endregion
+
 private:
 	class	CParser*			m_pParser						= { nullptr };
 	class	CFactory*			m_pFactory						= { nullptr };
 
 	class	CUI_FontPreset*		m_pUI_FontPreset				= { nullptr };
 	class	CUI_ControlHelper*	m_pUI_ControlHelper				= { nullptr };
-	class	CUI_StatusSyncer*	m_pUI_StatusSyncer				= { nullptr };
+	//class	CUI_StatusSyncer*	m_pUI_StatusSyncer				= { nullptr };
 
 	class	CDirector*			m_pDirector 					= { nullptr };
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };

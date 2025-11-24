@@ -61,6 +61,7 @@ private:
 	CModel* m_pBoneModel = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
+	CModel_Streaming* m_pModelCom = { nullptr };
 
 
 	_float3 m_vScale = {};

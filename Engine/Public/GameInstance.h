@@ -130,12 +130,16 @@ public:
 public:
 	HRESULT						Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 	HRESULT						Add_Render_StaticObject(class CStaticObject* pObject);
-	HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	//HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
+	HRESULT						Add_Render_StaticObject(vector<class CStaticObject*>* Container);
+	HRESULT						Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex);
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	void						Render_ShadowMap();
 	void						SettingFog(_bool IsOn);
+	void						SettingSSS(_bool IsOn);
+	void						SettingHDR(_float fExposure);
 	ID3D11ShaderResourceView*	Get_CurrentSceneSRV();
 	void						Setting_LUT(_uint iIndex, _float fLutLerpIntensity, _bool IsDynamicLut);
 	void						Get_Current_LutSetting(_uint* pOutIndex, _float* pOutIntensity, _bool* pOutIsDnyamicLut);
@@ -149,9 +153,10 @@ public:
 
 #pragma region LIGHT_MANAGER
 	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
-	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	void					Set_Active(const _wstring& strLightTag, _bool isActive);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, class BoundingBox* pBounding);
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
 #endif
@@ -177,10 +182,10 @@ public:
 #pragma region TIMER_MANAGER
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
-	_double		Get_PlayTime();
+	_double			Get_PlayTime();
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
-	HRESULT		Add_Timer(const _wstring& strTimerTag);
+	HRESULT			Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
@@ -281,6 +286,7 @@ public:
 	void				Clear_RootUI();
 #pragma endregion
 
+
 #pragma region RCS_MANAGER
 	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
@@ -329,6 +335,25 @@ public:
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 #pragma endregion
 
+#pragma region MODEL_STREAMING
+public:
+	HRESULT						RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
+	void						RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
+	void						RenderBufferPool(_uint iLODIndex);
+	void						LoadLastLOD();
+	void						Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
+	void						Add_To_RenderTest(vector<class CStaticObject*>* Container);
+	_uint						Render_ObjectsNum(_uint iLODIndex);
+	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread);
+	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
+	void						RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
+	void						Clear_BufferPool();
+	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
+	void						Destroy_RigidData();
+	void						Model_Manager_Change_Level(_uint iLevel);
+#pragma endregion
+
+
 #pragma region SFX_HUB
 	HRESULT						Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	HRESULT						End_SFX();
@@ -342,8 +367,23 @@ public:
 
 #ifdef _DEBUG
 	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
+	void					Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset);
 #endif
 #pragma endregion
+
+#pragma region ENVIRONMENT_MAP
+	HRESULT						Add_Probe(_float3 vCenter, _float fRange);
+	void						Bake_EnvMaps();
+	void						Add_EnvMap_SkyBox(CGameObject* pSkyBox);
+	void						Add_EnvMap_StaticObject(CStaticObject* pStaticObject);
+	HRESULT						Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName);
+#pragma endregion
+
+#pragma region RESOURCE_MANAGER
+	void									Load_Resource(const _char* pFolderPath);
+	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
+#pragma endregion
+
 
 public:
 	HRESULT					SetUp_CameraNF();
@@ -380,7 +420,10 @@ private:
 	class CShadowMap*			m_pShadowMap = { nullptr };
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 	class CVolumetricFog*		m_pVF = { nullptr };
+	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+	class CEnvironmentMap*		m_pEnvMap = { nullptr };
+	class CResource_Manager*	m_pResource_Manager = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

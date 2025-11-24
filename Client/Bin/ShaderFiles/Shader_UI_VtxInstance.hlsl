@@ -12,6 +12,8 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
 float g_AlphaStrength;
 
+Texture2D g_TextureFX;
+float g_FXStrength;
 
 // Gradient Variables
 float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f };  // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
@@ -31,6 +33,7 @@ float g_UIScale = 1.f; // UI Scaler
 
 
 
+
 // Variant UI Variables
 #define UIFLAG_ERROR                0           // 플래그를 주지 않았을 때의 초기값
 #define UIFLAG_COOLDOWN_CIRCLE      1           // 반시계방향으로 나타나는 쿨타임 구현용
@@ -39,11 +42,13 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_PLAYER_TRANSMIT      4  
 #define UIFLAG_SIMPLEMASK           5
 #define UIFLAG_ACTIVEFEEDBACK       6
-#define UIFLAG_END                  7
+#define UIFLAG_ENEMY_HP             7
+
+#define UIFLAG_END                  8
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
-
+//#define SCROLL_HP
 
 
 // ==============================
@@ -262,7 +267,11 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
         In.vSInstLook,
         In.vSInstTrans
     );
-    
+    float2 vFinalTexcoord = In.vTexcoord;
+    float4 vFinalExtra0 = In.mExtra0;
+    float4 vFinalExtra1 = In.mExtra1;
+    float4 vFinalExtra2 = In.mExtra2;
+    float4 vFinalExtra3 = In.mExtra3;
     
     
     // Variant : 계산 전에 계산용 행렬에 값 반영하여 원하는 transform 을 적용
@@ -302,6 +311,26 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
             matAdditionalTransform[1].xyz *= (vTargetScale.y / vCurScale.y);
 
         } break;
+        case UIFLAG_ENEMY_HP:
+        {
+            // ==============================
+            // * [7] Dynamic Enemy HP
+            // ==============================
+            float fYScale = In.mExtra2.y;
+            float fElapsedTime = In.mExtra2.z;
+            float fCoordSpeed = In.mExtra2.w;
+            
+            float2 vCurScale; // 현재 스케일이 0이 아님에 주의. 인스턴스별 크기가 이미 적용된 값이 들어옴.
+            vCurScale.y = length(matAdditionalTransform[1].xyz);
+            matAdditionalTransform[1].xyz *= fYScale;
+            
+            // texcoord pushing
+            #ifdef SCROLL_HP
+            vFinalTexcoord.x -= fElapsedTime * fCoordSpeed * 1.f;
+            #endif
+            vFinalExtra3.xy = In.vTexcoord;
+            
+        } break;
     }
     
     
@@ -319,7 +348,7 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
     
     
     Out.vPosition = vWorldPos;
-    Out.vTexcoord = In.vTexcoord;
+    Out.vTexcoord = vFinalTexcoord;
     Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = Out.vPosition;
     
@@ -332,10 +361,10 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
     Out.vSInstCoordY = In.vSInstCoordY;
     Out.vClipTexcoordX = In.vClipTexcoordX;
     Out.vClipTexcoordY = In.vClipTexcoordY;
-    Out.mExtra0 = In.mExtra0;
-    Out.mExtra1 = In.mExtra1;
-    Out.mExtra2 = In.mExtra2;
-    Out.mExtra3 = In.mExtra3;
+    Out.mExtra0 = vFinalExtra0;
+    Out.mExtra1 = vFinalExtra1;
+    Out.mExtra2 = vFinalExtra2;
+    Out.mExtra3 = vFinalExtra3;
     
     return Out;
 }
@@ -669,9 +698,28 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                             lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
     float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
-    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
-        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
-        discard;
+    
+    
+    #ifdef SCROLL_HP
+    switch (g_iVariantFlag)
+    {
+        case UIFLAG_ENEMY_HP: // 7
+        {
+             
+            
+        } break;
+        default :
+         {
+    #endif
+            if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+                fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+                discard;
+            
+            
+    #ifdef SCROLL_HP       
+        } break;
+    }
+    #endif
     
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
@@ -878,7 +926,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             Out.vColor = vAppliedColor;
             return Out;
-        }
+        } break;
         case UIFLAG_ACTIVEFEEDBACK :    // 6
         {
             // ==============================
@@ -902,7 +950,73 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             Out.vColor.a = vAppliedColor.a * lerp(1.f - fStartAlpha, 0.f, fDeltaX);
             
             return Out;
-        }
+        } break;
+        case UIFLAG_ENEMY_HP :          // 7
+        {
+            // ==============================
+            // * [7] Dynamic Enemy HP
+            // ==============================
+            // * matrix info [size : dynamic] (per mobs)
+            // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
+            // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
+            // [ALPHA] [YSCALE(VS)] [ELAPSEDTIME(VS)] [COORDSPEED(VS)]
+            // [ORIGINCOORD(fromVS).xy]
+            // ==============================
+            vector vColor1 = In.mExtra0.xyzw;
+            vector vColor2 = In.mExtra1.xyzw;
+            float fAlpha = saturate(In.mExtra2.x);
+            float2 vOriginCoord = In.mExtra3.xy;
+            
+            // 9sector.. 
+            float2 vSize = {
+                length(g_WorldMatrix[0].xyz) * g_UIScale,
+                length(g_WorldMatrix[1].xyz) * g_UIScale,
+            };
+            
+            float2 border = g_SectorBorder * g_UIScale;
+            float2 localPos = In.vTexcoord * vSize;
+                
+            Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            
+            // =====
+            
+            // 원본 coord (vOriginCoord) 기준으로 discard. (밀린 coord 가 아닌 원본 coord가 필요해서 따로 정의)
+            float2 fixedUV  = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, vOriginCoord.x),
+                                    lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, vOriginCoord.y));
+            float2 clipX    = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                                    lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+            float2 clipY    = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                                    lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+            
+            float2 fixedUV_Flip     = float2(1.0f - fixedUV.x, fixedUV.y);
+            
+            if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+                fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+                Out.vColor.a = 0.f;         // 추가적으로 그릴 수 있으니 discard 가 아닌, 알파로
+            
+            // =====
+
+            float fEdgeAlphaWidth = 0.2f;
+            
+            
+            float4 OriginColor = g_Texture.Sample(DefaultSampler, fixedUV);
+            float4 FlippedColor = g_Texture.Sample(DefaultSampler, fixedUV_Flip);
+            
+            
+            
+            
+            //Out.vColor.rgb = vColor.rgb;
+            Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
+            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength) * fAlpha;
+            
+            //#ifdef SCROLL_HP
+            float fEdgeAlpha = saturate(min(vOriginCoord.x /fEdgeAlphaWidth, (1.0f - vOriginCoord.x) / fEdgeAlphaWidth));
+            Out.vColor.a *= fEdgeAlpha;
+            //#endif
+            
+            //Out.vColor.rgba = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            return Out;
+        } break;
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);

@@ -2,7 +2,7 @@
 #include "StaticObject.h"
 
 NS_BEGIN(Engine)
-class CModel;
+class CModel_Streaming;
 class CShader;
 class CRigidbody;
 NS_END
@@ -36,7 +36,7 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta);
 	virtual		void			Update(_float fTimeDelta);
 	virtual		void			Late_Update(_float fTimeDelta);
-	virtual		void			Render();
+	virtual		void			Render()override;
 	virtual		void			Render_Shadow();
 
 	HRESULT Ready_Component(void* pArg = nullptr);
@@ -47,7 +47,7 @@ public:
 
 private:
 	_uint m_iShaderPassIndex = {};
-	CModel* m_pModelCom = { nullptr };
+	CModel_Streaming* m_pModelCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
 
@@ -56,6 +56,7 @@ private:
 private:
 	_float m_fTimeDelta = {};
 	_float4x4 m_FixedPos = {};
+
 public:
 	static CMapObject_Destruction_Debris* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

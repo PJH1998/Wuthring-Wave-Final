@@ -337,7 +337,7 @@ void CShader_Interface::Setting_LUT()
 
 	}
 
-	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, false);
+	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, true);
 #ifdef _DEBUG
 
 //	m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));

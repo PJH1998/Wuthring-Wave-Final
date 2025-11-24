@@ -32,6 +32,8 @@ public:
 	virtual void			Render()								override;
 
 public:
+	void					PreAssign_ChildUIs();
+
 	void					Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
 	void					Toggle_BossStatusUI(_bool isOn) { m_isOn_BossStatus = isOn; }
 
@@ -39,10 +41,13 @@ public:
 private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_Presets();
+
 	HRESULT					Ready_BossUINameText();
+	HRESULT					Ready_PlayerHPText();
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
+	void					Update_UI_SkillSection_Utility(_float fTimeDelta);
 	void					Update_UI_SkillSection_BG(_float fTimeDelta);
 	void					Update_UI_SkillFeedback_Trigger(_float fTimeDelta);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
@@ -59,11 +64,58 @@ private:
 
 	void					Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots);
 	void					Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots);
+	void					Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots);
 	
 	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 
 private:
+	void					Update_Text_PlayerHP();
+
+private:
 	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
+
+private:
+	CCustom_UI* m_pUI_SectorT_BossStatus = nullptr;
+	CCustom_UI* m_pUI_SectorB_Status = nullptr;
+	CCustom_UI* m_pUI_Skill[3] = { };
+	CCustom_UI* m_pUI_Change[3] = { };
+
+	CCustom_UI* m_pUI_Skill_ReadyFrame = nullptr;
+	CCustom_UI* m_pUI_Skill_BG = nullptr;
+	CCustom_UI* m_pUI_SectorRB_SkillIcons = nullptr;
+	CCustom_UI* m_pUI_Skill_Utility = nullptr;
+	CCustom_UI* m_pUI_Feedback = nullptr;
+	CCustom_UI* m_pUI_HPBar = nullptr;
+	CCustom_UI* m_pUI_BossHPBar = nullptr;
+	CCustom_UI* m_pUI_BossSABar = nullptr;
+	CCustom_UI* m_pUI_KeyButton = nullptr;
+
+	CCustom_UI* m_pUI_Group_Rover = nullptr;
+	CCustom_UI* m_pUI_Group_Augusta = nullptr;
+	CCustom_UI* m_pUI_Group_Galbrena = nullptr;
+
+	CCustom_UI* m_pUI_Frame_Rover_Dark = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta = nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Augusta_OtherEnergy = nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Augusta_UltMode = nullptr;
+	CCustom_UI* m_pUI_Frame_Galbrena = nullptr;
+	CCustom_UI* m_pUI_Frame_Galbrena_Icon = nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Galbrena_RageMode = nullptr;
+
+	CCustom_UI* m_pUI_Icon_ElementDark = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementThunder = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementFire = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementGuage = nullptr;
+
+	CCustom_UI* m_pUI_EnergyInstItems = nullptr;
+
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_SwordEnergy = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_CenterPointEnergy = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_UltModeEnergy = nullptr;
+
+	CCustom_UI* m_pTextUI_PlayerHP = nullptr;
+	CCustom_UI* m_pTextUI_BossName = nullptr;
+
 
 private:
 	class CGameSystem*		m_pGameSystem = { nullptr };
@@ -71,21 +123,17 @@ private:
 	class CPlayerStatus*	m_pPlayerStatus = { nullptr };
 	class CAbility*			m_pAbility = { nullptr };
 	
-
-	// * Temp assumed value.
-	//		| ROVER		|  AUGUSTA			| GARBENA
-	// ------------------------------------------------------------
-	//	0	| Normal	| Normal			| Normal
-	//	1	| DarkSerge	| Normal - Combo 1	| Normal - Burst Ready
-	//	2	| 			| Normal - Combo 2	| Burst
-	//	3	| 			| Normal - Combo 3	|
-	//	4	| 			| Ult				|
-	_uint					m_iPlayerEnhancedMode = 0;	// 용도 표시용으로 분기 둠. 나중에 제거.
-
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
+	array<array<_float2, 2>, 5>						m_arrUtilCoordPresets = {};
 	_uint m_iSelectedCHIndex = 0;
 
+
+private:
+	_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+
+private:
 
 	// ========== for Boss ==========
 	_bool					m_isOn_BossStatus = false;

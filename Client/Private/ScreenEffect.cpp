@@ -11,6 +11,7 @@ CScreenEffect::CScreenEffect(const CScreenEffect& Prototype)
 	, m_ViewMatrix { Prototype.m_ViewMatrix }
 	, m_ProjMatrix { Prototype.m_ProjMatrix }
 	, m_vWinSize{ Prototype.m_vWinSize }
+	, m_vEffectTime { Prototype.m_vEffectTime }
 {
 }
 
@@ -33,14 +34,6 @@ HRESULT CScreenEffect::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_isActivate = false;
-
-	if (FAILED(Ready_Components()))
-		return E_FAIL;
-
-	Setting_Scale(m_vWinSize.x, m_vWinSize.y);
-
-	Setting_Pos(m_vWinSize.x * 0.5f, m_vWinSize.y * 0.5f);
-
 
     return S_OK;
 }
@@ -72,23 +65,7 @@ void CScreenEffect::Setting_Pos(_float fPosX, _float fPosY)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(fPosX - (g_iWinSizeX * 0.5f), -fPosY + g_iWinSizeY * 0.5f, 0.f, 1.f));
 }
 
-HRESULT CScreenEffect::Ready_Components()
-{
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
-		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer_Rect), nullptr)))
-		ASSERT_CRASH(m_pVIBuffer_Rect);
-
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ScreenEffect"),
-		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
-		ASSERT_CRASH(m_pShader);
-
-	return S_OK;
-}
-
 void CScreenEffect::Free()
 {
 	__super::Free();
-
-	Safe_Release(m_pVIBuffer_Rect);
-	Safe_Release(m_pShader);
 }

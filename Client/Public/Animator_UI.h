@@ -14,6 +14,15 @@ public:
 		LINEAR, LT, RB, CUBIC, END
 	};
 
+	enum class UI_ANIM_DISABLE
+	{
+		POS				= 1 << 0, 
+		ROT				= 1 << 1, 
+		SCA				= 1 << 2, 
+		SCA_BLEND		= 1 << 3,
+		END				= 1 << 4
+	};
+
 	typedef struct tagAnimatorUIDesc
 	{
 		CCustom_UI*		pOwner = nullptr;
@@ -67,8 +76,8 @@ public:
 	HRESULT					Remove_Animation(_wstring strAnimName);
 	HRESULT					Clear_Animation();
 
-	HRESULT					Change_Animation(_wstring strAnimName);
-	HRESULT					Change_Animation(_uint iAnimIndex);
+	HRESULT					Change_Animation(_wstring strAnimName, _bool isForceRestart = false);
+	HRESULT					Change_Animation(_uint iAnimIndex, _bool isForceRestart = false);
 	HRESULT					Deselect_Animation();
 
 	UI_ANIM_DESC*			Find_Animation(_wstring strAnimName);
@@ -77,6 +86,7 @@ public:
 	UI_ANIM_DESC*			Get_CurAnimation() { return m_pCurAnimDesc; }
 	//_bool					Get_IsLastFrame() { return m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex == (static_cast<_uint>(m_fElapsedTime / fSingleFrameTime);) }
 
+	void					Set_DisableFlag(_uint iDisableFlag = 0) { m_iDisableFlag = iDisableFlag; }
 
 	UI_ANIM_KEYFRAME_DESC*	Get_CalcedAnimKeyframeDesc() { return &m_tCalcedKeyFrameDesc; }
 	UI_ANIM_KEYFRAME_DESC*	Get_CurCombinedAnimKeyframeDesc() { return &m_tCombinedKeyFrameDesc; }
@@ -104,6 +114,7 @@ private:
 	CCustom_UI*				m_pOwner = { nullptr };
 
 	_float					m_fElapsedTime = {};
+	_uint					m_iDisableFlag = {};
 
 public:
 	static CAnimator_UI*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

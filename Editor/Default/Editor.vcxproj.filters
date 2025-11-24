@@ -217,6 +217,12 @@
     <Filter Include="03. GameObject\SFX\Augusta\Blur">
       <UniqueIdentifier>{c3ce7c20-a584-4462-b6ad-20fe10d384d2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SFX\Galbrena">
+      <UniqueIdentifier>{6be37b23-a636-4bc7-84ce-e899da39eb63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\SFX\Galbrena\Blur">
+      <UniqueIdentifier>{7c036509-854b-4b08-8d10-aec1747c6dbd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -462,6 +468,19 @@
     <ClInclude Include="..\Public\Effect_Radial.h">
       <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Galbrena_SFX.h">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Galbrena_SFX_Star.h">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Galbrena_SFX_Circle.h">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Galbrena_Blur.h">
+      <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Water.h" />
     <ClInclude Include="..\Public\GltfLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
@@ -683,6 +702,19 @@
     <ClCompile Include="..\Private\Effect_Radial.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Galbrena_SFX.cpp">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Galbrena_SFX_Star.cpp">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Galbrena_SFX_Circle.cpp">
+      <Filter>03. GameObject\SFX\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Galbrena_Blur.cpp">
+      <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Water.cpp" />
     <ClCompile Include="..\Private\GltflLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>

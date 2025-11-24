@@ -30,7 +30,7 @@ void CMouse::Priority_Update(_float fTimeDelta)
 
 void CMouse::Update(_float fTimeDelta)
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_M) == KEYSTATE::DOWN)
 		m_isMouseOn = !m_isMouseOn;
 
 	if(true == m_isMouseOn)
