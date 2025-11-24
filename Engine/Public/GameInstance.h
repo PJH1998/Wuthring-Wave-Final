@@ -153,7 +153,7 @@ public:
 
 #pragma region LIGHT_MANAGER
 	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
-	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	void					Set_Active(const _wstring& strLightTag, _bool isActive);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, class BoundingBox* pBounding);
@@ -182,10 +182,10 @@ public:
 #pragma region TIMER_MANAGER
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
-	_double		Get_PlayTime();
+	_double			Get_PlayTime();
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
-	HRESULT		Add_Timer(const _wstring& strTimerTag);
+	HRESULT			Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
@@ -376,7 +376,7 @@ public:
 	void						Bake_EnvMaps();
 	void						Add_EnvMap_SkyBox(CGameObject* pSkyBox);
 	void						Add_EnvMap_StaticObject(CStaticObject* pStaticObject);
-	ID3D11ShaderResourceView*	Get_EnvMap(_uint iIndex);
+	HRESULT						Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName);
 #pragma endregion
 
 #pragma region RESOURCE_MANAGER

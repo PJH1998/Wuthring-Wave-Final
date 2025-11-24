@@ -32,7 +32,6 @@ Texture2DArray<float> g_ShadowMapTexture : register(t2);
 Texture3D<float4> VFLightTexture : register(t3);
 Texture3D<float> g_NoiseTexture : register(t4);
 
-
 RWTexture3D<float4> OutputTexture : register(u0);
 
 SamplerState DefaultSampler : register(s0);

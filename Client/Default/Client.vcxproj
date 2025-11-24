@@ -320,6 +320,7 @@
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\public\SFX_Prefab.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
+    <ClInclude Include="..\public\SkyBox_Rect.h" />
     <ClInclude Include="..\public\SonoraChange.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
@@ -514,6 +515,7 @@
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\private\SFX_Prefab.cpp" />
+    <ClCompile Include="..\private\SkyBox_Rect.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />

@@ -25,6 +25,10 @@ private:
 public:
 	HRESULT						Initialize(_float3 vCenter, _float fRange);
 	_bool						IsInProbe(BoundingBox* pObjectBounding);
+	_bool						IsInFrustrum();
+	
+	void						Fill_Data(ENV_MAP* pOut);
+
 	ID3D11ShaderResourceView*	Get_EnvMap() { return m_pSRV; }
 	void						Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer_Rect, _uint iIndex);
 	void						Add_SkyBox(CGameObject* pSkyBox);

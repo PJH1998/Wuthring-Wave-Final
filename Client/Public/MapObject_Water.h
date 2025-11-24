@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include "StaticObject.h"
+
 NS_BEGIN(Client)
-class CMapObject_Water :
-    public CStaticObject
+
+class CMapObject_Water : public CStaticObject
 {
 };
 
