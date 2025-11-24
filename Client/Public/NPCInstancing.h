@@ -9,7 +9,7 @@ NS_BEGIN(Client)
 class CNPCInstancing final : public CActor
 {
 public:
-	enum MESHTYPE {BODY, HAIR, FACE, END};
+	enum MESHTYPE {BODY, FACE, HAIR, END};
 
 	typedef struct tagNPCDesc : public CActor::ACTOR_DESC
 	{
