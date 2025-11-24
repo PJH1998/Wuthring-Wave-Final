@@ -281,8 +281,6 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     

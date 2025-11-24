@@ -161,8 +161,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }
-     
-    Out.vPBR.a = 1.f;
     
     float4 vNormal;
     
@@ -302,9 +300,7 @@ PS_OUT_LIGHT PS_MAIN_COLOR(PS_IN In)
         Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }
-     
-    Out.vPBR.a = 1.f;
-    
+
     float4 vNormal;
     
     if (g_HasNormal)

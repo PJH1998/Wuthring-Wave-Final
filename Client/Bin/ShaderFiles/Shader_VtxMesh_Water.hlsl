@@ -114,8 +114,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         Out.vPBR.z = 1.f;
     }
      
-    Out.vPBR.a = 1.f;
-    
     float4 vNormal;
 
     vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, float2(In.vTexcoord.x + g_fXOffset*0.01f, In.vTexcoord.y + g_fYOffset*0.01f));
