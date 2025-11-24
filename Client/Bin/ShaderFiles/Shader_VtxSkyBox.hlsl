@@ -86,6 +86,23 @@ struct PS_OUT_SKYBOX
     float4 vDiffuse : SV_TARGET0;
 };
 
+PS_OUT_SKYBOX PS_DOME(PS_IN In)
+{
+    PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
+    
+    float fLength = length(float2(0.5f, 0.5f) - In.vTexcoord);
+
+    //if(fLength > 0.5f)
+    //    Out.vDiffuse = float4(0.1f, 0.1f, 0.1f, 1.f);
+    //else
+    //{
+        Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        Out.vDiffuse.rgb *= float3(0.85f, 0.75f, 0.2f);
+    //}
+
+    return Out;
+}
+
 PS_OUT_SKYBOX PS_BACKGROUND(PS_IN In)
 {
     PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
@@ -93,15 +110,6 @@ PS_OUT_SKYBOX PS_BACKGROUND(PS_IN In)
     //float2 vTexcoord = float2(cos(g_fCloudSpeed), sin(g_fCloudSpeed));
     Out.vDiffuse = g_DiffuseTexture[0].Sample(PointClampSampler, In.vTexcoord);
     Out.vDiffuse.rgba = Out.vDiffuse.r;
-
-    return Out;
-}
-
-PS_OUT_SKYBOX PS_DOME(PS_IN In)
-{
-    PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
-    
-    Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
 
     return Out;
 }

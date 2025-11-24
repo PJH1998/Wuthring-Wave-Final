@@ -63,6 +63,9 @@ void CSkyBox::Render()
 
 	for (_uint i = 0; i < m_iNumModels; ++i)
 	{
+		if (nullptr == m_pModelCom[i])
+			continue;
+
 		m_pModelCom[i]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", 0, TEXTURETYPE::DIFFUSE);
 		//m_pModelCom[i]->Bind_Materials(m_pShaderCom, "g_MaskTexture", 0, TEXTURETYPE::MASK);
 		m_pShaderCom->Begin(i);
@@ -80,7 +83,7 @@ void CSkyBox::Render_OutLine()
 
 void CSkyBox::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
 {
-	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vCenter) + XMVectorSet(0.f, -10.f, 0.f, 0.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vCenter));// +XMVectorSet(0.f, -10.f, 0.f, 0.f));
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", &ViewMatrix);
@@ -108,10 +111,10 @@ void CSkyBox::Ready_Component(const vector<_wstring>& strModelTags)
 		TEXT("Com_Model_Dome"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::DOME)]), nullptr)))
 		CRASH("Com_Model_Dome");
 
-	// Com_Model_Background
-	if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::BACKGROUND)],
-		TEXT("Com_Model_Background"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::BACKGROUND)]), nullptr)))
-		CRASH("Com_Model_Background");
+	//// Com_Model_Background
+	//if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::BACKGROUND)],
+	//	TEXT("Com_Model_Background"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::BACKGROUND)]), nullptr)))
+	//	CRASH("Com_Model_Background");
 
 	// Com_Model_Cloud
 	//if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::CLOUD)],
