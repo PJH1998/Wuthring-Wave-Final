@@ -31,14 +31,7 @@ public:
 	void				Sort_AnimNotify();
 
 public:
-	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
-	//_bool				Update_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
-	_bool				Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
-
-	_bool				Update_TransformationMatrices_All(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
-
-	//_bool				Blend_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float fTrackLength);
-
+	HRESULT				Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
 	_bool				Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _matrix* Out = nullptr);
 private:
 	_char									m_szName[MAX_PATH] = {};

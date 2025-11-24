@@ -9,11 +9,14 @@ public:
 	{
 		BUFFER_KEY_FRAME = 0,
 		BUFFER_ANIM_INFO = 1,
-		BUFFER_INVERSEBIND_POSE = 2,
+		BUFFER_BONE_PARENT = 2,
 		BUFFER_FINAL_BONEMATRIX = 3,
 		BUFFER_ANIM_INFOCB = 4, // constant
 		BUFFER_STAGING = 5,
 		BUFFER_BONE_CHANNEL = 6,
+		BUFFER_ANIM_LOCALMATRIX = 7,
+		BUFFER_INSTANCECB = 8,
+		BUFFER_PRETRANSFORM = 9,
 		BUFFER_END
 	};
 
@@ -23,16 +26,26 @@ public:
 		SRV_KEY_FRAME = 0,
 		SRV_ANIM_INFO = 1,
 		SRV_BONE_CHANNEL = 2,
-		SRV_INVERSEBIND_POSE = 3,
-		SRV_FINAL_BONEMATRIX = 5,
+		SRV_BONE_PARENT = 3,
+		SRV_ANIM_INFOCB = 4,
+		SRV_ANIM_LOCALMATRIX = 5,
+		SRV_FINAL_BONEMATRIX = 6,
 		SRV_END
 	};
 
 	enum UAV
 	{
 		UAV_FINAL_BONEMATRIX = 0,
+		UAV_ANIM_LOCALMATRIX = 1,
 		UAV_END
 	};
+	typedef struct tagInstanceCB
+	{
+		_uint			iNumBones;
+		_uint			iNumInstance;
+		_uint			iMaxDepth;
+		_float			fTempFloat;
+	}INSTANCECB;
 
 private:
 	explicit CModelAnim_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -46,6 +59,7 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
+	const vector<_uint>&				Get_MeshOffset() { return m_MeshTypeOffsets; };
 	const _uint							Get_NumInstance() const { return m_iNumInstance; }
 
 #ifdef _DEBUG
@@ -73,25 +87,22 @@ public:
 	HRESULT								Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType);
 	HRESULT								Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect);
 	HRESULT								Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
-	HRESULT								Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
+	HRESULT								Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName);
+	HRESULT								Bind_OffsetMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
+	HRESULT								Bind_ConstantBuffers(class CShader* pShader);
 	HRESULT								Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	//_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
+	
+	//루트모션 & 인스턴스 객체 track 갱신
 	_bool								Update_RootMotion(const _string& strAnimationName, class CTransform* pTransform, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	//충돌 상호작용 이후 최종 매트릭스 업데이트
-	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices);
+	void								Update_AnimationState(const _string& strAnimationName, _fmatrix WorldMatrix, _uint iInstanceIndex, _float* pTrackPosition, _uint* pPaddingIndices = nullptr, _uint iExtra = 0);
 	// Compute Shader
-	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f);
-
-	void								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _uint iInstanceIndex);
-
+	void								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom);
+	void								FetchModelMatrices_FromCompute(class CComputeShader* pComputeShaderCom);
+	void								Update_WorldInstances();
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
 	
-
-
-	void								Ready_BoundingBox(_float* pMinPos, _float* pMaxPos);
-	BoundingBox*						Get_BoundingBox();
 
 	_uint								Get_BoneSize() { return  static_cast<_uint>(m_Bones.size()); }
 	const _float4x4*					Get_BoneMatrixPtr(_uint iBoneIndex);
@@ -111,6 +122,7 @@ private:
 	_float4									m_vPreRootPosition = {};
 	_matrix									m_RootMatrix = {};
 	_uint									m_iRootBoneIndex = {};
+	_uint									m_iNumBones = {};
 	vector<class CBone*>					m_Bones;
 
 	_uint									m_iNumAnimations = {};
@@ -125,8 +137,6 @@ private:
 
 	_uint								m_iNumInstance{};
 
-	BoundingBox*						m_pBoundingBox = { nullptr };
-
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
 	_uint m_iSelectIndex = { 0 };
@@ -137,7 +147,6 @@ private:
 #pragma region Compute Shader
 private:
 	void ApplyComputeResults_ToBones();
-	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
 	void FetchLocalMatrices_FromComputeNonRib(class CComputeShader* pComputeShaderCom);
 
 private:
@@ -150,7 +159,7 @@ private:
 	//인스턴스에 사용되는 매쉬 부위 개수
 	_uint									m_iNumMeshType = {};
 	//메쉬 종류에 따른 패딩 위치
-	vector<_uint>							m_MeshTypeCounts;
+	vector<_uint>							m_MeshTypeOffsets;
 	vector<vector<VTXINSTANCE_ANIMMESH>>		m_pVtxInstanceDatas;
 	_bool m_isRibAnimation = { false };
 
@@ -160,8 +169,9 @@ private:
 	void							Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
 
 private:
-	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex);
+	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex, _bool isFirst, vector<CBone*>& Temp);
 	HRESULT							Ready_Mesh(ifstream& InputFile);
+	HRESULT							Ready_Parts(const _char* pFolderPath, vector<_string>* strMeshTypes, vector<CBone*>& Temp);
 	HRESULT							Ready_Material(const _char* pFilePath);
 	HRESULT							Ready_Animation(const _char* pFilePath);
 
@@ -170,6 +180,7 @@ private:
 
 
 public:
+	//주의사항: 모델이 갖고있는 매쉬가 하나의 파일에서 여러 mesh가 있는 경우는 strMeshTypes = nullptr, 여러 모델 파일을 가져오는 경우 strMeshTypes 각 모델 폴더명 기재
 	static		CModelAnim_Instance*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, _uint iNumInstance, const _char* pFilePath, vector<_string>* strMeshTypes = nullptr);
 	virtual		CComponent*				Clone(void* pArg);
 	virtual		void					Free() override;

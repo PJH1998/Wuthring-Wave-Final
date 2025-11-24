@@ -20,7 +20,7 @@ matrix g_ShadowProjMatrix[4];
 matrix g_ShadowMapViewMatrix;
 matrix g_ShadowMapProjMatrix;
 
-float g_fOutLineRadius = 0.0005f;
+float g_fOutLineRadius = 0.0005;
 float g_fOutLineRadiusZ = 0.0005f;
 
 bool g_HasNormal = false;
@@ -505,7 +505,6 @@ PS_OUT_LIGHT PS_TEST(PS_IN In)
     Out.vPBR.x = g_fGlobalStaticMetallic;
     
     return Out;
-    
 }
 
 technique11 DefaultTechnique

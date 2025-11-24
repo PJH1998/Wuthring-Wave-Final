@@ -797,7 +797,6 @@ void CLevel_Map::Menu_Save_Load()
 						}
                         else
                         {
-
                             CEdit_MapObject::MAP_LOAD Desc{};
 							//경로 돌면서 하나하나 일일히 찾아서 경로 찾은 다음에 있는 거랑 비교한 후 없으면 프로토타입 만들기.
 
@@ -877,6 +876,7 @@ void CLevel_Map::Load_Objects()
     _int Lastversion = {};
     _wstring LastVersionName;
     _string LastVersionPath;
+
 	m_pGameInstance->Load_Resource(m_FolderPath.c_str());
     //마지막 폴더 못읽음. 프로토타입 안생김.
 	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
@@ -1079,53 +1079,8 @@ void CLevel_Map::Ready_Map_Load_Prototype(const _char* pModelName)
 					CRASH("Prototype Create Failed");
 				});
 		}
-
-		//	auto iter = m_szPrototypeName.find(entry.path().string());
-		//	if (iter == m_szPrototypeName.end())
-		//	{
-		//		m_szPrototypeName.insert(entry.path().string());
-
-		//		_char FileDrive[MAX_PATH] = {};
-		//		_char FileDir[MAX_PATH] = {};
-
-		//		_char FileName[MAX_PATH] = {};
-		//		_char FileExt[MAX_PATH] = {};
-		//		_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-
-		//		_string VersionName = FileName;
-
-		//		_string NoVersionName = FileName;
-		//		NoVersionName.pop_back();
-
-		//		//뒤 숫자 떼고 0부터 숫자까지 만들기. 이미 맨 뒤에 .dat 붙어있음.
-
-		//		_uint V = FileName[strlen(FileName) - 1] - '0' + 1;
-
-		//		//for (_uint i = 0; i < V; ++i)
-		//		//{
-		//		//	_wstring PrototypeName = L"Prototype_Component_Model_";
-		//		//	PrototypeName += StringToWString(NoVersionName);
-		//		//	PrototypeName += to_wstring(i);
-
-		//		//	_string VersionPath = FileDir;
-		//		//	VersionPath += NoVersionName;
-		//		//	VersionPath += to_string(i);
-		//		//	VersionPath += ".dat";
-
-		//		//	m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = VersionPath]() {
-		//		//		if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
-		//		//			CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)), Path.c_str()))))
-		//		//			CRASH("Prototype Create Failed");
-		//		//		});
-		//		//}
-		//		break;
-		//	}
-		//}
-		//m_pGameInstance->Wait_Thread_End();
 	}
-	
 	m_pGameInstance->Wait_Thread_End();
-
 	m_pGameInstance->LoadLastLOD();
 }
 

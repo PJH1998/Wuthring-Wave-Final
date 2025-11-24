@@ -74,6 +74,11 @@ HRESULT CEdit_MapObject_Destruction::Initialize_Clone(void* pArg)
 
 		_string ModelName = m_ModelName;
 
+		ModelName.pop_back();
+		ModelName.pop_back();
+		ModelName.pop_back();
+		ModelName.pop_back();
+
 		for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
 		{
 			_string Name = ModelName; // 예: "SM_Sev_Roc_24BS_"

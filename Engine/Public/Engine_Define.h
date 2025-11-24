@@ -19,6 +19,8 @@
 #include "DirectXTK/SpriteFont.h"
 #include "DirectXTK/PrimitiveBatch.h"
 #include "DirectXTK/Effects.h"
+#include "DirectXTK/ScreenGrab.h"
+#include "DirectXTK/DirectXTex.h"
 using namespace DirectX;
 
 // Comptr
@@ -120,6 +122,8 @@ namespace Engine
 	const unsigned int g_iMaxDecal = 128;
 
 	const unsigned int g_iMaxSector = 16;
+
+	const unsigned int g_iEnvMapSize = 512;
 }
 
 #define MAX_RENDER_THREAD 5

@@ -73,6 +73,10 @@ void CGameObject::Render_OutLine()
 {
 }
 
+void CGameObject::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
+{
+}
+
 HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, const _wstring& strComponentTag, CComponent** ppOut, void* pArg)
 {
 	auto iter = m_Components.find(strComponentTag);

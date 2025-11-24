@@ -1,0 +1,55 @@
+﻿#pragma once
+#include "Base.h"
+
+NS_BEGIN(Engine)
+
+class CGameInstance;
+class CProbe;
+class CGameObject;
+class CStaticObject;
+class CShader;
+class CVIBuffer_Rect;
+
+class CEnvironmentMap final : public CBase
+{
+private:
+	CEnvironmentMap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual ~CEnvironmentMap() = default;
+
+public:
+	HRESULT						Initialize();
+	HRESULT						Add_Probe(_float3 vCenter, _float fRange);
+	void						Bake_EnvMaps();
+	ID3D11ShaderResourceView*	Get_EnvMap(_uint iIndex);
+	void						Add_EnvMap_SkyBox(CGameObject* pSkyBox);
+	void						Add_EnvMap_StaticObject(CStaticObject* pStaticObject);
+
+	void						Clear();
+
+private:
+	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
+	CGameInstance*				m_pGameInstance = { nullptr };
+
+	vector<CProbe*>				m_Probes;
+	CShader*					m_pShader = { nullptr };
+	CVIBuffer_Rect*				m_pVIBuffer_Rect = { nullptr };
+
+	// Deferred Matrix
+	_float4x4					m_WorldMatrix = {};
+	_float4x4					m_ViewMatrix = {};
+	_float4x4					m_ProjMatrix = {};
+
+	_uint						m_iIndex = {};
+
+private:
+	HRESULT						Ready_Components();
+	HRESULT						Ready_MRT();
+	HRESULT						Ready_RT();
+
+public:
+	static CEnvironmentMap* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual void			Free() override;
+};
+
+NS_END
