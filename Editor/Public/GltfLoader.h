@@ -58,6 +58,13 @@ private:
 	aiMesh* FindMeshByMorphChannelName(const aiString& strMorphChannelName); // 메쉬 찾기 함수
 	aiNode* Find_Node(aiNode* pNode, const _string& strNodeName);
 
+	void   Write_Channels(uint iIndex, ofstream& file, const aiAnimation* pAnimation, _float fTimeScale);
+
+private:
+	_float4 GetRotationAtTime(aiNodeAnim* pNodeAnim, _float fTime);
+	_float3 GetPositionAtTime(aiNodeAnim* pNodeAnim, _float fTime);
+	_float3 GetScaleAtTime(aiNodeAnim* pNodeAnim, _float fTime);
+
 private:
 	HRESULT				Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType);
 	HRESULT				Save_Bone(ofstream& OutPut, const aiNode* pNode);

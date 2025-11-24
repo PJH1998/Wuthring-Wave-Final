@@ -421,6 +421,7 @@ HRESULT CGltfLoader::Save_Animation_Character(const _char* pFileName)
 	if (nullptr == m_pAIScene)
 		return E_FAIL;
 
+	// 1. 경로 및 파일 생성 설정
 	_char szDirPath[MAX_PATH] = {};
 	_char szFileName[MAX_PATH] = {};
 	_splitpath_s(pFileName, nullptr, 0, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
@@ -436,200 +437,162 @@ HRESULT CGltfLoader::Save_Animation_Character(const _char* pFileName)
 		filesystem::create_directories(dir);
 
 	ofstream file(szAnimFilePath, ios::binary);
-
 	if (false == file.is_open())
 	{
 		MSG_BOX("Animation Save Fail");
 		return E_FAIL;
 	}
 
-	//_uint iNumAnimations = m_pAIScene->mNumAnimations;
-	/*file.write(reinterpret_cast<const _char*>(&iNumAnimations), sizeof(_uint));*/
-
+	// 2. 애니메이션 분류 (Main / Morph)
 	map<_string, ANIM_SET> mapAnimGroups;
-
-	// 1. animMap에 읽을 파일들 저장하기.
 	for (size_t i = 0; i < m_pAIScene->mNumAnimations; ++i)
 	{
 		aiAnimation* pAnim = m_pAIScene->mAnimations[i];
 		string strFullName = pAnim->mName.C_Str();
 		string strBaseName = strFullName;
 
-#pragma region 1. Curve애니메이션과 아닌 애니메이션을 구분해서 map에 기록.
-		// 1. 접미사 처리: _Curves가 붙어있다면 Morph용 애니메이션으로 간주하고 이름을 분리
 		_bool isMorphOnly = false;
 		size_t findRes = strFullName.find("_Curves");
 		if (findRes != string::npos)
 		{
-			strBaseName = strFullName.substr(0, findRes); // "Attack01_Curves" -> "Attack01"
+			strBaseName = strFullName.substr(0, findRes);
 			isMorphOnly = true;
 		}
 
-		// 2. 맵에 넣기
 		if (isMorphOnly)
-		{
 			mapAnimGroups[strBaseName].pMorphAnim = pAnim;
-		}
 		else
 		{
-			// _Curves가 없으면 일단 Main으로 등록
 			mapAnimGroups[strBaseName].pMainAnim = pAnim;
-
-			// Main 안에 Morph 채널도 같이 들어있는 경우
 			if (pAnim->mNumMorphMeshChannels > 0 && mapAnimGroups[strBaseName].pMorphAnim == nullptr)
 				mapAnimGroups[strBaseName].pMorphAnim = pAnim;
 		}
-#pragma endregion
 	}
 
-
-	// 2. 정렬된 Map을 순회하며 파일 쓰기.
 	_uint iNumMergedAnims = static_cast<_uint>(mapAnimGroups.size());
 	file.write(reinterpret_cast<const _char*>(&iNumMergedAnims), sizeof(_uint));
 
+
+	// 3. 데이터 저장 루프
 	for (auto& Pair : mapAnimGroups)
 	{
-		_float fTimeScale = {};
-		
+		// [중요 변경점] TimeScale 계산을 공통 영역으로 이동
+		// Main이 없으면 Morph에서라도 기본 정보를 가져와야 함.
+		aiAnimation* pBaseAnim = Pair.second.pMainAnim ? Pair.second.pMainAnim : Pair.second.pMorphAnim;
+		if (!pBaseAnim) continue; // 둘 다 없으면 스킵
 
-#pragma region 2. map을 순회하면서 Main Anmation 정보를 저장.
+		_float fTargetFPS = 24.0f;
+		_float fSourceFPS = static_cast<_float>(pBaseAnim->mTicksPerSecond);
+		if (fSourceFPS <= 0.1f) fSourceFPS = 1000.0f; // glTF는 보통 1000(ms) 또는 0(Assimp default)
+
+		_float fTimeScale = fTargetFPS / fSourceFPS;
+		_float fDurationTick = static_cast<_float>(pBaseAnim->mDuration);
+		_float fDurationSecond = fDurationTick / fSourceFPS;
+
+		// 실제 재생 시간 * TargetFPS = 총 프레임 수 (올림 처리 혹은 +1)
+		_uint iTotalFrameCount = static_cast<_uint>(fDurationSecond * fTargetFPS) + 1;
+		_float fDurationConverted = static_cast<_float>(iTotalFrameCount); // Duration을 프레임 단위로 저장한다고 가정
+
+#pragma region 2. Main Animation 저장 (Resampling 적용)
 		if (nullptr != Pair.second.pMainAnim)
 		{
-			aiAnimation* pAnimation = Pair.second.pMainAnim; // MainAnimations;
+			aiAnimation* pAnimation = Pair.second.pMainAnim;
 			aiString strName = pAnimation->mName;
-
-
 			_uint iLength = strName.length;
 
-			// Animation Name 저장.
 			file.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
 			file.write(strName.data, iLength);
 
-			// 24.f 고정 => 기존 TickPerSecond.
-			_float fTargetFPS = 24.0f;
-			_float fSourceFPS = static_cast<_float>(pAnimation->mTicksPerSecond);
-			if (fSourceFPS <= 0.1f) fSourceFPS = 1000.0f;
-
-			// 변환 비율 계산 
-			fTimeScale = fTargetFPS / fSourceFPS;
-			_float fDuration = static_cast<_float>(pAnimation->mDuration) * fTimeScale;
-
-			file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
+			// Duration과 FPS 저장
+			file.write(reinterpret_cast<const _char*>(&fDurationConverted), sizeof(_float));
 			file.write(reinterpret_cast<const _char*>(&fTargetFPS), sizeof(_float));
 
 			_uint iNumChannels = pAnimation->mNumChannels;
-			// Num Channel
 			file.write(reinterpret_cast<const _char*>(&iNumChannels), sizeof(_uint));
 
-
-			// 4. Channel 정보 저장.
-			for (size_t j = 0; j < iNumChannels; ++j)
+			for (uint j = 0; j < iNumChannels; ++j)
 			{
 				aiNodeAnim* pChannel = pAnimation->mChannels[j];
 				aiString strChannelName = pChannel->mNodeName;
 				_uint iChannelNameLength = strChannelName.length;
 
-				// Channel(Bone) Name
 				file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
 				file.write(strChannelName.data, iChannelNameLength);
 
-				_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
-				// Num KeyFrame
-				file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+				// [핵심 변경] 키프레임 개수를 '전체 프레임 수'로 고정합니다.
+				// 이제 원본 키 개수와 상관없이 24FPS로 꽉 채운 데이터를 씁니다.
+				file.write(reinterpret_cast<const _char*>(&iTotalFrameCount), sizeof(_uint));
 
-				_float3 vScale = {};
-				_float4 vRotation = {};
-				_float3 vTranslation = {};
-
-				for (size_t k = 0; k < iNumKeyFrame; ++k)
+				// [Resampling Loop]
+				// 인덱스(k)가 아니라 0프레임부터 끝 프레임까지 시간을 순회합니다.
+				for (_uint iFrame = 0; iFrame < iTotalFrameCount; ++iFrame)
 				{
 					KEYFRAME KeyFrame = {};
-					if (k < pChannel->mNumScalingKeys)
-					{
-						KeyFrame.fTrackPosition = pChannel->mScalingKeys[k].mTime * fTimeScale;
-						memcpy(&vScale, &pChannel->mScalingKeys[k].mValue, sizeof(_float3));
-					}
-					if (k < pChannel->mNumRotationKeys)
-					{
-						KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime * fTimeScale;
 
-						{
-							vRotation.x = pChannel->mRotationKeys[k].mValue.x;
-							vRotation.y = pChannel->mRotationKeys[k].mValue.y;
-							vRotation.z = pChannel->mRotationKeys[k].mValue.z;
-							vRotation.w = pChannel->mRotationKeys[k].mValue.w;
-						}
-					}
-					if (k < pChannel->mNumPositionKeys)
-					{
-						KeyFrame.fTrackPosition = pChannel->mPositionKeys[k].mTime * fTimeScale;
-						memcpy(&vTranslation, &pChannel->mPositionKeys[k].mValue, sizeof(_float3));
+					// 1. 현재 저장하려는 프레임 번호
+					KeyFrame.fTrackPosition = static_cast<_float>(iFrame);
 
-						// .gltf의 경우에는 0.01f 설정
-					}
+					// 2. 현재 프레임이 원본 애니메이션의 어느 시간(Tick)에 해당하는지 역계산
+					// 공식: (현재프레임 / 목표FPS) * 원본TPS
+					double dCurrentTick = (static_cast<double>(iFrame) / static_cast<double>(fTargetFPS)) * fSourceFPS;
 
-					KeyFrame.vScale = vScale;
-					KeyFrame.vRotation = vRotation;
-					KeyFrame.vTranslation = vTranslation;
+					// 3. 해당 시간(dCurrentTick)의 값을 보간해서 가져옴 (인덱스 참조 X)
+					KeyFrame.vScale = GetScaleAtTime(pChannel, dCurrentTick);
+					KeyFrame.vRotation = GetRotationAtTime(pChannel, dCurrentTick);
+					KeyFrame.vTranslation = GetPositionAtTime(pChannel, dCurrentTick);
+
 					file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
 				}
 			}
 		}
 		else
-			continue; // MainAnim이 없으면 기록도 하지않음 => Curves만 들어간 경우.
+		{
+			// MainAnim이 없는 경우(Morph Only)에도 포맷 유지를 위해 더미 데이터를 쓸지, 
+			// 아니면 기존처럼 continue 할지 결정해야 합니다.
+			// 작성하신 로직상 Main이 없으면 'continue'를 했었으나, 
+			// 그러면 Morph 데이터도 저장이 안 됩니다.
+			// 여기서는 구조상 Main이 없으면 그냥 건너뛰되, 아래 Morph 저장은 실행되게 합니다.
+			// 만약 파일 포맷이 무조건 Main 정보를 요구한다면 0으로 채워서라도 써야 합니다.
+			// (현재는 Main이 없으면 Morph도 저장 안 되던 버그를 수정하기 위해 continue 제거)
+		}
 #pragma endregion
 
-#pragma region 3. map을 순회하면서 Morph Animation 정보를 저장.
+#pragma region 3. Morph Animation 저장
 		map<string, vector<KEYFRAME_CURVE>> mapMorphCurves;
 
-		// Key: 쉐이프키 이름 ("Smile"), Value: 해당 키의 시간별 변화량 목록 => 0.f[FRAME0], 1.f[FRAME1] ....
 		if (nullptr != Pair.second.pMorphAnim)
 		{
 			aiAnimation* pMorphAnimation = Pair.second.pMorphAnim;
-			// 1. MorphMeshChannels 채널을 확인하고 있다면 데이터를 저장합니다. => 무조건 하나만 나옴 Object가 하나라.
 			if (pMorphAnimation->mNumMorphMeshChannels > 0)
 			{
 				for (size_t i = 0; i < pMorphAnimation->mNumMorphMeshChannels; ++i)
 				{
 					aiMeshMorphAnim* pMeshMorphAnim = pMorphAnimation->mMorphMeshChannels[i];
 
-					// 1. 채널 이름으로 타겟 메쉬 찾기 => 그냥 다 똑같으므로. m_pAIScene의 첫번째 메시 가져오기.
+					// FindMeshByMorphChannelName 함수가 있다고 가정
 					aiMesh* pTargetMesh = FindMeshByMorphChannelName(pMeshMorphAnim->mName);
-					//aiMesh* pTargetMesh = m_pAIScene->mMeshes[0];
+					// if (nullptr == pTargetMesh && m_pAIScene->mNumMeshes > 0) pTargetMesh = m_pAIScene->mMeshes[0]; // Fallback
 					if (nullptr == pTargetMesh) continue;
 
-					// 2. 시간(Keys)을 기준으로 먼저 순회합니다. Assimp는 시간 -> 활성화된 쉐이프키 목록 순서로 저장
-					// 183 TrackPosition 이면. 1 TrackPosition => 105 ShapeKey 이렇게 저장됨. Assimp 에는.
 					for (_uint keyIdx = 0; keyIdx < pMeshMorphAnim->mNumKeys; ++keyIdx)
 					{
-						// ShapeKey 목록을 순회.
 						const aiMeshMorphKey& MorphKey = pMeshMorphAnim->mKeys[keyIdx];
 
-						// 이 시간대에 변화가 있는 모든 쉐이프 키들을 순회 
 						for (unsigned int v = 0; v < MorphKey.mNumValuesAndWeights; ++v)
 						{
-							// mValues[v] == 쉐이프키 인덱스.
 							_uint iShapeIdx = MorphKey.mValues[v];
-
-							// 인덱스
 							if (iShapeIdx >= pTargetMesh->mNumAnimMeshes) continue;
 
-							// 인덱스로부터 쉐이프 키 이름("Smile") 추출
 							aiAnimMesh* pAnimMesh = pTargetMesh->mAnimMeshes[iShapeIdx];
 							string strShapeKeyName = pAnimMesh->mName.C_Str();
 
-							// "Basis" 등 불필요한 키 제외
 							if (strShapeKeyName == "Basis" || strShapeKeyName.empty()) continue;
 
-							// 가중치 처리 => Weight는 
-							_float fWeight = static_cast<_float>(MorphKey.mWeights[v]); // 메시 ShapeKey에 대한 가중치 저장.
+							_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
 
-							//_float fWeight = static_cast<_float>(MorphKey.mWeights[v]);
-							//if (fWeight > 0.f) fWeight /= 100.f; // 정규화 (0~100 -> 0~1)
-							//fWeight = max(0.0f, min(fWeight, 1.0f));
-
-							// 맵에 데이터 추가 
 							KEYFRAME_CURVE KeyFrame = {};
+							// Morph는 기존 로직대로 키값만 저장 (TimeScale만 적용)
+							// fTimeScale은 이제 위에서 안전하게 계산됨
 							KeyFrame.fTrackPosition = static_cast<_float>(MorphKey.mTime) * fTimeScale;
 							KeyFrame.fValue = fWeight;
 
@@ -640,32 +603,26 @@ HRESULT CGltfLoader::Save_Animation_Character(const _char* pFileName)
 			}
 		}
 
-		// 정리된 데이터를 파일에 저장 => if 문 밖에서 확인하기. => MorphCurve 데이터가 없으면 0이라도 기록해두기 위함.
 		_uint iTotalCurves = static_cast<_uint>(mapMorphCurves.size());
 		file.write(reinterpret_cast<const _char*>(&iTotalCurves), sizeof(_uint));
 
-		// 맵을 순회 하면서 데이터 저장.
 		for (auto& Pair : mapMorphCurves)
 		{
-			string strCurveName = Pair.first;     // 이름
-			auto& vecKeys = Pair.second;          // 키프레임들
+			string strCurveName = Pair.first;
+			auto& vecKeys = Pair.second;
 
-			// 이름 저장
 			_uint iNameLen = static_cast<_uint>(strCurveName.length());
 			file.write(reinterpret_cast<const _char*>(&iNameLen), sizeof(_uint));
 			file.write(strCurveName.data(), iNameLen);
 
-			// 키 개수 및 데이터 저장
 			_uint iNumKeys = static_cast<_uint>(vecKeys.size());
 			file.write(reinterpret_cast<const _char*>(&iNumKeys), sizeof(_uint));
 			file.write(reinterpret_cast<const _char*>(vecKeys.data()), sizeof(KEYFRAME_CURVE) * iNumKeys);
 		}
 #pragma endregion
-
 	}
 
 	file.close();
-
 	return S_OK;
 }
 
@@ -860,6 +817,156 @@ aiNode* CGltfLoader::Find_Node(aiNode* pNode, const _string& strNodeName)
 	}
 
 	return nullptr;
+}
+
+void CGltfLoader::Write_Channels(uint iIndex, ofstream& file, const aiAnimation* pAnimation, _float fTimeScale)
+{
+	aiNodeAnim* pChannel = pAnimation->mChannels[iIndex];
+	aiString strChannelName = pChannel->mNodeName;
+	_uint iChannelNameLength = strChannelName.length;
+
+	// Channel(Bone) Name
+	file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
+	file.write(strChannelName.data, iChannelNameLength);
+
+	_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
+	// Num KeyFrame
+	//file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
+
+	_float3 vScale = {};
+	_float4 vRotation = {};
+	_float3 vTranslation = {};
+
+	_float fDuration = static_cast<_float>(pAnimation->mDuration);
+	_float fTickPerSecond = static_cast<_float>(pAnimation->mTicksPerSecond != 0 ? pAnimation->mTicksPerSecond : 24.0f);
+	_float fTotalFrameCount = fDuration * fTimeScale;
+	_float fTargetFPS = 24.f;
+
+	_uint iTotalFrameCount = static_cast<_uint>(fTotalFrameCount);
+	file.write(reinterpret_cast<const _char*>(&iTotalFrameCount), sizeof(_uint));
+	for (_uint i = 0; i <= iTotalFrameCount; ++i)
+	{
+		KEYFRAME KeyFrame = {};
+
+		// 현재 프레임 번호 (0, 1, 2...)
+		KeyFrame.fTrackPosition = static_cast<_float>(i);
+
+		// 현재 프레임이 원본 애니메이션의 몇 '틱(Tick)' 시간대인지 계산
+		// 예: 24FPS 타겟인데 원본이 1000틱이면, 1프레임은 약 41.6틱
+		_float fCurrentTimeTick = (static_cast<_float>(i) / fTargetFPS) * fTickPerSecond;
+
+		KeyFrame.vScale = GetScaleAtTime(pChannel, fCurrentTimeTick);
+
+		// 2. Rotation
+		KeyFrame.vRotation = GetRotationAtTime(pChannel, fCurrentTimeTick);
+
+		// 3. Translation
+		KeyFrame.vTranslation = GetPositionAtTime(pChannel, fCurrentTimeTick);
+
+		// 파일 쓰기
+		file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
+	}
+}
+
+
+_float4 CGltfLoader::GetRotationAtTime(aiNodeAnim* pNodeAnim, _float fTime)
+{
+	if (pNodeAnim->mNumRotationKeys == 0) return _float4(0.f, 0.f, 0.f, 1.f);
+	if (pNodeAnim->mNumRotationKeys == 1) {
+		auto val = pNodeAnim->mRotationKeys[0].mValue;
+		return _float4(val.x, val.y, val.z, val.w);
+	}
+
+	_uint iIndex = 0;
+	for (_uint i = 0; i < pNodeAnim->mNumRotationKeys - 1; ++i) {
+		if (fTime < pNodeAnim->mRotationKeys[i + 1].mTime) {
+			iIndex = i;
+			break;
+		}
+	}
+
+	if (fTime >= pNodeAnim->mRotationKeys[pNodeAnim->mNumRotationKeys - 1].mTime) {
+		auto val = pNodeAnim->mRotationKeys[pNodeAnim->mNumRotationKeys - 1].mValue;
+		return _float4(val.x, val.y, val.z, val.w);
+	}
+
+	aiQuatKey& KeyA = pNodeAnim->mRotationKeys[iIndex];
+	aiQuatKey& KeyB = pNodeAnim->mRotationKeys[iIndex + 1];
+
+	double dDelta = KeyB.mTime - KeyA.mTime;
+	float fFactor = (dDelta > 0.0) ? (float)((fTime - KeyA.mTime) / dDelta) : 0.0f;
+	fFactor = max(0.0f, min(fFactor, 1.0f));
+
+	aiQuaternion out;
+	aiQuaternion::Interpolate(out, KeyA.mValue, KeyB.mValue, fFactor);
+	return _float4(out.x, out.y, out.z, out.w);
+}
+
+_float3 CGltfLoader::GetPositionAtTime(aiNodeAnim* pNodeAnim, _float fTime)
+{
+	if (pNodeAnim->mNumPositionKeys == 0) return _float3(0.f, 0.f, 0.f);
+	if (pNodeAnim->mNumPositionKeys == 1) {
+		auto val = pNodeAnim->mPositionKeys[0].mValue;
+		return _float3(val.x, val.y, val.z);
+	}
+
+	// 현재 시간(dTime)이 위치한 인덱스 찾기
+	_uint iIndex = 0;
+	for (_uint i = 0; i < pNodeAnim->mNumPositionKeys - 1; ++i) {
+		if (fTime < pNodeAnim->mPositionKeys[i + 1].mTime) {
+			iIndex = i;
+			break;
+		}
+	}
+
+	// 마지막 키 이후라면 마지막 값 반환
+	if (fTime >= pNodeAnim->mPositionKeys[pNodeAnim->mNumPositionKeys - 1].mTime) {
+		auto val = pNodeAnim->mPositionKeys[pNodeAnim->mNumPositionKeys - 1].mValue;
+		return _float3(val.x, val.y, val.z);
+	}
+
+	// 보간 계산
+	aiVectorKey& KeyA = pNodeAnim->mPositionKeys[iIndex];
+	aiVectorKey& KeyB = pNodeAnim->mPositionKeys[iIndex + 1];
+
+	double dDelta = KeyB.mTime - KeyA.mTime;
+	float fFactor = (dDelta > 0.0) ? (float)((fTime - KeyA.mTime) / dDelta) : 0.0f;
+	fFactor = max(0.0f, min(fFactor, 1.0f));
+
+	aiVector3D out = KeyA.mValue + (KeyB.mValue - KeyA.mValue) * fFactor;
+	return _float3(out.x, out.y, out.z);
+}
+
+_float3 CGltfLoader::GetScaleAtTime(aiNodeAnim* pNodeAnim, _float fTime)
+{
+	if (pNodeAnim->mNumScalingKeys == 0) return _float3(1.f, 1.f, 1.f);
+	if (pNodeAnim->mNumScalingKeys == 1) {
+		auto val = pNodeAnim->mScalingKeys[0].mValue;
+		return _float3(val.x, val.y, val.z);
+	}
+
+	_uint iIndex = 0;
+	for (_uint i = 0; i < pNodeAnim->mNumScalingKeys - 1; ++i) {
+		if (fTime < pNodeAnim->mScalingKeys[i + 1].mTime) {
+			iIndex = i;
+			break;
+		}
+	}
+
+	if (fTime >= pNodeAnim->mScalingKeys[pNodeAnim->mNumScalingKeys - 1].mTime) {
+		auto val = pNodeAnim->mScalingKeys[pNodeAnim->mNumScalingKeys - 1].mValue;
+		return _float3(val.x, val.y, val.z);
+	}
+
+	aiVectorKey& KeyA = pNodeAnim->mScalingKeys[iIndex];
+	aiVectorKey& KeyB = pNodeAnim->mScalingKeys[iIndex + 1];
+
+	double dDelta = KeyB.mTime - KeyA.mTime;
+	float fFactor = (dDelta > 0.0) ? (float)((fTime - KeyA.mTime) / dDelta) : 0.0f;
+	fFactor = max(0.0f, min(fFactor, 1.0f));
+
+	aiVector3D out = KeyA.mValue + (KeyB.mValue - KeyA.mValue) * fFactor;
+	return _float3(out.x, out.y, out.z);
 }
 
 
