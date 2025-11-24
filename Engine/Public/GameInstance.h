@@ -156,7 +156,7 @@ public:
 	void					Set_Active(const _wstring& strLightTag, _bool isActive);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
-	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, class BoundingBox* pBounding);
+	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
 #endif

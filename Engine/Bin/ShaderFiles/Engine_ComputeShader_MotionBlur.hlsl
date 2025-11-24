@@ -33,41 +33,44 @@ float4 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
 {
     float4 vVelocity = 0.f;
     
-    int iSampleX0 = min(vIndex.x, vVelocitySize.x - 1);
-    int iSampleX1 = min(vIndex.x + 1, vVelocitySize.x - 1);
+    //int iSampleX0 = min(vIndex.x, vVelocitySize.x - 1);
+    //int iSampleX1 = min(vIndex.x + 1, vVelocitySize.x - 1);
     
-    int iSampleY0 = min(vIndex.y, vVelocitySize.y - 1);
-    int iSampleY1 = min(vIndex.y + 1, vVelocitySize.y - 1);
+    //int iSampleY0 = min(vIndex.y, vVelocitySize.y - 1);
+    //int iSampleY1 = min(vIndex.y + 1, vVelocitySize.y - 1);
     
-    float4 Vector[4];
+    //float4 Vector[4];
     
-    Vector[0] = VelocityMap.Load(int3(iSampleX0, iSampleY0, 0));
-    Vector[1] = VelocityMap.Load(int3(iSampleX1, iSampleY0, 0));
-    Vector[2] = VelocityMap.Load(int3(iSampleX0, iSampleY1, 0));
-    Vector[3] = VelocityMap.Load(int3(iSampleX1, iSampleY1, 0));
+    //Vector[0] = VelocityMap.Load(int3(iSampleX0, iSampleY0, 0));
+    //Vector[1] = VelocityMap.Load(int3(iSampleX1, iSampleY0, 0));
+    //Vector[2] = VelocityMap.Load(int3(iSampleX0, iSampleY1, 0));
+    //Vector[3] = VelocityMap.Load(int3(iSampleX1, iSampleY1, 0));
    
-    float fMaxLength = 0.f;
+    //float fMaxLength = 0.f;
 
-    for (int i = 0; i < 4; ++i)
-    {
-        float fLength = length(Vector[i].xy);
+    //for (int i = 0; i < 4; ++i)
+    //{
+    //    float fLength = length(Vector[i].xy);
 
-        if(fLength == 0.f)
-            return 0.f;
+    //    if(fLength == 0.f)
+    //        return 0.f;
             
-        if(fLength > fMaxLength)
-        {
-            fMaxLength = fLength;
-            vVelocity = Vector[i];
-        }
-    }
+    //    if(fLength > fMaxLength)
+    //    {
+    //        fMaxLength = fLength;
+    //        vVelocity = Vector[i];
+    //    }
+    //}
+   
+    vVelocity = VelocityMap.Load(int3(vIndex, 0));
    
     return vVelocity;
 }
 
 float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
 {
-    int2 iIndex = DTID.xy * 2;
+    //int2 iIndex = DTID.xy * 2;
+    int2 iIndex = DTID.xy;
     
     float4 vVelocity = Compute_Velocity(iIndex, vOutSize);
     
@@ -146,7 +149,7 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     return vFinalColor;
 }
 
-groupshared float4 vSharedMotionColor[THREAD_Y + 1][THREAD_X + 1];
+//groupshared float4 vSharedMotionColor[THREAD_Y + 1][THREAD_X + 1];
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void Motion_Blur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
@@ -159,71 +162,74 @@ void Motion_Blur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
     
     GroupMemoryBarrierWithGroupSync();
     
-    vSharedMotionColor[GTID.y][GTID.x] = ComputeMotionBlur(DTID, vInSize, vOutSize);
+    
+    OutputTexture[DTID.xy] = ComputeMotionBlur(DTID, vInSize, vOutSize);
+    
+    //vSharedMotionColor[GTID.y][GTID.x] = ComputeMotionBlur(DTID, vInSize, vOutSize);
 
-    if (GTID.y  == THREAD_Y - 1)
-    {
-        int3 OffsetID = int3(DTID.x, DTID.y + 1, 0);
-        if (OffsetID.y >= (int) vInSize.y)
-            OffsetID.y = (int) vInSize.y - 1;
+    //if (GTID.y >= THREAD_Y - 1)
+    //{
+    //    int3 OffsetID = int3(DTID.x, DTID.y + 1, 0);
+    //    if (OffsetID.y >= (int) vInSize.y)
+    //        OffsetID.y = (int) vInSize.y - 1;
             
-        vSharedMotionColor[GTID.y + 1][GTID.x] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
-    }
+    //    vSharedMotionColor[GTID.y + 1][GTID.x] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
+    //}
     
-    if (GTID.x >= THREAD_X - 1)
-    {
-        int3 OffsetID = int3(DTID.x + 1, DTID.y, 0);
-        if (OffsetID.x >= (int) vInSize.x)
-            OffsetID.x = (int) vInSize.x - 1;
+    //if (GTID.x >= THREAD_X - 1)
+    //{
+    //    int3 OffsetID = int3(DTID.x + 1, DTID.y, 0);
+    //    if (OffsetID.x >= (int) vInSize.x)
+    //        OffsetID.x = (int) vInSize.x - 1;
             
-        vSharedMotionColor[GTID.y][GTID.x + 1] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
-    }
+    //    vSharedMotionColor[GTID.y][GTID.x + 1] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
+    //}
     
-    if (GTID.x >= THREAD_X - 1 && GTID.y >= THREAD_Y -1 )
-    {
-        int3 OffsetID = int3(DTID.x + 1, DTID.y + 1, 0);
+    //if (GTID.x >= THREAD_X - 1 && GTID.y >= THREAD_Y -1 )
+    //{
+    //    int3 OffsetID = int3(DTID.x + 1, DTID.y + 1, 0);
         
-        if (OffsetID.x >= (int) vInSize.x)
-            OffsetID.x = (int) vInSize.x - 1;
+    //    if (OffsetID.x >= (int) vInSize.x)
+    //        OffsetID.x = (int) vInSize.x - 1;
             
-        if (OffsetID.y >= (int) vInSize.y)
-            OffsetID.y = (int) vInSize.y - 1;
+    //    if (OffsetID.y >= (int) vInSize.y)
+    //        OffsetID.y = (int) vInSize.y - 1;
             
-        vSharedMotionColor[GTID.y + 1][GTID.x + 1] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
-    }
+    //    vSharedMotionColor[GTID.y + 1][GTID.x + 1] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
+    //}
     
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
     
-    for (int i = 0; i < 4; i++)
-    {   
-        int2 OutIndex = DTID.xy * 2;
+    //for (int i = 0; i < 4; i++)
+    //{   
+    //    int2 OutIndex = DTID.xy * 2;
  
-        int2 Offset = int2(i % 2, clamp(i - 1, 0, 1));
+    //    int2 Offset = int2(i % 2, clamp(i - 1, 0, 1));
         
-        OutIndex += Offset;
+    //    OutIndex += Offset;
        
-        float2 vLowPos = (OutIndex + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
+    //    float2 vLowPos = (OutIndex + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
         
-        int2 iLowID = (int2) floor(vLowPos);
-        float2 fFrac = vLowPos - (float2) iLowID;
+    //    int2 iLowID = (int2) floor(vLowPos);
+    //    float2 fFrac = vLowPos - (float2) iLowID;
         
-        float4 vColor = 0.f;
+    //    float4 vColor = 0.f;
         
-        int2 vTexcoord = iLowID - (GroupID.xy * int2(THREAD_X, THREAD_Y));
-       
-        int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X); //min(iLowID.x, THREAD_X + 1);
-        int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X); //min(iLowID.x + 1, THREAD_X + 1);
+    //    int2 vTexcoord = iLowID - (GroupID.xy * int2(THREAD_X, THREAD_Y));
+        
+    //    int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X + 1);
+    //    int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X + 1);
     
-        int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y); //min(iLowID.y, THREAD_Y + 1);
-        int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y); //min(iLowID.y + 1, THREAD_Y + 1);
+    //    int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y + 1);
+    //    int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y + 1);
        
-        float4 vLT = vSharedMotionColor[iSampleY0][iSampleX0];
-        float4 vRT = vSharedMotionColor[iSampleY0][iSampleX1];
-        float4 vLB = vSharedMotionColor[iSampleY1][iSampleX0];
-        float4 vRB = vSharedMotionColor[iSampleY1][iSampleX1];
+    //    float4 vLT = vSharedMotionColor[iSampleY0][iSampleX0];
+    //    float4 vRT = vSharedMotionColor[iSampleY0][iSampleX1];
+    //    float4 vLB = vSharedMotionColor[iSampleY1][iSampleX0];
+    //    float4 vRB = vSharedMotionColor[iSampleY1][iSampleX1];
     
-        vColor = lerp(lerp(vLT, vRT, fFrac.x), lerp(vLB, vRB, fFrac.x), fFrac.y);
+    //    vColor = lerp(lerp(vLT, vRT, fFrac.x), lerp(vLB, vRB, fFrac.x), fFrac.y);
         
-        OutputTexture[OutIndex] = vColor;
-    }
+    //    OutputTexture[OutIndex] = vColor;
+    //}
 }

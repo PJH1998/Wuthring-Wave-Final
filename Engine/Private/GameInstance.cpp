@@ -158,7 +158,6 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 	
-
 	m_pObject_Manager->Update(fTimeDelta);
 
 	m_pCamera_Manager->Update(fTimeDelta);
@@ -1134,6 +1133,10 @@ void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffse
 {
 	m_pSFX_Hub->Set_SSR(fMinStep, fMaxStep, fStartOffset);
 }
+#endif
+#pragma endregion
+
+#pragma region ENVIRONMENT_MAP
 HRESULT CGameInstance::Add_Probe(_float3 vCenter, _float fRange)
 {
 	return m_pEnvMap->Add_Probe(vCenter, fRange);
@@ -1154,7 +1157,6 @@ HRESULT CGameInstance::Bind_EnvMapDatas(CShader* pShader, const _char* pTextureN
 {
 	return m_pEnvMap->Bind_EnvMapDatas(pShader, pTextureName, pBufferName, pHasEnvMapName, pNumEnvMapName);
 }
-#endif
 #pragma endregion
 
 #pragma region RESOURCE_MANAGER
@@ -1167,7 +1169,6 @@ ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResource
 	return m_pResource_Manager->Get_Resource(strResourceTag);
 }
 #pragma endregion
-
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {
