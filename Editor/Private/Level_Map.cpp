@@ -345,10 +345,10 @@ void CLevel_Map::Menu_Model_Load()
 
 			if (ImGui::Selectable(FileName))
 			{
-				auto iter = m_szPrototypeName.find(m_ModelPaths[i]);
+				auto iter = m_szPrototypeName.find(FileDir);
 				if (iter == m_szPrototypeName.end())
 				{
-					m_szPrototypeName.insert(m_ModelPaths[i]);
+					m_szPrototypeName.insert(FileDir);
 
 					_string NoVersionName = FileName;
 					NoVersionName.pop_back();
@@ -951,7 +951,7 @@ void CLevel_Map::Load_Objects()
 					auto iter = m_szPrototypeName.find(WStringToString(ProtoName));
 					if (iter != m_szPrototypeName.end())
 						continue;
-					m_szPrototypeName.insert(WStringToString(ProtoName));
+					m_szPrototypeName.insert(FileDir);
 					m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
 							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str(),true))))
@@ -1058,10 +1058,10 @@ void CLevel_Map::Ready_Map_Load_Prototype()
 			continue;
 		m_Test.insert(FileDir);
 
-		auto iter = m_szPrototypeName.find(entry.path().string());
+		auto iter = m_szPrototypeName.find(FileDir);
 		if (iter == m_szPrototypeName.end())
 		{
-			m_szPrototypeName.insert(entry.path().string());
+			m_szPrototypeName.insert(FileDir);
 
 
 
