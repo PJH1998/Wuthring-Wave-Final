@@ -220,7 +220,7 @@ void CAnimationActor::Render()
 		Render_Default();
 
 #ifdef _DEBUG
-	Print_WorldMatrix();
+	//Print_WorldMatrix();
 #endif // _DEBUG
 }
 
