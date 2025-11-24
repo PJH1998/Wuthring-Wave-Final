@@ -875,8 +875,8 @@ void CLevel_Map::Load_Objects()
     _int Lastversion = {};
     _wstring LastVersionName;
     _string LastVersionPath;
-	_string Test = m_FolderPath + "Textures";
-	m_pGameInstance->Load_Resource(Test.c_str());
+
+	m_pGameInstance->Load_Resource(m_FolderPath.c_str());
     //마지막 폴더 못읽음. 프로토타입 안생김.
 	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
 		if (entry.is_regular_file()) {
