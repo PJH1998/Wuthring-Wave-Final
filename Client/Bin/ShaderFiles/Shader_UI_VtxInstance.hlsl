@@ -1019,6 +1019,58 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             //Out.vColor.rgba = g_Texture.Sample(DefaultSampler, In.vTexcoord);
             return Out;
         } break;
+        case UIFLAG_OVFL_PALETTE :      // 8
+        {
+            // ==============================
+            // * [8] Overflow Palette (UI MiniGame Gimmick)
+            // ==============================
+            // * matrix info [size : 80] (10 * 8. per blocks)
+            // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+            // [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
+            // [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
+            //// [FXIMGSIZE.x] [FXIMGSIZE.y]
+            // 텍스쳐를 하나 더 받아와서
+            // 현재 winsize 및 inst transform (pos, sca) 기준으로 uv를 적절히 슬라이싱하여 적용하고
+            // 색상을 흑백화 및 컬러링해서 out. 하면 될 것 같기도? 아닌가
+            // ==============================
+            float4  vCurrColor          = In.mExtra0.xyzw;
+            float4  vDestColor          = In.mExtra1.xyzw;
+            float2  vChangeStartPos     = In.mExtra2.xy;
+            bool    IsChanging          = _BOOL(In.mExtra2.z);
+            float   fChangedRadius      = In.mExtra2.w;
+            //float2  vFXImageSize        = In.mExtra3.xy;
+            
+            // 마스크 이미지 알파 적용
+            float4 vMaskColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            Out.vColor.a = vMaskColor.r;
+            
+            if (IsChanging) // 변화중
+            {
+                // 변화중에는 색상 두 개를 사용함.
+                // vChangeStartPos 로부터 texcoord 의 스크린 변환 좌표까지의 길이가
+                // fChangedRadius 보다 짧은 경우에 vDescColor 적용, 아니면 vCurrColor 적용시키면 될 것으로 보임,
+                
+                float2 vScreenCoord = float2(In.vTexcoord.x * g_ScreenSize.x, -In.vTexcoord.y * g_ScreenSize.y);
+                float fLengthFromStartPos = length(vScreenCoord - vChangeStartPos);
+                
+                float4 vTargetColor;
+                
+                if (fLengthFromStartPos <= fChangedRadius)      // 가깝다! -> 변해야 됨
+                    vTargetColor = vDestColor;
+                else                                            // 멀다! -> 아직 변하면 안됨
+                    vTargetColor = vCurrColor;
+                    
+                Out.vColor.rgb = vTargetColor.rgb;
+                Out.vColor.a = vTargetColor.a * Out.vColor.a;
+            }
+            else            // 평시
+            {
+                Out.vColor.rgb = vCurrColor.rgb;
+                Out.vColor.a = vCurrColor.a * Out.vColor.a;
+            }   
+            
+            return Out;
+        } break;
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);

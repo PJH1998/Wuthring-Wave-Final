@@ -258,6 +258,16 @@ _uint CGameSystem::HideNGet_TabUtilityUI()
 	return m_pUI_ControlHelper->HideNGet_TabUtilityUI();
 }
 
+void CGameSystem::Open_Game_OverflowPalette()
+{
+	m_pUI_ControlHelper->Open_Game_OverflowPalette();
+}
+
+void CGameSystem::Close_Game_OverflowPalette()
+{
+	m_pUI_ControlHelper->Close_Game_OverflowPalette();
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
