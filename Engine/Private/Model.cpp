@@ -1020,7 +1020,6 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 		pAnimCBInfo->iRibbonAnimIndex = m_AnimationNameToIndex[strRibAnimationName];
 	}
 
-	IsRibAnimUsed = true;
 	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
