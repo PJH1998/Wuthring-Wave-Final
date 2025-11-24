@@ -417,6 +417,7 @@ void CMap_Interface::Load_Map_GUI()
 			Ready_Map_Prototype(m_szFilePath.c_str());
 			m_pGameInstance->LoadLastLOD();
 			for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
+
 				if (entry.is_regular_file())
 				{
 					_uint NameLength = {};
@@ -434,6 +435,7 @@ void CMap_Interface::Load_Map_GUI()
 					}
 					if (strFilePath.find("Meteo") != std::string::npos)
 					{
+						continue;
 						CEdit_Meteo::MAP_LOAD Desc{};
 
 						while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
@@ -549,8 +551,6 @@ void CMap_Interface::Load_Map_GUI()
 
 					else if (strFilePath.find("Destruction") != std::string::npos)
 					{
-						//continue;
-
 						_matrix PreTransformMatrix = XMMatrixIdentity();
 						_float fSize = 0.01f;
 						PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
