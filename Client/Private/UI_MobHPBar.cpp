@@ -287,7 +287,7 @@ void CUI_MobHPBar::Update_Instances()
 {
 	const _float fDistancecPivot = 10.f;
 
-	PreAssign_Presets(); // FORR RUNTIME TEST, TEMP
+	//PreAssign_Presets(); // FOR RUNTIME TEST, TEMP
 
 	vector<CCustom_UI*> vecFloatingUIs = {};
 	//vecFloatingUIs.push_back(m_pUI_HPFrame);

@@ -115,7 +115,7 @@ HRESULT CLoader_Test::Load_Texture()
 HRESULT CLoader_Test::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel, "The_False_Sovereign");
 
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
@@ -804,6 +804,7 @@ HRESULT CLoader_Test::Load_UI()
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
+	
 	return S_OK;
 }
 

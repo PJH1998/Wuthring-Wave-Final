@@ -38,6 +38,7 @@
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
+#include "UI_TabUtility.h"
 
 #include "Mouse.h"
 #pragma endregion
@@ -124,14 +125,13 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel, "The_False_Sovereign");
 
 	//m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel);
-
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
@@ -141,7 +141,6 @@ HRESULT CLoader_GamePlay::Load_Model()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Model_Skybox_Dome"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SM_Com2_Sky_21AH.dat"))))
 		CRASH("SkyDome");
-
 
 	cout << "Model" << endl;
 
@@ -503,6 +502,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
 
+	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -594,6 +596,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
 		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
+		CUI_TabUtility::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;

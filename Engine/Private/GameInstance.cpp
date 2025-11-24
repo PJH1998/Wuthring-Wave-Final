@@ -1150,9 +1150,9 @@ void CGameInstance::Add_EnvMap_StaticObject(CStaticObject* pStaticObject)
 {
 	m_pEnvMap->Add_EnvMap_StaticObject(pStaticObject);
 }
-ID3D11ShaderResourceView* CGameInstance::Get_EnvMap(_uint iIndex)
+HRESULT CGameInstance::Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName)
 {
-	return m_pEnvMap->Get_EnvMap(iIndex);
+	return m_pEnvMap->Bind_EnvMapDatas(pShader, pTextureName, pBufferName, pHasEnvMapName, pNumEnvMapName);
 }
 #endif
 #pragma endregion

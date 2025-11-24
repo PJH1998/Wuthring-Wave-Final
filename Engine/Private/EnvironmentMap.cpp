@@ -15,6 +15,8 @@ CEnvironmentMap::CEnvironmentMap(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 
 HRESULT CEnvironmentMap::Initialize()
 {
+	m_iMaxBindEnvMap = 8;
+	
 	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixScaling(static_cast<_float>(g_iEnvMapSize), static_cast<_float>(g_iEnvMapSize), 1.f));
 	XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());
 	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(static_cast<_float>(g_iEnvMapSize), static_cast<_float>(g_iEnvMapSize), 0.f, 1.f));
@@ -55,14 +57,6 @@ void CEnvironmentMap::Bake_EnvMaps()
 
 }
 
-ID3D11ShaderResourceView* CEnvironmentMap::Get_EnvMap(_uint iIndex)
-{
-	if (iIndex >= m_Probes.size())
-		return nullptr;
-
-	return m_Probes[iIndex]->Get_EnvMap();
-}
-
 void CEnvironmentMap::Add_EnvMap_SkyBox(CGameObject* pSkyBox)
 {
 	for (auto& pProbe : m_Probes)
@@ -73,6 +67,57 @@ void CEnvironmentMap::Add_EnvMap_StaticObject(CStaticObject* pStaticObject)
 {
 	for (auto& pProbe : m_Probes)
 		pProbe->Add_StaticObject(pStaticObject);
+}
+
+HRESULT CEnvironmentMap::Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName)
+{
+	m_EnvMapDatas.clear();
+
+	ID3D11ShaderResourceView* pSRVs[8] = { nullptr };
+	_uint iNumSRV = {};
+
+	_bool HasEnvMap = false;
+
+	for (auto& pProbe : m_Probes)
+	{
+		if (iNumSRV >= m_iMaxBindEnvMap)
+			MSG_BOX("EnvMap is Over");
+
+		if(pProbe->IsInFrustrum())
+		{
+			pSRVs[iNumSRV] = pProbe->Get_EnvMap();
+
+			ENV_MAP	Data = {};
+
+			pProbe->Fill_Data(&Data);
+
+			Data.iIndex = iNumSRV++;
+
+			m_EnvMapDatas.push_back(Data);
+		}
+	}
+
+	if (iNumSRV > 0)
+	{
+		HasEnvMap = true;
+
+		D3D11_BOX Box = { 0, 0, 0, max(sizeof(ENV_MAP) * iNumSRV, 1), 1, 1 };
+		m_pContext->UpdateSubresource(m_pProbeBuffer, 0, &Box, m_EnvMapDatas.data(), 0, 0);
+
+		if (FAILED(pShader->Bind_Textures(pTextureName, pSRVs, iNumSRV)))
+			CRASH("Failed to Bind EnvMap");
+
+		if (FAILED(pShader->Bind_Texture(pBufferName, m_pStructureSRV)))
+			CRASH("Failed to Bind BufferSRV");
+
+		if (FAILED(pShader->Bind_Value(pNumEnvMapName, &iNumSRV, sizeof(_uint))))
+			CRASH("Failed to Bind NumEnvMap");
+	}
+
+	if (FAILED(pShader->Bind_Value(pHasEnvMapName, &HasEnvMap, sizeof(_bool))))
+		CRASH("Failed to Bind HasEnvMap");
+
+	return S_OK;
 }
 
 void CEnvironmentMap::Clear()
@@ -93,6 +138,35 @@ HRESULT CEnvironmentMap::Ready_Components()
 		CRASH("Shader Fail");
 
 	return S_OK;
+}
+
+HRESULT CEnvironmentMap::Ready_Buffer()
+{
+
+	//STRUCTURED BUFFER
+	D3D11_BUFFER_DESC StructureBufferDesc = {};
+	StructureBufferDesc.ByteWidth = sizeof(ENV_MAP) * m_iMaxBindEnvMap;
+	StructureBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	StructureBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	StructureBufferDesc.StructureByteStride = sizeof(VF_LIGHT);
+	StructureBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	StructureBufferDesc.CPUAccessFlags = 0;
+
+	if (FAILED(m_pDevice->CreateBuffer(&StructureBufferDesc, nullptr, &m_pProbeBuffer)))
+		CRASH("Failed to Created VF_LightBuffer");
+
+	//SBUFFER SRV
+	D3D11_SHADER_RESOURCE_VIEW_DESC SBuffer_SRVDesc = {};
+	SBuffer_SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	SBuffer_SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	SBuffer_SRVDesc.Buffer.FirstElement = 0;
+	SBuffer_SRVDesc.Buffer.NumElements = m_iMaxBindEnvMap;
+
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_pProbeBuffer, &SBuffer_SRVDesc, &m_pStructureSRV)))
+		CRASH("Failed to Created Buffer_SRV");
+
+
+	return E_NOTIMPL;
 }
 
 
@@ -151,7 +225,6 @@ HRESULT CEnvironmentMap::Ready_RT()
 	return S_OK;
 }
 
-
 CEnvironmentMap* CEnvironmentMap::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CEnvironmentMap* pInstance = new CEnvironmentMap(pDevice, pContext);
@@ -175,4 +248,7 @@ void CEnvironmentMap::Free()
 
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer_Rect);
+
+	Safe_Release(m_pProbeBuffer);
+	Safe_Release(m_pStructureSRV);
 }

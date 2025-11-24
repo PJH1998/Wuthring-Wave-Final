@@ -36,6 +36,17 @@ _bool CProbe::IsInProbe(BoundingBox* pObjectBounding)
     return 	m_pBounding->Intersects(*pObjectBounding);
 }
 
+_bool CProbe::IsInFrustrum()
+{
+	return m_pGameInstance->IsIn_WorldSpace(m_pBounding);
+}
+
+void CProbe::Fill_Data(ENV_MAP* pOut)
+{
+	pOut->fRange = m_fRange;
+	pOut->vPosition = m_vCenter;
+}
+
 void CProbe::Render_SkyBoxs(_float4x4 ViewMatrix, _float4x4 ProjMatrix)
 {
 	for (auto& pSkyBox : m_SkyBoxs)

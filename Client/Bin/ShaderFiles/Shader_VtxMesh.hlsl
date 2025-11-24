@@ -116,14 +116,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
     
-    if (g_IsDynamicObject)
-    {
-        Out.vDepth.z = 1.f;
- //       Out.vPBR.z = 1.f;
-    }
-     
-    Out.vPBR.a = 1.f;
-    
     float4 vNormal;
     
     if (g_HasNormal)
@@ -189,6 +181,9 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
     Out.vDepth.w = 1.f;
     
     return Out;
@@ -205,7 +200,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_ALPHA(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    Out.vDepth.z = 0.f;
     
     Out.vDepth.w = 1.f;
     
@@ -500,6 +494,9 @@ PS_OUT_LIGHT PS_TEST(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;

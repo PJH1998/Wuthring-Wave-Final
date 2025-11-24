@@ -108,7 +108,7 @@
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
-    <ClInclude Include="..\public\ScreenSpaceReflection.h" />
+    <ClInclude Include="..\public\Water.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
     <ClInclude Include="..\public\SFX.h" />
@@ -241,7 +241,7 @@
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
-    <ClCompile Include="..\private\ScreenSpaceReflection.cpp" />
+    <ClCompile Include="..\private\Water.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />
     <ClCompile Include="..\private\SFX.cpp" />
@@ -294,6 +294,7 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Water.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />

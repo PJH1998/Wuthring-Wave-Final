@@ -38,6 +38,8 @@ public:
 	void					Update_Description(_float fTimeDelta);
 	void					Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType = TEXT_ALIGN_TYPE::END);
 
+	void					Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType = TEXT_ALIGN_TYPE::END);
+
 protected:
 	HRESULT					Bind_Description(void* pArg);
 	HRESULT					Ready_Components(void* pArg);

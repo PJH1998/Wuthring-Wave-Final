@@ -126,7 +126,7 @@ HRESULT CLoader_Heaven::Load_Model()
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel, "Heaven");
 
 
 	// SkyBox
