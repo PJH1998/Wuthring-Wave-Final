@@ -386,6 +386,12 @@
     <Filter Include="01. Utility\99. Renderer\SFX\SSR">
       <UniqueIdentifier>{1d22ec99-b1b4-4f75-a716-665728fad5fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\19.EnvironmentMap">
+      <UniqueIdentifier>{1746a0c5-a5dc-4846-9965-d94792c1d303}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\19.EnvironmentMap\Probe">
+      <UniqueIdentifier>{35e0b51f-8e80-4942-9ea0-c097861931a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -784,6 +790,12 @@
     <ClInclude Include="..\public\ScreenSpaceReflection.h">
       <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\EnvironmentMap.h">
+      <Filter>01. Utility\19.EnvironmentMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Probe.h">
+      <Filter>01. Utility\19.EnvironmentMap\Probe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1158,6 +1170,12 @@
     <ClCompile Include="..\private\ScreenSpaceReflection.cpp">
       <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\EnvironmentMap.cpp">
+      <Filter>01. Utility\19.EnvironmentMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Probe.cpp">
+      <Filter>01. Utility\19.EnvironmentMap\Probe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
@@ -1168,9 +1186,6 @@
     </None>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
-    </None>
-    <None Include="..\..\Editor\Default\Editor.vcxproj.filters">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
     </None>
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
@@ -1223,6 +1238,9 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_EnvMapDeferred.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

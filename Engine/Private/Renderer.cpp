@@ -812,7 +812,7 @@ void CRenderer::Render_SSR()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"))))
 		CRASH("Render Fail");
-	
+
 	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::SSR, m_pVIBuffer, m_pShader)))
 		return;
 

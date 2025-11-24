@@ -24,7 +24,7 @@ public:
 	const vector<_float4x4>& Get_OffsetMatrices() const { return m_OffsetMatrices; }
 
 public:
-	virtual		HRESULT			Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance);
+	virtual		HRESULT			Initialize_Prototype(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance, _uint iMatPadding);
 	virtual		HRESULT			Initialize_Clone(void* pArg);
 	virtual		HRESULT			Render() override;
 	virtual		HRESULT			Render(ID3D11DeviceContext* pDC)override;
@@ -35,8 +35,11 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
+	HRESULT						Bind_OffsetMatrix(class CShader* pShader, const _char* pConstantName);
 	HRESULT						Update_InstanceData(VTXINSTANCE_ANIMMESH* pMatrices, _uint iNumRenderCount);
 private:
+	ID3D11Buffer*					m_pBoneLocalIdxBuf = { nullptr };
+	ID3D11ShaderResourceView*		m_pBoneLocalIdxSRV = { nullptr };
 	_uint							m_iMaterialIndex = {};
 	_uint							m_iNumBones = {};
 	_uint							m_iNumMaxInstance = {};
@@ -51,10 +54,10 @@ private:
 	vector<_uint>				m_Indices;
 
 private:
-	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iMatPadding);
 
 public:
-	static		CMeshAnim_Instance*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance);
+	static		CMeshAnim_Instance*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _uint iNumInstance, _uint iMatPadding);
 	virtual		CComponent*				Clone(void* pArg);
 	virtual		void					Free() override;
 };

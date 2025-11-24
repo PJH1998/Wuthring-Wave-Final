@@ -101,6 +101,7 @@ float4 g_fRimIntensity = 0.8f;
 float g_fEffectIntensity;
 
 //SSR
+TextureCube g_EnvMapTexture;
 float g_fMinStepSize;
 float g_fMaxStepSize;
 float g_fStartOffset;
@@ -278,10 +279,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         float fViewZ = vViewPos.z;
 
         vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-    
-        float fShadowMap = 1.f;
-    
-        float fShadowNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
+
     
         if (g_HasShadowMap)
         {
@@ -343,7 +341,6 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
  
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
  
-    
     float3 vLightDiffuse = 0.f;
     float3 vLightSpecular = 0.f;
     
@@ -676,6 +673,7 @@ PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
     if (vViewPos.z == 0.f || g_iStep <= 0 || g_fMaxDistance <= g_fStartOffset)
     {
         Out.vColor = vOriginColor;
+        
         return Out;
     }
         
