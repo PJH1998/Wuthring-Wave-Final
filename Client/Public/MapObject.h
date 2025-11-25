@@ -31,8 +31,8 @@ private:
 	virtual ~CMapObject() = default;
 
 public:
-	virtual		HRESULT		Initialize_Prototype() override;
-	virtual		HRESULT		Initialize_Clone(void* pArg) override;
+	virtual		HRESULT			Initialize_Prototype() override;
+	virtual		HRESULT			Initialize_Clone(void* pArg) override;
 	virtual		void			Priority_Update(_float fTimeDelta) override;
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
@@ -44,19 +44,19 @@ public:
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
-	virtual		BoundingBox* Get_BoundingBox()override;
-	virtual		void					Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)override;
+	virtual		BoundingBox*	Get_BoundingBox()override;
+	virtual		void			Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)override;
 
 private:
-	CDeferredShader*		m_pShaderCom = { nullptr };
+	CDeferredShader*			m_pShaderCom = { nullptr };
 	CShader*					m_pShadowShaderCom = { nullptr };
-	CRigidbody*			m_pRigidbodyCom = { nullptr };
-	vector<CModel*>		m_pModelComArray;
-	class CModel_Streaming* m_pModelCom;
+	CRigidbody*					m_pRigidbodyCom = { nullptr };
+	vector<CModel*>				m_pModelComArray;
+	class CModel_Streaming*		m_pModelCom;
 
 	_uint						m_iShaderPassIndex = {};
-	class CGameSystem* m_pGameSystem = { nullptr };
-	_bool				m_IsRender = { true };
+	class CGameSystem*			m_pGameSystem = { nullptr };
+	_bool						m_IsRender = { true };
 private:
 	void						Ready_Component(void* pArg);
 

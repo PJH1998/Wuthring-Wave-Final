@@ -327,6 +327,9 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     
     float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
     
+    if(fAtt == 0.f)
+        discard;
+    
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
