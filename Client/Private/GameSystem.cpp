@@ -121,9 +121,9 @@ void CGameSystem::Add_Action(const _char* pFolderPath)
 {
 	m_pDirector->Add_Action(pFolderPath);
 }
-void CGameSystem::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain)
+void CGameSystem::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape)
 {
-	m_pDirector->Play_Action(strActionTag, WorldMatrix, isMaintain);
+	m_pDirector->Play_Action(strActionTag, WorldMatrix, isMaintain, isEscape);
 }
 void CGameSystem::Stop_Action()
 {

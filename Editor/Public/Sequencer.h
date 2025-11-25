@@ -301,6 +301,9 @@ private:
 	_bool								m_isSave = { false };
 	_bool								m_isLoad = { false };
 
+	// Camera Action
+	_bool								m_isEscape = { false };
+
 	// Sequence System Variable
 	_char								m_szSequenceTag[MAX_PATH] = {};
 	_bool								m_isPlay = { false };

@@ -278,11 +278,13 @@ void CSpringCamera::Action(_float fTimeDelta)
 	// Action End
 	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
 	{
-		if (false == m_isMaintain)
+		if (false == m_isMaintain && false == m_isEscape)
 		{
 			m_pGameSystem->HUD_FadeIn();
 			SetUp_Recovery();
 		}
+		if (true == m_isEscape)
+			m_eCameraState = CAMERA_STATE::TARGET;
 		return;
 	}
 
@@ -407,6 +409,7 @@ void CSpringCamera::Ready_Event()
 			m_isMaintain = event.isMaintain;
 			if(false == m_isMaintain)
 				m_pGameSystem->HUD_FadeOut();
+			m_isEscape = event.isEscape;
 		}
 		else
 		{

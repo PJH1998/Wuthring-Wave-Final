@@ -99,6 +99,7 @@ private:
 	_float								m_fDuration = {};
 	_bool								m_isMaintain = { false };
 	_bool								m_isLerp = { true };
+	_bool								m_isEscape = { false };
 
 private:
 	// Default

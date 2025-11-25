@@ -618,7 +618,7 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 
 	if (ImGui::Button("Action", ImVec2(100.f, 20.f)))
 	{
-		CAMERA_ACTION_EVENT event { item.mRampEdit.mTargetCameraFrames, true, item.iFrameStart, item.iFrameEnd };
+		CAMERA_ACTION_EVENT event { item.mRampEdit.mTargetCameraFrames, true, item.iFrameStart, item.iFrameEnd, m_isEscape };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
 	}
 	if (ImGui::Button("Reset", ImVec2(100.f, 20.f)))
@@ -628,6 +628,9 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 	}
 
 	ImGui::Text("======================");
+
+	if (ImGui::RadioButton("Escape", m_isEscape))
+		m_isEscape = !m_isEscape;
 
 	if (ImGui::Button("Save"))
 		m_isSave = !m_isSave;
