@@ -218,8 +218,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_ALPHA(PS_IN In)
         Out.vDepth.z = 1.f;
  //       Out.vPBR.z = 1.f;
     }
-     
-    Out.vPBR.a = 1.f;
     
     float4 vNormal;
     

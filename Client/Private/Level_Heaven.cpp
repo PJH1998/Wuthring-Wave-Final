@@ -35,13 +35,13 @@ HRESULT CLevel_Heaven::Initialize()
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
-	ShadowMapDesc.iNumSectorX = 8;
-	ShadowMapDesc.iNumSectorZ = 8;
+	ShadowMapDesc.iNumSectorX = 4;
+	ShadowMapDesc.iNumSectorZ = 12;
 	ShadowMapDesc.iSectorSizeX = 2048;
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
 	ShadowMapDesc.vCenterPos = _float3(-910.f, 0.f, -1870.f);
-	ShadowMapDesc.vExtents = _float3(160.f, 300.f, 160.f);
+	ShadowMapDesc.vExtents = _float3(200.f, 750.f, 160.f);
 	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
 
 	// Left Bottom : -910 / -1870
