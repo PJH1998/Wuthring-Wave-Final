@@ -24,6 +24,7 @@ HRESULT CCoro_Rock::Initialize_Clone(void* pArg)
 
 	CORO_ROCK_DESC* pDesc = static_cast<CORO_ROCK_DESC*>(pArg);
 	Ready_Component(pDesc);
+	m_pSocketMatrix = pDesc->pSocketMatrix;
 
 #ifdef _DEBUG
 	m_vOffsetTrans = pDesc->vOffsetTrans;
@@ -40,6 +41,7 @@ HRESULT CCoro_Rock::Initialize_Clone(void* pArg)
 
 void CCoro_Rock::Priority_Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CCoro_Rock::Update(_float fTimeDelta)
@@ -82,13 +84,21 @@ void CCoro_Rock::Render()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		_bool HasNormal{};
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
-
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		HRESULT hr = m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		if (SUCCEEDED(hr))
+			HasNormal = true;
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
 		m_pModelCom->Render(i);
 	}
+#ifdef _DEBUG
+	if (m_pRigidBodyCom)
+		m_pRigidBodyCom->Render();
+#endif // _DEBUG
+
 }
 
 void CCoro_Rock::Change_Layer(_uint iLayer)
@@ -103,6 +113,9 @@ void CCoro_Rock::Change_CollisionActive(_bool isActive)
 
 HRESULT CCoro_Rock::Bind_Resources()
 {
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	return S_OK;
 }
 
@@ -114,7 +127,7 @@ void CCoro_Rock::Ready_Component(CORO_ROCK_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK);
-	RigidbodyDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	RigidbodyDesc.vExtent = _float3(1.f, 4.f, 1.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -129,7 +142,7 @@ void CCoro_Rock::Ready_Component(CORO_ROCK_DESC* pDesc)
 	m_tCallback.fAttack = pDesc->fAttackDmg;
 	m_tCallback.eType = pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_tCallback);
-	m_pRigidBodyCom->IsActivate(false);
+	//m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MonsterProp"),

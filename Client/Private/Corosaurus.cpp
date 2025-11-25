@@ -39,7 +39,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 70.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 50.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 5.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -359,8 +359,8 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	CCoro_Rock::CORO_ROCK_DESC RockDesc{};
 	RockDesc.pParentTransform = m_pTransformCom;
 	RockDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp001");
-	RockDesc.vOffsetTrans = _float3(0.f, 0.f, 0.f);
-	RockDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	RockDesc.vOffsetTrans = _float3(2.5f, 0.f, 0.f);
+	RockDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(-90.f));
 	RockDesc.fAttackDmg = pDesc->fAttackDmg * 2.f;
 	RockDesc.eType = m_CallBack.eType;
 	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Rock"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_CoroRock"), &RockDesc)))
@@ -720,8 +720,8 @@ _bool CCorosaurus::AttackArrange()
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex == ATK_PATTERN::BURST)
-	//	return false;
+	if (iIndex != ATK_PATTERN::ATTACK8)
+		return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
