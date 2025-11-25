@@ -663,7 +663,7 @@ _bool CCorosaurus::isKnockDown()
 
 _bool CCorosaurus::isAttackEnable()
 {
-	if (!m_isDetecting && !m_isAggro)
+	if (!m_isDetecting || !m_isAggro)
 		return false;
 	if (m_fDistance > 20.f)
 		return false;
