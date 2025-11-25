@@ -9,6 +9,7 @@ NS_END
 NS_BEGIN(Client)
 class CGameSystem;
 class CAttackVolume;
+class CCoro_Rock;
 
 class CCorosaurus final : public CActor
 {
@@ -53,6 +54,7 @@ private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CGameSystem*		m_pGameSystem = { nullptr };
+	CCoro_Rock*			m_pCoroRock = { nullptr };
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;

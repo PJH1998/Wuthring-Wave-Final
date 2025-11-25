@@ -18,6 +18,7 @@ public:
 		_float3 vOffsetTrans ;
 		_float3 vOffsetRadian;
 		_float fAttackDmg;
+		TEXT_COLOR_TYPE eType;
 	}CORO_ROCK_DESC;
 
 public:
@@ -35,19 +36,23 @@ public:
 
 public:
 	void Change_Layer(_uint iLayer);
+	void Change_CollisionActive(_bool isActive);
 
 private:
 	CRigidbody* m_pRigidBodyCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
 
-	const _float4x4* m_pSocketMatrix = { nullptr };
+	const _float4x4*	m_pSocketMatrix = { nullptr };
 #ifdef _DEBUG
 	_float3 m_vOffsetTrans = {};
 	_float3 m_vOffsetRotate = {};
 #else
 	_float4x4 m_OffsetMatrix = {};
 #endif // _DEBUG
+
+	CALLBACK_CLIENT m_tCallback{};
+
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(CORO_ROCK_DESC* pDesc);

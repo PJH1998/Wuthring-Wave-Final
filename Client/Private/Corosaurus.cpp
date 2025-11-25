@@ -356,15 +356,19 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 		CRASH(m_pParryVolume);
 	m_pParryVolume->TriggerActivate(false);
 
-	//CCoro_Rock::CORO_ROCK_DESC RockDesc{};
-	//RockDesc.pParentTransform = m_pTransformCom;
-	//RockDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp001");
-	//RockDesc.vOffsetTrans = _float3(0.f, 0.f, 0.f);
-	//RockDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	//RockDesc.fAttackDmg = pDesc->fAttackDmg * 2.f;
-	//
-	//if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Rock"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Coro_Rock"), &RockDesc)))
-	//	CRASH("Failed to Clone PartObj : Coro_Rock");
+	CCoro_Rock::CORO_ROCK_DESC RockDesc{};
+	RockDesc.pParentTransform = m_pTransformCom;
+	RockDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp001");
+	RockDesc.vOffsetTrans = _float3(0.f, 0.f, 0.f);
+	RockDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	RockDesc.fAttackDmg = pDesc->fAttackDmg * 2.f;
+	RockDesc.eType = m_CallBack.eType;
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Rock"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_CoroRock"), &RockDesc)))
+		CRASH("Failed to Clone PartObj : Coro_Rock");
+	m_pCoroRock = dynamic_cast<CCoro_Rock*>(Find_PartObject(TEXT("Part_Rock")));
+	if (nullptr == m_pCoroRock)
+		CRASH("Failed to Find PartObj");
+	Safe_AddRef(m_pCoroRock);
 }
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
@@ -836,6 +840,7 @@ void CCorosaurus::Free()
 	{
 		Safe_Release(m_pAtkVolumes[i]);
 	}
+	Safe_Release(m_pCoroRock);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
