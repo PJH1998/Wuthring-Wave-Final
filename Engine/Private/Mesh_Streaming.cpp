@@ -10,8 +10,10 @@ CMesh_Streaming::CMesh_Streaming(const CMesh_Streaming& Prototype)
 	:CComponent(Prototype), m_iNumMeshes{Prototype.m_iNumMeshes },
 	m_pSharedVB{Prototype.m_pSharedVB},
 	m_pSharedIB{Prototype.m_pSharedIB},
-	m_Desc{ Prototype.m_Desc },
-	m_pBoundingBox{Prototype.m_pBoundingBox }
+	m_Desc{ Prototype.m_Desc }
+#ifdef _DEBUG
+	,m_pBoundingBox{Prototype.m_pBoundingBox }
+#endif
 {
 	Safe_AddRef(m_pSharedVB);
 	Safe_AddRef(m_pSharedIB);
@@ -240,5 +242,8 @@ void CMesh_Streaming::Free()
 		Safe_Delete(m_Desc);
 	Safe_Delete_Array(m_vecVertexPos);
 	Safe_Delete_Array(m_vecIndices);
+
+#ifdef _DEBUG
 	Safe_Delete(m_pBoundingBox);
+#endif
 }

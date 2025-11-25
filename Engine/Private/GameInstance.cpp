@@ -31,7 +31,7 @@
 #include "HZB.h"
 #include "EnvironmentMap.h"
 
-#include"Model_Manager.h"
+#include "Model_Manager.h"
 #include "SFX_Hub.h"
 #include "Resource_Manager.h"
 
@@ -1134,6 +1134,10 @@ void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffse
 {
 	m_pSFX_Hub->Set_SSR(fMinStep, fMaxStep, fStartOffset);
 }
+#endif
+#pragma endregion
+
+#pragma region ENV_MAP
 HRESULT CGameInstance::Add_Probe(_float3 vCenter, _float fRange)
 {
 	return m_pEnvMap->Add_Probe(vCenter, fRange);
@@ -1154,7 +1158,6 @@ HRESULT CGameInstance::Bind_EnvMapDatas(CShader* pShader, const _char* pTextureN
 {
 	return m_pEnvMap->Bind_EnvMapDatas(pShader, pTextureName, pBufferName, pHasEnvMapName, pNumEnvMapName);
 }
-#endif
 #pragma endregion
 
 #pragma region RESOURCE_MANAGER
@@ -1217,6 +1220,8 @@ void CGameInstance::Release_Engine()
 {
 	Wait_Thread_End();
 
+	Safe_Release(m_pPooling_Manager);
+	Safe_Release(m_pRenderer);
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
@@ -1224,9 +1229,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
-	Safe_Release(m_pPooling_Manager);
 	Safe_Release(m_pTargetManager);
-	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pCamera_Manager);

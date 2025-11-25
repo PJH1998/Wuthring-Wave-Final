@@ -434,12 +434,12 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
     
     float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    
     bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
-    if(false == IsDynamic)
+    bool IsSky = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    if (false == IsDynamic)
         vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
     
-    if (false == g_IsDynamicLUT && true == IsDynamic)
+    if ((false == g_IsDynamicLUT && true == IsDynamic) || false == IsSky)
     {
         Out.vColor = vOriginColor;
     

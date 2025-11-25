@@ -1403,7 +1403,6 @@ void CRenderer::Free()
 		m_pDeferredContext[i]->Flush();
 		Safe_Release(m_pDeferredContext[i]);
 	}
-	
 	Safe_Delete_Array(m_pDeferredContext);
 
 	for (auto& Pair : m_Effects)
@@ -1432,9 +1431,7 @@ void CRenderer::Free()
 	Safe_Release(m_pVIBuffer);
 	Safe_Release(m_pSubResource);
 	
-	Safe_Release(m_pDevice);
-	m_pContext->ClearState();
-	m_pContext->Flush();
 	Safe_Release(m_pContext);
+	Safe_Release(m_pDevice);
 	Safe_Release(m_pGameInstance);
 }

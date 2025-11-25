@@ -40,9 +40,13 @@ HRESULT CLevel_Heaven::Initialize()
 	ShadowMapDesc.iSectorSizeX = 2048;
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
-	ShadowMapDesc.vCenterPos = _float3(2200.f, 60.f, 1200.f);
+	ShadowMapDesc.vCenterPos = _float3(-910.f, 0.f, -1870.f);
 	ShadowMapDesc.vExtents = _float3(160.f, 300.f, 160.f);
 	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+
+	// Left Bottom : -910 / -1870
+	// Right Bottom : 600 / -2100
+	// Left Top : 1542
 
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
 		CRASH("Test");
@@ -52,7 +56,6 @@ HRESULT CLevel_Heaven::Initialize()
 
 	m_pGameInstance->Render_ShadowMap();
 
-	
 	m_pGameInstance->Begin_DownSampleShadowMap();
 
 	LIGHT_DESC LightDesc{};
@@ -61,7 +64,7 @@ HRESULT CLevel_Heaven::Initialize()
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 //	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
 //	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
 //LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
@@ -326,10 +329,11 @@ void CLevel_Heaven::Ready_Effect()
 void CLevel_Heaven::Ready_Skybox()
 {
 	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
-	SkyboxDesc.iNumModel = 2;
+	SkyboxDesc.iNumModel = 3;
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
-	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX2"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
+	SkyboxDesc.vUVRate = _float2(1.f, 1.f);
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
