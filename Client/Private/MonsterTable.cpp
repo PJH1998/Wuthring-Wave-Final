@@ -60,7 +60,7 @@ HRESULT CMonsterTable::LoadNPCDataTable(const _char* pFilePath, _uint iType)
 		Info.MeshtypeIndices[2] = stoi(Datas[i][9]);
 
 		Info.isCollide = stoi(Datas[i][10]) == 0 ? false : true;
-
+		Info.strAnimTag = Datas[i][11];
 		m_NPCTable[NPCTYPE(iType)].push_back(Info);
 	}
 
@@ -78,6 +78,11 @@ MONSTER_INFO* CMonsterTable::Get_MonsterInfo(const _char* pMonsterKey) const
        return nullptr;  
 
    return const_cast<MONSTER_INFO*>(&Infoiter->second);  
+}
+
+const vector<NPCINFO>& CMonsterTable::Get_NpcData(_uint iType) const
+{
+	return m_NPCTable[NPCTYPE(iType)];
 }
 
 CMonsterTable* CMonsterTable::Create()

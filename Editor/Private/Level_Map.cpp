@@ -48,32 +48,7 @@ HRESULT CLevel_Map::Initialize()
 	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
 
 	LEVEL m_eCurLevel = LEVEL::MAP;
-	//m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
-
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
-	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
-	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
-	//{
-	//    CRASH("Failed Load AnimMesh Shader");
-	//    return E_FAIL;
-	//}
-
-	//SHADER_MACRO eShaderMacro = {
-	//    {"THREAD_X", "64" }
-	//    ,{"THREAD_Y", "1" }
-	//    ,{"THREAD_Z", "1" }
-	//    , { NULL, NULL }
-	//};
-
-	//string strEntryPoint = "CSMain";
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
-	//    CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
-	//        , eShaderMacro, strEntryPoint))))
-	//{
-	//    CRASH("Failed Load AnimMesh Shader");
-	//    return E_FAIL;
-	//}
-
+	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
 	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
@@ -84,20 +59,45 @@ HRESULT CLevel_Map::Initialize()
 	//}
 
 	SHADER_MACRO eShaderMacro = {
-		{"THREAD_X", "64" }
-		,{"THREAD_Y", "1" }
-		,{"THREAD_Z", "1" }
-		, { NULL, NULL }
+	    {"THREAD_X", "64" }
+	    ,{"THREAD_Y", "1" }
+	    ,{"THREAD_Z", "1" }
+	    , { NULL, NULL }
 	};
 
 	string strEntryPoint = "CSMain";
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
-		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
-			, eShaderMacro, strEntryPoint))))
+	    CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+	        , eShaderMacro, strEntryPoint))))
 	{
-		CRASH("Failed Load AnimMesh Shader");
-		return E_FAIL;
+	    CRASH("Failed Load AnimMesh Shader");
+	    return E_FAIL;
 	}
+
+
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	//{
+	//    CRASH("Failed Load AnimMesh Shader");
+	//    return E_FAIL;
+	//}
+
+	//SHADER_MACRO eShaderMacro = {
+	//	{"THREAD_X", "64" }
+	//	,{"THREAD_Y", "1" }
+	//	,{"THREAD_Z", "1" }
+	//	, { NULL, NULL }
+	//};
+
+	//string strEntryPoint = "CSMain";
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+	//	CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+	//		, eShaderMacro, strEntryPoint))))
+	//{
+	//	CRASH("Failed Load AnimMesh Shader");
+	//	return E_FAIL;
+	//}
 
 	m_eObjectType = ENUM_CLASS(OBJECTTYPE::DEFAULT);
 

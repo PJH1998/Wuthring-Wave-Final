@@ -9,13 +9,6 @@ class CMonsterTable final : public CBase
 {
 private:
 	enum NPCTYPE { FEMALE_M, MALE_M, FEMALE_S, END };
-	typedef struct tagNPCInfo
-	{
-		_float3 vPosition;
-		_float3 vRotation;
-		_uint MeshtypeIndices[3];
-		_bool isCollide;
-	}NPCINFO;
 
 private:
 	explicit CMonsterTable();
@@ -26,6 +19,8 @@ public:
 	HRESULT LoadDataTable(const _char* pFilePath);
 	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+	_uint Get_NumNPCInstance(_uint iType) const { return m_NPCTable[iType].size(); }
+	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
 
 private:
 	map<const _string, _uint> m_MonsterKey;

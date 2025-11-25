@@ -333,6 +333,18 @@ MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
 {
 	return m_pMonsterTable->Get_MonsterInfo(pMonsterKey);
 }
+HRESULT CGameSystem::LoadNPCDataTable(const _char* pFilePath, _uint iType)
+{
+	return m_pMonsterTable->LoadNPCDataTable(pFilePath, iType);;
+}
+_uint CGameSystem::Get_NumNPCInstance(_uint iType) const
+{
+	return m_pMonsterTable->Get_NumNPCInstance(iType);
+}
+const vector<NPCINFO>& CGameSystem::Get_NpcData(_uint iType) const
+{
+	return m_pMonsterTable->Get_NpcData(iType);
+}
 #pragma endregion
 
 #pragma region SFX_PREFAB

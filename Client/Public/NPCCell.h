@@ -13,6 +13,7 @@ public:
 	typedef struct tagDummyCellDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_float3 vStartPos;
+		_float3 vStartRot;
 		function<_bool(const _string&, CTransform*, _float, _float*, _bool, _bool, _bool, _float)> pUpdateRootFunc;
 		function<void(const _string&, _fmatrix, _uint, _float*, _uint*, _uint)> pUpdateAnimStateFunc;
 		_uint iInstanceIndex;
@@ -55,6 +56,7 @@ private:
 	_float m_fRootMotionRate{};
 	_uint m_iFaceIndex{};
 	_uint m_iOriginFaceIndex{};
+	_float3 m_vDetectOffset{};
 	CALLBACK_CLIENT m_tCallBack{};
 
 private:
