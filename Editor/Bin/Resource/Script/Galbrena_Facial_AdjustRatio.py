@@ -10,7 +10,7 @@ TARGET_SHAPE_KEYS = [
     "A",
     "O",
     "I",
-    "E"
+    "U",
 ]
 
 # True: 위 리스트에 있는 것만 '변경' (Whitelist)

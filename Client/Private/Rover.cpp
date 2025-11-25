@@ -274,6 +274,8 @@ void CRover::Render_Shadow()
 // 캐릭터 전환시 Idle로 상태 전환..
 void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	m_pStateMachineCom->Exit_State();
+
 	switch (eTransitionType)
 	{
 		case CHARACTER_TRANSITIONTYPE::IDLE:

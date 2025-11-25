@@ -36,6 +36,24 @@ CAnimation::CAnimation(const CAnimation& Prototype)
 		Safe_AddRef(pMorphChannel);
 }
 
+#ifdef _DEBUG
+void CAnimation::Print_MorphKeyIndices()
+{
+
+	_wstring strIndices = { };
+
+	for (size_t i = 0; i < m_MorphKeyIndicies.size(); ++i)
+	{
+		strIndices += to_wstring(m_MorphKeyIndicies[i]);
+		strIndices += _wstring(L"\n");
+	}
+
+	OutputDebugString(strIndices.c_str());
+}
+#endif // _DEBUG
+
+
+
 void CAnimation::Register_Notify(const NOTIFY& AnimNotify)
 {
 	m_Notifies.push_back(AnimNotify);
@@ -287,6 +305,15 @@ _bool CAnimation::Bind_MorphChannels(const vector<string>& modelShapeKeys)
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	// 
+	if (strcmp(m_szName, "Stand2") == 0)
+		Print_MorphKeyIndices();
+#endif // _DEBUG
+
+
+
 	
 	return true;
 }
@@ -313,12 +340,6 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 
 		// 매핑된 타겟인덱스에 가중치 부여.
 		modelWeights[iTargetIndex] = fWeight;
-		//_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[i]);
-		//_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[iTargetIndex]);
-
-		// 모델의 해당 인덱스에 가중치 적용
-		//modelWeights[iTargetIndex] = fWeight;
-		//modelWeights[i] = fWeight;
 	}
 
 	return true;

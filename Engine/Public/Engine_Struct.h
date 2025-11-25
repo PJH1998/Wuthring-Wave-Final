@@ -251,7 +251,7 @@ namespace Engine
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
-		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibAnimUsed; // 4 => HLSL 에서 BOOL도 4Byte 인식.
 		_uint  iRibbonAnimIndex; // 4
 	}ANIMATION_CBINFO;
 
@@ -260,7 +260,7 @@ namespace Engine
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
-		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibAnimUsed; // 4 => HLSL 에서 BOOL도 4Byte 인식.
 		_uint  iRibbonAnimIndex; // 4
 		
 		// 2. Blend Layer Control

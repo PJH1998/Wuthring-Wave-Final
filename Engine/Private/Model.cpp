@@ -222,6 +222,19 @@ _bool CModel::Find_Animation(const _string& strAnimName)
 	return false;
 }
 
+void CModel::Print_ShapeKeyWeights()
+{
+	_wstring outString = {};
+
+	for (size_t i = 0; i < m_ShapeKeyWeights.size(); i++)
+	{
+		outString += to_wstring(m_ShapeKeyWeights[i]);
+		outString += _wstring(L"\n");
+	}
+
+	OutputDebugString(outString.c_str());
+}
+
 
 #endif // _DEBUG
 
@@ -910,6 +923,7 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 
 	m_Animations.at(strAnimationName)->Reset_Status();
 	m_Animations.at(strAnimationName)->Set_CurrentTrackPosition(fTrackPosition);
+	fill(m_ShapeKeyWeights.begin(), m_ShapeKeyWeights.end(), 0.0f);
 
 }
 

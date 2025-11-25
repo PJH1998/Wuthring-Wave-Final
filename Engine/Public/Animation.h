@@ -19,6 +19,8 @@ public:
 #ifdef _DEBUG
 	_float*				Get_TrackPositionPtr() { return &m_fCurrentTrackPosition; }
 	
+
+	void				Print_MorphKeyIndices();
 #endif // _DEBUG
 
 public:

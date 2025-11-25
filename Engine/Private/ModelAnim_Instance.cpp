@@ -427,7 +427,7 @@ void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName,
 {
 	m_AnimCBInfos[iInstanceIndex].fTrackPosition = *pTrackPosition;
 	m_AnimCBInfos[iInstanceIndex].iAnimindex = m_AnimationNameToIndex[strAnimationName];
-	m_AnimCBInfos[iInstanceIndex].IsRibAnimUsed = false;
+	m_AnimCBInfos[iInstanceIndex].iRibAnimUsed = 0;
 	m_AnimCBInfos[iInstanceIndex].iRibbonAnimIndex = iExtra;
 
 	//_matrix FixedWorldMatrix = XMLoadFloat4x4(&m_PreTransformMatrix) * WorldMatrix;

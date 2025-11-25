@@ -56,7 +56,7 @@ cbuffer AnimationInfoCB : register(b0)
 {
     float g_TrackPosition;
     uint g_AnimIndex;
-    bool g_IsRibAnimUsed;
+    uint g_RibAnimUsed;
     uint g_RibbonAnimIndex;
     
     bool g_IsBlendEnabled; // Blending Usable.
@@ -510,7 +510,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     
     // --- 3. 리본(Ribbon) 애니메이션 가산 ---
     matrix result_matrix;
-    if (g_IsRibAnimUsed)
+    if (1 == g_RibAnimUsed)
     {
         // 리본 SRT 가져오기
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);

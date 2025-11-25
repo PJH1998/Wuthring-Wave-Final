@@ -55,6 +55,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 		//m_pParentActor->Set_ChildActor(this);
 		m_pParentActor->Set_ChildActors(this);
 	}
+
 #endif // _DEBUG
 
 
@@ -577,10 +578,14 @@ void CAnimationActor::Render_Facial()
 		// 1. 재질 기존 유지.
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			continue;
-		//CRASH("Ready Diffuse Texture Failed");
 
-		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
-		//    return E_FAIL;
+		_bool HasNormal = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		_bool HasMask = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			HasMask = true;
 
 		// 2. 뼈 행렬 (기존 유지)
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))

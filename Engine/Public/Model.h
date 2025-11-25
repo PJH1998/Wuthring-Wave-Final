@@ -72,6 +72,8 @@ public:
 	void Render_Gizmo(_fmatrix TransformMatrix);
 
 	_bool Find_Animation(const _string& strAnimName);
+
+	void Print_ShapeKeyWeights();
 #endif
 
 public:

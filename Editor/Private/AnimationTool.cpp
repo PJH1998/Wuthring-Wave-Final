@@ -1181,7 +1181,6 @@ void CAnimationTool::Render_EditModel()
 	CTransform* pTransformCom = m_AnimationActors.at(m_wSelected_AnimActorTag)->Get_Transform();
 	m_pGameInstance->Use_Gizmo(pTransformCom);
 
-
 	if (ImGui::Button("Apply Position"))
 	{
 		_float3 vP = { };
@@ -1189,6 +1188,22 @@ void CAnimationTool::Render_EditModel()
 
 		_vector vPos = XMVectorSetW(XMLoadFloat3(&vP), 1.f);
 		pTransformCom->Set_State(STATE::POSITION, vPos);
+	}
+
+
+	static float fDegree[3] = { 0.f, 0.f, 0.f };
+	ImGui::InputFloat3("Degree", fDegree);
+
+	if (ImGui::Button("Apply Rotation"))
+	{
+		_float3 vR = {};
+		memcpy(&vR, fDegree, sizeof(_float3));
+		
+		vR.x = XMConvertToRadians(vR.x);
+		vR.y = XMConvertToRadians(vR.y);
+		vR.z = XMConvertToRadians(vR.z);
+		
+		pTransformCom->Rotation_Quaternion(vR);
 	}
 	
 

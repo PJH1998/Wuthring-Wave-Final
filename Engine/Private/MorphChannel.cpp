@@ -25,13 +25,16 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCu
 	{
 		// 인덱스 캐싱 로직
 
-#ifdef _DEBUG
-		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
-			--*pCurrentFrameIndex;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
+//			--*pCurrentFrameIndex;
+//#endif // _DEBUG
 
 		while (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fCurrentTrackPosition)
 			++*pCurrentFrameIndex;
+
+
+		
 
 		// 보간 계산.
 		_float fLeftWeight = m_KeyFrames[*pCurrentFrameIndex].fValue; // 키프레임에 값이 잘못들어간거 같은데?
@@ -126,6 +129,7 @@ HRESULT CMorphChannel::Initialize(ifstream& InputFile)
 	{
 		KEYFRAME_CURVE KeyFrameCurve = {};
 		InputFile.read(reinterpret_cast<_char*>(&KeyFrameCurve), sizeof(KEYFRAME_CURVE));
+		//KeyFrameCurve.fTrackPosition -= 1.f; // 1.f씩 땡겨준다.
 		m_KeyFrames.push_back(KeyFrameCurve);
 	}
 

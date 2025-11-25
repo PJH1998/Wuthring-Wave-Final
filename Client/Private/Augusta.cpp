@@ -286,6 +286,9 @@ void CAugusta::Render_OutLine()
 
 void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	// 현재 애니메이션 제거.
+	m_pStateMachineCom->Exit_State();
+
 	// 애니메이션 변경할 값.
 	switch (eTransitionType)
 	{

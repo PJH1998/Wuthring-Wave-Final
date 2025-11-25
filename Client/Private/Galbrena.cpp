@@ -39,7 +39,6 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_eCurLevel = pDesc->eCurLevel;
-
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
@@ -69,6 +68,14 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 
 	m_fCameraOriginOffset = 1.2f;
 	m_fCameraOffset = 1.2f;
+
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,m_pFacialComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true);
+
+#ifdef _DEBUG
+	m_pModelCom->Print_ShapeKeyWeights();
+#endif // _DEBUG
+
+
     return S_OK;
 }
 
@@ -192,7 +199,6 @@ void CGalbrena::Render()
     {
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			continue;
-		//m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
 
 		_bool HasNormal = { false };
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
@@ -211,15 +217,16 @@ void CGalbrena::Render()
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i)))
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
 			CRASH("Bind Morph Result Failed");
 
         if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
             CRASH("Ready Shader Begin Failed");
 
-
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
+
+		m_pShaderCom->UndBind_All_VS_SRV();
     }
 
 #ifdef _DEBUG
@@ -284,6 +291,8 @@ void CGalbrena::Render_Shadow()
 // 캐릭터 전환시 Idle로 상태 전환..
 void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	m_pStateMachineCom->Exit_State();
+
 	switch (eTransitionType)
 	{
 		case CHARACTER_TRANSITIONTYPE::IDLE:

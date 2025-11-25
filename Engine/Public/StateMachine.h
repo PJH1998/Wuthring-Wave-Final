@@ -60,6 +60,9 @@ public:
 	void Add_State(_uint iCategory, _uint iSubState, class CState* pState);
 	void Add_State(const StateKey& key, class CState* pState);
 
+	// 현재 State 탈출
+	void Exit_State();
+
 	// 현재 State 정보 반환
 	StateKey Get_CurrentStateKey() const { return m_CurrentStateKey; }
 	_uint Get_CurrentCategory() const { return m_CurrentStateKey.iCategory; }

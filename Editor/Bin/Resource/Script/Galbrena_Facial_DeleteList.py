@@ -7,10 +7,13 @@ import re
 
 # 삭제하거나 남길 쉐이프 키 이름 리스트
 TARGET_SHAPE_KEYS = [
+    "Aa",
     "A",
-    "O",
+    "0",
+    "E",
     "I",
-    "E"
+    "O",
+    "U"
 ]
 # True: 위 리스트에 있는 것만 '남기고' 나머지 삭제 (Whitelist)
 # False: 위 리스트에 있는 것만 '삭제' (Blacklist)

@@ -810,54 +810,6 @@ aiNode* CGltfLoader::Find_Node(aiNode* pNode, const _string& strNodeName)
 	return nullptr;
 }
 
-void CGltfLoader::Write_Channels(uint iIndex, ofstream& file, const aiAnimation* pAnimation, _float fTimeScale)
-{
-	aiNodeAnim* pChannel = pAnimation->mChannels[iIndex];
-	aiString strChannelName = pChannel->mNodeName;
-	_uint iChannelNameLength = strChannelName.length;
-
-	// Channel(Bone) Name
-	file.write(reinterpret_cast<const _char*>(&iChannelNameLength), sizeof(_uint));
-	file.write(strChannelName.data, iChannelNameLength);
-
-	_uint iNumKeyFrame = max(pChannel->mNumPositionKeys, max(pChannel->mNumRotationKeys, pChannel->mNumScalingKeys));
-	// Num KeyFrame
-	//file.write(reinterpret_cast<const _char*>(&iNumKeyFrame), sizeof(_uint));
-
-	_float3 vScale = {};
-	_float4 vRotation = {};
-	_float3 vTranslation = {};
-
-	_float fDuration = static_cast<_float>(pAnimation->mDuration);
-	_float fTickPerSecond = static_cast<_float>(pAnimation->mTicksPerSecond != 0 ? pAnimation->mTicksPerSecond : 24.0f);
-	_float fTotalFrameCount = fDuration * fTimeScale;
-	_float fTargetFPS = 24.f;
-
-	_uint iTotalFrameCount = static_cast<_uint>(fTotalFrameCount);
-	file.write(reinterpret_cast<const _char*>(&iTotalFrameCount), sizeof(_uint));
-	for (_uint i = 0; i <= iTotalFrameCount; ++i)
-	{
-		KEYFRAME KeyFrame = {};
-
-		// 현재 프레임 번호 (0, 1, 2...)
-		KeyFrame.fTrackPosition = static_cast<_float>(i);
-
-		// 현재 프레임이 원본 애니메이션의 몇 '틱(Tick)' 시간대인지 계산
-		// 예: 24FPS 타겟인데 원본이 1000틱이면, 1프레임은 약 41.6틱
-		_float fCurrentTimeTick = (static_cast<_float>(i) / fTargetFPS) * fTickPerSecond;
-
-		KeyFrame.vScale = GetScaleAtTime(pChannel, fCurrentTimeTick);
-
-		// 2. Rotation
-		KeyFrame.vRotation = GetRotationAtTime(pChannel, fCurrentTimeTick);
-
-		// 3. Translation
-		KeyFrame.vTranslation = GetPositionAtTime(pChannel, fCurrentTimeTick);
-
-		// 파일 쓰기
-		file.write(reinterpret_cast<const _char*>(&KeyFrame), sizeof(KEYFRAME));
-	}
-}
 
 
 _float4 CGltfLoader::GetRotationAtTime(aiNodeAnim* pNodeAnim, _float fTime)

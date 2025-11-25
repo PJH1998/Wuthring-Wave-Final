@@ -19,6 +19,7 @@ float g_fFlowRate = 0.f;
 
 matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
+bool g_HasSkinMask = false;
 
 
 // 렌더링 파이프 라인으로 넘겨질 최종 정점 정보.
@@ -71,6 +72,7 @@ VS_OUT VS_MAIN(VS_IN In)
     // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing
     float3 vMorphedPos = MorphedVert.vPosition;
     float3 vMorphedNormal = MorphedVert.vNormal;
+    
     
 
     // 2. [Skinning] 변형된 얼굴(vMorphedPos)을 기준으로 뼈대를 움직입니다.
@@ -175,6 +177,7 @@ struct PS_OUT
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
     float4 vPBR : SV_TARGET5;
+    float4 vSSS : SV_TARGET6;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -223,7 +226,7 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     // 
     float4 vNormal = 0.f;
     
-    if(g_HasNormal)
+    if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         vNormal = normalize(vNormalDesc * 2.f - 1.f);
@@ -252,17 +255,23 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
     
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    }
+    
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
-
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
     
     return Out;
 }
@@ -301,11 +310,12 @@ PS_OUT PS_ROVER(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
@@ -314,6 +324,8 @@ PS_OUT PS_ROVER(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -352,12 +364,13 @@ PS_OUT PS_GALBRENA(PS_IN In)
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
-    
+    if (g_HasSkinMask)
+    {
+        Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        
+    }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
-
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = vNormal;
@@ -365,6 +378,8 @@ PS_OUT PS_GALBRENA(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
