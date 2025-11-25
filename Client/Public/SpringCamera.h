@@ -102,6 +102,7 @@ private:
 	_float4x4							m_OwnerMatrix = {};
 	_bool								m_isMaintain = { false };
 	_bool								m_isLerp = { true };
+	_bool								m_isEscape = { false };
 
 private:
 	// Default

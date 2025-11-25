@@ -334,6 +334,7 @@ void CLevel_Heaven::Ready_Skybox()
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
 	SkyboxDesc.vUVRate = _float2(1.f, 1.f);
+	SkyboxDesc.fFXScaleRate = 0.3f;
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 		TEXT("Layer_BackGround"), &SkyboxDesc)))

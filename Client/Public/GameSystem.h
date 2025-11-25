@@ -40,7 +40,7 @@ public:
 
 #pragma region DIRECTOR
 	void							Add_Action(const _char* pFolderPath);
-	void							Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain);
+	void							Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape = false);
 	void							Stop_Action();
 #pragma endregion
 

@@ -246,8 +246,10 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 	// Action End
 	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
 	{
-		if (false == m_isMaintain)
+		if (false == m_isMaintain && false == m_isEscape)
 			SetUp_Recovery();
+		if (true == m_isEscape)
+			m_eCameraState = CAMERA_STATE::TARGET;
 		return;
 	}
 
@@ -378,6 +380,7 @@ void CSpringCamera_Edit::Ready_Event()
 				m_vPreTranslation = _float3(0.f, 0.f, 0.f);
 				m_fPreFixedDistance = m_fFixedDistance;
 				m_fDuration = static_cast<_float>(event.iEnd - event.iStart);
+				m_isEscape = event.isEscape;
 			}
 			else
 			{
