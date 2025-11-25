@@ -13,6 +13,7 @@
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
+#include "Coro_Rock.h"
 #include "AttackVolume.h"
 #include "AoEDoT.h"
 #include "Projectile.h"
@@ -325,6 +326,17 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	// Prototype_GameObject_CoroSaurus
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		CCorosaurus::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+
+	// Prototype_Component_Model_CoroRock
+	_fmatrix PrePropMatrix = XMMatrixScaling(0.001f, 0.002f, 0.001f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroRock"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PrePropMatrix, "../../Client/Bin/Resource/Model/Monster/Coro_Rock/SM_Tab_Roc_20AM_LOD0.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroRock
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroRock"),
+		CCoro_Rock::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 

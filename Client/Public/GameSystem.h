@@ -136,6 +136,9 @@ public:
 #pragma region MONSTER_TABLE
 	HRESULT LoadMonsterTable(const _char* pFilePath);
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
+	_uint Get_NumNPCInstance(_uint iType) const;
+	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
 #pragma endregion
 
 #pragma region SFX_PREFAB
