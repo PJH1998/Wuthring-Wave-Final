@@ -812,8 +812,12 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+									, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 
-								m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+								//바운딩박스 누수문제로 주석.
+
+								/*m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
 									CEdit_MapObject::MAP_LOAD pDesc{};
 									strcpy_s(pDesc.ModelName, ModelName.c_str());
 									pDesc.iShaderPassIndex = ShaderPass;
@@ -823,7 +827,7 @@ void CLevel_Map::Menu_Save_Load()
 
 									m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 										, m_iLevel, TEXT("Layer_MapObject"), &pDesc);
-									});
+									});*/
 
 							}
                         }
