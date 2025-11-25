@@ -45,20 +45,26 @@ private:
 	void			Trigger_ClickEvent();
 	void			Update_HoverEvent();
 
+	void			Update_ChangeColorBtn();
+	void			Update_ChangeEvent(_float fTimeDelta);
+	//void			Update_EndChangeEvent(_float fTimeDelta); 
+	void			Update_PalettesInstance();		// [임시] 로컬에 저장된 변수를 기반으로, 블럭들의 variantInstDesc 에 값 할당
+
+
 private:
-	HRESULT			Load_LevelData(_uint iLevelIndex);				// [임시] 외부든 내부든, 퍼즐의 패턴을 정의 및 로드 할 필요가 있음
+	HRESULT			Load_LevelData(_uint iLevelIndex = 0);				// [임시] 외부든 내부든, 퍼즐의 패턴을 정의 및 로드 할 필요가 있음
 
 	// 클릭 시,
 	// 1. 주변 블록 탐색 및 동일 색상이면 저장을 반복. 이는 유사 재귀식으로 작용할 필요 있음
 	// 2. 해당 탐색 결과를 로컬 vector에 담음. 이후 size 기반으로 count 넘어가면서 순차적 변화 + 애니메이션 재생.
-	void			Assign_TargetBlocksQueue(_uint iStartBlockIndex);			// 주변 박스를 순회하며, 같은 색인지 확인하고, 결과를 m_vecTargetsQueue 에 저장한다.
-	_bool			Calc_NearTarget(_uint iBlockIndex, _uint iDepth = 0);		// 재귀용. 직접 호출 X
+	void			Assign_TargetBlocksQueue(_uint iStartBlockIndex);			// 주변 박스를 순회하며, 같은 색인지 확인하고, 결과를 m_vecTargetsQueue 에 저장한다.	
+	//_bool			Calc_NearTarget(_uint iBlockIndex, _uint iDepth = 0);		// 재귀용. 직접 호출 X
+	void			Calc_NearTarget(_uint iBlockIndex);		// 뭔 재귀임 큐로 돌리셈
 
 	_bool			Check_ClickedBlockInstance(_uint* OutIndex);	// 몇 번째 인스턴스가 눌림?
 	_float2			Calc_InstBlock_ScrnPos(_uint iInstIndex);		// 그 인스턴스의 스크린 좌표가 어디임?
 	
 
-	void			Update_PalettesInstance();						// [임시] 로컬에 저장된 변수를 기반으로, 블럭들의 variantInstDesc 에 값 할당
 
 	void			Update_GoinDisable(_float fTimeDelta);
 
@@ -86,8 +92,9 @@ private:
 private:
 	array<_float4, 5>						m_arrColors = {};
 	array<array<UI_PALETTE_DESC, 10>, 8>	m_arrPalettesInfo = {};		
-	array<_bool, 80>						m_arrIsVisited = {};		// 재귀함수 도중 방문 여부 체크		
-	vector<vector<UI_PALETTE_DESC>>			m_vecTargetsQueue = {};
+	array<_bool, 80>						m_arrIsVisited = {};			// 방문 체크
+	array<_uint, 80>						m_arrDepth = {};				// 깊이 확인
+	vector<vector<UI_PALETTE_DESC>>			m_vecTargetsByDepth = {};
 
 
 
@@ -95,7 +102,7 @@ private:
 	// local variables for shader.
 	PALETTE_COLOR				m_eDestColorIndex	= PALETTE_COLOR::PCOLOR_END;
 	_float2						m_vChangeStartPos	= {};
-	_bool						m_isChanging		= false;
+	//_bool						m_isChanging		= false;
 	_float						m_fChangeRadius		= 0.f;
 	
 	// local variables for gameplay.

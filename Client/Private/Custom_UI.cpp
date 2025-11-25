@@ -209,16 +209,6 @@ _bool CCustom_UI::Check_OnInteract(_uint iEventInteractType, _uint iInstanceInde
         iInstanceIndex == m_iInputInstanceIndex)
         isSame_InstanceIndex = true;
 
-
-
-	if (m_tUIDesc.strUIName == L"FG_InstBlocks" &&
-		m_iInputState == 1 &&
-		isSame_InstanceIndex)
-		int i = 10;
-
-
-
-
     _bool isInteracted = (isSame_InteractType && isSame_InstanceIndex);
 
     return isInteracted;

@@ -1021,6 +1021,9 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         } break;
         case UIFLAG_OVFL_PALETTE :      // 8
         {
+            #define CHANGE_BYCIRCLE
+            
+            
             // ==============================
             // * [8] Overflow Palette (UI MiniGame Gimmick)
             // ==============================
@@ -1036,7 +1039,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             float4  vCurrColor          = In.mExtra0.xyzw;
             float4  vDestColor          = In.mExtra1.xyzw;
-            float2  vChangeStartPos     = In.mExtra2.xy;
+            float2  vChangeStartPos     = In.mExtra2.xy;        // 퍼지기가 시작될 지점
             bool    IsChanging          = _BOOL(In.mExtra2.z);
             float   fChangedRadius      = In.mExtra2.w;
             //float2  vFXImageSize        = In.mExtra3.xy;
@@ -1051,8 +1054,42 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 // vChangeStartPos 로부터 texcoord 의 스크린 변환 좌표까지의 길이가
                 // fChangedRadius 보다 짧은 경우에 vDescColor 적용, 아니면 vCurrColor 적용시키면 될 것으로 보임,
                 
-                float2 vScreenCoord = float2(In.vTexcoord.x * g_ScreenSize.x, -In.vTexcoord.y * g_ScreenSize.y);
-                float fLengthFromStartPos = length(vScreenCoord - vChangeStartPos);
+                // 전부 같게 변화하는 현상 발생. 각 인스턴스 별 좌표를 기준으로 다시 바로잡을 필요가 있음. 근데 그럼 더 쉽지 않나?
+                //float2 vScreenCoord = float2(In.vTexcoord.x * g_ScreenSize.x, -In.vTexcoord.y * g_ScreenSize.y);
+                
+
+                // 위에 이거는 현재 인스턴스의 한 점 자체만을 기준삼는 중.
+                // 여기에 인스턴스 별 스케일과 In.vPosition 을 적절히 곱하여 인스턴스 별 현재 픽셀 좌표를 알 수 있을 것 같고
+                // 이를 통해 물결처럼 퍼져나가는 효과를 기대할 수 있을 듯
+                // 사용 가능한 Input?
+                // float2 vSInstPos
+                // float2 vSInstSca
+                
+                
+                
+                // 스크린좌표로 변환하고, 현재 포커싱중인 점이 이를 지나면 색이 바뀌게끔..
+                
+                #ifdef CHANGE_BYCIRCLE
+                float2 vScreenX = { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.x + In.vSInstSca.x / 2.f };
+                float2 vScreenY = { In.vSInstPos.y - In.vSInstSca.y / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f };
+                
+                In.vTexcoord;   // 이게 인스턴스 기준 현재 포커싱중인 좌표
+                float2 vFixedScreenPos = { 
+                    lerp(vScreenX.x, vScreenX.y, In.vTexcoord.x),
+                    lerp(vScreenY.x, vScreenY.y, 1.f - In.vTexcoord.y)
+                };
+                #endif
+                
+                
+                #ifndef CHANGE_BYCIRCLE
+                float2 vSingleInstancePos = In.vSInstPos; ;           // 지금 이거 단순 인스턴스의 한 점을 기준삼는거라, 점 닿자마자 확 바뀌는 듯
+                #endif
+                
+                #ifdef CHANGE_BYCIRCLE
+                float2 vSingleInstancePos = vFixedScreenPos; //In.vSInstPos;           // 지금 이거 단순 인스턴스의 한 점을 기준삼는거라, 점 닿자마자 확 바뀌는 듯
+                #endif
+                
+                float fLengthFromStartPos = length(vSingleInstancePos - vChangeStartPos);
                 
                 float4 vTargetColor;
                 
@@ -1062,12 +1099,12 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                     vTargetColor = vCurrColor;
                     
                 Out.vColor.rgb = vTargetColor.rgb;
-                Out.vColor.a = 1.f;//vTargetColor.a * Out.vColor.a;
+                Out.vColor.a = vTargetColor.a * Out.vColor.a;
             }
             else            // 평시
             {
                 Out.vColor.rgb = vCurrColor.rgb;
-                Out.vColor.a = 1.f;//vCurrColor.a * Out.vColor.a;
+                Out.vColor.a = vCurrColor.a * Out.vColor.a;
             }   
             
             return Out;

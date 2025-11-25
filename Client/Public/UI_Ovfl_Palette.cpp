@@ -75,13 +75,23 @@ void CUI_Ovfl_Palette::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+	Update_ChangeColorBtn();
 	Update_HoverEvent();
-
 
 	// is KeyDown
 	Trigger_ClickEvent();
+	Update_ChangeEvent(fTimeDelta);
 
-	
+#ifdef _DEBUG
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
+		Load_LevelData();
+
+#endif // _DEBUG
+
+
+	Update_PalettesInstance();
 	Update_GoinDisable(fTimeDelta);
 
 	__super::Update(fTimeDelta);
@@ -156,18 +166,19 @@ void CUI_Ovfl_Palette::Trigger_ClickEvent()
 	_uint iClickedIndex = {};
 	if (Check_ClickedBlockInstance(&iClickedIndex))	// if Block Clicked !
 	{
+		m_isGoinChange = true;
+
 		_uint iIndexX = iClickedIndex / m_iPaletteSizeX;
 		_uint iIndexY = iClickedIndex % m_iPaletteSizeX;
 
 		UI_PALETTE_DESC& targetDesc = m_arrPalettesInfo[iIndexX][iIndexY];
 
-		m_eDestColorIndex = static_cast<PALETTE_COLOR>(targetDesc.eColor);
+		m_eDestColorIndex = m_eDestColorIndex;
 		m_vChangeStartPos = Calc_InstBlock_ScrnPos(iClickedIndex);
-		m_isChanging;
+		m_isGoinChange;
 		m_fChangeRadius;
 
 		Assign_TargetBlocksQueue(iClickedIndex);
-		Update_PalettesInstance();
 	}
 }
 
@@ -177,7 +188,7 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 	CCustom_UI* pHoverCheckTargetUI = m_pUI_InstBlocks;
 
 	// 마우스가 올라간 인스턴스를 탐색
-	_uint iNumInstHovers = pTargetUI->Get_UIDesc().vecInstanceDescs.size();
+	_uint iNumInstHovers = static_cast<_uint>(pTargetUI->Get_UIDesc().vecInstanceDescs.size());
 
 	_bool isHovered = false;
 	_uint iHoveredIndex = UINT_MAX;
@@ -211,7 +222,7 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 	// ksta : 임시 랜덤 생성. 나중에 패턴 추가 필요
 	iLevelIndex; // 이거 써서 로드 분기화 !!!
 
-	static _uint iRandColor = m_pGameInstance->Rand(0.f, 3.999f);
+	static _uint iRandColor = static_cast<_uint>(m_pGameInstance->Rand(0.f, 3.999f));
 	const _float fColorChangeChance = 0.1f;
 
 	for (auto& palettes : m_arrPalettesInfo)
@@ -230,16 +241,33 @@ void CUI_Ovfl_Palette::Assign_TargetBlocksQueue(_uint iStartBlockIndex)
 {
 	// 클릭 시 트리거.
 	
-
-	// 재귀로 주변 탐색 진행 및 저장
-	fill(m_arrIsVisited.begin(), m_arrIsVisited.end(), false);
+	m_arrIsVisited.fill(false);
 	Calc_NearTarget(iStartBlockIndex);
+
+	_uint iSize = 0;
+	for (auto& targets : m_vecTargetsByDepth)
+		for (auto& target : targets)
+			iSize++;
+	std::cout << "[CUI_Ovfl_Palette::Assign_TargetBlocksQueue] Change Queue Calced. (Vector Size : " << m_vecTargetsByDepth.size() << ", Total Size : " << iSize  << ")" << std::endl;
+
+	for (_uint i = 0; i < m_vecTargetsByDepth.size(); i++)
+	{
+		std::cout << "[CUI_Ovfl_Palette::Assign_TargetBlocksQueue] Depth [" << i << "] : ";
+		for (_uint j = 0; j < m_vecTargetsByDepth[i].size(); j++)
+			std::cout << "(" << m_vecTargetsByDepth[i][j].arrIndex[0] << ", " << m_vecTargetsByDepth[i][j].arrIndex[1] << ") ";
+		std::cout << std::endl;
+	}
+			
+
 }
 
+
+/*
 _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
 {
 	if (m_arrIsVisited[iBlockIndex])
 		return false;
+
 
 	m_arrIsVisited[iBlockIndex] = true;
 
@@ -255,7 +283,7 @@ _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
 		m_vecTargetsQueue.resize(1);
 
 		m_vecTargetsQueue[iDepth].push_back(m_arrPalettesInfo[iBlockIndex / iPaletteSizeX][iBlockIndex % iPaletteSizeX]);
-
+		m_arrIsVisited[iBlockIndex] = false;
 		iDepth++;
 		return Calc_NearTarget(iBlockIndex, iDepth);
 	}
@@ -292,7 +320,7 @@ _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
         auto& targetPalette = m_arrPalettesInfo[iIndexX][iIndexY];				// 주변 블럭 (비교대상)
         auto& originPalette = m_arrPalettesInfo[iOriginIndexX][iOriginIndexY];	// 중앙 블럭
 
-        _bool isSameColor = targetPalette.eColor == originPalette.eColor;
+		_bool isSameColor = (targetPalette.eColor == originPalette.eColor);
         if (isSameColor)
             vecTargetQueue.push_back(targetPalette);							// 지역 변수에 대상 삽입
     }
@@ -302,14 +330,18 @@ _bool CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex, _uint iDepth)
 
 
 	// - [3] 지역의 탐색 결과를 클래스의 로컬 변수로 삽입. 이후 재귀 호출.
+	// 
+	// 이렇게 하면 이미 위, 자식의 위, 그 자식의 위.. 으로 꽉 채워서 돌고,
+	// 다시 0, 0으로 돌아와서 오른쪽을 보려 할 떈 이미 방문해서 스킵되는 식으로 로직이 망가져있음 
 
 	m_vecTargetsQueue.resize(iDepth);
-	m_vecTargetsQueue[iDepth - 1] = vecTargetQueue;
+	m_vecTargetsQueue[iDepth - 1].insert(m_vecTargetsQueue[iDepth - 1].end(), vecTargetQueue.begin(), vecTargetQueue.end());
 
 	for (auto& target : vecTargetQueue)
 	{
+		_uint iFixedDepth = iDepth;
 		_uint iCurIndex = target.arrIndex[0] * iPaletteSizeX + target.arrIndex[1];
-		Calc_NearTarget(iCurIndex, iDepth);
+		Calc_NearTarget(iCurIndex, iFixedDepth);
 	}
 
 	return true;
@@ -335,42 +367,280 @@ _bool CUI_Ovfl_Palette::Check_ClickedBlockInstance(_uint* OutIndex)
 	*OutIndex = iInteractedIndex;
 	return isClicked;
 }
+*/
+
+
+void CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex)
+{
+	enum NEXT_TARGET { UP, RIGHT, DOWN, LEFT, END };
+
+	_uint iPaletteSizeX = m_iPaletteSizeX;
+	_uint iPaletteSizeY = m_iPaletteSizeY;
+	_uint iNumPalettes = m_iNumPalettes;
+
+	m_arrIsVisited.fill(false);
+	m_arrDepth.fill(0);
+
+	// [1] 큐 정의 및 최초 위치의 큐 설정
+	// [2] 최초 위치 진입 -> 방문 체크, 조건 계산, 주변 인덱스를 큐에 저장 (1회)
+	// [3] 다음 깊이 순회 -> 방문 체크, 조건 계산, 주변 인덱스를 큐에 저장 (4회)
+	// [4] 다음 깊이 순회.. (8회) 이후 반복
+	// [5] 다음 인덱스가 비어있으면 종료
+	// [6] 이후, 큐 돌며 진행한 저장 및 계산 결과를 바탕으로 원하는 값 도출
+
+
+	// 1. 큐 정의, 최초 위치의 큐 설정
+	queue<_uint> qTargetIndices = {};
+
+	m_arrIsVisited[iBlockIndex] = true;
+	qTargetIndices.push(iBlockIndex);
+	m_arrDepth[iBlockIndex]++;
+
+	// 2~5. 반복문 정의, 최초 위치 진입, 반복문 구성
+	while (!qTargetIndices.empty())
+	{
+		// 최초에는 최초 위치, 이후에는 탐색을 통해 다음 큐가 쌓임. 이를 통해 점차 깊어지는 depth 탐색.
+
+		_uint iIndex = qTargetIndices.front();
+		qTargetIndices.pop();					// 다음 계산을 위해 인덱스만 뽑고 버림
+
+
+		// 주변부 탐색..
+		//vector<_uint> vecCheckIndices = {};
+		_uint iTargets[END] = {};				// >> left, right : +/-를 수행했을 때에 줄바꿈이 일어나지는 않는가의 확인 필요
+		iTargets[UP]	=	IS_BETWEEN(iIndex	 - iPaletteSizeX, 0, iNumPalettes)	? iIndex - iPaletteSizeX	: UINT_MAX;
+		iTargets[RIGHT]	=	IS_BETWEEN(iIndex	 + 1			, 0, iNumPalettes) &&										
+							((iIndex + 1) / iNumPalettes == (iIndex / iNumPalettes))? iIndex + 1				: UINT_MAX;
+		iTargets[DOWN]	=	IS_BETWEEN(iIndex	 + iPaletteSizeX, 0, iNumPalettes)	? iIndex + iPaletteSizeX	: UINT_MAX;
+		iTargets[LEFT]	=	IS_BETWEEN(iIndex	 - 1			, 0, iNumPalettes) &&
+							((iIndex - 1) / iNumPalettes == (iIndex / iNumPalettes))? iIndex - 1				: UINT_MAX;
+
+		for (auto& target : iTargets)			// 유효하다면 큐에 삽입
+		{
+			if (target == UINT_MAX)		continue;		// 유효 X
+			if (m_arrIsVisited[target]) continue;		// 이미 탐색한 인덱스 X
+
+			auto iOriginIndex	= m_arrPalettesInfo[iIndex / iPaletteSizeX][iIndex % iPaletteSizeX];
+			auto iOtherIndex	= m_arrPalettesInfo[target / iPaletteSizeX][target % iPaletteSizeX];
+
+			_bool isSameColor	= iOriginIndex.eColor == iOtherIndex.eColor;
+			if (!isSameColor)			continue;		// 같은 색이 아니면 X
+
+
+			m_arrDepth[target] = m_arrDepth[iIndex] + 1;
+			m_arrIsVisited[target] = true;
+			//vecCheckIndices.push_back(target);
+			qTargetIndices.push(target);
+		}
+	}
+
+	_uint iMaxDepth = 0;
+	for (auto& depth : m_arrDepth)
+		if (iMaxDepth < depth) iMaxDepth = depth;
+	m_vecTargetsByDepth.clear();
+	m_vecTargetsByDepth.resize(iMaxDepth);
+
+
+	for (_uint i = 0; i < m_arrDepth.size(); i++)
+	{
+		_uint iTargetDepth = m_arrDepth[i];
+		if (iTargetDepth == 0)	 continue;
+
+		m_vecTargetsByDepth[iTargetDepth - 1].push_back(m_arrPalettesInfo[i / iPaletteSizeX][i % iPaletteSizeX]);
+	}
+
+	return;
+}
+
+_bool CUI_Ovfl_Palette::Check_ClickedBlockInstance(_uint* OutIndex)
+{
+	_uint iNumInstBlocks = static_cast<_uint>(m_pUI_InstBlocks->Get_UIDesc().vecInstanceDescs.size());
+
+	_bool isClicked = false;
+	_uint iInteractedIndex = UINT_MAX;
+
+	for (_uint i = 0; i < iNumInstBlocks; i++)
+	{
+		isClicked = m_pUI_InstBlocks->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), i);
+		if (isClicked)
+		{
+			iInteractedIndex = i;
+			break;
+		}
+	}
+
+	*OutIndex = iInteractedIndex;
+	return isClicked;
+}
+
 
 _float2 CUI_Ovfl_Palette::Calc_InstBlock_ScrnPos(_uint iInstIndex)
 {
 	auto targetInstDesc = m_pUI_InstBlocks->Get_UIDesc().vecInstanceDescs[iInstIndex];
 
-	_float2 fTargetPos = *reinterpret_cast<_float2*>(&targetInstDesc.vSInstTrans);
-	return fTargetPos;
+	_float2 vTargetPos = *reinterpret_cast<_float2*>(&targetInstDesc.vSInstTrans);
+
+	_float2 vDebugCenterPos = { vTargetPos.x + (_float)g_iWinSizeX * 0.5f, - vTargetPos.y + (_float)g_iWinSizeY * 0.5f };
+
+	return vTargetPos;
+}
+
+void CUI_Ovfl_Palette::Update_ChangeColorBtn()
+{
+	CCustom_UI* pTargetUI = m_pUI_InstColorBtns;
+
+	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetInstDesc = targetDesc.vecInstanceDescs;
+
+	_uint iNumTargetInst = static_cast<_uint>(targetInstDesc.size());
+	vector<_float4x4> vecColorBtnVariantMat = {};
+	vecColorBtnVariantMat.resize(iNumTargetInst);
+
+	for (_uint i = 0; i < vecColorBtnVariantMat.size(); i++)
+	{
+		// 상시 색상 할당
+		// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+		*reinterpret_cast<_float4*>(&vecColorBtnVariantMat[i]._11) = m_arrColors[i];
+	}
+	
+	CCustom_UI::VARIANTREADY_UI_DESC tColorBtnVariantDesc = {
+		vecColorBtnVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_OVFL_PALETTE),
+		true
+	};
+
+	pTargetUI->Set_VariantUIDesc(tColorBtnVariantDesc);
+
+
+
+	// 클릭 시 인덱스 감지하여 현재 선택한 색상을 그것으로 변경
+	for (_uint i = 0; i < iNumTargetInst; i++)
+	{
+		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), i))
+		{
+			m_eDestColorIndex = static_cast<PALETTE_COLOR>(i);
+
+#ifdef _DEBUG
+			_string strDebugText = {};
+			switch (m_eDestColorIndex)
+			{
+			case Client::CUI_Ovfl_Palette::PCOLOR_RED:		strDebugText = "RED";			break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_GREEN:	strDebugText = "GREEN";			break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_BLUE:		strDebugText = "BLUE";			break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_YELLOW:	strDebugText = "YELLOW";		break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_END:		strDebugText = "END";			break;
+			}
+
+			std::cout << "[CUI_Ovfl_Palette::Update_ChangeColorBtn] Changed Color Index : " << strDebugText << "(" << m_eDestColorIndex << ")" << std::endl;
+#endif // _DEBUG
+
+			break;
+		}
+	}
+
+
+}
+
+void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
+{
+	if (!m_isGoinChange)
+		return;
+
+
+	const _float fChangeSpeed = 300.f;
+	m_fChangeRadius = m_fChangeRadius + fTimeDelta * fChangeSpeed;	
+	// 이 값 change 끝나면 초기화 필요 및, dest 로 있던 색을 각 블럭에 실제 컬러값으로 변경해야 함
+
+
+
+	// Update End
+	// End 시, changeRadius 초기화 및 타겟들 현재 선택한 색상으로 실제 값변경 필요
+	_bool isChangeEnd = m_fChangeRadius >= static_cast<_float>(g_iWinSizeX);		// 전부 찼는지를 셰이더용 radius가 충분히 커졌는지로 판단..?
+
+	if (isChangeEnd)
+	{
+		m_isGoinChange = false;
+		m_fChangeRadius = 0.f;
+
+		for (auto& targets : m_vecTargetsByDepth)
+			for (auto& target : targets)
+			{
+				m_arrPalettesInfo[target.arrIndex[0]][target.arrIndex[1]].eColor = m_eDestColorIndex;// target.eColor;
+			}
+
+		std::cout << "[CUI_Ovfl_Palette::Update_ChangeEvent] Change Finally Applied!" << std::endl;
+	}
+	 
+
 }
 
 void CUI_Ovfl_Palette::Update_PalettesInstance()
 {
-	// 인스턴스들을 m_arrPalettesInfo 에 저장된 색상대로 채워넣는 함수
+	// 인스턴스들을 각종 로컬 변수와 m_arrPalettesInfo 에 저장된 색상대로 채워넣는 함수
 
+	// shader custom matrix info..
+	// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+	// [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
+	// [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
+
+
+	// 애들이 분별없이 전부 다 변화값을 가져가는 것 같음
+	// 근데 여기엔 아직 m_vecTargetsQueue 적용안됨
 
 	auto blocksDesc = m_pUI_InstBlocks->Get_UIDesc();
 	
+	_uint iNumTargetDesc = static_cast<_uint>(blocksDesc.vecInstanceDescs.size());
 	vector<_float4x4> vecPaletteVariantMat = {};
-	vecPaletteVariantMat.resize(80);
+	vecPaletteVariantMat.resize(iNumTargetDesc);
+
+
+
+	// 우선 변경되어야 하는 것들 먼저 선적용 후 방문 체크
+
+	array<_bool, 80> arrIsVisited = {};
+	arrIsVisited.fill(false);
+
+	for (auto& targetsQueue : m_vecTargetsByDepth)
+		for (auto& targetQueue : targetsQueue)
+		{
+			_uint iTargetIndexX = targetQueue.arrIndex[0];
+			_uint iTargetIndexY = targetQueue.arrIndex[1];
+			_uint iWidth = static_cast<_uint>(m_arrPalettesInfo[0].size());
+			_uint iSingleIndex = iTargetIndexX * iWidth + iTargetIndexY;
+
+			auto& target = m_arrPalettesInfo[iTargetIndexX][iTargetIndexY];
+
+			_float4x4& targetMat = vecPaletteVariantMat[iSingleIndex];
+
+			*reinterpret_cast<_float4*>(&targetMat._11) = m_arrColors[target.eColor];		// 현재 블럭의 색상
+			*reinterpret_cast<_float4*>(&targetMat._21) = m_arrColors[m_eDestColorIndex];	// 변하려는 색상
+			*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
+			*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isGoinChange);
+			*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
+
+			arrIsVisited[iSingleIndex] = true;
+		}
+
+
+
+	// 방문 체크 후 방문했으면 스킵, 아닌 애들은 그냥 현재 본인 색상으로 두기
 
 	for (_uint i = 0; i < m_arrPalettesInfo.size(); i++)
 		for (_uint j = 0; j < m_arrPalettesInfo[i].size(); j++)
 		{
-			_uint iWidth = m_arrPalettesInfo[i].size();
-			_uint iHeight = m_arrPalettesInfo.size();
+			_uint iWidth = static_cast<_uint>(m_arrPalettesInfo[i].size());
+			_uint iSingleIndex = i * iWidth + j;
+
+			if (arrIsVisited[iSingleIndex] == true)		//  "방문 체크 후 방문했으면 스킵"
+				continue;
 
 			_float4x4& targetMat = vecPaletteVariantMat[i * iWidth + j];
-			
-			// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
-			// [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
-			// [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
 
 			*reinterpret_cast<_float4*>(&targetMat._11) = m_arrColors[m_arrPalettesInfo[i][j].eColor];
-			*reinterpret_cast<_float4*>(&targetMat._21) = m_arrColors[m_eDestColorIndex];
-			*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
-			*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isChanging);
-			*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
+			//*reinterpret_cast<_float4*>(&targetMat._21) = m_arrColors[m_eDestColorIndex];
+			//*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
+			//*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isGoinChange);
+			//*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
 		}
 
 	CCustom_UI::VARIANTREADY_UI_DESC tPaletteVariantDesc = {
