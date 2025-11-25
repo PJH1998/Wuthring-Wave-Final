@@ -269,10 +269,10 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     {
         Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         
-        vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-        float fViewZ = vViewPos.z;
+        //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+        //float fViewZ = vViewPos.z;
 
-        vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+        //vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
 
     
         if (g_HasShadowMap)
@@ -434,12 +434,13 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
     
     float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    
     bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
-    if(false == IsDynamic)
+    bool IsSky = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    
+    if (false == IsDynamic)
         vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
     
-    if (false == g_IsDynamicLUT && true == IsDynamic)
+    if ((false == g_IsDynamicLUT && true == IsDynamic) || false == IsSky)
     {
         Out.vColor = vOriginColor;
     
@@ -640,10 +641,12 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     
     float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     float4 vBlurColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
-    float2 vVelocity = g_VelocityMap.Sample(DefaultSampler, In.vTexcoord).xy;
-    
-    bool IsBlur = length(vVelocity) > g_fLimitVelocity ? true : false;
-    
+    float4 vVelocity = g_VelocityMap.Sample(DefaultSampler, In.vTexcoord);
+  
+    bool IsBlur = (vVelocity.w != 1.f && length(vVelocity) > g_fLimitVelocity) ? true : false;
+   
+    //float fLerpRatio = clamp(g_fEffectIntensity, 0.f, 0.5f);
+   
     if(IsBlur)
         Out.vColor = lerp(vOriginColor, vBlurColor, g_fEffectIntensity);
     else

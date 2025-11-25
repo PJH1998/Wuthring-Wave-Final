@@ -112,6 +112,7 @@ private:
 	_uint m_iCurrentLoadCnt = {};
 	_uint m_iCurrentLevel = {};
 	_uint m_iMaxLevel = {};
+
 public:
 	static CModel_Manager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iMaxLevel);
 	virtual void				Free() override;

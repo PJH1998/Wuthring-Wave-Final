@@ -97,13 +97,15 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    if(length(vDiffuse) == 0.f)
+        vDiffuse = 1.f;
+    
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
 
     if (g_HasMask)
     {
         Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
         Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
-
     }
     else
     {
@@ -191,15 +193,101 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_ALPHA(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    //Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    Out.vDiffuse = float4(1.f, 1.f, 1.f, 1.f);
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vNormal = In.vNormal * 0.5f + 0.5f;
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+
+    if (g_HasMask)
+    {
+        Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
+        Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+
+    }
+    else
+    {
+        Out.vDiffuse = vDiffuse;
+    }
+    Out.vDiffuse.w = 1.f;
     
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+    
+    if (g_IsDynamicObject)
+    {
+        Out.vDepth.z = 1.f;
+ //       Out.vPBR.z = 1.f;
+    }
+    
+    float4 vNormal;
+    
+    if (g_HasNormal)
+    {
+        if (g_HasMask)
+        {
+            vector vDefaultNormal = g_NormalTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0);
+            
+            float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
+            //if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+            vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+
+            vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+        
+            //float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
+            //if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
+            //    vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
+
+            //if (vMask.r == 0.f && vMask.g == 0.f)
+            //    vNormal = vNormal1;
+            //else
+            //{
+            //    vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+            //    vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
+            //}
+            
+            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+        }
+        else
+        {
+            vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+		
+	        
+            vNormal = normalize(vDefaultNormal * 2.f - 1.f);
+            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+                vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+        }
+        //vector vNormalDesc = vDefaultNormal * (1.f - vMask.r) + vMaskNormal * vMask.g;
+        
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+
+        //vNormal = vNormal1;  
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        vNormal = vNormal * 0.5f + 0.5f;
+    }
+    
+    Out.vNormal = float4(vNormal.xyz, 1.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     
     Out.vDepth.w = 1.f;
+    
+    if (Out.vDiffuse.a <= 0.f)
+        discard;
     
     return Out;
 }
