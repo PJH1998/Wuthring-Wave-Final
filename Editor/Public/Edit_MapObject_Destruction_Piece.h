@@ -57,7 +57,7 @@ private:
 	_uint m_iShaderPassIndex = {};
 	_uint m_iLevel = {};
 	OBJECTTYPE m_eObjectType = { OBJECTTYPE::END };
-	vector<CModel*> m_pModelComArray;
+	CModel_Streaming* m_pModelCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
 

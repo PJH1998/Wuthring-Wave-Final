@@ -20,6 +20,8 @@
 #include "SceneCamera.h"
 #include "MapObject.h"
 
+#include "Logo_SkyBox.h"
+
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
 {
@@ -43,6 +45,18 @@ HRESULT CLoader_Logo::Initialize()
 HRESULT CLoader_Logo::Load_Texture()
 {
 	cout << "Texture" << endl;
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Back"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/T_Lau_Sky_01E_M.png"), 1))))
+		CRASH("Failed to Add Prototype Texture LogoSky Back");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Mid"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/T_Lau_Sky_01C_M.png"), 1))))
+		CRASH("Failed to Add Prototype Texture LogoSky Back");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Front"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/T_Lau_Sky_01D_M.png"), 1))))
+		CRASH("Failed to Add Prototype Texture LogoSky Back");
 
     return S_OK;
 }
@@ -69,6 +83,10 @@ HRESULT CLoader_Logo::Load_Object()
 {
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_LogoSkyBox"),
+		CLogo_SkyBox::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype GameObject LogoSkyBox");
 
 	cout << "Object" << endl;
 

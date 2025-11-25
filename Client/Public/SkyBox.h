@@ -40,7 +40,7 @@ public:
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
-	CModel*					m_pModelCom[ENUM_CLASS(SKYTYPE::END)] = {nullptr};
+	CModel*						m_pModelCom[ENUM_CLASS(SKYTYPE::END)] = {nullptr};
 
 	_uint						m_iCurrentLevel = {};
 	_uint						m_iNumModels = {};

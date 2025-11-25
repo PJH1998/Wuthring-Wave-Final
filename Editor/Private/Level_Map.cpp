@@ -345,10 +345,10 @@ void CLevel_Map::Menu_Model_Load()
 
 			if (ImGui::Selectable(FileName))
 			{
-				auto iter = m_szPrototypeName.find(m_ModelPaths[i]);
+				auto iter = m_szPrototypeName.find(FileDir);
 				if (iter == m_szPrototypeName.end())
 				{
-					m_szPrototypeName.insert(m_ModelPaths[i]);
+					m_szPrototypeName.insert(FileDir);
 
 					_string NoVersionName = FileName;
 					NoVersionName.pop_back();
@@ -589,6 +589,7 @@ void CLevel_Map::Menu_Save_Load()
 
         if (ImGuiFileDialog::Instance()->Display("Map File Load")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
+				Ready_Map_Load_Prototype();
                 _string DatFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
                 for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
                     if (entry.is_regular_file())
@@ -614,7 +615,6 @@ void CLevel_Map::Menu_Save_Load()
 							{
 								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 								File.read(Desc.ModelName, NameLength);
-								Ready_Map_Load_Prototype(Desc.ModelName);
 
 
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
@@ -757,7 +757,6 @@ void CLevel_Map::Menu_Save_Load()
 								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 								File.read(Desc.ModelName, NameLength);
 
-								Ready_Map_Load_Prototype(Desc.ModelName);
 								//여기서 _bone안에 있는 애들 찾아가지고 조각들 프로토타입 다 만들게 해야할듯.....
 								//Ready_Debris_Prototype(Desc.ModelName);
 
@@ -804,8 +803,6 @@ void CLevel_Map::Menu_Save_Load()
 							{
 								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 								File.read(Desc.ModelName, NameLength);
-
-								Ready_Map_Load_Prototype(Desc.ModelName);
 
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
@@ -913,11 +910,14 @@ void CLevel_Map::Load_Objects()
 				}
 				else if (entry.path().string().find("Bones") != std::string::npos && entry.path().string().find("_Bone") == std::string::npos)
 				{
-					m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+					//m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = FileDir]() {
+						//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+						//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+						//	CRASH("Prototype Create Failed");
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+							CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
 							CRASH("Prototype Create Failed");
-						});
+						//});
 					continue;
 				}
 				_wstring baseName = StringToWString(FileName);
@@ -949,7 +949,10 @@ void CLevel_Map::Load_Objects()
 				{
 					_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
 					ProtoName += StringToWString(FileName);
-
+					auto iter = m_szPrototypeName.find(WStringToString(ProtoName));
+					if (iter != m_szPrototypeName.end())
+						continue;
+					m_szPrototypeName.insert(FileDir);
 					m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
 							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str(),true))))
@@ -1032,30 +1035,36 @@ void CLevel_Map::Create_TriggerBox()
 	}
 }
 
-void CLevel_Map::Ready_Map_Load_Prototype(const _char* pModelName)
+void CLevel_Map::Ready_Map_Load_Prototype()
 {
-	_string Name = pModelName;
-
+	unordered_set<_string> m_Test;
 	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath))
 	{
 		if (!entry.is_regular_file())
 			continue;
 		if (entry.path().extension() != ".dat")
 			continue;
-		if (entry.path().string().find(Name) == string::npos)
+		if (entry.path().string().find("Bone") != string::npos)
 			continue;
 
-		auto iter = m_szPrototypeName.find(entry.path().string());
+		_char FileDrive[MAX_PATH] = {};
+		_char FileDir[MAX_PATH] = {};
+
+		_char FileName[MAX_PATH] = {};
+		_char FileExt[MAX_PATH] = {};
+		_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+		auto iter2 = m_Test.find(FileDir);
+		if (iter2 != m_Test.end())
+			continue;
+		m_Test.insert(FileDir);
+
+		auto iter = m_szPrototypeName.find(FileDir);
 		if (iter == m_szPrototypeName.end())
 		{
-			m_szPrototypeName.insert(entry.path().string());
+			m_szPrototypeName.insert(FileDir);
 
-			_char FileDrive[MAX_PATH] = {};
-			_char FileDir[MAX_PATH] = {};
 
-			_char FileName[MAX_PATH] = {};
-			_char FileExt[MAX_PATH] = {};
-			_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
 			_string VersionName = FileName;
 
@@ -1072,12 +1081,9 @@ void CLevel_Map::Ready_Map_Load_Prototype(const _char* pModelName)
 			PrototypeName.pop_back();
 			PrototypeName.pop_back();
 			PrototypeName.pop_back();
-
-			m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = FileDir]() {
-				if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
-					CModel_Streaming::Create(m_pDevice, m_pContext, Path))))
-					CRASH("Prototype Create Failed");
-				});
+			if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+				CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
+				CRASH("Prototype Create Failed");
 		}
 	}
 	m_pGameInstance->Wait_Thread_End();

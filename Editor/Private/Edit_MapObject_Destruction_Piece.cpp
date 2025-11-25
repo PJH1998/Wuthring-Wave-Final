@@ -30,10 +30,10 @@ HRESULT CEdit_MapObject_Destruction_Piece::Initialize_Clone(void* pArg)
 	if (FAILED(Ready_Component(pArg)))
 		return E_FAIL;
 
-	m_iNumLOD = m_pModelComArray.size() - 1;
+	m_iNumLOD = m_pModelCom->Get_NumMesh(0);
 
 
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+	Sync_BoundingBox(m_pModelCom->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 
 	_vector vScale, vRotation, vTranslation;
 
@@ -89,51 +89,48 @@ void CEdit_MapObject_Destruction_Piece::Late_Update(_float fTimeDelta)
 
 void CEdit_MapObject_Destruction_Piece::Render()
 {
-	_uint DrawModel = m_iLODIndex;
-	//_uint DrawModel = 0;
+	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
 
-	if (DrawModel > m_iNumLOD)
-		DrawModel = m_iNumLOD;
+	_bool HasNormal = { true };
+	_bool HasMask = { true };
+	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
+	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-		_bool HasNormal = { true };
-		_bool HasMask = { true };
+		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
+			return;
 
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
 		{
-			if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-				HasMask = false;
-
-
-			if (HasMask)
-			{
-				m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-
-				if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-					HasNormal = false;
-			}
-			else
-			{
-				m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
-
-				if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-					HasNormal = false;
-			}
-
-			m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-			m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-			
-			m_pShaderCom->Begin(m_iShaderPassIndex);
-
-			m_pModelComArray[DrawModel]->Render(i);
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			HasMask = false;
 		}
+
+		if (HasMask)
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE);
+
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL)))
+				HasNormal = false;
+		}
+		else
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0);
+
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = false;
+		}
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+
+		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
 
@@ -152,13 +149,12 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	_tchar Name[MAX_PATH] = {};
-	m_pModelComArray.resize(1);
 	MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
 	lstrcat(Model, Name);
 	if (FAILED(Add_Component(pDesc->iLevel, Model,
-		StringToWString(m_ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
+		StringToWString(m_ModelName), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
-
+	m_pModelCom->Ready_BoundingBox();
 	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
@@ -171,7 +167,7 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Dynamic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.vExtent = m_pModelComArray[0]->Get_BoundingBox()->Extents;
+	RigidbodyDesc.vExtent = m_pModelCom->Get_BoundingBox()->Extents;
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
@@ -246,9 +242,5 @@ void CEdit_MapObject_Destruction_Piece::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pRigidbodyCom);
-
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-
-	m_pModelComArray.clear();
+	Safe_Release(m_pModelCom);
 }

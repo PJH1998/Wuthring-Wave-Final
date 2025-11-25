@@ -12,7 +12,7 @@
 #include "Effect_Rect.h"
 #include "Effect_Decal.h"
 #include "Effect_Radial.h"
-
+#include"Map_Interface.h"
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -118,6 +118,9 @@ HRESULT CLevel_Effect::Initialize()
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
     }
+	m_pMap_Interface = CMap_Interface::Create(m_pDevice, m_pContext);
+
+
 	Ready_Map("../../Client/Bin/Resource/Map/MapData/Effect_Map/");
 
 
@@ -150,6 +153,11 @@ void CLevel_Effect::Render()
 
 void CLevel_Effect::Ready_Map(const _char* pFilePath)
 {
+	m_pMap_Interface->SetPrototypes(m_pGameInstance->Get_CurrentLevel());
+	m_pGameInstance->Load_Resource("../../Client/Bin/Resource/Map/Asphodel_Barrens/");
+	m_pMap_Interface->Ready_Map_Prototype("../../Client/Bin/Resource/Map/Asphodel_Barrens/");
+	m_pGameInstance->LoadLastLOD();
+
 	_char FileDrive[MAX_PATH] = {};
 	_char FileDir[MAX_PATH] = {};
 	_char FileName[MAX_PATH] = {};
@@ -163,74 +171,73 @@ void CLevel_Effect::Ready_Map(const _char* pFilePath)
 	ProjectPath += "/Client/Bin/Resource/Map";
 	_float fSize = 0.01f;
 	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
-
+	
 	_wstring PrototypeName = L"Prototype_Component_Model_";
 	_wstring InstancePrototypeName = L"Prototype_Component_Model_Instance_";
-
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_MapObject"),
 		CEdit_MapObject::Create(m_pDevice, m_pContext));
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_NonAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
 
-	for (const auto& entry : filesystem::directory_iterator(PasingDir)) {
-		if (!entry.is_regular_file())
-			continue;
-		if (entry.path().string().find("Prototype") == std::string::npos)
-			continue;
+	//for (const auto& entry : filesystem::directory_iterator(PasingDir)) {
+	//	if (!entry.is_regular_file())
+	//		continue;
+	//	if (entry.path().string().find("Prototype") == std::string::npos)
+	//		continue;
 
-		_string strFilePath = entry.path().string();
-		ifstream File(strFilePath, ios::binary);
+	//	_string strFilePath = entry.path().string();
+	//	ifstream File(strFilePath, ios::binary);
 
-		_uint NameLength = {};
+	//	_uint NameLength = {};
 
-		_char Name[MAX_PATH] = {};
-		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-		{
-			memset(Name, 0, sizeof(Name));
-			File.read(reinterpret_cast<_char*>(&Name), NameLength);
-			//여기서 프로토타입 생성.
-			_uint ProtoMax = Name[strlen(Name) - 1] - '0' + 1;
-			_string ModelName = Name;
-			ModelName.pop_back();
+	//	_char Name[MAX_PATH] = {};
+	//	while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+	//	{
+	//		memset(Name, 0, sizeof(Name));
+	//		File.read(reinterpret_cast<_char*>(&Name), NameLength);
+	//		//여기서 프로토타입 생성.
+	//		_uint ProtoMax = Name[strlen(Name) - 1] - '0' + 1;
+	//		_string ModelName = Name;
+	//		ModelName.pop_back();
 
-			for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
-				if (entry2.path().string().find("MapData") != std::string::npos)
-					continue;
-				if (entry2.path().string().find("Test") != std::string::npos)
-					continue;
+	//		for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
+	//			if (entry2.path().string().find("MapData") != std::string::npos)
+	//				continue;
+	//			if (entry2.path().string().find("Test") != std::string::npos)
+	//				continue;
 
-				if (entry2.path().string().find(ModelName) == std::string::npos)
-					continue;
+	//			if (entry2.path().string().find(ModelName) == std::string::npos)
+	//				continue;
 
-				if (entry2.path().extension() != ".dat")
-					continue;
+	//			if (entry2.path().extension() != ".dat")
+	//				continue;
 
-				_string Path = entry2.path().string();
-				_string Prototype = entry2.path().stem().string();
-				//파서 수정중
-				if (entry2.path().string().find("Instance") == std::string::npos)
-				{
-					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), PrototypeName + StringToWString(Prototype),
-							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
-							CRASH("Prototype Create Failed");
-						});
-				}
-				else if (entry2.path().string().find("Instance") != std::string::npos)
-				{
-					m_pGameInstance->Add_Work([=, Model = InstancePrototypeName + StringToWString(Prototype), ModelPath = Path]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Model,
-							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, ModelPath.c_str()))))
-							CRASH("Prototype Create Failed");
-						});
-				}
-				//프로토타입 생성
-			}
-		}
-		File.close();
-	}
-	m_pGameInstance->Wait_Thread_End();
+	//			_string Path = entry2.path().string();
+	//			_string Prototype = entry2.path().stem().string();
+	//			//파서 수정중
+	//			if (entry2.path().string().find("Instance") == std::string::npos)
+	//			{
+	//				m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+	//					if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), PrototypeName + StringToWString(Prototype),
+	//						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
+	//						CRASH("Prototype Create Failed");
+	//					});
+	//			}
+	//			else if (entry2.path().string().find("Instance") != std::string::npos)
+	//			{
+	//				m_pGameInstance->Add_Work([=, Model = InstancePrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+	//					if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Model,
+	//						CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, ModelPath.c_str()))))
+	//						CRASH("Prototype Create Failed");
+	//					});
+	//			}
+	//			//프로토타입 생성
+	//		}
+	//	}
+	//	File.close();
+	//}
+	//m_pGameInstance->Wait_Thread_End();
 
 	for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
 		if (!entry.is_regular_file())
@@ -316,5 +323,6 @@ void CLevel_Effect::Free()
     __super::Free();
 
     Safe_Release(m_pEffect_Controller);
-    Safe_Release(m_pAnimation_Tool);
+	Safe_Release(m_pAnimation_Tool);
+	Safe_Release(m_pMap_Interface);
 }

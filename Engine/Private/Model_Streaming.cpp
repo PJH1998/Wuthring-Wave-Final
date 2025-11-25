@@ -117,11 +117,6 @@ HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex, ID3D11Device
 	return S_OK;
 }
 
-void CModel_Streaming::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
-{
-
-}
-
 HRESULT CModel_Streaming::Bind_Buffer(ID3D11DeviceContext* pDeferredContext, _uint iLODIndex)
 {
 	return m_pModelPrototype->m_Meshes[iLODIndex]->Bind_Resources(0, pDeferredContext);

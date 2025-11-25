@@ -20,6 +20,7 @@ private:
 	class CEffect_Controller*										m_pEffect_Controller = { nullptr };
 	//
 	class CAnimationTool*											m_pAnimation_Tool = { nullptr };
+	class CMap_Interface*											m_pMap_Interface = { nullptr };
 public:
 	static		CLevel_Effect*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

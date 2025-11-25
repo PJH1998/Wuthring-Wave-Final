@@ -349,6 +349,9 @@
     <Filter Include="03. GameObject\Actor\Monster\CoroSaurus\Weapon">
       <UniqueIdentifier>{323146fd-c508-439b-bc38-b85f0b22e928}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SkyBox\Logo">
+      <UniqueIdentifier>{a025b515-ba1a-4b41-8a1a-3e1f744cd632}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -928,6 +931,9 @@
     <ClInclude Include="..\Public\MapObject_Water.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Logo_SkyBox.h">
+      <Filter>03. GameObject\SkyBox\Logo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1471,6 +1477,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Water.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Logo_SkyBox.cpp">
+      <Filter>03. GameObject\SkyBox\Logo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

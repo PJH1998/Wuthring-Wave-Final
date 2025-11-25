@@ -168,7 +168,8 @@ void CMesh_Streaming::Ready_BoundingBox()
 	vExtends.y = (pMax[1] - pMin[1]) * 0.5f;
 	vExtends.z = (pMax[2] - pMin[2]) * 0.5f;
 
-	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
+	if (!m_pBoundingBox)
+		m_pBoundingBox = new BoundingBox(vCenter, vExtends);
 
 	Safe_Delete_Array(pMin);
 	Safe_Delete_Array(pMax);
