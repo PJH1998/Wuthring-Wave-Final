@@ -1,10 +1,12 @@
 ﻿#include "EditorPch.h"
 #include "AnimationTool.h"
 #include "ModelLoader.h"
+#include "GltfLoader.h"
 #include "AnimationActor.h"
 #include "AnimNotifyTool.h"
 #include "AnimMachine.h"
 #include "Effect_Controller.h"
+
 
 
 #pragma region 기본함수들
@@ -23,6 +25,7 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
     m_eCurLevel = eLevel;
 
     m_pLoader = CModelLoader::Create();
+    m_pGltfLoader = CGltfLoader::Create();
 
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
     
@@ -115,7 +118,7 @@ void CAnimationTool::Render_DebugWindow()
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 
-    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "SAVE_STATE", "NONE"};
+    const char* typeNames[] = { "CONVERT_GLTF", "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "SAVE_STATE", "NONE"};
     ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);
 
     switch (m_eMode)
@@ -154,13 +157,22 @@ void CAnimationTool::Render_Menu()
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("TabBar", tab_bar_flags))
     {
-        if (ImGui::BeginTabItem("ConvertFBX"))
+
+        if (ImGui::BeginTabItem("ConvertGLTF"))
         {
-            m_pLoader->Update();
+            m_pGltfLoader->Update();
             ImGui::EndTabItem();
 
-            m_eMode = MODE::CONVERT_FBX_TO_DAT;
+            m_eMode = MODE::CONVERT_GLTF_TO_DAT;
         }
+
+		if (ImGui::BeginTabItem("ConvertFBX"))
+		{
+			m_pLoader->Update();
+			ImGui::EndTabItem();
+
+			m_eMode = MODE::CONVERT_FBX_TO_DAT;
+		}
 
         if (ImGui::BeginTabItem("LoadDAT"))
         {
@@ -193,13 +205,6 @@ void CAnimationTool::Render_Menu()
 
             m_eMode = MODE::EDIT_ANIMATION;
         }
-
-      /*  if (ImGui::BeginTabItem("SaveState"))
-        {
-            RenderUI_EditState();
-            ImGui::EndTabItem();
-            m_eMode = MODE::SAVE_STATE;
-        }*/
 
         ImGui::EndTabBar();
     }
@@ -732,7 +737,11 @@ void CAnimationTool::LoadDat()
 	_matrix		PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 1.f;
 	_float fSize = 0.0001f;
+	//_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
+
+	static bool isCharacter = { false };
+	ImGui::Checkbox("Character", &isCharacter);
 
 	static bool isPart = { false };
 	ImGui::Checkbox("Part", &isPart);
@@ -772,9 +781,7 @@ void CAnimationTool::LoadDat()
 			ImGui::InputFloat("fRadianZ", &fRadians[2]);
 			PreTransformMatrix *= XMMatrixRotationZ(XMConvertToRadians(fRadians[2]));
 		}
-			
 	}
-
 
     if (ImGui::Button("Load DAT File"))
     {
@@ -818,7 +825,20 @@ void CAnimationTool::LoadDat()
 
             wStrModelName = StringToWString(strModelName);
 
-            HRESULT hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
+			HRESULT hr = {};
+			// Character를 설정했으면 Character로 Load Dat
+			if (isCharacter)
+			{
+				_float fSize = 0.01f; // Blender에서 크기가 100배 작음.
+				//_float fSize = 1.f; // gltf로 가져왔으면 
+				//_float fSize = 0.0001f; // Blender에서 크기가 100배 작음.
+				PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
+				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str());
+			}
+				
+			else
+				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
+            
             if (FAILED(hr))
             {
                 return;
@@ -1048,10 +1068,11 @@ void CAnimationTool::Render_Model_Detail()
 	static char textObject[256] = "";
 	ImGui::InputText("Object Name", textObject, sizeof(textObject));
 	
-
-
 	static bool IsPart = { false };
 	ImGui::Checkbox("Parts", &IsPart);
+
+	static bool IsFacial = { false };
+	ImGui::Checkbox("Facial", &IsFacial);
 
     if (ImGui::Button("Create Instance"))
     {
@@ -1059,8 +1080,18 @@ void CAnimationTool::Render_Model_Detail()
         Desc.fSpeedPerSec = fSpeedPerSec;
         Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
-        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
-        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
+
+		if (IsFacial)
+		{
+			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter");
+			Desc.IsFacial = true;
+		}
+		else 
+			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+
+        //Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
+        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter");
+        Desc.strMorphComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph");
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));
         memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
@@ -1150,7 +1181,6 @@ void CAnimationTool::Render_EditModel()
 	CTransform* pTransformCom = m_AnimationActors.at(m_wSelected_AnimActorTag)->Get_Transform();
 	m_pGameInstance->Use_Gizmo(pTransformCom);
 
-
 	if (ImGui::Button("Apply Position"))
 	{
 		_float3 vP = { };
@@ -1158,6 +1188,22 @@ void CAnimationTool::Render_EditModel()
 
 		_vector vPos = XMVectorSetW(XMLoadFloat3(&vP), 1.f);
 		pTransformCom->Set_State(STATE::POSITION, vPos);
+	}
+
+
+	static float fDegree[3] = { 0.f, 0.f, 0.f };
+	ImGui::InputFloat3("Degree", fDegree);
+
+	if (ImGui::Button("Apply Rotation"))
+	{
+		_float3 vR = {};
+		memcpy(&vR, fDegree, sizeof(_float3));
+		
+		vR.x = XMConvertToRadians(vR.x);
+		vR.y = XMConvertToRadians(vR.y);
+		vR.z = XMConvertToRadians(vR.z);
+		
+		pTransformCom->Rotation_Quaternion(vR);
 	}
 	
 
@@ -1522,6 +1568,7 @@ void CAnimationTool::Free()
 {
     CBase::Free();
     Safe_Release(m_pLoader);
+	Safe_Release(m_pGltfLoader);
     Safe_Release(m_pAnimNotifyTool);
     Safe_Release(m_pAnimMachineCom);
     Safe_Release(m_pDevice);

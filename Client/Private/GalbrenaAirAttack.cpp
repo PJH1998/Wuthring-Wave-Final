@@ -250,20 +250,26 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
     if (m_IsAnimationEnd)
     {
 		// 기본 공중 공격 2번째..
-		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START02)
+		//if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START02)
+		//{
+		//	m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2); // 떨어지게.
+		//	m_fSpeed = 2.f;
+		//	return;
+		//}
+
+		// 기본 공중 공격
+        //if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
+        //{
+        //    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START02); // 떨어지게.
+        //    m_fSpeed = 2.f;
+        //    return;
+        //}
+		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2); // 떨어지게.
 			m_fSpeed = 2.f;
 			return;
 		}
-
-		// 기본 공중 공격
-        if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START02); // 떨어지게.
-            m_fSpeed = 2.f;
-            return;
-        }
           
 
         // 땅에 안닿으면? => AirAttack Loop가 아닌 경우에는 Fall로 변경.
@@ -308,7 +314,12 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 			}
 
 			// Loop 상태일때 땅에 닿으면 END 애니메이션 실행.
-			if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START02 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
+			/*if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START02 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END);
+				return;
+			}*/
+			if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
 			{
 				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END);
 				return;

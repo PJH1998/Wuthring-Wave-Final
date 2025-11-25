@@ -286,6 +286,9 @@ void CAugusta::Render_OutLine()
 
 void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	// 현재 애니메이션 제거.
+	m_pStateMachineCom->Exit_State();
+
 	// 애니메이션 변경할 값.
 	switch (eTransitionType)
 	{
@@ -958,6 +961,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
 		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->facialComputeShaderData.first)
+		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)

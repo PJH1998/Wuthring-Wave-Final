@@ -56,7 +56,7 @@ cbuffer AnimationInfoCB : register(b0)
 {
     float g_TrackPosition;
     uint g_AnimIndex;
-    bool g_IsRibAnimUsed;
+    uint g_RibAnimUsed;
     uint g_RibbonAnimIndex;
 }
 
@@ -416,7 +416,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     matrix result_matrix;
     
     // Ribbon Animation을 사용한다면?
-    if (g_IsRibAnimUsed)
+    if (1 == g_RibAnimUsed)
     {
         // 2. Ribbon Animation의 SRT 가져오기
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);

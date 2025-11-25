@@ -58,6 +58,7 @@ public:
 		class CPlayer* pOwner = { nullptr };
 		pair<LEVEL, _wstring> stateMachineData = {};
 		pair<LEVEL, _wstring> flyComputeShaderData = {};
+		pair<LEVEL, _wstring> facialComputeShaderData = {};
 		//pair<LEVEL, _wstring> controllerData = {};
 		vector<pair<_wstring, _wstring>> PartPrototypes;
 		_float3 vScale = { 1.f, 1.f, 1.f};
@@ -297,6 +298,7 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
+	class CComputeShader* m_pFacialComputeShaderCom = { nullptr }; // Facial 용도.
 
 	class CCollider* m_pQTEColliderCom = { nullptr };
 	

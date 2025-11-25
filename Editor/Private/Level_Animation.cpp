@@ -12,6 +12,8 @@ CLevel_Animation::CLevel_Animation(ID3D11Device* pDevice, ID3D11DeviceContext* p
 HRESULT CLevel_Animation::Initialize()
 {
     m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
+	
+
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
@@ -20,6 +22,14 @@ HRESULT CLevel_Animation::Initialize()
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
     }
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMeshCharacter.hlsl")
+			, VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+		return E_FAIL;
+	}
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -32,27 +42,15 @@ HRESULT CLevel_Animation::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
-    SHADER_MACRO eShaderMacro = {
-        {"THREAD_X", "64" }
-        ,{"THREAD_Y", "1" }
-        ,{"THREAD_Z", "1" }
-        , { NULL, NULL }
-    };
     
-    string strEntryPoint = "CSMain";
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
-        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
-        ,eShaderMacro, strEntryPoint))))
-    {
-        CRASH("Failed Load AnimMesh Shader");
-        return E_FAIL;
-    }
     return S_OK;
 }
 
 void CLevel_Animation::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Anim"));
+
+	//m_pGltfLoader->Update();
 
 }
 

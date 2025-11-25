@@ -481,6 +481,9 @@
       <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_MapObject_Water.h" />
+    <ClInclude Include="..\Public\GltfLoader.h">
+      <Filter>02. ModelLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -712,6 +715,9 @@
       <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Edit_MapObject_Water.cpp" />
+    <ClCompile Include="..\Private\GltflLoader.cpp">
+      <Filter>02. ModelLoader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

@@ -95,7 +95,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
 	Ready_Scene();
-	Ready_Skybox();
+	//Ready_Skybox();
 	Ready_UI();
 
     return S_OK;

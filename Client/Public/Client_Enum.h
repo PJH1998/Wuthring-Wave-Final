@@ -114,6 +114,19 @@ namespace Client
 		, DISSOLVE_NORMAL // 9
 		, END };
 
+	enum class SHADER_ANIMMESH_CHARACTER { 
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX // 1
+		, AUGUSTA // 2
+		, SHADOW // 3
+		, OUNTLINE // 4
+		, ROVER // 5
+		, GALBRENA // 6
+		, NORMAL_YELLOW // 7
+		, LOGOROVER // 8
+		, DISSOLVE_NORMAL // 9
+		, END };
+
 	enum class SHADER_PROPANIMMESH {
 		DEFAULT_NORMAL = 0
 		, NORMAL_TEX // 1

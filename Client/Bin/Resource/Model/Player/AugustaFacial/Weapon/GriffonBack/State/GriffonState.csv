@@ -1,0 +1,6 @@
+StateName,AnimName,Duration
+SA1Shouwangjiu_AirAttack_End,SA1Shouwangjiu_AirAttack_End,65.000000
+SA1Shouwangjiu_AirAttack_Loop,SA1Shouwangjiu_AirAttack_Loop,30.000000
+SA1Shouwangjiu_AirAttack_Start,SA1Shouwangjiu_AirAttack_Start,28.000000
+SA1Shouwangjiu_Fly_Loop,SA1Shouwangjiu_Fly_Loop,236.000000
+SA1Shouwangjiu_Skill_Strike,SA1Shouwangjiu_Skill_Strike,62.000000
