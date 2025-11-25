@@ -634,6 +634,7 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 			*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
 			*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isGoinChange);
 			*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
+			*reinterpret_cast<_float2*>(&targetMat._41) = _float2{ 1340.f, 1080.f };		// extra texture size.
 
 			arrIsVisited[iSingleIndex] = true;
 		}
@@ -658,6 +659,7 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 			//*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
 			//*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isGoinChange);
 			//*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
+			*reinterpret_cast<_float2*>(&targetMat._41) = _float2{ 1340.f, 1080.f };		// extra texture size.
 		}
 
 	CCustom_UI::VARIANTREADY_UI_DESC tPaletteVariantDesc = {

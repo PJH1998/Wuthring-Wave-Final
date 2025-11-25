@@ -1003,13 +1003,6 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
 
             float fEdgeAlphaWidth = 0.2f;
             
-            
-            float4 OriginColor = g_Texture.Sample(DefaultSampler, fixedUV);
-            float4 FlippedColor = g_Texture.Sample(DefaultSampler, fixedUV_Flip);
-            
-            
-            
-            
             //Out.vColor.rgb = vColor.rgb;
             Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
             Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength) * fAlpha;
@@ -1038,7 +1031,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
             // [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
             // [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
-            //// [FXIMGSIZE.x] [FXIMGSIZE.y]
+            // [EXIMGSIZE.x] [EXIMGSIZE.y]
             // 텍스쳐를 하나 더 받아와서
             // 현재 winsize 및 inst transform (pos, sca) 기준으로 uv를 적절히 슬라이싱하여 적용하고
             // 색상을 흑백화 및 컬러링해서 out. 하면 될 것 같기도? 아닌가
@@ -1049,43 +1042,29 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             float2  vChangeStartPos     = In.mExtra2.xy;        // 퍼지기가 시작될 지점
             bool    IsChanging          = _BOOL(In.mExtra2.z);
             float   fChangedRadius      = In.mExtra2.w;
-            //float2  vFXImageSize        = In.mExtra3.xy;
+            int2    vEXImageSize        = In.mExtra3.xy;
             
             // 마스크 이미지 알파 적용
             float4 vMaskColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
             Out.vColor.a = vMaskColor.r;
             
+            // 스크린 크기를 기준으로 uv를 반영한 좌표를 만듦.
+        #ifdef CHANGE_BYCIRCLE
+            float2 vScreenX = { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.x + In.vSInstSca.x / 2.f };
+            float2 vScreenY = { In.vSInstPos.y - In.vSInstSca.y / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f };
+                
+            In.vTexcoord;   // 이게 인스턴스 기준 현재 포커싱중인 좌표
+            float2 vFixedScreenPos = { 
+                lerp(vScreenX.x, vScreenX.y, In.vTexcoord.x),
+                lerp(vScreenY.x, vScreenY.y, 1.f - In.vTexcoord.y)
+            };
+        #endif
+            
             if (IsChanging) // 변화중
-            {
-                // 변화중에는 색상 두 개를 사용함.
-                // vChangeStartPos 로부터 texcoord 의 스크린 변환 좌표까지의 길이가
-                // fChangedRadius 보다 짧은 경우에 vDescColor 적용, 아니면 vCurrColor 적용시키면 될 것으로 보임,
-                
-                // 전부 같게 변화하는 현상 발생. 각 인스턴스 별 좌표를 기준으로 다시 바로잡을 필요가 있음. 근데 그럼 더 쉽지 않나?
-                //float2 vScreenCoord = float2(In.vTexcoord.x * g_ScreenSize.x, -In.vTexcoord.y * g_ScreenSize.y);
-                
-
-                // 위에 이거는 현재 인스턴스의 한 점 자체만을 기준삼는 중.
-                // 여기에 인스턴스 별 스케일과 In.vPosition 을 적절히 곱하여 인스턴스 별 현재 픽셀 좌표를 알 수 있을 것 같고
-                // 이를 통해 물결처럼 퍼져나가는 효과를 기대할 수 있을 듯
-                // 사용 가능한 Input?
-                // float2 vSInstPos
-                // float2 vSInstSca
-                
-                
-                
+            {   
                 // 스크린좌표로 변환하고, 현재 포커싱중인 점이 이를 지나면 색이 바뀌게끔..
                 
-                #ifdef CHANGE_BYCIRCLE
-                float2 vScreenX = { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.x + In.vSInstSca.x / 2.f };
-                float2 vScreenY = { In.vSInstPos.y - In.vSInstSca.y / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f };
-                
-                In.vTexcoord;   // 이게 인스턴스 기준 현재 포커싱중인 좌표
-                float2 vFixedScreenPos = { 
-                    lerp(vScreenX.x, vScreenX.y, In.vTexcoord.x),
-                    lerp(vScreenY.x, vScreenY.y, 1.f - In.vTexcoord.y)
-                };
-                #endif
+
                 
                 
                 #ifndef CHANGE_BYCIRCLE
@@ -1113,6 +1092,51 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 Out.vColor.rgb = vCurrColor.rgb;
                 Out.vColor.a = vCurrColor.a * Out.vColor.a;
             }   
+            
+            
+            
+            
+            
+            
+            
+            //// 넓은 이 이미지를.. 현재 인스턴스에 맞게 uv를 조절해야 함. 텍스쳐 크기 정보 필요할 것 같은데.
+            //
+            //// 1. 각 인스턴스 별 사이즈
+            //In.vSInstSca;
+            //// 2. 각 인스턴스 별 위치
+            //In.vSInstPos;
+            //// 3. 추가 텍스쳐 크기
+            //vEXImageSize = {};
+            //// 4. 각 인스턴스 별 Texcoord (0~1)
+            //In.vTexcoord;
+            
+            // 이걸로 적절하게 하면 됨ㅇ
+            
+            // 큰 이미지의 특정 부분으로 texcoord를 조절하면 되긴 할텐데
+            // 일단 이미지 사이즈 기준으로 좌표 구하고, 이미지 크기로 나누면 되는 것 아닌지?
+            float2 vImgPos = vFixedScreenPos.xy + vEXImageSize.xy * 0.5f;      // 이미지 사이즈 기준 좌표
+            float2 vImgPos_toUV = vImgPos.xy / vEXImageSize.xy;
+            
+            
+            
+            
+            
+            float2 vFixedTexUV;
+            float4 vColorTex = g_TextureExtra0.Sample(DefaultSampler, vImgPos_toUV);
+            
+            
+            float4 vFinalColorTex;
+            
+            //float4 vColorTex = g_TextureExtra0.Sample(DefaultSampler, In.vTexcoord);      //backup
+            
+            
+            float fColorAverage = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
+            vFinalColorTex.rgb = fColorAverage.xxx;
+            vFinalColorTex.a = vColorTex.a;
+            
+            
+            Out.vColor.rgb *= vFinalColorTex.rgb;
+            Out.vColor.a *= vFinalColorTex.a * (1.f - g_AlphaStrength);
             
             return Out;
         } break;
