@@ -244,11 +244,12 @@ void CUI_Ovfl_Palette::Assign_TargetBlocksQueue(_uint iStartBlockIndex)
 	m_arrIsVisited.fill(false);
 	Calc_NearTarget(iStartBlockIndex);
 
+#ifdef _DEBUG
 	_uint iSize = 0;
 	for (auto& targets : m_vecTargetsByDepth)
 		for (auto& target : targets)
 			iSize++;
-	std::cout << "[CUI_Ovfl_Palette::Assign_TargetBlocksQueue] Change Queue Calced. (Vector Size : " << m_vecTargetsByDepth.size() << ", Total Size : " << iSize  << ")" << std::endl;
+	std::cout << "[CUI_Ovfl_Palette::Assign_TargetBlocksQueue] Change Queue Calced. (Vector Size : " << m_vecTargetsByDepth.size() << ", Total Size : " << iSize << ")" << std::endl;
 
 	for (_uint i = 0; i < m_vecTargetsByDepth.size(); i++)
 	{
@@ -257,6 +258,8 @@ void CUI_Ovfl_Palette::Assign_TargetBlocksQueue(_uint iStartBlockIndex)
 			std::cout << "(" << m_vecTargetsByDepth[i][j].arrIndex[0] << ", " << m_vecTargetsByDepth[i][j].arrIndex[1] << ") ";
 		std::cout << std::endl;
 	}
+#endif // _DEBUG
+
 			
 
 }

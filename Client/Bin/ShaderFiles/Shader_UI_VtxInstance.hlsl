@@ -12,7 +12,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
 float g_AlphaStrength;
 
-Texture2D g_TextureFX;
+Texture2D g_TextureExtra;
 float g_FXStrength;
 
 // Gradient Variables

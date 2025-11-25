@@ -699,8 +699,6 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
 
-
-
 	for (auto& treeDesc : vecDescs)
 	{
 		for (auto& infoDesc : treeDesc.vecUIInfoDescs)
@@ -715,6 +713,9 @@ HRESULT CLoader_Test::Load_UI()
 				OutputDebugString(L"[Loader_Test::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
 		}
 	}
+
+
+
 
 	// ==============================
 	cout << "[Loader_Test] Model" << endl;
