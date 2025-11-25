@@ -6,18 +6,18 @@ class CComputeShader;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CNPCInstancing final : public CActor
 {
 public:
-	enum MESHTYPE {BODY, FACE, HAIR, END};
+	enum MESHTYPE { BODY, FACE, HAIR, END };
 
 	typedef struct tagNPCDesc : public CActor::ACTOR_DESC
 	{
 		_wstring wstrObjectPrototypeTag;
 		_wstring wstrCombiningPrototypeTag;
-		vector<_float3> vStartPositions;
-		vector<_string> InitAnimations;
-		vector<vector<_uint>> MeshTypes;
+		_uint iNPCType;
 
 	}NPC_DESC;
 
@@ -42,8 +42,9 @@ public:
 	virtual void Hit_Judge(void* pArg = nullptr) {};// 임시
 
 private:
-	CModelAnim_Instance* m_pModelInstanceCom = { nullptr };
-	CComputeShader* m_pSkinningCom = { nullptr };
+	CModelAnim_Instance*	m_pModelInstanceCom = { nullptr };
+	CComputeShader*			m_pSkinningCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 	vector<_uint>			m_MeshTypePadding;
 
 	_float					m_fFaceSize{};

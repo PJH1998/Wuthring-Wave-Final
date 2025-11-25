@@ -24,6 +24,12 @@
 #include "AoEDoT.h"
 #include "Projectile.h"
 #include "Corosaurus.h"
+#include "Coro_Rock.h"
+#pragma endregion
+
+#pragma region NPC
+#include "NPCInstancing.h"
+#include "NPCCell.h"
 #pragma endregion
 
 #pragma region UI
@@ -101,6 +107,8 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
+
+	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -123,25 +131,32 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
+	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1125_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel, "The_False_Sovereign");
 
-
+	//m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel);
 
-
 	// SkyBox
-	_matrix PreTransformMatrix = XMMatrixScaling(0.001f, 0.001f, 0.001f);
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Model_Skybox_Background"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground21.dat"))))
-		CRASH("SkyBackground");
+	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Model_Skybox_Dome"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
 		CRASH("SkyDome");
-
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Model_Skybox_Background"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground_Gameplay.dat"))))
+		CRASH("SkyBackground");
+	PreTransformMatrix = XMMatrixScaling(0.05f, 0.05f, 0.05f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(90.f), 0.f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Model_Skybox_FX"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Gameplay.dat"))))
+		CRASH("SkyFX");
+	//PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Model_Skybox_Cloud"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyCloud_Gameplay.dat"))))
+		CRASH("SkyCloud");
 
 	cout << "Model" << endl;
 
@@ -402,15 +417,17 @@ HRESULT CLoader_GamePlay::Load_Rover()
 HRESULT CLoader_GamePlay::Load_Galbrena()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/GalbrenaFacial/Galbrena.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	//_float fSize = 0.01f;
-	_float fSize = 0.0001f;
+
+	// Editor에서 isCharacter AnimationActor 생성과 동일하게.
+	_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
 
 
@@ -849,7 +866,41 @@ HRESULT CLoader_GamePlay::Load_Monster()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		CCorosaurus::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
+
+	// Prototype_Component_Model_CoroRock
+	_fmatrix PrePropMatrix = XMMatrixScaling(0.001f, 0.002f, 0.001f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroRock"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PrePropMatrix, "../../Client/Bin/Resource/Model/Monster/Coro_Rock/SM_Tab_Roc_20AM_LOD0.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroRock
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroRock"),
+		CCoro_Rock::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
+	return S_OK;
+}
+HRESULT CLoader_GamePlay::Load_NPC()
+{
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
+	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
+	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
+
+	vector<_string> TypeName = { "Body", "Hair", "Face" };
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleM"),
+		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, m_pGameSystem->Get_NumNPCInstance(0),
+			"../../Client/Bin/Resource/Model/NPC/FemaleM", &TypeName))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
+		CNPCInstancing::Create(m_pDevice, m_pContext))))
+		CRASH("NPCInstancing Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCCell"),
+		CNPCCell::Create(m_pDevice, m_pContext))))
+		CRASH("NPCCell Prototype Create Failed");
+
 	return S_OK;
 }
 #pragma endregion

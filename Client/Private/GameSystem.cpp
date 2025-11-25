@@ -68,9 +68,9 @@ void CGameSystem::Load_Sequence(const _char* pFolderPath)
 	m_pParser->Load_Sequence(pFolderPath);
 }
 
-void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
+void CGameSystem::Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
-	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
+	return m_pParser->Ready_Prototype_Map(pDataFilePath, eLevel, pModelFilePath);
 }
 
 void CGameSystem::Clone_MapObjects(LEVEL eLevel)
@@ -121,9 +121,9 @@ void CGameSystem::Add_Action(const _char* pFolderPath)
 {
 	m_pDirector->Add_Action(pFolderPath);
 }
-void CGameSystem::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain)
+void CGameSystem::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape)
 {
-	m_pDirector->Play_Action(strActionTag, WorldMatrix, isMaintain);
+	m_pDirector->Play_Action(strActionTag, WorldMatrix, isMaintain, isEscape);
 }
 void CGameSystem::Stop_Action()
 {
@@ -342,6 +342,18 @@ HRESULT CGameSystem::LoadMonsterTable(const _char* pFilePath)
 MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
 {
 	return m_pMonsterTable->Get_MonsterInfo(pMonsterKey);
+}
+HRESULT CGameSystem::LoadNPCDataTable(const _char* pFilePath, _uint iType)
+{
+	return m_pMonsterTable->LoadNPCDataTable(pFilePath, iType);;
+}
+_uint CGameSystem::Get_NumNPCInstance(_uint iType) const
+{
+	return m_pMonsterTable->Get_NumNPCInstance(iType);
+}
+const vector<NPCINFO>& CGameSystem::Get_NpcData(_uint iType) const
+{
+	return m_pMonsterTable->Get_NpcData(iType);
 }
 #pragma endregion
 

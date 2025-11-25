@@ -352,6 +352,9 @@
     <Filter Include="03. GameObject\UI\Containers_Event\OverflowingPalette">
       <UniqueIdentifier>{c86a7080-740e-403c-a1c3-779d7538a329}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SkyBox\Logo">
+      <UniqueIdentifier>{a025b515-ba1a-4b41-8a1a-3e1f744cd632}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -934,6 +937,9 @@
     <ClInclude Include="..\public\UI_Ovfl_Palette.h">
       <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Logo_SkyBox.h">
+      <Filter>03. GameObject\SkyBox\Logo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1481,6 +1487,9 @@
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp">
       <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Logo_SkyBox.cpp">
+      <Filter>03. GameObject\SkyBox\Logo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1530,7 +1539,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_MonsterProp.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
@@ -1575,6 +1584,15 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshCharacter.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMeshCharacter.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMorph.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

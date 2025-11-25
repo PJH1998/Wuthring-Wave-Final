@@ -42,6 +42,7 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 	m_ActivePartTypes.clear(); // 파츠 목록 초기화
     // 5. 애니메이션 타입에 맞는 파츠 설정. => 0, 1 SWORD / 2, 3 DARKSCYTHE
 
+	m_pGalbrena->Rotate_Target();
 	switch(eSpecialType)
 	{ 
 	case EGalbrenaSpecialType::ATTACK05:

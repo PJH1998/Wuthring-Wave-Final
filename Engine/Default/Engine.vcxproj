@@ -98,6 +98,7 @@
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\Public\Model_Manager.h" />
     <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\MorphChannel.h" />
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
@@ -108,12 +109,13 @@
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
-    <ClInclude Include="..\public\ScreenSpaceReflection.h" />
+    <ClInclude Include="..\public\Water.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
     <ClInclude Include="..\public\SFX.h" />
     <ClInclude Include="..\public\SFX_Hub.h" />
     <ClInclude Include="..\public\ShadowMap.h" />
+    <ClInclude Include="..\Public\ShapeKey.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\public\SSAO.h" />
     <ClInclude Include="..\Public\State.h" />
@@ -231,6 +233,7 @@
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Manager.cpp" />
     <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\MorphChannel.cpp" />
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
@@ -241,12 +244,13 @@
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
-    <ClCompile Include="..\private\ScreenSpaceReflection.cpp" />
+    <ClCompile Include="..\private\Water.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />
     <ClCompile Include="..\private\SFX.cpp" />
     <ClCompile Include="..\private\SFX_Hub.cpp" />
     <ClCompile Include="..\private\ShadowMap.cpp" />
+    <ClCompile Include="..\Private\ShapeKey.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\private\SSAO.cpp" />
     <ClCompile Include="..\Private\State.cpp" />
@@ -294,6 +298,7 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Water.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />

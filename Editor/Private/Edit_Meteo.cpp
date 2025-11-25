@@ -265,7 +265,6 @@ void CEdit_Meteo::Ready_Components(void* pArg)
 	if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
 		TEXT("Com_Test"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
-	m_pModelCom->Ready_BoundingBox();
 
 	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))

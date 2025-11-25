@@ -15,8 +15,8 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_fWinSizeX = static_cast<_float>(iWinSizeX);
 	m_fWinSizeY = static_cast<_float>(iWinSizeY);
 
-	m_MotionBlurData.fLimitVelocity = 1.f;
-	m_MotionBlurData.fLimitDepth = 150.f;
+	m_MotionBlurData.fLimitVelocity = 2.f;
+	m_MotionBlurData.fLimitDepth = 50.f;
 	m_MotionBlurData.fLengthScale = 0.5f;
 	m_MotionBlurData.fSampleDepthBias = 10.f;
 
@@ -60,7 +60,6 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Matrix("g_PrevCamProjMatrix", m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Failed Bind ProjMatrixInv");
 
-
 	if (FAILED(pShader->Bind_Value("g_fLimitDepth", &m_MotionBlurData.fLimitDepth, sizeof(_float))))
 		CRASH("Failed Bind g_fLimitVelocity");
 
@@ -71,34 +70,33 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 
 	m_pGameInstance->End_MRT();
 
-	// DOWNSAMPLE
-	_uint iDownSizeX = m_iWinSizeX >> 1;
-	_uint iDownSizeY = m_iWinSizeY >> 1;
+	//// DOWNSAMPLE
+	//_uint iDownSizeX = m_iWinSizeX >> 1;
+	//_uint iDownSizeY = m_iWinSizeY >> 1;
 
-	//BackBuffer DownScale
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_CurrentSceneSRV())))//m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
-		CRASH("Failed Add_SRVData");
+	////BackBuffer DownScale
+	//if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_CurrentSceneSRV())))//m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
+	//	CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY)))
-		CRASH("Failed RCS_DOWNSAMPLE");
+	//if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY)))
+	//	CRASH("Failed RCS_DOWNSAMPLE");
 
-	// DEPTH DownScale
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE_DEPTH"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
-		CRASH("Failed Add_SRVData");
+	//// DEPTH DownScale
+	//if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE_DEPTH"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+	//	CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE_DEPTH"), iDownSizeX, iDownSizeY)))
-		CRASH("Failed RCS_DOWNSAMPLE");
+	//if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE_DEPTH"), iDownSizeX, iDownSizeY)))
+	//	CRASH("Failed RCS_DOWNSAMPLE");
 
 	// Motion Blur + UpScale
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE")))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "InputTexture", m_pGameInstance->Get_CurrentSceneSRV())))//m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE")))))
 		CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "DepthTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE_DEPTH")))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))//m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE_DEPTH")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "VelocityMap", m_pGameInstance->Get_RT_SRV(TEXT("RT_VelocityMap")))))
 		CRASH("Failed Add_SRVData");
-
 
 	if (FAILED(m_pGameInstance->Add_BufferData(TEXT("RCS_MotionBlur"), "MOTION_DATA", reinterpret_cast<void*>(&m_MotionBlurData), sizeof(MOTION_BLUR_DATA))))
 		return E_FAIL;
@@ -106,9 +104,8 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(m_pGameInstance->Add_SamplerState(TEXT("RCS_MotionBlur"), 0, m_pClampSampler)))
 		return E_FAIL;
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_MotionBlur"), iDownSizeX, iDownSizeY)))
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_MotionBlur"), m_iWinSizeX, m_iWinSizeY)))
 		CRASH("Failed RCS_MotionBlur");
-
 
 	//Combined
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
@@ -116,9 +113,7 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 
 	if (FAILED(pShader->Bind_Texture("g_BackBufferTexture", m_pGameInstance->Get_CurrentSceneSRV())))
 		CRASH("Failed Bind BackBuffer");
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), pShader, "g_BackBufferTexture")))
-	//	CRASH("Failed Bind BackBuffer");
-
+	
 	if (FAILED(pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_MotionBlur")))))
 		CRASH("Failed Bind Blur Texture");
 

@@ -30,7 +30,7 @@ CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pGameInstance);
 }
 
-void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
+void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
     _char FileDrive[MAX_PATH] = {};
     _char FileDir[MAX_PATH] = {};
@@ -41,15 +41,16 @@ void CParser::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
 
     _string PasingDir = FileDir;
 	m_pGameInstance->Model_Manager_Change_Level(ENUM_CLASS(eLevel));
-    Read_Map_Prototype(PasingDir, eLevel);
+	Read_Map_Prototype(PasingDir, eLevel, pModelFilePath);
 	m_LoadingMap[eLevel].push_back(pFilePath);
 }
 
-void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
+void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
 	//넘어오는 건 폴더 경로.
 	_string ProjectPath = filesystem::current_path().parent_path().parent_path().string();
-	ProjectPath += "/Client/Bin/Resource/Map";
+	ProjectPath += "/Client/Bin/Resource/Map/";
+	ProjectPath += pModelFilePath;
 	_float fSize = 0.01f;
 	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
@@ -57,7 +58,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 	_wstring InstancePrototypeName = L"Prototype_Component_Model_Instance_";
 
 
-	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
+	for (const auto& entry : filesystem::directory_iterator(pDataFilePath)) {
 		if (!entry.is_regular_file())
 			continue;
 		if (entry.path().string().find("Prototype") == std::string::npos && entry.path().string().find("Instance") == std::string::npos

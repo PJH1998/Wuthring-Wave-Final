@@ -294,65 +294,6 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 
 void CEdit_MapObject::Render()
 {
-
-	// Bind_Resources();
-
-	// for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
-	// {
-	//     _bool HasNormal = { true };
-	//     _bool HasMask = { true };
-	//     if (m_TexMode)
-	//     {
-
-	//         if (m_pDiffuseTextureCom[i])
-	//             m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0);
-
-	//         if (m_pNormalTextureCom[i])
-	//             if (FAILED(m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture")))
-	//                 HasNormal = false;
-
-	//         if (m_pMaskTextureCom[i])
-	//             m_pMaskTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture");
-	//         else
-			 //{
-			 //	HasMask = false;
-			 //	m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-			 //}
-	//         if (m_pMaskDiffuseTextureCom[i])
-	//             m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
-	//     }
-	//     else
-	//     {
-	//         if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-			 //{
-			 //	m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-			 //	HasMask = false;
-			 //}
-
-
-	//         if (HasMask)
-	//         {
-	//             m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-
-	//             if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-	//                 HasNormal = false;
-	//         }
-	//         else
-	//         {
-	//             m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
-
-	//             if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-	//                 HasNormal = false;
-	//         }
-	//     }
-	//     m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-	//     m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-
-	//     m_pShaderCom->Begin(m_iShaderPassIndex);
-
-	//     m_pModelComArray[DrawModel]->Render(i);
-	// }
-
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
@@ -384,7 +325,7 @@ void CEdit_MapObject::Render()
 			else
 			{
 				HasMask = false;
-				m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+                m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
 			}
 			if (m_pMaskDiffuseTextureCom[i])
 				m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");

@@ -104,7 +104,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    //Out.vDiffuse = g_vDiffuseColor;
     Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
@@ -112,12 +111,9 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     if (g_IsDynamicObject)
     {
-        Out.vDepth.z = 1.f;
- //       Out.vPBR.z = 1.f;
+        Out.vPBR.z = 1.f;
     }
      
-    Out.vPBR.a = 1.f;
-    
     float4 vNormal;
 
     vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, float2(In.vTexcoord.x + g_fXOffset*0.01f, In.vTexcoord.y + g_fYOffset*0.01f));
@@ -134,7 +130,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         
     vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    vNormal.xyz = vNormal.xyz * 0.5f + 0.5f;
     
     Out.vNormal = float4(vNormal.xyz, 1.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;

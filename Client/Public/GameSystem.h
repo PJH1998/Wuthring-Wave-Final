@@ -29,7 +29,7 @@ public:
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
 	//============================Effect
 
-	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
@@ -40,7 +40,7 @@ public:
 
 #pragma region DIRECTOR
 	void							Add_Action(const _char* pFolderPath);
-	void							Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain);
+	void							Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape = false);
 	void							Stop_Action();
 #pragma endregion
 
@@ -142,6 +142,9 @@ public:
 #pragma region MONSTER_TABLE
 	HRESULT LoadMonsterTable(const _char* pFilePath);
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
+	_uint Get_NumNPCInstance(_uint iType) const;
+	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
 #pragma endregion
 
 #pragma region SFX_PREFAB
