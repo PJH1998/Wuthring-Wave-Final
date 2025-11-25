@@ -10,8 +10,10 @@ CMesh_Streaming::CMesh_Streaming(const CMesh_Streaming& Prototype)
 	:CComponent(Prototype), m_iNumMeshes{Prototype.m_iNumMeshes },
 	m_pSharedVB{Prototype.m_pSharedVB},
 	m_pSharedIB{Prototype.m_pSharedIB},
-	m_Desc{ Prototype.m_Desc },
-	m_pBoundingBox{Prototype.m_pBoundingBox }
+	m_Desc{ Prototype.m_Desc }
+#ifdef _DEBUG
+	,m_pBoundingBox{Prototype.m_pBoundingBox }
+#endif
 {
 	Safe_AddRef(m_pSharedVB);
 	Safe_AddRef(m_pSharedIB);
@@ -166,7 +168,8 @@ void CMesh_Streaming::Ready_BoundingBox()
 	vExtends.y = (pMax[1] - pMin[1]) * 0.5f;
 	vExtends.z = (pMax[2] - pMin[2]) * 0.5f;
 
-	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
+	if (!m_pBoundingBox)
+		m_pBoundingBox = new BoundingBox(vCenter, vExtends);
 
 	Safe_Delete_Array(pMin);
 	Safe_Delete_Array(pMax);
@@ -240,5 +243,8 @@ void CMesh_Streaming::Free()
 		Safe_Delete(m_Desc);
 	Safe_Delete_Array(m_vecVertexPos);
 	Safe_Delete_Array(m_vecIndices);
+
+#ifdef _DEBUG
 	Safe_Delete(m_pBoundingBox);
+#endif
 }

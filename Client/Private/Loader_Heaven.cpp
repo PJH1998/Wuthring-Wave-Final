@@ -121,22 +121,21 @@ HRESULT CLoader_Heaven::Load_Texture()
 
 HRESULT CLoader_Heaven::Load_Model()
 {
-
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1111_dest_Fix/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel);
-
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven/", m_eCurLevel, "Heaven");
 
 	// SkyBox
-	_matrix PreTransformMatrix = XMMatrixScaling(0.001f, 0.001f, 0.001f);
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Background"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground21.dat"))))
-		CRASH("SkyBackground");
+	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Dome"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
 		CRASH("SkyDome");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Background"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground_Heaven.dat"))))
+		CRASH("SkyBackground");
+	PreTransformMatrix = XMMatrixScaling(0.05f, 0.05f, 0.05f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(90.f), 0.f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_FX"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Heaven.dat"))))
+		CRASH("SkyFX");
 
 
 	cout << "Model" << endl;

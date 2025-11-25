@@ -174,9 +174,6 @@ PS_OUT PS_DEFAULT_WEAPON(PS_IN In) // Dissolve 추가.
     }
     
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-    
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
@@ -229,8 +226,6 @@ PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
     
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     

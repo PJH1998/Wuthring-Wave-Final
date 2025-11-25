@@ -345,10 +345,10 @@ void CLevel_Map::Menu_Model_Load()
 
 			if (ImGui::Selectable(FileName))
 			{
-				auto iter = m_szPrototypeName.find(m_ModelPaths[i]);
+				auto iter = m_szPrototypeName.find(FileDir);
 				if (iter == m_szPrototypeName.end())
 				{
-					m_szPrototypeName.insert(m_ModelPaths[i]);
+					m_szPrototypeName.insert(FileDir);
 
 					_string NoVersionName = FileName;
 					NoVersionName.pop_back();
@@ -589,6 +589,7 @@ void CLevel_Map::Menu_Save_Load()
 
         if (ImGuiFileDialog::Instance()->Display("Map File Load")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
+				Ready_Map_Load_Prototype();
                 _string DatFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
                 for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
                     if (entry.is_regular_file())
@@ -614,7 +615,6 @@ void CLevel_Map::Menu_Save_Load()
 							{
 								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 								File.read(Desc.ModelName, NameLength);
-								Ready_Map_Load_Prototype(Desc.ModelName);
 
 
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
@@ -757,7 +757,6 @@ void CLevel_Map::Menu_Save_Load()
 								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 								File.read(Desc.ModelName, NameLength);
 
-								Ready_Map_Load_Prototype(Desc.ModelName);
 								//여기서 _bone안에 있는 애들 찾아가지고 조각들 프로토타입 다 만들게 해야할듯.....
 								//Ready_Debris_Prototype(Desc.ModelName);
 
@@ -797,7 +796,6 @@ void CLevel_Map::Menu_Save_Load()
 						}
                         else
                         {
-
                             CEdit_MapObject::MAP_LOAD Desc{};
 							//경로 돌면서 하나하나 일일히 찾아서 경로 찾은 다음에 있는 거랑 비교한 후 없으면 프로토타입 만들기.
 
@@ -805,8 +803,6 @@ void CLevel_Map::Menu_Save_Load()
 							{
 								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 								File.read(Desc.ModelName, NameLength);
-
-								Ready_Map_Load_Prototype(Desc.ModelName);
 
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
@@ -816,8 +812,12 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+									, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 
-								m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+								//바운딩박스 누수문제로 주석.
+
+								/*m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
 									CEdit_MapObject::MAP_LOAD pDesc{};
 									strcpy_s(pDesc.ModelName, ModelName.c_str());
 									pDesc.iShaderPassIndex = ShaderPass;
@@ -827,7 +827,7 @@ void CLevel_Map::Menu_Save_Load()
 
 									m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 										, m_iLevel, TEXT("Layer_MapObject"), &pDesc);
-									});
+									});*/
 
 							}
                         }
@@ -854,13 +854,14 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
 
@@ -876,6 +877,7 @@ void CLevel_Map::Load_Objects()
     _int Lastversion = {};
     _wstring LastVersionName;
     _string LastVersionPath;
+
 	m_pGameInstance->Load_Resource(m_FolderPath.c_str());
     //마지막 폴더 못읽음. 프로토타입 안생김.
 	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
@@ -912,11 +914,14 @@ void CLevel_Map::Load_Objects()
 				}
 				else if (entry.path().string().find("Bones") != std::string::npos && entry.path().string().find("_Bone") == std::string::npos)
 				{
-					m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+					//m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = FileDir]() {
+						//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+						//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+						//	CRASH("Prototype Create Failed");
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+							CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
 							CRASH("Prototype Create Failed");
-						});
+						//});
 					continue;
 				}
 				_wstring baseName = StringToWString(FileName);
@@ -948,7 +953,10 @@ void CLevel_Map::Load_Objects()
 				{
 					_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
 					ProtoName += StringToWString(FileName);
-
+					auto iter = m_szPrototypeName.find(WStringToString(ProtoName));
+					if (iter != m_szPrototypeName.end())
+						continue;
+					m_szPrototypeName.insert(FileDir);
 					m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
 							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str(),true))))
@@ -1031,30 +1039,36 @@ void CLevel_Map::Create_TriggerBox()
 	}
 }
 
-void CLevel_Map::Ready_Map_Load_Prototype(const _char* pModelName)
+void CLevel_Map::Ready_Map_Load_Prototype()
 {
-	_string Name = pModelName;
-
+	unordered_set<_string> m_Test;
 	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath))
 	{
 		if (!entry.is_regular_file())
 			continue;
 		if (entry.path().extension() != ".dat")
 			continue;
-		if (entry.path().string().find(Name) == string::npos)
+		if (entry.path().string().find("Bone") != string::npos)
 			continue;
 
-		auto iter = m_szPrototypeName.find(entry.path().string());
+		_char FileDrive[MAX_PATH] = {};
+		_char FileDir[MAX_PATH] = {};
+
+		_char FileName[MAX_PATH] = {};
+		_char FileExt[MAX_PATH] = {};
+		_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+		auto iter2 = m_Test.find(FileDir);
+		if (iter2 != m_Test.end())
+			continue;
+		m_Test.insert(FileDir);
+
+		auto iter = m_szPrototypeName.find(FileDir);
 		if (iter == m_szPrototypeName.end())
 		{
-			m_szPrototypeName.insert(entry.path().string());
+			m_szPrototypeName.insert(FileDir);
 
-			_char FileDrive[MAX_PATH] = {};
-			_char FileDir[MAX_PATH] = {};
 
-			_char FileName[MAX_PATH] = {};
-			_char FileExt[MAX_PATH] = {};
-			_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
 			_string VersionName = FileName;
 
@@ -1071,60 +1085,12 @@ void CLevel_Map::Ready_Map_Load_Prototype(const _char* pModelName)
 			PrototypeName.pop_back();
 			PrototypeName.pop_back();
 			PrototypeName.pop_back();
-
-			m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = FileDir]() {
-				if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
-					CModel_Streaming::Create(m_pDevice, m_pContext, Path))))
-					CRASH("Prototype Create Failed");
-				});
+			if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+				CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
+				CRASH("Prototype Create Failed");
 		}
-
-		//	auto iter = m_szPrototypeName.find(entry.path().string());
-		//	if (iter == m_szPrototypeName.end())
-		//	{
-		//		m_szPrototypeName.insert(entry.path().string());
-
-		//		_char FileDrive[MAX_PATH] = {};
-		//		_char FileDir[MAX_PATH] = {};
-
-		//		_char FileName[MAX_PATH] = {};
-		//		_char FileExt[MAX_PATH] = {};
-		//		_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-
-		//		_string VersionName = FileName;
-
-		//		_string NoVersionName = FileName;
-		//		NoVersionName.pop_back();
-
-		//		//뒤 숫자 떼고 0부터 숫자까지 만들기. 이미 맨 뒤에 .dat 붙어있음.
-
-		//		_uint V = FileName[strlen(FileName) - 1] - '0' + 1;
-
-		//		//for (_uint i = 0; i < V; ++i)
-		//		//{
-		//		//	_wstring PrototypeName = L"Prototype_Component_Model_";
-		//		//	PrototypeName += StringToWString(NoVersionName);
-		//		//	PrototypeName += to_wstring(i);
-
-		//		//	_string VersionPath = FileDir;
-		//		//	VersionPath += NoVersionName;
-		//		//	VersionPath += to_string(i);
-		//		//	VersionPath += ".dat";
-
-		//		//	m_pGameInstance->Add_Work([=, Name = PrototypeName, Path = VersionPath]() {
-		//		//		if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Name,
-		//		//			CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)), Path.c_str()))))
-		//		//			CRASH("Prototype Create Failed");
-		//		//		});
-		//		//}
-		//		break;
-		//	}
-		//}
-		//m_pGameInstance->Wait_Thread_End();
 	}
-	
 	m_pGameInstance->Wait_Thread_End();
-
 	m_pGameInstance->LoadLastLOD();
 }
 

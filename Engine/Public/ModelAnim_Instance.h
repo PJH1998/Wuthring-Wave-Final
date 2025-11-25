@@ -2,6 +2,7 @@
 #include "Component.h"
 
 NS_BEGIN(Engine)
+
 class ENGINE_DLL CModelAnim_Instance final : public CComponent
 {
 public:

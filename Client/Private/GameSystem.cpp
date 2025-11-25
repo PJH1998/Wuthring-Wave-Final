@@ -68,9 +68,9 @@ void CGameSystem::Load_Sequence(const _char* pFolderPath)
 	m_pParser->Load_Sequence(pFolderPath);
 }
 
-void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
+void CGameSystem::Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath)
 {
-	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
+	return m_pParser->Ready_Prototype_Map(pDataFilePath, eLevel, pModelFilePath);
 }
 
 void CGameSystem::Clone_MapObjects(LEVEL eLevel)
@@ -159,6 +159,11 @@ CUI_Text* CGameSystem::Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring st
 	return m_pUI_FontPreset->Create_FontToScreen_Alpha(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
 }
 
+void CGameSystem::PreAssign_TargetUIs()
+{
+	return m_pUI_ControlHelper->PreAssign_TargetUIs();
+}
+
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)
 {
 	return m_pUI_ControlHelper->Find_RootUI(strName);
@@ -243,9 +248,9 @@ void CGameSystem::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	m_pUI_ControlHelper->Update_MobStatus(tDesc);
 }
 
-void CGameSystem::Show_TabUtilityUI()
+void CGameSystem::Show_TabUtilityUI(_uint iCurSelectedUtilityIndex)
 {
-	m_pUI_ControlHelper->Show_TabUtilityUI();
+	m_pUI_ControlHelper->Show_TabUtilityUI(iCurSelectedUtilityIndex);
 }
 
 _uint CGameSystem::HideNGet_TabUtilityUI()

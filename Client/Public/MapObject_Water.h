@@ -1,8 +1,9 @@
 ﻿#pragma once
-#include "C:\Users\dnheu\source\repos\Wuthering_Wave_Final\EngineSDK\Inc\StaticObject.h"
+#include "StaticObject.h"
+
 NS_BEGIN(Client)
-class CMapObject_Water :
-    public CStaticObject
+
+class CMapObject_Water : public CStaticObject
 {
 };
 

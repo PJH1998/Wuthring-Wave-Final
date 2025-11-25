@@ -112,7 +112,6 @@ private:
 private:
 	void						Render_Priority();
 	void						Render_Shadow();
-	void						Render_Outline();
 	void						Render_NonBlend();	// 임시
 	void						Render_Static();
 	void						Render_Decal();
@@ -120,9 +119,11 @@ private:
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_SSS();
-	void						Render_SSR();
 
 	void						Render_Combined();
+	void						Render_Water();
+	void						Render_SSR();
+	void						Render_Outline();
 	void						Render_NonLight();
 	void						Render_Emissive();	// 단독 Emissive
 	void						Render_Effect();	// Backbuffer + Emissive + Distoriton
