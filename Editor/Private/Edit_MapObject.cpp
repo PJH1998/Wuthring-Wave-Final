@@ -840,7 +840,7 @@ void CEdit_MapObject::About_Texture()
 
 						if ((fileName.string().find("_D_") != std::string::npos) || (fileName.string().find("_D") != std::string::npos))
 						{
-							if ((fileName.string().find("_Doo") != std::string::npos) || (fileName.string().find("_Des") != std::string::npos))
+							if ((fileName.string().find("_Doo") != std::string::npos) || (fileName.string().find("_Des") != std::string::npos) || (fileName.string().find("_Dec") != std::string::npos))
 							{
 								if (fileName.string().find("_N_") != std::string::npos || (fileName.string().find("_N") != std::string::npos))
 								{
