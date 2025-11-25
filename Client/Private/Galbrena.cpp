@@ -69,13 +69,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	m_fCameraOriginOffset = 1.2f;
 	m_fCameraOffset = 1.2f;
 
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,m_pFacialComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true);
-
-#ifdef _DEBUG
-	m_pModelCom->Print_ShapeKeyWeights();
-#endif // _DEBUG
-
-
+	m_pMainAttackVolume->TriggerActivate(false);
     return S_OK;
 }
 
@@ -694,7 +688,7 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 	case VOLUME::VOLUME_DEFAULT_E:
 		// 기본 E로 타격 시 State가 변하니까 Condition을 바꿔주어야함.
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
-		pAbility->Add_HarmonyGauge(7.f); // 협주 게이지 채우기.
+		pAbility->Add_HarmonyGauge(10.f); // 협주 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST5, 10.f); // 기본 궁극기 게이지
 
 		if(!IsBurst)
@@ -707,11 +701,12 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 		pAbility->Add_Cost(COST_TYPE::COST5, 7.f); // 기본 궁극기 게이지
 		break;
 	case VOLUME::VOLUME_TARGET_BURST: // 궁극기 사용 시 ?
-		pAbility->Add_HarmonyGauge(5.f); // 협주 게이지 채우기.
+		pAbility->Add_HarmonyGauge(20.f); // 협주 게이지 채우기.
 		if (!IsBurst)
 			pAbility->Add_Cost(COST_TYPE::COST1, 30.f); // 공명 게이지(강공격 게이지)
 		break;
 	default:
+		pAbility->Add_HarmonyGauge(5.f); // 협주 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST5, 4.f); // 기본 궁극기 게이지
 		if (!IsBurst)
 			pAbility->Add_Cost(COST_TYPE::COST1, 3.f); // 공명 게이지(강공격 게이지)
