@@ -33,7 +33,8 @@ HRESULT CLevel_GamePlay::Initialize()
 
 //	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
 
-	m_pGameInstance->Setting_LUT(0, 0.25f, false);
+	//m_pGameInstance->Setting_LUT(0, 0.25f, false);
+	m_pGameInstance->Setting_LUT(1, 0.77f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -62,7 +63,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 //	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
 //	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vDiffuse = _float4(0.5f, 0.55f, 0.85f, 1.f);
 //LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
@@ -84,7 +85,6 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
-
 
 	Ready_Effect();
 	Ready_Skybox();
@@ -418,10 +418,12 @@ void CLevel_GamePlay::Ready_Effect()
 void CLevel_GamePlay::Ready_Skybox()
 {
 	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
-	SkyboxDesc.iNumModel = 2;
+	SkyboxDesc.iNumModel = 4;
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
-	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX2"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Cloud"));
+	SkyboxDesc.vUVRate = _float2(9.f, 12.f);
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
@@ -555,26 +557,26 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	//	m_pGameInstance->SettingHDR(m_fExposure);
 	//
 	//}
-	//if (ImGui::CollapsingHeader("LUT"))
-	//{
-	//	if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
-	//	{
-	//		for (_uint i = 0; i < 7; ++i)
-	//		{
+	if (ImGui::CollapsingHeader("LUT"))
+	{
+		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
+		{
+			for (_uint i = 0; i < 7; ++i)
+			{
 
-	//			if (ImGui::Selectable(to_string(i).c_str()))
-	//			{
-	//				m_iLUT_Index = i;
-	//			}
-	//		}
+				if (ImGui::Selectable(to_string(i).c_str()))
+				{
+					m_iLUT_Index = i;
+				}
+			}
 
-	//		ImGui::EndCombo();
-	//	}
-
-	//	ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
-	//	ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-	//	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
-	//}
+			ImGui::EndCombo();
+		}
+	
+		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
+		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+	}
 
 	ImGui::End();
 	//if (ImGui::CollapsingHeader("MOTION_BLUR"))

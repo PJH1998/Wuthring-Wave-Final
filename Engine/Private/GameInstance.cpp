@@ -31,7 +31,7 @@
 #include "HZB.h"
 #include "EnvironmentMap.h"
 
-#include"Model_Manager.h"
+#include "Model_Manager.h"
 #include "SFX_Hub.h"
 #include "Resource_Manager.h"
 
@@ -1218,6 +1218,9 @@ void CGameInstance::Release_Engine()
 {
 	Wait_Thread_End();
 
+	Safe_Release(m_pPooling_Manager);
+	Safe_Release(m_pRenderer);
+	Safe_Release(m_pModel_Manager);
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
@@ -1225,9 +1228,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
-	Safe_Release(m_pPooling_Manager);
 	Safe_Release(m_pTargetManager);
-	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pCamera_Manager);
@@ -1248,7 +1249,6 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
-	Safe_Release(m_pModel_Manager);
 	
 	Safe_Release(m_pGraphic_Device);
 	Release();

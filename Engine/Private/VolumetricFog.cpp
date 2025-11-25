@@ -38,7 +38,8 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fFogMinHeight = 120.f;
 	m_VF_Data.fFogMaxHeight = 200.f;
 
-	m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
+	//m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
+	m_VF_Data.vFogColor = _float3(0.7f, 0.75f, 0.87f);
 	m_VF_Data.fHegihtFallOff = 0.01f;
 	m_VF_Data.fGroundFallOff = 0.02f;
 	m_VF_Data.fDistanceFallOff = 0.02f;

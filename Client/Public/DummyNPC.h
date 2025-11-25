@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Actor.h"
+
 NS_BEGIN(Engine)
 class CModelAnim_Instance;
 class CComputeShader;

@@ -243,6 +243,7 @@ void CMesh_Streaming::Free()
 		Safe_Delete(m_Desc);
 	Safe_Delete_Array(m_vecVertexPos);
 	Safe_Delete_Array(m_vecIndices);
+
 #ifdef _DEBUG
 	Safe_Delete(m_pBoundingBox);
 #endif
