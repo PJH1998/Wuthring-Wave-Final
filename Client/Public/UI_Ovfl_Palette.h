@@ -32,6 +32,7 @@ public:
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
 	HRESULT			Ready_Components(void* pArg);
+	HRESULT			Ready_ChildExtraComponents();
 
 public:
 	void			Req_OffPalette()		{ m_IsGoinDisabled = true;}

@@ -12,7 +12,10 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
 float g_AlphaStrength;
 
-Texture2D g_TextureExtra;
+Texture2D g_TextureExtra0;
+Texture2D g_TextureExtra1;
+Texture2D g_TextureExtra2;
+Texture2D g_TextureExtra3;
 float g_FXStrength;
 
 // Gradient Variables
@@ -1022,6 +1025,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         case UIFLAG_OVFL_PALETTE :      // 8
         {
             #define CHANGE_BYCIRCLE
+            
+            
+            //Out.vColor = g_TextureExtra0.Sample(DefaultSampler, In.vTexcoord);
+            //return Out;
             
             
             // ==============================

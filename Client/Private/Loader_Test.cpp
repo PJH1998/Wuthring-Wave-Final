@@ -699,6 +699,16 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
 
+
+	
+	
+	_string strFilePath_UI_ExtraTexturesLoad = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LoadDummy.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_ExtraTexturesLoad));
+	// Prototype_Component_Texture_Custom_ ...
+	// Palette_BG
+
+
+
 	for (auto& treeDesc : vecDescs)
 	{
 		for (auto& infoDesc : treeDesc.vecUIInfoDescs)

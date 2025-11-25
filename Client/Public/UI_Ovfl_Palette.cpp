@@ -38,6 +38,7 @@ HRESULT CUI_Ovfl_Palette::Initialize_Clone(void* pArg)
 	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
 	Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
+	Ready_ChildExtraComponents();
 	
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
@@ -126,6 +127,19 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
 {
+	return S_OK;
+}
+
+HRESULT CUI_Ovfl_Palette::Ready_ChildExtraComponents()
+{
+	// 자식들에게 효과용 추가 텍스쳐를 바인딩한다.
+	// 사전에 로더에서 프로토타입 생성 필요. 이는 텍스쳐 선 로드용 짬통 json을 사용함.
+	
+	_wstring strExtraTexName = L"T_BgTextureGreen";
+
+	if (FAILED(m_pUI_InstBlocks		->Add_ExtraTexture(strExtraTexName)))		return E_FAIL;
+	if (FAILED(m_pUI_InstColorBtns	->Add_ExtraTexture(strExtraTexName)))		return E_FAIL;
+
 	return S_OK;
 }
 
