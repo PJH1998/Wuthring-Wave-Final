@@ -371,19 +371,19 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         switch (static_cast<EAugustaIdleType>(m_iCurrentAnimIdx))
         {
 		case EAugustaIdleType::STANDCHANGE:
-			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
-			break;
-        case EAugustaIdleType::STAND1_ACTION01:
 			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
-            break;
+			break;
+   //     case EAugustaIdleType::STAND1_ACTION01:
+			//m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+   //         break;
         case EAugustaIdleType::STAND1_ACTION02:
 			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION03; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         case EAugustaIdleType::STAND1_ACTION03:
-			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         default:
-			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         }
 

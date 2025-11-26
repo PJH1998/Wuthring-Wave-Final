@@ -32,8 +32,11 @@ HRESULT CEdit_MapObject_Destruction_Piece::Initialize_Clone(void* pArg)
 
 	m_iNumLOD = m_pModelCom->Get_NumMesh(0);
 
-
+#ifdef _DEBUG
 	Sync_BoundingBox(m_pModelCom->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+#endif // _DEBUG
+
+	
 
 	_vector vScale, vRotation, vTranslation;
 
@@ -154,7 +157,12 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 	if (FAILED(Add_Component(pDesc->iLevel, Model,
 		StringToWString(m_ModelName), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
+
+#ifdef _DEBUG
 	m_pModelCom->Ready_BoundingBox();
+#endif // _DEBUG
+
+	
 	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
@@ -167,7 +175,12 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Dynamic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+
+#ifdef _DEBUG
 	RigidbodyDesc.vExtent = m_pModelCom->Get_BoundingBox()->Extents;
+#endif // _DEBUG
+
+	
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);

@@ -371,12 +371,12 @@ void CCharacter::Camera_Shake(_float fIntensity)
 	//m_pGameInstance->OnShake(vDir);
 }
 
-void CCharacter::Play_Action(const _wstring& strActionTag)
+void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
 {
 	if (nullptr == m_pTransformCom)
 		return;
 
-	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
 }
 
 _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)

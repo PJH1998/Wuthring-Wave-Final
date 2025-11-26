@@ -19,6 +19,7 @@
 
 #include "SceneCamera.h"
 #include "MapObject.h"
+#include"MapObject_Water.h"
 
 #include "Logo_SkyBox.h"
 
@@ -83,7 +84,9 @@ HRESULT CLoader_Logo::Load_Object()
 {
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
-
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Water"),
+		CMapObject_Water::Create(m_pDevice, m_pContext));
+	
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_LogoSkyBox"),
 		CLogo_SkyBox::Create(m_pDevice, m_pContext))))
 		CRASH("Failed to Add Prototype GameObject LogoSkyBox");

@@ -62,6 +62,9 @@ private:
 		// Hit
 		EGalbrenaHitType m_eHitType = EGalbrenaHitType::END;
 
+		// Interaction
+		EGalbrenaRopeType m_eRopeType = EGalbrenaRopeType::END;
+
 		// Prev Info
 		_string m_strPrevInfo = {};
 		void Clear()
@@ -93,7 +96,11 @@ private:
 			m_eClimbExitType = EGalbrenaClimbExitType::END;
 			m_IsClimbSecondStep = false;
 
+			// Hit
 			m_eHitType = EGalbrenaHitType::END;
+
+			// Interaction
+			m_eRopeType = EGalbrenaRopeType::END;
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
