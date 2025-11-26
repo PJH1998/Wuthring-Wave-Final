@@ -39,7 +39,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 70.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 50.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 5.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -356,15 +356,19 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 		CRASH(m_pParryVolume);
 	m_pParryVolume->TriggerActivate(false);
 
-	//CCoro_Rock::CORO_ROCK_DESC RockDesc{};
-	//RockDesc.pParentTransform = m_pTransformCom;
-	//RockDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp001");
-	//RockDesc.vOffsetTrans = _float3(0.f, 0.f, 0.f);
-	//RockDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	//RockDesc.fAttackDmg = pDesc->fAttackDmg * 2.f;
-	//
-	//if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Rock"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Coro_Rock"), &RockDesc)))
-	//	CRASH("Failed to Clone PartObj : Coro_Rock");
+	CCoro_Rock::CORO_ROCK_DESC RockDesc{};
+	RockDesc.pParentTransform = m_pTransformCom;
+	RockDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp001");
+	RockDesc.vOffsetTrans = _float3(2.5f, 0.f, 0.f);
+	RockDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(-90.f));
+	RockDesc.fAttackDmg = pDesc->fAttackDmg * 2.f;
+	RockDesc.eType = m_CallBack.eType;
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Rock"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_CoroRock"), &RockDesc)))
+		CRASH("Failed to Clone PartObj : Coro_Rock");
+	m_pCoroRock = dynamic_cast<CCoro_Rock*>(Find_PartObject(TEXT("Part_Rock")));
+	if (nullptr == m_pCoroRock)
+		CRASH("Failed to Find PartObj");
+	Safe_AddRef(m_pCoroRock);
 }
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
@@ -659,7 +663,7 @@ _bool CCorosaurus::isKnockDown()
 
 _bool CCorosaurus::isAttackEnable()
 {
-	if (!m_isDetecting && !m_isAggro)
+	if (!m_isDetecting || !m_isAggro)
 		return false;
 	if (m_fDistance > 20.f)
 		return false;
@@ -716,8 +720,8 @@ _bool CCorosaurus::AttackArrange()
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex == ATK_PATTERN::BURST)
-	//	return false;
+	if (iIndex != ATK_PATTERN::ATTACK8)
+		return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
@@ -836,6 +840,7 @@ void CCorosaurus::Free()
 	{
 		Safe_Release(m_pAtkVolumes[i]);
 	}
+	Safe_Release(m_pCoroRock);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);

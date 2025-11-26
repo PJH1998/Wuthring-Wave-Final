@@ -12,7 +12,10 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_Texture;
 float g_AlphaStrength;
 
-Texture2D g_TextureFX;
+Texture2D g_TextureExtra0;
+Texture2D g_TextureExtra1;
+Texture2D g_TextureExtra2;
+Texture2D g_TextureExtra3;
 float g_FXStrength;
 
 // Gradient Variables
@@ -44,7 +47,9 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_ACTIVEFEEDBACK       6
 #define UIFLAG_ENEMY_HP             7
 
-#define UIFLAG_END                  8
+#define UIFLAG_OVFL_PALETTE         8
+
+#define UIFLAG_END                  9
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -998,13 +1003,6 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
 
             float fEdgeAlphaWidth = 0.2f;
             
-            
-            float4 OriginColor = g_Texture.Sample(DefaultSampler, fixedUV);
-            float4 FlippedColor = g_Texture.Sample(DefaultSampler, fixedUV_Flip);
-            
-            
-            
-            
             //Out.vColor.rgb = vColor.rgb;
             Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
             Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength) * fAlpha;
@@ -1015,6 +1013,131 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             //#endif
             
             //Out.vColor.rgba = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            return Out;
+        } break;
+        case UIFLAG_OVFL_PALETTE :      // 8
+        {
+            #define CHANGE_BYCIRCLE
+            
+            
+            //Out.vColor = g_TextureExtra0.Sample(DefaultSampler, In.vTexcoord);
+            //return Out;
+            
+            
+            // ==============================
+            // * [8] Overflow Palette (UI MiniGame Gimmick)
+            // ==============================
+            // * matrix info [size : 80] (10 * 8. per blocks)
+            // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+            // [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
+            // [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
+            // [EXIMGSIZE.x] [EXIMGSIZE.y]
+            // 텍스쳐를 하나 더 받아와서
+            // 현재 winsize 및 inst transform (pos, sca) 기준으로 uv를 적절히 슬라이싱하여 적용하고
+            // 색상을 흑백화 및 컬러링해서 out. 하면 될 것 같기도? 아닌가
+            // ==============================
+            
+            float4  vCurrColor          = In.mExtra0.xyzw;
+            float4  vDestColor          = In.mExtra1.xyzw;
+            float2  vChangeStartPos     = In.mExtra2.xy;        // 퍼지기가 시작될 지점
+            bool    IsChanging          = _BOOL(In.mExtra2.z);
+            float   fChangedRadius      = In.mExtra2.w;
+            int2    vEXImageSize        = In.mExtra3.xy;
+            
+            // 마스크 이미지 알파 적용
+            float4 vMaskColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+            Out.vColor.a = vMaskColor.r;
+            
+            // 스크린 크기를 기준으로 uv를 반영한 좌표를 만듦.
+        #ifdef CHANGE_BYCIRCLE
+            float2 vScreenX = { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.x + In.vSInstSca.x / 2.f };
+            float2 vScreenY = { In.vSInstPos.y - In.vSInstSca.y / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f };
+                
+            In.vTexcoord;   // 이게 인스턴스 기준 현재 포커싱중인 좌표
+            float2 vFixedScreenPos = { 
+                lerp(vScreenX.x, vScreenX.y, In.vTexcoord.x),
+                lerp(vScreenY.x, vScreenY.y, 1.f - In.vTexcoord.y)
+            };
+        #endif
+            
+            if (IsChanging) // 변화중
+            {   
+                // 스크린좌표로 변환하고, 현재 포커싱중인 점이 이를 지나면 색이 바뀌게끔..
+                
+
+                
+                
+                #ifndef CHANGE_BYCIRCLE
+                float2 vSingleInstancePos = In.vSInstPos; ;           // 지금 이거 단순 인스턴스의 한 점을 기준삼는거라, 점 닿자마자 확 바뀌는 듯
+                #endif
+                
+                #ifdef CHANGE_BYCIRCLE
+                float2 vSingleInstancePos = vFixedScreenPos; //In.vSInstPos;           // 지금 이거 단순 인스턴스의 한 점을 기준삼는거라, 점 닿자마자 확 바뀌는 듯
+                #endif
+                
+                float fLengthFromStartPos = length(vSingleInstancePos - vChangeStartPos);
+                
+                float4 vTargetColor;
+                
+                if (fLengthFromStartPos <= fChangedRadius)      // 가깝다! -> 변해야 됨
+                    vTargetColor = vDestColor;
+                else                                            // 멀다! -> 아직 변하면 안됨
+                    vTargetColor = vCurrColor;
+                    
+                Out.vColor.rgb = vTargetColor.rgb;
+                Out.vColor.a = vTargetColor.a * Out.vColor.a;
+            }
+            else            // 평시
+            {
+                Out.vColor.rgb = vCurrColor.rgb;
+                Out.vColor.a = vCurrColor.a * Out.vColor.a;
+            }   
+            
+            
+            
+            
+            
+            
+            
+            //// 넓은 이 이미지를.. 현재 인스턴스에 맞게 uv를 조절해야 함. 텍스쳐 크기 정보 필요할 것 같은데.
+            //
+            //// 1. 각 인스턴스 별 사이즈
+            //In.vSInstSca;
+            //// 2. 각 인스턴스 별 위치
+            //In.vSInstPos;
+            //// 3. 추가 텍스쳐 크기
+            //vEXImageSize = {};
+            //// 4. 각 인스턴스 별 Texcoord (0~1)
+            //In.vTexcoord;
+            
+            // 이걸로 적절하게 하면 됨ㅇ
+            
+            // 큰 이미지의 특정 부분으로 texcoord를 조절하면 되긴 할텐데
+            // 일단 이미지 사이즈 기준으로 좌표 구하고, 이미지 크기로 나누면 되는 것 아닌지?
+            float2 vImgPos = vFixedScreenPos.xy + vEXImageSize.xy * 0.5f;      // 이미지 사이즈 기준 좌표
+            float2 vImgPos_toUV = vImgPos.xy / vEXImageSize.xy;
+            
+            
+            
+            
+            
+            float2 vFixedTexUV;
+            float4 vColorTex = g_TextureExtra0.Sample(DefaultSampler, vImgPos_toUV);
+            
+            
+            float4 vFinalColorTex;
+            
+            //float4 vColorTex = g_TextureExtra0.Sample(DefaultSampler, In.vTexcoord);      //backup
+            
+            
+            float fColorAverage = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
+            vFinalColorTex.rgb = fColorAverage.xxx;
+            vFinalColorTex.a = vColorTex.a;
+            
+            
+            Out.vColor.rgb *= vFinalColorTex.rgb;
+            Out.vColor.a *= vFinalColorTex.a * (1.f - g_AlphaStrength);
+            
             return Out;
         } break;
         default:

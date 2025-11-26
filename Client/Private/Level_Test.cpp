@@ -62,7 +62,7 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	//Ready_CoroSaurus();
+	Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
 
@@ -447,7 +447,7 @@ void CLevel_Test::Ready_AnimInstanceTest()
 	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
 	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_AnimInstanceTest"));
 	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_DummyCell");
-	NPCDesc.vStartPositions = _float3(18.f, -6.f, 2.f);
+	NPCDesc.vStartPositions = _float3(18.f, -6.f, -30.f);
 	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);
@@ -494,6 +494,10 @@ void CLevel_Test::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
+		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
+		CRASH("Failed Ready Ovfl_Palette");
 
 
 	m_pGameSystem->PreAssign_TargetUIs();
@@ -639,10 +643,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #endif // KSTA_UITEST_OLD
 
-
-
-
-
 	// interact
 #pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
@@ -746,6 +746,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
 #pragma region [TAB] KSTA_UITEST_TABUTILITY
 	static _bool isTabUtilityActive = false;
 	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
@@ -785,6 +786,25 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
+#pragma region [NUMPAD 3] KSTA_UITEST_OVERFLOWINGPALETTE 
+
+	static _bool isOpenOverflowingPalette = false;
+
+	if (!isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Open_Game_OverflowPalette();
+		isOpenOverflowingPalette = true;
+	}
+	else if (isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Close_Game_OverflowPalette();
+		isOpenOverflowingPalette = false;
+	}
+
+#pragma endregion
 
 
 }

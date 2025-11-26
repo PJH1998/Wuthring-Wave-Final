@@ -9,6 +9,7 @@
 #include "Corosaurus.h"
 #include "Projectile.h"
 #include "AoEDoT.h"
+#include "NPCInstancing.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -81,6 +82,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
 	Ready_CoroSaurus();
+	Ready_NPC();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -503,6 +505,19 @@ void CLevel_GamePlay::Ready_SFX()
 	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
 
 #pragma endregion
+}
+
+void CLevel_GamePlay::Ready_NPC()
+{
+	CNPCInstancing::NPC_DESC NPCDesc{};
+	NPCDesc.eCurLevel = m_eCurLevel;
+	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"));
+	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleM"));
+	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_NPCCell");
+	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
 }
 
 #ifdef _DEBUG
