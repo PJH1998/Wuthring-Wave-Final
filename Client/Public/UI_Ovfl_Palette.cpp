@@ -139,10 +139,18 @@ HRESULT CUI_Ovfl_Palette::Ready_ChildExtraComponents()
 	// 자식들에게 효과용 추가 텍스쳐를 바인딩한다.
 	// 사전에 로더에서 프로토타입 생성 필요. 이는 텍스쳐 선 로드용 짬통 json을 사용함.
 	
-	_wstring strExtraTexName = L"T_BgTextureGreen";
+	_wstring strExtraTexName			= L"T_BgTextureGreen";
 
-	if (FAILED(m_pUI_InstBlocks		->Add_ExtraTexture(strExtraTexName)))		return E_FAIL;
-	if (FAILED(m_pUI_InstColorBtns	->Add_ExtraTexture(strExtraTexName)))		return E_FAIL;
+	if (FAILED(m_pUI_InstBlocks			->Add_ExtraTexture(strExtraTexName)))			return E_FAIL;
+	if (FAILED(m_pUI_InstColorBtns		->Add_ExtraTexture(strExtraTexName)))			return E_FAIL;
+
+
+	_wstring strExtraTexName_Noise12	= L"T_Noise_No.png (12)";
+	_wstring strExtraTexName_Noise14	= L"T_Noise_No.png (14)";
+
+	if (FAILED(m_pUI_InstBlocks			->Add_ExtraTexture(strExtraTexName_Noise12)))	return E_FAIL;
+	if (FAILED(m_pUI_InstBlocks			->Add_ExtraTexture(strExtraTexName_Noise14)))	return E_FAIL;
+
 
 	return S_OK;
 }

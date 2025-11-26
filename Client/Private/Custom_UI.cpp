@@ -337,6 +337,9 @@ void  CCustom_UI::Update_CacheTransform(_float fTimeDelta)   // Caching Calculat
 
 HRESULT CCustom_UI::Add_ExtraTexture(_wstring strFileName)
 {
+	if (m_vecExtraTextureCom.size() >= 4)
+		CRASH("Extra Textures Exceeded. Max Texture Size is 4.")
+
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	CTexture* pExtraTexture = nullptr;
 

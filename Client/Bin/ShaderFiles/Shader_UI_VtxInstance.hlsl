@@ -1093,37 +1093,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 Out.vColor.a = vCurrColor.a * Out.vColor.a;
             }   
             
-            
-            
-            
-            
-            
-            
-            //// 넓은 이 이미지를.. 현재 인스턴스에 맞게 uv를 조절해야 함. 텍스쳐 크기 정보 필요할 것 같은데.
-            //
-            //// 1. 각 인스턴스 별 사이즈
-            //In.vSInstSca;
-            //// 2. 각 인스턴스 별 위치
-            //In.vSInstPos;
-            //// 3. 추가 텍스쳐 크기
-            //vEXImageSize = {};
-            //// 4. 각 인스턴스 별 Texcoord (0~1)
-            //In.vTexcoord;
-            
-            // 이걸로 적절하게 하면 됨ㅇ
-            
+                        
             // 큰 이미지의 특정 부분으로 texcoord를 조절하면 되긴 할텐데
             // 일단 이미지 사이즈 기준으로 좌표 구하고, 이미지 크기로 나누면 되는 것 아닌지?
             float2 vImgPos = vFixedScreenPos.xy + vEXImageSize.xy * 0.5f;      // 이미지 사이즈 기준 좌표
             float2 vImgPos_toUV = vImgPos.xy / vEXImageSize.xy;
             
-            
-            
-            
-            
             float2 vFixedTexUV;
             float4 vColorTex = smoothstep(0.f, 1.f, (g_TextureExtra0.Sample(DefaultSampler, vImgPos_toUV) * 1.35f));
-            
             
             float4 vFinalColorTex;
             
@@ -1133,6 +1110,63 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             float fColorAverage = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
             vFinalColorTex.rgb = fColorAverage.xxx;
             vFinalColorTex.a = vColorTex.a;
+            
+            
+            // - 효과 넣으려면?
+            // 인스턴스별로 얼마나 변화가 진행되었는지,
+            // 그리고 이전 타겟이 상하좌우 중 어디로부터 왔는지,
+            // 그리고 디졸브같은 노이즈 텍스쳐.. 등 필요할 듯
+            
+            // 1. 얼마나 변화가 진행되었는가. 유사 timedelta. with clamping
+            // 
+            // 꼭짓점 좌표를 구한 뒤 순회하여 변화 시작점과의 비교.
+            // 1) [시작점->"Nearest" 꼭짓점 거리] == [CHNG_RADIUS] 인 시점에서 변화도 0.
+            // 2) [시작점->"MostFar" 꼭짓점 거리] == [CHNG_RADIUS] 인 시점에서 변화도 1.
+            // 3) 이 두 개 사이에서 lerp 때리면 됨
+            
+            if (IsChanging)
+            {
+                float fChangeRatio;
+                
+                float2 vVerticesPos[4] = {
+                    { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f },   // LT 
+                    { In.vSInstPos.x + In.vSInstSca.x / 2.f, In.vSInstPos.y - In.vSInstSca.y / 2.f },   // RT 
+                    { In.vSInstPos.x + In.vSInstSca.x / 2.f, In.vSInstPos.y - In.vSInstSca.y / 2.f },   // RB 
+                    { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f }    // LB 
+                };
+                float fDistPerVertices[4] = {
+                    length(vVerticesPos[0] - vChangeStartPos),
+                    length(vVerticesPos[1] - vChangeStartPos),    
+                    length(vVerticesPos[2] - vChangeStartPos),
+                    length(vVerticesPos[3] - vChangeStartPos)
+                };
+                
+                uint iVertexIndex_Nearest = 0;
+                uint iVertexIndex_MostFar = 0;
+                for (uint i = 0; i < 4; i++)
+                {
+                    if (i == 0) continue;
+                    
+                    if (fDistPerVertices[iVertexIndex_Nearest] > fDistPerVertices[i])   iVertexIndex_Nearest = i;
+                    if (fDistPerVertices[iVertexIndex_MostFar] < fDistPerVertices[i])   iVertexIndex_MostFar = i;
+                }
+                
+                float2 vVertex_Nearest = vVerticesPos[iVertexIndex_Nearest];    // 가장 가까운 or 먼 점의 위치. 거리 비교용 재료.
+                float2 vVertex_MostFar = vVerticesPos[iVertexIndex_MostFar];    // 가장 가까운 or 먼 점의 위치. 거리 비교용 재료.
+                
+                
+                //fChangeRatio = saturate()
+                
+                
+                
+
+                
+            }
+            
+            
+            
+            
+            
             
             
             Out.vColor.rgb *= vFinalColorTex.rgb;
