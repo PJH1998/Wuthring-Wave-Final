@@ -355,6 +355,9 @@
     <Filter Include="03. GameObject\SkyBox\Logo">
       <UniqueIdentifier>{a025b515-ba1a-4b41-8a1a-3e1f744cd632}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan">
+      <UniqueIdentifier>{27f3bd8e-5674-439d-81d5-bc02bfe16cc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -940,6 +943,9 @@
     <ClInclude Include="..\public\Logo_SkyBox.h">
       <Filter>03. GameObject\SkyBox\Logo</Filter>
     </ClInclude>
+    <ClInclude Include="CLeviatan.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1489,6 +1495,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Logo_SkyBox.cpp">
       <Filter>03. GameObject\SkyBox\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="CLeviatan.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

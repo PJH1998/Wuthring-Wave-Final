@@ -12,10 +12,10 @@ NS_BEGIN(Client)
 class CGameSystem;
 class CAttackVolume;
 
-class CMonsterTest final : public CActor
+class CLeviatan final : public CActor
 {
 public:
-	typedef struct tagMonsterTestDesc : public CActor::ACTOR_DESC
+	typedef struct tagLeviatanDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vInitPosition;
 		_float3 vInitRotate;
@@ -24,16 +24,15 @@ public:
 		_float fAttackDmg;
 		_float fMaxStamina;
 		_float3 vDetectRange;
-	}MONSTERTEST_DESC;
-
+	}LEVIATAN_DESC;
 private:
-	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, WEAPON_GR, WEAPON_GL, END };
+	enum ATK_SOCKET { FOOT_L, FOOT_R, RAY1, WEAPON_GL, END };
 	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
-	enum SHINWANG_SHADER { UP, BODY, DOWN, ARM, PARTS, WEAPON, FX, FX2 };
+	enum LEVIATAN_SHADER { BANG, HAIR, FACE, UP, DOWN, CLOTH, ALPHA, FX };
 private:
-	explicit CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CMonsterTest(const CMonsterTest& Prototype);
-	virtual ~CMonsterTest() = default;
+	explicit CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CLeviatan(const CLeviatan& Prototype);
+	virtual ~CLeviatan() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype() override;
@@ -55,13 +54,13 @@ public:
 	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
-	CAnimMachine*			m_pAnimMachineCom = {nullptr};
-	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
-	CGameSystem*			m_pGameSystem = { nullptr };
-	const _float4x4*		m_pToeMatrix = { nullptr };
+	CAnimMachine* m_pAnimMachineCom = { nullptr };
+	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
+	CGameSystem* m_pGameSystem = { nullptr };
+	const _float4x4* m_pToeMatrix = { nullptr };
 
-	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
-	CAttackVolume*			m_pParryVolume = {nullptr,};
+	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = { nullptr, };
+	CAttackVolume* m_pParryVolume = { nullptr, };
 	vector<_uint>			m_ShaderIndices;
 
 #pragma region STATE_VARIABLE
@@ -87,7 +86,7 @@ private:
 	_bool					m_isAggro{};
 	_bool					m_isDist_Interp_Enable{};
 #pragma endregion
-	
+
 #pragma region STATUS
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};
@@ -110,8 +109,8 @@ private:
 
 private:
 	HRESULT						Bind_Resources();
-	void						Ready_Component(MONSTERTEST_DESC* pDesc);
-	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
+	void						Ready_Component(LEVIATAN_DESC* pDesc);
+	void						Ready_PartObjects(LEVIATAN_DESC* pDesc);
 
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
@@ -139,9 +138,8 @@ private:
 #pragma endregion
 
 public:
-	static		CMonsterTest*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual		CGameObject*			Clone(void* pArg) override;
+	static		CLeviatan* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 };
-
 NS_END
