@@ -43,6 +43,9 @@ HRESULT CPlayerStatus::Initialize(const vector<_string>& AbilityFolders)
 
 void CPlayerStatus::Update(_float fTimeDelta)
 {
+	
+	
+
 	for (_uint i = CPlayer::CHARACTERTYPE::ROVER; i < CPlayer::CHARACTERTYPE::TYPE_END; ++i)
 	{
 		// 비활성화된 캐릭터들의 쿨타임도 초기화.

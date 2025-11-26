@@ -58,7 +58,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-	//Ready_Dummy();
+	Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
@@ -168,14 +168,18 @@ void CLevel_Test::Ready_Dummy()
 	
 	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
 	DummyDesc.eLevel = m_eCurLevel;
-	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
-	DummyDesc.strInitAnimTag = "Stand1";
-	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
-	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로사우로스?
-	//DummyDesc.strInitAnimTag = "Stand";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");				//신왕
+	//DummyDesc.strInitAnimTag = "Stand1";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
+	
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로
+	DummyDesc.strInitAnimTag = "Stand";
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/CorroSaurus/Notify";
+	 
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Ggobul");						//꼬불이
 	//DummyDesc.strInitAnimTag = "SAttack01_1";
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Ggobul/Notify";
+	// 
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
@@ -401,7 +405,8 @@ void CLevel_Test::Ready_CoroSaurus()
 void CLevel_Test::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 15);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
+	//m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
 }
 
 void CLevel_Test::Ready_Skybox()

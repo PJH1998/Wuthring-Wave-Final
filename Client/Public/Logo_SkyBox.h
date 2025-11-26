@@ -4,6 +4,7 @@
 NS_BEGIN(Engine)
 class CShader;
 class CVIBuffer_Rect;
+class CModel;
 class CTexture;
 NS_END
 
@@ -12,7 +13,7 @@ NS_BEGIN(Client)
 class CLogo_SkyBox final : public CGameObject
 {
 private:
-	enum class SKYBOX { BACK, MID, FRONT, END};
+	enum class SKYBOX { BACK, FIRST_CLOUD, SEC_CLOUD, EFFECT, END};
 
 private:
 	CLogo_SkyBox(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -29,17 +30,24 @@ public:
 	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 
 private:
-	_vector						m_vPosition = {};
-	_vector						m_vRotateQuaternion = {};
-	_float2						m_vScale = { _float2(1.f, 1.f) };
-
 	CShader*					m_pShader = { nullptr };
 	CVIBuffer_Rect*				m_pVIBuffer = { nullptr };
-	CTexture*					m_pSkyTextures[ENUM_CLASS(SKYBOX::END)];
+	CTexture*					m_pTexture = { nullptr };
+	//CModel*						m_pSkyModel = { nullptr };
+
+	_float4x4					m_CombineMatrix = {};
+	_matrix						m_SkyMatrices[ENUM_CLASS(SKYBOX::END)] = {};
+	
+	_uint						m_iShaderIndex[ENUM_CLASS(SKYBOX::END)] = {};
 
 #ifdef _DEBUG
-	_float3						m_vDebugPosition = {};
-	_float3						m_vYawPitchRoll = {};
+	_matrix						m_DebugSkyMatrices[ENUM_CLASS(SKYBOX::END)] = {};
+	_uint						m_iIndex = 0;
+	
+
+	_float3						m_vScale[ENUM_CLASS(SKYBOX::END)] = {};
+	_float3						m_vYawPitchRoll[ENUM_CLASS(SKYBOX::END)] = {};
+	_float3						m_vPosition[ENUM_CLASS(SKYBOX::END)] = {};
 #endif
 
 private:

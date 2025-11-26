@@ -104,6 +104,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, In.TransformMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = Out.vPosition;
+    
     return Out;
 }
 
@@ -126,6 +127,7 @@ VS_OUT VS_FACE(VS_IN In)
         g_MeshLocalBoneIndecies[In.vBlendIndex.y],
         g_MeshLocalBoneIndecies[In.vBlendIndex.z],
         g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
+        
     matBone =
     mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
     mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
@@ -239,7 +241,6 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
     Out.vSSS.w = In.vProjPos.w;
-    
     
     return Out;
 }

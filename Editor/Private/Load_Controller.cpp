@@ -926,6 +926,9 @@ void CLoad_Controller::Load_FXRadial_FromJson(const _string& strFilePath, const 
 	if (RadialJson.contains("MyType"))
 		Desc.eMyType = static_cast<EFFECT_TYPE>(RadialJson["MyType"].get<double>());
 
+	if (RadialJson.contains("PositionFlag"))
+		Desc.PositionFlag = RadialJson["PositionFlag"].get<_bool>();
+
 	if(RadialJson.contains("LifeTime"))
 		Desc.fLifeTime = RadialJson["LifeTime"].get<_float>();
 

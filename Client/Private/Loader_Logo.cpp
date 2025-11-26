@@ -47,17 +47,9 @@ HRESULT CLoader_Logo::Load_Texture()
 {
 	cout << "Texture" << endl;
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Back"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/T_Lau_Sky_01E_M.png"), 1))))
-		CRASH("Failed to Add Prototype Texture LogoSky Back");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Mid"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/T_Lau_Sky_01C_M.png"), 1))))
-		CRASH("Failed to Add Prototype Texture LogoSky Back");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Front"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/T_Lau_Sky_01D_M.png"), 1))))
-		CRASH("Failed to Add Prototype Texture LogoSky Back");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_Logo_Skybox"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Skybox/Texture/Logo_Sky%d.png"), 4))))
+		CRASH("Prototype_Component_Texture_Logo_Skybox");
 
     return S_OK;
 }
@@ -68,6 +60,8 @@ HRESULT CLoader_Logo::Load_Model()
 	//m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo/", m_eCurLevel);
 	m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo_Test/", m_eCurLevel, "Logo");
 
+	_matrix PreTransformMatrix = XMMatrixTranslationFromVector(XMVectorSet(0.f, -25.f, 0.f, 1.f));//XMMatrixIdentity();//XMMatrixScaling(2.f, 2.f, 2.f) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(55.f), XMConvertToRadians(25.f)));
+
 	cout << "Model" << endl;
 
     return S_OK;
@@ -76,6 +70,10 @@ HRESULT CLoader_Logo::Load_Model()
 HRESULT CLoader_Logo::Load_Shader()
 {
 	cout << "Shader" << endl;
+	// Shader_VtxSkyBox
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Shader_VtxSkyBox_Logo"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox_Logo.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_VtxSkyBox_Logo");
 
     return S_OK;
 }
