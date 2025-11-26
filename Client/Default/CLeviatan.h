@@ -6,6 +6,7 @@ class CShader;
 class CModel;
 class CAnimMachine;
 class CBehavior_Tree;
+class CComputeShader;
 NS_END
 
 NS_BEGIN(Client)
@@ -26,7 +27,7 @@ public:
 		_float3 vDetectRange;
 	}LEVIATAN_DESC;
 private:
-	enum ATK_SOCKET { FOOT_L, FOOT_R, RAY1, WEAPON_GL, END };
+	enum ATK_SOCKET { FOOT_L, FOOT_R, WEAPON_GL, END };
 	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
 	enum LEVIATAN_SHADER { BANG, HAIR, FACE, UP, DOWN, CLOTH, ALPHA, FX };
 private:
@@ -57,7 +58,9 @@ private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CGameSystem* m_pGameSystem = { nullptr };
-	const _float4x4* m_pToeMatrix = { nullptr };
+	CComputeShader* m_pFacialComputeShaderCom = { nullptr };
+
+	//const _float4x4* m_pToeMatrix = { nullptr };
 
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = { nullptr, };
 	CAttackVolume* m_pParryVolume = { nullptr, };
