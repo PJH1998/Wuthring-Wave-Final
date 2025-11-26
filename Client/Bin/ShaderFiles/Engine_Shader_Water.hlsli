@@ -10,6 +10,10 @@ float g_fMaxDepth;
 float g_fMinTickness;
 float g_fMaxTickness;
 
+const static uint g_iBinaryStep = 4;
+const static uint g_iStep = 20;
+const static float g_fMaxDistance = 400.f;
+
 struct ENV_MAP
 {
     uint iIndex;
@@ -44,10 +48,18 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
     
     float fOffsetSize = g_fStartOffset;
     
+    float2 vTexcoord = 0.f;
+    
+    float2 vHitRange = float2(0.f, 0.f);
+    float fHitDepth = 0.f;
+    
     [unroll]
     for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
-    {
+    {   
         float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
+       
+        vHitRange.x = vHitRange.y;
+        vHitRange.y = fOffsetSize;
        
         float4 vProjPos = mul(vLay, g_CamProjMatrix);
         
@@ -56,14 +68,14 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
         if (false == IsInNDC(vProjPos))
             break;
         
-        float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
+        vTexcoord = Compute_Texcoord(vProjPos.xy);
         
         float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
-                             
-        if (fDepth <= vLay.z || fDepth == 0.f)
+        
+        if (fDepth <= vLay.z)
         {
             IsHit = true;
-            vReflectColor = SceneTexture.Sample(DefaultSampler, vTexcoord);
+            fHitDepth = fDepth;
             break;
         }
         
@@ -72,42 +84,65 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
         fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
     }
     
-    float fMinDistance = 10000.f;
-    
-    float4 vEnvColor = 0.f;
-    
-    uint iIndex = 0;
-    uint iSampleCount = clamp(g_iNumEnvMaps, 0, 8);
-    
-    for (uint j = 0; j < iSampleCount; ++j)
+    if (IsHit && fHitDepth != 0.f)
     {
-        ENV_MAP Envmap = g_EnvMapDatas[j];
-    
-        float fLength = length(vWorldPos - Envmap.vPosition);
-    
-        if (Envmap.fRange >= fLength && fMinDistance > fLength)
+        // binary Step
+        for (uint i = 0; i < g_iBinaryStep; ++i)
         {
-            iIndex = j;
+            float fBinaryOffset = (vHitRange.x + vHitRange.y) * 0.5f;
             
-            float3 vWorldReflect = normalize(mul(vReflect, g_ViewMatrixInv).xyz);
-          
-            vEnvColor = g_EnvMapTexture[iIndex].Sample(DefaultSampler, vWorldReflect);
+            float4 vBinaryLay = vViewPos + float4((vReflect.xyz * fBinaryOffset), 0.f);
             
-            fMinDistance = fLength;
+            float4 vProjPos = mul(vBinaryLay, g_CamProjMatrix);
+        
+            vProjPos /= vProjPos.w;
+
+            vTexcoord = Compute_Texcoord(vProjPos.xy);
+        
+            float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+            
+
+            if (fDepth <= vBinaryLay.z)
+                vHitRange.y = fBinaryOffset;
+            else
+                vHitRange.x = fBinaryOffset;
         }
+        
+        vReflectColor = SceneTexture.Sample(DefaultSampler, vTexcoord);
     }
-    
-    if(iSampleCount > 0)
+    else
     {
-        if (IsHit)
+        float fMinDistance = 10000.f;
+    
+        float4 vEnvColor = 0.f;
+    
+        uint iIndex = 0;
+        uint iSampleCount = clamp(g_iNumEnvMaps, 0, 8);
+    
+        for (uint j = 0; j < iSampleCount; ++j)
         {
-            vReflectColor = lerp(vReflectColor, vEnvColor, 0.5f);
+            ENV_MAP Envmap = g_EnvMapDatas[j];
+    
+            float fLength = length(vWorldPos - Envmap.vPosition);
+    
+            if (Envmap.fRange >= fLength && fMinDistance > fLength)
+            {
+                iIndex = j;
+            
+                float3 vWorldReflect = normalize(mul(vReflect, g_ViewMatrixInv).xyz);
+          
+                vEnvColor = g_EnvMapTexture[iIndex].Sample(DefaultSampler, vWorldReflect);
+            
+                fMinDistance = fLength;
+            }
         }
-        else
+    
+        if (iSampleCount > 0)
         {
             vReflectColor = vEnvColor;
         }
     }
+    
 
     vColor = float4(vReflectColor.xyz, 1.f);
     //float4(lerp(vOriginColor.xyz, vReflectColor.xyz, 0.5f), 1.f);
