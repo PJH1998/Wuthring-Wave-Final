@@ -180,6 +180,7 @@ void CSpawner::Free()
 {
 	__super::Free();
 
+	
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidBodyCom);
 }

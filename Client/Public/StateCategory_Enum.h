@@ -10,6 +10,7 @@ enum class EStateCategory : _uint
 	AIR = 1 << 1,		// 공중 상태
 	CLIMB = 1 << 2,		// 등반 상태
 	HIT = 1 << 3,		// 피격 상태
+	INTREACTION = 1 << 4, // 상호 작용
 	CATEGORY_END
 };
 #pragma endregion

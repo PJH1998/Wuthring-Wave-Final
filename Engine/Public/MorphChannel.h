@@ -20,6 +20,10 @@ public:
 	_float Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCurrentFrameIndex); // 현재 시간에 맞는 가중치(Weight) 반환
 	const _char* Get_Name() const { return m_szName; }
 
+#ifdef _DEBUG
+	_float Get_Weight(_uint iFrameIndex);
+#endif // _DEBUG
+
 
 
 public:

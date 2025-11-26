@@ -232,6 +232,7 @@
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecial.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
+    <ClInclude Include="..\Public\GalbrenaRope.h" />
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
@@ -243,6 +244,7 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\InteractionState.h" />
     <ClInclude Include="..\Public\Level_Heaven.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
@@ -451,6 +453,7 @@
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
+    <ClCompile Include="..\Private\GalbrenaRope.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp" />
@@ -462,6 +465,7 @@
     <ClCompile Include="..\Private\GroundState.cpp" />
     <ClCompile Include="..\private\HavocWarrior.cpp" />
     <ClCompile Include="..\Private\HitState.cpp" />
+    <ClCompile Include="..\Private\InteractionState.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
     <ClCompile Include="..\Private\Level_Heaven.cpp" />
     <ClCompile Include="..\Private\Level_Loading.cpp" />
