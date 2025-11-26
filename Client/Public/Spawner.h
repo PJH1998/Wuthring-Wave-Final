@@ -48,6 +48,8 @@ private:
 	_bool				m_isMonsterExist{};
 	_float4				m_vPlayerPos{};
 
+	_bool				m_isClone{ false };
+
 private:
 	void Ready_Component(SPAWNERDESC* pDesc);
 	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);

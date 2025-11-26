@@ -88,6 +88,9 @@ void CGalbrenaGroundRun::Handle_Input()
 		return;
 	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
 
+	// Rope 이동. => 객체가 탐지되었을 때만 Frustum으로. 탐지.(정면만 탐지해야됌)
+	m_States[MOVE_ROPE] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::G)); 
+
     // 키 입력.
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -202,6 +205,13 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 	{
 		m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
+		return;
+	}
+
+	if (m_States[MOVE_ROPE]) // 일단 잡아서 이동하는 Rope 액션만?
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eRopeType = EGalbrenaRopeType::FIXHOOK_START01_U;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPE));
 		return;
 	}
 

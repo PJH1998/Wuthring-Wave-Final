@@ -25,10 +25,10 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCu
 	{
 		// 인덱스 캐싱 로직
 
-//#ifdef _DEBUG
-//		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
-//			--*pCurrentFrameIndex;
-//#endif // _DEBUG
+#ifdef _DEBUG
+		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
+			--*pCurrentFrameIndex;
+#endif // _DEBUG
 
 		while (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fCurrentTrackPosition)
 			++*pCurrentFrameIndex;
@@ -48,9 +48,21 @@ _float CMorphChannel::Get_CurrentWeight(_float fCurrentTrackPosition, _uint* pCu
 	return 0.f;
 }
 
+#ifdef _DEBUG
+_float CMorphChannel::Get_Weight(_uint iFrameIndex)
+{
+	if (m_KeyFrames.size() < iFrameIndex)
+		return 0.f;
+
+	return m_KeyFrames[iFrameIndex].fValue;
+}
+#endif // _DEBUG
+
+
+
 
 //_float CMorphChannel::Get_CurrentWeight(_float fTrackPosition, _uint* pCurrentFrameIndex)
-//{
+//{2
 //	if (0.f == fTrackPosition)
 //		*pCurrentFrameIndex = 0;
 //
@@ -124,11 +136,21 @@ HRESULT CMorphChannel::Initialize(ifstream& InputFile)
 	// 2. Key Frame 개수 로드
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumKeyFrame), sizeof(_uint));
 
+	
+
+	_string strName = m_szName;
+	_bool IsDeleteChannel = strName._Starts_with("M_") || strName._Starts_with("L_") || strName._Starts_with("B_Anger"); // M_ Channel 지우면 입 안벌림.
+
+
 	// 3. Key Frame 데이터 로드
 	for (size_t i = 0; i < m_iNumKeyFrame; ++i)
 	{
 		KEYFRAME_CURVE KeyFrameCurve = {};
 		InputFile.read(reinterpret_cast<_char*>(&KeyFrameCurve), sizeof(KEYFRAME_CURVE));
+
+		if (IsDeleteChannel)
+			KeyFrameCurve.fValue = 0.f;
+			
 		//KeyFrameCurve.fTrackPosition -= 1.f; // 1.f씩 땡겨준다.
 		m_KeyFrames.push_back(KeyFrameCurve);
 	}

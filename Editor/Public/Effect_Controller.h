@@ -48,6 +48,7 @@ public:
 	void Reset_ChildrenInfo();
 	void Reset_PrefabInfo();
 	void Remove_Prefab();
+	void Remove_PrefabDesc_Children();
 
 public:
 	void Prefab_To_Json(const _string& strFilePath);

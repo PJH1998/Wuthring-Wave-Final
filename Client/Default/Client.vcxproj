@@ -232,6 +232,7 @@
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecial.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
+    <ClInclude Include="..\Public\GalbrenaRope.h" />
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
@@ -243,6 +244,7 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\InteractionState.h" />
     <ClInclude Include="..\Public\Level_Heaven.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
@@ -367,6 +369,7 @@
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
     <ClInclude Include="..\Public\Wing.h" />
+    <ClInclude Include="CLeviatan.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -451,6 +454,7 @@
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
+    <ClCompile Include="..\Private\GalbrenaRope.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp" />
@@ -462,6 +466,7 @@
     <ClCompile Include="..\Private\GroundState.cpp" />
     <ClCompile Include="..\private\HavocWarrior.cpp" />
     <ClCompile Include="..\Private\HitState.cpp" />
+    <ClCompile Include="..\Private\InteractionState.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
     <ClCompile Include="..\Private\Level_Heaven.cpp" />
     <ClCompile Include="..\Private\Level_Loading.cpp" />
@@ -572,6 +577,7 @@
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp" />
+    <ClCompile Include="CLeviatan.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>
@@ -662,6 +668,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Logo.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <FileType>Document</FileType>
     </FxCompile>

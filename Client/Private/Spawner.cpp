@@ -9,7 +9,9 @@ CSpawner::CSpawner(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CSpawner::CSpawner(const CSpawner& Prototype)
 	: CGameObject{ Prototype }
+	, m_pGameSystem {CGameSystem::GetInstance()}
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CSpawner::Initialize_Prototype()
@@ -22,8 +24,8 @@ HRESULT CSpawner::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	m_pGameSystem = CGameSystem::GetInstance();
-	Safe_AddRef(m_pGameSystem);
+	//m_pGameSystem = CGameSystem::GetInstance();
+	//Safe_AddRef(m_pGameSystem);
 	SPAWNERDESC* pDesc = static_cast<SPAWNERDESC*>(pArg);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat4(&pDesc->vPosition), 1.f));
 
@@ -55,7 +57,7 @@ HRESULT CSpawner::Initialize_Clone(void* pArg)
 	//	m_SpawnMatrix.push_back(InitMatrix);
 	//}
 #pragma endregion
-
+	m_isClone = true;
     return S_OK;
 }
 
@@ -180,6 +182,7 @@ void CSpawner::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pGameSystem);
+	if(m_isClone)
+		Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidBodyCom);
 }

@@ -158,10 +158,15 @@ public:
 public:
 	// Caemra
 	void Camera_Shake(_float fIntensity);
-	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
+	void Play_Action(const _wstring& strActionTag, _bool isEscape = false); // Action Camera (Cut Scene)
 
 	// Ability에서 확인 받기 => 상태 판별?
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
+
+	// T 사용시 컨디션 공유.
+
+	// Rope Action
+	_bool IsReached_RopeTarget();
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
@@ -296,7 +301,9 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
-	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+
+	class CTransform* m_pRopeTargetTransform = { nullptr }; // Rope Target 용도.
+
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 	class CComputeShader* m_pFacialComputeShaderCom = { nullptr }; // Facial 용도.
 

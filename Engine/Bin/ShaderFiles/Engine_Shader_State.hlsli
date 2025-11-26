@@ -101,6 +101,21 @@ BlendState BS_Blend
     BlendOp = Add;
 };
 
+BlendState BS_AccumBlend
+{
+    // vAccumColor (SV_TARGET3) 누적 설정
+    BlendEnable[3] = true;
+    SrcBlend[3] = ONE;
+    DestBlend[3] = ONE;
+    BlendOp[3] = Add;
+    
+    // vAccumAlpha (SV_TARGET4) 누적 설정
+    BlendEnable[4] = true;
+    SrcBlend[4] = ONE;
+    DestBlend[4] = ONE;
+    BlendOp[4] = Add;
+};
+
 BlendState BS_AlphaBlend
 {
     BlendEnable[0] = true;
@@ -120,6 +135,15 @@ BlendState BS_FXBlend
     DestBlend = DEST_ALPHA;
     BlendOp = Add;
 };
+ 
+BlendState BS_WeightBlend
+{
+    BlendEnable[0] = true;
 
+    SrcBlend[0] = SRC_ALPHA;
+    DestBlend[0] = INV_SRC_ALPHA;
+
+    BlendOp[0] = ADD;
+};
 
 #endif //Engine_Shader_State_h__

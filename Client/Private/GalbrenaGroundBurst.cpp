@@ -42,6 +42,7 @@ void CGalbrenaGroundBurst::OnEnter(void* pArg)
 
 	// 7. 타겟 바라보기
 	m_pGalbrena->Rotate_Target();
+
 	
 }
 

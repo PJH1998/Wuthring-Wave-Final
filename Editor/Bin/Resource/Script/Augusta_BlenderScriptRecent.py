@@ -9,9 +9,10 @@ TARGET_ACTION_NAMES = [
     for act in bpy.data.actions
 ]      # None 으로 두면 현재 선택 오브젝트의 action만 처리
 # 무시(초기화+mute)할 뼈 이름 리스트
-BONE_NAMES = ['Bone_Hair004_L', 'Bone_Hair006_R', 'Bone_Hair008_R', 'Bone_Skirt001_L', 'Bone_Skirt003_L', 'Bone_Skirt001_R', 'Bone_Piao011_L', 'Bone_Piao011_R']
+BONE_NAMES = ["Bone_Hair001_R", "Bone_Hair001_L", "Bone_Hair002_R", "Bone_Hair002_L", "Bone_Hair004_L", "Bone_Hair005_L", 
+"Bone_Hair006_L", "Bone_Hair006_R", "Bone_Hair007_L", "Bone_Hair007_R", "Bone_Hair008_R", "Bone_Hair009_R",
+ "Bone_Piao011_R","Bone_Piao012_R", "Bone_Piao011_L", "Bone_Piao012_R", "Bone_Skirt001_L", "Bone_Skirt001_R"]
 BONE_NAMES2 = ["Root"]
-
 # 무엇을 초기화할지 선택
 RESET_LOCATION = True
 RESET_ROT_EULER = True

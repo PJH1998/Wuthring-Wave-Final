@@ -337,7 +337,7 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 		// STOP SPRINT 이면서 애니메이션이 재생이 끝났다면?
 		if (m_IsAnimationEnd && (eSprintType == EAugustaSprintType::STOP_SPRINT_L))
 		{
-			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
 			return;
 		}

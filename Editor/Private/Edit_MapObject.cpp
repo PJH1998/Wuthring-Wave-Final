@@ -445,7 +445,12 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 	if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
+
+#ifdef _DEBUG
 	m_pModelCom->Ready_BoundingBox();
+#endif // _DEBUG
+
+	
 
 	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))

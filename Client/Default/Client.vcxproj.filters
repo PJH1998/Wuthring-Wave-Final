@@ -355,6 +355,15 @@
     <Filter Include="03. GameObject\SkyBox\Logo">
       <UniqueIdentifier>{a025b515-ba1a-4b41-8a1a-3e1f744cd632}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Interaction">
+      <UniqueIdentifier>{7aab3807-9177-4b9f-9afb-246e04c73b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Interaction\Galbrena">
+      <UniqueIdentifier>{9472f463-8d6a-41fa-bace-3afe89718c58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan">
+      <UniqueIdentifier>{27f3bd8e-5674-439d-81d5-bc02bfe16cc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -940,6 +949,15 @@
     <ClInclude Include="..\public\Logo_SkyBox.h">
       <Filter>03. GameObject\SkyBox\Logo</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\InteractionState.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaRope.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="CLeviatan.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1490,6 +1508,15 @@
     <ClCompile Include="..\private\Logo_SkyBox.cpp">
       <Filter>03. GameObject\SkyBox\Logo</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\InteractionState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaRope.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="CLeviatan.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1573,6 +1600,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Water.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Logo.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
