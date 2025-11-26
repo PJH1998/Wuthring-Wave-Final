@@ -214,6 +214,7 @@ void CRenderer::Render()
 	Render_NonLight();
 	Render_LUT();
 	Render_Effect();
+	Render_EffectResolve(); //test
 	Render_SFX();
 	Render_Emissive();	
 	Render_Bloom();		
@@ -811,7 +812,7 @@ void CRenderer::Render_Combined()
 
 void CRenderer::Render_Water()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Water"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::WATER));
@@ -893,12 +894,36 @@ void CRenderer::Render_LUT()
 
 void CRenderer::Render_Effect()
 {
+	m_pGameInstance->Clear_RT(TEXT("RT_AccumColor"));
+	m_pGameInstance->Clear_RT(TEXT("RT_AccumAlpha"));
+
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_EFFECT"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::EFFECT));
 
 	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_EffectResolve()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Lut"), nullptr, false)))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_AccumColor"), m_pShader, "g_AccumColorTexture")))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_AccumAlpha"), m_pShader, "g_AccumAlphaTexture")))
+		CRASH("Render Fail")
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::WEIGHTBLEND));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Lut"));
 }
 
 void CRenderer::Render_SFX()
@@ -936,7 +961,7 @@ void CRenderer::Render_BloomCombined()
 		CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Emissive"), m_pShader, "g_BlurTexture")))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_UPSAMPLE_BLOOM"), m_pShader, "g_BloomTexture", 0)))
 		CRASH("Failed Bind_RendererCS");
@@ -986,7 +1011,7 @@ void CRenderer::Render_Fog()
 	//	CRASH("Failed Bind RT_Lut");
 	
 	m_pGameInstance->Bind_VF_Resource(m_pShader, "g_VoulmetricTexture", "g_vFogRange");
-
+	           
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
 
 	m_pVIBuffer->Bind_Resources();
@@ -1188,7 +1213,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SSS */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSS"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSS"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightDiffuse */
@@ -1201,6 +1226,14 @@ HRESULT CRenderer::Ready_RT()
 
 	/* RenderTarget LightAmbient */
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightAmbient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	/* Test AccumColor */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_AccumColor"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	/* Test AccumAlpha */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_AccumAlpha"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 #ifdef _DEBUG
@@ -1227,6 +1260,17 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_SSS"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_WATER
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Diffuse"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Normal"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
@@ -1260,6 +1304,10 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Distortion"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_AccumColor"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_AccumAlpha"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

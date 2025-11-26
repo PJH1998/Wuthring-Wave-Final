@@ -8,16 +8,44 @@ CLogo_SkyBox::CLogo_SkyBox(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CLogo_SkyBox::CLogo_SkyBox(const CLogo_SkyBox& Prototype)
 	: CGameObject{ Prototype }
-	, m_vPosition { Prototype.m_vPosition }
-	, m_vRotateQuaternion { Prototype.m_vRotateQuaternion }
-	, m_vScale { Prototype.m_vScale }
 {
+	for (_uint i = 0; i < ENUM_CLASS(SKYBOX::END); ++i)
+	{
+		m_SkyMatrices[i] = Prototype.m_SkyMatrices[i];
+		m_iShaderIndex[i] = Prototype.m_iShaderIndex[i];
+
+#ifdef _DEBUG
+		m_DebugSkyMatrices[i] = Prototype.m_SkyMatrices[i];
+#endif
+	}
 }
 
 HRESULT CLogo_SkyBox::Initialize_Prototype()
 {
 	if (FAILED(__super::Initialize_Prototype()))
 		return E_FAIL;
+
+
+	m_SkyMatrices[ENUM_CLASS(SKYBOX::BACK)] =
+		XMMatrixScaling(5.f, 5.f, 1.f) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(-45.f), 0.f))
+		* XMMatrixTranslationFromVector(XMVectorSet(-1.f, 0.f, 1.f, 1.f));
+
+	m_SkyMatrices[ENUM_CLASS(SKYBOX::FIRST_CLOUD)] =
+		XMMatrixScaling(4.f, 2.5f, 1.f) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(-45.f), 0.f))
+		* XMMatrixTranslationFromVector(XMVectorSet(-1.25f, 0.8f, 1.f, 1.f));
+
+	m_SkyMatrices[ENUM_CLASS(SKYBOX::SEC_CLOUD)] =
+		XMMatrixScaling(4.f, 2.5f, 1.f) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(-45.f), 0.f))
+		* XMMatrixTranslationFromVector(XMVectorSet(-0.65f, 1.05f, 1.f, 1.f));
+
+	m_SkyMatrices[ENUM_CLASS(SKYBOX::EFFECT)] = 
+		XMMatrixScaling(2.f, 1.2f, 1.f) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(-45.f), 0.f))
+		* XMMatrixTranslationFromVector(XMVectorSet(-1.f, 0.6f, 1.f, 1.f));
+
+	m_iShaderIndex[ENUM_CLASS(SKYBOX::BACK)] = 0;
+	m_iShaderIndex[ENUM_CLASS(SKYBOX::FIRST_CLOUD)] = 1;
+	m_iShaderIndex[ENUM_CLASS(SKYBOX::SEC_CLOUD)] = 2;
+	m_iShaderIndex[ENUM_CLASS(SKYBOX::EFFECT)] = 3;
 
 	return S_OK;
 }
@@ -27,12 +55,32 @@ HRESULT CLogo_SkyBox::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	_matrix WorldMatrix = XMMatrixScaling(m_vScale.x, m_vScale.y, 1.f) * XMMatrixRotationQuaternion(m_vRotateQuaternion) * XMMatrixTranslationFromVector(m_vPosition);
-
-	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-
 	if (FAILED(Ready_Components()))
 		return E_FAIL;
+
+
+	//Env Map Bake
+	m_pGameInstance->Add_EnvMap_SkyBox(this);
+
+#ifdef _DEBUG
+	m_iIndex = 0;
+
+	m_vScale[ENUM_CLASS(SKYBOX::BACK)] = _float3(5.f, 5.f, 1.f);
+	m_vScale[ENUM_CLASS(SKYBOX::FIRST_CLOUD)] = _float3(3.f, 2.f, 1.f);
+	m_vScale[ENUM_CLASS(SKYBOX::SEC_CLOUD)] = _float3(3.f, 2.f, 1.f);
+	m_vScale[ENUM_CLASS(SKYBOX::EFFECT)] = _float3(2.f, 1.5f, 1.f);
+
+	m_vYawPitchRoll[ENUM_CLASS(SKYBOX::BACK)] = _float3(0.f, -45.f, 0.f);
+	m_vYawPitchRoll[ENUM_CLASS(SKYBOX::FIRST_CLOUD)] = _float3(0.f, -45.f, 0.f);
+	m_vYawPitchRoll[ENUM_CLASS(SKYBOX::SEC_CLOUD)] = _float3(0.f, -45.f, 0.f);
+	m_vYawPitchRoll[ENUM_CLASS(SKYBOX::EFFECT)] = _float3(0.f, -45.f, 0.f);
+
+	m_vPosition[ENUM_CLASS(SKYBOX::BACK)] = _float3(-1.f, 0.f, 1.f);
+	m_vPosition[ENUM_CLASS(SKYBOX::FIRST_CLOUD)] = _float3(-1.2f, 0.6f, 1.f);
+	m_vPosition[ENUM_CLASS(SKYBOX::SEC_CLOUD)] = _float3(-0.75f, 0.95f, 1.f);
+	m_vPosition[ENUM_CLASS(SKYBOX::EFFECT)] = _float3(-1.f, 0.6f, 1.f);
+
+#endif
 
 	return S_OK;
 }
@@ -43,6 +91,7 @@ void CLogo_SkyBox::Priority_Update(_float fTimeDelta)
 
 void CLogo_SkyBox::Update(_float fTimeDelta)
 {
+	m_pGameInstance->Use_Gizmo_Offset(&m_vScale[m_iIndex], &m_vYawPitchRoll[m_iIndex], &m_vPosition[m_iIndex]);
 }
 
 void CLogo_SkyBox::Late_Update(_float fTimeDelta)
@@ -54,51 +103,63 @@ void CLogo_SkyBox::Late_Update(_float fTimeDelta)
 void CLogo_SkyBox::Render()
 {
 #ifdef  _DEBUG
+
 	ImGui::Begin("LOGO_SKY");
 
-	if (ImGui::CollapsingHeader("ROTATE"))
+	if (ImGui::Button("BACK"))
 	{
-		ImGui::InputFloat("YAW", &m_vYawPitchRoll.x);
-		ImGui::InputFloat("PITCH", &m_vYawPitchRoll.y);
-		ImGui::InputFloat("ROLL", &m_vYawPitchRoll.z);
+		m_iIndex = 0;
 
-		m_vRotateQuaternion = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_vYawPitchRoll.x), XMConvertToRadians(m_vYawPitchRoll.y), XMConvertToRadians(m_vYawPitchRoll.z));
 	}
 
-	if (ImGui::CollapsingHeader("POSITION"))
-	{
-		ImGui::InputFloat("X", &m_vDebugPosition.x);
-		ImGui::InputFloat("Y", &m_vDebugPosition.y);
-		ImGui::InputFloat("Z", &m_vDebugPosition.z);
+	ImGui::SameLine();
 
-		m_vPosition = XMVectorSet(m_vDebugPosition.x, m_vDebugPosition.y, m_vDebugPosition.z, 1.f);
+	if (ImGui::Button("FIRST"))
+	{
+		m_iIndex = 1;
 	}
 
-	if (ImGui::CollapsingHeader("SCALE"))
+	ImGui::SameLine();
+	if (ImGui::Button("SEC"))
 	{
-		ImGui::InputFloat("SCALE_X", &m_vScale.x);
-		ImGui::InputFloat("SCALE_Y", &m_vScale.y);
+		m_iIndex = 2;
 	}
 
-	_matrix WorldMatrix = XMMatrixScaling(m_vScale.x, m_vScale.y, 1.f) * XMMatrixRotationQuaternion(m_vRotateQuaternion) * XMMatrixTranslationFromVector(m_vPosition);
+	ImGui::SameLine();
+	if (ImGui::Button("LAST"))
+	{
+		m_iIndex = 3;
+	}
 
-	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	//_matrix	WorldMatrix = XMMatrixScaling(m_vScale[m_iIndex].x, m_vScale[m_iIndex].y, m_vScale[m_iIndex].z) *
+	//	XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_vYawPitchRoll[m_iIndex].x), XMConvertToRadians(m_vYawPitchRoll[m_iIndex].y), XMConvertToRadians(m_vYawPitchRoll[m_iIndex].z))) *
+	//	XMMatrixTranslation(m_vPosition[m_iIndex].x, m_vPosition[m_iIndex].y, m_vPosition[m_iIndex].z);
+
+	//m_SkyMatrices[m_iIndex] = WorldMatrix;
+	
 
 	ImGui::End();
 #endif //  _DEBUG
 
-
-	m_pTransformCom->Bind_Matrix(m_pShader, "g_WorldMatrix");
-	m_pShader->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
-	m_pShader->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+		CRASH("Failed to Bind ViewMatrix");
+	if(FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+		CRASH("Failed to Bind ProjMatrix");
+	
+	_matrix TranslationMatrix = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat4(m_pGameInstance->Get_CamPos()), 1.f));
 
 	for (_uint i = 0; i < ENUM_CLASS(SKYBOX::END); ++i)
 	{
-		if (FAILED(m_pSkyTextures[i]->Bind_Shader_Resource(m_pShader, "g_DiffuseTexture")))
-			CRASH("Failed to Bind DiffuseTexture");
+		XMStoreFloat4x4(&m_CombineMatrix, m_SkyMatrices[i] * TranslationMatrix);
 
-		m_pShader->Begin(0);
+		if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_CombineMatrix)))
+			CRASH("Failed to Bind WorldMatrix");
 
+		if (FAILED(m_pTexture->Bind_Shader_Resource(m_pShader, "g_Texture", i)))
+			CRASH("Failed to Bind Texture");
+		
+		m_pShader->Begin(m_iShaderIndex[i]);
+		
 		m_pVIBuffer->Bind_Resources();
 		m_pVIBuffer->Render();
 	}
@@ -106,30 +167,43 @@ void CLogo_SkyBox::Render()
 
 void CLogo_SkyBox::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
 {
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &ViewMatrix)))
+		CRASH("Failed to Bind ViewMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &ProjMatrix)))
+		CRASH("Failed to Bind ProjMatrix");
+
+	_matrix TranslationMatrix = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat4(&vCenter), 1.f));
+
+	for (_uint i = 0; i < ENUM_CLASS(SKYBOX::END); ++i)
+	{
+		XMStoreFloat4x4(&m_CombineMatrix, m_SkyMatrices[i] * TranslationMatrix);
+
+		if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_CombineMatrix)))
+			CRASH("Failed to Bind WorldMatrix");
+
+		if (FAILED(m_pTexture->Bind_Shader_Resource(m_pShader, "g_Texture", i)))
+			CRASH("Failed to Bind Texture");
+
+		m_pShader->Begin(m_iShaderIndex[i]);
+
+		m_pVIBuffer->Bind_Resources();
+		m_pVIBuffer->Render();
+	}
 }
 
 HRESULT CLogo_SkyBox::Ready_Components()
 {
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Shader_VtxSkyBox_Logo"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
+		ASSERT_CRASH(m_pShader);
+
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBuffer), nullptr)))
 		ASSERT_CRASH(m_pVIBuffer);
 
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPosTex_SkyBox"),
-		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
-		ASSERT_CRASH(m_pShader);
-
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Back"), 
-		TEXT("Com_Texture_Back"), reinterpret_cast<CComponent**>(&m_pSkyTextures[ENUM_CLASS(SKYBOX::BACK)]), nullptr)))
-		ASSERT_CRASH(m_pSkyTextures[ENUM_CLASS(SKYBOX::BACK)]);
-
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Mid"),
-		TEXT("Com_Texture_Mid"), reinterpret_cast<CComponent**>(&m_pSkyTextures[ENUM_CLASS(SKYBOX::MID)]), nullptr)))
-		ASSERT_CRASH(m_pSkyTextures[ENUM_CLASS(SKYBOX::MID)]);
-
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_LogoSky_Front"),
-		TEXT("Com_Texture_Front"), reinterpret_cast<CComponent**>(&m_pSkyTextures[ENUM_CLASS(SKYBOX::FRONT)]), nullptr)))
-		ASSERT_CRASH(m_pSkyTextures[ENUM_CLASS(SKYBOX::FRONT)]);
-
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Texture_Logo_Skybox"),
+		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTexture), nullptr)))
+		ASSERT_CRASH(m_pTexture);
 
     return S_OK;
 }
@@ -160,9 +234,7 @@ void CLogo_SkyBox::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pVIBuffer);
 	Safe_Release(m_pShader);
-
-	for (_uint i = 0; i < ENUM_CLASS(SKYBOX::END); ++i)
-		Safe_Release(m_pSkyTextures[i]);
+	Safe_Release(m_pVIBuffer);
+	Safe_Release(m_pTexture);
 }

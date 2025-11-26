@@ -127,6 +127,7 @@ private:
 	void						Render_NonLight();
 	void						Render_Emissive();	// 단독 Emissive
 	void						Render_Effect();	// Backbuffer + Emissive + Distoriton
+	void						Render_EffectResolve();	//Weight Blend Test
 	void						Render_Bloom();		// Emissvie 처리
 	void						Render_BloomCombined();
 	void						Render_DistortionObject();

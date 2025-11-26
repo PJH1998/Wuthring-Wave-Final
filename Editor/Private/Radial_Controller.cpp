@@ -38,8 +38,9 @@ void CRadial_Controller::Radial_Tab()
            
                 if (ImGui::CollapsingHeader("Radial", ImGuiTreeNodeFlags_DefaultOpen))
                 {
-
-                    ImGui::Text("LifeTime");
+					ImGui::Checkbox("Position", &(m_pSelectedRadialDesc->PositionFlag));
+					
+					ImGui::Text("LifeTime");
                     ImGui::PushItemWidth(60);
                     ImGui::InputFloat("##RadialLifeTime", &(m_pSelectedRadialDesc->fLifeTime));
                     ImGui::PopItemWidth();
@@ -64,7 +65,6 @@ void CRadial_Controller::Radial_Tab()
 					ImGui::PopItemWidth();
 
                     ImGui::Separator();
-                  
                 }
 
             ImGui::End();
