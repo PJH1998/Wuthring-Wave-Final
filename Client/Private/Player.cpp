@@ -142,11 +142,8 @@ void CPlayer::Update(_float fTimeDelta)
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	
-	// 4. Target Sorting
-	Sorting_Target();
-    
-	// 5. Lock On
-    Toggle_LockOn();
+	Sorting_Target(); // 4. Target Sorting
+    Toggle_LockOn(); // 5. Lock On
 
 	m_TargetTransforms.clear();
 
@@ -228,7 +225,7 @@ void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 	// Collider도 제어되면안됨.
 	m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(true);
 	m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(false);
-	
+
 	// 그 뭐냐 UI에 캐릭 변경 불가능 상태를 줘야함
 	m_IsQTE = true;
 	m_pPlayerStatus->Bind_QTE(m_IsQTE);
@@ -272,6 +269,10 @@ void CPlayer::Player_KeyInput()
 				return;
 			}
 		}
+
+		// 1. 내가 뭘 넣었는지를 넣어 준다?
+		
+
 	}
 
 	
@@ -441,11 +442,13 @@ void CPlayer::Sync_Condition_FromCharacter(CCharacter* pCharacter)
 }
 
 
+// During 사이에 탐지하기.
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// Detect Body 탐지용
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) 
 		return;
+
 
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
 
@@ -750,7 +753,6 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_During(iLayer, pDesc, Manifold);
     });
-
 
 	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 	//	OnCollider_Enter(iLayer, pDesc, Manifold);

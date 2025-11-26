@@ -188,10 +188,11 @@ void CRover::Render()
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-            CRASH("Ready Diffuse Texture Failed");
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			CRASH("Ready Diffuse Texture Failed");
 
 		_bool HasNormal = { false };
+
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
 
@@ -205,14 +206,20 @@ void CRover::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
 			CRASH("Ready g_HasSkinMask Failed");
 
-        if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
-            CRASH("Ready Bone Matrices Failed");
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
-            CRASH("Ready Shader Begin Failed");
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
+			CRASH("Bind Morph Result Failed");
+
+
+		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+			CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
+
+		m_pShaderCom->UndBind_All_VS_SRV();
     }
 
 #ifdef _DEBUG

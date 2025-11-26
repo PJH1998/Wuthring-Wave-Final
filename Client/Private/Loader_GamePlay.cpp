@@ -338,15 +338,19 @@ HRESULT CLoader_GamePlay::Load_Augusta()
 HRESULT CLoader_GamePlay::Load_Rover()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/RoverFacial/Rover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	//_float fSize = 0.01f;
-	_float fSize = 0.0001f;
+	//_float fSize = 0.0001f;
+	_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+  /*  if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");*/
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
 
 
