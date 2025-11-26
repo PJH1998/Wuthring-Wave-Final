@@ -109,6 +109,12 @@ public:
 	// 탭 유틸리티 UI를 끄라는 요청을 보내며 (애니메이션 재생을 위함), 선택한 유틸리티를 반환합니다.
 	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
 	_uint		HideNGet_TabUtilityUI();
+
+	// [WIP] 다채화를 켭니다.
+	void		Open_Game_OverflowPalette();
+	// [WIP] 다채화를 끕니다.
+	void		Close_Game_OverflowPalette();
+
 #pragma endregion
 
 #pragma region PLAYER STATUS
@@ -136,6 +142,9 @@ public:
 #pragma region MONSTER_TABLE
 	HRESULT LoadMonsterTable(const _char* pFilePath);
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
+	_uint Get_NumNPCInstance(_uint iType) const;
+	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
 #pragma endregion
 
 #pragma region SFX_PREFAB

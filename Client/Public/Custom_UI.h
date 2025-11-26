@@ -53,13 +53,9 @@ public:
 		vector<_wstring> vecChildNames = {};
 		CGameObject* pParentObject = nullptr;
 
-
 		_bool		isInstance = false;
 		vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> vecInstanceDescs = {};
 	} CUSTOM_UI_DESC;
-
-
-
 
 	// for Load
 
@@ -147,6 +143,7 @@ public:
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 	void					Add_Child(CCustom_UI* pChildUI)		{ m_vecChildObjects.push_back(pChildUI); }
+	HRESULT					Add_ExtraTexture(_wstring strFilePath);
 
 protected:
 	//HRESULT				Ready_Prototypes(void* pArg);
@@ -159,7 +156,10 @@ protected:
 protected:
 	CShader*				m_pShaderCom			= { nullptr };
 	CVIBuffer*				m_pVIBufferCom			= { nullptr };
+
 	CTexture*				m_pTextureCom			= { nullptr };
+	vector<CTexture*>		m_vecExtraTextureCom	= {};
+	
 	CAnimator_UI*			m_pAnimator_UICom		= { nullptr };
 
 

@@ -24,16 +24,45 @@ HRESULT CCoro_Rock::Initialize_Clone(void* pArg)
 
 	CORO_ROCK_DESC* pDesc = static_cast<CORO_ROCK_DESC*>(pArg);
 	Ready_Component(pDesc);
+	m_pSocketMatrix = pDesc->pSocketMatrix;
+
+#ifdef _DEBUG
+	m_vOffsetTrans = pDesc->vOffsetTrans;
+	m_vOffsetRotate = pDesc->vOffsetRadian;
+#else
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+		XMQuaternionRotationRollPitchYaw(pDesc->vOffsetRadian.x, pDesc->vOffsetRadian.y, pDesc->vOffsetRadian.z),
+		XMVectorSetW(XMLoadFloat3(&pDesc->vOffsetTrans), 1.f));
+	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
+#endif // _DEBUG
 
     return S_OK;
 }
 
 void CCoro_Rock::Priority_Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CCoro_Rock::Update(_float fTimeDelta)
 {
+	_matrix ComBinedMatrix;
+#ifdef _DEBUG
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+		XMQuaternionRotationRollPitchYaw(m_vOffsetRotate.x, m_vOffsetRotate.y, m_vOffsetRotate.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetTrans), 1.f));
+#else
+	_matrix matOffset = XMLoadFloat4x4(&m_OffsetMatrix);
+#endif // _DEBUG
+
+	_matrix NonScaleMatrix = XMLoadFloat4x4(m_pSocketMatrix);
+	_vector vScale, vQuaternion, vTransition;
+	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
+	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
+	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
+	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
+	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
+
+	m_pRigidBodyCom->Update_Rigidbody(ComBinedMatrix, fTimeDelta);
 }
 
 void CCoro_Rock::Late_Update(_float fTimeDelta)
@@ -55,13 +84,21 @@ void CCoro_Rock::Render()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		_bool HasNormal{};
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
-
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		HRESULT hr = m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		if (SUCCEEDED(hr))
+			HasNormal = true;
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
 		m_pModelCom->Render(i);
 	}
+#ifdef _DEBUG
+	if (m_pRigidBodyCom)
+		m_pRigidBodyCom->Render();
+#endif // _DEBUG
+
 }
 
 void CCoro_Rock::Change_Layer(_uint iLayer)
@@ -69,8 +106,16 @@ void CCoro_Rock::Change_Layer(_uint iLayer)
 	m_pRigidBodyCom->Change_Layer(iLayer);
 }
 
+void CCoro_Rock::Change_CollisionActive(_bool isActive)
+{
+	m_pRigidBodyCom->IsActivate(isActive);
+}
+
 HRESULT CCoro_Rock::Bind_Resources()
 {
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	return S_OK;
 }
 
@@ -82,16 +127,32 @@ void CCoro_Rock::Ready_Component(CORO_ROCK_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK);
-	RigidbodyDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	RigidbodyDesc.vExtent = _float3(1.f, 4.f, 1.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
-		CRASH("Rigidbody");
+		CRASH("Coro_Rock/Rigidbody");
 
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
+
+	m_tCallback.pTransform = m_pParentTransform;
+	m_tCallback.fAttack = pDesc->fAttackDmg;
+	m_tCallback.eType = pDesc->eType;
+	m_pRigidBodyCom->Set_Desc(&m_tCallback);
+	//m_pRigidBodyCom->IsActivate(false);
+
+	// Com_Shader
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MonsterProp"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		CRASH("Coro_Rock/Com_Shader");
+
+	// Com_Model
+	if (FAILED(Add_Component(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Prototype_Component_Model_CoroRock"),
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("Coro_Rock/Com_Model");
 }
 
 void CCoro_Rock::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)

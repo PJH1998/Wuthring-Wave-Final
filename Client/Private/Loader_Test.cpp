@@ -13,6 +13,7 @@
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
+#include "Coro_Rock.h"
 #include "AttackVolume.h"
 #include "AoEDoT.h"
 #include "Projectile.h"
@@ -63,6 +64,7 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
+#include "UI_Ovfl_Palette.h"
 #pragma endregion
 
 
@@ -325,6 +327,17 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	// Prototype_GameObject_CoroSaurus
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		CCorosaurus::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+
+	// Prototype_Component_Model_CoroRock
+	_fmatrix PrePropMatrix = XMMatrixScaling(0.001f, 0.002f, 0.001f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroRock"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PrePropMatrix, "../../Client/Bin/Resource/Model/Monster/Coro_Rock/SM_Tab_Roc_20AM_LOD0.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroRock
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroRock"),
+		CCoro_Rock::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 
@@ -701,6 +714,18 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
 
+	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
+
+
+	
+	
+	_string strFilePath_UI_ExtraTexturesLoad = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LoadDummy.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_ExtraTexturesLoad));
+	// Prototype_Component_Texture_Custom_ ...
+	// Palette_BG
+
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -716,6 +741,9 @@ HRESULT CLoader_Test::Load_UI()
 				OutputDebugString(L"[Loader_Test::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
 		}
 	}
+
+
+
 
 	// ==============================
 	cout << "[Loader_Test] Model" << endl;
@@ -799,6 +827,12 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+
+	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
+		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
+
 
 
 

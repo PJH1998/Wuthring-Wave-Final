@@ -16,6 +16,7 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
+#include "UI_Ovfl_Palette.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -59,7 +60,8 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_MobHPBar				= Find_RootUI (L"UI_MobHPBar");
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
 
-
+	// MiniGames
+	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
 }
 
 CCustom_UI* CUI_ControlHelper::Find_RootUI(_wstring strName)
@@ -274,6 +276,26 @@ _uint CUI_ControlHelper::HideNGet_TabUtilityUI()
 		return ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
 
 	return static_cast<CUI_TabUtility*>(pRootUI)->Req_OffTabUI();
+}
+
+void CUI_ControlHelper::Open_Game_OverflowPalette()
+{
+	CCustom_UI* pRootUI = m_pRootUI_Ovfl_Palette;
+
+	if (!pRootUI)
+		return;
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Ovfl_Palette", _fmatrix(), nullptr);
+}
+
+void CUI_ControlHelper::Close_Game_OverflowPalette()
+{
+	CCustom_UI* pRootUI = m_pRootUI_Ovfl_Palette;
+
+	if (!pRootUI)
+		return;
+
+	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
