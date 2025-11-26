@@ -389,7 +389,7 @@ void CLevel_Map::Menu_Model_Load()
 				else if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::DESTRUCTION)
 				{
 					_string Name = FileName;
-					if ((Name.find("Roc_24BS") == string::npos) && (Name.find("Roc_28BS") == string::npos))
+					if ((Name.find("Roc_24BS") == string::npos) && (Name.find("Roc_28BS") == string::npos) && (Name.find("Flo_01EM") == string::npos))
 						continue;
 
 					CEdit_MapObject_Destruction::MAP_LOAD Desc{};
@@ -854,10 +854,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
@@ -904,6 +904,7 @@ void CLevel_Map::Load_Objects()
 
 				if (entry.path().string().find("_Bone") != std::string::npos)
 				{
+					int a = 0;
 					m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
 							CModel::Create(m_pDevice, m_pContext, MODELTYPE::ECO, PreTransformMatrix, Path.c_str()))))
@@ -913,10 +914,10 @@ void CLevel_Map::Load_Objects()
 				}
 				else if (entry.path().string().find("Bones") != std::string::npos && entry.path().string().find("_Bone") == std::string::npos)
 				{
-					//m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = FileDir]() {
-						//if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-						//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
-						//	CRASH("Prototype Create Failed");
+					/*m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = FileDir]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+							CModel_Streaming::Create(m_pDevice, m_pContext, Path))))
+							CRASH("Prototype Create Failed");*/
 						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
 							CModel_Streaming::Create(m_pDevice, m_pContext, FileDir))))
 							CRASH("Prototype Create Failed");
