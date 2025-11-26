@@ -19,6 +19,8 @@ public:
 #ifdef _DEBUG
 	_float*				Get_TrackPositionPtr() { return &m_fCurrentTrackPosition; }
 	
+
+	void				Print_MorphKeyIndices();
 #endif // _DEBUG
 
 public:
@@ -29,9 +31,10 @@ public:
 
 	void				Sort_Notify();
 	void				Sort_AnimNotify();
+	void				Reset_Status();
 
 public:
-	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
+	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
 	_bool				Update_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
 	_bool				Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition = nullptr);
 
@@ -39,7 +42,10 @@ public:
 
 	_bool				Blend_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float fTrackLength);
 
-	_bool Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
+	_bool			Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition);
+
+	_bool	        Bind_MorphChannels(const vector<string>& modelShapeKeys);
+	_bool			Update_MorphWeights(_float fTimeDelta, vector<float>& modelWeights);
 private:
 	_char									m_szName[MAX_PATH] = {};
 	_float									m_fDuration = {};
@@ -50,19 +56,37 @@ private:
 	vector<class CChannel*>				m_Channels;
 	vector<_uint>						m_CurrentFrameIndices;
 
-	vector<NOTIFY>					m_Notifies; // ?명솚?깆쓣 ?꾪빐 ?대젮??
+	vector<NOTIFY>					m_Notifies; // 
 
 	_uint							m_iNotifyIndex = {};
 	
-	// ?좉퇋 Notify 
+	// Notify 
 	vector<class CAnimNotify*> m_AnimNotifies;
 
-	/* ��� */
+#pragma region MORPH TARGET
+	// Morph Target Data
+	_uint							m_iNumMorphCurves = { }; // 기본 0
+	vector<class CMorphChannel*>	m_MorphMeshChannels;
+
+	vector<_uint>					m_CurrentMorphCurveIndicies; // 채널들에 대한 Index 관리.
+
+	// 매핑 테이블 => 현재 MorphChannel[i]가 Model의 ShapeKeyWeights의 몇번째 인덱스인지 저장.
+	vector<_int> 					m_MorphKeyIndicies; 
+
+
+#pragma endregion
+
+	
+
+
 
 private:
+	HRESULT Ready_NormalAnimations(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
+	HRESULT Ready_CharacterAnimations(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
+
 
 public:
-	static CAnimation* Create(ifstream& InputFile, const vector<class CBone*>& Bones);
+	static CAnimation* Create(ifstream& InputFile, const vector<class CBone*>& Bones, MODELTYPE eModelType = MODELTYPE::ANIM);
 	CAnimation* Clone();
 	virtual void Free() override;
 };

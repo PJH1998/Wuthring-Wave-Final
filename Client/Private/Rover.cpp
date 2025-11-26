@@ -274,6 +274,8 @@ void CRover::Render_Shadow()
 // 캐릭터 전환시 Idle로 상태 전환..
 void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	m_pStateMachineCom->Exit_State();
+
 	switch (eTransitionType)
 	{
 		case CHARACTER_TRANSITIONTYPE::IDLE:
@@ -803,6 +805,10 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
 
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
 		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->facialComputeShaderData.first)
+		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)

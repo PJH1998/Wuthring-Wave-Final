@@ -29,6 +29,7 @@ HRESULT CSkyBox::Initialize_Clone(void* pArg)
 	SKYBOX_DESC* pDesc = static_cast<SKYBOX_DESC*>(pArg);
 	m_iNumModels = pDesc->iNumModel;
 	m_fCloudSpeed = pDesc->fCloudSpeed;
+	m_fFXScaleRate = pDesc->fFXScaleRate;
 	m_vUVRate = pDesc->vUVRate;
 
 	Ready_Component(pDesc->strModelTags);
@@ -75,6 +76,7 @@ void CSkyBox::Render()
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
 	m_pShaderCom->Bind_Value("g_fCloudSpeed", &m_fTimeAcc, sizeof(_float));
+	m_pShaderCom->Bind_Value("g_fFXScaleRate", &m_fFXScaleRate, sizeof(_float));
 	m_pShaderCom->Bind_Value("g_vUVRate", &m_vUVRate, sizeof(_float2));
 	m_pShaderCom->Bind_Value("g_vBackGroundColor", &m_vBackGroundColor, sizeof(_float3));
 

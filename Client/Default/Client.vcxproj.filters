@@ -325,9 +325,6 @@
     <Filter Include="03. GameObject\UI\Containers_Child\HUD">
       <UniqueIdentifier>{5722860c-32aa-4818-9bb3-f6f8c726f814}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Containers_Child\EscMenu">
-      <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\Containers_Child\Loading">
       <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
     </Filter>
@@ -348,6 +345,12 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\CoroSaurus\Weapon">
       <UniqueIdentifier>{323146fd-c508-439b-bc38-b85f0b22e928}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Event">
+      <UniqueIdentifier>{d78242e4-c98e-436d-9a31-712442b24925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Event\OverflowingPalette">
+      <UniqueIdentifier>{c86a7080-740e-403c-a1c3-779d7538a329}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\SkyBox\Logo">
       <UniqueIdentifier>{a025b515-ba1a-4b41-8a1a-3e1f744cd632}</UniqueIdentifier>
@@ -931,6 +934,9 @@
     <ClInclude Include="..\Public\MapObject_Water.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Ovfl_Palette.h">
+      <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\Logo_SkyBox.h">
       <Filter>03. GameObject\SkyBox\Logo</Filter>
     </ClInclude>
@@ -1478,6 +1484,9 @@
     <ClCompile Include="..\Private\MapObject_Water.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\public\UI_Ovfl_Palette.cpp">
+      <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\Logo_SkyBox.cpp">
       <Filter>03. GameObject\SkyBox\Logo</Filter>
     </ClCompile>
@@ -1530,7 +1539,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_MonsterProp.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
@@ -1578,6 +1587,15 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshCharacter.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMeshCharacter.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMorph.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

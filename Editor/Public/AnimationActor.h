@@ -11,6 +11,7 @@ public:
 		LEVEL eLevel = {};
 		_wstring strShaderTag = {};
 		_wstring strComputeShaderTag = {};
+		_wstring strMorphComputeShaderTag = {};
 		_wstring strModelTag = {};
 		_string strModelDatPath = {};
 
@@ -23,6 +24,7 @@ public:
 		class CTransform* pParentTransform = { nullptr };
 		_string strBoneName = { };
 		CAnimationActor* pParentActor = { nullptr };
+		_bool IsFacial = { false };
 	}ANIMATION_ACTOR_DESC;
 
 
@@ -40,6 +42,8 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 	virtual void Render_Shadow() override;
+
+	
 
 #ifdef _DEBUG
 public:
@@ -79,6 +83,8 @@ public:
 	void Child_Render();
 	void Render_Detail();
 
+	void Print_WorldMatrix();
+
 	void Set_AnimationSpeed(_float fSpeed) { m_fAnimationSpeed = fSpeed; }
 	
 #endif // _DEBUG
@@ -89,6 +95,7 @@ private:
 	class CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
+	class CComputeShader* m_pMorphComputeShaderCom = { nullptr };
 
 	class CTransform* m_pParentTransform = { nullptr };
 	const _float4x4* m_pSocketMatrix = { nullptr };
@@ -115,7 +122,10 @@ private:
 
 
 	_float m_fAnimationSpeed = { 1.f };
+
+	// Facial
 	
+	_bool m_IsFacial = { false };
 
 #ifdef _DEBUG
 	// PartObject
@@ -125,6 +135,9 @@ private:
 	void Bind_Resources();
 	HRESULT Ready_Components(const ANIMATION_ACTOR_DESC* pDesc);
 	HRESULT Ready_Camera();
+
+	void Render_Facial();
+	void Render_Default();
 
 public:
 	virtual	CGameObject* Clone(void* pArg) override;

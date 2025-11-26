@@ -121,7 +121,7 @@ void CGalbrenaAirFall::Check_StateTransition(_float fTimeDelta)
 
     if (m_States[LAND])
     {
-        m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_LIGHT;
+        m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_HEAVY;
         m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND));
         return;
     }

@@ -26,6 +26,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     if (FAILED(CContainerObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	m_IsFacial = pDesc->IsFacial;
     m_eCurLevel = pDesc->eLevel;
 
     m_iShaderPath = pDesc->iShaderPath;
@@ -54,6 +55,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 		//m_pParentActor->Set_ChildActor(this);
 		m_pParentActor->Set_ChildActors(this);
 	}
+
 #endif // _DEBUG
 
 
@@ -128,16 +130,6 @@ void CAnimationActor::Update(_float fTimeDelta)
     }
 #endif
    
-    //if (m_IsPlayAnimation)
-    //{
-    //    m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, 0.01f);
-    //    _string strRibAnimation = "Rib_" + m_strCurrentAnimation;
-    //    //m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
-    //    m_pModelCom->Play_RibAnimation(strRibAnimation, m_fTrackPosition);
-    //    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    //}
-        
-
     /*if (m_IsPlayAnimation)
         m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
 
@@ -147,11 +139,9 @@ void CAnimationActor::Update(_float fTimeDelta)
     {
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
-
-		 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
-
-        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
+		//IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
 
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
@@ -225,26 +215,14 @@ void CAnimationActor::Render()
 {
     Bind_Resources();
 
-    _uint iNumMeshes = m_pModelCom->Get_NumMesh();
-    for (_uint i = 0; i < iNumMeshes; i++)
-    {
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			return;
-            //CRASH("Ready Diffuse Texture Failed");
+	if (m_IsFacial)
+		Render_Facial();
+	else
+		Render_Default();
 
-        //if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
-        //    return E_FAIL;
-
-        if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
-            CRASH("Ready Bone Matrices Failed");
-
-        if (FAILED(m_pShaderCom->Begin(2)))
-            CRASH("Ready Shader Begin Failed");
-
-        if (FAILED(m_pModelCom->Render(i)))
-            CRASH("Ready Render Failed");
-    }
-    
+#ifdef _DEBUG
+	//Print_WorldMatrix();
+#endif // _DEBUG
 }
 
 void CAnimationActor::Render_Shadow()
@@ -328,6 +306,7 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 
         // 4. fTimeDelta = 0.f로 GPU 업데이트를 1회 실행합니다.
         //    (기존 주석 코드를 GPU 버전으로 변경)
+		//m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,
             m_strCurrentAnimation,
             0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
@@ -503,6 +482,13 @@ void CAnimationActor::Render_Detail()
 	ImGui::End();
 	ImGui::PopID();  // ID 팝
 }
+void CAnimationActor::Print_WorldMatrix()
+{
+	_float4x4 matWorld = {};
+	XMStoreFloat4x4(&matWorld, m_pTransformCom->Get_WorldMatrix());
+
+	OutPutDebugMatrix(TEXT("AnimActor World Matrix : "), matWorld);
+}
 #endif
 
 // 1. 행렬 
@@ -531,8 +517,15 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
         return E_FAIL;
     }
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strComputeShaderTag,
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), pDesc->strComputeShaderTag,
         TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+    {
+        CRASH("Failed Ready_ComShader");
+        return E_FAIL;
+    }
+
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), pDesc->strMorphComputeShaderTag,
+        TEXT("Com_MorphComputeShader"), reinterpret_cast<CComponent**>(&m_pMorphComputeShaderCom), nullptr)))
     {
         CRASH("Failed Ready_ComShader");
         return E_FAIL;
@@ -575,6 +568,81 @@ HRESULT CAnimationActor::Ready_Camera()
 	return S_OK;
 }
 
+
+
+void CAnimationActor::Render_Facial()
+{
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		// 1. 재질 기존 유지.
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			continue;
+
+		_bool HasNormal = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		_bool HasMask = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			HasMask = true;
+
+		// 2. 뼈 행렬 (기존 유지)
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+	
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
+			CRASH("Bind Morph Result Failed");
+
+		if (FAILED(m_pShaderCom->Begin(2)))
+			CRASH("Ready Shader Begin Failed");
+
+		// Render 단위가 Mesh 단위 => Binding Buffer도 Mesh 단위로.
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+
+
+		m_pShaderCom->UndBind_All_VS_SRV();
+	}
+
+	// 매프레임 Compute Shader에서 사용해야 하므로 바인딩 해제.
+
+	
+	
+
+
+
+
+}
+
+
+void CAnimationActor::Render_Default()
+{
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		// 1. 재질 기존 유지.
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			return;
+
+		//CRASH("Ready Diffuse Texture Failed");
+
+		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
+		//    return E_FAIL;
+
+
+		// 2. 뼈 행렬 (기존 유지)
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(2)))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
+}
+
 #ifdef _DEBUG
 
 #endif
@@ -611,9 +679,10 @@ void CAnimationActor::Free()
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pComputeShaderCom);
+    Safe_Release(m_pMorphComputeShaderCom);
 	Safe_Release(m_pSpringCamera);
 
 	m_ChildActors.clear();
-	m_pChildActor == nullptr;
+	m_pChildActor = nullptr;
 
 }

@@ -41,7 +41,7 @@ private:
 	vector<class CMesh_Instance*>			m_Meshes;
 
 	_uint									m_iNumMaterials = {};
-	vector<class CMeshMaterial*>			m_Materials;
+	vector<class CMaterial*>			m_Materials;
 
 	_float4x4								m_PreTransformMatrix = {};
 	_float m_MinPos[3] = { FLT_MAX,FLT_MAX ,FLT_MAX };

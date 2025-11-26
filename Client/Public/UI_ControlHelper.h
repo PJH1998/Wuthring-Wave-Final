@@ -48,6 +48,9 @@ public:
 	void				Show_TabUtilityUI(_uint iCurSelectedUtilityIndex);
 	_uint				HideNGet_TabUtilityUI();
 
+	void				Open_Game_OverflowPalette();
+	void				Close_Game_OverflowPalette();
+
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorR_PartyFrame		= { nullptr };
@@ -66,10 +69,8 @@ private:
 	CCustom_UI*			m_pRootUI_MobHPBar					= { nullptr };
 	CCustom_UI*			m_pRootUI_TabUtility				= { nullptr };
 
+	CCustom_UI*			m_pRootUI_Ovfl_Palette				= { nullptr };
 
-
-
-		;
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };

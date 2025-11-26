@@ -4,6 +4,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float g_fCloudSpeed;
 float2 g_vUVRate = float2(1.f, 1.f);
 float3 g_vBackGroundColor = float3(1.f, 1.f, 1.f);
+float g_fFXScaleRate;
 
 texture2D   g_DiffuseTexture[2];
 texture2D   g_NormalTexture[2];
@@ -61,15 +62,13 @@ VS_OUT VS_EFFECT(VS_IN In)
     
     matrix matWV, matWVP;
     
-    In.vPosition *= 50.f;
-    
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
     Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
     Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
     Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
     Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), g_WorldMatrix));
-    Out.vTexcoord = In.vTexcoord;
+    Out.vTexcoord = In.vTexcoord + (float2(0.5f, 0.5f) - In.vTexcoord) * g_fFXScaleRate;
 
     return Out;
 }
