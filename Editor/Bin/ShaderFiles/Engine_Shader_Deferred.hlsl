@@ -262,7 +262,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
         vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
         
-        if (false == IsSkin)      // 陛加 何盒父 PBR 贸府
+        if (false == IsSkin)      // 旮堨啀 攵�攵勲 PBR 觳橂Μ
         {
           
             Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
