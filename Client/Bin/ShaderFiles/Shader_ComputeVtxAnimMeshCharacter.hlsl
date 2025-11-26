@@ -362,18 +362,33 @@ SRTKeyFrame Blend1D_SRT(uint clipA_idx, uint clipB_idx, float t, uint boneIndex,
 }
 
 
-// 헬퍼 2: 델타(Delta) SRT 계산 (가산 블렌딩용)
+float SafeDivide(float numerator, float denominator)
+{
+    // 분모가 아주 작으면(0에 가까우면) 나눗셈을 하지 않고 1(변화 없음)을 반환
+    if (abs(denominator) < 1e-6f)
+        return 1.0f;
+    return numerator / denominator;
+}
+
+// 델타(Delta) SRT 계산 (가산 블렌딩용)
 // (targetSRT - weightSRT)
 SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
 {
     SRTKeyFrame delta;
     
     // 척도(Scale) 뺄셈 (나눗셈)
-    delta.scale = targetSRT.scale / weightSRT.scale;
+    delta.scale.x = SafeDivide(targetSRT.scale.x, weightSRT.scale.x);
+    delta.scale.y = SafeDivide(targetSRT.scale.y, weightSRT.scale.y);
+    delta.scale.z = SafeDivide(targetSRT.scale.z, weightSRT.scale.z);
+    delta.scale.w = 1.0f;
+    //delta.scale = targetSRT.scale / weightSRT.scale;
     
     // 회전(Rotation) 뺄셈: target * inverse(weight)
     // inverse(q) = (-q.xyz, q.w)
+    //float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
     float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
+    if (dot(invWeightRot, invWeightRot) < 1e-6f)  invWeightRot = float4(0, 0, 0, 1); // Identity Quaternion
+    else invWeightRot = normalize(invWeightRot);
     delta.rotation = mul_quaternion(targetSRT.rotation, normalize(invWeightRot));
     
     // 이동(Translation) 뺄셈
@@ -381,7 +396,7 @@ SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
     return delta;
 }
 
-// 헬퍼 3: 델타(Delta) SRT 적용 (가산)
+//  델타(Delta) SRT 적용 (가산)
 // (baseSRT + deltaSRT)
 SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
 {
