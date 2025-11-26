@@ -44,10 +44,16 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
     
     float fOffsetSize = g_fStartOffset;
     
+    
+    float2 vHitRange = float2(0.f, vViewPos.z);
+    
     [unroll]
     for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
-    {
+    {   
         float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
+       
+        vHitRange.x = vHitRange.y;
+        vHitRange.y = vLay.z;
        
         float4 vProjPos = mul(vLay, g_CamProjMatrix);
         
@@ -70,6 +76,11 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
         float fOffsetRatio = saturate(i / g_iStep);
         
         fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
+    }
+    
+    if(IsHit)
+    {
+        // binary Step
     }
     
     float fMinDistance = 10000.f;
