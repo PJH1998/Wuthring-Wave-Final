@@ -54,6 +54,13 @@ enum class EGalbrenaHitState : _uint
 	HIT_END
 };
 
+// Galbrena Interaction
+enum class EGalbrenaInteractionState : _uint
+{
+	ROPE = 0, // Rope Action
+	INTERACTION_END
+};
+
 #pragma endregion
 
 #pragma region DEPTH2
@@ -339,6 +346,35 @@ enum class EGalbrenaHitType : _uint
 	END
 };
 
+#pragma endregion
+
+
+#pragma region INTREACTIOn
+enum class EGalbrenaRopeType : _uint
+{
+	FIXHOOK_END = 0,
+	FIXHOOK_END_FAST,
+	FIXHOOK_LOOP_D,
+	FIXHOOK_LOOP_F,
+	FIXHOOK_LOOP_L,
+	FIXHOOK_LOOP_R,
+	FIXHOOK_LOOP_U,
+	FIXHOOK_START01_D,
+	FIXHOOK_START01_F,
+	FIXHOOK_START01_U,
+	FIXHOOK_START02_D,
+	FIXHOOK_START02_F,
+	FIXHOOK_START02_U,
+	HOOK_UP,
+	DRAG_END,
+	DRAG_LOOP_D,
+	DRAG_LOOP_F,
+	DRAG_LOOP_U,
+	DRAG_START_D,
+	DRAG_START_F,
+	DRAG_START_U,
+	END
+};
 #pragma endregion
 
 

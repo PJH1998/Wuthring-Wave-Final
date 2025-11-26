@@ -198,7 +198,21 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         
     float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
 
-    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    float4 vWorldPos = 0.f;
+
+    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+    vWorldPos.z = vDepthDesc.x;
+    vWorldPos.w = 1.f;
+    
+    vWorldPos *= vDepthDesc.y;
+    
+    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
+    
+//    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
     
@@ -208,7 +222,10 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
    
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
     
-    float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+    float fRimPower = 0.f;
+    
+    if (vDepthDesc.w != 1.f)
+        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
 
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
     
@@ -245,7 +262,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
         vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
         
-        if (false == IsSkin)      // ê¸ˆì† ë¶€ë¶„ë§Œ PBR ì²˜ë¦¬
+        if (false == IsSkin)      // ±Ý¼Ó ºÎºÐ¸¸ PBR Ã³¸®
         {
           
             Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
@@ -318,7 +335,21 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     //vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     //vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
-    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    float4 vWorldPos = 0.f;
+
+    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+    vWorldPos.z = vDepthDesc.x;
+    vWorldPos.w = 1.f;
+    
+    vWorldPos *= vDepthDesc.y;
+    
+    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
+    
+//    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
     
@@ -333,7 +364,11 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
-    float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+   
+    float fRimPower = 0.f;
+    
+    if(vDepthDesc.w != 1.f)
+        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
     float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
  
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
@@ -610,7 +645,7 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
-    Out.vColor.z = vViewPos.z;          // Depth ï¿½ï¿½ï¿½
+    Out.vColor.z = vViewPos.z;          // Depth ???
     if (vViewPos.z == 0.f || vViewPos.z >= g_fLimitDepth)
     {
         Out.vColor.xy = 0.f;

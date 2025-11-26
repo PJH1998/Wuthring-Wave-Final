@@ -1,0 +1,50 @@
+﻿#pragma once
+#include "InteractionState.h"
+
+NS_BEGIN(Client)
+class CGalbrenaRope final : public CInteractionState
+{
+private:
+	enum ROPESTATE
+	{
+		MOVE = 0,
+		JUMP,
+		FALL,
+		LAND,
+		END
+	};
+
+private:
+	explicit CGalbrenaRope() = default;
+	virtual ~CGalbrenaRope() = default;
+
+public:
+	virtual HRESULT Initialize(class CGameObject* pOwner) override;
+	virtual void OnEnter(void* pArg = nullptr) override;
+	virtual void OnUpdate(_float fTimeDelta) override;
+	virtual void OnExit() override;
+
+private:
+	class CGalbrena* m_pGalbrena = { nullptr };
+	_bool m_States[ROPESTATE::END] = {};
+
+private:
+	void Enter_Rope();
+
+private:
+	virtual void Handle_Input() override;
+	void Update_RopeAnimation(_float fTimeDelta);
+	void Check_Physics(_float fTimeDelta);
+	void Check_StateTransition(_float fTimeDelta);
+
+	void Setup_Animations();
+	void State_Reset();
+
+
+public:
+	static CGalbrenaRope* Create(class CGameObject* pOwner);
+	virtual void Free() override;
+
+};
+NS_END
+
