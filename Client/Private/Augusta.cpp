@@ -211,8 +211,8 @@ void CAugusta::Render()
 		if(FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
-		//if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
-		//	CRASH("Ready g_HasSkinMask Failed");
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
+			CRASH("Ready g_HasSkinMask Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
