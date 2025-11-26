@@ -27,7 +27,8 @@ namespace PlayerData
     {
         CCharacter::CHARACTER_DESC Desc;
         Desc.eCurLevel = eLevel;
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta"));

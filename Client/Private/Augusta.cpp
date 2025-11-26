@@ -211,11 +211,15 @@ void CAugusta::Render()
 		if(FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
-			CRASH("Ready g_HasSkinMask Failed");
+		//if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
+		//	CRASH("Ready g_HasSkinMask Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
+			CRASH("Bind Morph Result Failed");
+
 
 		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
 			CRASH("Ready Shader Begin Failed");
@@ -224,6 +228,8 @@ void CAugusta::Render()
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
+
+		m_pShaderCom->UndBind_All_VS_SRV();
     }
 
 #ifdef _DEBUG
@@ -294,7 +300,7 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 	{
 		case CHARACTER_TRANSITIONTYPE::IDLE:
 		{
-			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 			break;
 		}

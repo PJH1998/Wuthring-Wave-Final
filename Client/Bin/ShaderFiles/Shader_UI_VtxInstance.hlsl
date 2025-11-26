@@ -1020,7 +1020,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             #define CHANGE_BYCIRCLE
             
             
-            //Out.vColor = g_TextureExtra0.Sample(DefaultSampler, In.vTexcoord);
+            //    Out.vColor = float4(1.f, 0.f, 1.f ,1.f);
             //return Out;
             
             
@@ -1030,7 +1030,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * matrix info [size : 80] (10 * 8. per blocks)
             // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
             // [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
-            // [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
+            // [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] << 이거 timedelta 대신 쓸 수 있을 것 같음
             // [EXIMGSIZE.x] [EXIMGSIZE.y]
             // 텍스쳐를 하나 더 받아와서
             // 현재 winsize 및 inst transform (pos, sca) 기준으로 uv를 적절히 슬라이싱하여 적용하고
@@ -1122,7 +1122,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             
             float2 vFixedTexUV;
-            float4 vColorTex = g_TextureExtra0.Sample(DefaultSampler, vImgPos_toUV);
+            float4 vColorTex = smoothstep(0.f, 1.f, (g_TextureExtra0.Sample(DefaultSampler, vImgPos_toUV) * 1.35f));
             
             
             float4 vFinalColorTex;

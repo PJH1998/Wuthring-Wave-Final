@@ -306,11 +306,11 @@ _bool CAnimation::Bind_MorphChannels(const vector<string>& modelShapeKeys)
 		}
 	}
 
-#ifdef _DEBUG
-	// 
-	if (strcmp(m_szName, "Stand2") == 0)
-		Print_MorphKeyIndices();
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	// 
+//	if (strcmp(m_szName, "Stand2") == 0)
+//		Print_MorphKeyIndices();
+//#endif // _DEBUG
 
 
 
@@ -327,6 +327,52 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 	fill(modelWeights.begin(), modelWeights.end(), 0.0f);
 
 	// MorphMeshChannel[i] -> m_MorphKeyIndices[i] = 들어있는 값(modelWeights의 인덱스)
+
+#ifdef _DEBUG
+	/*string strName = m_szName;
+	_bool IsCheck = { false };
+	if (strName == "Burst01")
+	{
+		
+		if (m_fCurrentTrackPosition >= 45.f && m_fCurrentTrackPosition >= 46.f)
+		{
+			for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
+			{
+				_wstring OutputValue = {};
+				_string strMorph = m_MorphMeshChannels[i]->Get_Name();
+				OutputValue += StringToWString(strMorph);
+				_float fValue = m_MorphMeshChannels[i]->Get_Weight(45);
+				if (fValue > 0.f)
+				OutPutDebugFloat(OutputValue, fValue);
+			}
+		}
+		
+		IsCheck = true;
+	}*/
+	/*if (strName == "Stand1_Action02")
+	{
+
+		if (m_fCurrentTrackPosition >= 0.f && m_fCurrentTrackPosition <= 20.f)
+		{
+			for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
+			{
+				_wstring OutputValue = {};
+				_string strMorph = m_MorphMeshChannels[i]->Get_Name();
+				OutputValue += StringToWString(strMorph);
+				_float fValue = m_MorphMeshChannels[i]->Get_Weight(45);
+				if (fValue > 0.f)
+					OutPutDebugFloat(OutputValue, fValue);
+			}
+		}
+
+		IsCheck = true;
+	}*/
+
+		
+
+
+#endif 
+
 	for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
 	{
 		_int iTargetIndex = m_MorphKeyIndicies[i];

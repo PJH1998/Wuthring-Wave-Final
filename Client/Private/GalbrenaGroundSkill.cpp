@@ -64,6 +64,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 			m_pGalbrena->Rotate_Target(); // 한번 회전.
 
 			// CutScene 실행?
+			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"));
 			break;
 		}
     }
@@ -251,7 +252,7 @@ void CGalbrenaGroundSkill::SetUp_Animations()
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP_START), "Attack_Jump_Start", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP), "Attack_Jump", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP_END02), "Attack_Jump_End02", 1.3f, 20.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::BURST01), "Burst01", 1.2f, 130.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::BURST01), "Burst01", 1.0f, 130.f);
 
     //m_PartsAnimations.emplace("Ex_Skill02", "Scythe_Ex_Attack03");
     //m_PartsAnimations.emplace("Skill02", "G_Skill02");

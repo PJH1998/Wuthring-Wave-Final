@@ -25,6 +25,9 @@
 // Hit 카테고리 State
 #include "GalbrenaHit.h"
 
+// Intraction 카테고리 State
+#include "GalbrenaRope.h"
+
 void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbrena* pCharacter)
 {
    // enum 기반 State 등록
@@ -52,4 +55,7 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 
 	// Hit 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT), CGalbrenaHit::Create(pCharacter));
+
+	// Intreaction 카테고리 하위 State들
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPE), CGalbrenaRope::Create(pCharacter));
 }

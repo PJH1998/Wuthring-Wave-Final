@@ -354,7 +354,12 @@ HRESULT CEdit_MapObject_Destruction::Ready_Component(void* pArg)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), WModelName,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
+
+#ifdef _DEBUG
 	m_pModelCom->Ready_BoundingBox();
+#endif // _DEBUG
+
+	
 
 	_wstring BoneName = Name;
 	BoneName.pop_back();
