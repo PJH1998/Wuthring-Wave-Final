@@ -19,9 +19,10 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-//	m_pGameInstance->Add_Probe(_float3(0.f, 5.f, 0.f), 500.f);
+	m_pGameInstance->Add_Probe(_float3(-55.f, 15.f, 50.f), 500.f);
 
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
+	m_pGameInstance->SettingFog(false);
 
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
@@ -40,11 +41,9 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
-	m_pGameInstance->SettingFog(true);
-
 	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
 
-//	m_pGameInstance->Bake_EnvMaps();
+	m_pGameInstance->Bake_EnvMaps();
 
     return S_OK;
 }

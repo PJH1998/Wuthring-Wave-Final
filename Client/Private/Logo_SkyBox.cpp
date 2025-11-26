@@ -60,7 +60,7 @@ HRESULT CLogo_SkyBox::Initialize_Clone(void* pArg)
 
 
 	//Env Map Bake
-	//m_pGameInstance->Add_EnvMap_SkyBox(this);
+	m_pGameInstance->Add_EnvMap_SkyBox(this);
 
 #ifdef _DEBUG
 	m_iIndex = 0;

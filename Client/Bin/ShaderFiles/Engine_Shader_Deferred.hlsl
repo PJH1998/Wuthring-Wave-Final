@@ -252,7 +252,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
 
         if (g_HasShadowMap)
         {
-            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.9f, 1.f);
+            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
         }
         
         bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
@@ -262,7 +262,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
         vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
         
-        if (false == IsSkin)      // ±›º” ∫Œ∫–∏∏ PBR √≥∏Æ
+        if (false == IsSkin)      // Í∏àÏÜç Î∂ÄÎ∂ÑÎßå PBR Ï≤òÎ¶¨
         {
           
             Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
@@ -369,6 +369,7 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     
     if(vDepthDesc.w != 1.f)
         fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+        
     float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
  
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
@@ -717,7 +718,6 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
    
     float4 vSceneDesc = g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord);
    
-   
     float4 vSceneWorldPos = 0.f;
     
     vSceneWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
@@ -849,7 +849,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_DEBUG_SHADOW_MAP();
     }
     
-    pass CombinedPass // 2
+    pass CombinedPass // 3
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -859,7 +859,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_COMBINED();
     }
-    pass DirectionalPass // 3
+    pass DirectionalPass // 4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -869,7 +869,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LIGHT_DIRECTIONAL();
     }
-    pass PointPass // 4
+    pass PointPass // 5
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -880,7 +880,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LIGHT_POINT();
     }
     
-    pass Bloom // 5
+    pass Bloom // 6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -891,7 +891,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_BLOOM();
     }
     
-    pass Distortion // 6
+    pass Distortion // 7
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -902,7 +902,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DISTORTION();
     }
     
-    pass LUT // 7
+    pass LUT // 8
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -913,7 +913,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LUT();
     }
     
-    pass Fog // 8
+    pass Fog // 9
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -924,7 +924,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_FOG();
     }
     
-    pass SSAO // 9
+    pass SSAO // 10
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -935,7 +935,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_SSAO();
     }
     
-    pass DOF // 10
+    pass DOF // 11
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -946,7 +946,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOF();
     }
     
-    pass DOF_DEPTH // 11
+    pass DOF_DEPTH // 12
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -957,7 +957,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOF_DEPTH();
     }
     
-    pass Blur   // 12
+    pass Blur   // 13
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -968,7 +968,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_BLUR();
     }
     
-    pass VelocityMap // 13
+    pass VelocityMap // 14
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -979,7 +979,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_VELOCITY_MAP();
     }
     
-    pass MotionBlur // 14
+    pass MotionBlur // 15
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -990,7 +990,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MOTION_BLUR();
     }
     
-    pass WATER // SSR
+    pass WATER // SSR 16
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);

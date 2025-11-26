@@ -44,10 +44,16 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
     
     float fOffsetSize = g_fStartOffset;
     
+    
+    float2 vHitRange = float2(0.f, vViewPos.z);
+    
     [unroll]
     for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
-    {
+    {   
         float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
+       
+        vHitRange.x = vHitRange.y;
+        vHitRange.y = vLay.z;
        
         float4 vProjPos = mul(vLay, g_CamProjMatrix);
         
@@ -72,28 +78,51 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
         fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
     }
     
-    if (IsHit)
-        vColor = float4(lerp(vOriginColor.xyz, vReflectColor.xyz, 0.5f), 1.f);
-    else
+    if(IsHit)
     {
-        float fMinDistance = 10000.f;
+        // binary Step
+    }
     
-        float4 vEnvColor = 0.f;
+    float fMinDistance = 10000.f;
     
-        for (int j = 0; j < g_iNumEnvMaps; ++j)
+    float4 vEnvColor = 0.f;
+    
+    uint iIndex = 0;
+    uint iSampleCount = clamp(g_iNumEnvMaps, 0, 8);
+    
+    for (uint j = 0; j < iSampleCount; ++j)
+    {
+        ENV_MAP Envmap = g_EnvMapDatas[j];
+    
+        float fLength = length(vWorldPos - Envmap.vPosition);
+    
+        if (Envmap.fRange >= fLength && fMinDistance > fLength)
         {
-            ENV_MAP Envmap = g_EnvMapDatas[j];
-        
-            float fLength = length(vWorldPos - Envmap.vPosition);
-        
-            if (Envmap.fRange <= fLength && fMinDistance > fLength)
-            {
-                float4 vWorldReflect = normalize(mul(vReflect, g_ViewMatrixInv));
-                vEnvColor = g_EnvMapTexture[Envmap.iIndex].Sample(DefaultSampler, vWorldReflect.xyz);
-            }
+            iIndex = j;
+            
+            float3 vWorldReflect = normalize(mul(vReflect, g_ViewMatrixInv).xyz);
+          
+            vEnvColor = g_EnvMapTexture[iIndex].Sample(DefaultSampler, vWorldReflect);
+            
+            fMinDistance = fLength;
         }
     }
-       
+    
+    if(iSampleCount > 0)
+    {
+        if (IsHit)
+        {
+            vReflectColor = lerp(vReflectColor, vEnvColor, 0.5f);
+        }
+        else
+        {
+            vReflectColor = vEnvColor;
+        }
+    }
+
+    vColor = float4(vReflectColor.xyz, 1.f);
+    //float4(lerp(vOriginColor.xyz, vReflectColor.xyz, 0.5f), 1.f);
+      
     return vColor;
 }
 

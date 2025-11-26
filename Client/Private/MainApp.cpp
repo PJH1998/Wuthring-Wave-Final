@@ -254,6 +254,10 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CRASH("DeferredShader_Map");
 
 	
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_NonAnimMesh_Water"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Water.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Failed to Add Prototype Shader NonAnimMesh Water");
+
 	// Shader_VtxPropAnimMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPropAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPropAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
