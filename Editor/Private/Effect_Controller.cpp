@@ -469,6 +469,7 @@ void CEffect_Controller::Prefab_Tab()
 
                                 m_pParticle_Controller->Remove_Desc(m_strChildrenTag);
 								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
+								Remove_PrefabDesc_Children();
 
                                 Reset_ChildrenInfo();
                             }
@@ -479,6 +480,7 @@ void CEffect_Controller::Prefab_Tab()
 
                                 m_pMesh_Controller->Remove_Desc(m_strChildrenTag);
 								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
+								Remove_PrefabDesc_Children();
 
                                 Reset_ChildrenInfo();
                             }
@@ -489,6 +491,7 @@ void CEffect_Controller::Prefab_Tab()
 
                                 m_pTrailMesh_Controller->Remove_Desc(m_strChildrenTag);
 								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
+								Remove_PrefabDesc_Children();
 
                                 Reset_ChildrenInfo();
                             }
@@ -499,6 +502,7 @@ void CEffect_Controller::Prefab_Tab()
 
 								m_pRect_Controller->Remove_Desc(m_strChildrenTag);
 								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
+								Remove_PrefabDesc_Children();
 
 								Reset_ChildrenInfo();
 							}
@@ -509,6 +513,7 @@ void CEffect_Controller::Prefab_Tab()
 
 								m_pDecal_Controller->Remove_Desc(m_strChildrenTag);
 								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
+								Remove_PrefabDesc_Children();
 
 								Reset_ChildrenInfo();
 							}
@@ -519,6 +524,9 @@ void CEffect_Controller::Prefab_Tab()
 
 								m_pRadial_Controller->Remove_Desc(m_strChildrenTag);
 								m_pSelectedPrefab->Remove_FrameDesc(m_strChildrenTag);
+
+								//프리팹의 Desc에 저장되어있는 것도 삭제해줘야함. 안그러면 터짐.
+								Remove_PrefabDesc_Children();
 
 								Reset_ChildrenInfo();
 							}
@@ -794,6 +802,22 @@ void CEffect_Controller::Remove_Prefab()
     m_pSelectedPrefab = nullptr;
     Reset_PrefabInfo();
     Reset_ChildrenInfo();
+}
+
+void CEffect_Controller::Remove_PrefabDesc_Children()
+{
+	auto PrefabDesc = m_PrefabDesc.find(m_pSelectedPrefab->Get_MyTag());
+
+	for (auto iter = PrefabDesc->second.FrameDesc.begin(); iter != PrefabDesc->second.FrameDesc.end(); )
+	{
+		if (iter->strChildrenTag == m_strChildrenTag)
+		{
+			PrefabDesc->second.FrameDesc.erase(iter);
+			PrefabDesc->second.ChildrenCount -= 1;
+		}
+		else
+			++iter;
+	}
 }
 
 void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)

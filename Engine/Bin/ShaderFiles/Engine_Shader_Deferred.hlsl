@@ -109,6 +109,10 @@ float g_fStartOffset;
 //DEBUG
 bool g_IsStylized;
 
+//WeightBlend
+Texture2D g_AccumColorTexture;
+Texture2D g_AccumAlphaTexture;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -789,6 +793,29 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_SHADOW_MAP(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_WeightBlend(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float4 vColor = g_AccumColorTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vAlpha = g_AccumAlphaTexture.Sample(DefaultSampler, In.vTexcoord);
+    float a = vAlpha.r;
+    
+    float4 vAccum;
+    
+    if (vColor.a > 1e-5f)
+    {
+        vAccum.rgb = vColor.rgb / a;
+        vAccum.a = saturate(a * 1.5f);
+    }
+    else
+        vAccum = float4(0.f, 0.f, 0.f, 0.f);
+    
+    Out.vColor = float4(vAccum.rgb * vAccum.a, vAccum.a);
+    
+    return Out;
+}
+
 
 technique11 DefaultTechnique
 {
@@ -975,5 +1002,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_SSR();
+    }
+
+    pass WEIGHTBLEND
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_WeightBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_WeightBlend();
     }
 }
