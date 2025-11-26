@@ -53,6 +53,8 @@ void CLevel_Camera::Update(_float fTimeDelta)
 		//임시로 여기 추가. 버튼 누르면 다른 맵 부르거나, 맵 안부르고 바로 끌 수 있음.(그냥 맵 선택 창 키고 끄는 용도)
 		if (ImGui::Button("Change Map Mode? "))
 			m_pMapInterface->Load_Another_Map();
+		if(ImGui::Button("Load Map"))
+			m_pMapInterface->Load_Map_GUI();
 	}
 
 	ImGui::End();

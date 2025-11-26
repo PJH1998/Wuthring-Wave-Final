@@ -235,7 +235,6 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 			}
 
 			m_IsNextAttackInput = false;
-			m_pGalbrena->Rotate_Target();
 			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK));
 			return;
 		}

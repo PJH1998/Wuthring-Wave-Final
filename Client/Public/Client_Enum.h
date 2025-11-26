@@ -50,6 +50,8 @@ namespace Client
 		UIFLAG_ACTIVEFEEDBACK,		// 조작 피드백 (스케일 커지며 사라지는 것)
 		UIFLAG_ENEMY_HP,			// 적 체력바용
 
+		UIFLAG_OVFL_PALETTE,		// 팔레트
+
 		UIFLAG_END
 	};
 
@@ -102,6 +104,19 @@ namespace Client
 
 	
 	enum class SHADER_ANIMMESH { 
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX // 1
+		, AUGUSTA // 2
+		, SHADOW // 3
+		, OUNTLINE // 4
+		, ROVER // 5
+		, GALBRENA // 6
+		, NORMAL_YELLOW // 7
+		, LOGOROVER // 8
+		, DISSOLVE_NORMAL // 9
+		, END };
+
+	enum class SHADER_ANIMMESH_CHARACTER { 
 		DEFAULT_NORMAL = 0
 		, NORMAL_TEX // 1
 		, AUGUSTA // 2

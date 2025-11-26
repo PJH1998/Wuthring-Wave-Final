@@ -95,6 +95,17 @@ namespace Engine
 		_float fTrackPosition;
 	}KEYFRAME;
 
+
+    // MORPH KEYFRAME
+	typedef struct tagKeyFrameCurve
+	{
+		_float fTrackPosition;
+		_float fValue;
+		_float fArriveTangent;
+		_float LeaveTangent; 
+		_uint iInterpolationType;
+	}KEYFRAME_CURVE;
+
 	typedef struct tagCameraFrame
 	{
 		// [Target] LookPos = TargetPos + vTranslation
@@ -212,10 +223,10 @@ namespace Engine
 
 	// 애니메이션 정보 구조체 => Depth1
 	typedef struct AnimInfo {
-		_uint  iStartChannelIndexOffset; // Channel ?쒖옉 (?꾩쟻 ?몃뜳??  
-		_uint  iNumChannels; // ???대┰???ы븿??梨꾨꼸(堉???媛쒖닔
+		_uint  iStartChannelIndexOffset; // Channel 
+		_uint  iNumChannels; // 
 		_float fDuration;
-		_uint iPadding;  // 4 諛붿씠???⑤뵫??異붽?
+		_uint iPadding;  // 4 
 	}ANIMINFO;
 
 	//
@@ -240,7 +251,7 @@ namespace Engine
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
-		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibAnimUsed; // 4 => HLSL 에서 BOOL도 4Byte 인식.
 		_uint  iRibbonAnimIndex; // 4
 	}ANIMATION_CBINFO;
 
@@ -249,7 +260,7 @@ namespace Engine
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
-		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibAnimUsed; // 4 => HLSL 에서 BOOL도 4Byte 인식.
 		_uint  iRibbonAnimIndex; // 4
 		
 		// 2. Blend Layer Control
@@ -289,6 +300,25 @@ namespace Engine
 		_string strClipxU;          // 4 
 		_string strWeightClipDU;       // 4 
 	}GPU_BLEND_INFO;
+
+	typedef struct tagMorphDeltaInfo
+	{
+		_float3 vPosDelta;	  // 위치 변화량
+		_float3 vNormalDelta; // 노말 변화량
+	}MORPH_DELTA_INFO;
+
+	typedef struct tagBaseVertexInfo
+	{
+		_float3 vPosition; // 원본 위치
+		_float3 vNormal; // 원본 Normal;
+	}BASE_VERTEX_INFO;
+
+	typedef struct tagMorphInfoCB
+	{
+		_uint iNumVertices;
+		_uint iNumActiveMorphs;
+		_float2 vPadding;
+	}MORPH_CBINFO;
 
 	typedef struct tagCollisionData {
 		class CCollideComponent* pComponent = { nullptr };
@@ -404,6 +434,8 @@ namespace Engine
 		_bool			 IsActive = false;
 		_matrix			OffsetMatrix = {};
 	}EFFECT_INFO;
+
+
 }
 
 

@@ -23,6 +23,11 @@ public:
 	HRESULT					Bind_Texture(const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
 	HRESULT					Bind_Textures(const _char* pConstantName, ID3D11ShaderResourceView** ppSRV, _uint iNumTextures);
 	HRESULT					Bind_Value(const _char* pConstantName, const void* pValue, _uint iLength);
+	HRESULT					Bind_SRV(const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+
+
+public:
+	void					UndBind_All_VS_SRV();
 #ifdef _DEBUG
 	//
 	_uint						Get_PassCount() { return m_iNumPasses; }

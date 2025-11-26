@@ -33,6 +33,7 @@ namespace PlayerData
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta"));
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
         Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
+        Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
         //Desc.abilityData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Ability"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
@@ -127,6 +128,7 @@ namespace PlayerData
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover"));
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Rover"));
 		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
+		Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.strFolderPath = "../Bin/Resource/Model/Player/Rover/Notify/";
         Desc.fSpeedPerSec = 10.f;
@@ -236,12 +238,14 @@ namespace PlayerData
 	{
 		CCharacter::CHARACTER_DESC Desc;
 		Desc.eCurLevel = eLevel;
-		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Galbrena"));
 		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Galbrena"));
 		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
+		Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
 		Desc.fRotationPerSec = XMConvertToRadians(90.f);
 		Desc.strFolderPath = "../Bin/Resource/Model/Player/Galbrena/Notify/";
 		Desc.fSpeedPerSec = 10.f;

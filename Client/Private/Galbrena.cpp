@@ -39,7 +39,6 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_eCurLevel = pDesc->eCurLevel;
-
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
@@ -69,6 +68,8 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 
 	m_fCameraOriginOffset = 1.2f;
 	m_fCameraOffset = 1.2f;
+
+	m_pMainAttackVolume->TriggerActivate(false);
     return S_OK;
 }
 
@@ -188,10 +189,10 @@ void CGalbrena::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
-    for (_uint i = 0; i < iNumMeshes - 1; i++)
+    for (_uint i = 0; i < iNumMeshes; i++)
     {
-		if(FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			continue;
 
 		_bool HasNormal = { false };
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
@@ -210,11 +211,16 @@ void CGalbrena::Render()
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
+		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
+			CRASH("Bind Morph Result Failed");
+
         if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
+
+		m_pShaderCom->UndBind_All_VS_SRV();
     }
 
 #ifdef _DEBUG
@@ -279,6 +285,8 @@ void CGalbrena::Render_Shadow()
 // 캐릭터 전환시 Idle로 상태 전환..
 void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	m_pStateMachineCom->Exit_State();
+
 	switch (eTransitionType)
 	{
 		case CHARACTER_TRANSITIONTYPE::IDLE:
@@ -680,7 +688,7 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 	case VOLUME::VOLUME_DEFAULT_E:
 		// 기본 E로 타격 시 State가 변하니까 Condition을 바꿔주어야함.
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
-		pAbility->Add_HarmonyGauge(7.f); // 협주 게이지 채우기.
+		pAbility->Add_HarmonyGauge(10.f); // 협주 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST5, 10.f); // 기본 궁극기 게이지
 
 		if(!IsBurst)
@@ -693,11 +701,12 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 		pAbility->Add_Cost(COST_TYPE::COST5, 7.f); // 기본 궁극기 게이지
 		break;
 	case VOLUME::VOLUME_TARGET_BURST: // 궁극기 사용 시 ?
-		pAbility->Add_HarmonyGauge(5.f); // 협주 게이지 채우기.
+		pAbility->Add_HarmonyGauge(20.f); // 협주 게이지 채우기.
 		if (!IsBurst)
 			pAbility->Add_Cost(COST_TYPE::COST1, 30.f); // 공명 게이지(강공격 게이지)
 		break;
 	default:
+		pAbility->Add_HarmonyGauge(5.f); // 협주 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST5, 4.f); // 기본 궁극기 게이지
 		if (!IsBurst)
 			pAbility->Add_Cost(COST_TYPE::COST1, 3.f); // 공명 게이지(강공격 게이지)
@@ -820,6 +829,10 @@ void CGalbrena::Bind_Resources()
 void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 {
     // 1. Components
+    /*if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
+        , pDesc->shaderData.second, TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+        CRASH("Shader");*/
+
     if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
         , pDesc->shaderData.second, TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         CRASH("Shader");
@@ -830,6 +843,10 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
 		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->facialComputeShaderData.first)
+		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
@@ -858,8 +875,10 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
+    //for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+    //    m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::GALBRENA);
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::GALBRENA);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
 }
 
 void CGalbrena::Ready_Positions(const CHARACTER_DESC* pDesc)

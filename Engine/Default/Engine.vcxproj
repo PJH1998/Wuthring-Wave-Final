@@ -98,6 +98,7 @@
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\Public\Model_Manager.h" />
     <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\MorphChannel.h" />
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
@@ -114,6 +115,7 @@
     <ClInclude Include="..\public\SFX.h" />
     <ClInclude Include="..\public\SFX_Hub.h" />
     <ClInclude Include="..\public\ShadowMap.h" />
+    <ClInclude Include="..\Public\ShapeKey.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\public\SSAO.h" />
     <ClInclude Include="..\Public\State.h" />
@@ -231,6 +233,7 @@
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Manager.cpp" />
     <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\MorphChannel.cpp" />
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
@@ -247,6 +250,7 @@
     <ClCompile Include="..\private\SFX.cpp" />
     <ClCompile Include="..\private\SFX_Hub.cpp" />
     <ClCompile Include="..\private\ShadowMap.cpp" />
+    <ClCompile Include="..\Private\ShapeKey.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\private\SSAO.cpp" />
     <ClCompile Include="..\Private\State.cpp" />

@@ -68,12 +68,17 @@ void CDummyNPC::Render()
 		
 
 		m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		HRESULT hr = m_pModelInstanceCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelInstanceCom->Bind_OffsetMatrices(m_pShaderCom, "g_OffsetMatrices", i);
 		if (i >= m_MeshTypePadding[MESHTYPE::FACE] && i < m_MeshTypePadding[MESHTYPE::HAIR])
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::FACE));
 		else
-			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
+		{
+			if(FAILED(hr))
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::NORMAL_TEX));
+		}
 
 		m_pModelInstanceCom->Render(i);
 	}
@@ -165,6 +170,7 @@ void CDummyNPC::Ready_InstanceCells(DUMMYNPC_DESC* pDesc)
 		CellDesc.iNumMeshType = 0;
 		CellDesc.fSpeedPerSec = 10.f;
 		CellDesc.fRotationPerSec = XMConvertToRadians(90.f);
+		CellDesc.isCollide = true;
 		if (false == m_MeshTypePadding.empty())
 		{
 			CellDesc.iNumMeshType = static_cast<_uint>(MeshType.size());

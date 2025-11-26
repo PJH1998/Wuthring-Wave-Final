@@ -18,7 +18,9 @@ public:
 
 	HRESULT		Save_Dat_NonAnim(const _char* pFileName);
 	HRESULT		Save_Dat_Anim(const _char* pFileName);
+	HRESULT		Save_Dat_Character(const _char* pFileName);	
 	HRESULT		Save_Animation(const _char* pFileName);
+	HRESULT		Save_Animation_Character(const _char* pFileName);
 	HRESULT		Save_Material(const _char* pFileName);
 
 
@@ -42,8 +44,13 @@ private:
 private:
 	void					Load_File();
 	void					Save_File();
-
 	void					Show_Info();
+
+private:
+	aiMesh* FindMeshByMorphChannelName(const aiString& strMorphChannelName); // 메쉬 찾기 함수
+	aiNode* Find_Node(aiNode* pNode, const _string& strNodeName);
+
+	void SimplifyChannel(const aiNodeAnim* pChannel, std::vector<KEYFRAME>& outKeys, float epsilon = 0.001f);
 
 private:
 	HRESULT				Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType);

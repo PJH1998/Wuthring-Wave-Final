@@ -27,6 +27,7 @@ void CDirector::Add_Action(const _char* pFolderPath)
 		Action.iFrameStart = 0;
 		Action.iFrameEnd = static_cast<_int>(ActionJson["Duration"]);
 
+
 		for (auto& Frame : ActionJson["Frame"])
 		{
 			CAMERA_FRAME CameraFrame = {};
@@ -47,12 +48,12 @@ void CDirector::Add_Action(const _char* pFolderPath)
 	}
 }
 
-void CDirector::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain)
+void CDirector::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape)
 {
 	CAMERA_ACTION CameraAction = Find_Action(strActionTag);
 	_float4x4 Matrix = {};
 	XMStoreFloat4x4(&Matrix, WorldMatrix);
-	CAMERA_ACTION_EVENT event{ CameraAction.Frames, true, CameraAction.iFrameStart, CameraAction.iFrameEnd, Matrix, isMaintain };
+	CAMERA_ACTION_EVENT event{ CameraAction.Frames, true, CameraAction.iFrameStart, CameraAction.iFrameEnd, Matrix, isMaintain, isEscape };
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
 }
 

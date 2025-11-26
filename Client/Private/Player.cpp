@@ -72,8 +72,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    //m_iCurrentCharacterIdx = AUGUSTA;
     m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
+    //m_iCurrentCharacterIdx = GALBRENA; // 갈브레나로 테스트
 
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
 	Safe_AddRef(m_pPlayerStatus);

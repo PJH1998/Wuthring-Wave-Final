@@ -42,6 +42,8 @@
 
 *.ini
 *.fbx
+*.gltf
+*.bin
 
 .vs/
 Client/Default/x64/

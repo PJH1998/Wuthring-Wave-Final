@@ -107,6 +107,16 @@ namespace Client
 		_float	fImpluseRate;		// 넉백 보정 수치(몬스터 무게, 가벼울수록 높게)
 
 	}MONSTER_INFO;
+
+	typedef struct tagNPCInfo
+	{
+		_float3 vPosition;
+		_float3 vRotation;
+		_uint MeshtypeIndices[3];	//몸통, 얼굴, 머리 인덱스
+		_bool isCollide;
+		_string strAnimTag;
+	}NPCINFO;
+
 	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
 	typedef struct tagUISkillSlot {
 		_string strKeyInput;      // "LB", "E", "Q" 등

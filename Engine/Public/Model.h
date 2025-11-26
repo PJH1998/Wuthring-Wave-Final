@@ -2,6 +2,12 @@
 #include "Component.h"
 
 NS_BEGIN(Engine)
+typedef struct tagShapeKeyInfo
+{
+	_uint iMeshIndex; // 어떤 메쉬에 속해있는지?
+	class CShapeKey* pShapeKey; // 실제 Shape Key 객체 포인터.
+}SHAPEKEYINFO;
+
 class ENGINE_DLL CModel final : public CComponent
 {
 public:
@@ -15,6 +21,7 @@ public:
 		BUFFER_ANIM_INFOFLYCB = 5, // constant
 		BUFFER_STAGING = 6,
 		BUFFER_BONE_CHANNEL = 7,
+		BUFFER_MORPH_WEIGHT = 8,
 		BUFFER_END
 	};
 
@@ -26,6 +33,7 @@ public:
 		SRV_BONE_CHANNEL = 2,
 		SRV_INVERSEBIND_POSE = 3,
 		SRV_FINAL_BONEMATRIX = 5,
+		SRV_MORPH_WEIGHT = 6,
 		SRV_END
 	};
 
@@ -47,9 +55,14 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
+
+	// View 용도.
+	const vector<_string>& Get_AllShapeKeyNames() const { return m_ShapeKeyNames; }
+	// 제어용도
+	void Set_ShapeKeyWeight(const _string& strKeyName, _float fWeight);
+	_uint Get_NumShapeKeys() { return static_cast<_uint>(m_ShapeKeyNames.size()); }
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
-	
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
@@ -59,11 +72,14 @@ public:
 	void Render_Gizmo(_fmatrix TransformMatrix);
 
 	_bool Find_Animation(const _string& strAnimName);
+
+	void Print_ShapeKeyWeights();
 #endif
 
 public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
 	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback);
+
 
 public:
 	virtual		HRESULT				Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
@@ -80,11 +96,17 @@ public:
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect);
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	HRESULT							Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
+	HRESULT							Bind_MorphedResult(class CShader* pShader, _uint iMeshIndex, const _char* pConstantName); // Mesh의 Morph 연산을 바인딩합니다.
+	//HRESULT							Bind_MorphWeights(class CShader* pShader);
+	//HRESULT							Bind_MorphSRV(class CShader* pShader, _uint iMeshIndex);
 	HRESULT							Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	// Compute Shader
-	//_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
+										, _float fRootMotionRate = 0.1f)
+;
+	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
 										, _float fRootMotionRate = 0.1f);
 
@@ -96,9 +118,12 @@ public:
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
 										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
+	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
-	//void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTrackPosition);
 
 
@@ -118,6 +143,8 @@ private:
 	_uint									m_iNumMeshes = {};
 	vector<class CMesh*>				m_Meshes;
 
+	
+
 	_uint									m_iNumMaterials = {};
 	vector<class CMeshMaterial*>	m_Materials;
 
@@ -134,10 +161,13 @@ private:
 	map<_string, class CAnimation*>		m_Animations;
 	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
 
+
+
+
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
 
-	_float								m_fPreScale = { 0.01f }; // RootMotionRate에 곱해줄 값.
+	_float								m_fPreScale = {}; // RootMotionRate에 곱해줄 값.
 
 	BoundingBox*						m_pBoundingBox = { nullptr };
 
@@ -149,14 +179,26 @@ private:
 	_uint m_iSelectIndex = { 0 };
 #endif
 	
+#pragma region FACIAL
+	vector<_string> 		   m_ShapeKeyNames;
+	vector<_float>			   m_ShapeKeyWeights;
+	map<_string, _uint>		   m_ShapeKeyIndices;
+
+	_float4x4				   m_ConversionMatrix = {};
+	
+#pragma endregion
+
+	
+
+
 
 
 #pragma region Compute Shader
 private:
-	void ApplyComputeResults_ToBones();
 	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
 	void FetchLocalMatrices_FromComputeFly(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo);
 	void FetchLocalMatrices_FromComputeNonRib(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
+
 
 private:
 	vector<ID3D11Buffer*> m_Buffers = {};
@@ -170,16 +212,38 @@ private:
 
 
 private:
-	void								Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
+	void							Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
+
+private:
+	HRESULT							Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	HRESULT							Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	HRESULT							Ready_CharacterModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	HRESULT							Ready_EchoModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
+	
+
 
 private:
 	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex);
 	HRESULT							Ready_Mesh(ifstream& InputFile);
+	HRESULT							Ready_ShapeKeyMesh(ifstream& InputFile);
+
+private:
+	HRESULT							Organize_ShapeKeyIndices();
+	HRESULT							Ready_Mesh_MorphBuffers();
+
 	HRESULT							Ready_Material(const _char* pFilePath);
 	HRESULT							Ready_Animation(const _char* pFilePath);
+	HRESULT							Ready_MorphAnimation(const _char* pFilePath);
+
 
 	HRESULT							Ready_Shared_Buffers();
 	HRESULT							Ready_Instance_Buffers();
+
+private:
+	HRESULT							Ready_MorphInstance_Buffers();
+
+
+
 
 
 public:

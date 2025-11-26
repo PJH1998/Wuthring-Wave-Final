@@ -147,7 +147,7 @@ void CGalbrenaAirJump::Check_StateTransition(_float fTimeDelta)
     // 점프 도중 땅에 닿으면?
     if (m_States[LAND] && (IsEscapePossible)/* 최소 조건*/)
     {
-        m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_LIGHT;
+        m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_HEAVY;
         m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND));
         return;
     }
