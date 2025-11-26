@@ -74,10 +74,11 @@ void CNPCInstancing::Render()
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::FACE));
 		else
 		{
-			if (FAILED(hr))
-				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
-			else
-				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::NORMAL_TEX));
+			//if (FAILED(hr))
+			//	m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
+			//else
+			//	m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::NORMAL_TEX));
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
 		}
 
 		m_pModelInstanceCom->Render(i);
