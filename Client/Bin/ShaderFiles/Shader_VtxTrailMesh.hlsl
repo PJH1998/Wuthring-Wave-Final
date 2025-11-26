@@ -88,6 +88,8 @@ struct PS_OUT
     float4 vDiffuse : SV_TARGET0;
     float4 vEmissive : SV_TARGET1;
     float4 vDistortion : SV_TARGET2;
+    float4 vAccumColor : SV_TARGET3;     //TEST
+    float4 vAccumAlpha : SV_TARGET4;
 };
 
 struct PS_DISTORTION_OUT
@@ -222,7 +224,14 @@ PS_OUT PS_TrailDefault(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
-
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     return Out;
 }
 
@@ -298,7 +307,16 @@ PS_OUT PS_TraillTest(PS_IN In)
 
 //if (fWeight >= g_fEmissiveThreshold)
 //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+   
     return Out;
 }
 
@@ -351,7 +369,15 @@ PS_OUT PS_Y_OUT(PS_IN In)
     Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
-
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     return Out;
 }
 
@@ -400,7 +426,17 @@ PS_OUT PS_Y_IN(PS_IN In)
     Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
-
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
+    
     return Out;
 }
 
@@ -476,7 +512,15 @@ PS_OUT PS_TraillTestA(PS_IN In)
     Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
-
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
     return Out;
 }
 
@@ -508,6 +552,11 @@ PS_OUT PS_TraillDissolve(PS_IN In)
 
     Out.vDiffuse = vColor;
 
+    if (Dissolve - fRatio <= 0.1f)
+    {
+        Out.vDiffuse.rgb *= 3.f;
+    }
+    
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
@@ -515,6 +564,15 @@ PS_OUT PS_TraillDissolve(PS_IN In)
 
     Out.vDiffuse.a *= g_Alpha;
     Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
     return Out;
 }
@@ -545,7 +603,15 @@ PS_OUT PS_TraillDesh(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
     Out.vDiffuse.rgb *= Out.vDiffuse.a;
-
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
     return Out;
 }
 
@@ -574,7 +640,16 @@ PS_OUT PS_TraillDeshB(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
 
     Out.vDiffuse.rgb *= Out.vDiffuse.a;
-
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
     return Out;
 }
 
@@ -636,6 +711,7 @@ PS_DISTORTION_OUT PS_DistortionPotal(PS_IN In)
     Out.vDistortion = vDist;
 
     Out.vDistortion.a = g_DistortionWeight;
+    
 
     return Out;
 }
@@ -682,7 +758,16 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
   
     Out.vEmissive.xyz *= Out.vDiffuse.a;
-
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
     return Out;
 }
 
@@ -728,18 +813,41 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
    
     Out.vEmissive.xyz *= Out.vDiffuse.a;
-
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.5f));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
     return Out;
 }
 
+PS_OUT WBTEST(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * 0.1f)); 
+    
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    Out.vAccumAlpha.r = vColor.a * Weight;
+    
+    return Out;
+}
 // ==Test==
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -749,8 +857,8 @@ technique11 DefaultTechnique
     pass TestPass // 1
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -760,8 +868,8 @@ technique11 DefaultTechnique
     pass TestPassA // 2
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -772,7 +880,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -782,8 +890,8 @@ technique11 DefaultTechnique
     pass PS_TraillTestB //4
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -793,8 +901,8 @@ technique11 DefaultTechnique
     pass TrailYOut // 5
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -804,8 +912,8 @@ technique11 DefaultTechnique
     pass TrailYIn // 6
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -815,8 +923,8 @@ technique11 DefaultTechnique
     pass TestDissolve // 7
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -827,7 +935,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -838,7 +946,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -849,7 +957,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -859,8 +967,8 @@ technique11 DefaultTechnique
     pass TrailAlphaLeft // 11
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -870,11 +978,22 @@ technique11 DefaultTechnique
     pass TrailAlphaRight // 12
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_TrailAlphaRight();
+    }
+
+    pass WeightBlend
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 WBTEST();
     }
 }

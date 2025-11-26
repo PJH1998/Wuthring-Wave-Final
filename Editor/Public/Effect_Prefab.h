@@ -65,6 +65,7 @@ public:
 
 public:
 	void Reset_Prefab_Info();			//툴에서도 소환해줘야해서 일단 Public
+	void Remove_FrameDesc(_wstring& ChildrenTag);
 
 private:
 	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info);

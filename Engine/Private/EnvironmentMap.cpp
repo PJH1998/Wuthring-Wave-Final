@@ -24,6 +24,9 @@ HRESULT CEnvironmentMap::Initialize()
 	if (FAILED(Ready_Components()))
 		return E_FAIL;
 
+	if (FAILED(Ready_Buffer()))
+		return E_FAIL;
+
 	if (FAILED(Ready_RT()))
 		return E_FAIL;
 
@@ -54,7 +57,6 @@ void CEnvironmentMap::Bake_EnvMaps()
 
 	for (auto& pProbe : m_Probes)
 		pProbe->Render(m_pShader, m_pVIBuffer_Rect, m_iIndex++);
-
 }
 
 void CEnvironmentMap::Add_EnvMap_SkyBox(CGameObject* pSkyBox)
@@ -148,7 +150,7 @@ HRESULT CEnvironmentMap::Ready_Buffer()
 	StructureBufferDesc.ByteWidth = sizeof(ENV_MAP) * m_iMaxBindEnvMap;
 	StructureBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	StructureBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	StructureBufferDesc.StructureByteStride = sizeof(VF_LIGHT);
+	StructureBufferDesc.StructureByteStride = sizeof(ENV_MAP);
 	StructureBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	StructureBufferDesc.CPUAccessFlags = 0;
 
@@ -165,8 +167,7 @@ HRESULT CEnvironmentMap::Ready_Buffer()
 	if (FAILED(m_pDevice->CreateShaderResourceView(m_pProbeBuffer, &SBuffer_SRVDesc, &m_pStructureSRV)))
 		CRASH("Failed to Created Buffer_SRV");
 
-
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 

@@ -466,6 +466,20 @@ void CEffect_Prefab::FrameDesc_Check(_wstring& ChildrenTag, _bool* bCheck)
 
 }
 
+void CEffect_Prefab::Remove_FrameDesc(_wstring& ChildrenTag)
+{
+	for (auto iterFrameDesc = m_vFrames.begin(); iterFrameDesc != m_vFrames.end(); )
+	{
+		if (iterFrameDesc->strChildrenTag == ChildrenTag)
+		{
+			iterFrameDesc = m_vFrames.erase(iterFrameDesc);
+			break;
+		}
+		else
+			++iterFrameDesc;
+	}
+}
+
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CEffect_Prefab* pInstance = new CEffect_Prefab(pDevice, pContext);
