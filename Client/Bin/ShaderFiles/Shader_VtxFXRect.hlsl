@@ -128,8 +128,8 @@ PS_OUT PS_MAIN(PS_IN In)
     
     vColor.a *= Alpha;
     
-    if (vColor.a <= 1e-5)
-       discard;
+    //if (vColor.a <= 1e-5)
+    //   discard;
     
     float fWeight = Luminance(vColor.xyz);
  
@@ -177,8 +177,8 @@ PS_OUT PS_TEST(PS_IN In)
     
     vColor *= g_vColor;
    
-    if (vColor.a <= 1e-5)
-        discard;
+    //if (vColor.a <= 1e-5)
+    //    discard;
    
     float fWeight = Luminance(vColor.xyz);
    
@@ -228,10 +228,9 @@ PS_OUT PS_TESTA(PS_IN In)
     vColor.a *= Alpha;
     //Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
     
-   //if (Out.vDiffuse.a < 0.1f)
-   //    discard;
-    if (vColor.a <= 1e-5)
-        discard;
+
+    //if (vColor.a <= 1e-5)
+    //    discard;
   
     float fWeight = Luminance(vColor.xyz);
    
@@ -282,8 +281,8 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     vColor.a *= Alpha;
     
-    if (vColor.a <= 1e-5)
-        discard;
+    //if (vColor.a <= 1e-5)       //빼도 될거 같은데 ?
+    //    discard;
 
     float fWeight = Luminance(vColor.xyz);
    

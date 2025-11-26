@@ -68,6 +68,7 @@ struct GS_OUT
     float2 vLifeTime : TEXCOORD1;
     float fPhase : TEXCOORD2;
     float2 fDelay : TEXCOORD3;
+    float4 vProjPos : TEXCOORD4;
 };
 
 [maxvertexcount(6)]
@@ -91,27 +92,28 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     Out[0].vLifeTime = In[0].vLifeTime;    
     Out[0].fPhase = In[0].fPhase;
     Out[0].fDelay = In[0].fDelay;
+    Out[0].vProjPos = Out[0].vPosition;
     
     Out[1].vPosition = mul(In[0].vPosition - vRight + vUp, matVP);
     Out[1].vTexcoord = float2(1.f, 0.f);
     Out[1].vLifeTime = In[0].vLifeTime;
     Out[1].fPhase = In[0].fPhase;
     Out[1].fDelay = In[0].fDelay;
-
+    Out[1].vProjPos = Out[1].vPosition;
     
     Out[2].vPosition = mul(In[0].vPosition - vRight - vUp, matVP);
     Out[2].vTexcoord = float2(1.f, 1.f);
     Out[2].vLifeTime = In[0].vLifeTime;
     Out[2].fPhase = In[0].fPhase;
     Out[2].fDelay = In[0].fDelay;
-
+    Out[2].vProjPos = Out[2].vPosition;
     
     Out[3].vPosition = mul(In[0].vPosition + vRight - vUp, matVP);
     Out[3].vTexcoord = float2(0.f, 1.f);
     Out[3].vLifeTime = In[0].vLifeTime;    
     Out[3].fPhase = In[0].fPhase;
     Out[3].fDelay = In[0].fDelay;
-
+    Out[3].vProjPos = Out[3].vPosition;
     
     Vertices.Append(Out[0]);
     Vertices.Append(Out[1]);
@@ -156,25 +158,29 @@ void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     Out[0].vTexcoord = float2(0.f, 0.f);
     Out[0].vLifeTime = In[0].vLifeTime;
     Out[0].fPhase = In[0].fPhase;
-    Out[1].fDelay = In[0].fDelay;
+    Out[0].fDelay = In[0].fDelay;
+    Out[0].vProjPos = Out[0].vPosition;
     
     Out[1].vPosition = mul(In[0].vPosition - vRight + vUp, matVP);
     Out[1].vTexcoord = float2(1.f, 0.f);
     Out[1].vLifeTime = In[0].vLifeTime;
     Out[1].fPhase = In[0].fPhase;
     Out[1].fDelay = In[0].fDelay;
+    Out[1].vProjPos = Out[1].vPosition;
     
     Out[2].vPosition = mul(In[0].vPosition - vRight - vUp + float4(Look, 0.f), matVP);
     Out[2].vTexcoord = float2(1.f, 1.f);
     Out[2].vLifeTime = In[0].vLifeTime;
     Out[2].fPhase = In[0].fPhase;
     Out[2].fDelay = In[0].fDelay;
+    Out[2].vProjPos = Out[2].vPosition;
     
     Out[3].vPosition = mul(In[0].vPosition + vRight - vUp + float4(Look, 0.f), matVP);
     Out[3].vTexcoord = float2(0.f, 1.f);
     Out[3].vLifeTime = In[0].vLifeTime;
     Out[3].fPhase = In[0].fPhase;
     Out[3].fDelay = In[0].fDelay;
+    Out[3].vProjPos = Out[3].vPosition;
     
     Vertices.Append(Out[0]);
     Vertices.Append(Out[1]);
@@ -195,42 +201,50 @@ struct PS_IN
     float2 vLifeTime : TEXCOORD1;
     float fPhase : TEXCOORD2;
     float2 fDelay : TEXCOORD3;
+    float4 vProjPos : TEXCOORD4;
 };
 
 struct PS_OUT
 {
-    float4 vDiffuse : SV_TARGET0;
     float4 vEmissive : SV_TARGET1;
+    float4 vAccumColor : SV_TARGET3; //TEST
+    float4 vAccumAlpha : SV_TARGET4;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;    
     
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vColor;
+    
+    vColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     if(g_MaskFlag == 1)
     {
-        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+        vColor.a = max(max(vColor.r, vColor.g), vColor.b);
     }
-    
-    if (Out.vDiffuse.a < 0.2f)
-     discard;
 
     float2 LifeTime = In.vLifeTime;
     
     float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
-    Out.vDiffuse *= g_vColor;
+    vColor *= g_vColor;
+    vColor.a *= Alpha;
     
-    Out.vDiffuse.a *= Alpha;
+    //if (vColor.a <= 1e-5)
+    //    discard;
     
-    float fWeight = Luminance(Out.vDiffuse.xyz);
+    float fWeight = Luminance(vColor.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz, 1.f);
     
-    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    Out.vEmissive.xyz *= vColor.a;
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    float Weight = max(1e-5, exp(-z * 0.1f));
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    Out.vAccumAlpha.r = vColor.a * Weight;
     
     return Out;
 }
@@ -239,7 +253,7 @@ PS_OUT PS_SPRITE(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    if (In.fDelay.y > 0.5f)      //¾È±×·Áµµ µÊ
+    if (In.fDelay.y > 0.5f)                                 //¾È±×·Áµµ µÊ
         discard;
     
     float fPhase = In.fPhase;
@@ -256,37 +270,34 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     float2 Texcoord = In.vTexcoord * CellSize + OffSet;
     
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
+    float4 vColor;
+    
+    vColor = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
     
     if (g_MaskFlag == 0)
     {
-        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+        vColor.a = max(max(vColor.r, vColor.g), vColor.b);
     }
-
-    if(Out.vDiffuse.a < 0.2f)
-        discard;
     
-    Out.vDiffuse = g_vColor * Out.vDiffuse;
+    vColor *= g_vColor;
     
     float2 LifeTime = In.vLifeTime;
     
     float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
-    Out.vDiffuse.a *= Alpha;
+    vColor.a *= Alpha;
     
-   // Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
-    
-    //if (Out.vDiffuse.a < 0.4f)
-    //    discard;
-    
-    //Out.vDiffuse.a = Out.vDiffuse.r; //?
-    
-    float fWeight = Luminance(Out.vDiffuse.xyz);
+    float fWeight = Luminance(vColor.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz, 1.f);
     
-    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    Out.vEmissive.xyz *= vColor.a;
+
+    float z = In.vProjPos.z / In.vProjPos.w;
+    float Weight = max(1e-5, exp(-z * 0.1f));
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    Out.vAccumAlpha.r = vColor.a * Weight;
     
     return Out;
 }
@@ -298,8 +309,8 @@ technique11 DefaultTechnique
     pass DefaultPass
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();   
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_MAIN();
@@ -309,8 +320,8 @@ technique11 DefaultTechnique
     pass StretchPass
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_Stretch();
         PixelShader = compile ps_5_0 PS_MAIN();
@@ -320,8 +331,8 @@ technique11 DefaultTechnique
     pass DefaultSpritePass
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_SPRITE();
@@ -331,8 +342,8 @@ technique11 DefaultTechnique
     pass StretchSpritePass
     {
         SetRasterizerState(RS_Default); 
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_Stretch();
         PixelShader = compile ps_5_0 PS_SPRITE();
