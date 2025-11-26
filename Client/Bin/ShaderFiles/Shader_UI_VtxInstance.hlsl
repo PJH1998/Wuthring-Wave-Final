@@ -1191,6 +1191,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             if (IsChanging)
             {
                 float fChangeRatio; //
+                const float fSpeedMultiply = 1.f;
                 
                 float2 vVerticesPos[4] = {
                     { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f },   // LT 
@@ -1223,11 +1224,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 float fRadTo_PosNearest = fDistPerVertices[iVertexIndex_Nearest];
                 float fRadTo_PosMostFar = fDistPerVertices[iVertexIndex_MostFar];
                 
-                fChangeRatio = saturate(smoothstep(         // <<<<<<<<<<<<<<<<<<<<<<
-                    fRadTo_PosNearest,
-                    fRadTo_PosMostFar,
-                    fChangedRadius                
-                ));
+                float fRawChangeRatio = smoothstep(fRadTo_PosNearest, fRadTo_PosMostFar, fChangedRadius) * (fSpeedMultiply);
+                fChangeRatio = saturate(fRawChangeRatio);
                 
                 // =====
                 

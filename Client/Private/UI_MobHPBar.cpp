@@ -4,7 +4,7 @@
 #include "GameSystem.h"
 
 
-//#define KSTA_CUSTOMTEST
+#define KSTA_CUSTOMTEST
 
 CUI_MobHPBar::CUI_MobHPBar(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Image(pDevice, pContext)

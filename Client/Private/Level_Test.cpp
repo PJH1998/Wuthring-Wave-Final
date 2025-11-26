@@ -665,7 +665,14 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	{
 		isEnableUITest = !isEnableUITest;
 
-		if (isEnableUITest)		std::cout << "[Level_Test::Testing_UI] UI Testing Enabled." << std::endl;
+		if (isEnableUITest)
+		{
+			std::cout << "[Level_Test::Testing_UI] UI Testing Enabled." << std::endl;
+			std::cout << "[Level_Test::Testing_UI] \t[NUMPAD4] MobHP, \t[NUMPAD1] MobHP -10, \t[NUMPAD2] MobHP +10: " << std::endl;
+			std::cout << "[Level_Test::Testing_UI] \t[NUMPAD+] Interact, \t[NUMPAD6] Parry, \t[NUMPAD.] LockOn" << std::endl;
+			std::cout << "[Level_Test::Testing_UI] \t[TAB] TabUI(Hold), \t[NUMPAD5] Overflowing Palette" << std::endl;
+		}
+
 		if (!isEnableUITest)	std::cout << "[Level_Test::Testing_UI] UI Testing Disabled." << std::endl;
 	}
 
@@ -737,14 +744,14 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
+#pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR
 	//static _bool isActiveMobHPBar = false;
 	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
 	//	isActiveMobHPBar = !isActiveMobHPBar;
 
 	//if (isActiveMobHPBar)
 		
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
 	{
 		if (m_pGameInstance->Find_UIObject(L"UI_MobHPBar")->IsActivate() == true)
 			m_pGameInstance->Find_UIObject(L"UI_MobHPBar")->SetActivate(false);
@@ -817,7 +824,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [NUMPAD 3] KSTA_UITEST_OVERFLOWINGPALETTE 
+#pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
 
 	static _bool isOpenOverflowingPalette = false;
 
