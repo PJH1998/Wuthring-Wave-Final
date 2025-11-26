@@ -142,11 +142,8 @@ void CPlayer::Update(_float fTimeDelta)
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	
-	// 4. Target Sorting
-	Sorting_Target();
-    
-	// 5. Lock On
-    Toggle_LockOn();
+	Sorting_Target(); // 4. Target Sorting
+    Toggle_LockOn(); // 5. Lock On
 
 	m_TargetTransforms.clear();
 
@@ -756,7 +753,6 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_During(iLayer, pDesc, Manifold);
     });
-
 
 	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 	//	OnCollider_Enter(iLayer, pDesc, Manifold);

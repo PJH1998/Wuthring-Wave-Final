@@ -230,16 +230,22 @@ HRESULT CLoader_Heaven::Load_Player()
 HRESULT CLoader_Heaven::Load_Augusta()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Augusta.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	//_float fSize = 0.01f;
-	_float fSize = 0.0001f;
+	_float fSize = 0.01f;
+	//_float fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
+
 	// 1. 모델 초기화.
+		//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		//    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		//    CRASH("Prototype Create Failed");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
+
 
 
 	// 2. StateMachine 초기화
@@ -305,21 +311,26 @@ HRESULT CLoader_Heaven::Load_Augusta()
 		CRASH("Prototype Create Failed");
 #pragma endregion
 
+
 	return S_OK;
 }
 
 HRESULT CLoader_Heaven::Load_Rover()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/RoverFacial/Rover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	//_float fSize = 0.01f;
-	_float fSize = 0.0001f;
+	//_float fSize = 0.0001f;
+	_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+  /*  if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");*/
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
 
 
@@ -401,15 +412,17 @@ HRESULT CLoader_Heaven::Load_Rover()
 HRESULT CLoader_Heaven::Load_Galbrena()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/GalbrenaFacial/Galbrena.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	//_float fSize = 0.01f;
-	_float fSize = 0.0001f;
+
+	// Editor에서 isCharacter AnimationActor 생성과 동일하게.
+	_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
 
 
@@ -470,6 +483,7 @@ HRESULT CLoader_Heaven::Load_Galbrena()
 		CRASH("Prototype Create Failed");
 
 #pragma endregion
+
 	return S_OK;
 }
 

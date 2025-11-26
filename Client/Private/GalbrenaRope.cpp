@@ -164,12 +164,12 @@ void CGalbrenaRope::Setup_Animations()
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_L), "FixHook_Loop_L", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_R), "FixHook_Loop_R", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_U), "FixHook_Loop_U", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::HOOK_UP), "Hook_Up", 1.f, 0.f);
 
 }
