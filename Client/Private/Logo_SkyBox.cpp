@@ -91,7 +91,7 @@ void CLogo_SkyBox::Priority_Update(_float fTimeDelta)
 
 void CLogo_SkyBox::Update(_float fTimeDelta)
 {
-	m_pGameInstance->Use_Gizmo_Offset(&m_vScale[m_iIndex], &m_vYawPitchRoll[m_iIndex], &m_vPosition[m_iIndex]);
+	//m_pGameInstance->Use_Gizmo_Offset(&m_vScale[m_iIndex], &m_vYawPitchRoll[m_iIndex], &m_vPosition[m_iIndex]);
 }
 
 void CLogo_SkyBox::Late_Update(_float fTimeDelta)

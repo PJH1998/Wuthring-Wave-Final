@@ -100,6 +100,9 @@ private:
 
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
+	vector<class CTransform*> m_MoveRopeTargetTransforms;
+	vector<class CTransform*> m_PullRopeTargetTrasnforms;
+
 	class CTransform* m_pTargetTransform = { nullptr };
 	class CTransform* m_pLockOnTargetTransform = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };

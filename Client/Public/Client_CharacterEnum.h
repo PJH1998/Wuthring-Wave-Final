@@ -104,7 +104,8 @@ namespace Client
 		D3 = 1 << 16,
 		D4 = 1 << 17,
 		D5 = 1 << 18,
-		D6 = 1 << 19
+		D6 = 1 << 19,
+		G = 1 << 20,
 	};
 
 	typedef enum class ESkillType : _uint

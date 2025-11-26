@@ -11,6 +11,7 @@ private:
 		JUMP,
 		FALL,
 		LAND,
+		ROPE_EXIT,
 		END
 	};
 
@@ -27,6 +28,9 @@ public:
 private:
 	class CGalbrena* m_pGalbrena = { nullptr };
 	_bool m_States[ROPESTATE::END] = {};
+
+	_float m_fTargetDistance = { }; // 타겟과의 거리? => 이건 Character가 알고있죠.
+	
 
 private:
 	void Enter_Rope();
