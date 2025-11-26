@@ -256,7 +256,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
 
         if (g_HasShadowMap)
         {
-            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.9f, 1.f);
+            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
         }
         
         bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
@@ -362,6 +362,9 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     
     float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
     
+    if(fAtt == 0.f)
+        discard;
+    
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
@@ -370,6 +373,7 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     
     if(vDepthDesc.w != 1.f)
         fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+        
     float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
  
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
@@ -717,7 +721,6 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     }
    
     float4 vSceneDesc = g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord);
-   
    
     float4 vSceneWorldPos = 0.f;
     

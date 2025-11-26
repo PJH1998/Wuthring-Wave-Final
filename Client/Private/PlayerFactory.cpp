@@ -23,6 +23,7 @@ void CPlayerFactory::Register_KeyInputs(CInputController* pInputControllerCom, C
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D4), DIK_4);
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D5), DIK_5);
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D6), DIK_6);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::G), DIK_G); // 임시 추가.
 
 
     // ���콺 Ű�Է� ���
