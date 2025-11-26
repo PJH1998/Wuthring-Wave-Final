@@ -116,11 +116,11 @@ void CDummyCell::Ready_Component(DUMMYCELL_DESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.8f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 0.6f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NPC);
 	ColliderDesc.fHeight = 1.0f;
-	ColliderDesc.fRadius = 0.3f;
+	ColliderDesc.fRadius = 0.1f;
 	ColliderDesc.fRayOffset = -0.17;
 	Add_Component(ENUM_CLASS(LEVEL::STATIC),TEXT("Prototype_Component_Collider"),
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
