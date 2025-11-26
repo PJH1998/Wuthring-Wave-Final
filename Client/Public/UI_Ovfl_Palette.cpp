@@ -46,6 +46,10 @@ HRESULT CUI_Ovfl_Palette::Initialize_Clone(void* pArg)
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_Initialize.json",
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_Show.json",
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_Hide.json",
+
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_Color_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_Color_FadeIn.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_Color_FadeOut.json",
 	};
 	Load_Animations(vecAnimFilePaths);
 
@@ -122,7 +126,7 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iAnimOrder = 0;
 	m_isActivate = true;
 
-	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_Show");;
+	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_Show");
 }
 
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
@@ -146,11 +150,18 @@ HRESULT CUI_Ovfl_Palette::Ready_ChildExtraComponents()
 void CUI_Ovfl_Palette::PreAssign_Presets()
 {
 	// Pre-Assign Color Presets
-	m_arrColors[PCOLOR_RED]		= _float4( 1.000f, 0.000f, 0.000f, 1.000f );
-	m_arrColors[PCOLOR_GREEN]	= _float4( 0.000f, 1.000f, 0.000f, 1.000f );
-	m_arrColors[PCOLOR_BLUE]	= _float4( 0.000f, 0.000f, 1.000f, 1.000f );
-	m_arrColors[PCOLOR_YELLOW]	= _float4( 1.000f, 1.000f, 0.000f, 1.000f );
+	m_arrColors[PCOLOR_RED]		= _float4( 0.667f, 0.278f, 0.286f, 1.000f );
+	m_arrColors[PCOLOR_GREEN]	= _float4( 0.400f, 0.675f, 0.596f, 1.000f );
+	m_arrColors[PCOLOR_BLUE]	= _float4( 0.478f, 0.639f, 0.835f, 1.000f );
+	m_arrColors[PCOLOR_YELLOW]	= _float4( 0.882f, 0.804f, 0.569f, 1.000f );
 	m_arrColors[PCOLOR_END]		= _float4( 1.000f, 0.000f, 1.000f, 1.000f );		// Magenta.
+
+	//_float4 col0 = _float4(0.667f, 0.278f, 0.286f, 1.000f); // aa4749
+	//_float4 col1 = _float4(0.400f, 0.675f, 0.596f, 1.000f); // 66ac98
+	//_float4 col2 = _float4(0.478f, 0.639f, 0.835f, 1.000f); // 7aa3d5
+	//_float4 col3 = _float4(0.882f, 0.804f, 0.569f, 1.000f); // e1cd91
+
+
 	
 	// Pre-Assign Palette Presets
 	for (_uint i = 0; i < m_arrPalettesInfo.size(); i++)
@@ -163,16 +174,18 @@ void CUI_Ovfl_Palette::PreAssign_Presets()
 
 void CUI_Ovfl_Palette::PreAssign_ChildUIs()
 {
-	m_pRUI_All				 = Find_ChildObject(L"Sub_All");
+	m_pRUI_All				= Find_ChildObject(L"Sub_All");
 
-	m_pUIBackgrounds		 = Find_ChildObject(L"SectorA_Backgrounds");
-	m_pUIForegrounds		 = Find_ChildObject(L"SectorA_Foregrounds");
-	m_pUISideThings			 = Find_ChildObject(L"SectorA_SideThings");
-	m_pUIOthers				 = Find_ChildObject(L"SectorA_Others");
-	
-	m_pUI_InstBlocks		 = Find_ChildObject(L"FG_InstBlocks");
-	m_pUI_InstHoverBlocks	 = Find_ChildObject(L"FG_InstHoverBlocks");
-	m_pUI_InstColorBtns		 = Find_ChildObject(L"Side_ColorButton");
+	m_pUIBackgrounds		= Find_ChildObject(L"SectorA_Backgrounds");
+	m_pUIForegrounds		= Find_ChildObject(L"SectorA_Foregrounds");
+	m_pUISideThings			= Find_ChildObject(L"SectorA_SideThings");
+	m_pUIOthers				= Find_ChildObject(L"SectorA_Others");
+
+	m_pUI_InstBlocks		= Find_ChildObject(L"FG_InstBlocks");
+	m_pUI_InstHoverBlocks	= Find_ChildObject(L"FG_InstHoverBlocks");
+	m_pUI_InstColorBtns		= Find_ChildObject(L"Side_ColorButton");
+	m_pUI_InstSelectedRing	= Find_ChildObject(L"Side_SelectedRing");
+	m_pUI_InstHoveredRing	= Find_ChildObject(L"Side_HoveredRing");
 }
 
 void CUI_Ovfl_Palette::Trigger_ClickEvent()
@@ -513,11 +526,14 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 	vector<_float4x4> vecColorBtnVariantMat = {};
 	vecColorBtnVariantMat.resize(iNumTargetInst);
 
+	// 항시 색상변경 반영
 	for (_uint i = 0; i < vecColorBtnVariantMat.size(); i++)
 	{
-		// 상시 색상 할당
 		// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
 		*reinterpret_cast<_float4*>(&vecColorBtnVariantMat[i]._11) = m_arrColors[i];
+		//..
+		*reinterpret_cast<_float2*>(&vecColorBtnVariantMat[i]._41) = _float2{1340.f, 1080.f};		// extra texture size.
+
 	}
 	
 	CCustom_UI::VARIANTREADY_UI_DESC tColorBtnVariantDesc = {
@@ -530,9 +546,8 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 
 
 
-	// 클릭 시 인덱스 감지하여 현재 선택한 색상을 그것으로 변경
+	// {Interact] 클릭 시 색상 변경
 	for (_uint i = 0; i < iNumTargetInst; i++)
-	{
 		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), i))
 		{
 			m_eDestColorIndex = static_cast<PALETTE_COLOR>(i);
@@ -553,9 +568,74 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 
 			break;
 		}
+
+
+
+	// [Interact] 클릭 및 호버 시 피드백
+	CCustom_UI* pSelectedRing	= m_pUI_InstSelectedRing;
+	auto selectedDesc			= pSelectedRing->Get_UIDesc();
+	auto& selectedInstDesc		= selectedDesc.vecInstanceDescs;
+
+	CCustom_UI* pHoveredRing	= m_pUI_InstHoveredRing; 
+	auto hoveredDesc			= pHoveredRing->Get_UIDesc();
+	auto& hoveredInstDesc		= hoveredDesc.vecInstanceDescs;
+
+
+	
+	_bool isHovering = false;
+	static _uint iHoveredIndex = Client::CUI_Ovfl_Palette::PCOLOR_END;
+	_bool isEntered = false;
+	_bool isExited = false;
+
+	for (_uint i = 0; i < iNumTargetInst; i++)
+		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), i))
+		{
+			if (iHoveredIndex == PCOLOR_END)						isEntered = true;// 선택 Enter
+			iHoveredIndex = static_cast<PALETTE_COLOR>(i);
+
+			isHovering = true;
+
+#ifdef _DEBUG
+			_string strDebugText = {};
+			switch (iHoveredIndex)
+			{
+			case Client::CUI_Ovfl_Palette::PCOLOR_RED:		strDebugText = "RED";			break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_GREEN:	strDebugText = "GREEN";			break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_BLUE:		strDebugText = "BLUE";			break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_YELLOW:	strDebugText = "YELLOW";		break;
+			case Client::CUI_Ovfl_Palette::PCOLOR_END:		strDebugText = "END";			break;
+			}
+
+			std::cout << "[CUI_Ovfl_Palette::Update_ChangeColorBtn] Hovered Color Index : " << strDebugText << "(" << m_eDestColorIndex << ")" << std::endl;
+#endif // _DEBUG
+
+			break;
+		}
+	
+	if (!isHovering &&
+		iHoveredIndex != PCOLOR_END)
+	{
+		isExited = true;
+		iHoveredIndex = PCOLOR_END;
+	}
+
+	if (isEntered)
+		static_cast<CAnimator_UI*>(pHoveredRing->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_Color_FadeIn", true);
+	if (isExited)
+		static_cast<CAnimator_UI*>(pHoveredRing->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_Color_FadeOut", true);
+
+	for (_uint i = 0; i < vecColorBtnVariantMat.size(); i++)
+	{
+		selectedInstDesc[i].vClipTexcoordX = (m_eDestColorIndex == i) ?
+			_float2(0.f, 1.f) : _float2(0.f, 0.f);
+
+		hoveredInstDesc[i].vClipTexcoordX = (iHoveredIndex == i) ?
+			_float2(0.f, 1.f) : _float2(0.f, 0.f);
 	}
 
 
+	pSelectedRing->Set_UIDesc(selectedDesc);
+	pHoveredRing->Set_UIDesc(hoveredDesc);
 }
 
 void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
@@ -599,10 +679,6 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 	// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
 	// [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
 	// [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
-
-
-	// 애들이 분별없이 전부 다 변화값을 가져가는 것 같음
-	// 근데 여기엔 아직 m_vecTargetsQueue 적용안됨
 
 	auto blocksDesc = m_pUI_InstBlocks->Get_UIDesc();
 	
