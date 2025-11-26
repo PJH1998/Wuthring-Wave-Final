@@ -32,7 +32,6 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 
 void CMapObject_Meteo::Priority_Update(_float fTimeDelta)
 {
-	m_pModelCom->Request_LOD(0);
 }
 
 void CMapObject_Meteo::Update(_float fTimeDelta)

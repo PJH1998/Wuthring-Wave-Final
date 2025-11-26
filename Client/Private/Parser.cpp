@@ -482,20 +482,27 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
-			
+
 					case OBJECTTYPE::NONSONORA:
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
-			
+
 					case OBJECTTYPE::NONSONORA_FLOOR:
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
-			
-					default:
-						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
+					case OBJECTTYPE::WATER:
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Water")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
+						break;
+					default:
+						if (ModelName.find("_Wat_") != string::npos)
+							m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Water")
+								, ENUM_CLASS(eLevel), TEXT("Layer_Water"), &pDesc);
+						else
+							m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
+								, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
 					}
 				});

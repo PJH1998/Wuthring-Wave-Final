@@ -210,8 +210,6 @@ void CMapObject::Ready_Component(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
@@ -307,8 +305,4 @@ void CMapObject::Free()
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pModelCom);
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-
-	m_pModelComArray.clear();
 }
