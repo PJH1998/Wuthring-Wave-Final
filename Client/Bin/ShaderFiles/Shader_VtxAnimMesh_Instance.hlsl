@@ -104,6 +104,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, In.TransformMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = Out.vPosition;
+    
     return Out;
 }
 
@@ -126,6 +127,7 @@ VS_OUT VS_FACE(VS_IN In)
         g_MeshLocalBoneIndecies[In.vBlendIndex.y],
         g_MeshLocalBoneIndecies[In.vBlendIndex.z],
         g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
+        
     matBone =
     mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
     mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
@@ -211,11 +213,13 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-    float3 vNormal = NormalDesc.xyz;
+    float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    //float3 vNormal = NormalDesc.xyz;
+    
+    vNormal.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
     
     float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(normalize(mul(vNormal, WorldMatrix)) * 0.5f + 0.5f, 0.f);
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
@@ -224,7 +228,6 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
     Out.vSSS.w = In.vProjPos.w;
-    
     
     return Out;
 }

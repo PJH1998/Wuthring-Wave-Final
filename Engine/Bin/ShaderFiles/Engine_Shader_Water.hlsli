@@ -88,7 +88,8 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
         
             if (Envmap.fRange <= fLength && fMinDistance > fLength)
             {
-           //     vEnvColor = g_EnvMapTexture[Envmap.iIndex].Sample(DefaultSampler, float3(In.vTexcoord, 0.f));
+                float4 vWorldReflect = normalize(mul(vReflect, g_ViewMatrixInv));
+                vEnvColor = g_EnvMapTexture[Envmap.iIndex].Sample(DefaultSampler, vWorldReflect.xyz);
             }
         }
     }

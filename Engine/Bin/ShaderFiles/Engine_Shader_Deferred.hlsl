@@ -682,7 +682,6 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
    
     float4 vSceneDesc = g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord);
    
-   
     float4 vSceneWorldPos = 0.f;
     
     vSceneWorldPos.x = In.vTexcoord.x * 2.f - 1.f;

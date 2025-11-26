@@ -7,21 +7,7 @@ float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
 Texture2D   g_MaskDiffuseTexture;
-Texture2D   g_MetallicTexture;
-vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
-vector      g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);
-
-//Texture2D   g_MaskTexture[4] : register(t8);
 Texture2D g_MaskTexture[4];
-
-matrix g_ShadowViewMatrix[4];
-matrix g_ShadowProjMatrix[4];
-
-matrix g_ShadowMapViewMatrix;
-matrix g_ShadowMapProjMatrix;
-
-float g_fOutLineRadius = 0.0005f;
-float g_fOutLineRadiusZ = 0.0005f;
 
 bool g_HasNormal = false;
 bool g_HasMask = false;
@@ -106,14 +92,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vPBR.y = g_fGlobalStaticRoughness;
-    Out.vPBR.x = g_fGlobalStaticMetallic;
+    Out.vPBR.w = 1.f;       // Water Masking
     
-    if (g_IsDynamicObject)
-    {
-        Out.vPBR.z = 1.f;
-    }
-     
     float4 vNormal;
 
     vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, float2(In.vTexcoord.x + g_fXOffset*0.01f, In.vTexcoord.y + g_fYOffset*0.01f));
