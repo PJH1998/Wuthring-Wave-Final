@@ -16,7 +16,7 @@ ID,posX,posY,posZ,rotX,rotY,rotZ,bodyIDX,faceIDX,hairIDX,isCollide,Animation
 14,3201.1,312.1,1678.1,0,-45,0,0,0,0,0,Stand_CrossHands_01_Loop
 15,3232.1,317.2,1707.4,0,135,0,0,0,0,0,Common_Sit_03_Loop
 16,3162.6,317,1671.5,0,0,0,0,0,0,0,Behit_Stand
-17,3224.66,317.43,1630.9,0,-45,0,0,0,0,0,Common_Peddling_01_Loop
+17,3224.66,317.6,1630.9,0,-45,0,0,0,0,0,Common_Peddling_01_Loop
 18,3198.2,318.2,1730.9,0,-90,0,0,0,0,0,Common_Guide_01_Loop
 19,3225.7,317.5,1619.1,0,135,0,0,0,0,0,Talk_Encourage_01_Loop
 20,3231.4,317.6,1618.6,0,135,0,0,0,0,0,Talk_Clap_01_Loop
