@@ -88,6 +88,8 @@ private:
 	CCustom_UI*		m_pUI_InstBlocks		= { nullptr };				// [FG]		FG_InstBlocks
 	CCustom_UI*		m_pUI_InstHoverBlocks	= { nullptr };				// [FG]		FG_InstHoverBlocks
 	CCustom_UI*		m_pUI_InstColorBtns		= { nullptr };				// [Side]	Side_ColorButton
+	CCustom_UI*		m_pUI_InstSelectedRing	= { nullptr };				// [Side]	Side_SelectedButton
+	CCustom_UI*		m_pUI_InstHoveredRing	= { nullptr };				// [Side]	Side_HoveredButton
 
 
 private:
