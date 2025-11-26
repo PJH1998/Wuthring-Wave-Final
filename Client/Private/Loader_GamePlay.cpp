@@ -133,7 +133,8 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1125_first/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_barrens_1125_third/", m_eCurLevel, "Asphodel_Barrens");
+
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel, "The_False_Sovereign");
@@ -497,7 +498,7 @@ HRESULT CLoader_GamePlay::Load_UI()
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Texture" << endl;
+	cout << "[Loader_GamePlay::Load_UI] Texture" << endl;
 	// ==============================
 
 	vector<CCustom_UI::CUSTOM_UITREE_DESC> vecDescs = {};       // parsed data from json
@@ -535,29 +536,29 @@ HRESULT CLoader_GamePlay::Load_UI()
 			infoDesc.tUIDesc.strFilePath;
 			if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
 				CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-				OutputDebugString(L"[CLoader_Test_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+				OutputDebugString(L"[Loader_GamePlay::Load_UI] Texture Load Failed. The texture may have already been loaded.\n");
 		}
 	}
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Model" << endl;
+	cout << "[Loader_GamePlay::Load_UI] Model" << endl;
 	// ==============================
 	// 
 	// VIBuffer_Rect
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
 		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
 
 	// VIBuffer_Rect_Instance_UI
 	CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
 	tRectInstDesc.iNumInstance = 500U;
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
 		CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Shader" << endl;
+	cout << "[Loader_GamePlay::Load_UI] Shader" << endl;
 	// ==============================
 
 	// Shader
@@ -577,54 +578,54 @@ HRESULT CLoader_GamePlay::Load_UI()
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Object" << endl;
+	cout << "[Loader_GamePlay::Load_UI] Object" << endl;
 	// ==============================
 
 	// * Components Load
 	// Animator_UI
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
 		CAnimator_UI::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[CCustom_UI::Load_Shader] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
 
 	// * Objects Load
 	// Custom UI
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button",
 		CUI_Button::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI:Load_Object] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image",
 		CUI_Image::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text",
 		CUI_Text::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
 
 	// Custom Text
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
 		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
 		CUI_LockOn::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
 		CUI_Parry::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
 		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
 
 	// ==============================
-	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
+	cout << "[Loader_GamePlay::Load_UI][UI Custom] Prototype" << endl;
 	// ==============================
 
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
 	// Mouse
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"),
@@ -637,20 +638,20 @@ HRESULT CLoader_GamePlay::Load_UI()
 HRESULT CLoader_GamePlay::Load_Font()
 {
 	// ==============================
-	cout << "[Loader_Test] Font " << endl;
+	cout << "[Loader_GamePlay::Load_Font] Font " << endl;
 	// ==============================
 	_uint iPixelHeight = 64U;
 
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", iPixelHeight)))
-		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_SemiBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-SemiBold.ttf", iPixelHeight)))
-		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_Bold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Bold.ttf", iPixelHeight)))
-		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_ExtraBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-ExtraBold.ttf", iPixelHeight)))
-		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_Heavy", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Heavy.ttf", iPixelHeight)))
-		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+		OutputDebugString(L"[Loader_GamePlay::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
 	return S_OK;
 }

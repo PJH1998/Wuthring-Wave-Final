@@ -495,6 +495,10 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
+		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
+		CRASH("Failed Ready Ovfl_Palette");
+
 
 	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
@@ -639,10 +643,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #endif // KSTA_UITEST_OLD
 
-
-
-
-
 	// interact
 #pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
@@ -746,6 +746,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
 #pragma region [TAB] KSTA_UITEST_TABUTILITY
 	static _bool isTabUtilityActive = false;
 	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
@@ -785,6 +786,25 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
+#pragma region [NUMPAD 3] KSTA_UITEST_OVERFLOWINGPALETTE 
+
+	static _bool isOpenOverflowingPalette = false;
+
+	if (!isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Open_Game_OverflowPalette();
+		isOpenOverflowingPalette = true;
+	}
+	else if (isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Close_Game_OverflowPalette();
+		isOpenOverflowingPalette = false;
+	}
+
+#pragma endregion
 
 
 }
