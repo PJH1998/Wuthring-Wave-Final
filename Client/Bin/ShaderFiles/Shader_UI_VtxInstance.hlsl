@@ -163,8 +163,6 @@ float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2
 }
 
 
-
-
 // ==============================
 // * Vertex Shader
 // ==============================
@@ -334,6 +332,75 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
             vFinalTexcoord.x -= fElapsedTime * fCoordSpeed * 1.f;
             #endif
             vFinalExtra3.xy = In.vTexcoord;
+            
+        } break;
+        case UIFLAG_OVFL_PALETTE:
+        {
+            // ==============================
+            // * [8] Overflow Palette (UI MiniGame Gimmick)
+            // ==============================
+            float2  vChangeStartPos     = In.mExtra2.xy;        // 퍼지기가 시작될 지점
+            bool    IsChanging          = _BOOL(In.mExtra2.z);
+            float   fChangedRadius      = In.mExtra2.w;
+            
+            const float     fScaler = 1.2f;
+            const float     fToRatio = 0.9f;
+            
+            if (!IsChanging) break;
+            
+            float2 vInstPos = In.vSInstTrans.xy;
+            float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+            
+            float fChangeRatio; //
+                
+            float2 vVerticesPos[4] = {
+                { vInstPos.x - vInstSca.x / 2.f, vInstPos.y + vInstSca.y / 2.f },   // LT 
+                { vInstPos.x + vInstSca.x / 2.f, vInstPos.y - vInstSca.y / 2.f },   // RT 
+                { vInstPos.x + vInstSca.x / 2.f, vInstPos.y - vInstSca.y / 2.f },   // RB 
+                { vInstPos.x - vInstSca.x / 2.f, vInstPos.y + vInstSca.y / 2.f }    // LB 
+            };
+            float fDistPerVertices[4] = {
+                length(vVerticesPos[0] - vChangeStartPos),
+                length(vVerticesPos[1] - vChangeStartPos),    
+                length(vVerticesPos[2] - vChangeStartPos),
+                length(vVerticesPos[3] - vChangeStartPos)
+            };
+                
+            uint iVertexIndex_Nearest = 0;
+            uint iVertexIndex_MostFar = 0;
+            for (uint i = 0; i < 4; i++)
+            {
+                if (i == 0) continue;
+                    
+                if (fDistPerVertices[iVertexIndex_Nearest] > fDistPerVertices[i])   iVertexIndex_Nearest = i;
+                if (fDistPerVertices[iVertexIndex_MostFar] < fDistPerVertices[i])   iVertexIndex_MostFar = i;
+            }
+                
+            float2 vVertex_Nearest = vVerticesPos[iVertexIndex_Nearest];
+            float2 vVertex_MostFar = vVerticesPos[iVertexIndex_MostFar];
+                
+            float fRadTo_PosNearest = fDistPerVertices[iVertexIndex_Nearest];
+            float fRadTo_PosMostFar = fDistPerVertices[iVertexIndex_MostFar];
+                
+            fChangeRatio = saturate(smoothstep(         // <<<<<<<<<<<<<<<<<<<<<<
+                fRadTo_PosNearest,
+                fRadTo_PosMostFar,
+                fChangedRadius                
+            ));
+            if (fChangeRatio > fToRatio) break;
+            
+            
+            float fMaxTimingRatio = fToRatio / 2.f;     // 0->0.1 : 0->1, 0.1->0.2 : 1->0
+            float2 resultScale;
+            resultScale.x = (fChangeRatio <= fMaxTimingRatio) ?
+                smoothstep(0.f, fMaxTimingRatio, fChangeRatio)  :           // 0 0.1 0~0.2
+                smoothstep(fToRatio, fMaxTimingRatio, fChangeRatio);
+            resultScale.y = (fChangeRatio <= fMaxTimingRatio) ? 
+                smoothstep(0.f, fMaxTimingRatio, fChangeRatio)  :
+                smoothstep(fToRatio, fMaxTimingRatio, fChangeRatio);
+            
+            matAdditionalTransform[0][0] *= lerp(1.0f, fScaler, resultScale.x);;
+            matAdditionalTransform[1][1] *= lerp(1.0f, fScaler, resultScale.y);;
             
         } break;
     }
@@ -1017,7 +1084,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         } break;
         case UIFLAG_OVFL_PALETTE :      // 8
         {
-            #define CHANGE_BYCIRCLE
+            //#define CHANGE_BYCIRCLE
             
             
             //    Out.vColor = float4(1.f, 0.f, 1.f ,1.f);
@@ -1049,7 +1116,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             Out.vColor.a = vMaskColor.r;
             
             // 스크린 크기를 기준으로 uv를 반영한 좌표를 만듦.
-        #ifdef CHANGE_BYCIRCLE
+        //#ifdef CHANGE_BYCIRCLE
             float2 vScreenX = { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.x + In.vSInstSca.x / 2.f };
             float2 vScreenY = { In.vSInstPos.y - In.vSInstSca.y / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f };
                 
@@ -1058,14 +1125,11 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 lerp(vScreenX.x, vScreenX.y, In.vTexcoord.x),
                 lerp(vScreenY.x, vScreenY.y, 1.f - In.vTexcoord.y)
             };
-        #endif
+        //#endif
             
             if (IsChanging) // 변화중
             {   
                 // 스크린좌표로 변환하고, 현재 포커싱중인 점이 이를 지나면 색이 바뀌게끔..
-                
-
-                
                 
                 #ifndef CHANGE_BYCIRCLE
                 float2 vSingleInstancePos = In.vSInstPos; ;           // 지금 이거 단순 인스턴스의 한 점을 기준삼는거라, 점 닿자마자 확 바뀌는 듯
@@ -1126,7 +1190,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             if (IsChanging)
             {
-                float fChangeRatio;
+                float fChangeRatio; //
                 
                 float2 vVerticesPos[4] = {
                     { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f },   // LT 
@@ -1154,12 +1218,36 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 float2 vVertex_Nearest = vVerticesPos[iVertexIndex_Nearest];    // 가장 가까운 or 먼 점의 위치. 거리 비교용 재료.
                 float2 vVertex_MostFar = vVerticesPos[iVertexIndex_MostFar];    // 가장 가까운 or 먼 점의 위치. 거리 비교용 재료.
                 
+                // 그냥 두 점의 경우 겹치는 시점의 radius를 구해서 그걸 기반으로 보간?
                 
-                //fChangeRatio = saturate()
+                float fRadTo_PosNearest = fDistPerVertices[iVertexIndex_Nearest];
+                float fRadTo_PosMostFar = fDistPerVertices[iVertexIndex_MostFar];
                 
+                fChangeRatio = saturate(smoothstep(         // <<<<<<<<<<<<<<<<<<<<<<
+                    fRadTo_PosNearest,
+                    fRadTo_PosMostFar,
+                    fChangedRadius                
+                ));
                 
+                // =====
                 
-
+                //vFinalColorTex.rgb = lerp(vCurrColor, vDestColor, smoothstep(0, 1, fChangeRatio));
+                
+                const float fNoiseCoordScale = .5f;
+                
+                float2 fNoiseAppliedCoord = In.vTexcoord.xy * fNoiseCoordScale.xx;
+                float vNoiseTex1 = g_TextureExtra1.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                float vNoiseTex2 = g_TextureExtra2.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                float vNoiseTex3 = g_TextureExtra3.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                
+                // 컷아웃 할 때 처럼, 알파를 fchangeratio 에 따라 비교.
+                
+                bool isChangedPixel = vNoiseTex3 <= fChangeRatio;
+                    
+                if (!isChangedPixel)
+                    Out.vColor.rgb = vCurrColor.rgb;
+                else
+                    Out.vColor.rgb = vDestColor.rgb;
                 
             }
             

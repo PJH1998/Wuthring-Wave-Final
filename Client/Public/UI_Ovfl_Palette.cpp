@@ -147,9 +147,11 @@ HRESULT CUI_Ovfl_Palette::Ready_ChildExtraComponents()
 
 	_wstring strExtraTexName_Noise12	= L"T_Noise_No.png (12)";
 	_wstring strExtraTexName_Noise14	= L"T_Noise_No.png (14)";
+	_wstring strExtraTexName_Caustic	= L"T_Caustic_Noise";
 
 	if (FAILED(m_pUI_InstBlocks			->Add_ExtraTexture(strExtraTexName_Noise12)))	return E_FAIL;
 	if (FAILED(m_pUI_InstBlocks			->Add_ExtraTexture(strExtraTexName_Noise14)))	return E_FAIL;
+	if (FAILED(m_pUI_InstBlocks			->Add_ExtraTexture(strExtraTexName_Caustic)))	return E_FAIL;
 
 
 	return S_OK;
