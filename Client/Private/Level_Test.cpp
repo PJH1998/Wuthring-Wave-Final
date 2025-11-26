@@ -1,12 +1,9 @@
 ﻿#include "ClientPch.h"
 #include "AnimationDummy.h"
-#include "ElectroPredator.h"
-#include "FS_Scythe.h"
 #include "GameSystem.h"
-#include "Ggobul.h"
-#include "HavocWarrior.h"
 #include "Level_Test.h"
 #include "MapObject.h"
+#pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
@@ -14,7 +11,7 @@
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
 #include "PatternDummy.h"
-#include "GameSystem.h"
+#pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
 #include "SkyBox.h"
@@ -27,6 +24,7 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 
+#include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
 #include "UI_Text.h"
@@ -62,10 +60,11 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	Ready_Dummy();
 	//Ready_MonsterTest();
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
 	Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_Spawner();
+	Ready_AnimInstanceTest();
 
     Ready_Effect();
     LIGHT_DESC LightDesc{};
@@ -96,7 +95,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
 	Ready_Scene();
-	Ready_Skybox();
+	//Ready_Skybox();
 	Ready_UI();
 
     return S_OK;
@@ -445,6 +444,20 @@ void CLevel_Test::Ready_Spawner()
 		CRASH("Spawner");
 }
 
+void CLevel_Test::Ready_AnimInstanceTest()
+{
+	CDummyNPC::DUMMYNPC_DESC NPCDesc{};
+	NPCDesc.eCurLevel = m_eCurLevel;
+	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"));
+	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_AnimInstanceTest"));
+	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_DummyCell");
+	NPCDesc.vStartPositions = _float3(18.f, -6.f, -30.f);
+	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);
+}
+
 void CLevel_Test::Ready_UI()
 {
 	// UI
@@ -487,6 +500,12 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
+		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
+		CRASH("Failed Ready Ovfl_Palette");
+
+
+	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
 }
 
@@ -629,10 +648,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #endif // KSTA_UITEST_OLD
 
-
-
-
-
 	// interact
 #pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
@@ -736,21 +751,24 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
-#pragma region [NUMPAD 3] KSTA_UITEST_TABUTILITY
+
+#pragma region [TAB] KSTA_UITEST_TABUTILITY
 	static _bool isTabUtilityActive = false;
-	_uint iTabUtilitySelectedIndex = UINT_MAX;
+	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+	//_uint iTabUtilitySelectedIndex = UINT_MAX;
 	_bool isTabUtilityHided = false;
-	
+
 	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Show_TabUtilityUI();
+		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
 		isTabUtilityActive = true;
 	}
 	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
 	{
-		iTabUtilitySelectedIndex = m_pGameSystem->HideNGet_TabUtilityUI();
+		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
 		isTabUtilityActive = false;
 		isTabUtilityHided = true;
 	}
@@ -759,7 +777,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	_string strSelectedUtilityName = {};
 	if (isTabUtilityHided)
 	{
-		switch (iTabUtilitySelectedIndex)
+		switch (iTmpSelectedUtility)
 		{
 		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
 		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
@@ -773,6 +791,25 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
+#pragma region [NUMPAD 3] KSTA_UITEST_OVERFLOWINGPALETTE 
+
+	static _bool isOpenOverflowingPalette = false;
+
+	if (!isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Open_Game_OverflowPalette();
+		isOpenOverflowingPalette = true;
+	}
+	else if (isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Close_Game_OverflowPalette();
+		isOpenOverflowingPalette = false;
+	}
+
+#pragma endregion
 
 
 }

@@ -18,7 +18,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  
   <ItemGroup>
     <ClInclude Include="..\Public\Animation.h" />
     <ClInclude Include="..\Public\Animation_Inst.h" />
@@ -70,6 +69,7 @@
     <ClInclude Include="..\Public\Engine_Struct.h" />
     <ClInclude Include="..\Public\Engine_Typedef.h" />
     <ClInclude Include="..\Public\Engine_Vertex.h" />
+    <ClInclude Include="..\public\EnvironmentMap.h" />
     <ClInclude Include="..\Public\Event.h" />
     <ClInclude Include="..\Public\EventBus.h" />
     <ClInclude Include="..\Public\Font_Manager.h" />
@@ -98,21 +98,24 @@
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\Public\Model_Manager.h" />
     <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\MorphChannel.h" />
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
+    <ClInclude Include="..\public\Probe.h" />
     <ClInclude Include="..\public\RadialBlur.h" />
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
-    <ClInclude Include="..\public\ScreenSpaceReflection.h" />
+    <ClInclude Include="..\public\Water.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
     <ClInclude Include="..\public\SFX.h" />
     <ClInclude Include="..\public\SFX_Hub.h" />
     <ClInclude Include="..\public\ShadowMap.h" />
+    <ClInclude Include="..\Public\ShapeKey.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\public\SSAO.h" />
     <ClInclude Include="..\Public\State.h" />
@@ -154,7 +157,6 @@
     <ClInclude Include="..\Public\VIBuffer_Spectrum.h" />
     <ClInclude Include="..\public\VolumetricFog.h" />
   </ItemGroup>
-
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\Private\Animation_Inst.cpp" />
@@ -202,6 +204,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\private\EnvironmentMap.cpp" />
     <ClCompile Include="..\Private\Event.cpp" />
     <ClCompile Include="..\Private\EventBus.cpp" />
     <ClCompile Include="..\Private\Font_Manager.cpp" />
@@ -230,21 +233,24 @@
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Manager.cpp" />
     <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\MorphChannel.cpp" />
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
+    <ClCompile Include="..\private\Probe.cpp" />
     <ClCompile Include="..\private\RadialBlur.cpp" />
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
-    <ClCompile Include="..\private\ScreenSpaceReflection.cpp" />
+    <ClCompile Include="..\private\Water.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />
     <ClCompile Include="..\private\SFX.cpp" />
     <ClCompile Include="..\private\SFX_Hub.cpp" />
     <ClCompile Include="..\private\ShadowMap.cpp" />
+    <ClCompile Include="..\Private\ShapeKey.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\private\SSAO.cpp" />
     <ClCompile Include="..\Private\State.cpp" />
@@ -286,15 +292,14 @@
     <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp" />
     <ClCompile Include="..\private\VolumetricFog.cpp" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Water.hlsli" />
   </ItemGroup>
-  
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_DOF.hlsl" />
@@ -313,8 +318,8 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Deferred.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_EnvMapDeferred.hlsl" />
   </ItemGroup>
-
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -420,7 +425,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../ThirdPartyLib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11d.lib;DirectXTKd.lib;ImGuiLib_d.lib;Jolt_d.lib;freetyped.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11d.lib;DirectXTKd.lib;ImGuiLib_d.lib;Jolt_d.lib;freetyped.lib;DirectXTexd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cd $(ProjectDir)../../
@@ -455,7 +460,7 @@ call Copy_D.bat
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../ThirdPartyLib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11.lib;DirectXTK.lib;ImGuiLib.lib;Jolt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11.lib;DirectXTK.lib;ImGuiLib.lib;Jolt.lib;freetype.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cd $(ProjectDir)../../

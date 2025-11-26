@@ -153,9 +153,10 @@ public:
 
 #pragma region LIGHT_MANAGER
 	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
-	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	void					Set_Active(const _wstring& strLightTag, _bool isActive);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
 #endif
@@ -181,10 +182,10 @@ public:
 #pragma region TIMER_MANAGER
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
-	_double		Get_PlayTime();
+	_double			Get_PlayTime();
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
-	HRESULT		Add_Timer(const _wstring& strTimerTag);
+	HRESULT			Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
@@ -370,6 +371,14 @@ public:
 #endif
 #pragma endregion
 
+#pragma region ENVIRONMENT_MAP
+	HRESULT						Add_Probe(_float3 vCenter, _float fRange);
+	void						Bake_EnvMaps();
+	void						Add_EnvMap_SkyBox(CGameObject* pSkyBox);
+	void						Add_EnvMap_StaticObject(CStaticObject* pStaticObject);
+	HRESULT						Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName);
+#pragma endregion
+
 #pragma region RESOURCE_MANAGER
 	void									Load_Resource(const _char* pFolderPath);
 	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
@@ -413,6 +422,7 @@ private:
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+	class CEnvironmentMap*		m_pEnvMap = { nullptr };
 	class CResource_Manager*	m_pResource_Manager = { nullptr };
 
 	_uint						m_iNumLevel = {};

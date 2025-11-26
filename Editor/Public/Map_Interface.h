@@ -19,6 +19,7 @@ public:
 	virtual		HRESULT			Initialize()override;
 	_bool						Set_ShaderPass(CShader* pShader,_uint* ShaderPassIndex);
 	_bool						Set_LOD(vector<CModel*>& pModelArray, _uint* iLODIndex);
+	_bool						Set_LOD(_uint* iLODIndex, _uint* iMaxLODIndex);
 	void						Set_Transform(CTransform* pTransform);
 	_bool						Load_Textures(_uint Origin, vector<_string>* VectorTextures, _string ResearchKeyWord, _string ResearchExt, _bool IsIntoChild, _string TextureFolderPath, _bool IsPng = true, _string SecondKeyWord = "");
 	_bool						Display_Textures(CTexture* pTexture, _uint iTextureNum = 0, _float SizeX = 256.f, _float SizeY = 0.f);
@@ -32,7 +33,6 @@ public:
 
 	void						Load_Map(const _char* pFilePath);
 	void						Ready_Map_Prototype(const _char* pFilePath);
-	void						Copy_MapObject();
 	void						SetPrototypes(_uint iLevel);
 private:
 	_bool m_IsCreateProto = { false };

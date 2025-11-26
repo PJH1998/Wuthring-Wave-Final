@@ -15,7 +15,10 @@ public:
 public:
 	typedef struct tagSkyBoxDesc {
 		vector<_wstring>	strModelTags;
-		_uint					iNumModel;
+		_uint					iNumModel = {};
+		_float					fCloudSpeed = {};
+		_float					fFXScaleRate = {};
+		_float2				vUVRate = {};
 	}SKYBOX_DESC;
 
 private:
@@ -32,7 +35,7 @@ public:
 	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
 	virtual		void			Render_OutLine() override;
-
+	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 	// Pooling Spawn CallBack
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
@@ -44,6 +47,11 @@ private:
 	_uint						m_iNumModels = {};
 
 	_float						m_fTimeAcc = {};
+
+	_float						m_fCloudSpeed = {};
+	_float						m_fFXScaleRate = {};
+	_float3					m_vBackGroundColor = {};
+	_float2					m_vUVRate = {};
 
 private:
 	void						Ready_Component(const vector<_wstring>& strModelTags);

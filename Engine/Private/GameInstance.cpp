@@ -29,8 +29,9 @@
 #include "Decal_Manager.h"
 #include "VolumetricFog.h"
 #include "HZB.h"
+#include "EnvironmentMap.h"
 
-#include"Model_Manager.h"
+#include "Model_Manager.h"
 #include "SFX_Hub.h"
 #include "Resource_Manager.h"
 
@@ -134,6 +135,10 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pSFX_Hub);
+
+	m_pEnvMap = CEnvironmentMap::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pEnvMap);
+
 	m_pResource_Manager = CResource_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pResource_Manager);
 
@@ -153,7 +158,6 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 	
-
 	m_pObject_Manager->Update(fTimeDelta);
 
 	m_pCamera_Manager->Update(fTimeDelta);
@@ -570,6 +574,10 @@ HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& 
 HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
+}
+HRESULT CGameInstance::Render_LightEnvMap(CShader* pShader, CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding)
+{
+	return m_pLight_Manager->Render_EnvMap(pShader, pVIBuffer, pBounding);
 }
 #ifdef _DEBUG
 LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
@@ -1128,6 +1136,29 @@ void CGameInstance::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffse
 #endif
 #pragma endregion
 
+#pragma region ENVIRONMENT_MAP
+HRESULT CGameInstance::Add_Probe(_float3 vCenter, _float fRange)
+{
+	return m_pEnvMap->Add_Probe(vCenter, fRange);
+}
+void CGameInstance::Bake_EnvMaps()
+{
+	m_pEnvMap->Bake_EnvMaps();
+}
+void CGameInstance::Add_EnvMap_SkyBox(CGameObject* pSkyBox)
+{
+	m_pEnvMap->Add_EnvMap_SkyBox(pSkyBox);
+}
+void CGameInstance::Add_EnvMap_StaticObject(CStaticObject* pStaticObject)
+{
+	m_pEnvMap->Add_EnvMap_StaticObject(pStaticObject);
+}
+HRESULT CGameInstance::Bind_EnvMapDatas(CShader* pShader, const _char* pTextureName, const _char* pBufferName, const _char* pHasEnvMapName, const _char* pNumEnvMapName)
+{
+	return m_pEnvMap->Bind_EnvMapDatas(pShader, pTextureName, pBufferName, pHasEnvMapName, pNumEnvMapName);
+}
+#pragma endregion
+
 #pragma region RESOURCE_MANAGER
 void CGameInstance::Load_Resource(const _char* pFolderPath)
 {
@@ -1138,7 +1169,6 @@ ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResource
 	return m_pResource_Manager->Get_Resource(strResourceTag);
 }
 #pragma endregion
-
 
 HRESULT CGameInstance::SetUp_CameraNF()
 {
@@ -1172,6 +1202,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
+	m_pEnvMap->Clear();
 	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
@@ -1187,6 +1218,9 @@ void CGameInstance::Release_Engine()
 {
 	Wait_Thread_End();
 
+	Safe_Release(m_pPooling_Manager);
+	Safe_Release(m_pRenderer);
+	Safe_Release(m_pModel_Manager);
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
@@ -1194,9 +1228,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
-	Safe_Release(m_pPooling_Manager);
 	Safe_Release(m_pTargetManager);
-	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pCamera_Manager);
@@ -1213,10 +1245,10 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pSFX_Hub);
+	Safe_Release(m_pEnvMap);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
-	Safe_Release(m_pModel_Manager);
 	
 	Safe_Release(m_pGraphic_Device);
 	Release();

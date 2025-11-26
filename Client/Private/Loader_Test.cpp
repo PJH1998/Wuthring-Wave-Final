@@ -5,18 +5,21 @@
 #include "Dummy.h"
 #include "MapObject.h"
 #include "AnimationDummy.h"
+
+#pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
+#include "Coro_Rock.h"
 #include "AttackVolume.h"
 #include "AoEDoT.h"
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
-
+#pragma endregion
 
 
 #pragma region PLAYER
@@ -43,9 +46,10 @@
 #include "Player.h"
 #pragma endregion
 
-
-
-
+#pragma region NPC
+#include "DummyNPC.h"
+#include "DummyCell.h"
+#pragma endregion
 
 
 #pragma region UI
@@ -60,6 +64,7 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
+#include "UI_Ovfl_Palette.h"
 #pragma endregion
 
 
@@ -96,6 +101,7 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     
+	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
 	Load_Action();
 
     return S_OK;
@@ -110,8 +116,8 @@ HRESULT CLoader_Test::Load_Texture()
 
 HRESULT CLoader_Test::Load_Model()
 {
-	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
+	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel, "The_False_Sovereign");
 
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
@@ -124,13 +130,13 @@ HRESULT CLoader_Test::Load_Model()
     //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreMatrix, "../Bin/Resource/Model/Player/FalseSovereign/False_SovereignTest1.dat"))))
     //    return E_FAIL;
 
-	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+	_matrix PreTransformMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Dome"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SM_Com2_Sky_21AH.dat"))))
+		CRASH("SkyDome");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Background"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground21.dat"))))
 		CRASH("SkyBackground");
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Dome"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
-		CRASH("SkyDome");
 
 	cout << "Model" << endl;
 
@@ -321,6 +327,17 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	// Prototype_GameObject_CoroSaurus
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		CCorosaurus::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+
+	// Prototype_Component_Model_CoroRock
+	_fmatrix PrePropMatrix = XMMatrixScaling(0.001f, 0.002f, 0.001f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroRock"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PrePropMatrix, "../../Client/Bin/Resource/Model/Monster/Coro_Rock/SM_Tab_Roc_20AM_LOD0.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroRock
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroRock"),
+		CCoro_Rock::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 
@@ -562,15 +579,17 @@ HRESULT CLoader_Test::Load_Rover()
 HRESULT CLoader_Test::Load_Galbrena()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/GalbrenaFacial/Galbrena.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	//_float fSize = 0.01f;
-	_float fSize = 0.0001f;
+	
+	// Editor에서 isCharacter AnimationActor 생성과 동일하게.
+	_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
 
 
@@ -641,6 +660,25 @@ HRESULT CLoader_Test::Load_Action()
 	return S_OK;
 }
 
+HRESULT CLoader_Test::Load_NPC()
+{
+	vector<_string> TypeName = { "Body", "Hair", "Face" };
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimInstanceTest"),
+		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, 50, 
+			"../../Client/Bin/Resource/Model/NPC/FemaleM", &TypeName))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
+		CDummyNPC::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyCell"),
+		CDummyCell::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	return S_OK;
+}
+
 HRESULT CLoader_Test::Load_UI()
 {
 	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
@@ -673,6 +711,18 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
 
+	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
+
+
+	
+	
+	_string strFilePath_UI_ExtraTexturesLoad = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LoadDummy.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_ExtraTexturesLoad));
+	// Prototype_Component_Texture_Custom_ ...
+	// Palette_BG
+
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -688,6 +738,9 @@ HRESULT CLoader_Test::Load_UI()
 				OutputDebugString(L"[Loader_Test::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
 		}
 	}
+
+
+
 
 	// ==============================
 	cout << "[Loader_Test] Model" << endl;
@@ -772,6 +825,12 @@ HRESULT CLoader_Test::Load_UI()
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
 
+	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
+		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
+
+
 
 
 	// ==============================
@@ -782,6 +841,7 @@ HRESULT CLoader_Test::Load_UI()
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
+	
 	return S_OK;
 }
 

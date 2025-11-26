@@ -113,98 +113,22 @@ HRESULT CAnimation_Inst::Initialize(ifstream& InputFile, const vector<class CBon
 		m_Channels.push_back(pChannel);
 	}
 
+	//auto iter = find_if(m_Channels.begin(), m_Channels.end(), [](CChannel* pChannel) {
+	//	return pChannel->Get_BoneIndex() == 1;
+	//	});
+	//if (iter != m_Channels.end())
+	//{
+	//	// 문제되는 채널 찾기
+	//	vector<KEYFRAME>* temp = (*iter)->Get_KeyframesPtr();
+	//	for (auto& tKeyFrame : *temp)
+	//	{
+	//		tKeyFrame.vScale = _float3(1.f, 1.f, 1.f);
+	//	}
+	//}
 	m_CurrentFrameIndices.resize(m_iNumChannels);
 
 	return S_OK;
 }
-
-//_bool CAnimation_Inst::Update_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
-//{
-//	if(nullptr != pTrackPosition)
-//		*pTrackPosition = m_fCurrentTrackPosition;
-//
-//	if (m_fCurrentTrackPosition > m_fDuration)
-//	{
-//		m_fCurrentTrackPosition = 0.f;
-//		return true;
-//	}
-//
-//	for (size_t i = 0; i < m_iNumChannels; ++i)
-//	{
-//		m_Channels[i]->Update_TransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
-//	}
-//
-//	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
-//
-//	return false;
-//}
-
-_bool CAnimation_Inst::Update_RibTransformationMatrices(_float fTrackPosition, const vector<class CBone*>& Bones, _float* pTrackPosition)
-{
-	_float fCurrentTrackPosition = fTrackPosition;
-
-	if (fCurrentTrackPosition > m_fDuration)
-	{
-		fCurrentTrackPosition = 0.f;
-		return true;
-	}
-
-
-	for (size_t i = 0; i < m_iNumChannels; ++i)
-	{
-		m_Channels[i]->Update_RibTransformationMatrix(fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
-	}
-
-	return false;
-}
-
-_bool CAnimation_Inst::Update_TransformationMatrices_All(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
-{
-	if (nullptr == pTrackPosition)
-		CRASH("pTrackPosition is nullptr");
-	_float fCurrentTrackPosition = *pTrackPosition;
-
-	if (fCurrentTrackPosition > m_fDuration)
-	{
-		*pTrackPosition = fCurrentTrackPosition = 0.f;
-		m_iNotifyIndex = 0;
-		return true;
-	}
-
-	while (m_iNotifyIndex < m_AnimNotifies.size() && fCurrentTrackPosition >= m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
-		m_AnimNotifies[m_iNotifyIndex++]->Execute();
-
-
-
-	for (size_t i = 0; i < m_iNumChannels; ++i)
-	{
-		m_Channels[i]->Update_TransformationMatrix_All(fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
-	}
-
-	
-
-	*pTrackPosition = fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
-
-	return false;
-}
-
-//_bool CAnimation_Inst::Blend_TransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float fTrackLength)
-//{
-//	if (m_fCurrentTrackPosition > fTrackLength)
-//	{
-//		m_fCurrentTrackPosition = 0.f;
-//		return true;
-//	}
-//
-//	for (size_t i = 0; i < m_iNumChannels; ++i)
-//	{
-//		m_Channels[i]->Blend_TransformationMatrix(m_fCurrentTrackPosition, Bones, fTrackLength);
-//	}
-//
-//	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
-//
-//	return false;
-//}
 
 _bool CAnimation_Inst::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _matrix* Out)
 {

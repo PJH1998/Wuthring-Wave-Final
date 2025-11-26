@@ -52,15 +52,6 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	if (m_tUIDesc.strUIName == L"ParryCircle_Activated" &&
-		m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha < 1.f)
-		int i = 10;
-
-#ifdef _DEBUG
-	if (m_tUIDesc.strUIName == L"SectorA_LockOn")
-		int i = 10;
-#endif // _DEBUG
-
     if (m_pAnimator_UICom)
         m_pAnimator_UICom->Update(fTimeDelta);
 
@@ -101,10 +92,6 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
 
-	if (m_tUIDesc.strUIName == L"InstHPBar")
-		int i = 10;
-
-
 	if (m_tUIDesc.isInstance)
 		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(m_tUIDesc.vecInstanceDescs);
 
@@ -117,7 +104,8 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
-	if (m_tUIDesc.strFileName == L"EmptyCanvuspng")							// 계층 나누기용 무의미 투명 텍스쳐면 렌더콜 스킵
+	if (m_tUIDesc.strFileName == L"EmptyCanvuspng" ||
+		m_tUIDesc.strFileName == L"mspaint_vXzwIq5FDL")			// 계층 나누기용 무의미 투명 텍스쳐면 렌더콜 스킵
 		return;
 
 
@@ -134,6 +122,14 @@ void CCustom_UI::Render()
             if (FAILED(m_pShaderCom->Bind_Value("g_iVariantFlag", &m_cachedVariantUIDesc.iShaderFlag, sizeof(m_cachedVariantUIDesc.iShaderFlag))))
                 CRASH("Binding_Value_Failed");
 
+		if (m_tUIDesc.isInstance)
+			for (_uint i = 0; i < m_vecExtraTextureCom.size(); i++)
+			{
+				_string strConstantName = "g_TextureExtra" + to_string(i);
+				if (FAILED(m_vecExtraTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, strConstantName.c_str())))
+					OutputDebugString(L"[Custom_UI::Render] Texture Bind Failed.");
+			}
+
         if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
             CRASH("Binding_Matrix_Failed");
 
@@ -143,7 +139,8 @@ void CCustom_UI::Render()
             CRASH("Binding_Matrix_Failed");
 
         if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
-            CRASH("Binding_Matrix_Failed");
+            CRASH("Binding_Texture_Failed");
+
         if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
             CRASH("Binding_Value_Failed");
         if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
@@ -264,10 +261,18 @@ _bool CCustom_UI::Check_IsInSpace()
 	}
 	else
 	{
+		// inst 도 combine 된 좌표 기준으로 확인 필요.
+		
 		for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
 		{
-			_float2 vPos = _float2{ m_tUIDesc.vecInstanceDescs[i].vSInstTrans.x, m_tUIDesc.vecInstanceDescs[i].vSInstTrans.y };
-			_float2 vSca = _float2{ m_tUIDesc.vecInstanceDescs[i].vSInstRight.x, m_tUIDesc.vecInstanceDescs[i].vSInstUp.y };
+			_float2 vPos = _float2{ 
+				m_tUIDesc.vecInstanceDescs[i].vSInstTrans.x + m_CombinedWorldMatrix._41,
+				m_tUIDesc.vecInstanceDescs[i].vSInstTrans.y + m_CombinedWorldMatrix._42
+			};
+			_float2 vSca = _float2{
+				m_tUIDesc.vecInstanceDescs[i].vSInstRight.x * m_CombinedWorldMatrix._11,
+				m_tUIDesc.vecInstanceDescs[i].vSInstUp.y	* m_CombinedWorldMatrix._22
+			};
 
 			if (ISINSPACE(tCursorPos, vPos, vSca))
 			{
@@ -330,30 +335,20 @@ void  CCustom_UI::Update_CacheTransform(_float fTimeDelta)   // Caching Calculat
 }
 #endif // KSTA_ON_TRANSFORM_CACHING
 
-
-/*
-HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
+HRESULT CCustom_UI::Add_ExtraTexture(_wstring strFileName)
 {
-    ASSERT_CRASH(pArg);
-    CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
+	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	CTexture* pExtraTexture = nullptr;
 
-    const   _wstring    strFilePath = pDesc->strFilePath;
-    const   _wstring	strFileName = pDesc->strFileName;
-    const   _uint       iNumFiles = pDesc->iNumFiles;
+	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Texture_Custom_" + strFileName),
+		TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&pExtraTexture), nullptr)))
+		CRASH("해당하는 텍스쳐 프로토타입 없음.");
 
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::UI);
+	if (pExtraTexture)
+		m_vecExtraTextureCom.push_back(pExtraTexture);
 
-    // 텍스쳐 프로토타입화
-    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
-        CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
-
-
-    return S_OK;
+	return S_OK;
 }
-*/
-
-//HRESULT CCustom_UI::Ready_Prototypes
 
 HRESULT CCustom_UI::Ready_Components(void* pArg)
 {
@@ -738,10 +733,14 @@ void CCustom_UI::Free()
 
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pVIBufferCom);
-    Safe_Release(m_pTextureCom); 
+    
+	Safe_Release(m_pTextureCom); 
+
+	for (auto& extraTextureCom : m_vecExtraTextureCom)		Safe_Release(extraTextureCom);
+	m_vecExtraTextureCom.clear();
+
     Safe_Release(m_pAnimator_UICom);
 
-    for (auto& child : m_vecChildObjects)
-        Safe_Release(child);
+    for (auto& child : m_vecChildObjects)					Safe_Release(child);
     m_vecChildObjects.clear();
 }

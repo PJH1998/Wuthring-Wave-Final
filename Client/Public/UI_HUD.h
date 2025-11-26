@@ -47,6 +47,7 @@ private:
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
+	void					Update_UI_SkillSection_Utility(_float fTimeDelta);
 	void					Update_UI_SkillSection_BG(_float fTimeDelta);
 	void					Update_UI_SkillFeedback_Trigger(_float fTimeDelta);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
@@ -82,6 +83,7 @@ private:
 	CCustom_UI* m_pUI_Skill_ReadyFrame = nullptr;
 	CCustom_UI* m_pUI_Skill_BG = nullptr;
 	CCustom_UI* m_pUI_SectorRB_SkillIcons = nullptr;
+	CCustom_UI* m_pUI_Skill_Utility = nullptr;
 	CCustom_UI* m_pUI_Feedback = nullptr;
 	CCustom_UI* m_pUI_HPBar = nullptr;
 	CCustom_UI* m_pUI_BossHPBar = nullptr;
@@ -121,21 +123,17 @@ private:
 	class CPlayerStatus*	m_pPlayerStatus = { nullptr };
 	class CAbility*			m_pAbility = { nullptr };
 	
-
-	// * Temp assumed value.
-	//		| ROVER		|  AUGUSTA			| GARBENA
-	// ------------------------------------------------------------
-	//	0	| Normal	| Normal			| Normal
-	//	1	| DarkSerge	| Normal - Combo 1	| Normal - Burst Ready
-	//	2	| 			| Normal - Combo 2	| Burst
-	//	3	| 			| Normal - Combo 3	|
-	//	4	| 			| Ult				|
-	_uint					m_iPlayerEnhancedMode = 0;	// 용도 표시용으로 분기 둠. 나중에 제거.
-
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
+	array<array<_float2, 2>, 5>						m_arrUtilCoordPresets = {};
 	_uint m_iSelectedCHIndex = 0;
 
+
+private:
+	_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+
+private:
 
 	// ========== for Boss ==========
 	_bool					m_isOn_BossStatus = false;

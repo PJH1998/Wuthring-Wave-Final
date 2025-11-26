@@ -9,6 +9,7 @@
 #include "Corosaurus.h"
 #include "Projectile.h"
 #include "AoEDoT.h"
+#include "NPCInstancing.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -31,7 +32,10 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
-	m_pGameInstance->Setting_LUT(0, 0.25f, false);
+//	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
+
+	//m_pGameInstance->Setting_LUT(0, 0.25f, false);
+	m_pGameInstance->Setting_LUT(1, 0.77f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -60,7 +64,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 //	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
 //	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vDiffuse = _float4(0.5f, 0.55f, 0.85f, 1.f);
 //LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
@@ -78,6 +82,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
 	Ready_CoroSaurus();
+	Ready_NPC();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -87,6 +92,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Skybox();
 	Ready_Mouse();
 	Ready_SFX();
+
+//	m_pGameInstance->Bake_EnvMaps();
 
 	return S_OK;
 }
@@ -147,6 +154,47 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 		isTargetAlive)
 		pTargetMobHPBarUI->SetActivate(false);
 #pragma endregion
+
+
+#pragma region [TAB] KSTA_UITEST_TABUTILITY
+	static _bool isTabUtilityActive = false;
+	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+
+	//_uint iTabUtilitySelectedIndex = UINT_MAX;
+	_bool isTabUtilityHided = false;
+
+	if (!isTabUtilityActive &&
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
+		isTabUtilityActive = true;
+	}
+	else if (isTabUtilityActive &&
+		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
+	{
+		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
+		isTabUtilityActive = false;
+		isTabUtilityHided = true;
+	}
+
+
+	_string strSelectedUtilityName = {};
+	if (isTabUtilityHided)
+	{
+		switch (iTmpSelectedUtility)
+		{
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
+		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
+		}
+
+		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
+	}
+
+#pragma endregion
+
 }
 
 void CLevel_GamePlay::Render()
@@ -372,10 +420,13 @@ void CLevel_GamePlay::Ready_Effect()
 void CLevel_GamePlay::Ready_Skybox()
 {
 	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
-	SkyboxDesc.iNumModel = 2;
+	SkyboxDesc.iNumModel = 4;
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
 	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
-	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX2"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Cloud"));
+	SkyboxDesc.vUVRate = _float2(9.f, 12.f);
+	SkyboxDesc.fFXScaleRate = 0.2f;
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
@@ -420,6 +471,12 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
 		CRASH("Failed Ready MobHPBar");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
+		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
+		CRASH("Failed Ready TabUtility");
+
+
+	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
 }
 
@@ -448,6 +505,19 @@ void CLevel_GamePlay::Ready_SFX()
 	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
 
 #pragma endregion
+}
+
+void CLevel_GamePlay::Ready_NPC()
+{
+	CNPCInstancing::NPC_DESC NPCDesc{};
+	NPCDesc.eCurLevel = m_eCurLevel;
+	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"));
+	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleM"));
+	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_NPCCell");
+	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
 }
 
 #ifdef _DEBUG
@@ -503,26 +573,26 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	//	m_pGameInstance->SettingHDR(m_fExposure);
 	//
 	//}
-	//if (ImGui::CollapsingHeader("LUT"))
-	//{
-	//	if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
-	//	{
-	//		for (_uint i = 0; i < 7; ++i)
-	//		{
+	if (ImGui::CollapsingHeader("LUT"))
+	{
+		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
+		{
+			for (_uint i = 0; i < 7; ++i)
+			{
 
-	//			if (ImGui::Selectable(to_string(i).c_str()))
-	//			{
-	//				m_iLUT_Index = i;
-	//			}
-	//		}
+				if (ImGui::Selectable(to_string(i).c_str()))
+				{
+					m_iLUT_Index = i;
+				}
+			}
 
-	//		ImGui::EndCombo();
-	//	}
-
-	//	ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
-	//	ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-	//	m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
-	//}
+			ImGui::EndCombo();
+		}
+	
+		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
+		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+	}
 
 	ImGui::End();
 	//if (ImGui::CollapsingHeader("MOTION_BLUR"))

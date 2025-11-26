@@ -134,7 +134,39 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    
     Out.vPBR.y = 0.2f;
+    Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+PS_OUT PS_NORMAL_YELLOW(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    float4 vNormal1 = normalize(NormalDesc * 2.f - 1.f);
+    if (NormalDesc.x > NormalDesc.z && NormalDesc.y > NormalDesc.z)
+        vNormal1.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
+    float3 vNormal = vNormal1.xyz;
+    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    //Out.vPBR.x = vNormal1.b; // PBR.X = 노말 텍스처 Blue, Z 값
+    Out.vPBR.y = vNormal1.a; // PBR.y = 노말 텍스처 Alpha 값
+    //Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
     
     return Out;
@@ -181,20 +213,19 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     if(g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        Out.vSSS.a = 1.f; // test
     }
     
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
-
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -236,12 +267,9 @@ PS_OUT PS_ROVER(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        Out.vSSS.a = 1.f; // test
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
@@ -250,6 +278,8 @@ PS_OUT PS_ROVER(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -291,14 +321,10 @@ PS_OUT PS_GALBRENA(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-
-        Out.vSSS.a = 1.f; // test
+        
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
-    //Test
-    Out.vPBR.a = 1.f;
-
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = vNormal;
@@ -306,6 +332,8 @@ PS_OUT PS_GALBRENA(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -347,12 +375,8 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
     if (g_HasSkinMask)
     {
         Out.vSSS = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        Out.vSSS.a = 1.f; // test
     }
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-    
-    //Test
-    Out.vPBR.a = 1.f;
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     
@@ -361,6 +385,8 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
     
     return Out;
 }
@@ -514,6 +540,7 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
         Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
         Out.vDepth.y = In.vProjPos.w;
         Out.vDepth.z = 1.f;
+    
         Out.vPBR.z = 1.f;
     }
     else
@@ -612,7 +639,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_NORMALTEX();
+        PixelShader = compile ps_5_0 PS_NORMAL_YELLOW();
     }
 
     pass LogoRover // 8

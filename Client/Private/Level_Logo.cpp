@@ -19,6 +19,8 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
+//	m_pGameInstance->Add_Probe(_float3(0.f, 5.f, 0.f), 500.f);
+
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
 
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
@@ -26,6 +28,7 @@ HRESULT CLevel_Logo::Initialize()
 	Ready_Layer_LogoFemaleRover();
 	Ready_UI();
 	Ready_Camera();
+	Ready_SkyBox();
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -40,6 +43,8 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SettingFog(true);
 
 	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
+
+//	m_pGameInstance->Bake_EnvMaps();
 
     return S_OK;
 }
@@ -146,6 +151,12 @@ void CLevel_Logo::Ready_UI()
 
 	cout << "[Level_Logo::Ready_UI] Logo UI Loaded!" << endl;
 	// _UI
+}
+
+void CLevel_Logo::Ready_SkyBox()
+{
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_LogoSkyBox"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_SkyBox"))))
+		CRASH("Failed to Add GameObject To Layer SkyBox");
 }
 
 

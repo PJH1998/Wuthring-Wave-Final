@@ -383,8 +383,20 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\SSS">
       <UniqueIdentifier>{e98527a6-6b5a-432f-8e18-5d7e2048d4fd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\99. Renderer\SFX\SSR">
+    <Filter Include="01. Utility\19.EnvironmentMap">
+      <UniqueIdentifier>{1746a0c5-a5dc-4846-9965-d94792c1d303}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\19.EnvironmentMap\Probe">
+      <UniqueIdentifier>{35e0b51f-8e80-4942-9ea0-c097861931a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Water">
       <UniqueIdentifier>{1d22ec99-b1b4-4f75-a716-665728fad5fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Model\Animation\MorphChannel">
+      <UniqueIdentifier>{ffcb18d6-3f35-4e61-bb31-e24180b30d7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Model\Mesh\ShapeKey">
+      <UniqueIdentifier>{5e9d27af-5e70-4c26-8439-18f578372255}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -781,9 +793,21 @@
     <ClInclude Include="..\public\SubsurfaceScattering.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\ScreenSpaceReflection.h">
-      <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
+    <ClInclude Include="..\public\Water.h">
+      <Filter>01. Utility\99. Renderer\SFX\Water</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\EnvironmentMap.h">
+      <Filter>01. Utility\19.EnvironmentMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Probe.h">
+      <Filter>01. Utility\19.EnvironmentMap\Probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MorphChannel.h">
+      <Filter>01. Utility\04. Component\Model\Animation\MorphChannel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ShapeKey.h">
+      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
+    </ClInclude> 
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1155,8 +1179,20 @@
     <ClCompile Include="..\private\SubsurfaceScattering.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\SSS</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\ScreenSpaceReflection.cpp">
-      <Filter>01. Utility\99. Renderer\SFX\SSR</Filter>
+    <ClCompile Include="..\private\Water.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Water</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\EnvironmentMap.cpp">
+      <Filter>01. Utility\19.EnvironmentMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Probe.cpp">
+      <Filter>01. Utility\19.EnvironmentMap\Probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MorphChannel.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\MorphChannel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ShapeKey.cpp">
+      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1169,13 +1205,13 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
-    <None Include="..\..\Editor\Default\Editor.vcxproj.filters">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-    </None>
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Water.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
   </ItemGroup>
@@ -1223,6 +1259,9 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSS.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_EnvMapDeferred.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

@@ -21,6 +21,7 @@ private:
 	HRESULT				Load_Object();
 	HRESULT				Load_MonsterTest();
 	HRESULT				Load_Monster();
+	HRESULT				Load_NPC();
 
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();

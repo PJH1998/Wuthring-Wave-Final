@@ -74,6 +74,12 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vOutlineColor		= { 0.900f, 0.900f, 0.900f, 0.5f };
 	tDesc.fFontOutlineWidth = 4.f;
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_PLAYERHP)] = tDesc;
+	// - TabUtil (탭 유틸리티 창 글자)
+	tDesc.vColor			= { 0.950f, 0.950f, 0.950f, 1.0f };
+	tDesc.vOutlineColor		= { 0.900f, 0.900f, 0.900f, 0.5f };
+	tDesc.fFontOutlineWidth = 0.f;
+	tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_TABUTIL)] = tDesc;
 
 
 

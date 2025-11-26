@@ -9,6 +9,7 @@ NS_END
 NS_BEGIN(Client)
 class CGameSystem;
 class CAttackVolume;
+class CCoro_Rock;
 
 class CCorosaurus final : public CActor
 {
@@ -27,7 +28,7 @@ public:
 
 private:
 	enum ATK_SOCKET { HEAD0, TAIL, END };
-	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, BURST, ATTACK8, ATK_END };
+	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK8, BURST, ATK_END };
 	enum CORO_SHADER {TAIL2, TAIL1, LEG, HEAD, BODY};
 private:
 	explicit CCorosaurus(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -53,6 +54,7 @@ private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CGameSystem*		m_pGameSystem = { nullptr };
+	CCoro_Rock*			m_pCoroRock = { nullptr };
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;

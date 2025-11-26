@@ -29,7 +29,7 @@ public:
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
 	//============================Effect
 
-	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
@@ -40,7 +40,7 @@ public:
 
 #pragma region DIRECTOR
 	void							Add_Action(const _char* pFolderPath);
-	void							Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain);
+	void							Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape = false);
 	void							Stop_Action();
 #pragma endregion
 
@@ -62,6 +62,7 @@ public:
 
 #pragma region [UI] CONTROL_HELPER
 	// UI 꺼내쓰기용. 혹 수정 필요시 말해주세요.
+	void		PreAssign_TargetUIs();	// Initialize for UI caching. call after ui load.
 
 	// 기존 GameInstance 에서는 번거롭게 캐스팅 필요하던 걸, 편하게 가져오도록 캐스팅 내장시켜서 재정의.
 	class CCustom_UI*	Find_RootUI(_wstring strName);
@@ -102,11 +103,18 @@ public:
 	// 살아 있는 동안 매 프레임 호출이 필요하며, 요구 구조체 내의 iMonsterPtrKey 는 몹 주소를 reinterpret_cast 를 통해 할당해주시면 됩니다.
 	void		Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
 
-	// [WIP] 탭 유틸리티 UI를 켭니다. 마우스 커서 락 해제 필요.(wip)
-	void		Show_TabUtilityUI();
-	// [WIP] 탭 유틸리티 UI를 끄라는 요청을 보내며 (애니메이션 재생을 위함), 선택한 유틸리티를 반환합니다.
-	//       반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
+	// 탭 유틸리티 UI를 켭니다. /  iCurSelectedUtilityIndex : 현재 선택중인 유틸리티 인덱스 (UI_TAB_UTILITY Enum을 따름)
+	// 마우스 커서 락 해제 필요.(wip)
+	void		Show_TabUtilityUI(_uint iCurSelectedUtilityIndex = ENUM_CLASS(UI_TAB_UTILITY::NOTHING));
+	// 탭 유틸리티 UI를 끄라는 요청을 보내며 (애니메이션 재생을 위함), 선택한 유틸리티를 반환합니다.
+	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
 	_uint		HideNGet_TabUtilityUI();
+
+	// [WIP] 다채화를 켭니다.
+	void		Open_Game_OverflowPalette();
+	// [WIP] 다채화를 끕니다.
+	void		Close_Game_OverflowPalette();
+
 #pragma endregion
 
 #pragma region PLAYER STATUS
@@ -134,6 +142,9 @@ public:
 #pragma region MONSTER_TABLE
 	HRESULT LoadMonsterTable(const _char* pFilePath);
 	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
+	_uint Get_NumNPCInstance(_uint iType) const;
+	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
 #pragma endregion
 
 #pragma region SFX_PREFAB

@@ -203,6 +203,7 @@
     <ClInclude Include="..\Public\Galbrena_SFX.h" />
     <ClInclude Include="..\Public\Galbrena_SFX_Circle.h" />
     <ClInclude Include="..\public\Galbrena_SFX_Star.h" />
+    <ClInclude Include="..\Public\GltfLoader.h" />
     <ClInclude Include="..\Public\Interface_Edit.h" />
     <ClInclude Include="..\Public\Level_Animation.h" />
     <ClInclude Include="..\Public\Level_Camera.h" />
@@ -288,6 +289,7 @@
     <ClCompile Include="..\Private\Galbrena_SFX.cpp" />
     <ClCompile Include="..\Private\Galbrena_SFX_Circle.cpp" />
     <ClCompile Include="..\private\Galbrena_SFX_Star.cpp" />
+    <ClCompile Include="..\Private\GltflLoader.cpp" />
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
     <ClCompile Include="..\Private\Level_Camera.cpp" />

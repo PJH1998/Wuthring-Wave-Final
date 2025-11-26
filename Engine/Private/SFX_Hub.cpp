@@ -10,7 +10,7 @@
 #include "ScreenBlur.h"
 #include "RadialBlur.h"
 #include "SubsurfaceScattering.h"
-#include "ScreenSpaceReflection.h"
+#include "Water.h"
 
 CSFX_Hub::CSFX_Hub(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -154,8 +154,8 @@ void CSFX_Hub::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLen
 }
 void CSFX_Hub::Set_SSR(_float fMinStep, _float fMaxStep, _float fStartOffset)
 {
-	CScreenSpaceReflection* pSSR = static_cast<CScreenSpaceReflection*>(Find_SFX(SFX_TYPE::SSR));
-	pSSR->Set_SSR(fMinStep, fMaxStep, fStartOffset);
+	CWater* pWater = static_cast<CWater*>(Find_SFX(SFX_TYPE::WATER));
+	pWater->Set_SSR(fMinStep, fMaxStep, fStartOffset);
 }
 #endif
 
@@ -197,9 +197,9 @@ HRESULT CSFX_Hub::Ready_SFX()
 	ASSERT_CRASH(pSSS);
 	m_SFXs.emplace(SFX_TYPE::SSS, pSSS);
 
-	CScreenSpaceReflection* pSSR = CScreenSpaceReflection::Create(m_pDevice, m_pContext);
-	ASSERT_CRASH(pSSR);
-	m_SFXs.emplace(SFX_TYPE::SSR, pSSR);
+	CWater* pWater = CWater::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(pWater);
+	m_SFXs.emplace(SFX_TYPE::WATER, pWater);
 
 	return S_OK;
 }

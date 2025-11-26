@@ -38,8 +38,11 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 	Sync_Sectors();
 
-	//if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
-	//	return E_FAIL;
+	// Env Map Bake
+	//m_pGameInstance->Add_EnvMap_StaticObject(this);
+
+	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -118,6 +121,10 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 
 void CMapObject::Render_Shadow()
 {
+	_uint iLODIndex = 0;
+	if (iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
+
 	m_pTransformCom->Bind_Matrix(m_pShadowShaderCom, "g_WorldMatrix");
 
 	for (auto& iSector : m_Sectors)
@@ -128,14 +135,62 @@ void CMapObject::Render_Shadow()
 		if (FAILED(m_pShadowShaderCom->Bind_Value("g_iShadowMapLayer", &iLayer, sizeof(_uint))))
 			CRASH("Failed Bind ShadowMapLayer");
 
-		_uint iNumMesh = m_pModelComArray[0]->Get_NumMesh();
+		_uint iNumMesh = m_pModelCom->Get_NumMesh(0);
 
+		m_pModelCom->Bind_Buffer(m_pContext, iLODIndex);
 		for (_uint i = 0; i < iNumMesh; ++i)
 		{
 			m_pShadowShaderCom->Begin(8);
 
-			m_pModelComArray[0]->Render(i);
+			m_pModelCom->Render(iLODIndex, i);
 		}
+	}
+}
+
+void CMapObject::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
+{
+	_uint iLODIndex = 0;
+	if (iLODIndex > m_pModelCom->Get_LastLODIndex())
+		return;
+
+	_bool HasNormal = { true };
+	_bool HasMask = { true };
+	_uint iNumMesh = m_pModelCom->Get_NumMesh(iLODIndex);
+
+	m_pTransformCom->Bind_Matrix(m_pShadowShaderCom, "g_WorldMatrix");
+	m_pShadowShaderCom->Bind_Matrix("g_ViewMatrix", &ViewMatrix);
+	m_pShadowShaderCom->Bind_Matrix("g_ProjMatrix", &ProjMatrix);
+
+	m_pModelCom->Bind_Buffer(m_pContext, iLODIndex);
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (m_pModelCom->Is_Overed(iLODIndex, i))
+			return;
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShadowShaderCom, "g_MaskTexture", iLODIndex, i, TEXTURETYPE::MASK)))
+		{
+			m_pShadowShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+			HasMask = false;
+		}
+
+		if (HasMask)
+		{
+			m_pModelCom->Bind_Materials(m_pShadowShaderCom, "g_DiffuseTexture", iLODIndex, i, TEXTURETYPE::DIFFUSE);
+
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShadowShaderCom, "g_NormalTexture", iLODIndex, i, TEXTURETYPE::NORMAL)))
+				HasNormal = false;
+		}
+		else
+		{
+			m_pModelCom->Bind_Materials(m_pShadowShaderCom, "g_DiffuseTexture", iLODIndex, i, TEXTURETYPE::DIFFUSE, 0);
+
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShadowShaderCom, "g_NormalTexture", iLODIndex, i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = false;
+		}
+		m_pShadowShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShadowShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+
+		m_pShadowShaderCom->Begin(m_iShaderPassIndex);
+		m_pModelCom->Render(iLODIndex, i);
 	}
 }
 
@@ -155,8 +210,6 @@ void CMapObject::Ready_Component(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
-	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
-	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
@@ -252,8 +305,4 @@ void CMapObject::Free()
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pModelCom);
-	for (auto& pModel : m_pModelComArray)
-		Safe_Release(pModel);
-
-	m_pModelComArray.clear();
 }

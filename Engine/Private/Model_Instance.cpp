@@ -1,6 +1,6 @@
 ﻿#include"EnginePch.h"
 #include"Model_Instance.h"
-#include"MeshMaterial.h"
+#include"Material.h"
 #include"Mesh_Instance.h"
 
 CModel_Instance::CModel_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -185,7 +185,7 @@ HRESULT CModel_Instance::Ready_Material(const _char* pFilePath)
 
 	for (auto& MaterialData : MaterialsData["Materials"])
 	{
-		CMeshMaterial* pMeshMaterial = CMeshMaterial::Create(m_pDevice, m_pContext, szMaterialFilePath, MaterialData);
+		CMaterial* pMeshMaterial = CMaterial::Create(m_pDevice, m_pContext, MaterialData);
 		if (nullptr == pMeshMaterial)
 			return E_FAIL;
 		m_Materials.push_back(pMeshMaterial);

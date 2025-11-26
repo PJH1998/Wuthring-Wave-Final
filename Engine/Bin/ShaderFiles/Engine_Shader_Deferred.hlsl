@@ -1,4 +1,5 @@
 #include "Engine_Shader_Shadow.hlsli"
+#include "Engine_Shader_Water.hlsli"
 
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
@@ -99,12 +100,6 @@ float4 g_fRimIntensity = 0.8f;
 
 //SFX
 float g_fEffectIntensity;
-
-//SSR
-float g_fMinStepSize;
-float g_fMaxStepSize;
-float g_fStartOffset;
-
 
 //DEBUG
 bool g_IsStylized;
@@ -278,14 +273,11 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     {
         Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         
-        vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-        float fViewZ = vViewPos.z;
+        //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+        //float fViewZ = vViewPos.z;
 
-        vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-    
-        float fShadowMap = 1.f;
-    
-        float fShadowNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
+        //vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+
     
         if (g_HasShadowMap)
         {
@@ -347,7 +339,6 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
  
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
  
-    
     float3 vLightDiffuse = 0.f;
     float3 vLightSpecular = 0.f;
     
@@ -447,12 +438,13 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
     
     float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    
     bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
-    if(false == IsDynamic)
+    bool IsSky = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    
+    if (false == IsDynamic)
         vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
     
-    if (false == g_IsDynamicLUT && true == IsDynamic)
+    if ((false == g_IsDynamicLUT && true == IsDynamic) || false == IsSky)
     {
         Out.vColor = vOriginColor;
     
@@ -635,7 +627,7 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
     
         float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
     
-        float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight); // 버퍼 안먹음 임시
+        float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight);
         vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
         
         float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
@@ -653,10 +645,12 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     
     float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     float4 vBlurColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
-    float2 vVelocity = g_VelocityMap.Sample(DefaultSampler, In.vTexcoord).xy;
-    
-    bool IsBlur = length(vVelocity) > g_fLimitVelocity ? true : false;
-    
+    float4 vVelocity = g_VelocityMap.Sample(DefaultSampler, In.vTexcoord);
+  
+    bool IsBlur = (vVelocity.w != 1.f && length(vVelocity) > g_fLimitVelocity) ? true : false;
+   
+    //float fLerpRatio = clamp(g_fEffectIntensity, 0.f, 0.5f);
+   
     if(IsBlur)
         Out.vColor = lerp(vOriginColor, vBlurColor, g_fEffectIntensity);
     else
@@ -665,67 +659,59 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     return Out;
 }
 
-PS_OUT_BACKBUFFER PS_SSR(PS_IN In)
+PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
     float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
-    vNormal = normalize(mul(vNormal, g_CamViewMatrix));
+    float4 vViewNormal = normalize(mul(vNormal, g_CamViewMatrix));
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
-    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
-    if (vViewPos.z == 0.f || g_iStep <= 0 || g_fMaxDistance <= g_fStartOffset)
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+   
+    float4 vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
+   
+    if(vPBRDesc.w != 1.f)
     {
         Out.vColor = vOriginColor;
         return Out;
     }
-        
-    float4 vLook = normalize(float4(vViewPos.xyz, 0.f));
+   
+    float4 vSceneDesc = g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord);
+   
+   
+    float4 vSceneWorldPos = 0.f;
     
-    float4 vReflect = normalize(float4(reflect(vLook.xyz, vNormal.xyz), 0.f));
+    vSceneWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+    vSceneWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+    vSceneWorldPos.z = vSceneDesc.z;
+    vSceneWorldPos.w = 1.f;
     
-    float4 vReflectColor = 0.f;
-
-    bool IsHit = false;
+    vSceneWorldPos *= vSceneDesc.w;
     
-    float fOffsetSize = g_fStartOffset;
+    vSceneWorldPos = mul(vSceneWorldPos, g_ProjMatrixInv);
+    vSceneWorldPos = mul(vSceneWorldPos, g_ViewMatrixInv);
     
-    [unroll]
-    for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
-    {
-        float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
-       
-        float4 vProjPos = mul(vLay, g_CamProjMatrix);
-        
-        vProjPos /= vProjPos.w;
-
-        if (false == IsInNDC(vProjPos))
-            break;
-        
-        float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
-        
-        float fDepth = g_DepthTexture.Sample(DefaultSampler, vTexcoord).y;
-                             
-        if (fDepth <= vLay.z || fDepth == 0.f)
-        {
-            IsHit = true;
-            vReflectColor = g_BackBufferTexture.Sample(DefaultSampler, vTexcoord);
-            break;
-        }
-        
-        float fOffsetRatio = saturate( i / g_iStep);
-        
-        fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
-    }
+    float4 vWaterColor = float4(0.1f, 0.5f, 0.1f, 1.f);
     
-    if(IsHit)
-        Out.vColor =  float4(lerp(vOriginColor.xyz, vReflectColor.xyz, 0.5f), 1.f);
-    else
-        Out.vColor = vOriginColor;
-        
+    float4 vReflectColor = Compute_Reflect(vWorldPos, vViewPos, vViewNormal, vOriginColor, g_BackBufferTexture, g_DepthTexture);
+    float4 vRefractColor = Compute_Refract(vWorldPos, vNormal, vWaterColor, g_BackBufferTexture, (vWorldPos.y - vSceneWorldPos.y));
+    
+    float3 vLook = normalize(g_vCamPosition.xyz - vWorldPos.xyz);
+    
+    float fNdotV = saturate(dot(vNormal.xyz, vLook));
+    
+    float3 vF0 = 0.02f;
+    float3 vFresnel = Compute_Fresnel(vF0, fNdotV);
+    
+    float fReflectRatio = lerp(0.5f, 0.8f, vFresnel.r);
+    
+    Out.vColor = lerp(vReflectColor, vRefractColor, fReflectRatio);
+    
     return Out;
 }
 
@@ -993,7 +979,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MOTION_BLUR();
     }
     
-    pass SSR
+    pass WATER // SSR
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -1001,7 +987,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_SSR();
+        PixelShader = compile ps_5_0 PS_WATER(); // PS_SSR
     }
 
     pass WEIGHTBLEND

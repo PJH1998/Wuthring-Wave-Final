@@ -5,7 +5,7 @@ namespace Client
 {
 	enum class LEVEL { STATIC, LOGO, GAMEPLAY, HEAVEN, LOADING, TEST, TEST_UI, END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
-	enum class COLLISIONLAYER { NONE, MAP, QTE, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
+	enum class COLLISIONLAYER { NONE, MAP, QTE, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, NPC, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
@@ -49,6 +49,8 @@ namespace Client
 		UIFLAG_SIMPLEMASK,			// 단순 마스킹용
 		UIFLAG_ACTIVEFEEDBACK,		// 조작 피드백 (스케일 커지며 사라지는 것)
 		UIFLAG_ENEMY_HP,			// 적 체력바용
+
+		UIFLAG_OVFL_PALETTE,		// 팔레트
 
 		UIFLAG_END
 	};
@@ -114,6 +116,19 @@ namespace Client
 		, DISSOLVE_NORMAL // 9
 		, END };
 
+	enum class SHADER_ANIMMESH_CHARACTER { 
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX // 1
+		, AUGUSTA // 2
+		, SHADOW // 3
+		, OUNTLINE // 4
+		, ROVER // 5
+		, GALBRENA // 6
+		, NORMAL_YELLOW // 7
+		, LOGOROVER // 8
+		, DISSOLVE_NORMAL // 9
+		, END };
+
 	enum class SHADER_PROPANIMMESH {
 		DEFAULT_NORMAL = 0
 		, NORMAL_TEX // 1
@@ -121,6 +136,16 @@ namespace Client
 		, OUNTLINE // 3
 		, DEFAULT_WEAPON // 4
 		, DISSOLVE_WEAPON // 5
+		, END
+	};
+
+	enum class SHADER_ANIMINST {
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX // 1
+		, AUGUSTA // 2
+		, SHADOW // 3
+		, OUNTLINE // 4
+		, FACE	// 5
 		, END
 	};
 
@@ -143,6 +168,7 @@ namespace Client
 
 		TT_BOSSNAME,
 		TT_PLAYERHP,
+		TT_TABUTIL,
 
 		END
 	};
@@ -156,11 +182,11 @@ namespace Client
 	};
 
 	enum class UI_TAB_UTILITY : unsigned int {
-		GRAPPLE,
-		SENSOR,
-		FLIGHT,
-		LEVITATOR,
+		GRAPPLE,		// 그래플
+		SENSOR,			// 스캔
+		FLIGHT,			// 활공
+		LEVITATOR,		// 컨트롤
 
-		NOTHING
+		NOTHING			// UI OFF 시 아무것도 선택되지 않음
 	};
 }

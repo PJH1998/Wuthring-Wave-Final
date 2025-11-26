@@ -75,6 +75,12 @@ void CStateMachine::Add_State(const StateKey& key, CState* pState)
     m_States.emplace(key, pState);
 }
 
+void CStateMachine::Exit_State()
+{
+	if (nullptr != m_pCurrentState)
+		m_pCurrentState->OnExit();
+}
+
 
 #pragma endregion
 

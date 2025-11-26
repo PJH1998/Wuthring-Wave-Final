@@ -101,6 +101,7 @@ void CUI_HUD::Update(_float fTimeDelta)
 
 	Update_UI_SkillSection(fTimeDelta);
 	Update_UI_SkillSection_BG(fTimeDelta);
+	Update_UI_SkillSection_Utility(fTimeDelta);
 	Update_UI_SkillFeedback_Trigger(fTimeDelta);
 	Update_UI_SkillSection_OnFeedback(fTimeDelta);
 	Update_UI_PlayerHPBar(fTimeDelta);
@@ -151,6 +152,7 @@ void CUI_HUD::PreAssign_ChildUIs()
 	m_pUI_Skill_BG = Find_ChildObject(L"Skill_BackgroundImage");
 
 	m_pUI_SectorRB_SkillIcons = Find_ChildObject(L"SectorRB_SkillIcons");
+	m_pUI_Skill_Utility = Find_ChildObject(L"Skill_Utility");
 
 	m_pUI_Feedback = Find_ChildObject(L"Skill_OnFeedback");
 
@@ -201,16 +203,20 @@ void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey,
 	m_strMonsterKey		= pMonsterKey;
 
 	// 텍스트 객체에, 출력될 텍스트를 변경
-	CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
-	if (nullptr != pTargetText)
-	{
-		auto& bossNameDesc = pTargetText->Get_TextUIDesc();
 
-		bossNameDesc.strText = strUIBosssName;
-		//pTargetText->Set_TextUIDesc(bossNameDesc);
-		pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
-		pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
-	}
+	CUI_Text* pTargetText = static_cast<CUI_Text*>(m_pTextUI_BossName);
+	pTargetText->Change_Text(strUIBosssName, TEXT_ALIGN_TYPE::CENTER);
+
+
+	//CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
+	//if (nullptr != pTargetText)
+	//{
+	//	auto& bossNameDesc = pTargetText->Get_TextUIDesc();
+	//
+	//	bossNameDesc.strText = strUIBosssName;
+	//	//pTargetText->Set_TextUIDesc(bossNameDesc);
+	//	pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
+	//}
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)
@@ -247,6 +253,14 @@ HRESULT CUI_HUD::Ready_Presets()
 	m_mapSkillTexIndices.emplace(L"Galbrena_R",					Calc_SpriteSpace(6, 0, iImgSize_Galbrena));
 	m_mapSkillTexIndices.emplace(L"Galbrena_LB_Burst",			Calc_SpriteSpace(2, 0, iImgSize_Galbrena));
 
+
+
+	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::GRAPPLE)]	= {_float2(0.00f, 0.25f), _float2(0.50f, 0.75f)}; 
+	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::SENSOR)]	= {_float2(0.75f, 1.00f), _float2(0.25f, 0.50f)}; 
+	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::FLIGHT)]	= {_float2(0.25f, 0.50f), _float2(0.75f, 1.00f)}; 
+	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::LEVITATOR)]= {_float2(0.25f, 0.50f), _float2(0.50f, 0.75f)}; 
+	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::NOTHING)]	= {_float2(0.75f, 1.00f), _float2(0.75f, 1.00f)};
+
 	return S_OK;
 }
 
@@ -254,7 +268,7 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 {
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f - 477.f},
-		L"테스트용 이름입니다.",	// 상호작용 글씨
+		L"",	// 상호작용 글씨
 		TEXT_COLOR_TYPE::TT_BOSSNAME,
 		0.4f,
 		L"UI_Text_HUD_BossName"
@@ -294,7 +308,7 @@ HRESULT CUI_HUD::Ready_PlayerHPText()
 {
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f + 496.f },
-		L"이건테스트에요",	// 현재체력/최대체력 표시
+		L"0/0",	// 현재체력/최대체력 표시
 		TEXT_COLOR_TYPE::TT_PLAYERHP,
 		0.22f,
 		L"UI_Text_Player_HP"
@@ -416,9 +430,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
 
-
-
-		// ksta : must separate later..
 		auto& UISlots = m_pAbility->Get_UISkillSlots();
 		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(m_iSelectedCHIndex);
 		switch (eCharacterType)
@@ -452,7 +463,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
     // ==============================
 	// * [Change Update] Cooldown
-	// ======wwwwwwwwwww==================
+	// ==============================
     for (_uint i = 0; i < CH_END; i++)
     {
         _float fCooldown = fChangeCD[i];
@@ -615,6 +626,22 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     std::cout << "[UI_HUD][Update_UI_Cooldown] R fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
 #endif // KSTA_UI_COOLDOWNTEST
 
+}
+
+void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
+{
+	CCustom_UI* pTargetUI = m_pUI_Skill_Utility;
+
+	auto utilDesc = pTargetUI->Get_UIDesc();
+	auto& utilInstDesc = utilDesc.vecInstanceDescs[0];
+
+
+	// ksta : m_iUtilityIndex_Tmp 나중에 플레이어가 들고있는 현재 유틸스킬 반드시 연결할 것.
+
+	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][0];
+	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][1];
+
+	pTargetUI->Set_UIDesc(utilDesc);
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)

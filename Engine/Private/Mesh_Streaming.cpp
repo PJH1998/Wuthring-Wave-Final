@@ -11,6 +11,9 @@ CMesh_Streaming::CMesh_Streaming(const CMesh_Streaming& Prototype)
 	m_pSharedVB{Prototype.m_pSharedVB},
 	m_pSharedIB{Prototype.m_pSharedIB},
 	m_Desc{ Prototype.m_Desc }
+#ifdef _DEBUG
+	,m_pBoundingBox{Prototype.m_pBoundingBox }
+#endif
 {
 	Safe_AddRef(m_pSharedVB);
 	Safe_AddRef(m_pSharedIB);
@@ -126,6 +129,85 @@ void CMesh_Streaming::Destroy_RigidData()
 	Safe_Delete_Array(m_vecIndices);
 }
 
+#ifdef _DEBUG
+void CMesh_Streaming::Ready_BoundingBox()
+{
+	if (m_pBoundingBox)
+		return;
+	_float* pMin = new _float[3];
+	_float* pMax = new _float[3];
+
+	for (_uint i = 0; i < 3; ++i)
+	{
+		pMin[i] = FLT_MAX;
+		pMax[i] = FLT_MIN;
+	}
+	for (_uint iMeshIndex = 0; iMeshIndex < m_iNumMeshes; ++iMeshIndex)
+	{
+		auto& pVertex = m_vecVertexPos[iMeshIndex];
+		for (_uint i = 0; i < pVertex.size(); ++i)
+		{
+			pMax[0] = max(pVertex[i].x, pMax[0]);
+			pMax[1] = max(pVertex[i].y, pMax[1]);
+			pMax[2] = max(pVertex[i].z, pMax[2]);
+
+			pMin[0] = min(pVertex[i].x, pMin[0]);
+			pMin[1] = min(pVertex[i].y, pMin[1]);
+			pMin[2] = min(pVertex[i].z, pMin[2]);
+		}
+	}
+
+	_float3 vCenter = _float3(0.f, 0.f, 0.f);
+	_float3 vExtends = {};
+
+	vCenter.x = (pMax[0] + pMin[0]) * 0.5f;
+	vCenter.y = (pMax[1] + pMin[1]) * 0.5f;
+	vCenter.z = (pMax[2] + pMin[2]) * 0.5f;
+
+	vExtends.x = (pMax[0] - pMin[0]) * 0.5f;
+	vExtends.y = (pMax[1] - pMin[1]) * 0.5f;
+	vExtends.z = (pMax[2] - pMin[2]) * 0.5f;
+
+	if (!m_pBoundingBox)
+		m_pBoundingBox = new BoundingBox(vCenter, vExtends);
+
+	Safe_Delete_Array(pMin);
+	Safe_Delete_Array(pMax);
+}
+
+_bool CMesh_Streaming::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
+{
+	_float fMin = FLT_MAX;
+	for (_uint iMeshIndex = 0; iMeshIndex < m_iNumMeshes; ++iMeshIndex)
+	{
+		for (size_t i = 0; i < m_vecIndices[iMeshIndex].size() - 2; i += 3)
+		{
+			auto& pVertex = m_vecVertexPos[iMeshIndex];
+			_float3 vPos[3] = {
+				pVertex[m_vecIndices[iMeshIndex][i]],
+				pVertex[m_vecIndices[iMeshIndex][i + 1]],
+				pVertex[m_vecIndices[iMeshIndex][i + 2]],
+			};
+			_float fDistance = {};
+			if (true == TriangleTests::Intersects(vRayPos, vRayDir,
+				XMVectorSetW(XMLoadFloat3(&vPos[0]), 1.f),
+				XMVectorSetW(XMLoadFloat3(&vPos[1]), 1.f),
+				XMVectorSetW(XMLoadFloat3(&vPos[2]), 1.f), fDistance))
+			{
+				if (fMin > fDistance)
+					fMin = fDistance;
+			}
+		}
+		if (fMin < FLT_MAX)
+		{
+			*pDistance = fMin;
+			return true;
+		}
+
+	}
+	return false;
+}
+#endif
 CMesh_Streaming* CMesh_Streaming::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumMeshes)
 {
 	CMesh_Streaming* pInstance = new CMesh_Streaming(pDevice, pContext);
@@ -161,4 +243,8 @@ void CMesh_Streaming::Free()
 		Safe_Delete(m_Desc);
 	Safe_Delete_Array(m_vecVertexPos);
 	Safe_Delete_Array(m_vecIndices);
+
+#ifdef _DEBUG
+	Safe_Delete(m_pBoundingBox);
+#endif
 }
