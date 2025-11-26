@@ -84,8 +84,8 @@ HRESULT CProbe::Ready_Matrices()
 		m_MatricesInv[ENUM_CLASS(D3DTS::VIEW)].push_back(ViewMatrixInv);
 
 		_float4x4 ProjMatrix = {};
-
-		XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(90.f), 1.f, 0.1f, m_fRange));
+		
+		XMStoreFloat4x4(&ProjMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(90.f), 1.f, 0.1f, (m_fRange * 2.f)));
 
 		m_Matrices[ENUM_CLASS(D3DTS::PROJ)].push_back(ProjMatrix);
 

@@ -1,4 +1,4 @@
-﻿#include"ClientPch.h"
+﻿#include"ClientPch.h" 
 #include "MapObject_Water.h"
 
 CMapObject_Water::CMapObject_Water(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -49,7 +49,7 @@ void CMapObject_Water::Update(_float fTimeDelta)
 
 void CMapObject_Water::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
 }
 
 void CMapObject_Water::Render()
@@ -94,7 +94,8 @@ void CMapObject_Water::Render()
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
-		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pShaderCom->Begin(4); // TEST
+//		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
@@ -128,12 +129,12 @@ void CMapObject_Water::Ready_Component(void* pArg)
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
 
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_NonAnimMesh_Water"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return;
 
 	// ShadowShader
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_NonAnimMesh_Water"),
 		TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
 		CRASH("FAILED");
 

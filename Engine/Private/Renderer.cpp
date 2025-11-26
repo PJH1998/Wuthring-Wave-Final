@@ -812,7 +812,7 @@ void CRenderer::Render_Combined()
 
 void CRenderer::Render_Water()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Water"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::WATER));
@@ -1213,7 +1213,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget SSS */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSS"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSS"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightDiffuse */
@@ -1260,6 +1260,17 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_SSS"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_WATER
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Diffuse"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Normal"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
