@@ -11,6 +11,7 @@
 #include"MapObject_Sonoro.h"
 #include"MapObject_Instance.h"
 #include"MapObject_Meteo.h"
+#include"MapObject_Water.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -133,7 +134,8 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1125_first/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_barrens_1125_third/", m_eCurLevel, "Asphodel_Barrens");
+
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel, "The_False_Sovereign");
@@ -198,7 +200,10 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Meteo"),
 		CMapObject_Meteo::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Water"),
+		CMapObject_Water::Create(m_pDevice, m_pContext));
+
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
 		CSpawner::Create(m_pDevice, m_pContext));
 #pragma endregion
