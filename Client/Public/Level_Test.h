@@ -28,10 +28,11 @@ private:
 	void			Ready_Skybox();
 	void			Ready_Spawner();
 	void			Ready_AnimInstanceTest();
+	void			Ready_Leviatan();
 	//void Ready_Layer_Augusta();
 	void			Ready_UI();
 	void			Ready_Scene();
-
+	void			Ready_RopeAnchor();
 	void			Testing_UI(_float fTimeDelta);
 
 

@@ -464,7 +464,7 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water","Collaps" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water","Collaps" ,"None","None2" };
 
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {

@@ -364,6 +364,21 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan">
       <UniqueIdentifier>{27f3bd8e-5674-439d-81d5-bc02bfe16cc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\Rope">
+      <UniqueIdentifier>{caa54a84-d651-4f94-bc83-cd6220cba4bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect">
+      <UniqueIdentifier>{c7899f9b-3c7c-4da3-9c36-75c56bb77972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Alter">
+      <UniqueIdentifier>{c64790f5-3c96-4844-b876-1f107abedd3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Ray">
+      <UniqueIdentifier>{47526b88-aaa1-48d9-af13-816827f2cec6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
+      <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -955,10 +970,16 @@
     <ClInclude Include="..\Public\GalbrenaRope.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClInclude>
-    <ClInclude Include="CLeviatan.h">
+    <ClInclude Include="..\Public\Leviatan.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="..\Public\MapObject_Collaps.h" />
+=======
+    <ClInclude Include="..\Public\RopeAnchor.h">
+      <Filter>03. GameObject\MapObject\Rope</Filter>
+    </ClInclude>
+>>>>>>> dev
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1515,10 +1536,16 @@
     <ClCompile Include="..\Private\GalbrenaRope.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClCompile>
-    <ClCompile Include="CLeviatan.cpp">
+    <ClCompile Include="..\Private\Leviatan.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
+=======
+    <ClCompile Include="..\Private\RopeAnchor.cpp">
+      <Filter>03. GameObject\MapObject\Rope</Filter>
+    </ClCompile>
+>>>>>>> dev
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

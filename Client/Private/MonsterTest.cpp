@@ -13,7 +13,9 @@ CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CMonsterTest::CMonsterTest(const CMonsterTest& Prototype)
 	: CActor { Prototype }
+	, m_pGameSystem { CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMonsterTest::Initialize_Prototype()
@@ -25,8 +27,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
-	m_pGameSystem = CGameSystem::GetInstance();
-	Safe_AddRef(m_pGameSystem);
+
 	MONSTERTEST_DESC* pDesc = static_cast<MONSTERTEST_DESC*>(pArg);
 
 	//m_pTransformCom->Scale({ 1.f, 1.f, 1.f});

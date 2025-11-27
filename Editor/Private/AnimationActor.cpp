@@ -404,13 +404,17 @@ _bool CAnimationActor::Is_ChildActor()
 //}
 void CAnimationActor::Child_Render()
 {
-
+	int index = 0; // 인덱스 관리 (ID 충돌 방지용)
 	for (auto& pChildActor : m_ChildActors)
 	{
 		if (nullptr != pChildActor)
-			pChildActor->Render_Detail();
+		{
+			pChildActor->Render_Detail(index++); // 인자 없이 호출 가능
+		}
+			
 	}
 }
+
 void CAnimationActor::Render_Detail()
 {
 	if (m_strCurrentAnimation.empty())
@@ -453,7 +457,7 @@ void CAnimationActor::Render_Detail()
 			Set_AnimationSpeed(fAnimSpeed);
 		}
 	}
-		
+
 	if (ImGui::SliderFloat("Child Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
 		Set_TrackPosition(m_fTrackPosition);
 
@@ -482,6 +486,156 @@ void CAnimationActor::Render_Detail()
 	ImGui::End();
 	ImGui::PopID();  // ID 팝
 }
+
+void CAnimationActor::Render_Detail(_int iIndex)
+{
+	// 1. 예외 처리: 애니메이션이 없거나 모델이 없으면 리턴
+	if (m_strCurrentAnimation.empty() || nullptr == m_pModelCom)
+		return;
+
+	_float fDuration = m_pModelCom->Get_Duration(m_strCurrentAnimation);
+	_float minTrackPos = 0.f;
+	_float maxTrackPos = fDuration;
+
+	// 2. 윈도우 위치 계산 (화면 하단 기준, 인덱스에 따라 위로 쌓임)
+	ImVec2 windowSize = ImVec2(600.f, 170.f);
+	// g_iWinSizeY에서 200픽셀 띄우고, 인덱스만큼 위로 올림
+	ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 200.f - (iIndex * (windowSize.y + 10.f)));
+
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once); // 위치 강제 (Always 권장)
+	ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+
+	// 3. 고유 ID 푸시 (충돌 방지)
+	ImGui::PushID(this);
+
+	char uniqueTitle[128];
+	sprintf_s(uniqueTitle, "Child Animation Detail [%p]", this);
+
+	// 4. 윈도우 시작
+	// Begin이 false를 반환해도(접힘 상태) End는 반드시 호출해야 하므로 if문 밖에서 End 처리
+	bool isWindowOpen = ImGui::Begin(uniqueTitle, nullptr, ImGuiWindowFlags_NoCollapse);
+
+	if (isWindowOpen)
+	{
+		ImGui::Text("Child Animation Name : %s", m_strCurrentAnimation.c_str());
+
+		static float fAnimSpeed = 1.f;
+
+		ImGui::Text("Child Duration : %.2f", fDuration);
+
+		// InputFloat에도 ID가 필요할 수 있음 (static 변수 공유 문제 방지 위해 ## 사용)
+		ImGui::InputFloat("Speed##Child", &fAnimSpeed);
+
+		ImGui::SameLine();
+		if (ImGui::Button("Apply Speed"))
+		{
+			Set_AnimationSpeed(fAnimSpeed);
+		}
+
+		if (ImGui::SliderFloat("Child Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
+			Set_TrackPosition(m_fTrackPosition);
+
+		_bool IsChanged = false;
+
+		// 키 입력 처리는 중복 방지를 위해 포커스가 있을 때만 하거나 주의 필요
+		if (ImGui::IsWindowFocused() && KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LALT))
+		{
+			IsChanged = true;
+			m_IsPlayAnimation = !m_IsPlayAnimation;
+		}
+
+		if (ImGui::Button("Stop"))
+		{
+			IsChanged = true;
+			m_IsPlayAnimation = false;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Play"))
+		{
+			IsChanged = true;
+			m_IsPlayAnimation = true;
+		}
+	}
+
+	// [중요] Begin을 호출했으면 무조건 End를 호출해야 함 (Missing End 방지)
+	ImGui::End();
+	ImGui::PopID();
+}
+
+// 이게 문제다?
+//void CAnimationActor::Render_Detail()
+//{
+//	if (m_strCurrentAnimation.empty())
+//		return;
+//
+//	_float fDuration = m_pModelCom->Get_Duration(m_strCurrentAnimation);
+//	_float minTrackPos = 0.f;
+//	_float maxTrackPos = fDuration;
+//
+//	ImGuiIO& io = ImGui::GetIO();
+//	ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 200.f);
+//	ImVec2 windowSize = ImVec2(600.f, 170.f);
+//
+//	static int instanceCount = 0;
+//	windowPos.y -= instanceCount * (windowSize.y + 10.f);
+//	instanceCount++;
+//
+//	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+//	ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+//
+//	//ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+//	//ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+//
+//	ImGui::PushID(this);  // 고유 ID 푸시
+//
+//	char uniqueTitle[128];
+//	sprintf_s(uniqueTitle, "Child Animation Detail [%p]", this);
+//	ImGui::Begin(uniqueTitle, nullptr, ImGuiWindowFlags_NoCollapse);
+//
+//	ImGui::Text("Child Animation Name : %s", m_strCurrentAnimation.c_str());
+//
+//	static float fAnimSpeed = 1.f;
+//	if (!m_strCurrentAnimation.empty())
+//	{
+//		ImGui::Text("Child Duration : %.2f", fDuration);
+//		ImGui::InputFloat("|", &fAnimSpeed);
+//		ImGui::SameLine();
+//		if (ImGui::Button("Apply Speed"))
+//		{
+//			Set_AnimationSpeed(fAnimSpeed);
+//		}
+//	}
+//		
+//	if (ImGui::SliderFloat("Child Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
+//		Set_TrackPosition(m_fTrackPosition);
+//
+//	_bool IsChanged = { false };
+//
+//	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LALT))
+//	{
+//		IsChanged = true;
+//		m_IsPlayAnimation = !m_IsPlayAnimation;
+//	}
+//
+//	if (ImGui::Button("Stop"))
+//	{
+//		IsChanged = true;
+//		m_IsPlayAnimation = false;
+//	}
+//
+//
+//	ImGui::SameLine();
+//	if (ImGui::Button("Play"))
+//	{
+//		IsChanged = true;
+//		m_IsPlayAnimation = true;
+//	}
+//
+//	ImGui::End();
+//	ImGui::PopID();  // ID 팝
+//}
+
 void CAnimationActor::Print_WorldMatrix()
 {
 	_float4x4 matWorld = {};
