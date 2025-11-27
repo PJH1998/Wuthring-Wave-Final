@@ -4,6 +4,8 @@
 #include"MapObject_Instance.h"
 #include "Dummy.h"
 #include "MapObject.h"
+#include "Trigger_Box.h"
+#include "MapObject_Collaps.h"
 #include "AnimationDummy.h"
 
 #pragma region MONSTER
@@ -174,7 +176,12 @@ HRESULT CLoader_Test::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Instance"),
 		CMapObject_Instance::Create(m_pDevice, m_pContext));
+	
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_TriggerBox"),
+		CTrigger_Box::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Collaps"),
+		CMapObject_Collaps::Create(m_pDevice, m_pContext));
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"),
 		CDummy::Create(m_pDevice, m_pContext))))
