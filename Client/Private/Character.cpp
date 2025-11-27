@@ -388,6 +388,18 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 }
 
 
+void CCharacter::Bind_GrappleTarget(CTransform* pTargetTransform, OBJECTTYPE eObjectType)
+{
+	m_pGrappleTransform = pTargetTransform;
+	m_eGrappleType = eObjectType;
+}
+
+
+_bool CCharacter::Is_MoveGrapple()
+{
+	return _bool();
+}
+
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
 	if (nullptr == m_pAbillityCom)
@@ -825,14 +837,16 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 {
-
 	if (m_IsQTE)
 		return;
 
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	pTransformCom->Set_WorldMatrix(mat);
+}
 
-
+void CCharacter::Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType)
+{
+	m_eInteractionType = eInteractionType;
 }
 
 #ifdef _DEBUG
@@ -944,6 +958,17 @@ void CCharacter::Sync_Condition_ToPlayer(_uint* pCondition)
 
 	*pCondition = m_iCondition; // 값 넣어주기.
 }
+
+void CCharacter::Add_Condition_FromPlayer(_uint iCondition)
+{
+	m_iCondition |= iCondition;
+}
+
+void CCharacter::Remove_Condition_FromPlayer(_uint iCondition)
+{
+	m_iCondition &= ~iCondition;
+}
+
 
 
 #pragma endregion

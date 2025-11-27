@@ -33,6 +33,8 @@ private:
 	HRESULT				Load_UI();
 	HRESULT				Load_Font();
 
+	HRESULT				Load_RopeAnchor();
+
 private:
 	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);
 
