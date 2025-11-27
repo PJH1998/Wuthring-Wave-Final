@@ -35,7 +35,7 @@ HRESULT CLevel_GamePlay::Initialize()
 //	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
 
 	//m_pGameInstance->Setting_LUT(0, 0.25f, false);
-	m_pGameInstance->Setting_LUT(1, 0.77f, false);
+	m_pGameInstance->Setting_LUT(1, 0.22f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
