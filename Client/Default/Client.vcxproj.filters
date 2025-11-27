@@ -958,6 +958,7 @@
     <ClInclude Include="CLeviatan.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Collaps.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1517,6 +1518,7 @@
     <ClCompile Include="CLeviatan.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

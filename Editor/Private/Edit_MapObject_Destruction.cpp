@@ -318,7 +318,7 @@ void CEdit_MapObject_Destruction::Create_Particles()
 		_vector TT = XMQuaternionNormalize(vRot);
 		_float4x4 Mat;
 		XMStoreFloat4x4(&Mat,
-			XMMatrixRotationQuaternion(TT) *
+			XMMatrixRotationQuaternion(vRot) *
 			XMMatrixTranslationFromVector(vTrans) *
 			m_pTransformCom->Get_WorldMatrix());
 		Desc.WorldMatrix = &Mat;
@@ -416,8 +416,9 @@ HRESULT CEdit_MapObject_Destruction::Ready_Component(void* pArg)
 		_vector TT = XMQuaternionNormalize(vRot);
 		_float4x4 Mat;
 		XMStoreFloat4x4(&Mat,
-			XMMatrixRotationQuaternion(TT) *
+			XMMatrixRotationQuaternion(vRot) *
 			XMMatrixTranslationFromVector(vTrans) *
+			//XMLoadFloat4x4(&TestMat) *
 			m_pTransformCom->Get_WorldMatrix());
 		Desc.WorldMatrix = &Mat;
 

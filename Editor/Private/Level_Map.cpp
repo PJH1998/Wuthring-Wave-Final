@@ -17,6 +17,7 @@
 #include"Edit_Meteo.h"
 #include"Model_Streaming.h"
 #include"Edit_MapObject_Water.h"
+#include"Edit_MapObject_Collaps.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -246,6 +247,10 @@ void CLevel_Map::Menu_Object()
 		if (m_pPickedWater)
 			m_pPickedWater->Set_ImGuiOption();
 		break;
+	case static_cast<_uint>(OBJECTTYPE::COLLAPS):
+		if (m_pPickedCollaps)
+			m_pPickedCollaps->Set_ImGuiOption();
+		break;
 	default:
 		if (m_pPickedObject)
 			m_pPickedObject->Set_ImGuiOption();
@@ -334,15 +339,6 @@ void CLevel_Map::Menu_Model_Load()
             _char FileExt[MAX_PATH] = {};
             _splitpath_s(m_ModelPaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
-			//이 안에 경로 다 들어있음.
-			//프로토타입 3개 다 만들어서 하면 될듯?
-
-			//m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
-			//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-			//		CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
-			//		CRASH("Prototype Create Failed");
-			//	});
-
 			if (ImGui::Selectable(FileName))
 			{
 				auto iter = m_szPrototypeName.find(FileDir);
@@ -360,7 +356,6 @@ void CLevel_Map::Menu_Model_Load()
 
 					PrototypeName = L"Prototype_Component_Model_";
 					PrototypeName += StringToWString(NoVersionName);
-					//m_pGameInstance->Load_Resource(FileDir);
 
 					PrototypeName.pop_back();
 					PrototypeName.pop_back();
@@ -419,6 +414,19 @@ void CLevel_Map::Menu_Model_Load()
 					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Water")
 						, m_iLevel, TEXT("Layer_MapObject_Water"), &Desc);
 				}
+				else if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::COLLAPS)
+				{
+					CEdit_MapObject_Collaps::MAP_LOAD Desc{};
+					_float4x4 DefaultMatrix{};
+					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					Desc.vDestWorldMatrix = Desc.vSourWorldMatrix = DefaultMatrix;
+					strcpy_s(Desc.ModelName, FileName);
+					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
+					Desc.iLevel = m_iLevel;
+
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Collaps")
+						, m_iLevel, TEXT("Layer_MapObject_Collaps"), &Desc);
+				}
 				else
 				{
 					CEdit_MapObject::MAP_LOAD Desc{};
@@ -456,7 +464,8 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water","Collaps" };
+
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {
         for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -543,6 +552,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Meteo"), event);
 				else if (Pair.first.find("Water") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Water"), event);
+				else if (Pair.first.find("Collaps") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Collaps"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -782,7 +793,6 @@ void CLevel_Map::Menu_Save_Load()
 						}
 						else if (strFilePath.find("TriggerBox") != std::string::npos)
 						{
-							_uint iTriggerIndex;
 							CEdit_TriggerBox::TRIGGER Desc{};
 							while (File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint)))
 							{
@@ -792,6 +802,30 @@ void CLevel_Map::Menu_Save_Load()
 								Desc.WorldMatrix = &Matrix;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox")
 									, m_iLevel, TEXT("Layer_Test"), &Desc);
+							}
+						}
+						else if (strFilePath.find("Collaps") != std::string::npos)
+						{
+							CEdit_MapObject_Collaps::MAP_LOAD Desc{};
+							while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+							{
+								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+								File.read(Desc.ModelName, NameLength);
+
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+								File.read(reinterpret_cast<char*>(&Desc.vSourWorldMatrix), sizeof(_float4x4));
+								File.read(reinterpret_cast<char*>(&Desc.vDestWorldMatrix), sizeof(_float4x4));
+								
+								File.read(reinterpret_cast<char*>(&Desc.fDuration), sizeof(_float));
+								File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
+								//File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+								//File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Collaps")
+									, m_iLevel, TEXT("Layer_MapObject_Collaps"), &Desc);
+
 							}
 						}
                         else
@@ -1274,7 +1308,10 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Water"),
 		CEdit_MapObject_Water::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Collaps"),
+		CEdit_MapObject_Collaps::Create(m_pDevice, m_pContext));
+
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
 
@@ -1304,10 +1341,12 @@ void CLevel_Map::Ready_Event()
 		{
 			if (event.fDistance <= m_fNearDistance)
 			{
-				if (m_pPickedObject)
-					m_pPickedObject->Set_ShaderPass(0);
-				if (m_pPickedDestructObject)
-					m_pPickedDestructObject->Set_ShaderPass(0);
+				if (m_pPickedObject) m_pPickedObject->Set_ShaderPass(0);
+				if (m_pPickedDestructObject) m_pPickedDestructObject->Set_ShaderPass(0);
+				if(m_pPickedMeteo) m_pPickedMeteo->Set_ShaderPass(0);
+				if(m_pPickedWater) m_pPickedWater->Set_ShaderPass(0);
+				if(m_pPickedCollaps) m_pPickedCollaps->Set_ShaderPass(0);
+
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 				{
@@ -1349,6 +1388,10 @@ void CLevel_Map::Ready_Event()
 				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
 				{
 					m_pPickedWater->Set_ShaderPass(3);
+				}
+				else if (m_pPickedCollaps = dynamic_cast<CEdit_MapObject_Collaps*>(pObject))
+				{
+					m_pPickedCollaps->Set_ShaderPass(3);
 				}
 			}
 		}
@@ -1402,6 +1445,11 @@ void CLevel_Map::Ready_Event()
 			{
 				m_SaveObjects["Map_Object_Water"].push_back(m_pPickedWater);
 				Safe_AddRef(m_pPickedWater);
+			}
+			else if (m_pPickedCollaps = dynamic_cast<CEdit_MapObject_Collaps*>(pObject))
+			{
+				m_SaveObjects["Map_Object_Collaps"].push_back(m_pPickedCollaps);
+				Safe_AddRef(m_pPickedCollaps);
 			}
 		}
 
