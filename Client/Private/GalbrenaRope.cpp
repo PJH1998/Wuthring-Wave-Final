@@ -21,14 +21,7 @@ void CGalbrenaRope::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
 
-	// 1. 복사본 context 받아오기.
-	const auto context = m_pGalbrena->TakeStateContext();
-
-	// 2. 복사본에서 필요한 값 읽기
-	EGalbrenaRopeType eRopeType = context.m_eRopeType;
-
-	// 3. 값에 따른 상태 변경.
-	m_iCurrentAnimIdx = ENUM_CLASS(eRopeType);
+	// 1. 애니메이션 결정을 위한 LookVector 조회 (Y < -0.1f D || -0.1f <= Y < 0.1f F || 0.1f <= Y U
 
 	// 4. 상태 리셋.
 	State_Reset();
@@ -38,7 +31,7 @@ void CGalbrenaRope::OnEnter(void* pArg)
 
 	// 6. 나중에 감지된 위치에 있는 방향으로 회전합니다. 
 	// 추후에는 => Look이 y도 돌아가야함.
-	m_pGalbrena->Rotate_Target();
+	m_pGalbrena->Rotate_MoveGrapple();
 
 	// 6. 중력 적용
 	m_pGalbrena->Set_Gravity(true);
@@ -164,12 +157,12 @@ void CGalbrenaRope::Setup_Animations()
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_L), "FixHook_Loop_L", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_R), "FixHook_Loop_R", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_U), "FixHook_Loop_U", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::HOOK_UP), "Hook_Up", 1.f, 0.f);
 
 }

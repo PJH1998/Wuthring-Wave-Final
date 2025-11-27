@@ -80,6 +80,7 @@ public:
 public:
 	_bool Is_TargetValid(class CTransform* pTarget); // 타겟이 유효한가?
 
+
 private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
@@ -100,11 +101,12 @@ private:
 
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
-	vector<class CTransform*> m_MoveRopeTargetTransforms;
-	vector<class CTransform*> m_PullRopeTargetTrasnforms;
+	vector<pair<class CTransform*, OBJECTTYPE>> m_GrappleCandidates;
+	//vector<class CTransform*> m_GrappleTargetTransforms;
 
 	class CTransform* m_pTargetTransform = { nullptr };
 	class CTransform* m_pLockOnTargetTransform = { nullptr };
+	pair<class CTransform*, OBJECTTYPE> m_TargetGrappleInfo = { nullptr, OBJECTTYPE::END };
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };
@@ -122,16 +124,27 @@ private:
 	mutex m_Mutex;
 
 	_float m_fTargetDistance = {}; // 몬스터와의 거리
-
 	_uint m_iCondition = {};
+	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING }; // Player에서 관리.
 
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
 	void Sync_Condition_FromCharacter(class CCharacter* pCharacter);
+	void Sync_InteractionType_ToCharacter(class CCharacter* pCharacter);
+	
+	
 	void Sorting_Target();
 	void Toggle_LockOn();
+	void Sorting_GrappleTarget();
+	void Toggle_Grapple();
+
+	void Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc);
+	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
+
+	void Manage_Condition();
+	
 
 #ifdef _DEBUG
 	_float3		m_vDebugTeleportPos = {};

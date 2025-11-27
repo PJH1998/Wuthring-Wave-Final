@@ -73,7 +73,7 @@ void CAnimState::Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentA
 	*pCurrentAnimTag = m_strAnimationTag;
 	StateData = m_StateData;
 	//상태 전환 시 초기 데이터 복원
-
+	pModelCom->Clear_Animation(m_strAnimationTag);
 }
 
 void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag, _float fTrackPosition/*, ANIMSTATE_DESC& StateData*/)

@@ -71,7 +71,9 @@ void CAugustaAirFall::Handle_Input()
 		return;
 
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
-	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
+		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
+
 	m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
