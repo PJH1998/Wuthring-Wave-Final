@@ -27,7 +27,9 @@ public:
 		_float3 vDetectRange;
 	}LEVIATAN_DESC;
 private:
-	enum ATK_SOCKET { FOOT_L, FOOT_R, WEAPON_GL, END };
+	enum ATK_SOCKET { FOOT_L, FOOT_R, WEAPON_GL, ATKEND };
+	//					신권,	   이권,	인권	
+	enum SWORD { MAIN, DIVINITY, DISCORD, VIRTUE, END };
 	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
 	enum LEVIATAN_SHADER { BANG, HAIR, FACE, UP, DOWN, CLOTH, ALPHA, FX };
 private:
@@ -47,7 +49,7 @@ public:
 	//virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	void			OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
-	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
+	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
@@ -62,7 +64,7 @@ private:
 
 	//const _float4x4* m_pToeMatrix = { nullptr };
 
-	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = { nullptr, };
+	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
 	CAttackVolume* m_pParryVolume = { nullptr, };
 	vector<_uint>			m_ShaderIndices;
 
@@ -88,6 +90,8 @@ private:
 	_bool					m_beHit{};
 	_bool					m_isAggro{};
 	_bool					m_isDist_Interp_Enable{};
+	_bool					m_isRender{};
+	_uint					m_iPhase{};
 #pragma endregion
 
 #pragma region STATUS
