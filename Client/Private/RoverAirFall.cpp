@@ -71,7 +71,8 @@ void CRoverAirFall::Handle_Input()
 	if (m_States[HIT])
 		return;
 
-	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
+		(m_pRover->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
 	m_States[AIR_ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));

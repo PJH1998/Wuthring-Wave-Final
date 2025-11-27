@@ -86,7 +86,8 @@ void CGalbrenaGroundRun::Handle_Input()
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
-	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) && 
+		(m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
 	// Rope 이동. => 객체가 탐지되었을 때만 Frustum으로. 탐지.(정면만 탐지해야됌)
 	m_States[MOVE_ROPE] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::G)); 

@@ -617,6 +617,7 @@ void CLeviatan::Free()
 		Safe_Release(m_pAtkVolumes[i]);
 
 	Safe_Release(m_pGameSystem);
+	Safe_Release(m_pFacialComputeShaderCom);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);

@@ -364,6 +364,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan">
       <UniqueIdentifier>{27f3bd8e-5674-439d-81d5-bc02bfe16cc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\Rope">
+      <UniqueIdentifier>{caa54a84-d651-4f94-bc83-cd6220cba4bd}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect">
       <UniqueIdentifier>{c7899f9b-3c7c-4da3-9c36-75c56bb77972}</UniqueIdentifier>
     </Filter>
@@ -970,6 +973,9 @@
     <ClInclude Include="..\Public\Leviatan.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RopeAnchor.h">
+      <Filter>03. GameObject\MapObject\Rope</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1528,6 +1534,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Leviatan.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RopeAnchor.cpp">
+      <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -85,6 +85,11 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 			m_Characters[i]->Set_Ability(m_pPlayerStatus->Get_Ability(i));
 	}
 
+
+	// 7. 기본 상태 FLIGHT
+	m_eUtilityType = UI_TAB_UTILITY::FLIGHT;
+	
+
     return S_OK;
 }
 
@@ -104,22 +109,23 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 		Change_Character(m_eNextCharacter, fTimeDelta);
 	}
    
+	// 4. 현재 캐릭터에 대한 초기 업데이트
 	if (m_iCurrentCharacterIdx != NONE)
 		m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
 
-	// 2. Harmony
+	// 5. Harmony
 	if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
 		m_Characters[m_iHarmonyCharacterIdx]->Priority_Update(fTimeDelta);
 
 
-	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
+	// 6. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
 	if (nullptr != m_pPlayerStatus)
 		m_pPlayerStatus->Update(fTimeDelta);
 
-	// 5. 몬스터 사이와의 거리는 Priority Update에서 계산
-	if (nullptr != m_pTargetTransform)
-		m_fTargetDistance = 0.f;
+
+	// 7. Interaction Type 갱신.
+	
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -129,6 +135,7 @@ void CPlayer::Update(_float fTimeDelta)
 	{
 		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
 		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 컨디션 동기화
+		//Sync_InteractionType_ToCharacter(m_Characters[m_iCurrentCharacterIdx]); // Interaction 선택 동기화
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
 
@@ -141,14 +148,14 @@ void CPlayer::Update(_float fTimeDelta)
 	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
+	Sorting_GrappleTarget(); // Grapple Target Sorting;
+	Toggle_Grapple(); 
+	Sorting_Target(); // 4. Target Sorting
+    Toggle_LockOn(); // 5. Lock On
 	
-	// 4. Target Sorting
-	Sorting_Target();
-    
-	// 5. Lock On
-    Toggle_LockOn();
-
+	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
+	
 
 #ifdef _DEBUG
 	GUI_Teleport();
@@ -273,8 +280,24 @@ void CPlayer::Player_KeyInput()
 			}
 		}
 
-		// 1. 내가 뭘 넣었는지를 넣어 준다?
-		
+		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
+		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
+		{
+			_uint iSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
+
+			if (iSelectedUtility != ENUM_CLASS(UI_TAB_UTILITY::NOTHING)) // NOTHING은 예시
+			{
+				m_eUtilityType = static_cast<UI_TAB_UTILITY>(iSelectedUtility);
+
+				// 변경 즉시 현재 활성 캐릭터에게도 알림 
+				if (m_Characters[m_iCurrentCharacterIdx])
+				{
+					Sync_InteractionType_ToCharacter(m_Characters[m_iCurrentCharacterIdx]);
+					//m_Characters[m_iCurrentCharacterIdx]->Sync_UtilityType_FromPlayer(m_eUtilityType);
+				}
+			}
+
+		}
 
 	}
 
@@ -444,29 +467,38 @@ void CPlayer::Sync_Condition_FromCharacter(CCharacter* pCharacter)
 	pCharacter->Sync_Condition_ToPlayer(&m_iCondition);
 }
 
+// 플레이어 전체 공통이므로 전달.
+void CPlayer::Sync_InteractionType_ToCharacter(CCharacter* pCharacter)
+{
+	if (nullptr == pCharacter)
+		return;
+
+	pCharacter->Sync_UtilityType_FromPlayer(m_eUtilityType);
+}
+
+
+
 
 // During 사이에 탐지하기.
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	// Detect Body 탐지용
-	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) 
+	// 둘다 아닌 경우에만.
+	if ((ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) &&
+		(ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer))
 		return;
 
-
+	// Detect Body 탐지용 => switch
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
 
-	// CallBack Client Transform에 이상한 값이 들어가 있음.
-    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
-    if (nullptr == pTargetTransform)
-        return;
-	
+	switch (eLayer)
 	{
-		
-		lock_guard<mutex> lock(m_Mutex);
-		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
-		// Vector 컨테이너에 넣어줄 거면 
-		m_TargetTransforms.push_back(pTargetTransform);
-		m_pTargetTransform = nullptr; 
+	case COLLISIONLAYER::ENEMY:
+		Process_CollideEnemy(pcallDesc);
+		break;
+	case COLLISIONLAYER::GRAPPLE:
+		Process_CollideGrapple(pcallDesc);
+		break;
 	}
 }
 
@@ -644,6 +676,67 @@ void CPlayer::Toggle_LockOn()
 
     //m_pTargetTransform = nullptr;
 }
+
+void CPlayer::Sorting_GrappleTarget()
+{
+	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const pair<CTransform*, OBJECTTYPE>& src, const pair<CTransform*, OBJECTTYPE>& dst)->_bool {
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) 
+			- src.first->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) 
+			- dst.first->Get_State(STATE::POSITION)));
+		return fSrcDistance < fDstDistance;
+		});
+
+	if (0 < m_GrappleCandidates.size())
+		m_TargetGrappleInfo = m_GrappleCandidates[0];
+}
+void CPlayer::Toggle_Grapple()
+{
+	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
+	if (m_eUtilityType == UI_TAB_UTILITY::GRAPPLE)
+		m_Characters[m_iCurrentCharacterIdx]->Bind_GrappleTarget(
+			m_TargetGrappleInfo.first,
+			m_TargetGrappleInfo.second
+		);
+
+}
+void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
+{
+	// CallBack Client Transform에 이상한 값이 들어가 있음.
+	CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+	if (nullptr == pTargetTransform)
+		return;
+	{
+
+		lock_guard<mutex> lock(m_Mutex);
+		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		// Vector 컨테이너에 넣어줄 거면 
+		m_TargetTransforms.push_back(pTargetTransform);
+		m_pTargetTransform = nullptr;
+	}
+}
+
+void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
+{
+	CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+	if (nullptr == pTargetTransform)
+		return;
+
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		// 컨테이너에 넣을때 어떤 타입인지도 넣어주어야함.
+		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType });
+
+		// 매프레임 초기화.
+		m_TargetGrappleInfo = { nullptr, OBJECTTYPE::END };
+	}
+}
+
+void CPlayer::Manage_Condition()
+{
+
+}
+
 #ifdef _DEBUG
 void CPlayer::GUI_Teleport()
 {
@@ -756,7 +849,6 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_During(iLayer, pDesc, Manifold);
     });
-
 
 	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 	//	OnCollider_Enter(iLayer, pDesc, Manifold);

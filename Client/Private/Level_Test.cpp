@@ -31,6 +31,11 @@
 #include "UI_Text.h"
 #endif // KSTA_UITEST_OLD
 
+#pragma region OBJECT
+#include "RopeAnchor.h"
+#pragma endregion
+
+
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
 {
@@ -69,6 +74,8 @@ HRESULT CLevel_Test::Initialize()
 	Ready_Leviatan();
 
     Ready_Effect();
+	Ready_RopeAnchor();
+
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
     LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
@@ -467,12 +474,12 @@ void CLevel_Test::Ready_Leviatan()
 	CLeviatan::LEVIATAN_DESC MobDesc{};
 	MobDesc.eCurLevel = m_eCurLevel;
 	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
-	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
 	MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Leviatan"));
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
-	MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	MobDesc.vInitPosition = _float3(0.f, -8.f, -4.f);
 	MobDesc.pAnimationTag = "Stand2";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
@@ -549,6 +556,31 @@ void CLevel_Test::Ready_Scene()
 	CameraDesc.fMouseSensor = 0.004f;
 	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::TEST), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
 		CRASH("SceneCamera");
+}
+
+void CLevel_Test::Ready_RopeAnchor()
+{
+	_float3 vScale{}, vRotation{}, vPosition{};
+	vScale = { 1.f, 1.f, 1.f };
+	vRotation = { 0.f, 0.f, 0.f };
+	vPosition = { 0.f, 1.f, 50.f };
+	CRopeAnchor::ROPEOBJECT_DESC Desc{};
+	Desc.vScale = vScale;
+	Desc.vRotation = vRotation;
+	Desc.vPosition = vPosition;
+	Desc.fRotationPerSec = XMConvertToRadians(90.f);
+	Desc.fSpeedPerSec = 10.f;
+	Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxMesh"));
+	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_RopeAnchor"));
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_RopeAnchor"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_RopeAnchor"), &Desc)))
+		CRASH("Failed Ready Player");
+
+	vPosition = { 0.f, 1.f, 55.f };
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_RopeAnchor"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_RopeAnchor"), &Desc)))
+		CRASH("Failed Ready Player");
 }
 
 void CLevel_Test::Testing_UI(_float fTimeDelta)

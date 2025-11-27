@@ -68,6 +68,10 @@
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
 
+#pragma region OBJECT
+#include "RopeAnchor.h"
+#pragma endregion
+
 
 
 #include"GameSystem.h"
@@ -103,6 +107,8 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     
 	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_RopeAnchor(); Complete_Load(); });
+
 	Load_Action();
 
     return S_OK;
@@ -357,7 +363,7 @@ HRESULT CLoader_Test::Load_Leviatan()
 
 	// Prototype_Component_Model_Leviatan
 	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
-	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan.dat"))))
 		CRASH("Prototype Create Failed");
@@ -895,6 +901,31 @@ HRESULT CLoader_Test::Load_Font()
 		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_Heavy", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Heavy.ttf", iPixelHeight)))
 		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_RopeAnchor()
+{
+	
+	_wstring wStrModelTag = L"Prototype_Component_Model_RopeAnchor";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Interaction/RopeAnchor/RopeAnchor.dat";
+	_float fSize = 0.005f;
+	//_float fSize = 0.001f;
+	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화
+	_wstring wstrObjectTag = TEXT("Prototype_GameObject_RopeAnchor");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CRopeAnchor::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 
 	return S_OK;
 }
