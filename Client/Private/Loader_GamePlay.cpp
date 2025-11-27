@@ -47,6 +47,8 @@
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
 
+#include "UI_Ovfl_Palette.h"
+
 #include "Mouse.h"
 #pragma endregion
 
@@ -528,6 +530,14 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
 
+	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
+
+
+
+
+	_string strFilePath_UI_ExtraTexturesLoad = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LoadDummy.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_ExtraTexturesLoad));
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -622,6 +632,13 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+
+	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
+		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
+
+
 
 	// ==============================
 	cout << "[Loader_GamePlay::Load_UI][UI Custom] Prototype" << endl;

@@ -143,14 +143,14 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
+#pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR
 	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
 	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
 		!isTargetAlive)
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
 		isTargetAlive)
 		pTargetMobHPBarUI->SetActivate(false);
 #pragma endregion
@@ -192,8 +192,28 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
 	}
+#pragma endregion
+
+#pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
+
+	static _bool isOpenOverflowingPalette = false;
+
+	if (!isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Open_Game_OverflowPalette();
+		isOpenOverflowingPalette = true;
+	}
+	else if (isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Close_Game_OverflowPalette();
+		isOpenOverflowingPalette = false;
+	}
 
 #pragma endregion
+
+
 
 }
 
@@ -474,6 +494,10 @@ void CLevel_GamePlay::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
+		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
+		CRASH("Failed Ready Ovfl_Palette");
 
 
 	m_pGameSystem->PreAssign_TargetUIs();
