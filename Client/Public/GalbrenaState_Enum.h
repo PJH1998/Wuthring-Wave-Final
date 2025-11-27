@@ -349,7 +349,7 @@ enum class EGalbrenaHitType : _uint
 #pragma endregion
 
 
-#pragma region INTREACTIOn
+#pragma region INTREACTION
 enum class EGalbrenaRopeType : _uint
 {
 	FIXHOOK_END = 0,

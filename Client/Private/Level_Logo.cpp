@@ -19,8 +19,9 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-	m_pGameInstance->Add_Probe(_float3(-55.f, 15.f, 50.f), 500.f);
-
+//	m_pGameInstance->Add_Probe(_float3(-55.f, 15.f, 50.f), 200.f);
+	m_pGameInstance->Add_Probe(_float3(-36.f, 8.f, 25.f), 150.f);
+	
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
 	m_pGameInstance->SettingFog(false);
 

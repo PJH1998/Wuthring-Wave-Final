@@ -11,6 +11,7 @@ private:
     {
         JUMP = 0,
 		FLY,
+		MOVE_ROPE,
         LAND,
         MOVE,
 		HIT,

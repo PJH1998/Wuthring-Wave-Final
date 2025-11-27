@@ -12,6 +12,7 @@
 #include"MapObject_Instance.h"
 #include"MapObject_Meteo.h"
 #include"MapObject_Water.h"
+#include"MapObject_Collaps.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -46,6 +47,8 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
+
+#include "UI_Ovfl_Palette.h"
 
 #include "Mouse.h"
 #pragma endregion
@@ -134,7 +137,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_barrens_1125_third/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1127_second/", m_eCurLevel, "Asphodel_Barrens");
 
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
@@ -204,6 +207,9 @@ HRESULT CLoader_GamePlay::Load_Object()
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Water"),
 		CMapObject_Water::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Collaps"),
+		CMapObject_Collaps::Create(m_pDevice, m_pContext));
+	
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
 		CSpawner::Create(m_pDevice, m_pContext));
 #pragma endregion
@@ -538,6 +544,14 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
 
+	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
+
+
+
+
+	_string strFilePath_UI_ExtraTexturesLoad = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LoadDummy.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_ExtraTexturesLoad));
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -632,6 +646,13 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+
+	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
+		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
+
+
 
 	// ==============================
 	cout << "[Loader_GamePlay::Load_UI][UI Custom] Prototype" << endl;

@@ -387,6 +387,11 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
+UI_TAB_UTILITY CCharacter::Get_UtilityType()
+{
+	 return m_eUtilityType;
+}
+
 
 void CCharacter::Bind_GrappleTarget(CTransform* pTargetTransform, OBJECTTYPE eObjectType)
 {
@@ -403,10 +408,30 @@ _bool CCharacter::Is_MoveGrapple()
 	if ((nullptr == m_pTargetGrappleTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_eTargetGrappleType))
 		return false;
 
-	_vector vPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
-	m_pGameInstance->IsIn_WorldSpace(vPos, 20.f);
+	_vector vTargetPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
 
-	return true;
+	// 타겟의 거리가 카메라 Frustum 내부에서 거리가 20.f 이내인경우?
+	_bool IsFrustum = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vPos));
+
+
+	return IsFrustum && fDistance <= 25.f;
+}
+
+_bool CCharacter::Is_ReachedGrappleTarget()
+{
+	if ((nullptr == m_pTargetGrappleTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_eTargetGrappleType))
+		return false;
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+
+	_float fLength = XMVectorGetX(XMVector3Length(vPos - vTargetPos));
+	
+	return fLength <= 1.f;
 }
 
 
@@ -418,7 +443,7 @@ void CCharacter::Rotate_MoveGrapple()
 
 	_vector vTarget = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
 	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
-	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+	_vector vToTarget = XMVector3Normalize(XMVectorSetY(vTarget - vMyPos, 0.f));
 
 
 	//vToTarget = XMVectorSetY(vToTarget, 0.f);
@@ -427,8 +452,51 @@ void CCharacter::Rotate_MoveGrapple()
 
 void CCharacter::Move_Grapple(_float fTimeDelta, _float fSpeed)
 {
-	_vector vMoveDir = m_pTransformCom->Get_State(STATE::LOOK);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	_vector vMoveDir = XMVector3Normalize(vTargetPos - vPos);
 	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+}
+
+_float CCharacter::Get_GrappleDistance()
+{
+	if (nullptr == m_pTargetGrappleTransform)
+		return 0.f;
+
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vMyPos));
+
+	return fDistance;
+}
+
+ROPEDIR CCharacter::Calculate_RopeDirection()
+{
+	if (nullptr == m_pTargetGrappleTransform ||
+		OBJECTTYPE::ROPE_ANCHOR != m_eTargetGrappleType)
+		return ROPEDIR::END;
+
+	// 1. 방향 판별할 Y
+	_float fTotalHeight = m_fColliderRadius * 2.f + m_fColliderHeight;
+	
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+
+	// 2. 높이값 추출
+	_float fTargetY = XMVectorGetY(vTargetPos);
+	_float fMyY = XMVectorGetY(vMyPos);
+
+	_float fFeetLevel = fMyY; // Transform이 발에 있으므로?
+	_float fEyeLevel = fMyY + fTotalHeight;
+
+	if (fTargetY > fEyeLevel)
+		return ROPEDIR::U; // 위 (눈보다 위)
+	else if (fTargetY < fFeetLevel)
+		return ROPEDIR::D; // 아래 (발보다 아래)
+	else
+		return ROPEDIR::F; // 정면 (눈과 발 사이)
+
+	return ROPEDIR::END;
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
@@ -875,9 +943,9 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 	pTransformCom->Set_WorldMatrix(mat);
 }
 
-void CCharacter::Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType)
+void CCharacter::Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eUtilityType)
 {
-	m_eInteractionType = eInteractionType;
+	m_eUtilityType = eUtilityType;
 }
 
 #ifdef _DEBUG

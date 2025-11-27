@@ -21,20 +21,37 @@ void CGalbrenaRope::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
 
-	// 1. 애니메이션 결정을 위한 LookVector 조회 (Y < -0.1f D || -0.1f <= Y < 0.1f F || 0.1f <= Y U
+	// 1. 애니메이션 결정을 위한 방향 설정.
+	m_eRopeDir = m_pGalbrena->Calculate_RopeDirection();
+
+	// 2. 초기 단계 설정.
+	m_eRopeStep = ROPESTEP::STEP_START;
+
+	switch (m_eRopeDir)
+	{
+	case ROPEDIR::U:
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U);
+		break;
+	case ROPEDIR::F:
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F);
+		break;
+	case ROPEDIR::D:
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F);
+		break;
+	}
 
 	// 4. 상태 리셋.
 	State_Reset();
 
 	// 5. Description을 이용하여 시작 초기 작업을 정의합니다.
-	Enter_Rope();
+	//Enter_Rope();
 
 	// 6. 나중에 감지된 위치에 있는 방향으로 회전합니다. 
 	// 추후에는 => Look이 y도 돌아가야함.
 	m_pGalbrena->Rotate_MoveGrapple();
 
-	// 6. 중력 적용
-	m_pGalbrena->Set_Gravity(true);
+	// 6. 중력 끄기
+	m_pGalbrena->Set_Gravity(false);
 }
 
 void CGalbrenaRope::OnUpdate(_float fTimeDelta)
@@ -55,12 +72,16 @@ void CGalbrenaRope::OnUpdate(_float fTimeDelta)
 
 	// 상태 리셋;
 	State_Reset();
+
+	//m_pGalbrena->Rotate_MoveGrapple(); // 회전.
 }
 
 void CGalbrenaRope::OnExit()
 {
 	CInteractionState::OnExit();
 	m_pGalbrena->Set_Gravity(false);
+	m_eRopeDir = ROPEDIR::END;
+	m_eRopeStep = ROPESTEP::STEP_NONE;
 
 }
 
@@ -85,84 +106,155 @@ void CGalbrenaRope::Update_RopeAnimation(_float fTimeDelta)
 {
 	CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta);
 	EGalbrenaRopeType eRopeType = static_cast<EGalbrenaRopeType>(m_iCurrentAnimIdx);
+
+	// 이 경우에만 이동?
+	if (m_eRopeStep == ROPESTEP::STEP_START || m_eRopeStep == ROPESTEP::STEP_START2)
+		m_pGalbrena->Move_Grapple(fTimeDelta, 0.2f); // 이동.
+
+	if (m_eRopeStep == ROPESTEP::STEP_LOOP)
+		m_pGalbrena->Move_Grapple(fTimeDelta, 2.f); // 이동.
 	
 }
 
 void CGalbrenaRope::Check_Physics(_float fTimeDelta)
 {
 	m_States[LAND] = m_pGalbrena->Is_LandCollider(&m_vLandNormal);
+	m_States[REACHED] = m_pGalbrena->Is_ReachedGrappleTarget();
 }
 
 void CGalbrenaRope::Check_StateTransition(_float fTimeDelta)
 {
-
-	// 1. (탈출 조건) 목표 타겟(? => 어케 찾죠) 위치에 내가 도달했는가? (0.5f 이내?)
-
 	EGalbrenaRopeType eRopeType = static_cast<EGalbrenaRopeType>(m_iCurrentAnimIdx);
-
 	_bool IsEscapePossible = CState::Is_EscapePossible();
 
-	if (IsEscapePossible)
+	// 1. Step Start 인경우? => Start2로 변경.
+	if (m_eRopeStep == ROPESTEP::STEP_START)
 	{
-		if (m_States[LAND])
+		if (m_IsAnimationEnd)
 		{
-			if (m_States[MOVE])
+			switch (eRopeType)
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
-				return;
+			case EGalbrenaRopeType::FIXHOOK_START01_U:
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U);
+				m_eRopeStep = ROPESTEP::STEP_START2;
+				break;
+			case EGalbrenaRopeType::FIXHOOK_START01_D:
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U);
+				m_eRopeStep = ROPESTEP::STEP_START2;
+				break;
+			case EGalbrenaRopeType::FIXHOOK_START01_F:
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U);
+				m_eRopeStep = ROPESTEP::STEP_START2;
+				break;
+			default:
+				break;
 			}
+		}
+		return;
+	}
 
-			if (m_States[JUMP])
+	if (m_eRopeStep == ROPESTEP::STEP_START2)
+	{
+		if (m_IsAnimationEnd)
+		{
+			switch (eRopeType)
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
-				return;
+			case EGalbrenaRopeType::FIXHOOK_START02_U:
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_U);
+				m_eRopeStep = ROPESTEP::STEP_LOOP;
+				break;
+			case EGalbrenaRopeType::FIXHOOK_START02_F:
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_F);
+				m_eRopeStep = ROPESTEP::STEP_LOOP;
+				break;
+			case EGalbrenaRopeType::FIXHOOK_START02_D:
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_D);
+				m_eRopeStep = ROPESTEP::STEP_LOOP;
+				break;
+			default:
+				break;
 			}
-
-			m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_HEAVY;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND));
 			return;
 		}
+	}
 
-		if (!m_States[LAND])
+
+
+	// Step이 Loop이거나 End인 경우. 다른 State로 변경 가능.
+	if (m_eRopeStep == ROPESTEP::STEP_LOOP || m_eRopeStep == ROPESTEP::STEP_END)
+	{
+		if (IsEscapePossible)
 		{
-			if (m_States[JUMP])
+			// Loop 가 End로 변하는 조건은?
+			if ((m_eRopeStep == ROPESTEP::STEP_LOOP) && m_States[REACHED])
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_END);
+				m_eRopeStep = ROPESTEP::STEP_END;
+				return;
+			}
+
+			if (m_States[LAND])
+			{
+				if (m_States[MOVE])
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
+					return;
+				}
+
+				if (m_States[JUMP])
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
+					return;
+				}
+
+				m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_HEAVY;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND));
+				return;
+			}
+
+			if (!m_States[LAND])
+			{
+				if (m_States[JUMP])
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
+					return;
+				}
+			}
+		}
+
+		if (m_IsAnimationEnd && ROPESTEP::STEP_END == m_eRopeStep)
+		{
+			if (!m_States[LAND])
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eFallType = EGalbrenaFallType::FALL_LOOP;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL));
 				return;
 			}
 		}
 	}
 
-	if (m_IsAnimationEnd)
-	{
-		if (!m_States[LAND])
-		{
-			m_pGalbrena->GetStateContextForWrite().m_eFallType = EGalbrenaFallType::FALL_LOOP;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL));
-			return;
-		}
-	}
+	
 }
 
 
 void CGalbrenaRope::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_END), "FixHook_End", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_END), "FixHook_End", 1.5f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_END_FAST), "FixHook_End_Fast", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_D), "FixHook_Loop_D", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_F), "FixHook_Loop_F", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_L), "FixHook_Loop_L", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_R), "FixHook_Loop_R", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_LOOP_U), "FixHook_Loop_U", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.f, 16.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.f, 16.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.f, 16.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.f, 20.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.f, 20.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.5f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.5f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.5f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.5f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.5f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.5f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaRopeType::HOOK_UP), "Hook_Up", 1.f, 0.f);
 
 }

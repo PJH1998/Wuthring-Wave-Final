@@ -15,7 +15,11 @@ void CResource_Manager::Load_Resource(const _char* pFolderPath)
 
 	for (const auto& Entry : filesystem::recursive_directory_iterator(pFolderPath))
 	{
-		// Folder
+		if (false == Entry.is_regular_file())
+			continue;
+		if (Entry.path().extension() != ".dds" && Entry.path().extension() != ".png")
+			continue;
+			// Folder
 		//if (true == Entry.is_directory())
 		//{
 		//	Load_Resource(Entry.path().string().c_str());

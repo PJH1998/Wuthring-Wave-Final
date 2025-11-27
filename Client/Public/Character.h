@@ -164,14 +164,17 @@ public:
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
 	
 	// T 사용시 컨디션 공유. Interaction Type 설정.
-	UI_TAB_UTILITY Get_UtilityType() { return m_eInteractionType; }
+	UI_TAB_UTILITY Get_UtilityType();
 	
 	// Grapple Target 전달.
 	// Player의 T가 현재 어떤 상태인지도 전달해주어야함.
 	void Bind_GrappleTarget(class CTransform* pTargetTransform, OBJECTTYPE eObjectType); 
-	_bool Is_MoveGrapple();
 	void Rotate_MoveGrapple();
 	void Move_Grapple(_float fTimeDelta, _float fSpeed);
+	_float Get_GrappleDistance();
+	_bool Is_MoveGrapple();
+	_bool Is_ReachedGrappleTarget();
+	ROPEDIR Calculate_RopeDirection();
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
@@ -251,7 +254,7 @@ public:
 	void Sync_Transform_ToPlayer(class CTransform* pTransformCom); // Player로 보낸다.
 
 	// Interaction Type
-	void Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType);
+	void Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eUtilityType);
 #pragma endregion
 
 #ifdef _DEBUG
@@ -333,7 +336,7 @@ protected:
 	_float4 m_vQTEPos = {};
 	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
-	UI_TAB_UTILITY m_eInteractionType = { UI_TAB_UTILITY::NOTHING };
+	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
 
 

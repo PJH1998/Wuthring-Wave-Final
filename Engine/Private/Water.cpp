@@ -14,8 +14,8 @@ HRESULT CWater::Initialize()
 	if (FAILED(__super::Initialize()))
 		return E_FAIL;
 
-	m_fMinStepSize = 5.f;
-	m_fMaxStepSize = 15.f;
+	m_fMinStepSize = 10.f;
+	m_fMaxStepSize = 20.f;
 	m_fStartOffset = 10.f;
 
 	m_fMaxDepth = 3.f;
