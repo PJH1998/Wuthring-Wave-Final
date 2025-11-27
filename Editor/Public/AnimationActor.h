@@ -82,6 +82,7 @@ public:
 	
 	void Child_Render();
 	void Render_Detail();
+	void Render_Detail(_int iIndex);
 
 	void Print_WorldMatrix();
 

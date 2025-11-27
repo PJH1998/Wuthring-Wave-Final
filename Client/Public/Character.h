@@ -308,8 +308,8 @@ protected:
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 
-	class CTransform* m_pGrappleTransform = { nullptr }; // Grapple 용도.
-	OBJECTTYPE m_eGrappleType = { OBJECTTYPE::END };
+	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
+	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };
 
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 	class CComputeShader* m_pFacialComputeShaderCom = { nullptr }; // Facial 용도.

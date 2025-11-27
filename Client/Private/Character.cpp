@@ -390,8 +390,11 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 
 void CCharacter::Bind_GrappleTarget(CTransform* pTargetTransform, OBJECTTYPE eObjectType)
 {
-	m_pGrappleTransform = pTargetTransform;
-	m_eGrappleType = eObjectType;
+	m_pTargetGrappleTransform = pTargetTransform;
+	m_eTargetGrappleType = eObjectType;
+
+	_vector vPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	m_pGameInstance->IsIn_WorldSpace(vPos, 20.f);
 }
 
 
