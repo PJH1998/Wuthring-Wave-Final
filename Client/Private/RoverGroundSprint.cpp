@@ -90,6 +90,10 @@ void CRoverGroundSprint::Handle_Input()
 	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pRover->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
+	m_States[MOVE_ROPE] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pRover->Is_MoveGrapple());
+
 	// 키 입력.
 	m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 	m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -201,6 +205,12 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
 	{
 		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
+		return;
+	}
+
+	if (m_States[MOVE_ROPE])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPE));
 		return;
 	}
 

@@ -14,6 +14,7 @@ private:
 		DODGE,
 		DODGEABLE,
 		FLY,
+		MOVE_ROPE,
 		MOVE,
 		FALL,
 		WALL,

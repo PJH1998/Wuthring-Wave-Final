@@ -1,6 +1,13 @@
 ﻿#pragma once
 namespace Client
 {
+	enum class ROPEDIR : unsigned int {
+		U = 0,
+		F,
+		D,
+		END
+	};
+
 	enum class PROP_CONDITION : unsigned int {
 		DEFAULT = 1 << 0,  
 		DISSOLVE = 1 << 1, // Dissolve 설정.

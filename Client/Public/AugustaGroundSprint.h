@@ -12,6 +12,7 @@ private:
 		HIT = 0, // 피격 상태 최우선순위
         JUMP,
 		FLY,
+		MOVE_ROPE,
         DASH,
 		DODGE,
 		DODGEABLE,
