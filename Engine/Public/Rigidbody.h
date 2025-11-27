@@ -49,6 +49,7 @@ private:
 
 public:
 	void							Set_Position(const _fvector& vPos);
+	void							Set_Transform(const _fmatrix& Matrix);
 	// Data (void*)
 	void							Set_Desc(void* pData) { m_tCollisionData.pDesc = pData; }
 

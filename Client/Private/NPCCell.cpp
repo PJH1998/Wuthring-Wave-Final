@@ -86,25 +86,28 @@ void CNPCCell::Late_Update(_float fTimeDelta)
 
 void CNPCCell::Ready_Component(DUMMYCELL_DESC* pDesc)
 {
+	if(pDesc->isRigid)
+	{
+		// Com_Rigidbody
+		CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+		RigidbodyDesc.eBodyType = CRigidbody::BODY;
+		RigidbodyDesc.eShape = SHAPE::BOX;
+		RigidbodyDesc.eType = EMotionType::Kinematic;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
+		RigidbodyDesc.vExtent = _float3(0.4f, 0.3f, 0.4f);
+		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		
+		if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+			CRASH("Rigidbody");
+		
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			OnCollide_Enter(iLayer, pDesc, Manifold);
+			});
+
+	}
 	if (pDesc->isCollide)
 	{
-		//// Com_Rigidbody
-		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-		//RigidbodyDesc.eBodyType = CRigidbody::BODY;
-		//RigidbodyDesc.eShape = SHAPE::BOX;
-		//RigidbodyDesc.eType = EMotionType::Kinematic;
-		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-		//RigidbodyDesc.vExtent = _float3(0.4f, 0.3f, 0.4f);
-		//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-		//
-		//if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-		//	CRASH("Rigidbody");
-		//
-		//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		//	OnCollide_Enter(iLayer, pDesc, Manifold);
-		//	});
-		
 		// Com_Collider
 		CCollider::COLLIDER_DESC ColliderDesc = {};
 		XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));

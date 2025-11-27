@@ -19,6 +19,7 @@
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
+#include "Leviatan.h"
 #pragma endregion
 
 
@@ -98,7 +99,7 @@ HRESULT CLoader_Test::Initialize()
 	
 	
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
-
+	m_pGameInstance->Add_Work([this]() {Load_Leviatan(); Complete_Load(); });
 	
     m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 	
@@ -354,6 +355,28 @@ HRESULT CLoader_Test::Load_MonsterTest()
 		CRASH("PatternDummy Prototype Create Failed");
 #pragma endregion
     return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Leviatan()
+{
+	cout << "Leviatan" << endl;
+
+	// Prototype_Component_Model_Leviatan
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Leviatan
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
+		CLeviatan::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+#pragma region WEAPON
+
+#pragma endregion
+	return S_OK;
 }
 
 HRESULT CLoader_Test::Load_Effect()
