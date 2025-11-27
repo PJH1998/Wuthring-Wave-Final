@@ -61,10 +61,16 @@ HRESULT CUI_Ovfl_Palette::Initialize_Clone(void* pArg)
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_ResetHover_FadeIn.json",
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_ResetHover_FadeOut.json",
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_ResetHover_Click.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Palette_ResetHover_TickLoop.json",
 	};
 	Load_Animations(vecAnimFilePaths);
 	Create_ChildText_InfoText();
 	Create_ChildText_LeftChance();
+
+	Create_ChildText_Description();
+	Create_ChildText_DestColor();
+
+
 
 	// Load Levels.
 	Load_LevelData(0);
@@ -95,7 +101,9 @@ void CUI_Ovfl_Palette::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+	// 종료 조건시에도 작동해야 하는 것들
 	Update_ResetBtn();
+	Update_GoinDisable(fTimeDelta);
 	
 	if ((m_isGoinSuccess || m_isGoinFail) &&
 		(!m_isGoinChange))			// 종료 이벤트 체크 후, 종료 조건 시 진행 막음
@@ -105,7 +113,7 @@ void CUI_Ovfl_Palette::Update(_float fTimeDelta)
 		return;
 	}
 
-
+	// 종료 조건이 아닐 때만 작동해야 하는 것들
 	Update_ChangeColorBtn();
 	Update_HoverEvent();
 
@@ -125,7 +133,6 @@ void CUI_Ovfl_Palette::Update(_float fTimeDelta)
 
 
 	Update_PalettesInstance();
-	Update_GoinDisable(fTimeDelta);
 
 	__super::Update(fTimeDelta);
 }
@@ -149,12 +156,14 @@ void CUI_Ovfl_Palette::Render()
 
 void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	m_IsGoinDisabled = false;
-	m_fDisableTimer = 0.f;
-	m_iAnimOrder = 0;
-	m_isActivate = true;
+	UI_OVFLPALETTE_DESC* pDesc = static_cast<UI_OVFLPALETTE_DESC*>(pArg);
+	_uint iTargetLevel = pDesc->iTargetLevel;
 
-	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_Show");
+	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_Show", true);
+
+	Trigger_ResetLevel(iTargetLevel);
+	m_isActivate = true;
+	m_IsGoinDisabled = false;
 }
 
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
@@ -221,6 +230,7 @@ void CUI_Ovfl_Palette::PreAssign_ChildUIs()
 
 	m_pUI_Background		= Find_ChildObject(L"Palette_Background");
 
+	m_pUI_BGFrame			= Find_ChildObject(L"FG_Frame");
 	m_pUI_InstBlocks		= Find_ChildObject(L"FG_InstBlocks");
 	m_pUI_InstHoverBlocks	= Find_ChildObject(L"FG_InstHoverBlocks");
 	m_pUI_InstColorBtns		= Find_ChildObject(L"Side_ColorButton");
@@ -235,7 +245,7 @@ void CUI_Ovfl_Palette::Create_ChildText_InfoText()
 {
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f - 800.f, g_iWinSizeY / 2.f - 400.f },
-		L"남은 횟수",	// 상호작용 글씨
+		L"남은 횟수",
 		TEXT_COLOR_TYPE::TT_NORMAL,
 		0.33f,
 		L"UI_Text_Palette_Info"
@@ -264,7 +274,7 @@ void CUI_Ovfl_Palette::Create_ChildText_LeftChance()
 {
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f - 710.f, g_iWinSizeY / 2.f - 405.f },
-		L"153",	// 상호작용 글씨
+		L"153",
 		TEXT_COLOR_TYPE::TT_TITLE,
 		0.5f,
 		L"UI_Text_Palette_LeftChance"
@@ -289,12 +299,77 @@ void CUI_Ovfl_Palette::Create_ChildText_LeftChance()
 	m_pTextUI_LeftChance = pFont;
 }
 
+void CUI_Ovfl_Palette::Create_ChildText_Description()
+{
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f - 550.f, g_iWinSizeY / 2.f + 450.f },
+		L"모든 색상 블록을              으로 염색하세요.",
+		TEXT_COLOR_TYPE::TT_NORMAL,
+		0.33f,
+		L"UI_Text_Palette_Description"
+	);
+
+	CCustom_UI* pAttacher = m_pRUI_All;
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+	m_pTextUI_Description = pFont;
+}
+
+void CUI_Ovfl_Palette::Create_ChildText_DestColor()
+{
+	array<_wstring, 5> arrText = { L"빨간색",  L"초록색" , L"파란색" , L"노란색", L"Nothing"};
+
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f - 400.f, g_iWinSizeY / 2.f + 450.f },
+		arrText[m_eDestColorIndex],	// 상호작용 글씨
+		TEXT_COLOR_TYPE::TT_NORMAL,
+		0.33f,
+		L"UI_Text_Palette_DestColor"
+	);
+
+	CCustom_UI* pAttacher = m_pRUI_All;
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+	m_pTextUI_DestColor = pFont;
+
+
+	auto& targetTestDesc = pFont->Get_TextUIDesc();
+	targetTestDesc.vColor = m_arrColors[m_eGoalColorIndex];
+}
+
 void CUI_Ovfl_Palette::Trigger_ResetLevel(_uint iLevelIndex)
 {
 	m_isGoinChange	= false;
 	m_isGoinOpen	= false;
 	m_isGoinSuccess	= false;
 	m_isGoinFail	= false;
+	m_fChangeRadius = 0.f;
 
 	Load_LevelData(iLevelIndex);
 }
@@ -302,16 +377,22 @@ void CUI_Ovfl_Palette::Trigger_ResetLevel(_uint iLevelIndex)
 void CUI_Ovfl_Palette::Trigger_ClickEvent()
 {
 	_uint iClickedIndex = {};
-	if (Check_ClickedBlockInstance(&iClickedIndex))	// if Block Clicked !
+	if (!m_isGoinChange &&
+		Check_ClickedBlockInstance(&iClickedIndex))	// if Block Clicked !
 	{
-		m_isGoinChange = true;
 
 		_uint iIndexX = iClickedIndex / m_iPaletteSizeX;
 		_uint iIndexY = iClickedIndex % m_iPaletteSizeX;
 
 		UI_PALETTE_DESC& targetDesc = m_arrPalettesInfo[iIndexX][iIndexY];
 
-		m_eDestColorIndex = m_eDestColorIndex;
+		//m_eDestColorIndex = m_eDestColorIndex;
+
+		if (targetDesc.eColor == m_eDestColorIndex)
+			return;
+		
+		m_isGoinChange = true;
+
 		m_vChangeStartPos = Calc_InstBlock_ScrnPos(iClickedIndex);
 		m_isGoinChange;
 		m_fChangeRadius;
@@ -349,6 +430,9 @@ void CUI_Ovfl_Palette::Trigger_ClickEvent()
 
 void CUI_Ovfl_Palette::Update_HoverEvent()
 {
+	if (m_isGoinChange)
+		return;
+
 	CCustom_UI* pTargetUI = m_pUI_InstHoverBlocks;
 	CCustom_UI* pHoverCheckTargetUI = m_pUI_InstBlocks;
 
@@ -384,11 +468,13 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 
 HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 {
-	const vector<_string> vecFilePath = {
+	const vector<_string> vecFilePath = { // test
 		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_beohr_01_4.csv",
 		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Avinoleum_04_3.csv",
 		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Avinoleum_01_4.csv",
 	};
+
+	array<_wstring, 5> arrText = { L"빨간색",  L"초록색" , L"파란색" , L"노란색", L"Nothing" };
 
 	_uint iTargetLevel = UINT_MAX;
 	_bool isNotExistLevel = false;
@@ -398,27 +484,14 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 	vector<vector<_string>> vecLoadDatas = {};
 	_bool isLoaded = false;
 
-	if (vecFilePath.empty())
-	{
-		std::cout << "[UI_Ovfl_Palette::Load_LevelData] There are no pre-defined data. Try Generate random levels.." << std::endl;
+	CCustom_UI* pTargetFrameUI = m_pUI_BGFrame;
+	auto frameDesc = pTargetFrameUI->Get_UIDesc();
+	auto& frameInstDesc = frameDesc.vecInstanceDescs;
 
-		_uint iRandColor = static_cast<_uint>(m_pGameInstance->Rand(0.f, 3.999f));
-		const _float fColorChangeChance = 0.1f;
+	vector<_float4x4> vecFrameVariantMat = { _float4x4() };
 
-		for (auto& palettes : m_arrPalettesInfo)
-			for (auto& palette : palettes)
-			{
-				if (m_pGameInstance->Rand_Normal() <= fColorChangeChance)
-					iRandColor = static_cast<_uint>(m_pGameInstance->Rand(0.f, 3.999f));
 
-				palette.eColor = static_cast<PALETTE_COLOR>(iRandColor);
-			}
-		m_iLeftChance		= 10;
-		m_iMaxChance		= 10;
-		m_eGoalColorIndex	= static_cast<PALETTE_COLOR>(m_pGameInstance->Rand(0.f, 3.999f));
-		static_cast<CUI_Text*>(m_pTextUI_LeftChance)->Change_Text(to_wstring(m_iLeftChance));
-	}
-	else if (!vecFilePath.empty() && isNotExistLevel)
+	if (isNotExistLevel)
 	{
 		std::cout << "[UI_Ovfl_Palette::Load_LevelData] Cannot find pre-defined Level " << iLevelIndex << " Data. Try random loads.." << std::endl;
 
@@ -443,19 +516,25 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 		iTargetLevel = iLevelIndex;
 	}
 
-	if (!isLoaded)
-		return S_OK;	// 랜덤생성
-
-
-	
 	for (_uint i = 0; i < static_cast<_uint>(m_arrPalettesInfo.size()); i++)
 		for (_uint j = 0; j < static_cast<_uint>(m_arrPalettesInfo[i].size()); j++)
 			m_arrPalettesInfo[i][j].eColor = static_cast<PALETTE_COLOR>(stoi(vecLoadDatas[i][j]));
 
+	
 	m_iLeftChance		= static_cast<_uint>(stoi(vecLoadDatas[8][0]));
 	static_cast<CUI_Text*>(m_pTextUI_LeftChance)->Change_Text(to_wstring(m_iLeftChance));
 	m_iMaxChance		= static_cast<_uint>(stoi(vecLoadDatas[8][0]));
 	m_eGoalColorIndex	= static_cast<PALETTE_COLOR>(stoi(vecLoadDatas[8][1]));
+	static_cast<CUI_Text*>(m_pTextUI_DestColor)->Change_Text(arrText[m_eGoalColorIndex]);
+	*reinterpret_cast<_float4*>(&vecFrameVariantMat[0]._11) = m_arrColors[m_eGoalColorIndex];
+	CCustom_UI::VARIANTREADY_UI_DESC tFrameVariantDesc = {
+		vecFrameVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLE_COLORIZE),
+		true
+	};
+	pTargetFrameUI->Set_VariantUIDesc(tFrameVariantDesc);
+	auto& targetTestDesc = static_cast<CUI_Text*>(m_pTextUI_DestColor)->Get_TextUIDesc();
+	targetTestDesc.vColor = m_arrColors[m_eGoalColorIndex];
 
 	m_iCurTargetLevel	= iTargetLevel;
 
@@ -606,6 +685,9 @@ _float2 CUI_Ovfl_Palette::Calc_InstBlock_ScrnPos(_uint iInstIndex)
 
 void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 {
+	if (m_isGoinChange)
+		return;
+
 	CCustom_UI* pTargetUI = m_pUI_InstColorBtns;
 
 	auto targetDesc = pTargetUI->Get_UIDesc();
@@ -798,30 +880,36 @@ void CUI_Ovfl_Palette::Update_ResetBtn()
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 	if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0))
-	{
 		Trigger_ResetLevel(m_iCurTargetLevel);
-		static_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_Click");
+
+	
+	_bool isFinished = (m_isGoinSuccess || m_isGoinFail);
+	if (!isFinished)
+	{
+		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0))
+			static_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_Click");
+		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER), 0))
+			static_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_FadeIn");
+		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT), 0))
+			static_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_FadeOut");
 	}
-
-	//CCustom_UI* pHovered = m_pUI_ResetHover;
-	//auto hoveredDesc = pHovered->Get_UIDesc();
-	//auto& hoveredInstDesc = hoveredDesc.vecInstanceDescs;
-
-	if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER), 0))
-		static_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_FadeIn");
-	if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT), 0))
-		static_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_FadeOut");
-	//if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0))
-	//	static_cast<CAnimator_UI*>(pHovered->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_Click");
 
 }
 
 void CUI_Ovfl_Palette::Update_FinishEvent()
 {
-	if (m_isGoinFail || m_isGoinSuccess)
+	if (!(m_isGoinFail || m_isGoinSuccess))
 		return;
 
+	if		(m_isGoinFail)
+	{
+		static_cast<CAnimator_UI*>(m_pUI_ResetHover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Palette_ResetHover_TickLoop");
+	}
 
+	else if	(m_isGoinSuccess)
+	{
+		Req_OffPalette();
+	}
 
 	// ksta : 여기에 실패 / 성공 이벤트?
 

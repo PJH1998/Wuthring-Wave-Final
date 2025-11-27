@@ -51,6 +51,7 @@ namespace Client
 		UIFLAG_ENEMY_HP,			// 적 체력바용
 
 		UIFLAG_OVFL_PALETTE,		// 팔레트
+		UIFLAG_SIMPLE_COLORIZE,		// 단순 이미지 색상 평균값을 통한 색상화
 
 		UIFLAG_END
 	};

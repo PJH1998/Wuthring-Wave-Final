@@ -6,7 +6,9 @@ NS_BEGIN(Client)
 class CUI_Ovfl_Palette final : public CCustom_UI
 {
 public:
-
+	typedef struct tUI_OverflowPaletteDesc {
+		_uint iTargetLevel = 0;
+	} UI_OVFLPALETTE_DESC;
 
 private:
 	enum PALETTE_COLOR : _uint { PCOLOR_RED, PCOLOR_GREEN, PCOLOR_BLUE, PCOLOR_YELLOW, PCOLOR_END };
@@ -43,6 +45,8 @@ private:
 
 	void			Create_ChildText_InfoText();
 	void			Create_ChildText_LeftChance();
+	void			Create_ChildText_Description();
+	void			Create_ChildText_DestColor();
 
 private:
 	// 좀 정제된 함수들은 여기로..
@@ -94,6 +98,7 @@ private:
 
 	CCustom_UI*		m_pUI_Background		= { nullptr };				// [All]	Palette_Background
 
+	CCustom_UI*		m_pUI_BGFrame			= { nullptr };				// [FG]		FG_Frame
 	CCustom_UI*		m_pUI_InstBlocks		= { nullptr };				// [FG]		FG_InstBlocks
 	CCustom_UI*		m_pUI_InstHoverBlocks	= { nullptr };				// [FG]		FG_InstHoverBlocks
 	CCustom_UI*		m_pUI_InstColorBtns		= { nullptr };				// [Side]	Side_ColorButton
@@ -104,6 +109,8 @@ private:
 
 	CCustom_UI*		m_pTextUI_InfoText		= { nullptr };				// [Text]	InfoText		
 	CCustom_UI*		m_pTextUI_LeftChance	= { nullptr };				// [Text]	LeftChance	
+	CCustom_UI*		m_pTextUI_Description	= { nullptr };				// [Text]	Description	
+	CCustom_UI*		m_pTextUI_DestColor		= { nullptr };				// [Text]	DestColor	
 
 
 

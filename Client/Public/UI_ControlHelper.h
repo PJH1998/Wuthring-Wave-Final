@@ -48,7 +48,7 @@ public:
 	void				Show_TabUtilityUI(_uint iCurSelectedUtilityIndex);
 	_uint				HideNGet_TabUtilityUI();
 
-	void				Open_Game_OverflowPalette();
+	void				Open_Game_OverflowPalette(_uint iTargetLevel);
 	void				Close_Game_OverflowPalette();
 
 private:

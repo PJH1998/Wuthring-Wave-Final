@@ -194,7 +194,7 @@ void CUI_TabUtility::Update_MouseSelection()
 
 	
 	// 1. 커서 위치에 따라 Arrow 도 같이 돌아가야 함. 이는 중앙 대비 커서 위치에 따라 단순히 m_pUI_Arrow 를 돌리기만 하면 될 것.
-	// 2. 커서가 중앙으로부터 일정 거리 벗어나면, SelectedIndex 가 갱신되어야 함. (기본값 UINT_MAX)
+	// 2. 커서가 중앙으로부터 일정 거리 벗어나면, SelectedIndex 가 갱신되어야 함.
 	// 3. SelectedIndex 가 갱신될 떄에, Hover 또한 애니메이션이 재생되어야 하며, 해당 인덱스에 맞는 인스턴스만이 보여야 함
 	
 	//	 근데 다시 중앙에 돌아오면, SelectedIndex 는 다시 기본값으로 돌아가며, 이 상태로 끄면 선택한 장비는 현행유지여야 함.

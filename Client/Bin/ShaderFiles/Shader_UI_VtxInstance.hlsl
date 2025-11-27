@@ -48,8 +48,9 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_ENEMY_HP             7
 
 #define UIFLAG_OVFL_PALETTE         8
+#define UIFLAG_SIMPLE_COLORIZE      9
 
-#define UIFLAG_END                  9
+#define UIFLAG_END                  10
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -933,10 +934,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // ==============================
             // * [4] PlayerEnergy
             // ==============================
-            // * matrix info [size : 41 * 2] (energy * 41, background * 41)
+            // * matrix info [size : 41 * 3] (energy * 41, background * 41, static * 41)
             // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
             // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
-            // [VISIBLE] [HEIGHT]] -
+            // [VISIBLE] [HEIGHT] -
             // ==============================
             vector vColor1 = In.mExtra0.rgba;
             vector vColor2 = In.mExtra1.rgba;
@@ -1084,13 +1085,6 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         } break;
         case UIFLAG_OVFL_PALETTE :      // 8
         {
-            //#define CHANGE_BYCIRCLE
-            
-            
-            //    Out.vColor = float4(1.f, 0.f, 1.f ,1.f);
-            //return Out;
-            
-            
             // ==============================
             // * [8] Overflow Palette (UI MiniGame Gimmick)
             // ==============================
@@ -1260,6 +1254,24 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             return Out;
         } break;
+        case UIFLAG_SIMPLE_COLORIZE:
+        {
+            // ==============================
+            // * [9] Simple Colorize
+            // ==============================
+            // * matrix info
+            // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+            // ==============================
+            
+            float4  vColor          = In.mExtra0.rgba;
+            float4  vColorTex       = smoothstep(0.f, 1.f, (g_Texture.Sample(DefaultSampler, In.vTexcoord)));
+            
+            float   fColorAverage   = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
+            Out.vColor.rgb = vColor.rgb * fColorAverage.xxx;
+            Out.vColor.a = vColorTex.a;
+            
+            return Out;
+        }
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);

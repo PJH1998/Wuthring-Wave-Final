@@ -258,9 +258,9 @@ _uint CGameSystem::HideNGet_TabUtilityUI()
 	return m_pUI_ControlHelper->HideNGet_TabUtilityUI();
 }
 
-void CGameSystem::Open_Game_OverflowPalette()
+void CGameSystem::Open_Game_OverflowPalette(_uint iTargetLevel)
 {
-	m_pUI_ControlHelper->Open_Game_OverflowPalette();
+	m_pUI_ControlHelper->Open_Game_OverflowPalette(iTargetLevel);
 }
 
 void CGameSystem::Close_Game_OverflowPalette()
