@@ -74,9 +74,9 @@ void CAugustaAirFall::Handle_Input()
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
-	m_States[MOVE_ROPE] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
-		&& (m_pAugusta->Is_MoveGrapple());
+		&& (m_pAugusta->Is_GrappleHook());
 
 	m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
@@ -134,9 +134,9 @@ void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (m_States[MOVE_ROPE])
+	if (m_States[ROPE_HOOK])
 	{
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPE));
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK));
 		return;
 	}
 

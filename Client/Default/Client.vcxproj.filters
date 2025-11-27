@@ -967,7 +967,7 @@
     <ClInclude Include="..\Public\InteractionState.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\GalbrenaRope.h">
+    <ClInclude Include="..\Public\GalbrenaRopeHook.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Leviatan.h">
@@ -977,11 +977,14 @@
     <ClInclude Include="..\Public\RopeAnchor.h">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaRope.h">
+    <ClInclude Include="..\Public\AugustaRopeHook.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\RoverRope.h">
+    <ClInclude Include="..\Public\RoverRopeHook.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaRopeDrag.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1536,7 +1539,7 @@
     <ClCompile Include="..\Private\InteractionState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\GalbrenaRope.cpp">
+    <ClCompile Include="..\Private\GalbrenaRopeHook.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Leviatan.cpp">
@@ -1546,11 +1549,14 @@
     <ClCompile Include="..\Private\RopeAnchor.cpp">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaRope.cpp">
+    <ClCompile Include="..\Private\AugustaRopeHook.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\RoverRope.cpp">
+    <ClCompile Include="..\Private\RoverRopeHook.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

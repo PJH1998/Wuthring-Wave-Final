@@ -73,9 +73,9 @@ void CGalbrenaAirJump::Handle_Input()
 	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
-	m_States[MOVE_ROPE] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+	m_States[ROPE_HOOK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
-		&& (m_pGalbrena->Is_MoveGrapple());
+		&& (m_pGalbrena->Is_GrappleHook());
 
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -127,10 +127,10 @@ void CGalbrenaAirJump::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (m_States[MOVE_ROPE]) // 일단 잡아서 이동하는 Rope 액션만?
+	if (m_States[ROPE_HOOK]) // 일단 잡아서 이동하는 Rope 액션만?
 	{
 		// 애니메이션은 Rope 안에서 결정하기.
-		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPE));
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEHOOK));
 		return;
 	}
 

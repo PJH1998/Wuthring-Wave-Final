@@ -63,7 +63,7 @@ private:
 		EGalbrenaHitType m_eHitType = EGalbrenaHitType::END;
 
 		// Interaction
-		EGalbrenaRopeType m_eRopeType = EGalbrenaRopeType::END;
+		EGalbrenaRopeHookType m_eRopeHookType = EGalbrenaRopeHookType::END;
 
 		// Prev Info
 		_string m_strPrevInfo = {};
@@ -100,7 +100,7 @@ private:
 			m_eHitType = EGalbrenaHitType::END;
 
 			// Interaction
-			m_eRopeType = EGalbrenaRopeType::END;
+			m_eRopeHookType = EGalbrenaRopeHookType::END;
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};

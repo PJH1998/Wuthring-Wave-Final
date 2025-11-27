@@ -42,6 +42,9 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta)override;
 	virtual		void			Render()override;
 	void LerpPos(_float fTimeDelta);
+
+public:
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 private:
 	void Ready_Components(void* pArg);
 
@@ -66,9 +69,13 @@ private:
 	CModel_Streaming* m_pModelCom = { nullptr };
 
 private:
+	class CTransform* m_pTargetTransform = { nullptr };
 	_uint m_iShaderPassIndex = {};
 	_bool m_IsRender = { true };
 	_bool m_IsTriggerd = { false };
+	CALLBACK_CLIENT m_CallBack = {};
+	Mutex m_Mutex;
+	
 
 public:
 	static CMapObject_Collaps* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

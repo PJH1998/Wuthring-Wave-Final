@@ -73,9 +73,9 @@ void CRoverAirJump::Handle_Input()
 	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pRover->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
-	m_States[MOVE_ROPE] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+	m_States[ROPE_HOOK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
-		&& (m_pRover->Is_MoveGrapple());
+		&& (m_pRover->Is_GrappleHook());
 
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -128,9 +128,9 @@ void CRoverAirJump::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (m_States[MOVE_ROPE])
+	if (m_States[ROPE_HOOK])
 	{
-		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPE));
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEHOOK));
 		return;
 	}
 

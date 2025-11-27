@@ -57,7 +57,8 @@ enum class ERoverHitState : _uint
 // Galbrena Interaction
 enum class ERoverInteractionState : _uint
 {
-	ROPE = 0, // Rope Action
+	ROPEHOOK = 0, // Rope Action
+	ROPEDRAG,
 	INTERACTION_END
 };
 
@@ -346,7 +347,7 @@ enum class ERoverHitType : _uint
 
 
 #pragma region INTREACTION
-enum class ERoverRopeType : _uint
+enum class ERoverRopeHookType : _uint
 {
 	FIXHOOK_END = 0,
 	FIXHOOK_END_FAST,
@@ -362,6 +363,11 @@ enum class ERoverRopeType : _uint
 	FIXHOOK_START02_F,
 	FIXHOOK_START02_U,
 	HOOK_UP,
+	END
+};
+
+enum class ERoverRopeDragType : _uint
+{
 	DRAG_END,
 	DRAG_LOOP_D,
 	DRAG_LOOP_F,

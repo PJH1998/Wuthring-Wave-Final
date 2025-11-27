@@ -2,7 +2,7 @@
 #include "InteractionState.h"
 
 NS_BEGIN(Client)
-class CRoverRope final : public CInteractionState
+class CAugustaRopeHook final : public CInteractionState
 {
 private:
 	enum ROPESTATE
@@ -26,8 +26,8 @@ private:
 	};
 
 private:
-	explicit CRoverRope() = default;
-	virtual ~CRoverRope() = default;
+	explicit CAugustaRopeHook() = default;
+	virtual ~CAugustaRopeHook() = default;
 
 public:
 	virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -36,7 +36,7 @@ public:
 	virtual void OnExit() override;
 
 private:
-	class CRover* m_pRover = { nullptr };
+	class CAugusta* m_pAugusta = { nullptr };
 	_bool m_States[ROPESTATE::END] = {};
 
 	ROPEDIR m_eRopeDir = { ROPEDIR::END };
@@ -59,7 +59,7 @@ private:
 
 
 public:
-	static CRoverRope* Create(class CGameObject* pOwner);
+	static CAugustaRopeHook* Create(class CGameObject* pOwner);
 	virtual void Free() override;
 
 };

@@ -46,7 +46,6 @@ public:
 
 
 #pragma region CHARACTER INFO
-	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
@@ -166,7 +165,6 @@ private:
 
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
 
-	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
 public:

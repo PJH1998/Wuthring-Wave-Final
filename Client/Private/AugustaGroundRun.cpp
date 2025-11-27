@@ -86,9 +86,9 @@ void CAugustaGroundRun::Handle_Input()
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
-	m_States[MOVE_ROPE] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
-		&& (m_pAugusta->Is_MoveGrapple());
+		&& (m_pAugusta->Is_GrappleHook());
 
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -225,10 +225,10 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (m_States[MOVE_ROPE]) // 일단 잡아서 이동하는 Rope 액션만?
+	if (m_States[ROPE_HOOK]) // 일단 잡아서 이동하는 Rope 액션만?
 	{
 		// 애니메이션은 Rope 안에서 결정하기.
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPE));
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK));
 		return;
 	}
 
