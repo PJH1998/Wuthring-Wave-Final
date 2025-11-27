@@ -54,6 +54,14 @@ enum class EAugustaHitState : _uint
 	HIT_END
 };
 
+// Galbrena Interaction
+enum class EAugustaInteractionState : _uint
+{
+	ROPE = 0, // Rope Action
+	INTERACTION_END
+};
+
+
 #pragma endregion
 
 
@@ -375,6 +383,34 @@ enum class EAugustaHitType : _uint
 
 #pragma endregion
 
+
+#pragma region INTREACTION
+enum class EAugustaRopeType : _uint
+{
+	FIXHOOK_END = 0,
+	FIXHOOK_END_FAST,
+	FIXHOOK_LOOP_D,
+	FIXHOOK_LOOP_F,
+	FIXHOOK_LOOP_L,
+	FIXHOOK_LOOP_R,
+	FIXHOOK_LOOP_U,
+	FIXHOOK_START01_D,
+	FIXHOOK_START01_F,
+	FIXHOOK_START01_U,
+	FIXHOOK_START02_D,
+	FIXHOOK_START02_F,
+	FIXHOOK_START02_U,
+	HOOK_UP,
+	DRAG_END,
+	DRAG_LOOP_D,
+	DRAG_LOOP_F,
+	DRAG_LOOP_U,
+	DRAG_START_D,
+	DRAG_START_F,
+	DRAG_START_U,
+	END
+};
+#pragma endregion
 
 #pragma endregion
 

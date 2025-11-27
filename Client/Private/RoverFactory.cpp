@@ -25,6 +25,8 @@
 // Hit 카테고리 State
 #include "RoverHit.h"
 
+// Intraction 카테고리 State
+#include "RoverRope.h"
 
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCharacter)
@@ -59,4 +61,7 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 	//
 	//// Hit 하위 State
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT), CRoverHit::Create(pCharacter));
+
+	// Interaction 하위 State들
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPE), CRoverRope::Create(pCharacter));
 }

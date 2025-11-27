@@ -45,6 +45,8 @@ HRESULT CRopeAnchor::Initialize_Clone(void* pArg)
 void CRopeAnchor::Priority_Update(_float fTimeDelta)
 {
 	CGameObject::Priority_Update(fTimeDelta);
+
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CRopeAnchor::Update(_float fTimeDelta)
@@ -164,8 +166,9 @@ HRESULT CRopeAnchor::Ready_Components(ROPEOBJECT_DESC* pDesc)
 		OnCollider_During(iLayer, pDesc, Manifold);
 	});
 
-	// 내 위치. 넣기.
-	m_CallBack.pTransform = m_pTransformCom;
+	// Transform과 Rope_Anchor 타입임을 알립니다.
+	m_CallBack.pTransform = m_pTransformCom; 
+	m_CallBack.eObjectType = OBJECTTYPE::ROPE_ANCHOR;
 	m_pRigidbodyCom->Set_Desc(&m_CallBack);
 	return S_OK;
 }

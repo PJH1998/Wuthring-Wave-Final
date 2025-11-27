@@ -977,6 +977,12 @@
     <ClInclude Include="..\Public\RopeAnchor.h">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaRope.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverRope.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1539,6 +1545,12 @@
     <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
     <ClCompile Include="..\Private\RopeAnchor.cpp">
       <Filter>03. GameObject\MapObject\Rope</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaRope.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverRope.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

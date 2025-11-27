@@ -89,6 +89,12 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 	// 7. 기본 상태 FLIGHT
 	m_eUtilityType = UI_TAB_UTILITY::FLIGHT;
 	
+	// 8. 기본 상태 모두 적용하기.
+	for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
+	{
+		if (nullptr != m_Characters[i])
+			m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
+	}
 
     return S_OK;
 }
@@ -289,11 +295,11 @@ void CPlayer::Player_KeyInput()
 			{
 				m_eUtilityType = static_cast<UI_TAB_UTILITY>(iSelectedUtility);
 
-				// 변경 즉시 현재 활성 캐릭터에게도 알림 
-				if (m_Characters[m_iCurrentCharacterIdx])
+				// 변경 즉시 현재 모든 캐릭터에게도 적용
+				for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
 				{
-					Sync_InteractionType_ToCharacter(m_Characters[m_iCurrentCharacterIdx]);
-					//m_Characters[m_iCurrentCharacterIdx]->Sync_UtilityType_FromPlayer(m_eUtilityType);
+					if (nullptr != m_Characters[i])
+						m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 				}
 			}
 

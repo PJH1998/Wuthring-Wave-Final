@@ -37,6 +37,8 @@
 // Hit State
 #include "AugustaHit.h"
 
+// Intraction 카테고리 State
+#include "AugustaRope.h"
 
 void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pCharacter)
 {
@@ -70,6 +72,10 @@ void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta*
 
     // Hit 하위 State
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT), CAugustaHit::Create(pCharacter));
+
+	// Interaction 하위 State들
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPE), CAugustaRope::Create(pCharacter));
+
 }
 
 

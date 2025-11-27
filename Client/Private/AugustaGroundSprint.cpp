@@ -92,6 +92,10 @@ void CAugustaGroundSprint::Handle_Input()
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
+	m_States[MOVE_ROPE] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pAugusta->Is_MoveGrapple());
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -137,10 +141,6 @@ void CAugustaGroundSprint::Handle_Input()
 
 
 }
-
-
-
-
 
 void CAugustaGroundSprint::Update_RunAnimation(_float fTimeDelta)
 {
@@ -207,6 +207,12 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
 		return;
     }
+
+	if (m_States[MOVE_ROPE])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPE));
+		return;
+	}
 
 	if (m_States[FLY])
 	{
