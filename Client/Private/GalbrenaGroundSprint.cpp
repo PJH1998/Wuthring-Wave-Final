@@ -91,6 +91,11 @@ void CGalbrenaGroundSprint::Handle_Input()
 	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
+	// T키를 누르고 => 현재 상호작용이 Grapple이며 => 이동 가능한 상태일때.
+	m_States[MOVE_ROPE] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pGalbrena->Is_MoveGrapple());
+
 	// 키 입력.
 	m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 	m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -205,6 +210,13 @@ void CGalbrenaGroundSprint::Check_StateTransition(_float fTimeDelta)
 	{
 		m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
+		return;
+	}
+
+	if (m_States[MOVE_ROPE]) // 일단 잡아서 이동하는 Rope 액션만?
+	{
+		// 애니메이션은 Rope 안에서 결정하기.
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPE));
 		return;
 	}
 

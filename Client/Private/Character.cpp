@@ -393,14 +393,42 @@ void CCharacter::Bind_GrappleTarget(CTransform* pTargetTransform, OBJECTTYPE eOb
 	m_pTargetGrappleTransform = pTargetTransform;
 	m_eTargetGrappleType = eObjectType;
 
-	_vector vPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
-	m_pGameInstance->IsIn_WorldSpace(vPos, 20.f);
+	
 }
 
 
 _bool CCharacter::Is_MoveGrapple()
 {
-	return _bool();
+	// 1. 예외 조건 처리.
+	if ((nullptr == m_pTargetGrappleTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_eTargetGrappleType))
+		return false;
+
+	_vector vPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	m_pGameInstance->IsIn_WorldSpace(vPos, 20.f);
+
+	return true;
+}
+
+
+// Is_MoveGrapple이 True 인 경우에만 호출한다.
+void CCharacter::Rotate_MoveGrapple()
+{
+	if (nullptr == m_pTargetGrappleTransform)
+		return;
+
+	_vector vTarget = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+
+	//vToTarget = XMVectorSetY(vToTarget, 0.f);
+	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
+}
+
+void CCharacter::Move_Grapple(_float fTimeDelta, _float fSpeed)
+{
+	_vector vMoveDir = m_pTransformCom->Get_State(STATE::LOOK);
+	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)

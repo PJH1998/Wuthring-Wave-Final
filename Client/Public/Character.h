@@ -170,6 +170,8 @@ public:
 	// Player의 T가 현재 어떤 상태인지도 전달해주어야함.
 	void Bind_GrappleTarget(class CTransform* pTargetTransform, OBJECTTYPE eObjectType); 
 	_bool Is_MoveGrapple();
+	void Rotate_MoveGrapple();
+	void Move_Grapple(_float fTimeDelta, _float fSpeed);
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);

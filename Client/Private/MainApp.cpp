@@ -352,6 +352,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute AnimMesh Shader");
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshCharacter.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Failed Load AnimMesh Character Shader");
+
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"),
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshFly.hlsl")
 			, eShaderMacro, strEntryPoint))))
