@@ -196,6 +196,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
@@ -370,7 +371,6 @@
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
     <ClInclude Include="..\Public\Wing.h" />
-    <ClInclude Include="CLeviatan.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -413,6 +413,7 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
@@ -579,7 +580,6 @@
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp" />
-    <ClCompile Include="CLeviatan.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>

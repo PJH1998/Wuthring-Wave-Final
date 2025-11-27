@@ -82,6 +82,8 @@ void CNPCInstancing::Render()
 		}
 
 		m_pModelInstanceCom->Render(i);
+
+		m_pShaderCom->UndBind_All_VS_SRV();
 	}
 }
 

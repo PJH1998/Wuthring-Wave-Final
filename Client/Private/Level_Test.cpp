@@ -11,6 +11,7 @@
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
 #include "PatternDummy.h"
+#include "Leviatan.h"
 #pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
@@ -63,13 +64,14 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-	Ready_Dummy();
+	//Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
+	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
+	Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -463,6 +465,30 @@ void CLevel_Test::Ready_AnimInstanceTest()
 	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);
+}
+
+void CLevel_Test::Ready_Leviatan()
+{
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("Leviatan");
+
+	CLeviatan::LEVIATAN_DESC MobDesc{};
+	MobDesc.eCurLevel = m_eCurLevel;
+	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
+	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
+	MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Leviatan"));
+	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	MobDesc.fSpeedPerSec = 10.f;
+	MobDesc.vInitPosition = _float3(0.f, -8.f, -4.f);
+	MobDesc.pAnimationTag = "Stand2";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
+	MobDesc.fHP = pInfo->fMaxHp;
+	MobDesc.fAttackDmg = pInfo->fAttack;
+	MobDesc.fMaxStamina = pInfo->fMaxStamina;
+	MobDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &MobDesc)))
+		CRASH("Failed Ready MonsterTest");
 }
 
 void CLevel_Test::Ready_UI()

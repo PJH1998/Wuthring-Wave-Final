@@ -693,7 +693,7 @@ _bool CModel::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const 
 	{
 		m_isChangeAnimation = true;
 		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
+		//Clear_Animation(strAnimationName);
 	}
 
 	// 2. 현재 애니메이션의 Track Position 업데이트
