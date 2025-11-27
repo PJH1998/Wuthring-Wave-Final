@@ -1373,7 +1373,8 @@ void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRe
 	Rect["TextureTag"] = WStringToString(pRectDesc->strTextureTag);
 
 	Rect["ShaderPass"] = pRectDesc->iShaderPass;
-	Rect["MaskFloag"] = pRectDesc->iMaskFlag;
+	Rect["MaskFlag"] = pRectDesc->iMaskFlag;
+	Rect["ColorFlag"] = pRectDesc->iColorFlag;
 
 	Rect["SweepSpeed"] = pRectDesc->fSweepSpeed;
 	Rect["SweepSoft"] = pRectDesc->fSoft;

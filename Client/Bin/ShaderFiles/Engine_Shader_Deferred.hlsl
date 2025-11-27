@@ -825,17 +825,15 @@ PS_OUT_BACKBUFFER PS_WeightBlend(PS_IN In)
     float4 vAlpha = g_AccumAlphaTexture.Sample(DefaultSampler, In.vTexcoord);
     float a = vAlpha.r;
     
-    float4 vAccum;
+    float4 vAccum = float4(0.f, 0.f, 0.f, 0.f);
     
-    if (vColor.a > 1e-5f)
+    if (a > 1e-5f)
     {
-        vAccum.rgb = vColor.rgb / a;
-        vAccum.a = saturate(a * 1.5f);
+        vAccum.rgb = saturate(max(vColor.rgb / a, 0.0f));
+        vAccum.a = saturate(a);
     }
-    else
-        vAccum = float4(0.f, 0.f, 0.f, 0.f);
-    
-    Out.vColor = float4(vAccum.rgb * vAccum.a, vAccum.a);
+
+    Out.vColor = float4(vAccum.rgb * vAccum.a , vAccum.a);
     
     return Out;
 }
