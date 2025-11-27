@@ -83,7 +83,8 @@ void CRoverGroundRun::Handle_Input()
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
-	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
+		(m_pRover->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
     // 키 입력.
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));

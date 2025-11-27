@@ -138,8 +138,10 @@ namespace Client
 		_wstring strEffectTag = {};		// 호출할 이펙트 태그
 		TEXT_COLOR_TYPE eType{};		// 공격자 속성
 		ATTACKVOULME_DIR eDir{};
+		OBJECTTYPE eObjectType { OBJECTTYPE::END }; // 어떤 오브젝트인지 넣어서 판단하게. ANCHOR(고정), PULL(당긴다)
 		// Shaking이나, HitStop? 이런 거.
 	}CALLBACK_CLIENT;
+
 
 	typedef struct tagDelayedAction {
 		enum class TYPE { HIT, PARRY, DODGE }; // 이벤트 타입.

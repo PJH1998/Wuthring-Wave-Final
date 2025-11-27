@@ -101,6 +101,7 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 		m_fAnimationSpeed = Desc.fAnimationSpeed;
 
 		pModelCom->Set_TrackPosition(m_strCurrentAnimTag, fTargetTrackPos);
+		m_fCurrentTrackPositon = fTargetTrackPos;
 	}
 }
 
@@ -169,6 +170,38 @@ void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, 
 	pModelCom->Sync_RootNode(pTransform, fTimeDelata);
 
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
+	if (m_isLoop)
+		isAnimFinished = true;
+}
+
+//facial
+void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CComputeShader* pFacialShaderCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
+{
+	_bool AnyStateResult{};
+	_string strNextAnimation;
+	_float fTargetTrackPosition{};
+	// 0. Any State Transition
+	for (auto& pTransition : m_AnyState)
+	{
+		if (AnyStateResult = pTransition->Is_Transit(pState, strNextAnimation, fTargetTrackPosition))
+		{
+			Handle_Input(pModelCom, pState, strNextAnimation, fTargetTrackPosition);
+			break;
+		}
+	}
+
+	if (false == AnyStateResult)
+		m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
+
+
+	isAnimFinished = pModelCom->Play_Animation_GPU(pComputeShaderCom, pFacialShaderCom, m_strCurrentAnimTag, fTimeDelata,
+		&m_fCurrentTrackPositon, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+
+	pModelCom->Sync_RootNode(pTransform, fTimeDelata);
+
+	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
+	if (m_isLoop)
+		isAnimFinished = true;
 }
 
 void CAnimMachine::Reset(CModel* pModelCom, const _string& strAnimTag)

@@ -23,6 +23,7 @@ public:
 		_float fTrackPos;
 		_char szAnimationTag[MAX_PATH];
 		_bool isCollide;
+		_bool isRigid;
 	}DUMMYCELL_DESC;
 private:
 	explicit CNPCCell(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
