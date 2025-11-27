@@ -235,8 +235,12 @@ void CPatternDummy::Effect_Active(const _wstring& wStrEffectTag)
 	if(nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
+	PREFAB_INFO Info = {};
+	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	Info.pModelPtr = m_pModelCom;
+
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &Info);
 }
 
 CPatternDummy* CPatternDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

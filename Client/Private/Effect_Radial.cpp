@@ -40,7 +40,11 @@ void CEffect_Radial::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	m_pGameInstance->Setting_Radial(m_tDesc.Center, m_tDesc.DistanceRange, m_tDesc.IntensityRange);
+	if (!m_tDesc.PositionFlag)
+		m_pGameInstance->Setting_Radial(m_tDesc.Center, m_tDesc.DistanceRange, m_tDesc.IntensityRange);
+	else
+		m_pGameInstance->Setting_Radial(m_vObjectPos, m_tDesc.DistanceRange, m_tDesc.IntensityRange);
+
 
 	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL, m_tDesc.fLifeTime);
 
@@ -60,6 +64,10 @@ void CEffect_Radial::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	m_isActivate = pDesc->IsActive;
 
+	if (m_tDesc.PositionFlag)
+	{
+		m_vObjectPos = WorldMatrix.r[3];
+	}
 }
 
 

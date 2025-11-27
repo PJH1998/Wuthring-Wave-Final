@@ -19,6 +19,7 @@
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
+#include "Leviatan.h"
 #pragma endregion
 
 
@@ -67,6 +68,10 @@
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
 
+#pragma region OBJECT
+#include "RopeAnchor.h"
+#pragma endregion
+
 
 
 #include"GameSystem.h"
@@ -94,7 +99,7 @@ HRESULT CLoader_Test::Initialize()
 	
 	
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
-
+	m_pGameInstance->Add_Work([this]() {Load_Leviatan(); Complete_Load(); });
 	
     m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 	
@@ -102,6 +107,8 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     
 	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_RopeAnchor(); Complete_Load(); });
+
 	Load_Action();
 
     return S_OK;
@@ -350,6 +357,28 @@ HRESULT CLoader_Test::Load_MonsterTest()
     return S_OK;
 }
 
+HRESULT CLoader_Test::Load_Leviatan()
+{
+	cout << "Leviatan" << endl;
+
+	// Prototype_Component_Model_Leviatan
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Leviatan
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
+		CLeviatan::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+#pragma region WEAPON
+
+#pragma endregion
+	return S_OK;
+}
+
 HRESULT CLoader_Test::Load_Effect()
 {
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
@@ -357,6 +386,7 @@ HRESULT CLoader_Test::Load_Effect()
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	//m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);
 
     return S_OK;
 }
@@ -403,15 +433,19 @@ HRESULT CLoader_Test::Load_Player()
 HRESULT CLoader_Test::Load_Augusta()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
+	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Augusta.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
-    //_float fSize = 0.01f;
-    _float fSize = 0.0001f;
+    _float fSize = 0.01f;
+    //_float fSize = 0.0001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
+    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+    //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+    //    CRASH("Prototype Create Failed");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
 
 
@@ -487,16 +521,20 @@ HRESULT CLoader_Test::Load_Augusta()
 HRESULT CLoader_Test::Load_Rover()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+    //_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+    _string strFilePath = "../../Client/Bin/Resource/Model/Player/RoverFacial/Rover.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
-    //_float fSize = 0.01f;
-    _float fSize = 0.0001f;
+    //_float fSize = 0.0001f;
+	_float fSize = 0.01f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+  /*  if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
-        CRASH("Prototype Create Failed");
+        CRASH("Prototype Create Failed");*/
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
 
 
     // 2. StateMachine 초기화
@@ -863,6 +901,31 @@ HRESULT CLoader_Test::Load_Font()
 		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_Heavy", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Heavy.ttf", iPixelHeight)))
 		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_RopeAnchor()
+{
+	
+	_wstring wStrModelTag = L"Prototype_Component_Model_RopeAnchor";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Interaction/RopeAnchor/RopeAnchor.dat";
+	_float fSize = 0.005f;
+	//_float fSize = 0.001f;
+	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화
+	_wstring wstrObjectTag = TEXT("Prototype_GameObject_RopeAnchor");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CRopeAnchor::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 
 	return S_OK;
 }

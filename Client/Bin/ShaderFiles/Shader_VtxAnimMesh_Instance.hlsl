@@ -104,6 +104,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, In.TransformMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = Out.vPosition;
+    
     return Out;
 }
 
@@ -126,6 +127,7 @@ VS_OUT VS_FACE(VS_IN In)
         g_MeshLocalBoneIndecies[In.vBlendIndex.y],
         g_MeshLocalBoneIndecies[In.vBlendIndex.z],
         g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
+        
     matBone =
     mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
     mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
@@ -193,6 +195,7 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.w = 1.f;
     
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
@@ -210,21 +213,34 @@ PS_OUT PS_NORMALTEX(PS_IN In)
 
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-    float3 vNormal = NormalDesc.xyz;
+
+    vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    float3 vNormal;
+        
+    vNormal = vNormalDesc * 2.f - 1.f;
+   
+    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+   
+    float3 vTangent = In.vTangent.xyz;
+    float3 vBinormal = In.vBinormal.xyz * -1.f;
+    float3 vInNormal = In.vNormal.xyz;
+
+    float3x3 WorldMatrix;
+    WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+       
+    vNormal = normalize(mul(vNormal, WorldMatrix));
+    vNormal = vNormal * 0.5f + 0.5f;
     
-    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vector(vNormal, 0.f);
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.w = 1.f;
     Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
     
     Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
     Out.vSSS.w = In.vProjPos.w;
-    
     
     return Out;
 }

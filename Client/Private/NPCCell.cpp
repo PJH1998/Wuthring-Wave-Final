@@ -86,7 +86,7 @@ void CNPCCell::Late_Update(_float fTimeDelta)
 
 void CNPCCell::Ready_Component(DUMMYCELL_DESC* pDesc)
 {
-	if (pDesc->isCollide)
+	if(pDesc->isRigid)
 	{
 		// Com_Rigidbody
 		CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
@@ -96,39 +96,40 @@ void CNPCCell::Ready_Component(DUMMYCELL_DESC* pDesc)
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
 		RigidbodyDesc.vExtent = _float3(0.4f, 0.3f, 0.4f);
 		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-
+		
 		if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
 			CRASH("Rigidbody");
+		
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			OnCollide_Enter(iLayer, pDesc, Manifold);
+			});
 
-		if (pDesc->isCollide)
-		{
-			m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-				OnCollide_Enter(iLayer, pDesc, Manifold);
-				});
-		}
 	}
-	// Com_Collider
-	CCollider::COLLIDER_DESC ColliderDesc = {};
-	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.8f, 0.f);
-	ColliderDesc.eType = EMotionType::Kinematic;
-	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NPC);
-	ColliderDesc.fHeight = 1.0f;
-	ColliderDesc.fRadius = 0.3f;
-	ColliderDesc.fRayOffset = -0.17;
-	Add_Component(ENUM_CLASS(LEVEL::STATIC),TEXT("Prototype_Component_Collider"),
-		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
-	ASSERT_CRASH(m_pColliderCom);
-	m_pColliderCom->Set_Gravity(true);
-	//if(pDesc->isCollide)
-	//{
-	//	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//		OnCollide_Enter(iLayer, pDesc, Manifold);
-	//		});
-	//}
-	m_tCallBack.pTransform = m_pTransformCom;
-	m_pColliderCom->Set_Desc(&m_tCallBack);
+	if (pDesc->isCollide)
+	{
+		// Com_Collider
+		CCollider::COLLIDER_DESC ColliderDesc = {};
+		XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		ColliderDesc.vOffset = _float3(0.f, 0.65f, 0.f);
+		ColliderDesc.eType = EMotionType::Kinematic;
+		ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NPC);
+		ColliderDesc.fHeight = 0.7f;
+		ColliderDesc.fRadius = 0.3f;
+		ColliderDesc.fRayOffset = -0.19;
+		Add_Component(ENUM_CLASS(LEVEL::STATIC),TEXT("Prototype_Component_Collider"),
+			TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
+		ASSERT_CRASH(m_pColliderCom);
+		m_pColliderCom->Set_Gravity(true);
+		//if(pDesc->isCollide)
+		//{
+		//	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		//		OnCollide_Enter(iLayer, pDesc, Manifold);
+		//		});
+		//}
+		m_tCallBack.pTransform = m_pTransformCom;
+		m_pColliderCom->Set_Desc(&m_tCallBack);
+	}
 
 }
 

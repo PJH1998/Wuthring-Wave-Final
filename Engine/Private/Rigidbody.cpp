@@ -25,6 +25,15 @@ void CRigidbody::Set_Position(const _fvector& vPos)
 	m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vPos), EActivation::Activate);
 }
 
+void CRigidbody::Set_Transform(const _fmatrix& Matrix)
+{
+	_vector vScale{}, vRotation{}, vTranslation{};
+
+	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, Matrix);
+
+	m_pBodyInterface->SetPositionAndRotation(m_BodyID, LoadVec3(vTranslation), LoadQuat(vRotation), EActivation::Activate);
+}
+
 HRESULT CRigidbody::Initialize_Prototype()
 {
 	return S_OK;

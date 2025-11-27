@@ -1278,7 +1278,6 @@ void CAnimationTool::Render_Animation_Detail()
     {
         IsChanged = true;
         m_IsPlayAnimation = !m_IsPlayAnimation;
-
     }
         
 
@@ -1323,16 +1322,6 @@ void CAnimationTool::Render_Animation_Detail()
 
 
 #endif // _DEBUG
-
-
-    // 이거를 눌렀을때 현재 Actor와 ActorTag, Actor의 Animation 정보들을 정할 수 있다.
-    /*ImGui::SameLine();
-
-    if (ImGui::Button("State Transition Visible"))
-    {
-        m_IsStateTransition = !m_IsStateTransition;
-    }*/
-    
 
     ImGui::End();
 }

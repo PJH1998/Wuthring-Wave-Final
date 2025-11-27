@@ -43,6 +43,10 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
     // 5. 애니메이션 타입에 맞는 파츠 설정. => 0, 1 SWORD / 2, 3 DARKSCYTHE
 
 	m_pGalbrena->Rotate_Target();
+
+	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName; // 진입할때 한번 현재 스킬이름 저장.
+
 	switch(eSpecialType)
 	{ 
 	case EGalbrenaSpecialType::ATTACK05:
@@ -56,6 +60,7 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_SECONDGUN);
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		m_pGalbrena->Set_Gravity(false);
+		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), true);
 		break;
 	case EGalbrenaSpecialType::ATTACK08:
 		break;
@@ -68,8 +73,7 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		m_pGalbrena->PartActivate(PartType, true);
 		
 
-	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName; // 진입할때 한번 현재 스킬이름 저장.
+	
 }
 
 void CGalbrenaGroundSpecial::OnUpdate(_float fTimeDelta)

@@ -371,12 +371,12 @@ void CCharacter::Camera_Shake(_float fIntensity)
 	//m_pGameInstance->OnShake(vDir);
 }
 
-void CCharacter::Play_Action(const _wstring& strActionTag)
+void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
 {
 	if (nullptr == m_pTransformCom)
 		return;
 
-	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
 }
 
 _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
@@ -387,6 +387,49 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
+
+void CCharacter::Bind_GrappleTarget(CTransform* pTargetTransform, OBJECTTYPE eObjectType)
+{
+	m_pTargetGrappleTransform = pTargetTransform;
+	m_eTargetGrappleType = eObjectType;
+
+	
+}
+
+
+_bool CCharacter::Is_MoveGrapple()
+{
+	// 1. 예외 조건 처리.
+	if ((nullptr == m_pTargetGrappleTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_eTargetGrappleType))
+		return false;
+
+	_vector vPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	m_pGameInstance->IsIn_WorldSpace(vPos, 20.f);
+
+	return true;
+}
+
+
+// Is_MoveGrapple이 True 인 경우에만 호출한다.
+void CCharacter::Rotate_MoveGrapple()
+{
+	if (nullptr == m_pTargetGrappleTransform)
+		return;
+
+	_vector vTarget = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+
+	//vToTarget = XMVectorSetY(vToTarget, 0.f);
+	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
+}
+
+void CCharacter::Move_Grapple(_float fTimeDelta, _float fSpeed)
+{
+	_vector vMoveDir = m_pTransformCom->Get_State(STATE::LOOK);
+	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+}
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
@@ -825,14 +868,16 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 {
-
 	if (m_IsQTE)
 		return;
 
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	pTransformCom->Set_WorldMatrix(mat);
+}
 
-
+void CCharacter::Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType)
+{
+	m_eInteractionType = eInteractionType;
 }
 
 #ifdef _DEBUG
@@ -944,6 +989,17 @@ void CCharacter::Sync_Condition_ToPlayer(_uint* pCondition)
 
 	*pCondition = m_iCondition; // 값 넣어주기.
 }
+
+void CCharacter::Add_Condition_FromPlayer(_uint iCondition)
+{
+	m_iCondition |= iCondition;
+}
+
+void CCharacter::Remove_Condition_FromPlayer(_uint iCondition)
+{
+	m_iCondition &= ~iCondition;
+}
+
 
 
 #pragma endregion

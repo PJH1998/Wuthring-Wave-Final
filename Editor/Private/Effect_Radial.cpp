@@ -27,7 +27,7 @@ HRESULT CEffect_Radial::Initialize_Clone(void* pArg)
 	m_tDesc.DistanceRange = pDesc->DistanceRange;
 	m_tDesc.IntensityRange = pDesc->IntensityRange;
 	m_tDesc.fLifeTime = pDesc->fLifeTime;
-
+	m_tDesc.PositionFlag = pDesc->PositionFlag;
     //처음 만들어질 땐 무조건 활성화 ?
     m_isActivate = false;
 
@@ -43,10 +43,12 @@ void CEffect_Radial::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	m_pGameInstance->Setting_Radial(m_tDesc.Center, m_tDesc.DistanceRange, m_tDesc.IntensityRange);
+	if (!m_tDesc.PositionFlag)
+		m_pGameInstance->Setting_Radial(m_tDesc.Center, m_tDesc.DistanceRange, m_tDesc.IntensityRange);
+	else
+		m_pGameInstance->Setting_Radial(m_vObjectPos, m_tDesc.DistanceRange, m_tDesc.IntensityRange);
 
-	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL, m_tDesc.fLifeTime);
-
+	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL, m_tDesc.fLifeTime); 
 
 	m_isActivate = false;
 }
@@ -64,6 +66,10 @@ void CEffect_Radial::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	m_isActivate = pDesc->IsActive;
 
+	if (m_tDesc.PositionFlag)
+	{
+		m_vObjectPos = WorldMatrix.r[3];
+	}
 }
 
 

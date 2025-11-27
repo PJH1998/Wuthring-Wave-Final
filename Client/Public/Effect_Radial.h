@@ -16,6 +16,8 @@ public:
 
 		_float fLifeTime = {};
 		_float fRadialTime = 0.5f;
+
+		_bool  PositionFlag = false;
 	}RADIAL_DESC;
 
 private:
@@ -37,7 +39,7 @@ public:
 private:
 	RADIAL_DESC					m_tDesc = {};
 	_float						m_fCurrentTime = 0.f;
-	
+	_vector						m_vObjectPos = {};
 
 public:
 	static CEffect_Radial* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const RADIAL_DESC* pDesc);

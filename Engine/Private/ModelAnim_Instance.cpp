@@ -280,6 +280,8 @@ HRESULT CModelAnim_Instance::Initialize_Clone(void* pArg)
 			{
 				m_pVtxInstanceDatas[i].resize(m_MeshTypeOffsets[i]);
 			}*/
+			m_pVtxInstanceDatas.resize(1);
+			m_pVtxInstanceDatas[0].reserve(m_iNumInstance);
 		}
 		else
 		{
@@ -287,7 +289,7 @@ HRESULT CModelAnim_Instance::Initialize_Clone(void* pArg)
 
 			for (_uint i = 0; i < m_iNumMeshes; i++)
 			{
-				m_pVtxInstanceDatas[i].reserve(m_iNumMeshes);
+				m_pVtxInstanceDatas[i].reserve(m_iNumInstance);
 			}
 		}
 	}
@@ -438,16 +440,23 @@ void CModelAnim_Instance::Update_AnimationState(const _string& strAnimationName,
 	XMStoreFloat4(&m_VtxInstanceDatas[iInstanceIndex].vTranslation, WorldMatrix.r[ENUM_CLASS(STATE::POSITION)]);
 	m_VtxInstanceDatas[iInstanceIndex].iBaseIndex = iInstanceIndex;
 
-	// 각 메쉬 타입별로 인스턴스 매트릭스를 분배
-	if (nullptr == pPaddingIndices)
+	_vector vPos = XMLoadFloat4(&m_VtxInstanceDatas[iInstanceIndex].vTranslation);
+	_vector vCamPos = XMLoadFloat4(m_pGameInstance->Get_CamPos());
+
+	if (XMVectorGetX(XMVector3Length(vCamPos - vPos)) < 90.f)
 	{
-		// 종류로 구분되는 mesh가 아닌경우(머리, 얼굴, 몸통 등 부위를 조합하는 경우가 아닐 때, mesh가 한 개, 혹은 여러 개의 모음집일 경우)
-	}
-	else
-	{
-		for (_uint i = 0; i < m_iNumMeshType; ++i)
+		// 각 메쉬 타입별로 인스턴스 매트릭스를 분배
+		if (nullptr == pPaddingIndices)
 		{
-			m_pVtxInstanceDatas[(pPaddingIndices[i] + m_MeshTypeOffsets[i])].push_back(m_VtxInstanceDatas[iInstanceIndex]);
+			// 종류로 구분되는 mesh가 아닌경우(머리, 얼굴, 몸통 등 부위를 조합하는 경우가 아닐 때, mesh가 한 개, 혹은 여러 개의 모음집일 경우)
+			m_pVtxInstanceDatas[0].push_back(m_VtxInstanceDatas[iInstanceIndex]);
+		}
+		else
+		{
+			for (_uint i = 0; i < m_iNumMeshType; ++i)
+			{
+				m_pVtxInstanceDatas[(pPaddingIndices[i] + m_MeshTypeOffsets[i])].push_back(m_VtxInstanceDatas[iInstanceIndex]);
+			}
 		}
 	}
 }
@@ -652,7 +661,7 @@ void CModelAnim_Instance::Update_WorldInstances()
 	{
 		for (_uint i = 0; i < m_iNumMeshes; i++)
 		{
-			m_Meshes[i]->Update_InstanceData(m_VtxInstanceDatas.data(), m_VtxInstanceDatas.size());
+			m_Meshes[i]->Update_InstanceData(m_pVtxInstanceDatas[0].data(), m_pVtxInstanceDatas[0].size());
 		}
 	}
 	else

@@ -158,15 +158,25 @@ public:
 public:
 	// Caemra
 	void Camera_Shake(_float fIntensity);
-	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
+	void Play_Action(const _wstring& strActionTag, _bool isEscape = false); // Action Camera (Cut Scene)
 
 	// Ability에서 확인 받기 => 상태 판별?
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
+	
+	// T 사용시 컨디션 공유. Interaction Type 설정.
+	UI_TAB_UTILITY Get_UtilityType() { return m_eInteractionType; }
+	
+	// Grapple Target 전달.
+	// Player의 T가 현재 어떤 상태인지도 전달해주어야함.
+	void Bind_GrappleTarget(class CTransform* pTargetTransform, OBJECTTYPE eObjectType); 
+	_bool Is_MoveGrapple();
+	void Rotate_MoveGrapple();
+	void Move_Grapple(_float fTimeDelta, _float fSpeed);
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
-	void Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag);
+	void Bind_CostCondition_ToAbility(_uint iConditionw, _uint iConditionFlag);
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
@@ -195,8 +205,6 @@ public:
 	void Set_Hit(_bool IsHit) { m_IsHit = IsHit; }
 	const HIT_DESC* GetPendingHitDesc() const { return &m_PendingHitDesc; } // 읽기 전용 정보 전달.
 	void ClearPendingHit() { m_PendingHitDesc = {}; }
-
-
 
 	// KeyInput
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
@@ -241,6 +249,9 @@ public:
 	// Transform
 	void Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevVeloctiy, _float fTimeDelta);
 	void Sync_Transform_ToPlayer(class CTransform* pTransformCom); // Player로 보낸다.
+
+	// Interaction Type
+	void Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType);
 #pragma endregion
 
 #ifdef _DEBUG
@@ -280,6 +291,8 @@ public:
 	void Remove_Condition(_uint iConditionFlag);
 	void Remove_AllCondition();
 	void Sync_Condition_ToPlayer(_uint* pCondition);
+	void Add_Condition_FromPlayer(_uint iCondition);
+	void Remove_Condition_FromPlayer(_uint iCondition);
 
 
 	void Bind_ChangeTimer() { m_fChangeTimer = m_fChangeDuration; } // Dissolve에 바인딩할 변수값.
@@ -296,7 +309,10 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
-	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+
+	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
+	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };
+
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 	class CComputeShader* m_pFacialComputeShaderCom = { nullptr }; // Facial 용도.
 
@@ -317,7 +333,8 @@ protected:
 	_float4 m_vQTEPos = {};
 	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
-	
+	UI_TAB_UTILITY m_eInteractionType = { UI_TAB_UTILITY::NOTHING };
+
 
 
 protected:

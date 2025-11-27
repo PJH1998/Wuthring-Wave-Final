@@ -83,7 +83,8 @@ void CAugustaGroundRun::Handle_Input()
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
-	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
+		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -356,7 +357,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         // Stop Run 이면서 애니메이션 재생이 끝났다면?.
         if ((eRunType == EAugustaRunType::STOP_RUN_L) && m_IsAnimationEnd)
         {
-            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
             return;
         }

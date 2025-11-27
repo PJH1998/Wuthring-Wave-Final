@@ -8,6 +8,14 @@ namespace Client
 		END
 	};
 
+	enum class CHARACTER_INTERACTIONTYPE : unsigned int {
+		GRAPPLE = 0,		// 그래플
+		SENSOR,			// 스캔
+		FLIGHT,			// 활공
+		LEVITATOR,		// 컨트롤
+		NOTHING			// UI OFF 시 아무것도 선택되지 않음
+	};
+
 	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
 	enum class CHARACTER_CONDITION : unsigned int {
 		HIT = 1 << 0,
@@ -19,6 +27,7 @@ namespace Client
 		CUTSCENE = 1 << 6,
 		SKILLHIT = 1 << 7, // Skill에 맞았단 판정이 필요한 경우.(Galbrena Default E)
 		SELECT = 1 << 8, // 선택된 상태.
+		MOVE_ROPE = 1 << 9, // Rope 이동이 가능한상태?
 		END
 	};
 
@@ -104,7 +113,8 @@ namespace Client
 		D3 = 1 << 16,
 		D4 = 1 << 17,
 		D5 = 1 << 18,
-		D6 = 1 << 19
+		D6 = 1 << 19,
+		G = 1 << 20,
 	};
 
 	typedef enum class ESkillType : _uint

@@ -184,10 +184,14 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     if(g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        vNormal = vNormalDesc * 2.f - 1.f;
+    
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -242,10 +246,14 @@ PS_OUT PS_ROVER(PS_IN In)
     if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        vNormal = vNormalDesc * 2.f - 1.f;
+    
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -296,11 +304,15 @@ PS_OUT PS_GALBRENA(PS_IN In)
     if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        vNormal = vNormalDesc * 2.f - 1.f;
+    
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-            
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+                 
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
         float3 vInNormal = In.vNormal.xyz;
@@ -350,10 +362,14 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
     if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        vNormal = vNormalDesc * 2.f - 1.f;
+    
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;

@@ -196,6 +196,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
@@ -232,6 +233,7 @@
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecial.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
+    <ClInclude Include="..\Public\GalbrenaRope.h" />
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
@@ -243,6 +245,7 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\InteractionState.h" />
     <ClInclude Include="..\Public\Level_Heaven.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
@@ -296,6 +299,7 @@
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\public\Projectile.h" />
+    <ClInclude Include="..\Public\RopeAnchor.h" />
     <ClInclude Include="..\Public\Rover.h" />
     <ClInclude Include="..\Public\RoverAirAttack.h" />
     <ClInclude Include="..\Public\RoverAirFall.h" />
@@ -409,6 +413,7 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
@@ -451,6 +456,7 @@
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
+    <ClCompile Include="..\Private\GalbrenaRope.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp" />
@@ -462,6 +468,7 @@
     <ClCompile Include="..\Private\GroundState.cpp" />
     <ClCompile Include="..\private\HavocWarrior.cpp" />
     <ClCompile Include="..\Private\HitState.cpp" />
+    <ClCompile Include="..\Private\InteractionState.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
     <ClCompile Include="..\Private\Level_Heaven.cpp" />
     <ClCompile Include="..\Private\Level_Loading.cpp" />
@@ -503,6 +510,7 @@
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\private\Projectile.cpp" />
+    <ClCompile Include="..\Private\RopeAnchor.cpp" />
     <ClCompile Include="..\Private\RoverAirAttack.cpp" />
     <ClCompile Include="..\Private\RoverAirFly.cpp" />
     <ClCompile Include="..\Private\RoverDarkScythe.cpp" />
@@ -662,6 +670,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Logo.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <FileType>Document</FileType>
     </FxCompile>

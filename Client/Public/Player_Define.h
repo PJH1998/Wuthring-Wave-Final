@@ -27,8 +27,9 @@ namespace PlayerData
     {
         CCharacter::CHARACTER_DESC Desc;
         Desc.eCurLevel = eLevel;
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-        Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
+        Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta"));
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
@@ -122,8 +123,10 @@ namespace PlayerData
     {
         CCharacter::CHARACTER_DESC Desc;
         Desc.eCurLevel = eLevel;
-        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-        Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
+		//Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover"));
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Rover"));
@@ -240,7 +243,8 @@ namespace PlayerData
 		Desc.eCurLevel = eLevel;
 		//Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
 		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
-		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		//Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
 		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Galbrena"));
 		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Galbrena"));

@@ -155,6 +155,11 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 		{
 			m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(isActive);
 		}
+		else if (wstrPartTag == TEXT("Weapon"))
+		{
+			m_pCoroRock->Change_CollisionActive(isActive);
+			m_pCoroRock->SetActivate(isActive);
+		}
 		else
 		{
 			m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(isActive);
@@ -180,11 +185,15 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 
 void CCorosaurus::Effect_Active(const _wstring& wStrEffectTag)
 {
-	/*if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);*/
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
 }
 
 void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
@@ -199,6 +208,32 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("LookRev"))
 	{
 			m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
+	}
+	else if (wstrTypeTag == TEXT("Type"))
+	{
+		if (wstrAnimTag == TEXT("ATK"))
+		{
+			for (auto& pATKVolume : m_pAtkVolumes)
+				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
+			m_pCoroRock->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK));
+		}
+		else if (wstrAnimTag == TEXT("HARD"))
+		{
+			for (auto& pATKVolume : m_pAtkVolumes)
+				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_HARDATTACK);
+			m_pCoroRock->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK));
+		}
+		else if (wstrAnimTag == TEXT("SKILL"))
+		{
+			for (auto& pATKVolume : m_pAtkVolumes)
+				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_SKILL);
+			m_pCoroRock->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL));
+		}
+		else if (wstrAnimTag == TEXT("GRAB"))
+		{
+			for (auto& pATKVolume : m_pAtkVolumes)
+				pATKVolume->Change_Layer(COLLISIONLAYER::GRAB);
+		}
 	}
 
 }
@@ -720,7 +755,7 @@ _bool CCorosaurus::AttackArrange()
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK8)
+	if (iIndex != ATK_PATTERN::BURST)
 		return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
