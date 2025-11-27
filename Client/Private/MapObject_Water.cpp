@@ -49,6 +49,7 @@ void CMapObject_Water::Update(_float fTimeDelta)
 
 void CMapObject_Water::Late_Update(_float fTimeDelta)
 {
+	m_fTime = fmod((m_fTime + (fTimeDelta * 0.12f)), 1.f);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
 }
 
@@ -58,13 +59,16 @@ void CMapObject_Water::Render()
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
-	_bool HasNormal = { true };
+	_bool HasNormal = { true };   
 	_bool HasMask = { true };
 	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_fTime", &m_fTime, sizeof(_float))))
+		CRASH("Failed to Bind fTime");
 
 	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
