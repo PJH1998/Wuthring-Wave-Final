@@ -712,6 +712,8 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     
     float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
    
+    float4 vWaterColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+   
     float4 vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
     if(vPBRDesc.w != 1.f)
@@ -734,8 +736,6 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     vSceneWorldPos = mul(vSceneWorldPos, g_ProjMatrixInv);
     vSceneWorldPos = mul(vSceneWorldPos, g_ViewMatrixInv);
     
-    float4 vWaterColor = float4(0.1f, 0.5f, 0.1f, 1.f);
-    
     float4 vReflectColor = Compute_Reflect(vWorldPos, vViewPos, vViewNormal, vOriginColor, g_BackBufferTexture, g_DepthTexture);
     float4 vRefractColor = Compute_Refract(vWorldPos, vNormal, vWaterColor, g_BackBufferTexture, (vWorldPos.y - vSceneWorldPos.y));
     
@@ -748,7 +748,7 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     
     float fReflectRatio = lerp(0.5f, 0.8f, vFresnel.r);
    
-    Out.vColor = lerp(vOriginColor, lerp(vReflectColor, vRefractColor, fReflectRatio), 0.5f);
+    Out.vColor = lerp(vWaterColor, lerp(vReflectColor, vRefractColor, fReflectRatio), 0.7f);
     
     return Out;
 }
