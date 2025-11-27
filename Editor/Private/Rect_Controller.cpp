@@ -141,6 +141,15 @@ void CRect_Controller::Rect_Tab()
                     ImGui::InputFloat("##RectLifeTimeY", &(m_pSelectedRectDesc->vLifeTime.y));
                     ImGui::PopItemWidth();
 
+					ImGui::PushItemWidth(100);
+					if (ImGui::Button("ColorFlag"))
+					{
+						if (m_pSelectedRectDesc->iColorFlag == 0)
+							m_pSelectedRectDesc->iColorFlag = 1;
+						else
+							m_pSelectedRectDesc->iColorFlag = 0;
+					}
+
                     if (ImGui::ColorEdit4("Color", m_fColor, 
 						ImGuiColorEditFlags_NoOptions          // 설정 메뉴 비활성화 (HSV 등 변환 방지)
 						| ImGuiColorEditFlags_NoInputs         // 텍스트 입력 비활성 (정확히 선택한 색 유지)

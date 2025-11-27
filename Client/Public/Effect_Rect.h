@@ -25,6 +25,7 @@ public:
 
 		_int	iShaderPass = 0;
 		_int	iMaskFlag = 0;
+		_int	iColorFlag = 0;
 
 		_bool	IsSprite = false;
 		_int    iRows = 0;
@@ -78,6 +79,7 @@ private:
 	_float						m_fSoft = {};
 
 	_int						m_iMaskFlag = 0;
+	_int						m_iColorFlag = 0;
 
 	_bool						m_IsSprite = false;
 	_int						m_iRow = {};
