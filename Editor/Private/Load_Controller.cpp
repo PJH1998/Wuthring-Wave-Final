@@ -830,6 +830,9 @@ void CLoad_Controller::Load_FXRect_FromJson(const _string& strFilePath, const _w
 	if (RectJson.contains("MaskFlag"))
 		Desc.iMaskFlag = RectJson["MaskFlag"].get<_int>();
 
+	if (RectJson.contains("ColorFlag"))
+		Desc.iColorFlag = RectJson["ColorFlag"].get<_int>();
+
 	if (RectJson.contains("SweepSpeed"))
 		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();
 

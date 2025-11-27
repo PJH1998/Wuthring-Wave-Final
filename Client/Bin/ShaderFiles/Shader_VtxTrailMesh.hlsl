@@ -184,9 +184,9 @@ PS_OUT PS_TrailDefault(PS_IN In)
     ColorUV -= g_Sweep; //X로 긴 텍스처니까 색상 움직이듯 보여질려면 이렇게 해야하나?
     float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, ColorUV);
 
-    vColor.rgb = saturate(vColor.rgb);
-    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
-    vColor.rgb *= g_ColorGain;
+     vColor.rgb = saturate(vColor.rgb);
+     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+     vColor.rgb *= g_ColorGain;
 
     float alpha;
 
@@ -227,9 +227,9 @@ PS_OUT PS_TrailDefault(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     return Out;
@@ -308,12 +308,10 @@ PS_OUT PS_TraillTest(PS_IN In)
 //if (fWeight >= g_fEmissiveThreshold)
 //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
-    
     float z = In.vProjPos.z / In.vProjPos.w;
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
-    
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
    
@@ -360,7 +358,7 @@ PS_OUT PS_Y_OUT(PS_IN In)
         discard;
 
     Out.vDiffuse = float4(vColor.rgb, fAlpha);
-
+    
     float fWeight = Luminance(Out.vDiffuse.xyz);
 
     if (fWeight >= g_fEmissiveThreshold)
@@ -370,12 +368,11 @@ PS_OUT PS_Y_OUT(PS_IN In)
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
     
-    
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     return Out;
@@ -430,9 +427,9 @@ PS_OUT PS_Y_IN(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -515,9 +512,9 @@ PS_OUT PS_TraillTestA(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -568,9 +565,9 @@ PS_OUT PS_TraillDissolve(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -596,6 +593,7 @@ PS_OUT PS_TraillDesh(PS_IN In)
 
     if (Out.vDiffuse.r < 0.2f)      //테스트
         discard;
+   
 
     float fWeight = Luminance(Out.vDiffuse.xyz);
 
@@ -606,9 +604,9 @@ PS_OUT PS_TraillDesh(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -633,7 +631,7 @@ PS_OUT PS_TraillDeshB(PS_IN In)
 
     if (Out.vDiffuse.r < 0.2f)      //테스트
         discard;
-
+ 
     float fWeight = Luminance(Out.vDiffuse.xyz);
 
     if (fWeight >= g_fEmissiveThreshold)
@@ -641,12 +639,11 @@ PS_OUT PS_TraillDeshB(PS_IN In)
 
     Out.vDiffuse.rgb *= Out.vDiffuse.a;
     
-    
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -726,9 +723,11 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
 
     MaskUV.x = 1 - frac(MaskUV.x + g_MaskSpeed * g_Time);
 
-    float MaskR = g_MaskTexture.Sample(ClampSampler, MaskUV).r;
+    float4 Mask = g_MaskTexture.Sample(ClampSampler, MaskUV);
 
-    if (MaskR < 0.3f)
+    float MaskR = max(max(Mask.r, Mask.g), Mask.b);
+    
+    if (MaskR < 0.2f)
         discard;
 
     if (UV.x > g_Sweep)
@@ -759,12 +758,11 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
   
     Out.vEmissive.xyz *= Out.vDiffuse.a;
     
-    
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -781,9 +779,11 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
 
     MaskUV.x = frac(MaskUV.x + g_MaskSpeed * g_Time);
 
-    float MaskR = g_MaskTexture.Sample(ClampSampler, MaskUV).r;
+    float4 Mask = g_MaskTexture.Sample(ClampSampler, MaskUV);
 
-    if (MaskR < 0.3f)
+    float MaskR = max(max(Mask.r, Mask.g), Mask.b);
+    
+    if (MaskR < 0.2f)
         discard;
 
     if (UV.x < 1.f - g_Sweep)
@@ -816,9 +816,9 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.5f));
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
-    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, Out.vDiffuse.a) * Weight;
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
@@ -833,7 +833,7 @@ PS_OUT WBTEST(PS_IN In)
     
     float z = In.vProjPos.z / In.vProjPos.w;
     
-    float Weight = max(1e-5, exp(-z * 0.1f)); 
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
     
     Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
     Out.vAccumAlpha.r = vColor.a * Weight;
@@ -847,7 +847,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -858,7 +858,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -869,7 +869,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -880,7 +880,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -891,7 +891,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -902,7 +902,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -913,7 +913,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -924,7 +924,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -957,7 +957,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -968,7 +968,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -979,7 +979,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;

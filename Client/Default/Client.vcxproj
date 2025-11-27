@@ -253,6 +253,7 @@
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
     <ClInclude Include="..\public\Logo_SkyBox.h" />
+    <ClInclude Include="..\Public\MapObject_Collaps.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\MapObject_Instance.h" />
@@ -494,6 +495,7 @@
     <ClCompile Include="..\private\Logo_SkyBox.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\MapObject_Instance.cpp" />

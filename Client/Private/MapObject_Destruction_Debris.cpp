@@ -48,7 +48,7 @@ void CMapObject_Destruction_Debris::Priority_Update(_float fTimeDelta)
 		m_pRigidbodyCom->IsActivate(true);
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_FixedPos));
 		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pRigidbodyCom->Impulse(m_vImpulse);
 		m_IsTriggered = false;
 	}
@@ -146,7 +146,7 @@ HRESULT CMapObject_Destruction_Debris::Ready_Component(void* pArg)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Dynamic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
 	RigidbodyDesc.vExtent = _float3(1.f, 1.f, 1.f);
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

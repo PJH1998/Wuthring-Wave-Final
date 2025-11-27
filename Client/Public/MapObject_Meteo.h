@@ -2,7 +2,7 @@
 #include "StaticObject.h"
 
 NS_BEGIN(Engine)
-class CModel;
+class CModel_Streaming;
 class CShader;
 class CRigidbody;
 NS_END
@@ -56,7 +56,7 @@ private:
 
 	//CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
-	class CModel_Streaming* m_pModelCom = { nullptr };
+	CModel_Streaming* m_pModelCom = { nullptr };
 private:
 	_uint m_iShaderPassIndex = {};
 	_bool m_IsRender = { true };

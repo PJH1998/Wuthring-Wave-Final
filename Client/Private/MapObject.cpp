@@ -27,13 +27,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
-	//_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
-	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
-	//m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
 	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
-	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
-	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 
 	Sync_Sectors();
@@ -214,60 +209,60 @@ void CMapObject::Ready_Component(void* pArg)
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 
 
-		// DeferredShader
-		if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
-			TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-			CRASH("FAILED");
-		// ShadowShader
-		if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
-			TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
-			CRASH("FAILED");
+	// DeferredShader
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		CRASH("FAILED");
+	// ShadowShader
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+		TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
+		CRASH("FAILED");
 
-		m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
-		if (!m_pBoundingBox)
-			CRASH("Failed");
+	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
+	if (!m_pBoundingBox)
+		CRASH("Failed");
 
-		_wstring ModelName = Model;
-		ModelName.pop_back();
-		ModelName.pop_back();
-		ModelName.pop_back();
-		ModelName.pop_back();
-		ModelName.pop_back();
+	_wstring ModelName = Model;
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
 
-		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelName,
-			TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-			CRASH("FAILED");
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelName,
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("FAILED");
 
-		if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
-		{
+	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
+	{
 
 
-			CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-			RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-			XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-			RigidbodyDesc.eShape = SHAPE::MESH;
-			XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-			RigidbodyDesc.eType = EMotionType::Static;
-			RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-			RigidbodyDesc.pModel = m_pModelCom;
-			//RigidbodyDesc.pModel = m_pModelComArray[0];
+		CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		RigidbodyDesc.eShape = SHAPE::MESH;
+		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		RigidbodyDesc.eType = EMotionType::Static;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.pModel = m_pModelCom;
+		//RigidbodyDesc.pModel = m_pModelComArray[0];
 
-			//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-			//RigidbodyDesc.vPos = pDesc->vBoundingPos;
-			//RigidbodyDesc.eShape = SHAPE::BOX;
-			//RigidbodyDesc.eType = EMotionType::Static;
-			//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-			//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
+		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+		//RigidbodyDesc.vPos = pDesc->vBoundingPos;
+		//RigidbodyDesc.eShape = SHAPE::BOX;
+		//RigidbodyDesc.eType = EMotionType::Static;
+		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
 
-			Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-				TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
-		}
-		else
-		{
-			m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
-				m_isActivate = false;
-				m_IsRender = false;
-				});
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	}
+	else
+	{
+		m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
+			m_isActivate = false;
+			m_IsRender = false;
+			});
 	}
 }
 

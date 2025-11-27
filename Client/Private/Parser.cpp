@@ -6,6 +6,8 @@
 #include "MapObject_Destruction.h"
 #include "MapObject_Instance.h"
 #include "MapObject_Meteo.h"
+#include"MapObject_Collaps.h"
+
 #include "Spawner.h"
 
 #include "Effect_Prefab.h"
@@ -352,8 +354,11 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-				, PROTOTYPE::GAMEOBJECT, &Desc);
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Destruction")
+				, ENUM_CLASS(eLevel), TEXT("Layer_Meteo"), &Desc);
+
+			//m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+			//	, PROTOTYPE::GAMEOBJECT, &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
@@ -418,6 +423,28 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 				, ENUM_CLASS(eLevel), TEXT("Layer_Trigger"), &Desc);
 		}
 	}
+	else if (pFilePath.find("Collaps") != std::string::npos)
+	{
+		CMapObject_Collaps::MAP_LOAD Desc{};
+		OBJECTTYPE Type;
+		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+		{
+			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+			File.read(Desc.ModelName, NameLength);
+
+			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.vSourWorldMatrix), sizeof(_float4x4));
+			File.read(reinterpret_cast<char*>(&Desc.vDestWorldMatrix), sizeof(_float4x4));
+
+			File.read(reinterpret_cast<char*>(&Desc.fDuration), sizeof(_float));
+			File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
+			Desc.iLevel = ENUM_CLASS(eLevel);
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Collaps")
+				, ENUM_CLASS(eLevel), TEXT("Layer_Collaps"), &Desc);
+		}
+}
 	else
 	{
 		CMapObject::MAP_LOAD Desc{};
@@ -439,31 +466,6 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
 			_wstring ModelName = StringToWString(Desc.ModelName);
-
-			//Desc.iLevel = ENUM_CLASS(eLevel);
-			//
-			//switch (Desc.eObjectType)
-			//{
-			//case OBJECTTYPE::SONORA:
-			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-			//		, Desc.iLevel, TEXT("Layer_Sonoro"), &Desc);
-			//	break;
-			//
-			//case OBJECTTYPE::NONSONORA:
-			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-			//		, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
-			//	break;
-			//
-			//case OBJECTTYPE::NONSONORA_FLOOR:
-			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-			//		, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
-			//	break;
-			//
-			//default:
-			//	m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject")
-			//		, PROTOTYPE::GAMEOBJECT, &Desc);
-			//	break;
-			//}
 
 			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
 				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
@@ -1163,6 +1165,9 @@ void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& Re
 
 	if (RectJson.contains("MaskFlag"))
 		Desc.iMaskFlag = RectJson["MaskFlag"].get<_int>();
+
+	if (RectJson.contains("ColorFlag"))
+		Desc.iColorFlag = RectJson["ColorFlag"].get<_int>();
 
 	if (RectJson.contains("SweepSpeed"))
 		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();

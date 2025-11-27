@@ -48,8 +48,9 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_ENEMY_HP             7
 
 #define UIFLAG_OVFL_PALETTE         8
+#define UIFLAG_SIMPLE_COLORIZE      9
 
-#define UIFLAG_END                  9
+#define UIFLAG_END                  10
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -161,8 +162,6 @@ float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2
     
     return resultUV;
 }
-
-
 
 
 // ==============================
@@ -334,6 +333,75 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
             vFinalTexcoord.x -= fElapsedTime * fCoordSpeed * 1.f;
             #endif
             vFinalExtra3.xy = In.vTexcoord;
+            
+        } break;
+        case UIFLAG_OVFL_PALETTE:
+        {
+            // ==============================
+            // * [8] Overflow Palette (UI MiniGame Gimmick)
+            // ==============================
+            float2  vChangeStartPos     = In.mExtra2.xy;        // 퍼지기가 시작될 지점
+            bool    IsChanging          = _BOOL(In.mExtra2.z);
+            float   fChangedRadius      = In.mExtra2.w;
+            
+            const float     fScaler = 1.2f;
+            const float     fToRatio = 0.9f;
+            
+            if (!IsChanging) break;
+            
+            float2 vInstPos = In.vSInstTrans.xy;
+            float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+            
+            float fChangeRatio; //
+                
+            float2 vVerticesPos[4] = {
+                { vInstPos.x - vInstSca.x / 2.f, vInstPos.y + vInstSca.y / 2.f },   // LT 
+                { vInstPos.x + vInstSca.x / 2.f, vInstPos.y - vInstSca.y / 2.f },   // RT 
+                { vInstPos.x + vInstSca.x / 2.f, vInstPos.y - vInstSca.y / 2.f },   // RB 
+                { vInstPos.x - vInstSca.x / 2.f, vInstPos.y + vInstSca.y / 2.f }    // LB 
+            };
+            float fDistPerVertices[4] = {
+                length(vVerticesPos[0] - vChangeStartPos),
+                length(vVerticesPos[1] - vChangeStartPos),    
+                length(vVerticesPos[2] - vChangeStartPos),
+                length(vVerticesPos[3] - vChangeStartPos)
+            };
+                
+            uint iVertexIndex_Nearest = 0;
+            uint iVertexIndex_MostFar = 0;
+            for (uint i = 0; i < 4; i++)
+            {
+                if (i == 0) continue;
+                    
+                if (fDistPerVertices[iVertexIndex_Nearest] > fDistPerVertices[i])   iVertexIndex_Nearest = i;
+                if (fDistPerVertices[iVertexIndex_MostFar] < fDistPerVertices[i])   iVertexIndex_MostFar = i;
+            }
+                
+            float2 vVertex_Nearest = vVerticesPos[iVertexIndex_Nearest];
+            float2 vVertex_MostFar = vVerticesPos[iVertexIndex_MostFar];
+                
+            float fRadTo_PosNearest = fDistPerVertices[iVertexIndex_Nearest];
+            float fRadTo_PosMostFar = fDistPerVertices[iVertexIndex_MostFar];
+                
+            fChangeRatio = saturate(smoothstep(         // <<<<<<<<<<<<<<<<<<<<<<
+                fRadTo_PosNearest,
+                fRadTo_PosMostFar,
+                fChangedRadius                
+            ));
+            if (fChangeRatio > fToRatio) break;
+            
+            
+            float fMaxTimingRatio = fToRatio / 2.f;     // 0->0.1 : 0->1, 0.1->0.2 : 1->0
+            float2 resultScale;
+            resultScale.x = (fChangeRatio <= fMaxTimingRatio) ?
+                smoothstep(0.f, fMaxTimingRatio, fChangeRatio)  :           // 0 0.1 0~0.2
+                smoothstep(fToRatio, fMaxTimingRatio, fChangeRatio);
+            resultScale.y = (fChangeRatio <= fMaxTimingRatio) ? 
+                smoothstep(0.f, fMaxTimingRatio, fChangeRatio)  :
+                smoothstep(fToRatio, fMaxTimingRatio, fChangeRatio);
+            
+            matAdditionalTransform[0][0] *= lerp(1.0f, fScaler, resultScale.x);;
+            matAdditionalTransform[1][1] *= lerp(1.0f, fScaler, resultScale.y);;
             
         } break;
     }
@@ -866,10 +934,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // ==============================
             // * [4] PlayerEnergy
             // ==============================
-            // * matrix info [size : 41 * 2] (energy * 41, background * 41)
+            // * matrix info [size : 41 * 3] (energy * 41, background * 41, static * 41)
             // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
             // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
-            // [VISIBLE] [HEIGHT]] -
+            // [VISIBLE] [HEIGHT] -
             // ==============================
             vector vColor1 = In.mExtra0.rgba;
             vector vColor2 = In.mExtra1.rgba;
@@ -1017,13 +1085,6 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         } break;
         case UIFLAG_OVFL_PALETTE :      // 8
         {
-            #define CHANGE_BYCIRCLE
-            
-            
-            //    Out.vColor = float4(1.f, 0.f, 1.f ,1.f);
-            //return Out;
-            
-            
             // ==============================
             // * [8] Overflow Palette (UI MiniGame Gimmick)
             // ==============================
@@ -1049,7 +1110,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             Out.vColor.a = vMaskColor.r;
             
             // 스크린 크기를 기준으로 uv를 반영한 좌표를 만듦.
-        #ifdef CHANGE_BYCIRCLE
+        //#ifdef CHANGE_BYCIRCLE
             float2 vScreenX = { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.x + In.vSInstSca.x / 2.f };
             float2 vScreenY = { In.vSInstPos.y - In.vSInstSca.y / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f };
                 
@@ -1058,14 +1119,11 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 lerp(vScreenX.x, vScreenX.y, In.vTexcoord.x),
                 lerp(vScreenY.x, vScreenY.y, 1.f - In.vTexcoord.y)
             };
-        #endif
+        //#endif
             
             if (IsChanging) // 변화중
             {   
                 // 스크린좌표로 변환하고, 현재 포커싱중인 점이 이를 지나면 색이 바뀌게끔..
-                
-
-                
                 
                 #ifndef CHANGE_BYCIRCLE
                 float2 vSingleInstancePos = In.vSInstPos; ;           // 지금 이거 단순 인스턴스의 한 점을 기준삼는거라, 점 닿자마자 확 바뀌는 듯
@@ -1093,37 +1151,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 Out.vColor.a = vCurrColor.a * Out.vColor.a;
             }   
             
-            
-            
-            
-            
-            
-            
-            //// 넓은 이 이미지를.. 현재 인스턴스에 맞게 uv를 조절해야 함. 텍스쳐 크기 정보 필요할 것 같은데.
-            //
-            //// 1. 각 인스턴스 별 사이즈
-            //In.vSInstSca;
-            //// 2. 각 인스턴스 별 위치
-            //In.vSInstPos;
-            //// 3. 추가 텍스쳐 크기
-            //vEXImageSize = {};
-            //// 4. 각 인스턴스 별 Texcoord (0~1)
-            //In.vTexcoord;
-            
-            // 이걸로 적절하게 하면 됨ㅇ
-            
+                        
             // 큰 이미지의 특정 부분으로 texcoord를 조절하면 되긴 할텐데
             // 일단 이미지 사이즈 기준으로 좌표 구하고, 이미지 크기로 나누면 되는 것 아닌지?
             float2 vImgPos = vFixedScreenPos.xy + vEXImageSize.xy * 0.5f;      // 이미지 사이즈 기준 좌표
             float2 vImgPos_toUV = vImgPos.xy / vEXImageSize.xy;
             
-            
-            
-            
-            
             float2 vFixedTexUV;
             float4 vColorTex = smoothstep(0.f, 1.f, (g_TextureExtra0.Sample(DefaultSampler, vImgPos_toUV) * 1.35f));
-            
             
             float4 vFinalColorTex;
             
@@ -1135,11 +1170,108 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             vFinalColorTex.a = vColorTex.a;
             
             
+            // - 효과 넣으려면?
+            // 인스턴스별로 얼마나 변화가 진행되었는지,
+            // 그리고 이전 타겟이 상하좌우 중 어디로부터 왔는지,
+            // 그리고 디졸브같은 노이즈 텍스쳐.. 등 필요할 듯
+            
+            // 1. 얼마나 변화가 진행되었는가. 유사 timedelta. with clamping
+            // 
+            // 꼭짓점 좌표를 구한 뒤 순회하여 변화 시작점과의 비교.
+            // 1) [시작점->"Nearest" 꼭짓점 거리] == [CHNG_RADIUS] 인 시점에서 변화도 0.
+            // 2) [시작점->"MostFar" 꼭짓점 거리] == [CHNG_RADIUS] 인 시점에서 변화도 1.
+            // 3) 이 두 개 사이에서 lerp 때리면 됨
+            
+            if (IsChanging)
+            {
+                float fChangeRatio; //
+                const float fSpeedMultiply = 1.f;
+                
+                float2 vVerticesPos[4] = {
+                    { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f },   // LT 
+                    { In.vSInstPos.x + In.vSInstSca.x / 2.f, In.vSInstPos.y - In.vSInstSca.y / 2.f },   // RT 
+                    { In.vSInstPos.x + In.vSInstSca.x / 2.f, In.vSInstPos.y - In.vSInstSca.y / 2.f },   // RB 
+                    { In.vSInstPos.x - In.vSInstSca.x / 2.f, In.vSInstPos.y + In.vSInstSca.y / 2.f }    // LB 
+                };
+                float fDistPerVertices[4] = {
+                    length(vVerticesPos[0] - vChangeStartPos),
+                    length(vVerticesPos[1] - vChangeStartPos),    
+                    length(vVerticesPos[2] - vChangeStartPos),
+                    length(vVerticesPos[3] - vChangeStartPos)
+                };
+                
+                uint iVertexIndex_Nearest = 0;
+                uint iVertexIndex_MostFar = 0;
+                for (uint i = 0; i < 4; i++)
+                {
+                    if (i == 0) continue;
+                    
+                    if (fDistPerVertices[iVertexIndex_Nearest] > fDistPerVertices[i])   iVertexIndex_Nearest = i;
+                    if (fDistPerVertices[iVertexIndex_MostFar] < fDistPerVertices[i])   iVertexIndex_MostFar = i;
+                }
+                
+                float2 vVertex_Nearest = vVerticesPos[iVertexIndex_Nearest];    // 가장 가까운 or 먼 점의 위치. 거리 비교용 재료.
+                float2 vVertex_MostFar = vVerticesPos[iVertexIndex_MostFar];    // 가장 가까운 or 먼 점의 위치. 거리 비교용 재료.
+                
+                // 그냥 두 점의 경우 겹치는 시점의 radius를 구해서 그걸 기반으로 보간?
+                
+                float fRadTo_PosNearest = fDistPerVertices[iVertexIndex_Nearest];
+                float fRadTo_PosMostFar = fDistPerVertices[iVertexIndex_MostFar];
+                
+                float fRawChangeRatio = smoothstep(fRadTo_PosNearest, fRadTo_PosMostFar, fChangedRadius) * (fSpeedMultiply);
+                fChangeRatio = saturate(fRawChangeRatio);
+                
+                // =====
+                
+                //vFinalColorTex.rgb = lerp(vCurrColor, vDestColor, smoothstep(0, 1, fChangeRatio));
+                
+                const float fNoiseCoordScale = .5f;
+                
+                float2 fNoiseAppliedCoord = In.vTexcoord.xy * fNoiseCoordScale.xx;
+                float vNoiseTex1 = g_TextureExtra1.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                float vNoiseTex2 = g_TextureExtra2.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                float vNoiseTex3 = g_TextureExtra3.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                
+                // 컷아웃 할 때 처럼, 알파를 fchangeratio 에 따라 비교.
+                
+                bool isChangedPixel = vNoiseTex3 <= fChangeRatio;
+                    
+                if (!isChangedPixel)
+                    Out.vColor.rgb = vCurrColor.rgb;
+                else
+                    Out.vColor.rgb = vDestColor.rgb;
+                
+            }
+            
+            
+            
+            
+            
+            
+            
             Out.vColor.rgb *= vFinalColorTex.rgb;
             Out.vColor.a *= vFinalColorTex.a * (1.f - g_AlphaStrength);
             
             return Out;
         } break;
+        case UIFLAG_SIMPLE_COLORIZE:
+        {
+            // ==============================
+            // * [9] Simple Colorize
+            // ==============================
+            // * matrix info
+            // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+            // ==============================
+            
+            float4  vColor          = In.mExtra0.rgba;
+            float4  vColorTex       = smoothstep(0.f, 1.f, (g_Texture.Sample(DefaultSampler, In.vTexcoord)));
+            
+            float   fColorAverage   = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
+            Out.vColor.rgb = vColor.rgb * fColorAverage.xxx;
+            Out.vColor.a = vColorTex.a * (1.f - g_AlphaStrength);
+            
+            return Out;
+        }
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
