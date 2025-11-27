@@ -414,7 +414,6 @@ HRESULT CCustom_UI::Ready_Events()
         [this](const ONCLICKEXIT_UI_EVENT event)        
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT), event.iInstanceIndex))   
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT)); });
-
     m_pGameInstance->Subscribe<ONHOVERENTER_UI_EVENT>   (ENUM_CLASS(STATIC::NONE), L"Event_OnHoverEnterUI",
         [this](const ONHOVERENTER_UI_EVENT event)       
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER), event.iInstanceIndex))  

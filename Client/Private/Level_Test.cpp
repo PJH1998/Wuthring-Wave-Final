@@ -890,11 +890,24 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
 
 	static _bool isOpenOverflowingPalette = false;
+	static _uint iTargetLevel = 0;
+	const _uint iMaxNumLevel = 5;
+
+	if		(m_pGameInstance->Get_DIKeyState(DIK_LEFTARROW) == KEYSTATE::DOWN)
+	{
+		iTargetLevel = (iTargetLevel <= 0) ? iTargetLevel : iTargetLevel - 1;
+		std::cout << "[Level_Test::Testing_UI] TargetLevel : " << iTargetLevel << std::endl;
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_RIGHTARROW) == KEYSTATE::DOWN)
+	{	
+		iTargetLevel = (iTargetLevel >= iMaxNumLevel - 1) ? iTargetLevel : iTargetLevel + 1;
+		std::cout << "[Level_Test::Testing_UI] TargetLevel : " << iTargetLevel << std::endl;
+	}
 
 	if (!isOpenOverflowingPalette &&
 		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Open_Game_OverflowPalette();
+		m_pGameSystem->Open_Game_OverflowPalette(iTargetLevel);
 		isOpenOverflowingPalette = true;
 	}
 	else if (isOpenOverflowingPalette &&

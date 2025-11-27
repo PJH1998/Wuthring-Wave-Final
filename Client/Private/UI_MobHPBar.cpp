@@ -91,13 +91,23 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 	static _float fTmpHP = 70.f;
 	_bool isHitTmp = false;
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	{
 		fTmpHP -= 10.f;
+		std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	{
 		fTmpHP += 10.f;
+		std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	{
 		isHitTmp = true;
+		std::cout << "[CUI_MobHPBar::Update] Triggered! " << fTmpHP << std::endl;
+	}
 
-	//std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+	
+	
 
 	//if (isActiveMobHPBar)
 	//{

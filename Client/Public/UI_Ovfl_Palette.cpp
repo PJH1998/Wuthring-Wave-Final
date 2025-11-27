@@ -468,10 +468,13 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 
 HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 {
+	// 10 * 8 데이터 csv로 불러온 뒤, 남은 색상 + 목표 색상 으로 불러옴.
 	const vector<_string> vecFilePath = { // test
-		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_beohr_01_4.csv",
+		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Beohr_01_4.csv",
 		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Avinoleum_04_3.csv",
 		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Avinoleum_01_4.csv",
+		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Beohr_03_3.csv",
+		"../../Client/Bin/Resource/UI/Fcsv/UILevel_OvflPalette/level_Beohr_02_8.csv",
 	};
 
 	array<_wstring, 5> arrText = { L"빨간색",  L"초록색" , L"파란색" , L"노란색", L"Nothing" };

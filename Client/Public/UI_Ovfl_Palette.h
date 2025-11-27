@@ -125,7 +125,7 @@ private:
 
 private:
 	// local variables for shader.
-	PALETTE_COLOR				m_eDestColorIndex	= PALETTE_COLOR::PCOLOR_END;
+	PALETTE_COLOR				m_eDestColorIndex	= PALETTE_COLOR::PCOLOR_RED;
 	_float2						m_vChangeStartPos	= {};
 	//_bool						m_isChanging		= false;
 	_float						m_fChangeRadius		= 0.f;
