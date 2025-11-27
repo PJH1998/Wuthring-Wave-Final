@@ -973,9 +973,13 @@
     <ClInclude Include="..\Public\Leviatan.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClInclude>
+<<<<<<< HEAD
+    <ClInclude Include="..\Public\MapObject_Collaps.h" />
+=======
     <ClInclude Include="..\Public\RopeAnchor.h">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClInclude>
+>>>>>>> dev
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1535,9 +1539,13 @@
     <ClCompile Include="..\Private\Leviatan.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClCompile>
+<<<<<<< HEAD
+    <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
+=======
     <ClCompile Include="..\Private\RopeAnchor.cpp">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClCompile>
+>>>>>>> dev
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

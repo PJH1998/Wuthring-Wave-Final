@@ -12,6 +12,7 @@
 #include"MapObject_Instance.h"
 #include"MapObject_Meteo.h"
 #include"MapObject_Water.h"
+#include"MapObject_Collaps.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -136,7 +137,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_barrens_1125_third/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1127_second/", m_eCurLevel, "Asphodel_Barrens");
 
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
@@ -206,6 +207,9 @@ HRESULT CLoader_GamePlay::Load_Object()
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Water"),
 		CMapObject_Water::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Collaps"),
+		CMapObject_Collaps::Create(m_pDevice, m_pContext));
+	
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
 		CSpawner::Create(m_pDevice, m_pContext));
 #pragma endregion
