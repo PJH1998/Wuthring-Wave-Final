@@ -66,6 +66,12 @@ void CMapObject_Destruction::Late_Update(_float fTimeDelta)
 {
 	if (!m_IsDestroy)
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	else
+		if (!m_IsChange)
+		{
+			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+			m_IsChange = true;
+		}
 }
 
 //void CMapObject_Destruction::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
@@ -214,6 +220,18 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 
+	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+	RigidbodyDesc.eShape = SHAPE::MESH;
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	RigidbodyDesc.eType = EMotionType::Static;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.pModel = m_pModelCom;
+
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
 	_string ModelName = pDesc->ModelName;
 
 	for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
@@ -330,4 +348,6 @@ void CMapObject_Destruction::Free()
 	Safe_Release(m_pGameSystem);
 	Safe_Delete(m_pBoundingBox);
 	Safe_Release(m_pModelCom);
+	Safe_Release(m_pRigidbodyCom);
+	
 }

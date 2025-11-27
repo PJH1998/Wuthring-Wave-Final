@@ -122,8 +122,8 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->vSourWorldMatrix));
 
 	m_fDuration = pDesc->fDuration;
-	m_DestMat = pDesc->vSourWorldMatrix;
-	m_SourMat = pDesc->vDestWorldMatrix;
+	m_SourMat = pDesc->vSourWorldMatrix;
+	m_DestMat = pDesc->vDestWorldMatrix;
 	m_iTriggerIndex = pDesc->TriggerIndex;
 	XMMatrixDecompose(&m_vSourScale.Vec, &m_vSourRot.Vec, &m_vSourTrans.Vec, XMLoadFloat4x4(&m_SourMat));
 	XMMatrixDecompose(&m_vDestScale.Vec, &m_vDestRot.Vec, &m_vDestTrans.Vec, XMLoadFloat4x4(&m_DestMat));

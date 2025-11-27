@@ -19,6 +19,30 @@ HRESULT CEdit_MonsterSpawnor::Initialize_Prototype()
 		return E_FAIL;
 
 	m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Spawn"), [this](const MAP_SAVE& event) {
+/*
+		for (_uint i = 2; i < m_MonsterSpawn.size(); ++i)
+		{
+			auto& Map = m_MonsterSpawn[i];
+			event.File.write(reinterpret_cast<const char*>(&Map.vMonsterSpawnorPos), sizeof(_float4));
+
+			_uint iLength = {};
+			event.File.write(reinterpret_cast<const char*>(&Map.vMonsterPos1.float4), sizeof(_float4));
+			iLength = strlen(Map.szMonsterName1);
+			event.File.write(reinterpret_cast<const char*>(&iLength), sizeof(_uint));
+			event.File.write(Map.szMonsterName1, iLength);
+
+			event.File.write(reinterpret_cast<const char*>(&Map.vMonsterPos2.float4), sizeof(_float4));
+			iLength = strlen(Map.szMonsterName2);
+			event.File.write(reinterpret_cast<const char*>(&iLength), sizeof(_uint));
+			event.File.write(Map.szMonsterName2, iLength);
+
+			event.File.write(reinterpret_cast<const char*>(&Map.vMonsterPos3.float4), sizeof(_float4));
+			iLength = strlen(Map.szMonsterName3);
+			event.File.write(reinterpret_cast<const char*>(&iLength), sizeof(_uint));
+			event.File.write(Map.szMonsterName3, iLength);
+
+		}
+		*/
 		for (auto& Map : m_MonsterSpawn)
 		{
 			//event.File.write(reinterpret_cast<const char*>(&Map), sizeof(SPAWN_DESC));
