@@ -281,7 +281,10 @@ void CGameSystem::Close_Game_OverflowPalette()
 
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
 {
-	m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+	{
+		lock_guard<mutex>lock(m_Mutex);
+		m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+	}
 }
 
 void CGameSystem::OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg)

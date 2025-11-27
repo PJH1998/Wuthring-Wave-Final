@@ -168,7 +168,7 @@ private:
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
-
+	Mutex m_Mutex;
 public:
 	void				Release_System();
 
