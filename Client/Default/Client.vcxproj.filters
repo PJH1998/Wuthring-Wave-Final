@@ -379,6 +379,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\GrafflePoint">
+      <UniqueIdentifier>{1dda4253-7a9b-4853-9436-0d14c8a74145}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -983,6 +986,9 @@
     <ClInclude Include="..\Public\RoverRope.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_GrafflePoint.h">
+      <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1551,6 +1557,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverRope.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_GrafflePoint.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

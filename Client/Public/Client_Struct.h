@@ -200,13 +200,11 @@ namespace Client
 		SFX_TYPE			eSFXType;
 	}SQ_SFX_DATA;
 
+
+#pragma region UI
+
 	typedef struct tUIMobsInfoDesc
 	{
-		//_uint iMobLvl = 10;
-		//_wstring strMobName = L"Test Mob";
-
-		//const char* pMonsterKey = {};
-
 		uintptr_t	iMonsterPtrKey = {};		// 오브젝트의 고유한 키. reinterpret_cast 필요
 
 		_bool	isAtkedCurFrame = false;
@@ -215,14 +213,14 @@ namespace Client
 		_float	fMobCurHP = 500.f;
 		_float	fMobMaxHP = 500.f;
 
-		//_bool	isHaveSA = false;
-		//
-		//_float	fMobCurSA = 300.f;
-		//_float	fMobMaxSA = 300.f;
-
 		_float3 vMobPos = { 0.f, -10.f, 0.f };
 
 	} UI_MOBINFO_DESC;
 
 #pragma endregion
+
+
+
+
+
 }
