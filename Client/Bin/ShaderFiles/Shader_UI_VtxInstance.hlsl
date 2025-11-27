@@ -1268,7 +1268,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             float   fColorAverage   = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
             Out.vColor.rgb = vColor.rgb * fColorAverage.xxx;
-            Out.vColor.a = vColorTex.a;
+            Out.vColor.a = vColorTex.a * (1.f - g_AlphaStrength);
             
             return Out;
         }
