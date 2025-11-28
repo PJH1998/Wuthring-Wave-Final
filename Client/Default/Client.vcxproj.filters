@@ -379,6 +379,12 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Interaction\Augusta">
+      <UniqueIdentifier>{a72c7482-73ab-47d2-834c-e2f223ab5a78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Interaction\Rover">
+      <UniqueIdentifier>{35995a8e-e366-4ce4-8a7e-cfaff07a41f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -977,14 +983,20 @@
     <ClInclude Include="..\Public\RopeAnchor.h">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaRopeHook.h">
-      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\RoverRopeHook.h">
-      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaRopeHook.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverRopeHook.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaRopeDrag.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverRopeDrag.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1549,14 +1561,20 @@
     <ClCompile Include="..\Private\RopeAnchor.cpp">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaRopeHook.cpp">
-      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\RoverRopeHook.cpp">
-      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaRopeHook.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverRopeHook.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaRopeDrag.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverRopeDrag.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

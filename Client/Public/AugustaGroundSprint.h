@@ -13,6 +13,7 @@ private:
         JUMP,
 		FLY,
 		ROPE_HOOK,
+		ROPE_DRAG,
         DASH,
 		DODGE,
 		DODGEABLE,

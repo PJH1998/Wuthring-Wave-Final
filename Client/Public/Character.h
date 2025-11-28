@@ -65,7 +65,7 @@ public:
 		_float3 vRotation = { 0.f, 0.f, 0.f };
 		_float3 vPosition = { 0.f, 0.f, 0.f };
 		_float fHookRange = { 25.f };
-		_float fDragRange = { 10.f };
+		_float fDragRange = { 15.f };
 		_float fReacedRopeHook = { 1.f };
 
 	}CHARACTER_DESC;

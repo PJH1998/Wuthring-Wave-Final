@@ -96,6 +96,10 @@ void CAugustaGroundSprint::Handle_Input()
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pAugusta->Is_GrappleHook());
 
+	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pAugusta->Is_GrappleDrag());
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -209,6 +213,12 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
     }
 
 	if (m_States[ROPE_HOOK])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK));
+		return;
+	}
+
+	if (m_States[ROPE_DRAG])
 	{
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK));
 		return;

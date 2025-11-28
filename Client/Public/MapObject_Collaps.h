@@ -65,6 +65,7 @@ private:
 
 	CRigidbody* m_pSourRigidbodyCom = { nullptr };
 	CRigidbody* m_pDestRigidbodyCom = { nullptr };
+	CRigidbody* m_pBoxRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
 	CModel_Streaming* m_pModelCom = { nullptr };
 

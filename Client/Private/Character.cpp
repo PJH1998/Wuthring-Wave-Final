@@ -458,7 +458,7 @@ void CCharacter::Execute_RopeDragTrigger()
 	if (nullptr == m_GrappleInfo.pTransform || OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType)
 		return;
 
-	m_pGameSystem->OnTriggerActivate(m_GrappleInfo.iCondition);
+	m_pGameSystem->OnTriggerActivate(*m_GrappleInfo.pTriggerIndex);
 }
 
 _float CCharacter::Get_GrappleDistance()

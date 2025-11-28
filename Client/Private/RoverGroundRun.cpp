@@ -90,6 +90,10 @@ void CRoverGroundRun::Handle_Input()
 		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pRover->Is_GrappleHook());
 
+	m_States[ROPE_DRAG] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pRover->Is_GrappleDrag());
+
     // 키 입력.
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -207,6 +211,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 	if (m_States[ROPE_HOOK])
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEHOOK));
+		return;
+	}
+
+	if (m_States[ROPE_DRAG])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG));
 		return;
 	}
 

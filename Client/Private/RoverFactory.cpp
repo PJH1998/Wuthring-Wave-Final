@@ -27,6 +27,7 @@
 
 // Intraction 카테고리 State
 #include "RoverRopeHook.h"
+#include "RoverRopeDrag.h"
 
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCharacter)
@@ -64,4 +65,5 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 
 	// Interaction 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEHOOK), CRoverRopeHook::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG), CRoverRopeDrag::Create(pCharacter));
 }

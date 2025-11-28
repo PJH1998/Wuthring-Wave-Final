@@ -765,10 +765,10 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 			return;
 
 		lock_guard<mutex> lock(m_Mutex);
-		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, *pcallDesc->pCondition });
+		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
 
 		// 매프레임 초기화.
-		m_TargetGrappleInfo = { nullptr, OBJECTTYPE::END, 0 };
+		m_TargetGrappleInfo.Reset();
 	}
 }
 

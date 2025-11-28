@@ -113,13 +113,13 @@ namespace Client
 	typedef struct tagGrappleInfo {
 		CTransform* pTransform = { nullptr };
 		OBJECTTYPE eObjectType;
-		uint iCondition;
+		uint* pTriggerIndex = { nullptr };
 
 		void Reset()
 		{
 			pTransform = nullptr;
 			eObjectType = OBJECTTYPE::END;
-			iCondition = 0;
+			pTriggerIndex = { nullptr };
 		}
 	}GRAPPLE_INFO;
 
