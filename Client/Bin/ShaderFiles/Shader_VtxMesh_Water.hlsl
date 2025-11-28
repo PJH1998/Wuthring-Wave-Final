@@ -3,7 +3,7 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
-float4 g_LogoWaterColor = float4(0.669f, 0.921f, 1.f, 1.f);
+float4 g_LogoWaterColor = 0.f; //float4(0.669f, 0.921f, 1.f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
@@ -20,6 +20,8 @@ int g_iShadowMapLayer = 0;
 float4 g_vDiffuseColor = float4(1.f, 1.f, 1.f, 1.f);
 float g_fXOffset = 0.f;
 float g_fYOffset = 0.f;
+
+float g_fTime = 0.f;
 
 struct VS_IN
 {
@@ -263,15 +265,17 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
  
     float4 vColor = g_LogoWaterColor;
+                                                                                                                                                                                                                                                                                                                      
+    float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y);
     
-    vector vNormalDesc = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
- 
-    float3 vNormal;
-	        
-    vNormal = vNormalDesc.xyz * 2.f - 1.f;
+    vector vNormalDesc = g_DiffuseTexture[0].Sample(DefaultSampler, vTexcoord);
     
-    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    float3 vMainNormal = 0.f;
+
+    vMainNormal = vNormalDesc.xyz * 2.f - 1.f;
+    vMainNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     
+
     float3 vTangent = In.vTangent.xyz;
     float3 vBinormal = In.vBinormal.xyz * -1.f;
     float3 vInNormal = In.vNormal.xyz;
@@ -279,9 +283,11 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     float3x3 WorldMatrix;
     WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         
-    vNormal = normalize(mul(vNormal, WorldMatrix));
-    vNormal = vNormal * 0.5f + 0.5f;
+    vMainNormal = mul(vMainNormal, WorldMatrix);
     
+    float3 vNormal = normalize(vMainNormal.xyz * 0.2f);
+    
+    vNormal = vNormal * 0.5f + 0.5f;
     
     Out.vDiffuse = vColor;
     Out.vNormal = float4(vNormal, 1.f);

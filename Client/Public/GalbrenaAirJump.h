@@ -13,6 +13,7 @@ private:
         LAND,
         MOVE,
 		FLY,
+		ROPE_HOOK,
         DOUBLE_JUMP,
         AIR_ATTACK,
 		HIT,

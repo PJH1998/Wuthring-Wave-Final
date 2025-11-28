@@ -113,7 +113,8 @@ HRESULT CCamera_Manager::Initialize(_uint iNumLevel)
 
 void CCamera_Manager::Update(_float fTimeDelta)
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_F11) == KEYSTATE::DOWN)
+//	if (m_pGameInstance->Get_DIKeyState(DIK_F11) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_F10) == KEYSTATE::DOWN)
 		m_isFree = !m_isFree;
 
 	if (nullptr == m_pMainCamera || true == m_isFree)

@@ -278,14 +278,16 @@ _uint CUI_ControlHelper::HideNGet_TabUtilityUI()
 	return static_cast<CUI_TabUtility*>(pRootUI)->Req_OffTabUI();
 }
 
-void CUI_ControlHelper::Open_Game_OverflowPalette()
+void CUI_ControlHelper::Open_Game_OverflowPalette(_uint iTargetLevel)
 {
 	CCustom_UI* pRootUI = m_pRootUI_Ovfl_Palette;
 
 	if (!pRootUI)
 		return;
 
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Ovfl_Palette", _fmatrix(), nullptr);
+	CUI_Ovfl_Palette::UI_OVFLPALETTE_DESC tDesc = { iTargetLevel };
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Ovfl_Palette", _fmatrix(), &tDesc);
 }
 
 void CUI_ControlHelper::Close_Game_OverflowPalette()

@@ -337,6 +337,9 @@ void  CCustom_UI::Update_CacheTransform(_float fTimeDelta)   // Caching Calculat
 
 HRESULT CCustom_UI::Add_ExtraTexture(_wstring strFileName)
 {
+	if (m_vecExtraTextureCom.size() >= 4)
+		CRASH("Extra Textures Exceeded. Max Texture Size is 4.")
+
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	CTexture* pExtraTexture = nullptr;
 
@@ -411,7 +414,6 @@ HRESULT CCustom_UI::Ready_Events()
         [this](const ONCLICKEXIT_UI_EVENT event)        
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT), event.iInstanceIndex))   
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT)); });
-
     m_pGameInstance->Subscribe<ONHOVERENTER_UI_EVENT>   (ENUM_CLASS(STATIC::NONE), L"Event_OnHoverEnterUI",
         [this](const ONHOVERENTER_UI_EVENT event)       
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER), event.iInstanceIndex))  

@@ -36,10 +36,11 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
     // 0. Actor 초기화
     if (FAILED(CActor::Initialize_Clone(pDesc)))
         return E_FAIL;
-    // 1. State 초기화
-    //m_Stats = pDesc->eStat;
 
-	//m_EventDatas.resize(CHARACTER_EVENT_ID::EVENT_END);
+	// 1. Rope Action 거리 초기화 (모든 캐릭 공통)
+	m_fHookRange = pDesc->fHookRange;
+	m_fDragRange = pDesc->fDragRange;
+	m_fReachedHook = pDesc->fReacedRopeHook;
 
     return S_OK;
 }
@@ -167,19 +168,6 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 	ASSERT_CRASH(m_pColliderCom);
 	return m_pColliderCom->IsLand(pNormal);
 }
-
-// fDistanceGround (Ray 쏴서 땅에 닿은 거리가 매개변수로 받은 거리보다 크다면 => 땅이아니다)
-//_bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
-//{
-//	_float fDistanceToGround = Get_DistanceFromGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
-//
-//	if (fDistanceToGround > fLandDistance)
-//		return false;
-//
-//	return true;
-//}
-
-
 #pragma endregion
 
 #pragma region PHYSICS
@@ -192,17 +180,17 @@ const _float CCharacter::Calculate_RootMotionScale()
 
 	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
 	if (m_fTargetDistance < 1.f)
-		return 0.05f; // 거의 이동량 없게.
+		return 0.05f;
 	else if (m_fTargetDistance < 3.f)
-		return 0.5f;  // 짧게: 과접근 방지
+		return 0.5f;
 	else if (m_fTargetDistance < 3.5f)
 		return 0.6f;  
 	else if (m_fTargetDistance < 4.f)
 		return 0.7f;  
 	else if (m_fTargetDistance >= 7.f)
-		return 1.4f;  // 길게: 빠른 접근
+		return 1.4f;
 	
-	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비율
+	return 1.f;
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
@@ -214,14 +202,12 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 	vLook = XMVector3Normalize(vLook);
 
 	// 가슴 높이에서 전방 Radius로 레이 발사
-
 	_float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
 	_vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
 	_vector vEnd = vStart + vLook * (m_fColliderRadius + 0.1f); // Collider Radius 고려.
 
 	_float4 vHitPoint = {};
 	_bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
-
 
 	if (bHit)
 	{
@@ -253,7 +239,6 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
 void CCharacter::Set_Gravity(_bool IsGravity)
 {
 	ASSERT_CRASH(m_pColliderCom);
-	
 
 	if (!m_IsQTE)
 		m_pColliderCom->Set_Gravity(IsGravity);
@@ -366,9 +351,6 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 void CCharacter::Camera_Shake(_float fIntensity)
 {
 
-	//_float3 vDir = {0.5f, 0.1f, -0.1f};
-	//
-	//m_pGameInstance->OnShake(vDir);
 }
 
 void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
@@ -387,48 +369,137 @@ _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
 	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
-
-void CCharacter::Bind_GrappleTarget(CTransform* pTargetTransform, OBJECTTYPE eObjectType)
+UI_TAB_UTILITY CCharacter::Get_UtilityType()
 {
-	m_pTargetGrappleTransform = pTargetTransform;
-	m_eTargetGrappleType = eObjectType;
-
-	
+	 return m_eUtilityType;
 }
 
 
-_bool CCharacter::Is_MoveGrapple()
+// 날아갈 놈들.
+_bool CCharacter::Is_GrappleHook()
 {
 	// 1. 예외 조건 처리.
-	if ((nullptr == m_pTargetGrappleTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_eTargetGrappleType))
+	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
 		return false;
 
-	_vector vPos = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
-	m_pGameInstance->IsIn_WorldSpace(vPos, 20.f);
+	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
 
-	return true;
+	// 2. 타겟의 거리가 카메라 Frustum 내부에서 거리가 20.f 이내인경우?
+	_bool IsFrustum = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vPos));
+
+	return IsFrustum && fDistance <= m_fHookRange;
+}
+
+// 당길 놈들.
+_bool CCharacter::Is_GrappleDrag()
+{
+	// 1. 예외 조건 처리. 
+	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType))
+		return false;
+
+	// 2. 카메라 Frustum 안에 있는가?
+	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_bool IsFrustum = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+	// 3. 거리가 지정한 거리 이내인가?
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vPos));
+	return IsFrustum && fDistance <= m_fDragRange;
+}
+
+// Zip 로프액션 이후에 겹쳐지는 경우를 판단.
+_bool CCharacter::Is_ReachedGrappleHook()
+{
+	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+		return false;
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
+
+	_float fLength = XMVectorGetX(XMVector3Length(vPos - vTargetPos));
+	
+	return fLength <= m_fReachedHook;
 }
 
 
-// Is_MoveGrapple이 True 인 경우에만 호출한다.
-void CCharacter::Rotate_MoveGrapple()
+void CCharacter::Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo)
 {
-	if (nullptr == m_pTargetGrappleTransform)
+	m_GrappleInfo = grapInfo;
+}
+
+// Is_MoveGrapple이 True 인 경우에만 호출한다.
+void CCharacter::Rotate_GrappleTarget()
+{
+	if (nullptr == m_GrappleInfo.pTransform)
 		return;
 
-	_vector vTarget = m_pTargetGrappleTransform->Get_State(STATE::POSITION);
+	_vector vTarget = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
 	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
-	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+	_vector vToTarget = XMVector3Normalize(XMVectorSetY(vTarget - vMyPos, 0.f));
 
-
-	//vToTarget = XMVectorSetY(vToTarget, 0.f);
 	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 }
 
 void CCharacter::Move_Grapple(_float fTimeDelta, _float fSpeed)
 {
-	_vector vMoveDir = m_pTransformCom->Get_State(STATE::LOOK);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
+	_vector vMoveDir = XMVector3Normalize(vTargetPos - vPos);
 	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+}
+
+// RopePull Trigger 실행. => 한번만 실행.
+void CCharacter::Execute_RopeDragTrigger()
+{
+	// 1. nullptr 이고 Pull 타입이 아니라면?
+	if (nullptr == m_GrappleInfo.pTransform || OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType)
+		return;
+
+	m_pGameSystem->OnTriggerActivate(*m_GrappleInfo.pTriggerIndex);
+}
+
+_float CCharacter::Get_GrappleDistance()
+{
+	if (nullptr == m_GrappleInfo.pTransform)
+		return 0.f;
+
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vMyPos));
+
+	return fDistance;
+}
+
+// 로프 방향 연산.
+ROPEDIR CCharacter::Calculate_RopeDirection()
+{
+	if (nullptr == m_GrappleInfo.pTransform)
+		return ROPEDIR::END;
+
+	// 1. 방향 판별할 Y
+	_float fTotalHeight = m_fColliderRadius * 2.f + m_fColliderHeight;
+	
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
+
+	// 2. 높이값 추출
+	_float fTargetY = XMVectorGetY(vTargetPos);
+	_float fMyY = XMVectorGetY(vMyPos);
+
+	_float fFeetLevel = fMyY; // Transform이 발에 있으므로?
+	_float fEyeLevel = fMyY + fTotalHeight;
+
+	if (fTargetY > fEyeLevel)
+		return ROPEDIR::U; // 위 (눈보다 위)
+	else if (fTargetY < fFeetLevel)
+		return ROPEDIR::D; // 아래 (발보다 아래)
+	else
+		return ROPEDIR::F; // 정면 (눈과 발 사이)
+
+	return ROPEDIR::END;
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
@@ -875,9 +946,9 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 	pTransformCom->Set_WorldMatrix(mat);
 }
 
-void CCharacter::Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType)
+void CCharacter::Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eUtilityType)
 {
-	m_eInteractionType = eInteractionType;
+	m_eUtilityType = eUtilityType;
 }
 
 #ifdef _DEBUG

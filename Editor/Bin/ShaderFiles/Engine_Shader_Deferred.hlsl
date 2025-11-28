@@ -747,8 +747,8 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     float3 vFresnel = Compute_Fresnel(vF0, fNdotV);
     
     float fReflectRatio = lerp(0.5f, 0.8f, vFresnel.r);
-    
-    Out.vColor = lerp(vReflectColor, vRefractColor, fReflectRatio);
+   
+    Out.vColor = lerp(vOriginColor, lerp(vReflectColor, vRefractColor, fReflectRatio), 0.5f);
     
     return Out;
 }

@@ -36,7 +36,8 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta)override;
 	virtual		void			Update(_float fTimeDelta)override;
 	virtual		void			Late_Update(_float fTimeDelta)override;
-	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	//virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	virtual		void			Render() override;
 	
 	virtual		void			Render_Shadow()override;
 
@@ -49,13 +50,13 @@ private:
 	_char m_ModelName[MAX_PATH] = {};
 	_char m_BoneModelName[MAX_PATH] = {};
 	_uint m_iShaderPassIndex = {};
-	vector<CModel*> m_pModelComArray;
+	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CModel* m_pBoneModel = { nullptr };
-	CDeferredShader* m_pShaderCom = { nullptr };
+	CShader* m_pShaderCom = { nullptr };
 	class CModel_Streaming* m_pModelCom;
 
 	_bool m_IsDestroy = { false };
-
+	_bool m_IsChange = { false };
 	_float3 m_vImpulsePos = {};
 	_float3 m_vImpulsePower = {};
 

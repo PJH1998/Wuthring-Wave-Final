@@ -35,7 +35,7 @@ HRESULT CLevel_GamePlay::Initialize()
 //	m_pGameInstance->Add_Probe(_float3(2375.42f, 317.92f, 1645.60f), 2000.f);
 
 	//m_pGameInstance->Setting_LUT(0, 0.25f, false);
-	m_pGameInstance->Setting_LUT(1, 0.77f, false);
+	m_pGameInstance->Setting_LUT(1, 0.22f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -90,7 +90,6 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	Ready_Effect();
 	Ready_Skybox();
-	Ready_Mouse();
 	Ready_SFX();
 
 //	m_pGameInstance->Bake_EnvMaps();
@@ -102,6 +101,9 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("GamePlay"));
 
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+		m_pGameSystem->Set_MouseFix(false);
 	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
 	{
 		//if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
@@ -143,14 +145,14 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [NUMPAD 5] KSTA_UITEST_MOBHPBAR
+#pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR
 	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
 	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
 		!isTargetAlive)
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN &&
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
 		isTargetAlive)
 		pTargetMobHPBarUI->SetActivate(false);
 #pragma endregion
@@ -192,8 +194,28 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
 	}
+#pragma endregion
+
+#pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
+
+	static _bool isOpenOverflowingPalette = false;
+
+	if (!isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Open_Game_OverflowPalette();
+		isOpenOverflowingPalette = true;
+	}
+	else if (isOpenOverflowingPalette &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Close_Game_OverflowPalette();
+		isOpenOverflowingPalette = false;
+	}
 
 #pragma endregion
+
+
 
 }
 
@@ -476,16 +498,13 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
+		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
+		CRASH("Failed Ready Ovfl_Palette");
+
 
 	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
-}
-
-void CLevel_GamePlay::Ready_Mouse()
-{
-	// Mouse
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"), ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_Mouse"))))
-		CRASH("Mosue");
 }
 
 void CLevel_GamePlay::Ready_SFX()

@@ -173,6 +173,8 @@
     <ClInclude Include="..\Public\AugustaAirJump.h" />
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
+    <ClInclude Include="..\Public\AugustaRopeDrag.h" />
+    <ClInclude Include="..\Public\AugustaRopeHook.h" />
     <ClInclude Include="..\Public\Augusta_UltiPostSFX.h" />
     <ClInclude Include="..\Public\AugustaClimbExit.h" />
     <ClInclude Include="..\Public\AugustaClimbMove.h" />
@@ -196,6 +198,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
     <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
     <ClInclude Include="..\Public\Character.h" />
@@ -233,7 +236,7 @@
     <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecial.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
-    <ClInclude Include="..\Public\GalbrenaRope.h" />
+    <ClInclude Include="..\Public\GalbrenaRopeHook.h" />
     <ClInclude Include="..\Public\GalbrenaShotGun.h" />
     <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
@@ -252,6 +255,7 @@
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
     <ClInclude Include="..\public\Logo_SkyBox.h" />
+    <ClInclude Include="..\Public\MapObject_Collaps.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\MapObject_Instance.h" />
@@ -261,6 +265,7 @@
     <ClInclude Include="..\Public\MapObject_Water.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
     <ClInclude Include="..\Public\Mouse.h" />
+    <ClInclude Include="..\Public\MouseController.h" />
     <ClInclude Include="..\Public\NPCCell.h" />
     <ClInclude Include="..\Public\NPCInstancing.h" />
     <ClInclude Include="..\Public\Particle.h" />
@@ -320,6 +325,8 @@
     <ClInclude Include="..\Public\RoverGroundSpecial.h" />
     <ClInclude Include="..\Public\RoverGroundSprint.h" />
     <ClInclude Include="..\Public\RoverHit.h" />
+    <ClInclude Include="..\Public\RoverRopeDrag.h" />
+    <ClInclude Include="..\Public\RoverRopeHook.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
@@ -409,10 +416,13 @@
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaHit.cpp" />
+    <ClCompile Include="..\Private\AugustaRopeDrag.cpp" />
+    <ClCompile Include="..\Private\AugustaRopeHook.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
     <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
@@ -456,7 +466,7 @@
     <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecial.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
-    <ClCompile Include="..\Private\GalbrenaRope.cpp" />
+    <ClCompile Include="..\Private\GalbrenaRopeHook.cpp" />
     <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
     <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\private\GalbrenaUlti_PostSFX.cpp" />
@@ -491,6 +501,7 @@
     <ClCompile Include="..\private\Logo_SkyBox.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\MapObject_Instance.cpp" />
@@ -502,6 +513,7 @@
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Mouse.cpp" />
+    <ClCompile Include="..\Private\MouseController.cpp" />
     <ClCompile Include="..\Private\NPCCell.cpp" />
     <ClCompile Include="..\Private\NPCInstancing.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
@@ -523,6 +535,8 @@
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
     <ClCompile Include="..\Private\RoverGroundSprint.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
+    <ClCompile Include="..\Private\RoverRopeDrag.cpp" />
+    <ClCompile Include="..\Private\RoverRopeHook.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\private\SFX_Prefab.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />

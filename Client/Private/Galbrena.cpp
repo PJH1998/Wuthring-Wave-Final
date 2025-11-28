@@ -233,7 +233,7 @@ void CGalbrena::Render()
 		m_pMainAttackVolume->Render();*/
 
 	m_pMainAttackVolume->Render();
-
+	Print_LookRay();
 #endif // _DEBUG
 
 }
@@ -857,7 +857,7 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
 
-
+	
 	CCollider::COLLIDER_DESC ColliderDesc{};
 	ColliderDesc.vPos = pDesc->vPosition;
 	ColliderDesc.vOffset = { 0.f, 0.67f, 0.f };

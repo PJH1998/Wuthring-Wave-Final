@@ -17,9 +17,6 @@ float g_fGlobalDynamicRoughness = 0.35; // PBR.y
 float g_fGlobalStaticMetallic = 0.f;
 float g_fGlobalStaticRoughness = 0.75f;
 
-const static uint g_iStep = 20;
-const static float g_fMaxDistance = 400.f;
-
 //Effect
 float g_WeightBlend = 0.02f;
 float g_EmssiveColorWeight = 1.4f;

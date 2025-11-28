@@ -86,6 +86,14 @@ void CAugustaGroundRun::Handle_Input()
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
+	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pAugusta->Is_GrappleHook());
+
+	m_States[ROPE_DRAG] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pAugusta->Is_GrappleDrag());
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -218,6 +226,20 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 	{
 		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
+
+	if (m_States[ROPE_HOOK]) // 일단 잡아서 이동하는 Rope 액션만?
+	{
+		// 애니메이션은 Rope 안에서 결정하기.
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK));
+		return;
+	}
+
+	if (m_States[ROPE_DRAG]) // 일단 잡아서 이동하는 Rope 액션만?
+	{
+		// 애니메이션은 Rope 안에서 결정하기.
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEDRAG));
 		return;
 	}
 

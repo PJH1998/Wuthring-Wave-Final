@@ -289,7 +289,10 @@ void CEdit_MapObject_Destruction::Create_Particles()
 {
 	m_IsDestroy = true;
 	_string ModelName = m_ModelName;
-
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
 	for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
 	{
 		_string Name = ModelName; // 예: "SM_Sev_Roc_24BS_"
@@ -315,7 +318,7 @@ void CEdit_MapObject_Destruction::Create_Particles()
 		_vector TT = XMQuaternionNormalize(vRot);
 		_float4x4 Mat;
 		XMStoreFloat4x4(&Mat,
-			XMMatrixRotationQuaternion(TT) *
+			XMMatrixRotationQuaternion(vRot) *
 			XMMatrixTranslationFromVector(vTrans) *
 			m_pTransformCom->Get_WorldMatrix());
 		Desc.WorldMatrix = &Mat;
@@ -328,7 +331,7 @@ void CEdit_MapObject_Destruction::Create_Particles()
 		CEdit_MapObject_Destruction_Piece::RESET_DESC Reset{};
 		XMStoreFloat3(&Reset.vImpulse, vDeltaPos * Power);
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Test") + to_wstring(i), XMLoadFloat4x4(Desc.WorldMatrix), &Reset);
+		m_pGameInstance->Spawn_PoolingObject(StringToWString(Name), XMLoadFloat4x4(Desc.WorldMatrix), &Reset);
 	}
 }
 
@@ -413,8 +416,9 @@ HRESULT CEdit_MapObject_Destruction::Ready_Component(void* pArg)
 		_vector TT = XMQuaternionNormalize(vRot);
 		_float4x4 Mat;
 		XMStoreFloat4x4(&Mat,
-			XMMatrixRotationQuaternion(TT) *
+			XMMatrixRotationQuaternion(vRot) *
 			XMMatrixTranslationFromVector(vTrans) *
+			//XMLoadFloat4x4(&TestMat) *
 			m_pTransformCom->Get_WorldMatrix());
 		Desc.WorldMatrix = &Mat;
 
@@ -425,7 +429,7 @@ HRESULT CEdit_MapObject_Destruction::Ready_Component(void* pArg)
 
 		XMStoreFloat3(&Desc.vImpulse, vDeltaPos * Power);
 		if (FAILED(m_pGameInstance->Add_PoolingObject(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
-			, m_iLevel, TEXT("Layer_Destruction_Peice"), TEXT("Pool_Test") + to_wstring(i), 7, &Desc)))
+			, m_iLevel, TEXT("Layer_Destruction_Peice"), StringToWString(Name), 7, &Desc)))
 			return S_OK;
 	}
 	return S_OK;

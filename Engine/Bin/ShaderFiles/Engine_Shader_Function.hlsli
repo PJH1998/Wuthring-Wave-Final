@@ -370,4 +370,19 @@ float3 ToneMap(float3 vInput)
     
     return saturate((vInput * (fA * vInput + fB)) / (vInput * (fC * vInput + fD) + fE));
 }
+
+float Hash21(float2 vInput)
+{
+    vInput = frac(vInput * float2(123.32, 456.21));
+    vInput += dot(vInput, vInput + 45.32);
+    return frac(vInput.x * vInput.y);
+}
+
+float Hash13(float3 vInput)
+{
+    vInput = frac(vInput * 0.1031);
+    vInput += dot(vInput, vInput.yzx + 33.33);
+    return frac((vInput.x + vInput.y) * vInput.z);
+}
+
 #endif //Engine_Shader_Function_h__

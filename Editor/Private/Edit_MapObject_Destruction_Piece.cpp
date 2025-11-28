@@ -174,7 +174,7 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Dynamic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
 
 #ifdef _DEBUG
 	RigidbodyDesc.vExtent = m_pModelCom->Get_BoundingBox()->Extents;
@@ -219,7 +219,7 @@ void CEdit_MapObject_Destruction_Piece::Reset(const _fmatrix& WorldMatrix, void*
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	RESET_DESC* pDesc = static_cast<RESET_DESC*>(pArg);
 	m_vImpulse = pDesc->vImpulse;
-
+	
 	m_fTimeDelta = 0.f;
 }
 
