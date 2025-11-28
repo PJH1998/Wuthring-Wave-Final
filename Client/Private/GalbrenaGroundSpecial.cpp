@@ -195,11 +195,11 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				}
 				case EGalbrenaSpecialType::ATTACK08:
 				{
-					m_pGalbrena->GetStateContextForWrite().m_eSpecialType = EGalbrenaSpecialType::ATTACK11;
+					m_pGalbrena->GetStateContextForWrite().m_eSpecialType = EGalbrenaSpecialType::ATTACK_H_01;
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIAL));
 					return;
 				}
-				case EGalbrenaSpecialType::ATTACK11:
+				case EGalbrenaSpecialType::ATTACK_H_01:
 				{
 					m_pGalbrena->GetStateContextForWrite().m_eSpecialType = EGalbrenaSpecialType::ATTACK07;
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIAL));
@@ -249,6 +249,7 @@ void CGalbrenaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK07), "Attack07", 1.f, 50.f); // 25.f ~ 50.f 에 콤보 이펙트.
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK08), "Attack08", 1.2f, 20.f); // 
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK11), "Attack11", 1.2f, 50.f); //발차기.
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK_H_01), "Attack_H_01", 1.2f, 50.f); //발차기.
 
 
 	m_PartsAnimations.emplace("Attack05", "Gun01");
@@ -256,6 +257,7 @@ void CGalbrenaGroundSpecial::SetUp_Animations()
 	m_PartsAnimations.emplace("Attack07", "Gun01");
 	m_PartsAnimations.emplace("Attack08", "Gun01");
 	m_PartsAnimations.emplace("Attack11", "Gun01");
+	m_PartsAnimations.emplace("Attack_H_01", "Gun01");
 }
 
 void CGalbrenaGroundSpecial::State_Reset()
