@@ -1023,6 +1023,9 @@
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1609,6 +1612,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>

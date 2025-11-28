@@ -116,6 +116,11 @@ _bool CGalbrenaGroundAttack::Hit_Judge()
 	if (nullptr == pDesc)
 		return false;
 
+	// Hit 상태이면서 Enemy Skill을 받았을때만 캔슬하고 Hit로
+	if (!m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)))
+		return false;
+
+
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pGalbrena->GetPendingHitDesc()->iLayer);
 	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
 		IsHit = true;
@@ -138,7 +143,7 @@ void CGalbrenaGroundAttack::Handle_Input()
 
     // 입력키 체크
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
-	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB)) || m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 
     // 스킬 체크
@@ -218,10 +223,17 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (m_States[DASH]) 
+	//if (m_States[DASH]) 
+	//{
+	//	m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+	//	return;
+	//}
+
+	if (m_States[DASH])
 	{
-		m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
-		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+		m_pGalbrena->GetStateContextForWrite().m_eSpecialDashType = EGalbrenaSpecialDashType::ATTACK_CHARGE;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIALDASH));
 		return;
 	}
 
