@@ -39,14 +39,17 @@ public:
 	virtual		void					Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)override;
 
 private:
-	CShader* m_pShaderCom = { nullptr };
-	CShader* m_pShadowShaderCom = { nullptr };
-	CRigidbody* m_pRigidbodyCom = { nullptr };
-	vector<CModel*>		m_pModelComArray;
+	CShader*				m_pShaderCom = { nullptr };
+	CShader*				m_pShadowShaderCom = { nullptr };
+	CRigidbody*				m_pRigidbodyCom = { nullptr };
+	vector<CModel*>			m_pModelComArray;
 	class CModel_Streaming* m_pModelCom;
 
-	_uint						m_iShaderPassIndex = {};
-	_bool				m_IsRender = { true };
+	_uint					m_iShaderPassIndex = {};
+	_bool					m_IsRender = { true };
+
+	_float					m_fTime = {};
+
 private:
 	virtual		void						Ready_Component(void* pArg);
 

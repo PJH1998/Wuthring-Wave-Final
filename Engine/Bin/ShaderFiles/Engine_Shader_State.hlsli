@@ -103,6 +103,14 @@ BlendState BS_Blend
 
 BlendState BS_AccumBlend
 {
+    BlendEnable[0] = true;
+    SrcBlend[0] = ZERO;
+    DestBlend[0] = ONE;
+
+    BlendEnable[1] = true;
+    SrcBlend[1] = ONE;
+    DestBlend[1] = ONE;
+
     // vAccumColor (SV_TARGET3) 누적 설정
     BlendEnable[3] = true;
     SrcBlend[3] = ONE;
@@ -139,10 +147,10 @@ BlendState BS_FXBlend
 BlendState BS_WeightBlend
 {
     BlendEnable[0] = true;
-
-    SrcBlend[0] = SRC_ALPHA;
+    
+    SrcBlend[0] = ONE;
     DestBlend[0] = INV_SRC_ALPHA;
-
+    
     BlendOp[0] = ADD;
 };
 

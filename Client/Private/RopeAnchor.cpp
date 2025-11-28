@@ -45,6 +45,8 @@ HRESULT CRopeAnchor::Initialize_Clone(void* pArg)
 void CRopeAnchor::Priority_Update(_float fTimeDelta)
 {
 	CGameObject::Priority_Update(fTimeDelta);
+
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CRopeAnchor::Update(_float fTimeDelta)
@@ -59,7 +61,6 @@ void CRopeAnchor::Update(_float fTimeDelta)
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vMyPos - vTargetPos));
 	}
 	
-
 
 	// 2. RigidBodyCom 업데이트
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -118,6 +119,7 @@ void CRopeAnchor::Render()
 	
 }
 
+// 플레이어를 감지하지말고. 플레이어가 Trigger로 동작하게 수정할 예정.
 void CRopeAnchor::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 1. Detect 감지되면?
@@ -153,7 +155,7 @@ HRESULT CRopeAnchor::Ready_Components(ROPEOBJECT_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
-	RigidbodyDesc.vExtent = _float3(20.f, 20.f, 20.f); // 탐지 범위 안에 들어가있다면?
+	RigidbodyDesc.vExtent = _float3(1.5f, 1.5f, 1.5f); // 탐지 범위 안에 들어가있다면?
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -164,8 +166,11 @@ HRESULT CRopeAnchor::Ready_Components(ROPEOBJECT_DESC* pDesc)
 		OnCollider_During(iLayer, pDesc, Manifold);
 	});
 
-	// 내 위치. 넣기.
-	m_CallBack.pTransform = m_pTransformCom;
+	// Transform과 Rope_Anchor 타입임을 알립니다.
+	m_CallBack.pTransform = m_pTransformCom; 
+	m_CallBack.eObjectType = OBJECTTYPE::ROPE_ANCHOR;
+	m_CallBack.pCondition = &m_iCondition;
+
 	m_pRigidbodyCom->Set_Desc(&m_CallBack);
 	return S_OK;
 }

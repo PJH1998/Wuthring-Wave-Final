@@ -15,6 +15,7 @@ float g_fYSize;
 float g_Sweep;      // 0 -> 1
 float g_Soft;       //
 int g_MaskFlag;
+int g_ColorFlag;
 
 int g_iCol;         //qt
 int g_iRow;
@@ -120,7 +121,13 @@ PS_OUT PS_MAIN(PS_IN In)
         vColor.a = max(max(vColor.r, vColor.g), vColor.b);
     }
 
-    vColor *= g_vColor;
+    if (vColor.a < 0.2f)
+        discard;
+    
+    if (g_ColorFlag == 0)
+        vColor *= g_vColor;
+    else
+        vColor.rgb = g_vColor.rgb;
     
     float2 LifeTime = g_vLifeTime;
     
@@ -128,19 +135,16 @@ PS_OUT PS_MAIN(PS_IN In)
     
     vColor.a *= Alpha;
     
-    if (vColor.a <= 1e-5)
-       discard;
-    
-    float fWeight = Luminance(vColor.xyz);
+    float fWeight = Luminance(vColor.xyz * g_EmssiveColorWeight);
  
     if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(vColor.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz * g_EmssiveColorWeight, 1.f);
     
     Out.vEmissive.xyz *= vColor.a;
 
     float z = In.vProjPos.z / In.vProjPos.w;
-    float Weight = max(1e-5, exp(-z * 0.1f));
-    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = vColor.a * Weight;
     
     return Out;
@@ -164,6 +168,9 @@ PS_OUT PS_TEST(PS_IN In)
     //        discard;
     //}
     
+    if (vColor.a < 0.2f)
+        discard;
+    
     float fCenter = In.vTexcoord - (0.5, 0.5);
     
     float fCircle = length(fCenter) / 0.5f;
@@ -175,23 +182,26 @@ PS_OUT PS_TEST(PS_IN In)
     //if (Out.vDiffuse.a < 0.3f)
     //    discard;
     
-    vColor *= g_vColor;
+    if (g_ColorFlag == 0)
+        vColor *= g_vColor;
+    else
+        vColor.rgb = g_vColor.rgb;
    
-    if (vColor.a <= 1e-5)
+    if (vColor.a < 0.1f)
         discard;
    
-    float fWeight = Luminance(vColor.xyz);
+    float fWeight = Luminance(vColor.xyz * g_EmssiveColorWeight);
    
    if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(vColor.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz * g_EmssiveColorWeight, 1.f);
     
     Out.vEmissive.xyz *= vColor.a;
     
     float z = In.vProjPos.z / In.vProjPos.w;
-    float Weight = max(1e-5, exp(-z * 0.1f));
-    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = vColor.a * Weight;
-   
+ 
     return Out;
 }
 
@@ -209,6 +219,9 @@ PS_OUT PS_TESTA(PS_IN In)
      
     }
     
+    if (vColor.a < 0.2f)
+        discard;
+    
     float fCenter = In.vTexcoord - (0.5, 0.5);
     
     float fCircle = length(fCenter) / 0.5f;
@@ -219,30 +232,30 @@ PS_OUT PS_TESTA(PS_IN In)
     
     //Å×½ºÆ®
     
-    vColor.rgb *= g_vColor;
+    if (g_ColorFlag == 0)
+        vColor *= g_vColor;
+    else
+        vColor.rgb = g_vColor.rgb;
     
     float2 LifeTime = g_vLifeTime;
     
     float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
     vColor.a *= Alpha;
-    //Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
     
-   //if (Out.vDiffuse.a < 0.1f)
-   //    discard;
-    if (vColor.a <= 1e-5)
+    if (vColor.a < 0.1f)
         discard;
   
-    float fWeight = Luminance(vColor.xyz);
+    float fWeight = Luminance(vColor.xyz * g_EmssiveColorWeight);
    
     if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(vColor.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz * g_EmssiveColorWeight, 1.f);
     
     Out.vEmissive.xyz *= vColor.a;
  
     float z = In.vProjPos.z / In.vProjPos.w;
-    float Weight = max(1e-5, exp(-z * 0.1f));
-    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = vColor.a * Weight;
     
     return Out;
@@ -269,12 +282,15 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     vColor = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
     
-    //if (vColor.a < 0.1f)
-    //    discard;
+    if (vColor.a < 0.1f)
+        discard;
     
-    vColor.a = 1.f;
+    //vColor.a = 1.f;
     
-    vColor *= g_vColor;
+    if (g_ColorFlag == 0)
+        vColor *= g_vColor;
+    else
+        vColor.rgb = g_vColor.rgb;
     
     float2 LifeTime = g_vLifeTime;
     
@@ -282,23 +298,23 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     vColor.a *= Alpha;
     
-    if (vColor.a <= 1e-5)
+    if (vColor.a < 0.1f)
         discard;
-
-    float fWeight = Luminance(vColor.xyz);
+    
+    float fWeight = Luminance(vColor.xyz * g_EmssiveColorWeight);
    
-   if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(vColor.xyz, 1.f);
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(vColor.xyz * g_EmssiveColorWeight, 1.f);
     
     Out.vEmissive.xyz *= vColor.a;
     
     float z = In.vProjPos.z / In.vProjPos.w;
-    float Weight = max(1e-5, exp(-z * 0.1f));
-    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    Out.vAccumColor = float4(vColor.rgb * vColor.a, 0.0f) * Weight;
     Out.vAccumAlpha.r = vColor.a * Weight;
    
-    return Out;
-}
+        return Out;
+    }
 
 
 technique11 DefaultTechnique
@@ -307,7 +323,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -318,7 +334,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -329,7 +345,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -340,7 +356,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -351,7 +367,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -362,7 +378,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();

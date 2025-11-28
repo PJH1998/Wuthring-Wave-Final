@@ -1,6 +1,13 @@
 ﻿#pragma once
 namespace Client
 {
+	enum class ROPEDIR : unsigned int {
+		U = 0,
+		F,
+		D,
+		END
+	};
+
 	enum class PROP_CONDITION : unsigned int {
 		DEFAULT = 1 << 0,  
 		DISSOLVE = 1 << 1, // Dissolve 설정.
@@ -27,7 +34,8 @@ namespace Client
 		CUTSCENE = 1 << 6,
 		SKILLHIT = 1 << 7, // Skill에 맞았단 판정이 필요한 경우.(Galbrena Default E)
 		SELECT = 1 << 8, // 선택된 상태.
-		MOVE_ROPE = 1 << 9, // Rope 이동이 가능한상태?
+		ROPE_HOOK = 1 << 9, // Rope 이동이 가능한상태?
+		ROPE_DRAG = 1 << 10, // Rope Drag 상태.
 		END
 	};
 

@@ -484,6 +484,7 @@
     <ClInclude Include="..\Public\GltfLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Collaps.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -718,6 +719,7 @@
     <ClCompile Include="..\Private\GltflLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Collaps.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

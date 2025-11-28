@@ -157,20 +157,6 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), WModelName,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
-	//m_pModelComArray.resize(V);
-
-	//for (_uint i = 0; i < V; ++i)
-	//{
-	//	_wstring ModelCom = Model;
-	//	ModelCom.pop_back();
-	//	ModelCom += to_wstring(i);
-
-	//	_char ModelName[MAX_PATH] = {};
-	//	sprintf_s(ModelName, "Com_Model%d", i);
-	//	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
-	//		StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-	//		CRASH("FAILED");
-	//}
 
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))

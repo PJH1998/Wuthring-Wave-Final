@@ -12,6 +12,7 @@ private:
         JUMP = 0,
         LAND,
         MOVE,
+		ROPE_HOOK,
 		FLY,
         DOUBLE_JUMP,
         AIR_ATTACK,

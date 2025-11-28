@@ -64,7 +64,9 @@ public:
 		_float3 vScale = { 1.f, 1.f, 1.f};
 		_float3 vRotation = { 0.f, 0.f, 0.f };
 		_float3 vPosition = { 0.f, 0.f, 0.f };
-		CHARACTER_STAT eStat = {};
+		_float fHookRange = { 25.f };
+		_float fDragRange = { 15.f };
+		_float fReacedRopeHook = { 1.f };
 
 	}CHARACTER_DESC;
 	
@@ -164,14 +166,18 @@ public:
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
 	
 	// T 사용시 컨디션 공유. Interaction Type 설정.
-	UI_TAB_UTILITY Get_UtilityType() { return m_eInteractionType; }
+	UI_TAB_UTILITY Get_UtilityType();
 	
 	// Grapple Target 전달.
-	// Player의 T가 현재 어떤 상태인지도 전달해주어야함.
-	void Bind_GrappleTarget(class CTransform* pTargetTransform, OBJECTTYPE eObjectType); 
-	_bool Is_MoveGrapple();
-	void Rotate_MoveGrapple();
+	void Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo);
+	void Rotate_GrappleTarget();
 	void Move_Grapple(_float fTimeDelta, _float fSpeed);
+	void Execute_RopeDragTrigger();
+	_float Get_GrappleDistance();
+	_bool Is_GrappleHook();
+	_bool Is_GrappleDrag();
+	_bool Is_ReachedGrappleHook();
+	ROPEDIR Calculate_RopeDirection();
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
@@ -251,7 +257,7 @@ public:
 	void Sync_Transform_ToPlayer(class CTransform* pTransformCom); // Player로 보낸다.
 
 	// Interaction Type
-	void Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eInteractionType);
+	void Sync_UtilityType_FromPlayer(UI_TAB_UTILITY eUtilityType);
 #pragma endregion
 
 #ifdef _DEBUG
@@ -310,8 +316,11 @@ protected:
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 
+	GRAPPLE_INFO m_GrappleInfo = {};
+
 	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
 	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };
+	_uint m_iGrappleCondition = {};
 
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 	class CComputeShader* m_pFacialComputeShaderCom = { nullptr }; // Facial 용도.
@@ -333,7 +342,7 @@ protected:
 	_float4 m_vQTEPos = {};
 	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
-	UI_TAB_UTILITY m_eInteractionType = { UI_TAB_UTILITY::NOTHING };
+	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
 
 
@@ -361,6 +370,10 @@ protected:
 
 	_float m_fCameraOffset = {};
 	_float m_fCameraOriginOffset = {};
+
+	_float m_fHookRange = {};
+	_float m_fReachedHook = {};
+	_float m_fDragRange = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

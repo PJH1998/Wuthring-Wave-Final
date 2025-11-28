@@ -28,6 +28,7 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
 
     m_iShaderPass = pDesc->iShaderPass;
 	m_iMaskFlag = pDesc->iMaskFlag;
+	m_iColorFlag = pDesc->iColorFlag;
 
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
@@ -220,6 +221,9 @@ HRESULT CEffect_Rect::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorFlag", &m_iColorFlag, sizeof(_int))))
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_vLifeTime", &m_vLifeTime, sizeof(_float2))))

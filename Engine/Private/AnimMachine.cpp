@@ -213,7 +213,7 @@ void CAnimMachine::Reset(CModel* pModelCom, const _string& strAnimTag)
 		pModelCom->Clear_Animation(Pair.first);
 	}
 	CAnimState::ANIMSTATE_DESC Desc{};
-	m_AnimStates[strAnimTag]->Enter(nullptr, nullptr, &m_strCurrentAnimTag, Desc);
+	m_AnimStates[strAnimTag]->Enter(pModelCom, nullptr, &m_strCurrentAnimTag, Desc);
 
 	m_isRootMotion = Desc.isRootMotion;
 	m_isRootMotionRotate = Desc.isRootMotionRotate;

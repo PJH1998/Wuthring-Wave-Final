@@ -46,7 +46,6 @@ public:
 
 
 #pragma region CHARACTER INFO
-	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
@@ -110,8 +109,8 @@ public:
 	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
 	_uint		HideNGet_TabUtilityUI();
 
-	// [WIP] 다채화를 켭니다.
-	void		Open_Game_OverflowPalette();
+	// [WIP] 다채화를 켭니다. / iTargetLevel : 열 레벨. 오픈 대상 파일들은 CUI_Ovfl_Palette::Load_LevelData 에 순서대로 정의됨.
+	void		Open_Game_OverflowPalette(_uint iTargetLevel = 0);
 	// [WIP] 다채화를 끕니다.
 	void		Close_Game_OverflowPalette();
 
@@ -151,6 +150,13 @@ public:
 	void	Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex);
 #pragma endregion
 
+#pragma region MOUSECONTROLLER
+	void						Register_Mouse(class CMouse* pMouse);
+	void						Set_MouseFix(_bool isFix);
+	_bool						IsFix();
+#pragma endregion
+
+
 private:
 	class	CParser*			m_pParser						= { nullptr };
 	class	CFactory*			m_pFactory						= { nullptr };
@@ -165,10 +171,10 @@ private:
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
+	class	CMouseController*		m_pMouseController = { nullptr };
 
-	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
-
+	Mutex m_Mutex;
 public:
 	void				Release_System();
 

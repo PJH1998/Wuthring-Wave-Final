@@ -3,6 +3,7 @@
 #include"Map_Interface.h"
 #include"Event_Level.h"
 #include"Level_Map.h"
+#include "Edit_MapObject_Collaps.h"
 
 CEdit_Meteo::CEdit_Meteo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice,pContext)
