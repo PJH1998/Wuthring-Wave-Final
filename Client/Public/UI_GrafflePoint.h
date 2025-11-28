@@ -7,19 +7,20 @@ NS_BEGIN(Client)
 class CUI_GrafflePoint final : public CUI_Image
 {
 public:
-	typedef struct tUI_GrafflePointDesc {
-		_float3* pTargetPos = nullptr;
-	} UI_GRAFFLEINFO_DESC;
+	//typedef struct tUI_GrafflePointDesc {
+	//	_float3* pTargetPos = nullptr;
+	//} UI_GRAFFLEINFO_DESC;
 
 private:
 	typedef struct tUI_GraffleRTDesc {
-		UI_GRAFFLEINFO_DESC tInfoDesc = {};
+		//UI_GRAFFLEINFO_DESC tInfoDesc = {}; 
+		_float3*	pTargetPos = {};
 
 		_float		fCurElapsedTime = 0.f;
 		_float		fCurStackedTime = 0.f;
 
-		_float		fAtkedElapsedTime = {};
-		_bool		isTimerActived = {};
+		//_float	fAtkedElapsedTime = {};
+		//_bool		isTimerActived = {};
 	} UI_GRAFFLE_RT_DESC;
 	
 public:
@@ -37,6 +38,9 @@ public: // 생성/복제
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
+public:
+	void			Add_GrafflePoints(_float3* pTargetPos);
+
 private:
 	void			PreAssign_ChildUIs();
 	void			Ready_Presets();
@@ -46,7 +50,7 @@ private:
 
 private:
 	_float3			Calc_PosToScreen(const _float3* v3DPos);
-	_float3			Calc_CamDistScale_PerInst(const _float3* vInstSca, _float fPivotDistance);	// 이거 인스턴스별로..
+	_float3			Calc_CamDistScale_PerInst(const _float3* vInstPos, const _float3* vInstSca, _float fPivotDistance, _float3 fFixedBaseScale);	// 이거 인스턴스별로..
 
 private:
 	CCustom_UI*			m_pGrafflePointUI		= nullptr;

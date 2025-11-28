@@ -65,6 +65,8 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
+#include "UI_GrafflePoint.h"
+
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
 
@@ -751,6 +753,9 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
 
+	_string strFilePath_UI_GrafflePoint = "../../Client/Bin/Resource/UI/FJson/UITree/Root_GrafflePoint.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_GrafflePoint));
+
 
 	
 	
@@ -861,6 +866,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_GrafflePoint",
+		CUI_GrafflePoint::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_GrafflePoint Load Failed. The UI_GrafflePoint may have already been loaded.\n");
 
 	// Custom UI (MiniGames)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",

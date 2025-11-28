@@ -110,11 +110,14 @@ public:
 	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
 	_uint		HideNGet_TabUtilityUI();
 
-	// [WIP] 다채화를 켭니다. / iTargetLevel : 열 레벨. 오픈 대상 파일들은 CUI_Ovfl_Palette::Load_LevelData 에 순서대로 정의됨.
+	// 다채화를 켭니다. / iTargetLevel : 열 레벨. 오픈 대상 파일들은 CUI_Ovfl_Palette::Load_LevelData 에 순서대로 정의됨.
 	void		Open_Game_OverflowPalette(_uint iTargetLevel = 0);
-	// [WIP] 다채화를 끕니다.
+	// 다채화를 끕니다.
 	void		Close_Game_OverflowPalette();
 
+
+
+	// [WIP] 
 #pragma endregion
 
 #pragma region PLAYER STATUS

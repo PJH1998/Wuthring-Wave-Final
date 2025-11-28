@@ -3,6 +3,7 @@
 #include "Animator_UI.h"
 
 #define KSTA_UITEST_GRAFFLE_TOZERO
+#define KSTA_POSPTRIMPL
 
 
 CUI_GrafflePoint::CUI_GrafflePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -43,7 +44,7 @@ HRESULT CUI_GrafflePoint::Initialize_Clone(void* pArg)
 
 
 	static_cast<CAnimator_UI*>(m_pGrafflePointUI->Get_Component(L"Com_Animator_UI"))->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
-	static_cast<CAnimator_UI*>(m_pGrafflePointUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
+	//static_cast<CAnimator_UI*>(m_pGrafflePointUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Initialize");
 
 	Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
@@ -68,6 +69,31 @@ void CUI_GrafflePoint::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+#ifdef _DEBUG
+
+	static _bool isInitilized = false;
+	
+	if (!isInitilized)
+	{
+		isInitilized = true;
+
+		const _uint iNumDebugPoints = 1;// 10;
+		const _float fRandPosRadius = 20;
+		const _float3 vRandPosOffset = { 0.f, -10.f, 0.f };
+
+		_float3* pRandDebugPos = new _float3 {
+			vRandPosOffset.x, //+ m_pGameInstance->Rand(-fRandPosRadius, fRandPosRadius),
+			vRandPosOffset.y, //+ m_pGameInstance->Rand(-fRandPosRadius, fRandPosRadius),
+			vRandPosOffset.z //+ m_pGameInstance->Rand(-fRandPosRadius, fRandPosRadius)
+		};
+
+		
+
+		for (_uint i = 0; i < iNumDebugPoints; i++)
+			Add_GrafflePoints(pRandDebugPos);
+	}
+
+#endif // _DEBUG
 
 
 	__super::Update(fTimeDelta);
@@ -97,7 +123,7 @@ void CUI_GrafflePoint::Render()
 void CUI_GrafflePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	// 최초에는 안보이게 가리기
-	static_cast<CAnimator_UI*>(m_pGrafflePointUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Show", true);
+	//static_cast<CAnimator_UI*>(m_pGrafflePointUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"LockOn_Show", true);
 
 	//if (pArg != nullptr);
 	//	m_pTargetPos = static_cast<UI_GRAFFLEINFO_DESC*>(pArg)->pTargetPos;
@@ -105,9 +131,18 @@ void CUI_GrafflePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 }
 
+void CUI_GrafflePoint::Add_GrafflePoints(_float3* pTargetPos)
+{
+	UI_GRAFFLE_RT_DESC tDesc = {};
+	
+	tDesc.pTargetPos = pTargetPos;
+	m_vecGraffleInfo.push_back(tDesc);
+}
+
 void CUI_GrafflePoint::PreAssign_ChildUIs()
 {
-	m_pGrafflePointUI = Find_ChildObject(L"SectorA_Static");
+	//m_pGrafflePointUI = Find_ChildObject(L"SectorA_Static");
+	m_pGrafflePointUI = Find_ChildObject(L"GrafflePoint");
 
 }
 
@@ -122,29 +157,47 @@ void CUI_GrafflePoint::Update_Instances()
 	auto targetDesc = pTargetUI->Get_UIDesc();
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
+	targetInstDesc.resize(m_vecGraffleInfo.size());
+
 	const _float fDistancecPivot = 10.f;
 
 	for (_uint i = 0; i < m_vecGraffleInfo.size(); i++)
 	{
 		// 타겟 위치 반영을 위한 계산..
 		UI_GRAFFLE_RT_DESC& graffleInfo = m_vecGraffleInfo[i];
-		_float3* targetPos = graffleInfo.tInfoDesc.pTargetPos;
-
-
-
+		_float3* targetPos = graffleInfo.pTargetPos;
 
 		_float3 vInstSca = {
-			XMVectorGetX(XMVector3Length(XMLoadFloat3(&*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstRight)))),
-			XMVectorGetX(XMVector3Length(XMLoadFloat3(&*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstUp)))),
-			XMVectorGetX(XMVector3Length(XMLoadFloat3(&*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstLook))))
+			XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstRight)))),
+			XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstUp)))),
+			XMVectorGetX(XMVector3Length(XMLoadFloat3(reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstLook))))
 		};
-		_float3 targetScreenPos = Calc_PosToScreen(targetPos);		// 계산 결과 (3d상에서 화면으로)
-		_float3 targetScreenSca = Calc_CamDistScale_PerInst(&vInstSca, fDistancecPivot);
+		_float3 vBaseScale = { 150.f, 150.f, 1.f };
+
+		_float3 targetScreenPos = Calc_PosToScreen(targetPos);												// 계산 결과 (3d상에서 화면으로)
+		_float3 targetScreenSca = Calc_CamDistScale_PerInst(targetPos, &vInstSca, fDistancecPivot, vBaseScale);			// 계산 결과 (목표와 카메라 간의 거리를 통한 크기 계산) 
 
 		// static_cast<CTransform*>(m_pGrafflePointUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
 
 		*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstTrans.x) = targetScreenPos;
 		*reinterpret_cast<_float*>(&targetInstDesc[i].vSInstTrans.w) = 1.f;
+		
+		// 가져온 스케일 normalize 한 뒤 계산 스케일 반영, 이후 인스턴스로 넘김
+		_float3& vScaX = *reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstRight);	// `X Right 
+		_float3& vScaY = *reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstUp);		// `Y Up
+		_float3& vScaZ = *reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstLook);	// `Z Look
+		_float3 vCalcedScaX = vScaX;	// 계산용으로 옮김
+		_float3 vCalcedScaY = vScaY;
+		_float3 vCalcedScaZ = vScaZ;
+		vCalcedScaX = {vCalcedScaX.x / vInstSca.x * targetScreenSca.x, vCalcedScaX.y / vInstSca.x * targetScreenSca.x, vCalcedScaX.z / vInstSca.x * targetScreenSca.x};	// 계산 진행
+		vCalcedScaY = {vCalcedScaY.x / vInstSca.y * targetScreenSca.y, vCalcedScaY.y / vInstSca.y * targetScreenSca.y, vCalcedScaY.z / vInstSca.y * targetScreenSca.y};
+		vCalcedScaZ = {vCalcedScaZ.x / vInstSca.z * targetScreenSca.z, vCalcedScaZ.y / vInstSca.z * targetScreenSca.z, vCalcedScaZ.z / vInstSca.z * targetScreenSca.z};
+		*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstRight) = vCalcedScaX;
+		*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstUp	  ) = vCalcedScaY;
+		*reinterpret_cast<_float3*>(&targetInstDesc[i].vSInstLook ) = vCalcedScaZ;
+
+
+		//_float3 vCalcedInstSca = { vInstSca.x, vInstSca.y, vInstSca.z };
 	}
 
 	pTargetUI->Set_UIDesc(targetDesc);
@@ -185,15 +238,27 @@ _float3 CUI_GrafflePoint::Calc_PosToScreen(const _float3* v3DPos)
 	return vStorePos;
 }
 
-_float3 CUI_GrafflePoint::Calc_CamDistScale_PerInst(const _float3* vInstSca, _float fPivotDistance)
+_float3 CUI_GrafflePoint::Calc_CamDistScale_PerInst(const _float3* vInstPos, const _float3* vInstSca, _float fPivotDistance, _float3 fFixedBaseScale)
 {
 	// 몬스터 hp때와 다르게, position은 손댈생각 말고, 인스턴스 별 크기만 손대면 될 거라 생각함
+	const _float fMaxScaleFactor = 0.6f;
+
+	// calculate target distance from camera
+	const _matrix matCamView = m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW);
+	_float fDist = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat3(vInstPos)));		// 이거 ㅅㅂ 왜 2d 화면좌표랑 3d 카메라좌표랑 비교하고있냐ㅋㅋ
+
+	// calc scale factor
+	_float fScaleFactor = fPivotDistance / fDist;
+	fScaleFactor = fScaleFactor > fMaxScaleFactor ? fMaxScaleFactor : fScaleFactor; // 최대 확대
+
+	// calc scale
+	_float3 vResultScale = {fScaleFactor * fFixedBaseScale.x, fScaleFactor * fFixedBaseScale.y, 1.f * fFixedBaseScale.z };
 
 
+	
+	std::cout << "[UI_GrafflePoint::Calc_CamDistScale_PerInst] Scale Test.. [X : " << vResultScale.x << "], [Y : " << vResultScale.y << " ]" << std::endl;
 
-
-
-
+	return vResultScale;
 }
 
 CUI_GrafflePoint* CUI_GrafflePoint::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -220,6 +285,15 @@ CGameObject* CUI_GrafflePoint::Clone(void* pArg)
 
 void CUI_GrafflePoint::Free()
 {
+#ifdef _DEBUG
+#ifdef KSTA_POSPTRIMPL
+	
+	for (auto& graffleInfo : m_vecGraffleInfo)
+		delete graffleInfo.pTargetPos;
+
+#endif // KSTA_POSPTRIMPL
+#endif // _DEBUG
+
 	if (m_isClone)
 		m_pGameInstance->Remove_RootUI(L"UI_GrafflePoint");
 

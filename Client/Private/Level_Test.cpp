@@ -533,6 +533,11 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 1)))
+		CRASH("Failed Ready GrafflePoint");
+
+
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
 		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
 		CRASH("Failed Ready Ovfl_Palette");
@@ -919,6 +924,19 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
+#pragma region [NUMPAD 0] KSTA_UITEST_GRAFFLEPOINT
+
+	static _bool isInitialized_GrafflePoint = false;
+
+	if (!isInitialized_GrafflePoint)
+	{
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), nullptr);
+
+		isInitialized_GrafflePoint = true;
+	}
+
+#pragma endregion
 
 }
 
