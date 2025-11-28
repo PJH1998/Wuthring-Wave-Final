@@ -88,7 +88,6 @@ HRESULT CLevel_Heaven::Initialize()
 
 	Ready_Effect();
 	Ready_Skybox();
-	Ready_Mouse();
 	//Ready_SFX();
 
 	return S_OK;
@@ -376,13 +375,6 @@ void CLevel_Heaven::Ready_UI()
 	//	CRASH("Failed Ready Parry");
 
 	// _UI
-}
-
-void CLevel_Heaven::Ready_Mouse()
-{
-	// Mouse
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_Mouse"), ENUM_CLASS(LEVEL::HEAVEN), TEXT("Layer_Mouse"))))
-		CRASH("Mosue");
 }
 
 void CLevel_Heaven::Ready_SFX()

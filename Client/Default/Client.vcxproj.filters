@@ -379,6 +379,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="93. Mouse">
+      <UniqueIdentifier>{808949be-3865-47f6-a37d-453077a30ff9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Player\State\Interaction\Augusta">
       <UniqueIdentifier>{a72c7482-73ab-47d2-834c-e2f223ab5a78}</UniqueIdentifier>
     </Filter>
@@ -1010,6 +1013,9 @@
     <ClInclude Include="..\Public\RoverRopeDrag.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MouseController.h">
+      <Filter>93. Mouse</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\CaptureState.h">
       <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
     </ClInclude>
@@ -1594,6 +1600,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverRopeDrag.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MouseController.cpp">
+      <Filter>93. Mouse</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\CaptureState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
