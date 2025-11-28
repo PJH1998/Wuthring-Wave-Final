@@ -6,7 +6,7 @@
 #include "GameSystem.h"
 #include "Animator_UI.h"
 
-#define KSTA_UITEST_GRAFFLE_TOZERO
+#define KSTA_UITEST_GRAFFLE_TOZERO  
 #define	 IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
 
 

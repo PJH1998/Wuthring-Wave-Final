@@ -164,6 +164,8 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	Trigger_ResetLevel(iTargetLevel);
 	m_isActivate = true;
 	m_IsGoinDisabled = false;
+
+	m_pGameSystem->Set_MouseFix(false);
 }
 
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
@@ -1009,6 +1011,8 @@ void CUI_Ovfl_Palette::Update_GoinDisable(_float fTimeDelta)
 		m_iAnimOrder = 0;
 		m_fDisableTimer = 0.f;
 
+		m_pGameSystem->Set_MouseFix(true);
+		
 		return;
 	}
 	

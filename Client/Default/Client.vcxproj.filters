@@ -391,6 +391,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Interaction\Rover">
       <UniqueIdentifier>{35995a8e-e366-4ce4-8a7e-cfaff07a41f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\QTE">
+      <UniqueIdentifier>{2c66c6f3-2767-4487-b448-d5c4df9f6471}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1010,6 +1013,9 @@
     <ClInclude Include="..\public\UI_GrafflePoint.h">
       <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_QTE.h">
+      <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1593,6 +1599,9 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_GrafflePoint.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_QTE.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

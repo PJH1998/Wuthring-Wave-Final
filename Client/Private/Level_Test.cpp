@@ -24,6 +24,7 @@
 #include "SceneCamera.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
+#include "UI_GrafflePoint.h"
 
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
@@ -934,7 +935,9 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	if (!isInitialized_GrafflePoint)
 	{
 		for (_uint i = 0; i < iNumGraffleUI; i++)
+		{
 			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), nullptr);
+		}
 
 		isInitialized_GrafflePoint = true;
 	}

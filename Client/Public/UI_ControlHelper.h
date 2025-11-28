@@ -51,7 +51,7 @@ public:
 	void				Open_Game_OverflowPalette(_uint iTargetLevel);
 	void				Close_Game_OverflowPalette();
 
-	void				Attach_GrafflePoint(_float3* pTargetPos);
+	void				Attach_GrafflePoint(_float3* pTargetPos);		// 외부 값 받아올거면, 그래플 UI 헤더, cpp에 최상단 define 해제 필요
 
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
