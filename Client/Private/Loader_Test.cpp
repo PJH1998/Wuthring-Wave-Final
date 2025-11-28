@@ -22,6 +22,7 @@
 #include "Spawner.h"
 #include "PatternDummy.h"
 #include "Leviatan.h"
+#include "Levi_Bayonet.h"
 #pragma endregion
 
 
@@ -375,13 +376,42 @@ HRESULT CLoader_Test::Load_Leviatan()
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan.dat"))))
 		CRASH("Prototype Create Failed");
 
+	// Prototype_Component_BehaviorTree_Leviatan1
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Leviatan1"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
+
+	// Prototype_Component_AnimMachine_Leviatan_Phase1
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase1"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Animation/Leviatan_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_BehaviorTree_Leviatan2
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Leviatan2"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan_BT2.json"))))
+		CRASH("BehaviorTree Create Failed");
+
+	// Prototype_Component_AnimMachine_Leviatan_Phase2
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase2"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Animation/Leviatan_StateMachine2.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
 	// Prototype_GameObject_Leviatan
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
 		CLeviatan::Create(m_pDevice, m_pContext))))
 		CRASH("Leviatan Prototype Create Failed");
 
 #pragma region WEAPON
+	// Prototype_Component_Model_Leviatan_Bayonet
+	_fmatrix PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) /** XMMatrixRotationY(XMConvertToRadians(180.f))*/;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Bayonet"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Levi_Dajian/Levi_Dajian.dat"))))
+		CRASH("Prototype Create Failed");
 
+	// Prototype_GameObject_Levi_Bayonet
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"),
+		CLevi_Bayonet::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;
 }

@@ -403,6 +403,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Capture\Rover">
       <UniqueIdentifier>{e074fb96-d88d-40d6-b1a4-609b49fbf7af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet">
+      <UniqueIdentifier>{865ddfb4-ae01-44d4-923a-b046ed456f2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1028,6 +1031,9 @@
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Levi_Bayonet.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1617,6 +1623,9 @@
     <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Bayonet.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
