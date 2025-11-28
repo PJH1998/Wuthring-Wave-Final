@@ -30,8 +30,10 @@ private:
 	enum ATK_SOCKET { FOOT_L, FOOT_R, WEAPON_GL, ATKEND };
 	//					신권,	   이권,	인권	
 	enum SWORD { MAIN, DIVINITY, DISCORD, VIRTUE, END };
-	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
+	//enum ATK_PATTERN_P1 {ATTACK3, ATTACK5, ATTACK12, ATTACK13, BURST, ATTACK18, ATK1_END };
+	enum ATK_PATTERN { ATTACK3, ATTACK5, ATTACK12, ATTACK13, BURST, ATTACK18, ATTACK1, ATTACK20, ATTACK22, ATK_END };
 	enum LEVIATAN_SHADER { BANG, HAIR, FACE, UP, DOWN, CLOTH, ALPHA, FX };
+	enum PHASE { ONE, TWO, P_END };
 private:
 	explicit CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CLeviatan(const CLeviatan& Prototype);
@@ -57,8 +59,8 @@ public:
 	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
-	CAnimMachine* m_pAnimMachineCom = { nullptr };
-	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
+	CAnimMachine* m_pAnimMachineCom[PHASE::P_END] = { nullptr };
+	CBehavior_Tree* m_pBehaviorTreeCom[PHASE::P_END] = {nullptr,};
 	CGameSystem* m_pGameSystem = { nullptr };
 	CComputeShader* m_pFacialComputeShaderCom = { nullptr };
 
@@ -74,8 +76,8 @@ private:
 	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
-	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
-	_float					m_fAttackAcc[ATK_PATTERN::ATK_END]{};
+	_float					m_fAttackCoolTime[PHASE::P_END][ATK_PATTERN::ATK_END]{};
+	_float					m_fAttackAcc[PHASE::P_END][ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
 	_float					m_fDistanceNonY{};
 	_float					m_fDodgeCoolTime{};
@@ -137,7 +139,8 @@ private:
 	_bool						isAttackEnable();
 	_bool						DodgeCooldown();
 	_bool						Attack(_uint iIndex, _float fInterval);
-	void						Attack_Arrange();
+	_bool						Attack_Arrange();
+	_bool						CheckHit();
 	_bool						Back();
 	_bool						Front();
 	_bool						Left();
