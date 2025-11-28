@@ -34,7 +34,6 @@ void CAugustaGroundDash::OnEnter(void* pArg)
 
 	// 4. State 초기화.
     State_Reset();
-
 	m_pAugusta->Set_Gravity(true);
 
 	// 5. 무적
@@ -49,7 +48,7 @@ void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 실행
-    Update_SprintAnimation(fTimeDelta);
+	Update_DashAnimation(fTimeDelta);
     
     // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
@@ -71,8 +70,8 @@ void CAugustaGroundDash::Handle_Input()
 	// Dash 키입력 체크.
 	m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 	m_States[HIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+	m_States[DODGE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//m_States[DODGE] = m_States[DODGEABLE] // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
@@ -87,7 +86,7 @@ void CAugustaGroundDash::Handle_Input()
 
 
 
-void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
+void CAugustaGroundDash::Update_DashAnimation(_float fTimeDelta)
 {
     // 1. 누른키에 따른 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
@@ -99,7 +98,10 @@ void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
 		m_pAugusta->Rotate_Direction(vMoveDir);
     }
 
+	// 3. Animation 실행
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+
+	
     
 }
 

@@ -382,6 +382,9 @@
     <Filter Include="03. GameObject\UI\Containers_Prop\GrafflePoint">
       <UniqueIdentifier>{1dda4253-7a9b-4853-9436-0d14c8a74145}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\NonStatic">
+      <UniqueIdentifier>{7775ba39-3792-4e81-b9a0-73409fa53076}</UniqueIdentifier>
+    </Filter>
     <Filter Include="93. Mouse">
       <UniqueIdentifier>{808949be-3865-47f6-a37d-453077a30ff9}</UniqueIdentifier>
     </Filter>
@@ -393,6 +396,21 @@
     </Filter>
     <Filter Include="03. GameObject\UI\Containers_Prop\QTE">
       <UniqueIdentifier>{2c66c6f3-2767-4487-b448-d5c4df9f6471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture">
+      <UniqueIdentifier>{9dd1696c-dfdf-412e-9fbc-f31c3f33d74d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture\Augusta">
+      <UniqueIdentifier>{c9bc1bf1-db9e-429a-a22d-1f9d31f001ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture\Galbrena">
+      <UniqueIdentifier>{02e963b5-be46-439f-988e-00708a716e3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture\Rover">
+      <UniqueIdentifier>{e074fb96-d88d-40d6-b1a4-609b49fbf7af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet">
+      <UniqueIdentifier>{865ddfb4-ae01-44d4-923a-b046ed456f2d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -751,18 +769,6 @@
     <ClInclude Include="..\Public\MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Destruction.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Sonoro.h">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClInclude>
@@ -967,12 +973,6 @@
     <ClInclude Include="..\Public\Coro_Rock.h">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Meteo.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Water.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\UI_Ovfl_Palette.h">
       <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
     </ClInclude>
@@ -988,7 +988,6 @@
     <ClInclude Include="..\Public\Leviatan.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Collaps.h" />
     <ClInclude Include="..\Public\RopeAnchor.h">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClInclude>
@@ -1015,6 +1014,37 @@
     </ClInclude>
     <ClInclude Include="..\public\UI_QTE.h">
       <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Sonoro.h">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Collaps.h">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Water.h">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CaptureState.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaCapture.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Levi_Bayonet.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1347,18 +1377,6 @@
     <ClCompile Include="..\Private\MapObject_Instance.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClCompile>
@@ -1554,12 +1572,6 @@
     <ClCompile Include="..\Private\Coro_Rock.cpp">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Meteo.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Water.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp">
       <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
     </ClCompile>
@@ -1575,7 +1587,6 @@
     <ClCompile Include="..\Private\Leviatan.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
     <ClCompile Include="..\Private\RopeAnchor.cpp">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClCompile>
@@ -1602,6 +1613,37 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_QTE.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Collaps.cpp">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Water.cpp">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CaptureState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaCapture.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Bayonet.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

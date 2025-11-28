@@ -18,6 +18,7 @@
 #include"Model_Streaming.h"
 #include"Edit_MapObject_Water.h"
 #include"Edit_MapObject_Collaps.h"
+#include"Edit_LightManager.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -282,44 +283,14 @@ void CLevel_Map::Menu_RandSacpe()
 
     if (m_pPickedInstanceObject)
         m_pPickedInstanceObject->Set_ImGuiOption();
-#pragma region 랜드스케이프
-    //??쇨린?ㅼ? ?뚮젅?댁뼱??媛源뚯씠 ?덉쓣 ???뚮젅?댁뼱瑜?以묒젏?쇰줈 ?놁쑝濡??꾩?. ?꾩슫 ?곹깭濡?諛붾엺???붾뱾由?
-    //?뚮젅?댁뼱??嫄곗쓽 寃뱀튇 ??쇨린?ㅼ? Clip?섎뒗?? ?덈낫??
-    //?吏곸씪 ???뚮젅?댁뼱 諛쒕컮?μ뿉 諛쒖옄援??곗뭡 ?앷?. 留덉뒪???대?吏 媛숈? 嫄곕줈 ?섎뒗??
-    //洹몃┝??吏?怨녹씠???꾨땶 怨녹씠???묎컳???대몢?. 臾댁“嫄?留덉뒪??
-
-    // ?먰봽??諛쒖옄援?? ?덉깮湲곗?留????뚯? 李⑹???????쇨린媛 ?ы븯寃??붾뱾由?(?대뼸寃???)
-    //踰쎌뿉???щ━湲?????諛??꾩튂??諛쒖옄援??곗뭡 ????댄럺?멸? ?앷?.
-
-    //留듭뿉 源붾젮?덈뒗 ?꾩씠?쒖쓣 癒뱀쓣 ?뚮뒗 諛붾떏???섎춪???붾뱾由щ뒗 ?댄럺???앷린硫댁꽌 ?щ씪吏?
-    //洹쇱쿂??癒뱀쓣 ???덈뒗(?곹샇?묒슜 媛?ν븳 ?꾩씠?쒖씠 ?덉쑝硫?UI ?앹꽦. ?쇱젙 二쇨린留덈떎 寃됰?遺꾩씠 鍮쏅궓.
-    //諛붾떏 ??쇨린 留먭퀬 ??????쇨린?ㅼ씠??紐?鍮꾨퉴 ???뚮━ ?섏빞??(肄쒕씪?대뜑?) ?섎꽕???묎컳???뚮젅?댁뼱 ?꾩튂??留욎떠???붾뱾由щ뒗??
-
-    //?꾩튂???곕씪 ?붾젆?붾꼸?쇱씠???뷀벂利??됱씠 諛붾뚮뒗?? -> 洹몃깷 硫붿돩媛 ?ㅻⅨ 嫄곗씪 ?섎룄
-
-    //諛붾엺???붾뱾由щ뒗 諛⑺뼢? 紐⑤몢 媛숈? 諛⑺뼢????
-
-    //?뚯? ?뗣뀑 洹몃깷 ?먯뀑?ㅽ넗?댁뿉???쇱삩??뀑??
-    //?뱀젙 ?꾩튂???곕씪 ??쇨린???됱씠 ?덇툑??諛붾?
-    //愿묐Ъ瑜섎뒗 硫由??덉쑝硫?鍮ㅼ쭩鍮ㅼ쭩??
-
-
-    //湲몄갼湲? 媛留뚰엳 ?덉쑝硫?紐⑺몴 ?꾩튂濡??쇰쟻?대뒗 ?댄럺???앷린硫댁꽌 湲??뚮젮以? 臾댁“嫄?1?먭? ?꾨땲??醫뚯슦濡?履쇰걫???붾뱾由щ뒗 ?댄럺?몄씤??
-    //嫄곕━媛 醫 ?덉쑝硫??덇컻媛 ?댁쭩 源붾━??留듬룄 ?덈뒗 嫄?媛숈쓬.
-#pragma endregion
     ImGui::End();
 }
 
 void CLevel_Map::Menu_Light()
 {
-    // 議곕챸. ?쇰떒 Imgui??List濡??꾩옱 ?닿? ?ｌ? 議곕챸???뺣낫? ?쒖꽌 ?꾩슦湲? 踰꾪듉?뺤떇?쇰줈 ?꾨Ⅴ硫?洹?議곕챸??????뺣낫媛 ?섏삤寃?
-       // ?쇱씠???ㅻ툕?앺듃瑜??섎굹 留뚮뱾?댁꽌 洹??덉쓽 ?꾩튂 ?뺣낫瑜?議곕챸?쇰줈. 議곗젅?????덇쾶. -> ?쇱씠??媛앹껜媛 ?꾩옱 異붽???議곕챸??以묒뿉??紐?踰덉㎏ ?쒖꽌?몄?
-       // 媛곸쥌 ?됱긽?뺣낫 諛??멸린, ?뷀벂利??곕퉬?명듃 湲고? ?깅벑 ???섏젙?????덇쾶. -> ?ㅼ떆媛??곸슜? or 踰꾪듉 ?꾨Ⅴ硫??곸슜. ?섎룎由ш린 湲곕뒫???덉쓬 醫뗭쓣??
-       // ?먯“紐낆뿉??洹몃┝???놁쓬.
-       //湲곗쫰紐??ш굅硫?議곕챸???ш린. 
-    
-
-    //?댁깫湲??꾨Ⅴ硫??????앷??
+	ImGui::Begin("Menu_Light");
+	m_pLightManager->Set_ImGuiOption();
+	ImGui::End();
 }
 
 void CLevel_Map::Menu_Model_Load()
@@ -554,6 +525,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Water"), event);
 				else if (Pair.first.find("Collaps") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Collaps"), event);
+				else if (Pair.first.find("Light") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Light"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -828,6 +801,29 @@ void CLevel_Map::Menu_Save_Load()
 
 							}
 						}
+						else if (strFilePath.find("Object_Light") != std::string::npos)
+						{
+							LIGHT_DESC ReadDesc{};
+							
+							_uint iSize = {};
+							File.read(reinterpret_cast<char*>(&iSize), sizeof(_uint));
+							for (_uint i = 0; i < iSize; ++i)
+							{
+								File.read(reinterpret_cast<char*>(&ReadDesc.eType), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&ReadDesc.fRange), sizeof(_float));
+								File.read(reinterpret_cast<char*>(&ReadDesc.vAmbient), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&ReadDesc.vDiffuse), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&ReadDesc.vDirection), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&ReadDesc.vPosition), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&ReadDesc.vSpecular), sizeof(_float4));
+
+								CEdit_LightObject::MAP_LOAD Desc{};
+								Desc.vWorldPos = ReadDesc.vPosition;
+								Desc.CopyDesc = &ReadDesc;
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
+									, m_iLevel, TEXT("Layer_Light"), &Desc);
+							}
+						}
                         else
                         {
                             CEdit_MapObject::MAP_LOAD Desc{};
@@ -845,7 +841,9 @@ void CLevel_Map::Menu_Save_Load()
 								Desc.WorldMatrix = &Matrix;
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
-
+								_string Name = Desc.ModelName;
+								if (Name.find("Lig") != string::npos)
+									Desc.iShaderPassIndex = 4;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 									, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 
@@ -888,10 +886,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
@@ -1254,6 +1252,26 @@ HRESULT CLevel_Map::Ready_Static_Component()
     _float fSize = 0.001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
 
+	//LIGHT_DESC LightDesc{};
+	//LightDesc.eType = LIGHT_DESC::DIRECTION;
+	//LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+	//LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	//LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);
+	//LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	LIGHT_DESC LightDesc{};
+	LightDesc.eType = LIGHT_DESC::DIRECTION;
+
+	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+	//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
+	LightDesc.vDiffuse = _float4(0.5f, 0.55f, 0.85f, 1.f);
+	//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+
+	m_pLightManager = CEdit_LightManager::Create();
+	m_SaveObjects["Map_Object_Light"].push_back(nullptr);
 
     //?쇰컲 紐⑤뜽
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
@@ -1312,9 +1330,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Collaps"),
 		CEdit_MapObject_Collaps::Create(m_pDevice, m_pContext));
 
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
-        , m_iLevel, TEXT("Layer_Light"));
-
     Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
 
@@ -1341,11 +1356,11 @@ void CLevel_Map::Ready_Event()
 		{
 			if (event.fDistance <= m_fNearDistance)
 			{
-				if (m_pPickedObject) m_pPickedObject->Set_ShaderPass(0);
+				/*if (m_pPickedObject) m_pPickedObject->Set_ShaderPass(0);
 				if (m_pPickedDestructObject) m_pPickedDestructObject->Set_ShaderPass(0);
 				if(m_pPickedMeteo) m_pPickedMeteo->Set_ShaderPass(0);
 				if(m_pPickedWater) m_pPickedWater->Set_ShaderPass(0);
-				if(m_pPickedCollaps) m_pPickedCollaps->Set_ShaderPass(0);
+				if(m_pPickedCollaps) m_pPickedCollaps->Set_ShaderPass(0);*/
 
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
@@ -1368,22 +1383,14 @@ void CLevel_Map::Ready_Event()
 				{
 
 					m_pPickedDestructObject->Set_ShaderPass(3);
-					//m_ppicked
 					if (m_pPickedDestructObject)
 					{
 						m_pPickedDestructObject->Set_ShaderPass(0);
-						//m_pPickedDestructObject = nullptr;
 					}
 				}
 				else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
 				{
 					m_pPickedMeteo->Set_ShaderPass(3);
-
-					if (m_pPickedMeteo)
-					{
-						m_pPickedMeteo->Set_ShaderPass(0);
-						//m_pPickedMeteo = nullptr;
-					}
 				}
 				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
 				{
@@ -1559,6 +1566,7 @@ void CLevel_Map::Free()
     Safe_Release(m_pPreViewObject);
 	Safe_Release(m_pBrush);
 	Safe_Release(m_pPickedSpawnor);
+	Safe_Release(m_pLightManager);
 	
     for (auto& Pair : m_SaveObjects)
     {

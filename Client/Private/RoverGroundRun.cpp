@@ -77,9 +77,9 @@ void CRoverGroundRun::Handle_Input()
 	m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 
-	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
@@ -117,8 +117,7 @@ void CRoverGroundRun::Handle_Input()
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    //m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
-    m_fSpeed = 0.7f;
+    m_fSpeed = 0.6f;
 
 	// Burst인지 체크
 	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
@@ -180,12 +179,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 
 	// 1. 우선순위
-	if (m_States[DODGE])
-	{
-		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
-		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
-		return;
-	}
+	//if (m_States[DODGE])
+	//{
+	//	m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+	//	m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
+	//	return;
+	//}
 
 	// 2.
 	if (m_States[HIT])
@@ -193,6 +192,24 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
 		return;
 	}
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
+
 
 	if (m_States[FALL])
 	{
@@ -278,22 +295,22 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 	}
 
 
-	// 뛰다가 Dash
-	if (m_States[DASH])
-	{
-		if (m_States[RUN_D])
-		{
-			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-		else
-		{
-			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-	}
+	//// 뛰다가 Dash
+	//if (m_States[DASH])
+	//{
+	//	if (m_States[RUN_D])
+	//	{
+	//		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
+	//		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//	else
+	//	{
+	//		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+	//		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//}
 
     // Dash 보다 우선순위 높음.
 	if (m_States[SPRINT])
@@ -388,12 +405,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundRun::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_B), "Run_B", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_F), "Run_F", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LB), "Run_LB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LF), "Run_LF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RB), "Run_RB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RF), "Run_RF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_B), "Run_B", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_F), "Run_F", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LB), "Run_LB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LF), "Run_LF", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RB), "Run_RB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RF), "Run_RF", 1.2f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_BASEPOSE), "Run_BasePose", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_POSE_F), "Run_Pose_F", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);

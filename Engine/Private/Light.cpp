@@ -24,7 +24,7 @@ HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	if (false == m_isActive)
 		return S_OK;
 
-	_uint iPassIndex = {};
+	_uint iPassIndex = {}; 
 
 	if (ENUM_CLASS(LIGHT_DESC::DIRECTION) == m_LightDesc.eType)
 	{

@@ -41,6 +41,7 @@ private:
 		EGalbrenaDodgeType m_eDodgeType = EGalbrenaDodgeType::END;
 
 		EGalbrenaAttackType m_eAttackType = EGalbrenaAttackType::END;
+		EGalbrenaHeavyAttackType m_eHeavyAttackType = EGalbrenaHeavyAttackType::END;
 		EGalbrenaSkillType m_eSkillType = EGalbrenaSkillType::END;
 		EGalbrenaUniqueType m_eUniqueType = EGalbrenaUniqueType::END;
 		EGalbrenaBurstType m_eBurstType = EGalbrenaBurstType::END;
@@ -79,6 +80,7 @@ private:
 
 			// Attack
 			m_eAttackType = EGalbrenaAttackType::END;
+			m_eHeavyAttackType = EGalbrenaHeavyAttackType::END;
 			m_eSkillType = EGalbrenaSkillType::END;
 			m_eUniqueType = EGalbrenaUniqueType::END;
 			m_eBurstType = EGalbrenaBurstType::END;
@@ -200,6 +202,7 @@ private:
 	vector<class CAttackVolume*> m_AttackVolumes;
 
 	_bool m_PendingConditions[CONDITION_END] = {};
+
 
 private:
 	void Bind_TargetToVolumes();

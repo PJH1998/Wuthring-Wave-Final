@@ -115,7 +115,7 @@ void CRover::Update(_float fTimeDelta)
 	}
 
 	// 3. 상태 머신 갱신
-	m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -473,9 +473,13 @@ void CRover::Hit_Judge(void* pArg)
 
 
 	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
-	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(ERoverGroundState::ATTACK);
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND)
+		&& eKey.iSubState == ENUM_CLASS(ERoverGroundState::ATTACK);
+
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+	else
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.5f); // Attack은 살짝만 느려지게
 
 	
 	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
@@ -634,73 +638,12 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 
 	_uint iVolumeIdx = stoul(var3);
 
-	/* SWORD|ROVER|0*/
-	// 1. 어떤 무기인가?
-	//if (var1 == TEXT("SWORD"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-	//	m_pRoverSword->Change_Volume(iVolumeIdx);
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//	{
-	//		// 3. 볼륨 레이어 변경
-	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-	//	}
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	//}
-	//if (var1 == TEXT("SCYTHE"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-	//	m_pRoverDarkScythe->Change_Volume(iVolumeIdx);
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//	{
-	//		// 3. 볼륨 레이어 변경
-	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-	//	}
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	//}
-	//else if (var1 == TEXT("DARKWING"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-	//	m_pRoverDarkWing->Change_Volume(iVolumeIdx);
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//	{
-	//		// 3. 볼륨 레이어 변경
-	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-	//	}
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	//}
-	//else if (var1 == TEXT("ROVER"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
-	//	if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
-	//		return;
-
-	//	m_pMainAttackVolume->TriggerActivate(false); // 교체.
-	//	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
-	//}
+	if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
+	{
+		m_fStateTimeRate = stof(var2);
+		m_fStateDelayTimer = stof(var3);
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
+	}
 	
 
 }
@@ -745,6 +688,17 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 		}
 	}
 
+	_uint iDelayFlag = ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY);
+	if (Check_AnyCondition(iDelayFlag))
+	{
+		m_fStateDelayTimer -= fTimeDelta;
+		if (m_fStateDelayTimer <= 0.f)
+		{
+			Remove_Condition(iDelayFlag);
+			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
+			m_fStateDelayTimer = 0.f;
+		}
+	}
 
 	while (!m_DelayedActions.empty())
 	{

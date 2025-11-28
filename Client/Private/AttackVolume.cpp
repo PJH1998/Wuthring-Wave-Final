@@ -25,8 +25,8 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
     ATKVOLUME_DESC* pDesc = static_cast<ATKVOLUME_DESC*>(pArg);
     
 	m_eType = pDesc->eType;
-	m_pParenTransform = pDesc->pParenTransform;
-	Safe_AddRef(m_pParenTransform);
+	m_pParentTransform = pDesc->pParenTransform;
+	Safe_AddRef(m_pParentTransform);
 
 	Ready_Component(pDesc);
 
@@ -74,9 +74,9 @@ void CAttackVolume::Update(_float fTimeDelta)
 
 	if (nullptr == m_pSocketMatrix)
 	{
-		if (nullptr == m_pParenTransform)
+		if (nullptr == m_pParentTransform)
 			CRASH("need parent transform : Bone type");
-		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * m_pParenTransform->Get_WorldMatrix();
+		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * m_pParentTransform->Get_WorldMatrix();
 	}
 	else
 	{
@@ -85,7 +85,7 @@ void CAttackVolume::Update(_float fTimeDelta)
 		XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 		NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
 		if(COMBINED_TYPE::BONE == m_eType)
-			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParenTransform->Get_WorldMatrix();
+			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 		else
 			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix;
 	}
@@ -190,7 +190,7 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	//	OnCollide_During(iLayer, pDesc, Manifold);
 	//	});
 
-	m_CallBack.pTransform = m_pParenTransform;
+	m_CallBack.pTransform = m_pParentTransform;
 	m_CallBack.fAttack = pDesc->fAttackDmg;
 	m_CallBack.strEffectTag = pDesc->strEffectTag;
 	m_CallBack.eType = pDesc->eDamageType;
@@ -254,6 +254,6 @@ void CAttackVolume::Free()
 	__super::Free();
 
 	Safe_Release(m_pRigidBodyCom);
-	Safe_Release(m_pParenTransform);
+	Safe_Release(m_pParentTransform);
 
 }

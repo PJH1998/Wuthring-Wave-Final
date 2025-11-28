@@ -16,6 +16,7 @@ enum class EGalbrenaGroundState : _uint
 	DASH,			
 	DODGE,
 	ATTACK,			
+	HEAVYATTACK,			
 	SKILL,			
 	BURST,			
 	SPECIAL,		
@@ -156,6 +157,14 @@ enum class EGalbrenaAttackType : _uint
 	END
 };
 
+enum class EGalbrenaHeavyAttackType : _uint
+{
+	ATTACK_H_0201 = 0,
+	ATTACK_H_0202,
+	ATTACK_H_0203,
+	END
+};
+
 enum class EGalbrenaSkillType : _uint
 {
 	ATTACK_JUMP = 0,
@@ -172,6 +181,8 @@ enum class EGalbrenaSpecialType : _uint
 	ATTACK07,
 	ATTACK08,
 	ATTACK08_H,
+	ATTACK11,
+	ATTACK_H_01,
 	END
 };
 

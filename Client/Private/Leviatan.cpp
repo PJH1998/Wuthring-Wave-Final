@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Leviatan.h"
 #include "AttackVolume.h"
+#include "Levi_Bayonet.h"
 #include "GameSystem.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -30,16 +31,22 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Rotation_Quaternion(vQuat);
 
 #pragma region ATTACK_STATE
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 3.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK4] = 5.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK6] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK7] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK9] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK10] = 4.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK11] = 3.f;
+	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK3] = 25.f;
+	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK5] = 25.f;
+	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK12] = 40.f;
+	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK13] = 40.f;
+	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::BURST] = 90.f;
+	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK18] = 40.f;
+
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK3] = 25.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK5] = 25.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK12] = 40.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK13] = 40.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::BURST] = 120.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK18] = 40.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK1] = 80.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK20] = 80.f;
+	m_fAttackCoolTime[PHASE::TWO][ATK_PATTERN::ATTACK22] = 80.f;
 #pragma endregion
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
@@ -78,13 +85,20 @@ void CLeviatan::Update(_float fTimeDelta)
 {
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	if(m_pBehaviorTreeCom)
-		m_pBehaviorTreeCom->tick(this);
+	if(m_pBehaviorTreeCom[m_iPhase])
+	{
+		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
+		{
+			//1페 사망 애니메이션 진행 중
+		}
+		else
+			m_pBehaviorTreeCom[m_iPhase]->tick(this);
+	}
 	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	if(m_pAnimMachineCom)
-		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	if(m_pAnimMachineCom[m_iPhase])
+		m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	else
 	{
@@ -226,8 +240,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
-		if (false == m_isAggro)
-			m_isAggro = true;
+		//if (false == m_isAggro)
+		//	m_isAggro = true;
 	}
 }
 
@@ -278,6 +292,10 @@ void CLeviatan::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 	else if (wstrTypeTag == TEXT("Distance"))
 	{
 		m_isDist_Interp_Enable = Isactive;
+	}
+	else if (wstrTypeTag == TEXT("Visible"))
+	{
+		m_isRender = Isactive;
 	}
 }
 
@@ -330,6 +348,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(0.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
+	}
+	else if (wstrTypeTag == TEXT("Reset"))
+	{
+		Reset_NotifyInteraction();
 	}
 }
 
@@ -408,54 +430,201 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 		CRASH("Leviatan/Com_Model");
 	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA));
 
-	//CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
-	//AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
-	////Com_AnimMachine
-	//if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_AnimMachine_Leviatan"),
-	//	TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
-	//	CRASH("Leviatan/Com_AnimMachine");
+	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
+	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
+	//Com_AnimMachine
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase1"),
+		TEXT("Com_AnimMachine1"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom[PHASE::ONE]), &AnimMachineDesc)))
+		CRASH("Leviatan/Com_AnimMachine1");
+
+	//Com_AnimMachine
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase2"),
+		TEXT("Com_AnimMachine2"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom[PHASE::TWO]), &AnimMachineDesc)))
+		CRASH("Leviatan/Com_AnimMachine2");
 
 #pragma region BlackBoard_Value_&_Condition
-	//CBlackBoard* pBlackBoard = CBlackBoard::Create();
-	//pBlackBoard->Add_Data("iState", pBlackBoard->DeduceType(m_iState), &m_iState);
-	//pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
-	//pBlackBoard->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
-	//pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
-	//pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
-	//pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 3.f); });
-	//pBlackBoard->Add_Condition("Attack10", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK10, 4.f); });
-	//pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 5.f); });
-	//pBlackBoard->Add_Condition("Attack7", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK7, 6.f); });
-	//pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 8.f); });
-	//pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 10.f); });
-	//pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
-	//pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
-	//pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
-	//pBlackBoard->Add_Condition("Right", [this]() ->_bool { return Right(); });
-	//
-	//CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
-	//BTDesc.pBlackBoard = pBlackBoard;
-	////Com_BehaviorTree
-	//if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_BehaviorTree_Leviatan"),
-	//	TEXT("Leviatan/Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
-	//	CRASH(m_pBehaviorTreeCom);
+	CBlackBoard* pBlackBoard1 = CBlackBoard::Create();
+	pBlackBoard1->Add_Data("iState", pBlackBoard1->DeduceType(m_iState), &m_iState);
+	pBlackBoard1->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
+	pBlackBoard1->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
+	pBlackBoard1->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
+	pBlackBoard1->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
+	pBlackBoard1->Add_Condition("ATKArrange", [this]() ->_bool { return Attack_Arrange(); });
+	pBlackBoard1->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 3.f); });
+	pBlackBoard1->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 4.f); });
+	pBlackBoard1->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 5.f); });
+	pBlackBoard1->Add_Condition("Attack13", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK13, 6.f); });
+	pBlackBoard1->Add_Condition("Attack15", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 15.f); });
+	pBlackBoard1->Add_Condition("Attack18", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK18, 10.f); });
+	pBlackBoard1->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
+	pBlackBoard1->Add_Condition("Front", [this]() ->_bool { return Front(); });
+	pBlackBoard1->Add_Condition("Back", [this]() ->_bool { return Back(); });
+	pBlackBoard1->Add_Condition("Left", [this]() ->_bool { return Left(); });
+	pBlackBoard1->Add_Condition("Right", [this]() ->_bool { return Right(); });
+	
+	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
+	BTDesc.pBlackBoard = pBlackBoard1;
+	//Com_BehaviorTree
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_BehaviorTree_Leviatan1"),
+		TEXT("Com_BehaviorTree1"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom[PHASE::ONE]), &BTDesc)))
+		CRASH("Leviatan/Com_BehaviorTree1");
+
+	CBlackBoard* pBlackBoard2 = CBlackBoard::Create();
+	pBlackBoard2->Add_Data("iState", pBlackBoard2->DeduceType(m_iState), &m_iState);
+	pBlackBoard2->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
+	pBlackBoard2->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
+	pBlackBoard2->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
+	pBlackBoard2->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
+	pBlackBoard2->Add_Condition("ATKArrange", [this]() ->_bool { return Attack_Arrange(); });
+	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 3.f); });
+	pBlackBoard2->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 4.f); });
+	pBlackBoard2->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 5.f); });
+	pBlackBoard2->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 6.f); });
+	pBlackBoard2->Add_Condition("Attack13", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK13, 8.f); });
+	pBlackBoard2->Add_Condition("Attack14", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 100.f); });
+	pBlackBoard2->Add_Condition("Attack18", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK18, 10.f); });
+	pBlackBoard2->Add_Condition("Attack20", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK20, 10.f); });
+	pBlackBoard2->Add_Condition("Attack22", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK22, 10.f); });
+	pBlackBoard2->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
+	pBlackBoard2->Add_Condition("Front", [this]() ->_bool { return Front(); });
+	pBlackBoard2->Add_Condition("Back", [this]() ->_bool { return Back(); });
+	pBlackBoard2->Add_Condition("Left", [this]() ->_bool { return Left(); });
+	pBlackBoard2->Add_Condition("Right", [this]() ->_bool { return Right(); });
+
+	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc2{};
+	BTDesc2.pBlackBoard = pBlackBoard2;
+	//Com_BehaviorTree
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_BehaviorTree_Leviatan2"),
+		TEXT("Com_BehaviorTree2"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom[PHASE::TWO]), &BTDesc2)))
+		CRASH("Leviatan/Com_BehaviorTree2");
 #pragma endregion
 }
 
 void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 {
+	CLevi_Bayonet::LEVIBAYONET_DESC BayonetDesc{};
+	BayonetDesc.eType = TEXT_COLOR_TYPE::DARK;
+	BayonetDesc.fAttackDmg = m_fAttackDmg;
+	BayonetDesc.pParentTransform = m_pTransformCom;
+	BayonetDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+	BayonetDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	BayonetDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bayonet"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"), &BayonetDesc)))
+		CRASH("Failed to Add Part : Bayonet");
 }
 
 void CLeviatan::Calculate_PosAndDir()
 {
+	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+	_vector vDir = vTargetPos - vPosition;
+	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	m_fDistanceNonY = XMVectorGetX(XMVector3Length(XMVectorSetY(vTargetPos, 0.f) - XMVectorSetY(vPosition, 0.f)));
+	vDir = XMVector3Normalize(vDir);
+	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+
+	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 }
 
 void CLeviatan::Reset_Condition(_float fTimeDelta)
 {
+	if (m_fHP <= 0.f)
+	{
+		if (m_iPhase == 0)
+		{
+			m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
+			m_fHP = 1.f;
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+		}
+		else
+			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		return;
+	}
+	if (m_isAnimationFinished)
+	{
+		_uint iRemainState{};
+		if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+			iRemainState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		m_iState = ENUM_CLASS(TEST_STATE::NONE);
+
+		m_iState |= iRemainState;
+
+	}
+	if (m_isDetecting)
+	{
+		Calculate_PosAndDir();
+#ifdef _DEBUG
+		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
+		//cout << "distance: " << m_fDistance << endl;
+#endif
+	}
+	
+	for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+	{
+		if (m_fAttackAcc[m_iPhase][i] > 0.f)
+			m_fAttackAcc[m_iPhase][i] -= fTimeDelta;
+	}
+	
+	if (m_fDodgeCoolTime > 0.f)
+		m_fDodgeCoolTime -= fTimeDelta;
+
+#pragma region UI_BIND
+	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+#pragma endregion
+
+	if (m_isParalysis)
+	{
+		m_fParalysisAcc -= fTimeDelta;
+		if (m_fParalysisAcc <= 0.f)
+		{
+			//그로기 유지시간 정의하기
+			m_fParalysisAcc = 5.f;
+			m_isParalysis = false;
+			m_fStamina = m_fMaxStamina;
+		}
+	}
+	else
+		m_isKnockDownTrig = m_isParalysis;
 }
 
 void CLeviatan::After_Condition(_float fTimeDelta)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+	{
+		if (!m_isDeadTrigger)
+		{
+			m_isDeadTrigger = true;
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+		}
+		return;
+	}
+	else if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
+	{
+
+	}
+	if (m_isTurnLerp)
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+
+	//그로기 특수상황
+	if (m_isParalysis)
+	{
+		if (m_isKnockDownTrig)
+			m_iState = ENUM_CLASS(TEST_STATE::PARALYSIS);
+		else
+		{
+			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_isKnockDownTrig = true;
+		}
+	}
+	else
+		m_isKnockDownTrig = m_isParalysis;
+
+	if (m_beHit)
+		m_beHit = false;
 }
 
 void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -467,6 +636,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		m_isAggro = true;
 	}
 }
 
@@ -479,8 +649,9 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+		m_fHP -= pDesc->fAttack;
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};
 
@@ -536,31 +707,78 @@ void CLeviatan::DistanceInterpolate(_bool isActive)
 	m_isDist_Interp_Enable = isActive;
 }
 
+void CLeviatan::Reset_NotifyInteraction()
+{
+	m_isTurnLerp = false;
+	m_isDist_Interp_Enable = false;
+	m_isRender = true;
+	m_pColliderCom->Set_Gravity(true);
+	for (_uint i = 0; i < ATK_SOCKET::ATKEND; i++)
+	{
+		if(nullptr != m_pAtkVolumes[i])
+			m_pAtkVolumes[i]->SetActivate(false);
+	}
+	if (nullptr != m_pParryVolume)
+		m_pParryVolume->SetActivate(false);
+	for (auto& Pair : m_PartObjects)
+	{
+
+	}
+}
+
 _bool CLeviatan::isKnockDown()
 {
-	return _bool();
+	if (m_isParalysis)
+		return true;
+
+	return m_iState & (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::BLOCK));
 }
 
 _bool CLeviatan::isAttackEnable()
 {
-	return _bool();
+	if (!m_isDetecting || !m_isAggro)
+		return false;
+
+	return true;
 }
 
 _bool CLeviatan::DodgeCooldown()
 {
-	return _bool();
+	_bool Result = m_isDetecting && m_fDodgeCoolTime <= 0.f && m_fDistanceNonY < 3.f;
+	if (Result)
+		m_fDodgeCoolTime = 7.f;
+	return Result;
 }
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	return _bool();
+	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
+	if (bResult)
+	{
+		m_fAttackAcc[m_iPhase][iIndex] = m_fAttackCoolTime[m_iPhase][iIndex];
+		//Attack_Arrange();
+	}
+	return bResult;
 }
 
-void CLeviatan::Attack_Arrange()
+_bool CLeviatan::Attack_Arrange()
 {
 	_float fRand = m_pGameInstance->Rand_Normal();
 	if (fRand < 0.5f)
 		m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
+	return true;
+}
+
+_bool CLeviatan::CheckHit()
+{
+	if (m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+
+		m_beHit = false;
+		return true;
+	}
+	return false;
 }
 
 _bool CLeviatan::Back()
@@ -619,6 +837,8 @@ void CLeviatan::Free()
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pFacialComputeShaderCom);
 	Safe_Release(m_pParryVolume);
-	Safe_Release(m_pBehaviorTreeCom);
-	Safe_Release(m_pAnimMachineCom);
+	for (_uint i = 0; i < PHASE::P_END; ++i)
+		Safe_Release(m_pBehaviorTreeCom[i]);
+	for (_uint i = 0; i < PHASE::P_END; ++i)
+		Safe_Release(m_pAnimMachineCom[i]);
 }

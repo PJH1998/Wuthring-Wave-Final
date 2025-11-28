@@ -83,9 +83,9 @@ void CAugustaGroundSprint::Handle_Input()
 	m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	m_States[HIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-
-	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+	//m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//
+	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
@@ -190,10 +190,18 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
     EAugustaSprintType eSprintType = static_cast<EAugustaSprintType>(m_iCurrentAnimIdx);
 
 	// 1. 우선순위
-	if (m_States[DODGE])
+	//if (m_States[DODGE])
+	//{
+	//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+	//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+	//	return;
+	//}
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
 	{
-		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
 
@@ -294,12 +302,12 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 
 
 	// 뛰다가 Dash
-	if (m_States[DASH])
-	{
-		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-		return;
-	}
+	//if (m_States[DASH])
+	//{
+	//	m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+	//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+	//	return;
+	//}
     
 	// Sprint 상태면?
 	if (m_States[SPRINT])
