@@ -107,6 +107,7 @@ void CRoverGroundAttack::Handle_Input()
 
     // 입력키 체크
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
+	m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 
     // 스킬 체크
@@ -127,10 +128,7 @@ void CRoverGroundAttack::Handle_Input()
     }
 
 	// 공격시에 Hit 받았을때는 좀더 판단을 빡빡하게
-	if (m_pRover->Is_Hit())
-	{
-		m_States[HIT] = Hit_Judge();
-	}
+	m_States[HIT] = Hit_Judge();
 	
     
 }
@@ -180,7 +178,15 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
     
 	if (m_States[HIT])
 	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
 
+	if (m_States[DASH])
+	{
+		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+		return;
 	}
 
 	

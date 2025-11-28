@@ -418,6 +418,16 @@ enum class EAugustaRopeDragType : _uint
 };
 #pragma endregion
 
+#pragma region CAPTURED
+
+enum class EAugustaCaptureType : _uint
+{
+	CAPTURED = 0,
+	END
+};
+#pragma endregion
+
+
 #pragma endregion
 
 

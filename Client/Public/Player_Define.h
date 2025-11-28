@@ -37,7 +37,8 @@ namespace PlayerData
         Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
         //Desc.abilityData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Ability"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
-        Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
+        //Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/AugustaFacial/Notify/";
         //Desc.strAbilityFolderPath = "../Bin/Resource/Model/Player/Augusta/Ability/"; // 스탯 정보 폴더.
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
@@ -133,7 +134,8 @@ namespace PlayerData
 		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
 		Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
-        Desc.strFolderPath = "../Bin/Resource/Model/Player/Rover/Notify/";
+        //Desc.strFolderPath = "../Bin/Resource/Model/Player/Rover/Notify/";
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/RoverFacial/Notify/";
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
@@ -250,7 +252,8 @@ namespace PlayerData
 		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
 		Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
 		Desc.fRotationPerSec = XMConvertToRadians(90.f);
-		Desc.strFolderPath = "../Bin/Resource/Model/Player/Galbrena/Notify/";
+		//Desc.strFolderPath = "../Bin/Resource/Model/Player/Galbrena/Notify/";
+		Desc.strFolderPath = "../Bin/Resource/Model/Player/GalbrenaFacial/Notify/";
 		Desc.fSpeedPerSec = 10.f;
 		Desc.vScale = vScale;
 		Desc.vRotation = vRotation;

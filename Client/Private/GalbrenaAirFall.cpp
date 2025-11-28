@@ -74,6 +74,10 @@ void CGalbrenaAirFall::Handle_Input()
 	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) &&
 		(m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
+	m_States[ROPE_HOOK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pGalbrena->Is_GrappleHook());
+
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
 	m_States[AIR_ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
