@@ -153,6 +153,7 @@ void CPlayer::Update(_float fTimeDelta)
 
 	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	m_pGrappleRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	Sorting_GrappleTarget(); // Grapple Target Sorting;
 	Toggle_Grapple(); 
@@ -180,10 +181,22 @@ void CPlayer::Late_Update(_float fTimeDelta)
         m_Characters[m_iHarmonyCharacterIdx]->Late_Update(fTimeDelta);
 
 	
+
+#ifdef _DEBUG
+	if (FAILED((m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))))
+		return;
+#endif // DEBUG
+
+	
 }
 void CPlayer::Render()
 {
     
+#ifdef _DEBUG
+	//m_pRigidbodyCom->Render();
+	m_pGrappleRigidbodyCom->Render();
+#endif // _DEBUG
+
 }
 
 void CPlayer::Render_Shadow()
@@ -489,8 +502,7 @@ void CPlayer::Sync_InteractionType_ToCharacter(CCharacter* pCharacter)
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 둘다 아닌 경우에만.
-	if ((ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) &&
-		(ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer))
+	if ((ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer))
 		return;
 
 	// Detect Body 탐지용 => switch
@@ -502,10 +514,25 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 	case COLLISIONLAYER::ENEMY:
 		Process_CollideEnemy(pcallDesc);
 		break;
+	}
+}
+
+// Grapple 전용 .
+void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer))
+		return;
+
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	switch (eLayer)
+	{
 	case COLLISIONLAYER::GRAPPLE:
 		Process_CollideGrapple(pcallDesc);
 		break;
 	}
+	
 }
 
 
@@ -683,26 +710,34 @@ void CPlayer::Toggle_LockOn()
     //m_pTargetTransform = nullptr;
 }
 
+
+
 void CPlayer::Sorting_GrappleTarget()
 {
-	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const pair<CTransform*, OBJECTTYPE>& src, const pair<CTransform*, OBJECTTYPE>& dst)->_bool {
-		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) 
-			- src.first->Get_State(STATE::POSITION)));
-		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) 
-			- dst.first->Get_State(STATE::POSITION)));
+	// 거리순으로 정렬해서 넣어줍니다.
+	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const GRAPPLE_INFO& src, const GRAPPLE_INFO& dst)->_bool {
+		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
+		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
+
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+			- pDstTransform->Get_State(STATE::POSITION)));
 		return fSrcDistance < fDstDistance;
 		});
 
 	if (0 < m_GrappleCandidates.size())
 		m_TargetGrappleInfo = m_GrappleCandidates[0];
 }
+
+
 void CPlayer::Toggle_Grapple()
+
 {
 	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
 	if (m_eUtilityType == UI_TAB_UTILITY::GRAPPLE)
 		m_Characters[m_iCurrentCharacterIdx]->Bind_GrappleTarget(
-			m_TargetGrappleInfo.first,
-			m_TargetGrappleInfo.second
+			m_TargetGrappleInfo
 		);
 
 }
@@ -724,17 +759,16 @@ void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
 
 void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 {
-	CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
-	if (nullptr == pTargetTransform)
-		return;
-
 	{
+		CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+		if (nullptr == pTargetTransform)
+			return;
+
 		lock_guard<mutex> lock(m_Mutex);
-		// 컨테이너에 넣을때 어떤 타입인지도 넣어주어야함.
-		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType });
+		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
 
 		// 매프레임 초기화.
-		m_TargetGrappleInfo = { nullptr, OBJECTTYPE::END };
+		m_TargetGrappleInfo.Reset();
 	}
 }
 
@@ -856,6 +890,22 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 		OnCollider_During(iLayer, pDesc, Manifold);
     });
 
+	RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
+	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_GrappleRigidbody"), reinterpret_cast<CComponent**>(&m_pGrappleRigidbodyCom), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pGrappleRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
+		});
+
 	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 	//	OnCollider_Enter(iLayer, pDesc, Manifold);
 	//	});
@@ -930,6 +980,7 @@ void CPlayer::Free()
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pRigidbodyCom);
+    Safe_Release(m_pGrappleRigidbodyCom);
 	Safe_Release(m_pColliderCom);
 	Safe_Release(m_pPlayerStatus);
 }

@@ -841,7 +841,9 @@ void CLevel_Map::Menu_Save_Load()
 								Desc.WorldMatrix = &Matrix;
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
-
+								_string Name = Desc.ModelName;
+								if (Name.find("Lig") != string::npos)
+									Desc.iShaderPassIndex = 4;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 									, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 
@@ -1354,11 +1356,11 @@ void CLevel_Map::Ready_Event()
 		{
 			if (event.fDistance <= m_fNearDistance)
 			{
-				if (m_pPickedObject) m_pPickedObject->Set_ShaderPass(0);
+				/*if (m_pPickedObject) m_pPickedObject->Set_ShaderPass(0);
 				if (m_pPickedDestructObject) m_pPickedDestructObject->Set_ShaderPass(0);
 				if(m_pPickedMeteo) m_pPickedMeteo->Set_ShaderPass(0);
 				if(m_pPickedWater) m_pPickedWater->Set_ShaderPass(0);
-				if(m_pPickedCollaps) m_pPickedCollaps->Set_ShaderPass(0);
+				if(m_pPickedCollaps) m_pPickedCollaps->Set_ShaderPass(0);*/
 
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
@@ -1381,22 +1383,14 @@ void CLevel_Map::Ready_Event()
 				{
 
 					m_pPickedDestructObject->Set_ShaderPass(3);
-					//m_ppicked
 					if (m_pPickedDestructObject)
 					{
 						m_pPickedDestructObject->Set_ShaderPass(0);
-						//m_pPickedDestructObject = nullptr;
 					}
 				}
 				else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
 				{
 					m_pPickedMeteo->Set_ShaderPass(3);
-
-					if (m_pPickedMeteo)
-					{
-						m_pPickedMeteo->Set_ShaderPass(0);
-						//m_pPickedMeteo = nullptr;
-					}
 				}
 				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
 				{

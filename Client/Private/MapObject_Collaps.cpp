@@ -26,6 +26,7 @@ HRESULT CMapObject_Collaps::Initialize_Clone(void* pArg)
 
 	Ready_Components(pArg);
 
+	// 1. 시작할때 Trigger를 GameSystem에 등록하고, 실행할때도 Index를 바탕으로 실행한다.
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		m_IsTriggerd = true;
 		});
@@ -34,12 +35,17 @@ HRESULT CMapObject_Collaps::Initialize_Clone(void* pArg)
 
 void CMapObject_Collaps::Priority_Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CMapObject_Collaps::Update(_float fTimeDelta)
 {
-	if (m_IsTriggerd)
+	if (m_IsTriggerd) // Trigger 실행 이후.
 		LerpPos(fTimeDelta);
+
+	m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	// 매프레임 Target Transform 비우기.
+	m_pTargetTransform = nullptr;
 }
 
 void CMapObject_Collaps::Late_Update(_float fTimeDelta)
@@ -93,6 +99,11 @@ void CMapObject_Collaps::Render()
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
+
+#ifdef _DEBUG
+	m_pBoxRigidbodyCom->Render();
+#endif // _DEBUG
+
 }
 
 void CMapObject_Collaps::LerpPos(_float fTimeDelta)
@@ -115,6 +126,25 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 		m_pSourRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pDestRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
 		return;
+	}
+}
+
+void CMapObject_Collaps::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	// 1. Detect 감지되면?
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+		return;
+
+	// 2. CallBack 정보 가져오기
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+	if (nullptr == pTargetTransform)
+		return;
+
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_pTargetTransform = pTargetTransform;
 	}
 }
 
@@ -156,7 +186,8 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 	RigidbodyDesc.eShape = SHAPE::MESH;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.eBodyType = CRigidbody::BODY; // 어떤 충돌 형태로 할ㅈ ㅣ정의
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
 	RigidbodyDesc.pModel = m_pModelCom;
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -173,6 +204,22 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 		TEXT("Com_DestRigidbody"), reinterpret_cast<CComponent**>(&m_pDestRigidbodyCom), &RigidbodyDesc);
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->vSourWorldMatrix));
+
+	CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
+	RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyBoxDesc.eShape = SHAPE::BOX;
+	RigidbodyBoxDesc.eType = EMotionType::Kinematic;
+	RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+	RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
+	XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+	m_CallBack.pCondition = &m_iTriggerIndex;
+	m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
 }
 
 
@@ -207,6 +254,7 @@ void CMapObject_Collaps::Free()
 	__super::Free();
 	Safe_Release(m_pSourRigidbodyCom);
 	Safe_Release(m_pDestRigidbodyCom);
+	Safe_Release(m_pBoxRigidbodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);

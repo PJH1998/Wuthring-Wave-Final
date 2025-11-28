@@ -39,7 +39,6 @@ HRESULT CEdit_LightManager::Initialize()
 			SaveLightDesc = *pLight.second->Save_Light();
 			//구조체로 내보내는 거 안돼서 그냥 이따구로 함ㅇㅇ
 			event.File.write(reinterpret_cast<const _char*>(&SaveLightDesc.eType), sizeof(_uint));
-			//event.File.write(reinterpret_cast<const _char*>(&SaveLightDesc.eType),sizeof(LIGHT_DESC::TYPE));
 			event.File.write(reinterpret_cast<const _char*>(&SaveLightDesc.fRange),sizeof(_float));
 			event.File.write(reinterpret_cast<const _char*>(&SaveLightDesc.vAmbient),sizeof(_float4));
 			event.File.write(reinterpret_cast<const _char*>(&SaveLightDesc.vDiffuse),sizeof(_float4));

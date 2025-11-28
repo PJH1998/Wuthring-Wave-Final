@@ -15,6 +15,8 @@
 
 #include "MonsterTable.h"
 
+#include "MouseController.h"
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -47,6 +49,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pMonsterTable = CMonsterTable::Create();
 	ASSERT_CRASH(m_pMonsterTable);
+
+	m_pMouseController = CMouseController::Create();
+	ASSERT_CRASH(m_pMouseController);
 
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
@@ -132,10 +137,7 @@ void CGameSystem::Stop_Action()
 #pragma endregion
 
 #pragma region CHARACTER INFO
-void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
-{
-	m_Stats = eCharacterStat;
-}
+
 
 #pragma endregion
 
@@ -279,6 +281,7 @@ void CGameSystem::Close_Game_OverflowPalette()
 
 #pragma region TRIGGER
 
+// Trigger 등록
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
 {
 	{
@@ -287,6 +290,7 @@ void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFu
 	}
 }
 
+// Trigger 실행.
 void CGameSystem::OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg)
 {
 	auto iter = m_TriggerEvents.find(iNumTriggerMapIndex);
@@ -365,6 +369,18 @@ void CGameSystem::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLev
 {
 	m_pParser->Ready_SFX_Prefab(pFolderPath, iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex);
 }
+void CGameSystem::Register_Mouse(CMouse* pMouse)
+{
+	m_pMouseController->Register_Mouse(pMouse);
+}
+void CGameSystem::Set_MouseFix(_bool isFix)
+{
+	m_pMouseController->Set_MouseFix(isFix);
+}
+_bool CGameSystem::IsFix()
+{
+    return m_pMouseController->IsFix();
+}
 #pragma endregion
 
 void CGameSystem::Release_System()
@@ -379,6 +395,7 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pSonoro_Manager);
 	//Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pMonsterTable);
+	Safe_Release(m_pMouseController);
 
 	Release();
 }
