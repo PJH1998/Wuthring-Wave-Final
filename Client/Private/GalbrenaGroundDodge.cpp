@@ -48,9 +48,11 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 
 	// 6. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
 	// 회피 가능 창을 닫습니다. => Timer 실행 방지.
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); 
+	
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
+	
 
 	// 7. Hit Stop
 	CGameInstance* pGameInstance = CGameInstance::GetInstance();
@@ -66,6 +68,8 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 	
 	pGameInstance->OnShake(Desc);
 
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	// 8. Effect
 	m_pGalbrena->Spawn_Effect(TEXT("Common_Limit"));
 
@@ -92,6 +96,7 @@ void CGalbrenaGroundDodge::OnExit()
 {
     CGroundState::OnExit();
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CGalbrenaGroundDodge::Handle_Input()

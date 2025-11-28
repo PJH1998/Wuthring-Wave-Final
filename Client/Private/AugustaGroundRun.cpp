@@ -195,17 +195,25 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     
 
 	// 1. 우선순위
-	if (m_States[DODGE])
-	{
-		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
-		return;
-	}
+	//if (m_States[DODGE])
+	//{
+	//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+	//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+	//	return;
+	//}
 
 	// 2.
 	if (m_States[HIT])
 	{
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
 
@@ -300,13 +308,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
   
-	// 뛰다가 Dash
-	if (m_States[DASH])
-	{
-		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-		return;
-	}
+	
 
     // Dash 보다 우선순위 높음.
     if (m_States[SPRINT_F])

@@ -160,6 +160,7 @@ public:
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	virtual void Parry_Judge(void* pArg = nullptr) override;
 	virtual void Grab_Judge(void* pArg = nullptr) override;
+	virtual void Resolove_PerfectDodge();
 
 
 	void Sync_Position();

@@ -48,16 +48,20 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 
 	// 6. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
 	// 회피 가능 창을 닫습니다. => Timer 실행 방지.
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); 
+	
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	// 7. Hit Stop
 	CGameInstance* pGameInstance = CGameInstance::GetInstance();
 	//pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f);
-	pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
-	pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
+	//pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
+	//pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
 
+	// 8. Resolve Perfect Dodge?
+	m_pAugusta->Resolve_PerfectDodge();
+
+	// 퍼펙트 닷지가 성공했을 경우에만.
 	CAMERA_SHAKE Desc{};
 	Desc.fDuration = 0.15f;
 	Desc.fFrequency = 20.f;
@@ -67,6 +71,8 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 	
 	pGameInstance->OnShake(Desc);
 
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	// 8. Effect
 	m_pAugusta->Spawn_Effect(TEXT("Common_Limit"));
@@ -94,6 +100,7 @@ void CAugustaGroundDodge::OnExit()
 {
     CGroundState::OnExit();
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDodge::Handle_Input()

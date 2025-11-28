@@ -138,6 +138,7 @@ void CGalbrenaGroundAttack::Handle_Input()
 
     // 입력키 체크
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
+	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 
     // 스킬 체크
@@ -211,10 +212,16 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
     EGalbrenaAttackType eAttackType = static_cast<EGalbrenaAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
-    
 	if (m_States[HIT])
 	{
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
+		return;
+	}
+
+	if (m_States[DASH]) 
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
 

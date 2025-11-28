@@ -77,9 +77,9 @@ void CRoverGroundRun::Handle_Input()
 	m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 
-	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
@@ -179,12 +179,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 
 	// 1. 우선순위
-	if (m_States[DODGE])
-	{
-		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
-		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
-		return;
-	}
+	//if (m_States[DODGE])
+	//{
+	//	m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+	//	m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
+	//	return;
+	//}
 
 	// 2.
 	if (m_States[HIT])
@@ -192,6 +192,24 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
 		return;
 	}
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
+
 
 	if (m_States[FALL])
 	{
@@ -277,22 +295,22 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 	}
 
 
-	// 뛰다가 Dash
-	if (m_States[DASH])
-	{
-		if (m_States[RUN_D])
-		{
-			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-		else
-		{
-			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-	}
+	//// 뛰다가 Dash
+	//if (m_States[DASH])
+	//{
+	//	if (m_States[RUN_D])
+	//	{
+	//		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
+	//		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//	else
+	//	{
+	//		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+	//		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//}
 
     // Dash 보다 우선순위 높음.
 	if (m_States[SPRINT])

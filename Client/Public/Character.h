@@ -117,6 +117,8 @@ public:
 	virtual void Hit_Judge(void* pArg = nullptr) {};
 	virtual void Parry_Judge(void* pArg = nullptr) {};
 	virtual void Grab_Judge(void* pArg = nullptr) {};
+	virtual void Resolve_PerfectDodge() {};
+
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);

@@ -490,13 +490,15 @@ void CAugusta::Hit_Judge(void* pArg)
 	m_fDodgeableHitTimer = m_fDodgeableDuration;
 
 	
-	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
-	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
+	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시.
+	// => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) 
+		&& eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
+
 	if (!IsAttack)
-	{
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.1f); // Dodge 시간 동안 느리게하기?
-	}
-		
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+	else
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.5f); // Attack은 살짝만 느려지게
 
 
 	
@@ -539,6 +541,30 @@ void CAugusta::Grab_Judge(void* pArg)
 
 	
 
+}
+
+void CAugusta::Resolove_PerfectDodge()
+{
+	// 1. 회피 가능 상태인지 확인.
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+		return;
+
+	// 2. 조건 플래그 제거.
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	// 3. (데미지 무효화)
+	// DelayedActions 큐를 비워버리거나, HIT 타입만 제거하는 로직 필요
+	while (!m_DelayedActions.empty())
+	{
+		DELAYED_ACTION eAction = m_DelayedActions.front();
+		if (DELAYED_ACTION::TYPE::HIT == eAction.type) // Hit 면 정보 날리기.
+			m_DelayedActions.pop();
+	}
+
+	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
+	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
+
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 1.0f, 0.1f); // 시간 복구
 }
 
 
@@ -758,6 +784,7 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 
 	}
 	
+	// Dodge가 아닐때만 추가되므로.
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();

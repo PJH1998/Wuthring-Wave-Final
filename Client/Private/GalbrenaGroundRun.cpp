@@ -80,9 +80,9 @@ void CGalbrenaGroundRun::Handle_Input()
 	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	m_States[HIT] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	m_States[DODGEABLE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-
-	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+	//m_States[DODGEABLE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//
+	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
@@ -185,12 +185,12 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
     // 이 조건은 추후 디테일 잡아보기.
 
 	// 1. 우선순위
-	if (m_States[DODGE])
-	{
-		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
-		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
-		return;
-	}
+	//if (m_States[DODGE])
+	//{
+	//	m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
+	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
+	//	return;
+	//}
 
 	// 2. Hit 우선순위
 	if (m_States[HIT])
@@ -199,6 +199,23 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 	
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_B;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
 
 	if (m_States[FALL])
 	{
@@ -279,22 +296,7 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	// 뛰다가 Dash
-	if (m_States[DASH])
-	{
-		if (m_States[RUN_D])
-		{
-			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_B;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-		else
-		{
-			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-	}
+	
 
     if (m_States[SPRINT])
     {
