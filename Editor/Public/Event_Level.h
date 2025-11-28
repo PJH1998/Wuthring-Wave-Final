@@ -71,3 +71,10 @@ typedef struct tagMapBound : public CEvent
 	};
 
 }MAP_BOUND;
+
+typedef struct tagMapLightCreate : public CEvent
+{
+	_uint iNumCreateIndex;
+	void* pObject = { nullptr };
+	tagMapLightCreate(_uint _iNumCreateIndex, void* _pObject) :iNumCreateIndex(_iNumCreateIndex), pObject(_pObject) {};
+}LIGHT_CREATE;

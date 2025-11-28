@@ -132,7 +132,7 @@ void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMa
 		//pAnimMachineCom->Handle_Input(pModelCom, pOwnerState, strNextAnimTag);
 		if(m_Transitions.empty())
 		{
-
+			//다른 애니메이션으로 변환되지 않는 leap
 		}
 		//루프가 아닌 애니메이션 자동 전환은 백터 맨 마지막에 설정
 		else if(false == m_StateData.isLoop)

@@ -235,8 +235,6 @@ void CMapObject::Ready_Component(void* pArg)
 
 	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
 	{
-
-
 		CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
 		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
 		XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());

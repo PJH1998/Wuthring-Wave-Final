@@ -1264,7 +1264,7 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 
 #pragma region MRT_WATER
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_BackBuffer"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Diffuse"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Normal"))))
 		ASSERT_CRASH(false);
