@@ -4,19 +4,15 @@
 NS_BEGIN(Client)
 
 // Galbrena Attack State - Attack01~04, Attack_*, SpAttack* 처리
-class CGalbrenaGroundAttack final : public CGroundState
+class CGalbrenaGroundHeavyAttack final : public CGroundState
 {
 private:
     enum ATTACKSTATE // 내부에서 전환 가능한 상태.
     {
-		ATTACK = 0,
-        FIRST_ATTACK,
-        SECOND_ATTACK,
-        THIRED_ATTACK,
-        LAST_ATTACK,
-        HEAVY_ATTACK_PENDING,
-        HEAVY_ATTACK,
-		DASH,
+		HEAVY_ATTACK1,
+		HEAVY_ATTACK2,
+		HEAVY_ATTACK3,
+		HEAVY_ATTACK_PENDING,
         SKILL_Q,
         SKILL_E,
         SKILL_R,
@@ -29,8 +25,8 @@ private:
     };
 
 private:
-    explicit CGalbrenaGroundAttack() = default;
-    virtual ~CGalbrenaGroundAttack() = default;
+    explicit CGalbrenaGroundHeavyAttack() = default;
+    virtual ~CGalbrenaGroundHeavyAttack() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -62,7 +58,7 @@ private:
     void State_Reset();
 
 public:
-    static CGalbrenaGroundAttack* Create(class CGameObject* pOwner);
+    static CGalbrenaGroundHeavyAttack* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

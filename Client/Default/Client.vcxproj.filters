@@ -391,6 +391,18 @@
     <Filter Include="03. GameObject\Actor\Player\State\Interaction\Rover">
       <UniqueIdentifier>{35995a8e-e366-4ce4-8a7e-cfaff07a41f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture">
+      <UniqueIdentifier>{9dd1696c-dfdf-412e-9fbc-f31c3f33d74d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture\Augusta">
+      <UniqueIdentifier>{c9bc1bf1-db9e-429a-a22d-1f9d31f001ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture\Galbrena">
+      <UniqueIdentifier>{02e963b5-be46-439f-988e-00708a716e3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Capture\Rover">
+      <UniqueIdentifier>{e074fb96-d88d-40d6-b1a4-609b49fbf7af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1009,6 +1021,13 @@
     <ClInclude Include="..\Public\MapObject_Water.h">
       <Filter>03. GameObject\MapObject\NonStatic</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\CaptureState.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaCapture.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1591,6 +1610,13 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Water.cpp">
       <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CaptureState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaCapture.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

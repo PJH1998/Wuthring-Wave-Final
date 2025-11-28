@@ -11,6 +11,7 @@ enum class EStateCategory : _uint
 	CLIMB = 1 << 2,		// 등반 상태
 	HIT = 1 << 3,		// 피격 상태
 	INTREACTION = 1 << 4, // 상호 작용
+	CAPTURED = 1 << 5, // 잡기 상호작용.
 	CATEGORY_END
 };
 #pragma endregion

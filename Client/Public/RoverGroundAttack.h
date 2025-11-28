@@ -20,6 +20,7 @@ private:
         SKILL_E,
         SKILL_R,
         MOVE,
+		DASH,
 		HIT,
 		HIT_PENDING,
         JUMP,
