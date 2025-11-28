@@ -374,9 +374,9 @@ void CSpringCamera::Ready_Event()
 			m_fPreFixedDistance = m_fFixedDistance;
 			m_fDuration = static_cast<_float>(event.iEnd - event.iStart);
 			m_isMaintain = event.isMaintain;
-			if(false == m_isMaintain)
-				m_pGameSystem->HUD_FadeOut();
 			m_isEscape = event.isEscape;
+			if(false == m_isMaintain && false == m_isEscape)
+				m_pGameSystem->HUD_FadeOut();
 		}
 		else
 		{
