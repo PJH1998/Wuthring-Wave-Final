@@ -698,6 +698,7 @@ _bool CCorosaurus::isKnockDown()
 
 _bool CCorosaurus::isAttackEnable()
 {
+	m_isAttack = false;
 	if (!m_isDetecting || !m_isAggro)
 		return false;
 	if (m_fDistance > 20.f)
@@ -755,8 +756,8 @@ _bool CCorosaurus::AttackArrange()
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::BURST)
-		return false;
+	//if (iIndex != ATK_PATTERN::BURST)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
@@ -770,7 +771,6 @@ _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 
 _bool CCorosaurus::CheckHit()
 {
-	m_isAttack = false;
 	if (m_beHit)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);

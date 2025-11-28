@@ -446,7 +446,6 @@
     <ClInclude Include="..\Public\Edit_MonsterSpawnor.h">
       <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_Meteo.h" />
     <ClInclude Include="..\public\SFX_Interface.h">
       <Filter>96. Interface\SFX</Filter>
     </ClInclude>
@@ -480,11 +479,19 @@
     <ClInclude Include="..\public\Galbrena_Blur.h">
       <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_MapObject_Water.h" />
     <ClInclude Include="..\Public\GltfLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_MapObject_Collaps.h" />
+    <ClInclude Include="..\Public\Edit_Meteo.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Collaps.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Water.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_LightManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -681,7 +688,6 @@
     <ClCompile Include="..\Private\Edit_MonsterSpawnor.cpp">
       <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_Meteo.cpp" />
     <ClCompile Include="..\private\SFX_Interface.cpp">
       <Filter>96. Interface\SFX</Filter>
     </ClCompile>
@@ -715,11 +721,19 @@
     <ClCompile Include="..\private\Galbrena_Blur.cpp">
       <Filter>03. GameObject\SFX\Galbrena\Blur</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_MapObject_Water.cpp" />
     <ClCompile Include="..\Private\GltflLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_MapObject_Collaps.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Collaps.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Water.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_Meteo.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_LightManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

@@ -16,7 +16,9 @@ CLevel_Shader::CLevel_Shader(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Shader::Initialize()
 {
-    if (FAILED(Ready_Light()))
+	m_pGameInstance->Load_Resource("../../Client/Bin/Resource/Map/The_False_Sovereign/");
+
+	if (FAILED(Ready_Light()))
         CRASH("Failed Light");
 
     if (FAILED(Ready_Interface()))
@@ -25,11 +27,8 @@ HRESULT CLevel_Shader::Initialize()
     if(FAILED(Ready_TestObjects()))
         CRASH("Failed TestObject");
 
-	//const _tchar* pFilePath[4] = { nullptr, nullptr , TEXT("../../Client/Bin/Resource/Decal/T_Decal_24001.png"), TEXT("../../Client/Bin/Resource/Decal/T_Decal_24001.png")};
-
-	//if (FAILED(m_pGameInstance->Add_Decal(TEXT("Decal_Test"), pFilePath, _float3(0.8f, 0.8f, 0.8f))))
-	//	CRASH("Failed Add DecalTexture");
-
+	m_pGameInstance->SettingFog(0);
+	
     return S_OK;
 }
 

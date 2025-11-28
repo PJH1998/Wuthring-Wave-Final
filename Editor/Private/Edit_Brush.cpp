@@ -36,7 +36,6 @@ HRESULT CEdit_Brush::Initialize_Prototype()
 	m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), [this](const MAP_SAVE& event) {
 		for (auto Pair : m_SaveInstanceObjects)
 		{
-			//저장하는 순서 : Pair.first로 종류, 이름 길이, 이름, 셰이더 패스도 ㅇㅇ iNumTotalInstance로 읽을 횟수, 매트릭스.
 			if (Pair.second.empty())
 				continue;
 
@@ -78,19 +77,10 @@ HRESULT CEdit_Brush::Initialize_Prototype()
 				float posY = Totalmatrix[i].m[3][1];
 				float posZ = Totalmatrix[i].m[3][2];
 
-				// 2. 이 값들을 _vector(XMVECTOR)로 로드합니다.
-				//    w값은 Min/Max 계산에 영향을 주지 않도록 초기값(1.f)과 동일하게 맞춥니다.
 				_vector vPos = XMVectorSet(posX, posY, posZ, 1.f);
-
-				//MaxPos.m128_f32[0] = max(MaxPos.m128_f32[0], reinterpret_cast<_float4*>(Totalmatrix[i].m[3])->x);
-				//MaxPos.m128_f32[1] = max(MaxPos.m128_f32[1], reinterpret_cast<_float4*>(Totalmatrix[i].m[3])->y);
-				//MaxPos.m128_f32[2] = max(MaxPos.m128_f32[2], reinterpret_cast<_float4*>(Totalmatrix[i].m[3])->z);
 
 				MinPos = XMVectorMin(MinPos, vPos);
 				MaxPos = XMVectorMax(MaxPos, vPos);
-				//MinPos.m128_f32[0] = min(MinPos.m128_f32[0], reinterpret_cast<_float4*>(Totalmatrix[i].m[3])->x);
-				//MinPos.m128_f32[1] = min(MinPos.m128_f32[1], reinterpret_cast<_float4*>(Totalmatrix[i].m[3])->y);
-				//MinPos.m128_f32[2] = min(MinPos.m128_f32[2], reinterpret_cast<_float4*>(Totalmatrix[i].m[3])->z);
 			}
 
 			MinPos -= XMVectorSet(2.f, 2.f, 2.f, 0.f);
@@ -144,10 +134,6 @@ void CEdit_Brush::Priority_Update(_float fTimeDelta)
 
 		if (!m_SaveInstanceObjects[m_iCurSaveIndex].empty())
 		{
-			//비교 후 원래 색 있으면 그거로 바꾸기.
-			//if(vDiffuseColor.float_4 != *m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color())
-			//if (!XMVector4Equal(XMLoadFloat4(m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color()), XMVectorZero()))
-			//	vDiffuseColor.float_4 = *m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color();
 			for (auto& pObject : m_SaveInstanceObjects[m_iCurSaveIndex])
 				pObject->Set_Color(vDiffuseColor.float_4);
 		}
