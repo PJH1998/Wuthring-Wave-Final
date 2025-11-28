@@ -201,6 +201,7 @@ private:
 
 	_bool m_PendingConditions[CONDITION_END] = {};
 
+
 private:
 	void Bind_TargetToVolumes();
 	void Update_TargetDistance();

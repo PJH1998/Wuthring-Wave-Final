@@ -173,6 +173,7 @@
     <ClInclude Include="..\Public\AugustaAirJump.h" />
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
+    <ClInclude Include="..\Public\AugustaCapture.h" />
     <ClInclude Include="..\Public\AugustaRopeDrag.h" />
     <ClInclude Include="..\Public\AugustaRopeHook.h" />
     <ClInclude Include="..\Public\Augusta_UltiPostSFX.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
     <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
@@ -398,6 +400,7 @@
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
     <ClCompile Include="..\Private\AugustaAirSkill.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
+    <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
     <ClCompile Include="..\Private\AugustaFactory.cpp" />
@@ -421,6 +424,7 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
     <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />

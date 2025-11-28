@@ -134,7 +134,7 @@ void CAugustaGroundRun::Handle_Input()
 
     // 상태에 따라 속도 다르게.
     //m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
-    m_fSpeed = 0.7f;
+    m_fSpeed = 0.6f;
 
 	m_States[LOCKON] = m_pAugusta->Is_LockOn();
 }
@@ -155,10 +155,6 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
     // 1. 회전 및 이동.
     if (m_States[LOCKON])
     {
-       /* if (eRunType == EAugustaRunType::SPRINT_F || eRunType == EAugustaRunType::STOP_SPRINT_L)
-            m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
-        else */
-            // 1. WASD 입력에 따른 8방향 이동
         m_pAugusta->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
     }
     else 
@@ -392,12 +388,12 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundRun::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_B), "Run_B", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_F), "Run_F", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_LB), "Run_LB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_LF), "Run_LF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_RB), "Run_RB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_RF), "Run_RF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_B), "Run_B", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_F), "Run_F", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_LB), "Run_LB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_LF), "Run_LF", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_RB), "Run_RB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_RF), "Run_RF", 1.2f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_BASEPOSE), "Run_BasePose", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_POSE_F), "Run_Pose_F", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaRunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);

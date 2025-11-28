@@ -172,6 +172,7 @@ enum class EGalbrenaSpecialType : _uint
 	ATTACK07,
 	ATTACK08,
 	ATTACK08_H,
+	ATTACK11,
 	END
 };
 

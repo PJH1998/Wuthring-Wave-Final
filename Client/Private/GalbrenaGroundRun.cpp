@@ -121,7 +121,7 @@ void CGalbrenaGroundRun::Handle_Input()
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-	m_fSpeed = 0.7f;
+	m_fSpeed = 0.6f;
 
 	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)); // Burst 상태 인지 체크
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
@@ -367,12 +367,12 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundRun::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_B), "Run_B", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_F), "Run_F", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_LB), "Run_LB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_LF), "Run_LF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_RB), "Run_RB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_RF), "Run_RF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_B), "Run_B", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_F), "Run_F", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_LB), "Run_LB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_LF), "Run_LF", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_RB), "Run_RB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_RF), "Run_RF", 1.2f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_BASEPOSE), "Run_BasePose", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_POSE_F), "Run_Pose_F", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);

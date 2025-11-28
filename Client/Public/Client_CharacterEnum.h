@@ -36,6 +36,8 @@ namespace Client
 		SELECT = 1 << 8, // 선택된 상태.
 		ROPE_HOOK = 1 << 9, // Rope 이동이 가능한상태?
 		ROPE_DRAG = 1 << 10, // Rope Drag 상태.
+		GRABED = 1 << 11, // Player가 Grab 된 상태
+		STATE_DELAY = 1 << 12,  // Player의 State 속도가 저하된 상태.
 		END
 	};
 

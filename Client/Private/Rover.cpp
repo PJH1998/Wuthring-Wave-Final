@@ -115,7 +115,7 @@ void CRover::Update(_float fTimeDelta)
 	}
 
 	// 3. 상태 머신 갱신
-	m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -634,73 +634,12 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 
 	_uint iVolumeIdx = stoul(var3);
 
-	/* SWORD|ROVER|0*/
-	// 1. 어떤 무기인가?
-	//if (var1 == TEXT("SWORD"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-	//	m_pRoverSword->Change_Volume(iVolumeIdx);
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//	{
-	//		// 3. 볼륨 레이어 변경
-	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-	//	}
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	//}
-	//if (var1 == TEXT("SCYTHE"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-	//	m_pRoverDarkScythe->Change_Volume(iVolumeIdx);
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//	{
-	//		// 3. 볼륨 레이어 변경
-	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-	//	}
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	//}
-	//else if (var1 == TEXT("DARKWING"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-	//	m_pRoverDarkWing->Change_Volume(iVolumeIdx);
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//	{
-	//		// 3. 볼륨 레이어 변경
-	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-	//	}
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	//}
-	//else if (var1 == TEXT("ROVER"))
-	//{
-	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
-	//	if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
-	//		return;
-
-	//	m_pMainAttackVolume->TriggerActivate(false); // 교체.
-	//	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-
-	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-	//	if (var2 == TEXT("ATTACK"))
-	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
-	//	else if (var2 == TEXT("SKILL"))
-	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
-	//	else if (var2 == TEXT("KNOCKBACK"))
-	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
-	//}
+	if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
+	{
+		m_fStateTimeRate = stof(var2);
+		m_fStateDelayTimer = stof(var3);
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
+	}
 	
 
 }
@@ -745,6 +684,17 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 		}
 	}
 
+	_uint iDelayFlag = ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY);
+	if (Check_AnyCondition(iDelayFlag))
+	{
+		m_fStateDelayTimer -= fTimeDelta;
+		if (m_fStateDelayTimer <= 0.f)
+		{
+			Remove_Condition(iDelayFlag);
+			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
+			m_fStateDelayTimer = 0.f;
+		}
+	}
 
 	while (!m_DelayedActions.empty())
 	{

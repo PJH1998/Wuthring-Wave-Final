@@ -116,7 +116,7 @@ void CGalbrena::Update(_float fTimeDelta)
 	}
 
 	// 3. 상태 머신 갱신
-	m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -228,9 +228,6 @@ void CGalbrena::Render()
 		m_pColliderCom->Render();
 	else
 		m_pQTEColliderCom->Render();
-
-	/*if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();*/
 
 	m_pMainAttackVolume->Render();
 	Print_LookRay();
@@ -667,6 +664,12 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 			}
 		}
 	}
+	else if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
+	{
+		m_fStateTimeRate = stof(var2);
+		m_fStateDelayTimer = stof(var3);
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
+	}
 
 	// GalbrenaWing|Bone
 
@@ -735,6 +738,19 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 			m_PendingConditions[HIT] = true;
 			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
 		}
+	}
+
+	_uint iDelayFlag = ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY);
+	if (Check_AnyCondition(iDelayFlag))
+	{
+		m_fStateDelayTimer -= fTimeDelta;
+		if (m_fStateDelayTimer <= 0.f)
+		{
+			Remove_Condition(iDelayFlag);
+			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
+			m_fStateDelayTimer = 0.f;
+		}
+
 	}
 
 

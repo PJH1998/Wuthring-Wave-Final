@@ -24,6 +24,13 @@ public:
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 	}PARRY_DESC;
+	
+	typedef struct tagGrabDesc {
+		_uint iLayer;
+		_float fAttack;
+		CTransform* pTransform = { nullptr };
+		const _float4x4* pSocketMatrix = { nullptr };
+	}GRAB_DESC;
 
 
 
@@ -106,9 +113,10 @@ public:
 	// 거리 판단
 	const _float Calculate_RootMotionScale();
 
-	// Hit 판단.
+	// 상태 판단.
 	virtual void Hit_Judge(void* pArg = nullptr) {};
 	virtual void Parry_Judge(void* pArg = nullptr) {};
+	virtual void Grab_Judge(void* pArg = nullptr) {};
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
@@ -361,6 +369,8 @@ protected:
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
+	GRAB_DESC m_PendingGrabDesc = {};
+
 
 	_float m_fDodgeableDuration = 0.2f;
 	_float m_fDodgeableHitTimer = {};
@@ -374,6 +384,10 @@ protected:
 	_float m_fHookRange = {};
 	_float m_fReachedHook = {};
 	_float m_fDragRange = {};
+
+	_float m_fStateTimeRate = { 1.f }; //
+	_float m_fOriginTimeRate = { 1.f };
+	_float m_fStateDelayTimer = {}; // StateDelayTimer;
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

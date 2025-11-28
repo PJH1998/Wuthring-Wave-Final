@@ -117,8 +117,7 @@ void CRoverGroundRun::Handle_Input()
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    //m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
-    m_fSpeed = 0.7f;
+    m_fSpeed = 0.6f;
 
 	// Burst인지 체크
 	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
@@ -388,12 +387,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundRun::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_B), "Run_B", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_F), "Run_F", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LB), "Run_LB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LF), "Run_LF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RB), "Run_RB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RF), "Run_RF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_B), "Run_B", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_F), "Run_F", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LB), "Run_LB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_LF), "Run_LF", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RB), "Run_RB", 1.2f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_RF), "Run_RF", 1.2f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_BASEPOSE), "Run_BasePose", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_POSE_F), "Run_Pose_F", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverRunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);
