@@ -444,7 +444,24 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Collaps")
 				, ENUM_CLASS(eLevel), TEXT("Layer_Collaps"), &Desc);
 		}
-}
+	}
+	else if (pFilePath.find("Light") != std::string::npos)
+	{
+		LIGHT_DESC ReadDesc{};
+		_uint iLightIndex = { 0 };
+		File.read(reinterpret_cast<char*>(&iLightIndex), sizeof(_uint));
+		for (_uint i = 0; i < iLightIndex; ++i)
+		{
+			File.read(reinterpret_cast<char*>(&ReadDesc.eType), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&ReadDesc.fRange), sizeof(_float));
+			File.read(reinterpret_cast<char*>(&ReadDesc.vAmbient), sizeof(_float4));
+			File.read(reinterpret_cast<char*>(&ReadDesc.vDiffuse), sizeof(_float4));
+			File.read(reinterpret_cast<char*>(&ReadDesc.vDirection), sizeof(_float4));
+			File.read(reinterpret_cast<char*>(&ReadDesc.vPosition), sizeof(_float4));
+			File.read(reinterpret_cast<char*>(&ReadDesc.vSpecular), sizeof(_float4));
+			m_pGameInstance->Add_Light(to_wstring(i), ReadDesc);
+		}
+	}
 	else
 	{
 		CMapObject::MAP_LOAD Desc{};

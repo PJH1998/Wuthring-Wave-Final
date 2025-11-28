@@ -379,6 +379,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\NonStatic">
+      <UniqueIdentifier>{7775ba39-3792-4e81-b9a0-73409fa53076}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -736,18 +739,6 @@
     <ClInclude Include="..\Public\MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Destruction.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Sonoro.h">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClInclude>
@@ -952,12 +943,6 @@
     <ClInclude Include="..\Public\Coro_Rock.h">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Meteo.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Water.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\UI_Ovfl_Palette.h">
       <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
     </ClInclude>
@@ -973,7 +958,6 @@
     <ClInclude Include="..\Public\Leviatan.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Collaps.h" />
     <ClInclude Include="..\Public\RopeAnchor.h">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClInclude>
@@ -982,6 +966,27 @@
     </ClInclude>
     <ClInclude Include="..\Public\RoverRope.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Sonoro.h">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Collaps.h">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Water.h">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1314,18 +1319,6 @@
     <ClCompile Include="..\Private\MapObject_Instance.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClCompile>
@@ -1521,12 +1514,6 @@
     <ClCompile Include="..\Private\Coro_Rock.cpp">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus\Weapon</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Meteo.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Water.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp">
       <Filter>03. GameObject\UI\Containers_Event\OverflowingPalette</Filter>
     </ClCompile>
@@ -1542,7 +1529,6 @@
     <ClCompile Include="..\Private\Leviatan.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Collaps.cpp" />
     <ClCompile Include="..\Private\RopeAnchor.cpp">
       <Filter>03. GameObject\MapObject\Rope</Filter>
     </ClCompile>
@@ -1551,6 +1537,27 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverRope.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Collaps.cpp">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Water.cpp">
+      <Filter>03. GameObject\MapObject\NonStatic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

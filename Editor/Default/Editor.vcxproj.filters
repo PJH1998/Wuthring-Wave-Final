@@ -491,6 +491,7 @@
     <ClInclude Include="..\Public\Edit_MapObject_Water.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_LightManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -732,6 +733,7 @@
     <ClCompile Include="..\Private\Edit_Meteo.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_LightManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

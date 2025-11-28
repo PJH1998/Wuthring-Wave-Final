@@ -358,6 +358,12 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     vector vLook = normalize(g_vCamPosition - vWorldPos);
     
     float3 vLightDir = g_vLightPosition.xyz - vWorldPos.xyz;
+    
+    bool IsLight = dot(normalize(vLightDir * -1.f), vNormal.xyz) < 0.f;
+
+    if (false == IsLight)
+        discard;
+    
     float fDistance = length(vLightDir);
     
     float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
