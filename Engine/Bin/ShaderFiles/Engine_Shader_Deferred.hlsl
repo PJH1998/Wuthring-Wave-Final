@@ -336,8 +336,6 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
         discard;
         
     float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-    //vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    //vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
     float4 vWorldPos = 0.f;
 
@@ -358,6 +356,12 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     vector vLook = normalize(g_vCamPosition - vWorldPos);
     
     float3 vLightDir = g_vLightPosition.xyz - vWorldPos.xyz;
+    
+    //bool IsLight = dot(normalize(vLightDir), vNormal.xyz) > 0.f;
+    
+    //if(false == IsLight)
+    //    discard;
+    
     float fDistance = length(vLightDir);
     
     float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
@@ -405,9 +409,7 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
         vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular)) + (fRimPower * vRimColor);
         Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
         Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
-        
-        
-        
+
         //float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
         //Out.vLightAcc.xyz *= fAtt;
