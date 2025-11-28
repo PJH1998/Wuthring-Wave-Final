@@ -16,7 +16,7 @@ public:
 	void					Set_Active(_bool isActive) { m_isActive = isActive; }
 
 #ifdef _DEBUG
-	LIGHT_DESC* Get_LightDesc_For_Map() { return &m_LightDesc; }
+	LIGHT_DESC*		Get_LightDesc_For_Map() { return &m_LightDesc; }
 #endif
 public:
 	HRESULT			Initialize(const LIGHT_DESC& LightDesc);
