@@ -509,7 +509,7 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 	else
 	{
 		filesystem::path p(vecFilePath[iLevelIndex]);
-		std::cout << "[UI_Ovfl_Palette::Load_LevelData] Trying Load Level.. : " << iLevelIndex << "(" << p.filename().string() << ")" << std::endl;
+		std::cout << "[UI_Ovfl_Palette::Load_LevelData] Trying Load Level.. : " << iLevelIndex << "(" << p.filename().c_str() << ")" << std::endl;
 
 		vecLoadDatas = m_pGameSystem->Load_CSV(vecFilePath[iLevelIndex].c_str());
 

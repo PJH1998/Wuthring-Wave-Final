@@ -115,6 +115,9 @@ public:
 	// 다채화를 끕니다.
 	void		Close_Game_OverflowPalette();
 
+	// 그래플링 UI가 생길 지점의 점 위치를 할당합니다. (pooling 이용, 최대 50) 
+	// 크기 변화 기준 등 내부에서 정의 필요. 너무 멀면 렌더콜X
+	void		Attach_GrafflePoint(_float3* pTargetPos);
 
 
 	// [WIP] 

@@ -167,7 +167,7 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
     // ?띿뒪爾??꾨줈?좏??낇솕
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
         CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+        OutputDebugString(L"[Custom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
 
     return S_OK;
 }

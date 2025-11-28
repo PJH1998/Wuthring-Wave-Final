@@ -777,7 +777,9 @@ HRESULT CLoader_Test::Load_UI()
 			infoDesc.tUIDesc.strFilePath;
 			if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
 				CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
+			{
 				OutputDebugString(L"[Loader_Test::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+			}
 		}
 	}
 
