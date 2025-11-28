@@ -1,11 +1,11 @@
 ﻿#include "ClientPch.h"
-#include "RoverRope.h"
+#include "RoverRopeHook.h"
 #include "Rover.h"
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
 // 이건 이동 Rope 로만 사용하자.
-HRESULT CRoverRope::Initialize(class CGameObject* pOwner)
+HRESULT CRoverRopeHook::Initialize(class CGameObject* pOwner)
 {
 	if (FAILED(CInteractionState::Initialize(pOwner)))
 		return E_FAIL;
@@ -17,7 +17,7 @@ HRESULT CRoverRope::Initialize(class CGameObject* pOwner)
 	return S_OK;
 }
 
-void CRoverRope::OnEnter(void* pArg)
+void CRoverRopeHook::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
 
@@ -30,13 +30,13 @@ void CRoverRope::OnEnter(void* pArg)
 	switch (m_eRopeDir)
 	{
 	case ROPEDIR::U:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_START01_U);
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_U);
 		break;
 	case ROPEDIR::F:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_START01_F);
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_F);
 		break;
 	case ROPEDIR::D:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_START01_F);
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_F);
 		break;
 	}
 
@@ -48,13 +48,13 @@ void CRoverRope::OnEnter(void* pArg)
 
 	// 6. 나중에 감지된 위치에 있는 방향으로 회전합니다. 
 	// 추후에는 => Look이 y도 돌아가야함.
-	m_pRover->Rotate_MoveGrapple();
+	m_pRover->Rotate_GrappleTarget();
 
 	// 6. 중력 끄기
 	m_pRover->Set_Gravity(false);
 }
 
-void CRoverRope::OnUpdate(_float fTimeDelta)
+void CRoverRopeHook::OnUpdate(_float fTimeDelta)
 {
 	CInteractionState::OnUpdate(fTimeDelta);
 
@@ -73,10 +73,10 @@ void CRoverRope::OnUpdate(_float fTimeDelta)
 	// 상태 리셋;
 	State_Reset();
 
-	//m_pRover->Rotate_MoveGrapple(); // 회전.
+	//m_pRover->Rotate_GrappleTarget(); // 회전.
 }
 
-void CRoverRope::OnExit()
+void CRoverRopeHook::OnExit()
 {
 	CInteractionState::OnExit();
 	m_pRover->Set_Gravity(false);
@@ -87,14 +87,14 @@ void CRoverRope::OnExit()
 
 
 
-void CRoverRope::Enter_Rope()
+void CRoverRopeHook::Enter_Rope()
 {
 	// 1. Rope Target 위치로 회전하기 . Look Y도 돌아가야한다.
 
 	// 2. 목표 벡터 위치로 이동하기? 서서히 => 받았을때 한번만 받기.
 }
 
-void CRoverRope::Handle_Input()
+void CRoverRopeHook::Handle_Input()
 {
 	m_eDir = m_pRover->Calculate_Direction(); // 방향 계산.
 	m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
@@ -102,10 +102,10 @@ void CRoverRope::Handle_Input()
 
 }
 
-void CRoverRope::Update_RopeAnimation(_float fTimeDelta)
+void CRoverRopeHook::Update_RopeAnimation(_float fTimeDelta)
 {
 	CCharacterState::Play_Animation(m_pRover, fTimeDelta);
-	ERoverRopeType eRopeType = static_cast<ERoverRopeType>(m_iCurrentAnimIdx);
+	ERoverRopeHookType eRopeType = static_cast<ERoverRopeHookType>(m_iCurrentAnimIdx);
 
 	// 이 경우에만 이동?
 	if (m_eRopeStep == ROPESTEP::STEP_START || m_eRopeStep == ROPESTEP::STEP_START2)
@@ -116,15 +116,15 @@ void CRoverRope::Update_RopeAnimation(_float fTimeDelta)
 	
 }
 
-void CRoverRope::Check_Physics(_float fTimeDelta)
+void CRoverRopeHook::Check_Physics(_float fTimeDelta)
 {
 	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
-	m_States[REACHED] = m_pRover->Is_ReachedGrappleTarget();
+	m_States[REACHED] = m_pRover->Is_ReachedGrappleHook();
 }
 
-void CRoverRope::Check_StateTransition(_float fTimeDelta)
+void CRoverRopeHook::Check_StateTransition(_float fTimeDelta)
 {
-	ERoverRopeType eRopeType = static_cast<ERoverRopeType>(m_iCurrentAnimIdx);
+	ERoverRopeHookType eRopeType = static_cast<ERoverRopeHookType>(m_iCurrentAnimIdx);
 	_bool IsEscapePossible = CState::Is_EscapePossible();
 
 	// 1. Step Start 인경우? => Start2로 변경.
@@ -134,16 +134,16 @@ void CRoverRope::Check_StateTransition(_float fTimeDelta)
 		{
 			switch (eRopeType)
 			{
-			case ERoverRopeType::FIXHOOK_START01_U:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_START02_U);
+			case ERoverRopeHookType::FIXHOOK_START01_U:
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
-			case ERoverRopeType::FIXHOOK_START01_D:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_START02_U);
+			case ERoverRopeHookType::FIXHOOK_START01_D:
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
-			case ERoverRopeType::FIXHOOK_START01_F:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_START02_U);
+			case ERoverRopeHookType::FIXHOOK_START01_F:
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			default:
@@ -159,16 +159,16 @@ void CRoverRope::Check_StateTransition(_float fTimeDelta)
 		{
 			switch (eRopeType)
 			{
-			case ERoverRopeType::FIXHOOK_START02_U:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_U);
+			case ERoverRopeHookType::FIXHOOK_START02_U:
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_U);
 				m_eRopeStep = ROPESTEP::STEP_LOOP;
 				break;
-			case ERoverRopeType::FIXHOOK_START02_F:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_F);
+			case ERoverRopeHookType::FIXHOOK_START02_F:
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_F);
 				m_eRopeStep = ROPESTEP::STEP_LOOP;
 				break;
-			case ERoverRopeType::FIXHOOK_START02_D:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_D);
+			case ERoverRopeHookType::FIXHOOK_START02_D:
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_D);
 				m_eRopeStep = ROPESTEP::STEP_LOOP;
 				break;
 			default:
@@ -188,7 +188,7 @@ void CRoverRope::Check_StateTransition(_float fTimeDelta)
 			// Loop 가 End로 변하는 조건은?
 			if ((m_eRopeStep == ROPESTEP::STEP_LOOP) && m_States[REACHED])
 			{
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeType::FIXHOOK_END);
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_END);
 				m_eRopeStep = ROPESTEP::STEP_END;
 				return;
 			}
@@ -208,10 +208,6 @@ void CRoverRope::Check_StateTransition(_float fTimeDelta)
 					m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
 					return;
 				}
-
-				m_pRover->GetStateContextForWrite().m_eLandType = ERoverLandType::LAND_HEAVY;
-				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND));
-				return;
 			}
 
 			if (!m_States[LAND])
@@ -240,26 +236,26 @@ void CRoverRope::Check_StateTransition(_float fTimeDelta)
 }
 
 
-void CRoverRope::Setup_Animations()
+void CRoverRopeHook::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_END), "FixHook_End", 1.5f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_END_FAST), "FixHook_End_Fast", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_D), "FixHook_Loop_D", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_F), "FixHook_Loop_F", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_L), "FixHook_Loop_L", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_R), "FixHook_Loop_R", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_LOOP_U), "FixHook_Loop_U", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.5f, 16.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.5f, 16.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.5f, 16.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.5f, 20.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.5f, 20.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.5f, 20.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverRopeType::HOOK_UP), "Hook_Up", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_END), "FixHook_End", 1.5f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_END_FAST), "FixHook_End_Fast", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_D), "FixHook_Loop_D", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_F), "FixHook_Loop_F", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_L), "FixHook_Loop_L", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_R), "FixHook_Loop_R", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_LOOP_U), "FixHook_Loop_U", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_D), "FixHook_Start01_D", 1.5f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_F), "FixHook_Start01_F", 1.5f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_U), "FixHook_Start01_U", 1.5f, 16.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_D), "FixHook_Start02_D", 1.5f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_F), "FixHook_Start02_F", 1.5f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U), "FixHook_Start02_U", 1.5f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverRopeHookType::HOOK_UP), "Hook_Up", 1.f, 0.f);
 
 }
 
-void CRoverRope::State_Reset()
+void CRoverRopeHook::State_Reset()
 {
 	for (_uint i = 0; i < ROPESTATE::END; ++i)
 		m_States[i] = false;
@@ -267,21 +263,21 @@ void CRoverRope::State_Reset()
 
 
 
-CRoverRope* CRoverRope::Create(class CGameObject* pOwner)
+CRoverRopeHook* CRoverRopeHook::Create(class CGameObject* pOwner)
 {
-	CRoverRope* pInstance = new CRoverRope();
+	CRoverRopeHook* pInstance = new CRoverRopeHook();
 
 	if (FAILED(pInstance->Initialize(pOwner)))
 	{
 		Safe_Release(pInstance);
-		MSG_BOX("Failed to Create : CRoverRope");
+		MSG_BOX("Failed to Create : CRoverRopeHook");
 		return nullptr;
 	}
 
 	return pInstance;
 }
 
-void CRoverRope::Free()
+void CRoverRopeHook::Free()
 {
 	CInteractionState::Free();
 }

@@ -2,13 +2,14 @@
 #include "InteractionState.h"
 
 NS_BEGIN(Client)
-class CAugustaRope final : public CInteractionState
+class CGalbrenaRopeDrag final : public CInteractionState
 {
 private:
 	enum ROPESTATE
 	{
 		MOVE = 0,
 		JUMP,
+		DRAG,
 		FALL,
 		LAND,
 		REACHED,
@@ -19,15 +20,14 @@ private:
 	enum ROPESTEP
 	{
 		STEP_START,
-		STEP_START2,
 		STEP_LOOP,
 		STEP_END,
 		STEP_NONE,
 	};
 
 private:
-	explicit CAugustaRope() = default;
-	virtual ~CAugustaRope() = default;
+	explicit CGalbrenaRopeDrag() = default;
+	virtual ~CGalbrenaRopeDrag() = default;
 
 public:
 	virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -36,7 +36,7 @@ public:
 	virtual void OnExit() override;
 
 private:
-	class CAugusta* m_pAugusta = { nullptr };
+	class CGalbrena* m_pGalbrena = { nullptr };
 	_bool m_States[ROPESTATE::END] = {};
 
 	ROPEDIR m_eRopeDir = { ROPEDIR::END };
@@ -59,7 +59,7 @@ private:
 
 
 public:
-	static CAugustaRope* Create(class CGameObject* pOwner);
+	static CGalbrenaRopeDrag* Create(class CGameObject* pOwner);
 	virtual void Free() override;
 
 };

@@ -29,6 +29,7 @@ HRESULT CLevel_Logo::Initialize()
 	Ready_Layer_LogoMaleRover();
 	Ready_Layer_LogoFemaleRover();
 	Ready_UI();
+	Ready_Mouse();
 	Ready_Camera();
 	Ready_SkyBox();
 
@@ -151,6 +152,13 @@ void CLevel_Logo::Ready_UI()
 
 	cout << "[Level_Logo::Ready_UI] Logo UI Loaded!" << endl;
 	// _UI
+}
+
+void CLevel_Logo::Ready_Mouse()
+{
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Mouse"), ENUM_CLASS(LEVEL::STATIC), TEXT("Layer_Mouse"))))
+		CRASH("Mouse");
 }
 
 void CLevel_Logo::Ready_SkyBox()

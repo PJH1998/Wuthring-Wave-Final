@@ -18,6 +18,8 @@ private:
         SPRINT,
         MOVE,
 		FLY,
+		ROPE_HOOK,
+		ROPE_DRAG,
 		FALL,
         ATTACK,
         MOVE_U,

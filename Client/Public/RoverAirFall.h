@@ -11,7 +11,7 @@ private:
     {
         MOVE = 0,
         LAND = 1,
-		MOVE_ROPE,
+		ROPE_HOOK,
 		FLY,
 		HIT,
 		AIR_ATTACK,

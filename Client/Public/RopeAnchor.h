@@ -44,6 +44,7 @@ private:
 	
 	CALLBACK_CLIENT m_CallBack = {};
 	mutex m_Mutex; 
+	_uint m_iCondition = {};
 
 	_float m_fTargetDistance = {};
 	_float m_fEventDistance = { };

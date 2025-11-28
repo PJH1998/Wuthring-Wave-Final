@@ -84,6 +84,13 @@ void CRoverGroundIdle::Handle_Input()
 		return;
 
 	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+	m_States[ROPE_HOOK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pRover->Is_GrappleHook());
+
+	m_States[ROPE_DRAG] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
+		&& (m_pRover->Is_GrappleDrag());
 
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
@@ -174,6 +181,18 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 	{
 		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
+		return;
+	}
+
+	if (m_States[ROPE_HOOK])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEHOOK));
+		return;
+	}
+
+	if (m_States[ROPE_DRAG])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG));
 		return;
 	}
 

@@ -12,8 +12,6 @@ private:
 public:
 	HRESULT Initialize();
 
-	HRESULT Sync_Status_toHUD(CHARACTER_STAT& eStat);
-
 private:
 	class CGameInstance*	m_pGameInstance			= { nullptr };
 

@@ -92,7 +92,7 @@ HRESULT CLevel_Test::Initialize()
 
 	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_GameObject_TriggerBox"),
 
-		CTrigger_Box::Create(m_pDevice, m_pContext));
+	CTrigger_Box::Create(m_pDevice, m_pContext));
 
 	CTrigger_Box::TRIGGER Tri;
 	Tri.iLevel = iLevel;
