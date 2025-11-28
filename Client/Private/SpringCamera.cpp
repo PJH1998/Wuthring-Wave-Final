@@ -60,7 +60,7 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 	m_fFixedDistance = 3.f;
 	m_fLerpSpeed = 1.5f;
 	m_fMinDistance = 1.f;
-	m_fMaxDistance = 6.f;
+	m_fMaxDistance = 4.f;
 
 	m_fLockOnMinDistance = 6.f;
 
@@ -167,7 +167,7 @@ void CSpringCamera::Lerp_Distance(_float fTimeDelta)
 
 void CSpringCamera::Mouse_Scroll(_float fTimeDelta)
 {
-	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 0.05f;
 
 	m_fFixedDistance = max(m_fMinDistance, min(m_fMaxDistance, m_fFixedDistance));
 }

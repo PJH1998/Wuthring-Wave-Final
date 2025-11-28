@@ -151,6 +151,12 @@ public:
 	void	Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex);
 #pragma endregion
 
+#pragma region MOUSECONTROLLER
+	void						Register_Mouse(class CMouse* pMouse);
+	void						Set_MouseFix(_bool isFix);
+#pragma endregion
+
+
 private:
 	class	CParser*			m_pParser						= { nullptr };
 	class	CFactory*			m_pFactory						= { nullptr };
@@ -165,6 +171,8 @@ private:
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
+
+	class CMouseController*		m_pMouseController = { nullptr };
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

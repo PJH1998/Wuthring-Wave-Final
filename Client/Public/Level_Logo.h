@@ -20,6 +20,7 @@ private:
 	void							Ready_Layer_LogoFemaleRover();
 
 	void							Ready_UI();
+	void							Ready_Mouse();
 	void							Ready_SkyBox();
 private:
 	class CGameSystem*		m_pGameSystem = { nullptr };

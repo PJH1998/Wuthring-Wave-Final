@@ -20,6 +20,8 @@
 
 #include "CustomFont.h"
 
+#include "Mouse.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -335,6 +337,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_SFX_Burst_Instance.hlsl"), VTXRECTINSTANCE::Elements, VTXRECTINSTANCE::iNumElements))))
 		CRASH("Shader_ScreenEffect");
 
+	// Shader_Mouse
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_Mouse"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_Mouse");
+
 #pragma endregion
 
 #pragma region COMPUTE_SHADER
@@ -462,6 +469,17 @@ void CMainApp::Ready_Prototype_ForStatic()
 	//Decal
 	m_pGameSystem->Load_EffectDecalData_FromFolder("../Bin/Resource/Effect/Prefabs/Common/Decal");
 
+#pragma region MOUSE
+	// Mouse_Texture
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Texture_Mouse"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/UI/Mouse/CursorHi.png"), 1))))
+		CRASH("Mouse_Texture");
+
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Mouse"),
+		CMouse::Create(m_pDevice, m_pContext))))
+		CRASH("Mouse");
+#pragma endregion
 }
 
 void CMainApp::Ready_Sequence_Item()

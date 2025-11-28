@@ -15,6 +15,8 @@
 
 #include "MonsterTable.h"
 
+#include "MouseController.h"
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -47,6 +49,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pMonsterTable = CMonsterTable::Create();
 	ASSERT_CRASH(m_pMonsterTable);
+
+	m_pMouseController = CMouseController::Create();
+	ASSERT_CRASH(m_pMouseController);
 
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
@@ -362,6 +367,14 @@ void CGameSystem::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLev
 {
 	m_pParser->Ready_SFX_Prefab(pFolderPath, iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex);
 }
+void CGameSystem::Register_Mouse(CMouse* pMouse)
+{
+	m_pMouseController->Register_Mouse(pMouse);
+}
+void CGameSystem::Set_MouseFix(_bool isFix)
+{
+	m_pMouseController->Set_MouseFix(isFix);
+}
 #pragma endregion
 
 void CGameSystem::Release_System()
@@ -376,6 +389,7 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pSonoro_Manager);
 	//Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pMonsterTable);
+	Safe_Release(m_pMouseController);
 
 	Release();
 }
