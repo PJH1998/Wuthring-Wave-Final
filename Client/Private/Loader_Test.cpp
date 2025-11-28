@@ -22,6 +22,7 @@
 #include "Spawner.h"
 #include "PatternDummy.h"
 #include "Leviatan.h"
+#include "Levi_Bayonet.h"
 #pragma endregion
 
 
@@ -401,7 +402,16 @@ HRESULT CLoader_Test::Load_Leviatan()
 		CRASH("Leviatan Prototype Create Failed");
 
 #pragma region WEAPON
+	// Prototype_Component_Model_Leviatan_Bayonet
+	_fmatrix PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) /** XMMatrixRotationY(XMConvertToRadians(180.f))*/;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Bayonet"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Levi_Dajian/Levi_Dajian.dat"))))
+		CRASH("Prototype Create Failed");
 
+	// Prototype_GameObject_Levi_Bayonet
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"),
+		CLevi_Bayonet::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;
 }

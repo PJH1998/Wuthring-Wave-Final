@@ -388,6 +388,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Interaction\Rover">
       <UniqueIdentifier>{35995a8e-e366-4ce4-8a7e-cfaff07a41f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet">
+      <UniqueIdentifier>{865ddfb4-ae01-44d4-923a-b046ed456f2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1004,6 +1007,9 @@
     <ClInclude Include="..\Public\MouseController.h">
       <Filter>93. Mouse</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Levi_Bayonet.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1584,6 +1590,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MouseController.cpp">
       <Filter>93. Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Bayonet.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

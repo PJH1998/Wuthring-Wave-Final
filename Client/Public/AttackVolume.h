@@ -62,7 +62,7 @@ private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
 	const _float4x4*	m_pSocketMatrix = { nullptr };
 	//const _float4x4*	m_pCombinedMatrix = { nullptr };
-	CTransform*			m_pParenTransform = { nullptr };
+	CTransform*			m_pParentTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	//ATTACKVOULME_DIR	m_eDirType = {};

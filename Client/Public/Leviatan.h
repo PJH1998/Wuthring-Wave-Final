@@ -29,7 +29,7 @@ public:
 private:
 	enum ATK_SOCKET { FOOT_L, FOOT_R, WEAPON_GL, ATKEND };
 	//					신권,	   이권,	인권	
-	enum SWORD { MAIN, DIVINITY, DISCORD, VIRTUE, END };
+	enum WEAPON { MAIN, DIVINITY, DISCORD, VIRTUE, YUNO, END };
 	//enum ATK_PATTERN_P1 {ATTACK3, ATTACK5, ATTACK12, ATTACK13, BURST, ATTACK18, ATK1_END };
 	enum ATK_PATTERN { ATTACK3, ATTACK5, ATTACK12, ATTACK13, BURST, ATTACK18, ATTACK1, ATTACK20, ATTACK22, ATK_END };
 	enum LEVIATAN_SHADER { BANG, HAIR, FACE, UP, DOWN, CLOTH, ALPHA, FX };
@@ -132,6 +132,7 @@ private:
 	void						TurnFix();
 	void						TurnLerp(_bool isActive);
 	void						DistanceInterpolate(_bool isActive);
+	void						Reset_NotifyInteraction();
 
 #pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }

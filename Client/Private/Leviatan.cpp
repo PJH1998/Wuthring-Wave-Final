@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Leviatan.h"
 #include "AttackVolume.h"
+#include "Levi_Bayonet.h"
 #include "GameSystem.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -292,6 +293,10 @@ void CLeviatan::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 	{
 		m_isDist_Interp_Enable = Isactive;
 	}
+	else if (wstrTypeTag == TEXT("Visible"))
+	{
+		m_isRender = Isactive;
+	}
 }
 
 void CLeviatan::Effect_Active(const _wstring& wStrEffectTag)
@@ -343,6 +348,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(0.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
+	}
+	else if (wstrTypeTag == TEXT("Reset"))
+	{
+		Reset_NotifyInteraction();
 	}
 }
 
@@ -476,7 +485,7 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 	pBlackBoard2->Add_Condition("Attack18", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK18, 10.f); });
 	pBlackBoard2->Add_Condition("Attack20", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK20, 10.f); });
 	pBlackBoard2->Add_Condition("Attack22", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK22, 10.f); });
-	pBlackBoard1->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
+	pBlackBoard2->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
 	pBlackBoard2->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard2->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard2->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -493,7 +502,16 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 
 void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 {
+	CLevi_Bayonet::LEVIBAYONET_DESC BayonetDesc{};
+	BayonetDesc.eType = TEXT_COLOR_TYPE::DARK;
+	BayonetDesc.fAttackDmg = m_fAttackDmg;
+	BayonetDesc.pParentTransform = m_pTransformCom;
+	BayonetDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+	BayonetDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	BayonetDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bayonet"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"), &BayonetDesc)))
+		CRASH("Failed to Add Part : Bayonet");
 }
 
 void CLeviatan::Calculate_PosAndDir()
@@ -687,6 +705,25 @@ void CLeviatan::TurnLerp(_bool isActive)
 void CLeviatan::DistanceInterpolate(_bool isActive)
 {
 	m_isDist_Interp_Enable = isActive;
+}
+
+void CLeviatan::Reset_NotifyInteraction()
+{
+	m_isTurnLerp = false;
+	m_isDist_Interp_Enable = false;
+	m_isRender = true;
+	m_pColliderCom->Set_Gravity(true);
+	for (_uint i = 0; i < ATK_SOCKET::ATKEND; i++)
+	{
+		if(nullptr != m_pAtkVolumes[i])
+			m_pAtkVolumes[i]->SetActivate(false);
+	}
+	if (nullptr != m_pParryVolume)
+		m_pParryVolume->SetActivate(false);
+	for (auto& Pair : m_PartObjects)
+	{
+
+	}
 }
 
 _bool CLeviatan::isKnockDown()
