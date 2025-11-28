@@ -18,6 +18,7 @@ private:
 
 public:
 	void						Set_MouseFix(_bool isFix) { m_isMouseFix = isFix; }
+	_bool						IsFix() { return m_isMouseFix; }
 
 public:
 	virtual		HRESULT		Initialize_Prototype() override;

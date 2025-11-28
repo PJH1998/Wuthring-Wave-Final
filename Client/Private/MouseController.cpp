@@ -22,6 +22,14 @@ void CMouseController::Set_MouseFix(_bool isFix)
 	m_pMouse->Set_MouseFix(isFix);
 }
 
+_bool CMouseController::IsFix()
+{
+	if (nullptr == m_pMouse)
+		return false;
+
+	return m_pMouse->IsFix();
+}
+
 CMouseController* CMouseController::Create()
 {
     return new CMouseController();

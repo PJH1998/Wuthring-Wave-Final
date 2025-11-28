@@ -377,6 +377,10 @@ void CGameSystem::Set_MouseFix(_bool isFix)
 {
 	m_pMouseController->Set_MouseFix(isFix);
 }
+_bool CGameSystem::IsFix()
+{
+    return m_pMouseController->IsFix();
+}
 #pragma endregion
 
 void CGameSystem::Release_System()

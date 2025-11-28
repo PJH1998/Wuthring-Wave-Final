@@ -99,7 +99,7 @@ void CSpringCamera::Update(_float fTimeDelta)
 		if (true == m_isRecovery)
 			Recovery(fTimeDelta);
 	}
-	else
+	else if(true == m_pGameSystem->IsFix())
 	{
 		Mouse_Scroll(fTimeDelta);
 		// 0. Cam Rotate
@@ -112,39 +112,6 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// 2. Ray Cast => 벽 충돌
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD7) == KEYSTATE::DOWN)
-	{
-		CAMERA_SHAKE Shake = {};
-		Shake.fDuration = 0.25f;
-		Shake.fFrequency = 12.f;
-		Shake.fAmplitude = 1.f;
-		Shake.fFovKick = XMConvertToRadians(0.7f);
-		Shake.vRotation = _float3(0.1f, 0.1f, 0.1f);
-		m_pGameInstance->OnShake(Shake);
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	{
-		CAMERA_SHAKE Shake = {};
-		Shake.fDuration = 0.12f;
-		Shake.fFrequency = 12.f;
-		Shake.fAmplitude = 1.f;
-		Shake.fFovKick  = XMConvertToRadians(0.f);
-		Shake.vRotation = _float3(0.1f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
-		m_pGameInstance->OnShake(Shake);
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
-	{
-		CAMERA_SHAKE Shake = {};
-		Shake.fDuration = 0.12f;
-		Shake.fFrequency = 12.f;
-		Shake.fAmplitude = 1.f;
-		Shake.fFovKick = XMConvertToRadians(0.f);
-		Shake.vRotation = _float3(0.1f, 0.f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
-		m_pGameInstance->OnShake(Shake);
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-		m_pGameInstance->Set_CurrentCamera_Far(300.f);
 
 	Shaking(fTimeDelta);
 }

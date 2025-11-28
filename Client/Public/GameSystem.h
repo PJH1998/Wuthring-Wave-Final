@@ -153,6 +153,7 @@ public:
 #pragma region MOUSECONTROLLER
 	void						Register_Mouse(class CMouse* pMouse);
 	void						Set_MouseFix(_bool isFix);
+	_bool						IsFix();
 #pragma endregion
 
 

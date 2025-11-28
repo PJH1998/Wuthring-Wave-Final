@@ -12,6 +12,7 @@ private:
 public:
 	void									Register_Mouse(class CMouse* pMouse);
 	void									Set_MouseFix(_bool isFix);
+	_bool									IsFix();
 
 private:
 	class CMouse*						m_pMouse = { nullptr };
