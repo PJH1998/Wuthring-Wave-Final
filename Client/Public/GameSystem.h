@@ -46,7 +46,6 @@ public:
 
 
 #pragma region CHARACTER INFO
-	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
@@ -171,12 +170,10 @@ private:
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
+	class	CMouseController*		m_pMouseController = { nullptr };
 
-	class CMouseController*		m_pMouseController = { nullptr };
-
-	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
-
+	Mutex m_Mutex;
 public:
 	void				Release_System();
 

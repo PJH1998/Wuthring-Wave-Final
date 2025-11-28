@@ -12,7 +12,7 @@ private:
         MOVE = 0,
         LAND = 1,
 		FLY,
-		MOVE_ROPE,
+		ROPE_HOOK,
 		HIT,
 		AIR_ATTACK,
         END

@@ -111,10 +111,10 @@ void CGalbrenaAirFall::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (m_States[MOVE_ROPE]) // 일단 잡아서 이동하는 Rope 액션만?
+	if (m_States[ROPE_HOOK]) // 일단 잡아서 이동하는 Rope 액션만?
 	{
 		// 애니메이션은 Rope 안에서 결정하기.
-		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPE));
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEHOOK));
 		return;
 	}
 

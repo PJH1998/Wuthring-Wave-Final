@@ -62,8 +62,6 @@ public:
 	void ExecuteQTE(CHARACTERTYPE eCharacterType);
 
 #pragma endregion
-
-
 	
 
 public:
@@ -74,6 +72,7 @@ public:
 
 public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 
@@ -85,6 +84,7 @@ private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
+	class CRigidbody* m_pGrappleRigidbodyCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 
 	
@@ -101,12 +101,13 @@ private:
 
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
-	vector<pair<class CTransform*, OBJECTTYPE>> m_GrappleCandidates;
+	//vector<pair<class CTransform*, OBJECTTYPE>> m_GrappleCandidates;
+	vector<GRAPPLE_INFO> m_GrappleCandidates;
 	//vector<class CTransform*> m_GrappleTargetTransforms;
 
 	class CTransform* m_pTargetTransform = { nullptr };
 	class CTransform* m_pLockOnTargetTransform = { nullptr };
-	pair<class CTransform*, OBJECTTYPE> m_TargetGrappleInfo = { nullptr, OBJECTTYPE::END };
+	GRAPPLE_INFO m_TargetGrappleInfo = { };
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };

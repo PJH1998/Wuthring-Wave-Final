@@ -21,11 +21,6 @@ HRESULT CUI_StatusSyncer::Initialize()
 	return S_OK;
 }
 
-HRESULT CUI_StatusSyncer::Sync_Status_toHUD(CHARACTER_STAT& eStat)
-{
-	//return dynamic_cast<CUI_HUD*>(m_pGameInstance->Find_UIObject(L"UI_HUD"))->Sync_StatusValue(eStat);
-	return S_OK;
-}
 
 CUI_StatusSyncer* CUI_StatusSyncer::Create()
 {

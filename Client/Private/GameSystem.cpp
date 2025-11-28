@@ -137,10 +137,7 @@ void CGameSystem::Stop_Action()
 #pragma endregion
 
 #pragma region CHARACTER INFO
-void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
-{
-	m_Stats = eCharacterStat;
-}
+
 
 #pragma endregion
 
@@ -284,11 +281,16 @@ void CGameSystem::Close_Game_OverflowPalette()
 
 #pragma region TRIGGER
 
+// Trigger 등록
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
 {
-	m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+	{
+		lock_guard<mutex>lock(m_Mutex);
+		m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+	}
 }
 
+// Trigger 실행.
 void CGameSystem::OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg)
 {
 	auto iter = m_TriggerEvents.find(iNumTriggerMapIndex);

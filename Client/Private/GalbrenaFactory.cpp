@@ -26,7 +26,8 @@
 #include "GalbrenaHit.h"
 
 // Intraction 카테고리 State
-#include "GalbrenaRope.h"
+#include "GalbrenaRopeHook.h"
+#include "GalbrenaRopeDrag.h"
 
 void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbrena* pCharacter)
 {
@@ -57,5 +58,6 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT), CGalbrenaHit::Create(pCharacter));
 
 	// Intreaction 카테고리 하위 State들
-	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPE), CGalbrenaRope::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEHOOK), CGalbrenaRopeHook::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEDRAG), CGalbrenaRopeDrag::Create(pCharacter));
 }
