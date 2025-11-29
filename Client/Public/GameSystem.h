@@ -164,6 +164,7 @@ public:
 
 #pragma region GRAB_INTERACT
 	void						Call_Animation();
+	void						Call_PlayerVisible();
 	void						Unbind_Grab();
 #pragma endregion
 
