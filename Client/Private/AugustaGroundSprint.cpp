@@ -18,7 +18,6 @@ HRESULT CAugustaGroundSprint::Initialize(class CGameObject* pOwner)
 }
 
 
-
 void CAugustaGroundSprint::OnEnter(void* pArg)
 {
     CGroundState::OnEnter(pArg);

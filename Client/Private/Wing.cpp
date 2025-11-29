@@ -89,9 +89,6 @@ void CWing::Render()
 			CRASH("Ready Render Failed");
 	}
 
-#ifdef _DEBUG
-	m_pRigidbodyCom->Render();
-#endif // _DEBUG
 }
 
 void CWing::Activate(_bool IsActivate)
@@ -113,19 +110,6 @@ void CWing::Ready_Components(const PROP_DESC* pDesc)
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
 		, pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
-
-	CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
-	RigidbodyDesc.fRadius = 0.3f;
-	RigidbodyDesc.fHeight = 0.5f;
-	RigidbodyDesc.eShape = SHAPE::CAPSULE;
-	RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
-	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
-	RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
-		, pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-		CRASH("Rigidbody");
 }
 
 void CWing::Ready_Variables(const PROP_DESC* pDesc)

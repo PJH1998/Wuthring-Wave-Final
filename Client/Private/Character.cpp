@@ -42,6 +42,9 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	m_fDragRange = pDesc->fDragRange;
 	m_fReachedHook = pDesc->fReacedRopeHook;
 
+	// 2. 그랩 용도 Matrix
+	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
+
     return S_OK;
 }
 
@@ -247,39 +250,6 @@ void CCharacter::Set_Gravity(_bool IsGravity)
 		ASSERT_CRASH(m_pQTEColliderCom);
 		m_pQTEColliderCom->Set_Gravity(IsGravity);
 	}
-		
-}
-
-
-
-void CCharacter::Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset)
-{
-	m_strColliderReferenceBone = strBoneName;
-
-	if (strBoneName.empty())
-	{
-		m_pColliderCom->Sync_Position(m_pTransformCom);
-		m_pColliderCom->Set_Offset(m_vColliderOffSet);    // 원본 오프셋으로 변경.
-		return;
-	}
-
-	// 1. RootBone의 위치 가져오기.
-	_matrix RootMatrix = XMLoadFloat4x4(m_pModelCom->Get_BoneMatrixPtr("Root"));
-	_matrix TargetMatrix = XMLoadFloat4x4(m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str()));
-
-	// 2. Root 본의 로컬 위치
-	_vector vRootPos = RootMatrix.r[3];
-	// 3. Target 본의 로컬 위치
-	_vector vTargetPos = TargetMatrix.r[3];
-	_vector vBoneOffset = (vTargetPos - vRootPos) * 0.01f - XMLoadFloat3(&vOffset);
-
-	_float3 vNewOffset = {};
-	XMStoreFloat3(&vNewOffset, XMLoadFloat3(&m_vColliderOffSet) + vBoneOffset); // 차이만큼 더한다.
-
-	m_pColliderCom->Set_Offset(vNewOffset);
-
-	m_vAnimColliderOffset = vOffset;
-
 }
 
 void CCharacter::Sync_Collider(_fvector vVelocity, _float fTimeDelta)
@@ -345,6 +315,47 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 	
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
+}
+
+
+void CCharacter::Bind_GrabEscapePossible()
+{
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+}
+
+void CCharacter::Bind_GrabEscapeExecute()
+{
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
+	ResetPose();
+}
+
+void CCharacter::ResetPose()
+{
+	if (nullptr == m_pTransformCom)
+		return;
+
+	_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+	vLook = XMVectorSetY(vLook, 0.f); // 하늘/바닥 보는 성분 제거
+
+	if(XMVector3Equal(vLook, XMVectorZero()))
+		vLook = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+
+	vLook = XMVector3Normalize(vLook);
+
+	// (B) 월드 기준 Up 벡터 (0, 1, 0)
+	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+
+	_vector vRight = XMVector3Cross(vWorldUp, vLook);
+	vRight = XMVector3Normalize(vRight);
+
+	// (D) Up 벡터 다시 계산 (Look x Right) -> 수직 보장
+	_vector vUp = XMVector3Cross(vLook, vRight);
+	vUp = XMVector3Normalize(vUp);
+
+	// (E) Transform에 적용 (이제 캐릭터는 똑바로 서게 됨)
+	m_pTransformCom->Set_State(STATE::RIGHT, vRight);
+	m_pTransformCom->Set_State(STATE::UP, vUp);
+	m_pTransformCom->Set_State(STATE::LOOK, vLook);
 }
 
 // 내 Velocity 고정.
@@ -656,7 +667,26 @@ _bool CCharacter::Is_LockOn()
 }
 
 
+void CCharacter::ActiveCaptureState()
+{
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
 
+	// 4. 충돌 콜백 도중에는 하면 안된다.?
+	//m_pColliderCom->IsActivate(false);
+}
+
+// 무조건 Grab Animation이 나오는게 아니라 들어간 상태에서 애니메이션을 선별
+void CCharacter::ClearCaptureState()
+{
+	// 1. 데이터 지우기
+	m_PendingCaptureDesc = {};
+
+	// 2. Collider 충돌 처리 켜기.
+	//m_pColliderCom->IsActivate(true);
+
+	// 3. 제거
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+}
 
 _bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {

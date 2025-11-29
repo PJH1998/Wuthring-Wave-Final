@@ -114,7 +114,6 @@ void CAugustaBayonet::Render()
     }
 
 #ifdef _DEBUG
-    //m_pRigidbodyCom->Render();
 	//if (m_pMainAttackVolume->IsActivate())
 	m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -209,18 +208,6 @@ void CAugustaBayonet::Ready_Components(const PROP_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
- /*   CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
-    RigidbodyDesc.fRadius = 0.3f;
-    RigidbodyDesc.fHeight = 0.5f;
-    RigidbodyDesc.eShape = SHAPE::CAPSULE;
-    RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
-    RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
-    RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
-        , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
 }
 
 void CAugustaBayonet::Ready_Variables(const PROP_DESC* pDesc)
