@@ -162,7 +162,8 @@ public:
 	_bool						IsFix();
 #pragma endregion
 
-#pragma region GRAB_INTERACT
+#pragma region PLAYER_INTERACT
+	void						Bind_Condition_ToPlayer(const _string& strTransition);
 	void						Call_Animation();
 	void						Call_PlayerVisible();
 	void						Unbind_Grab();
