@@ -388,6 +388,15 @@ _bool CGameSystem::IsFix()
 }
 #pragma endregion
 
+#pragma region GRAB_INTERACT
+void CGameSystem::Call_Animation()
+{
+}
+void CGameSystem::Unbind_Grab()
+{
+}
+#pragma endregion
+
 void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
