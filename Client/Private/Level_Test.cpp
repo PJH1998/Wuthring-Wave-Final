@@ -24,6 +24,7 @@
 #include "SceneCamera.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
+#include "UI_GrafflePoint.h"
 
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
@@ -533,6 +534,11 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
+		CRASH("Failed Ready GrafflePoint");
+
+
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
 		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
 		CRASH("Failed Ready Ovfl_Palette");
@@ -919,6 +925,24 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
+#pragma region [NUMPAD 0] KSTA_UITEST_GRAFFLEPOINT
+
+	static _bool isInitialized_GrafflePoint = false;
+
+	_uint iNumGraffleUI = 50;
+
+	if (!isInitialized_GrafflePoint)
+	{
+		for (_uint i = 0; i < iNumGraffleUI; i++)
+		{
+			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), nullptr);
+		}
+
+		isInitialized_GrafflePoint = true;
+	}
+
+#pragma endregion
 
 }
 

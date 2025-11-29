@@ -34,6 +34,7 @@ private:
 	{
 		// Ground
 		EGalbrenaDashType m_eDashType = EGalbrenaDashType::END;
+		EGalbrenaSpecialDashType m_eSpecialDashType = EGalbrenaSpecialDashType::END;
 		EGalbrenaIdleType  m_eIdleType = EGalbrenaIdleType::END;
 		EGalbrenaRunType m_eRunType = EGalbrenaRunType::END;
 		EGalbrenaSprintType m_eSprintType = EGalbrenaSprintType::END;
@@ -75,6 +76,7 @@ private:
 			m_eRunType = EGalbrenaRunType::END;
 			m_eSprintType = EGalbrenaSprintType::END;
 			m_eDashType = EGalbrenaDashType::END;
+			m_eSpecialDashType = EGalbrenaSpecialDashType::END;
 			m_eLandType = EGalbrenaLandType::END;
 			m_eDodgeType = EGalbrenaDodgeType::END;
 

@@ -2,11 +2,6 @@
 #include "UI_Image.h"
 
 
-NS_BEGIN(Engine)
-class CTransform;
-NS_END
-
-
 NS_BEGIN(Client)
 
 class CUI_LockOn final : public CUI_Image

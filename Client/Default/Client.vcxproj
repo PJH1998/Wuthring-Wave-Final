@@ -201,6 +201,7 @@
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
     <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
@@ -350,6 +351,7 @@
     <ClInclude Include="..\public\UI_Button_Interact.h" />
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
+    <ClInclude Include="..\public\UI_GrafflePoint.h" />
     <ClInclude Include="..\public\UI_HUD.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -368,6 +370,7 @@
     <ClInclude Include="..\public\UI_MobHPBar.h" />
     <ClInclude Include="..\public\UI_Ovfl_Palette.h" />
     <ClInclude Include="..\public\UI_Parry.h" />
+    <ClInclude Include="..\public\UI_QTE.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_TabUtility.h" />
     <ClInclude Include="..\public\UI_Text.h">
@@ -429,6 +432,7 @@
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
     <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />
@@ -570,6 +574,7 @@
     <ClCompile Include="..\private\UI_Button_Interact.cpp" />
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
+    <ClCompile Include="..\private\UI_GrafflePoint.cpp" />
     <ClCompile Include="..\private\UI_HUD.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -587,6 +592,7 @@
     <ClCompile Include="..\private\UI_Logo.cpp" />
     <ClCompile Include="..\private\UI_MobHPBar.cpp" />
     <ClCompile Include="..\private\UI_Parry.cpp" />
+    <ClCompile Include="..\private\UI_QTE.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_TabUtility.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">

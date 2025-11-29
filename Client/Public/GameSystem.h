@@ -109,11 +109,17 @@ public:
 	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.
 	_uint		HideNGet_TabUtilityUI();
 
-	// [WIP] 다채화를 켭니다. / iTargetLevel : 열 레벨. 오픈 대상 파일들은 CUI_Ovfl_Palette::Load_LevelData 에 순서대로 정의됨.
+	// 다채화를 켭니다. / iTargetLevel : 열 레벨. 오픈 대상 파일들은 CUI_Ovfl_Palette::Load_LevelData 에 순서대로 정의됨.
 	void		Open_Game_OverflowPalette(_uint iTargetLevel = 0);
-	// [WIP] 다채화를 끕니다.
+	// 다채화를 끕니다.
 	void		Close_Game_OverflowPalette();
 
+	// 그래플링 UI가 생길 지점의 점 위치를 할당합니다. (pooling 이용, 최대 50) 
+	// 크기 변화 기준 등 내부에서 정의 필요. 너무 멀면 렌더콜X
+	void		Attach_GrafflePoint(_float3* pTargetPos);
+
+
+	// [WIP] 
 #pragma endregion
 
 #pragma region PLAYER STATUS

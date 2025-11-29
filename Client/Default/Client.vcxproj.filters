@@ -379,6 +379,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\GrafflePoint">
+      <UniqueIdentifier>{1dda4253-7a9b-4853-9436-0d14c8a74145}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\MapObject\NonStatic">
       <UniqueIdentifier>{7775ba39-3792-4e81-b9a0-73409fa53076}</UniqueIdentifier>
     </Filter>
@@ -390,6 +393,9 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\State\Interaction\Rover">
       <UniqueIdentifier>{35995a8e-e366-4ce4-8a7e-cfaff07a41f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\QTE">
+      <UniqueIdentifier>{2c66c6f3-2767-4487-b448-d5c4df9f6471}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\State\Capture">
       <UniqueIdentifier>{9dd1696c-dfdf-412e-9fbc-f31c3f33d74d}</UniqueIdentifier>
@@ -1003,6 +1009,12 @@
     <ClInclude Include="..\Public\MouseController.h">
       <Filter>93. Mouse</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_GrafflePoint.h">
+      <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_QTE.h">
+      <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\MapObject_Sonoro.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClInclude>
@@ -1033,6 +1045,9 @@
     </ClInclude>
     <ClInclude Include="..\public\Levi_Bayonet.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1596,6 +1611,12 @@
     <ClCompile Include="..\Private\MouseController.cpp">
       <Filter>93. Mouse</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_GrafflePoint.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_QTE.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
     </ClCompile>
@@ -1626,6 +1647,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Levi_Bayonet.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
