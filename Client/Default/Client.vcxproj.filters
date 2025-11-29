@@ -406,6 +406,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet">
       <UniqueIdentifier>{865ddfb4-ae01-44d4-923a-b046ed456f2d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bow">
+      <UniqueIdentifier>{2ced9772-e1c0-4614-b481-8f5a8903fee7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1034,6 +1037,9 @@
     <ClInclude Include="..\public\Levi_Bayonet.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Levi_Bow.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1626,6 +1632,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Levi_Bayonet.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Bow.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

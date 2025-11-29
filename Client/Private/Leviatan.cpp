@@ -54,7 +54,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	_float temp{};
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
-
+	m_iPhase = PHASE::TWO;
 	m_fHP = pDesc->fHP;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
