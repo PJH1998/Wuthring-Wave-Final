@@ -67,7 +67,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
+	//Ready_HavocWarrior();mm
 	//Ready_ElectroPredator();
 	Ready_CoroSaurus();
 	//Ready_Spawner();

@@ -18,7 +18,7 @@ private:
 	ID3D11DeviceContext*				m_pContext = { nullptr };
 
 	map<const _string, ID3D11ShaderResourceView*> m_Resources;
-
+	unordered_set<_string> m_MAs;
 private:
 	ID3D11ShaderResourceView*		Find_Resource(const _string& strResourceTag);
 

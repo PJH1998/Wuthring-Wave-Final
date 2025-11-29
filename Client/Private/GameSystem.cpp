@@ -16,6 +16,7 @@
 #include "MonsterTable.h"
 
 #include "MouseController.h"
+#include "Player.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -389,13 +390,37 @@ _bool CGameSystem::IsFix()
 #pragma endregion
 
 #pragma region GRAB_INTERACT
-void CGameSystem::Call_Animation()
+void CGameSystem::Call_Animation() // => 땅에 부딪혔을 때 => 탈출 가능한 지점.
 {
+	if (nullptr == m_pPlayer)
+		return;
+
+	// 탈출 가능하다고 알림.
+	m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
 }
-void CGameSystem::Unbind_Grab()
+void CGameSystem::Call_PlayerVisible()
 {
+
+}
+void CGameSystem::Unbind_Grab() // => 몬스터 잡기애니메이션이 거의 끝났을 때?
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	// 탈출 가능하다고 알림.
+	m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
+}
+
+#pragma endregion
+
+#pragma region PLAYER
+void CGameSystem::Register_Player(CPlayer* pPlayer)
+{
+	m_pPlayer = pPlayer;
+	Safe_AddRef(m_pPlayer);
 }
 #pragma endregion
+
 
 void CGameSystem::Release_System()
 {
@@ -410,6 +435,7 @@ void CGameSystem::Release_System()
 	//Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pMonsterTable);
 	Safe_Release(m_pMouseController);
+	Safe_Release(m_pPlayer);
 
 	Release();
 }
