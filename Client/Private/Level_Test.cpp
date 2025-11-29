@@ -950,8 +950,20 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)	
-		m_pGameSystem->Play_QTE();
+#pragma region  [NUMPAD 0] KSTA_UITEST_QTE
+	static _bool isQTETrigger = false;
+
+	if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE);
+		isQTETrigger = !isQTETrigger;
+	}
+	else if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER, UI_QTE_BTN::F);
+		isQTETrigger = !isQTETrigger;
+	}
+#pragma endregion
 
 
 }

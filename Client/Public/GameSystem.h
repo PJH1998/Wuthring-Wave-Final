@@ -118,8 +118,13 @@ public:
 	// 카메라 거리에 따른 크기 변화 기준 등 내부에서 상수로 변경 가능. 너무 멀면 렌더콜X
 	void		Attach_GrafflePoint(_float3* pTargetPos);
 
-	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. 0, 0이 중점, 우하단이 양수.
-	void		Play_QTE(_float2 vSpawnPos = _float2{0.f, 0.f});
+	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
+	// eQTEType : QTE 종류 (연타로 게이지채우기, 단발성 중 선택), eIconIndex : 사용 버튼 종류.
+	void		Play_QTE(
+		_float2 vSpawnPos		= _float2{0.f, 0.f}, 
+		UI_QTE_TYPE eQTEType	= UI_QTE_TYPE::FILLGUAGE,
+		UI_QTE_BTN eIconIndex	= UI_QTE_BTN::F
+	);		// 여기에 정보 받기용으로 out 포인터 인자라도 만들거나, status 같은 곳에 호출? 
 
 
 	// [WIP] 

@@ -17,6 +17,8 @@
 
 #include "MouseController.h"
 
+
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -275,9 +277,9 @@ void CGameSystem::Attach_GrafflePoint(_float3* pTargetPos)
 	m_pUI_ControlHelper->Attach_GrafflePoint(pTargetPos);
 }
 
-void CGameSystem::Play_QTE(_float2 vSpawnPos)
+void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex)
 {
-	m_pUI_ControlHelper->Play_QTE(vSpawnPos);
+	m_pUI_ControlHelper->Play_QTE(vSpawnPos, eQTEType, eIconIndex);
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)

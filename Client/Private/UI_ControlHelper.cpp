@@ -315,11 +315,16 @@ void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos)
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
 }
 
-void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos)
+void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex)
 {
 	//CCustom_UI* pRootUI = m_pRootUI_QTE;
+	
+		
+	CUI_QTE::UI_QTE_DESC tDesc;
 
-	CUI_QTE::UI_QTE_DESC tDesc = { vSpawnPos };
+	tDesc.vSpawnPos = vSpawnPos;
+	tDesc.eQTEType = eQTEType;
+	tDesc.eIconIndex = eIconIndex;
 
 	//if (!pRootUI)
 	//	return;

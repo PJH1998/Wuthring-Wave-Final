@@ -53,7 +53,7 @@ public:
 
 	void				Attach_GrafflePoint(_float3* pTargetPos);		// 외부 값 받아올거면, 그래플 UI 헤더, cpp에 최상단 define 해제 필요
 
-	void				Play_QTE(_float2 vSpawnPos);
+	void				Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex);
 
 
 
