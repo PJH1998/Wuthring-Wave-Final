@@ -123,7 +123,8 @@ public:
 	void		Play_QTE(
 		_float2 vSpawnPos		= _float2{0.f, 0.f}, 
 		UI_QTE_TYPE eQTEType	= UI_QTE_TYPE::FILLGUAGE,
-		UI_QTE_BTN eIconIndex	= UI_QTE_BTN::F
+		UI_QTE_BTN eIconIndex	= UI_QTE_BTN::F,
+		_float2 vScale			= _float2{1.f, 1.f}
 	);		// 여기에 정보 받기용으로 out 포인터 인자라도 만들거나, status 같은 곳에 호출? 
 
 

@@ -8,6 +8,7 @@ class CUI_QTE final : public CUI_Image
 public:
 	typedef struct tUIQTEDesc {
 		_float2		vSpawnPos	= _float2(0.f, 0.f);
+		_float2		vSpawnScale = _float2(1.f, 1.f);
 		UI_QTE_BTN	eIconIndex	= UI_QTE_BTN::F;
 		UI_QTE_TYPE	eQTEType	= UI_QTE_TYPE::FILLGUAGE;
 	} UI_QTE_DESC;
@@ -43,6 +44,8 @@ private:
 		
 private:
 	//CCustom_UI* m_pRUI? = ;
+	CCustom_UI*		m_pRRUI_TransformCtrl				= nullptr;
+
 	CCustom_UI*		m_pRUI_All							= nullptr;
 	CCustom_UI*		m_pUI_SectorA_KeyGuide				= nullptr;
 	CCustom_UI*		m_pUI_SectorA_BG					= nullptr;

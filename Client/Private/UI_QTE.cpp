@@ -153,7 +153,9 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	_float4 vPosition = { vSpawnPos.x, vSpawnPos.y, 0.f, 1.f };
 	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vPosition));
-	
+	_float3 vScale		= _float3(pDesc->vSpawnScale.x, pDesc->vSpawnScale.y, 1.f);
+	static_cast<CTransform*>(m_pRRUI_TransformCtrl->Get_Component(L"Com_Transform"))->Scale(vScale);
+
 	
 	// m_eIconIndex 에 따른, 중앙에 나올 이미지 변경
 	auto& keyDesc = m_pUI_KeyButtons->Get_UIDesc();
@@ -161,7 +163,8 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	keyInstDesc[0].vSInstCoordX = m_arrBtnPresets[ENUM_CLASS(m_eIconIndex)][0];
 	keyInstDesc[0].vSInstCoordY = m_arrBtnPresets[ENUM_CLASS(m_eIconIndex)][1];	
-	
+
+
 
 	// m_eQTEType에 따른, 타입 별 이미지 다르게. 이는 Update단에서 on/off 로 하도록.
 	switch (m_eQTEType)
@@ -226,6 +229,8 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CUI_QTE::PreAssign_ChildUIs()
 {
+	m_pRRUI_TransformCtrl			= Find_ChildObject(L"Sub_TransformCtrl");
+
 	m_pRUI_All						= Find_ChildObject(L"Sub_All");
 	m_pUI_SectorA_KeyGuide			= Find_ChildObject(L"SectorA_KeyGuide");
 	m_pUI_SectorA_BG				= Find_ChildObject(L"SectorA_BG");
