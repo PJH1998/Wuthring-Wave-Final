@@ -1055,6 +1055,9 @@
     <ClInclude Include="..\Public\Levi_Bow.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Levi_Alter.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1659,6 +1662,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Levi_Bow.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Alter.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
