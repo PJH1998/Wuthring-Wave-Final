@@ -69,10 +69,10 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	//Ready_CoroSaurus();
+	Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	Ready_Leviatan();
+	//Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -193,6 +193,11 @@ void CLevel_Test::Ready_Dummy()
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
+
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Leviatan_Alter");					//레비아탄(분신)
+	//DummyDesc.strInitAnimTag = "Stand2";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
+
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &DummyDesc)))
