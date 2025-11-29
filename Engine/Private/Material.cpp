@@ -85,8 +85,8 @@ void CMaterial::Store_Texture(const json& MaterialData, const _char* pTextureTag
 			strFileName = strFileName.substr(0, CutPos);
 		
 		ID3D11ShaderResourceView* pSRV = m_pGameInstance->Get_Resource(strFileName);
-
-		m_SRVs[ENUM_CLASS(eTextureType)].push_back(pSRV);
+		if (pSRV)
+			m_SRVs[ENUM_CLASS(eTextureType)].push_back(pSRV);
 	}
 }
 

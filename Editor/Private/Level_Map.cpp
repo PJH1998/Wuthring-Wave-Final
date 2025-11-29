@@ -1393,13 +1393,13 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 		*pShaderIndex = 14;
 	}
 	else if (NameCheck(ModelName, "SM_Com2_Roc_APD_10AM") ||
-		NameCheck(ModelName, "SM_Tab_Roc_23AL") || 
-		NameCheck(ModelName, "SM_Tab_Roc_13BH") || 
-		NameCheck(ModelName, "SM_Com2_Roc_14AM") || 
-		NameCheck(ModelName, "SM_Com2_Roc_39AX") || 
-		NameCheck(ModelName, "SM_Tab_Roc_24AL") || 
-		NameCheck(ModelName, "SM_Tab_Roc_07AH") || 
-		NameCheck(ModelName, "SM_Tab_Roc_19AM") || 
+		NameCheck(ModelName, "SM_Tab_Roc_23AL") ||
+		NameCheck(ModelName, "SM_Tab_Roc_13BH") ||
+		NameCheck(ModelName, "SM_Com2_Roc_14AM") ||
+		NameCheck(ModelName, "SM_Com2_Roc_39AX") ||
+		NameCheck(ModelName, "SM_Tab_Roc_24AL") ||
+		NameCheck(ModelName, "SM_Tab_Roc_07AH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_19AM") ||
 		NameCheck(ModelName, "SM_Tab_Roc_28AS"))
 	{
 		*pShaderIndex = 15;
@@ -1451,7 +1451,8 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 	{
 		*pShaderIndex = 16;
 	}
-
+	else if (NameCheck(ModelName, "Doo_") || NameCheck(ModelName, "SM_Sev_Bui_02"))
+		*pShaderIndex = 17;
 #pragma endregion
 
 }

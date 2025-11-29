@@ -19,6 +19,14 @@ void CResource_Manager::Load_Resource(const _char* pFolderPath)
 			continue;
 		if (Entry.path().extension() != ".dds" && Entry.path().extension() != ".png")
 			continue;
+		if (Entry.path().string().find("_MA") != string::npos)
+		{
+			auto iter = m_MAs.find(Entry.path().stem().string());
+
+			if (iter == m_MAs.end())
+				m_MAs.insert(Entry.path().stem().string());
+			continue;
+		}
 			// Folder
 		//if (true == Entry.is_directory())
 		//{
@@ -55,6 +63,11 @@ void CResource_Manager::Load_Resource(const _char* pFolderPath)
 
 ID3D11ShaderResourceView* CResource_Manager::Get_Resource(const _string& strResourceTag)
 {
+	auto iter = m_MAs.find(strResourceTag);
+
+	if (iter != m_MAs.end())
+		return nullptr;
+
 	ID3D11ShaderResourceView* pInstance = Find_Resource(strResourceTag);
 	ASSERT_CRASH(pInstance);
 
