@@ -18,6 +18,7 @@ CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCustom_UI(pDevice, pContext)
 	, m_pGameSystem ( CGameSystem::GetInstance() )
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 CUI_HUD::CUI_HUD(const CUI_HUD& Prototype)

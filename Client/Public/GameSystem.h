@@ -162,6 +162,10 @@ public:
 	_bool						IsFix();
 #pragma endregion
 
+#pragma region GRAB_INTERACT
+	void						Call_Animation();
+	void						Unbind_Grab();
+#pragma endregion
 
 private:
 	class	CParser*			m_pParser						= { nullptr };

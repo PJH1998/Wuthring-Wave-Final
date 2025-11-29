@@ -1046,6 +1046,9 @@
     <ClInclude Include="..\public\Levi_Bayonet.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1644,6 +1647,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Levi_Bayonet.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

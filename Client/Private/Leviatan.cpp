@@ -13,6 +13,7 @@ CLeviatan::CLeviatan(const CLeviatan& Prototype)
 	: CActor { Prototype }
 	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLeviatan::Initialize_Prototype()

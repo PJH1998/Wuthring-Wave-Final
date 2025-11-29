@@ -20,6 +20,7 @@ private:
 		HIT,
 		HIT_PENDING,
         JUMP,
+		DASH,
 		BURST,
         END
     };

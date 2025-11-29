@@ -294,6 +294,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli" />
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Light.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />

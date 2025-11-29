@@ -201,6 +201,7 @@
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
     <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
@@ -431,6 +432,7 @@
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
     <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />

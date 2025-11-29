@@ -25,7 +25,7 @@ CUI_ControlHelper::CUI_ControlHelper()
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
 	Safe_AddRef(m_pGameInstance);
-	Safe_AddRef(m_pGameSystem);		// 상호참조 발생
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_ControlHelper::Initialize()
@@ -331,5 +331,5 @@ void CUI_ControlHelper::Free()
 {
 	__super::Free();
 	Safe_Release(m_pGameInstance);
-	Safe_Release(m_pGameSystem);		// 상호참조 발생
+	Safe_Release(m_pGameSystem);
 }

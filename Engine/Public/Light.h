@@ -12,6 +12,7 @@ private:
 	virtual ~CLight() = default;
 
 public:
+	_bool					IsInFrustrum();
 	const LIGHT_DESC*		Get_LightDesc() { return &m_LightDesc; }
 	void					Set_Active(_bool isActive) { m_isActive = isActive; }
 
@@ -28,9 +29,6 @@ private:
 	LIGHT_DESC		m_LightDesc = {};
 
 	_bool			m_isActive = { true };
-
-private:
-	void			Add_VF_Light();
 
 public:
 	static		CLight*	Create(const LIGHT_DESC& LightDesc);
