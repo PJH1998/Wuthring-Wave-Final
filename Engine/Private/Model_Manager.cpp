@@ -18,11 +18,17 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	m_ModelPrototypes = new unordered_map<_string, class CModel_Streaming*>[iMaxLevel];
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
-	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
+	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 60, 20);
+	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 45, 10);
+	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 25, 6);
+	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 10, 3);
+
+	/*
+		m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 128, sizeof(VTXMESH));
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
 	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
-
+	*/
 	D3D11_BUFFER_DESC StagingDesc = {};
 	StagingDesc.ByteWidth = 1024 * 1024 * 64;
 	StagingDesc.Usage = D3D11_USAGE_STAGING;
@@ -43,7 +49,8 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 
 void CModel_Manager::Update(_float fTimeDelta)
 {
-	m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
+	//m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
+	m_fTotalPlayTime = 0.f;
 	m_iCurrentLoadCnt = 0;
 	//for (_uint i = 0; i < m_DeleteList.size(); ++i)
 	//{
@@ -464,6 +471,8 @@ void CModel_Manager::LoadLastLOD()
 	}
 	Release_Vector(m_StagingData);
 	m_StagingData.clear();
+	m_DataPool.clear();
+	m_DataPool.shrink_to_fit();
 }
 
 void CModel_Manager::Add_To_RenderTest(_uint iLODIndex, CStaticObject* pObject)
