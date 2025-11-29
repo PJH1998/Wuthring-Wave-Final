@@ -171,6 +171,8 @@ public:
 	void Bind_GrabVisible(_bool IsVisible);
 	void ResetPose();
 
+	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
+
 #pragma endregion
 
 

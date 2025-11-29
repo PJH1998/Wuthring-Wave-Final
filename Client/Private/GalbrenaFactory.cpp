@@ -31,6 +31,9 @@
 #include "GalbrenaRopeHook.h"
 #include "GalbrenaRopeDrag.h"
 
+// Capture state
+#include "GalbrenaCapture.h"
+
 void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbrena* pCharacter)
 {
    // enum 기반 State 등록
@@ -65,4 +68,11 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	// Intreaction 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEHOOK), CGalbrenaRopeHook::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEDRAG), CGalbrenaRopeDrag::Create(pCharacter));
+
+	// Capture 카테고리 하위 State들.
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EGalbrenaCaptureState::CAPTURE), CGalbrenaCapture::Create(pCharacter));
+
+
+
+
 }

@@ -60,6 +60,9 @@ private:
 		// Hit
 		EAugustaHitType m_eHitType = EAugustaHitType::END;
 
+		//Interaction
+		EAugustaRopeHookType m_eRopeHookType = EAugustaRopeHookType::END;
+
 		// Capture
 		EAugustaCaptureType m_eCaptureType = EAugustaCaptureType::END;
 		
@@ -228,7 +231,9 @@ private:
 
 private:
 	void Update_TargetDistance();
-
+	void Update_Physics(_float fTimeDelta);
+	void Update_Camera(_float fTimeDelta);
+	
 
 private:
 	// Runtime 

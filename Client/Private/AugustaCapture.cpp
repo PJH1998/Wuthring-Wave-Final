@@ -36,8 +36,11 @@ void CAugustaCapture::OnEnter(void* pArg)
 	// 5. 중력 켰다.
 	m_pAugusta->Set_Gravity(false);
 
-	// 6.
-	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+	// 6. 타이머 속도 변경
+	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
+
+	// 7. Capture 스테이트 변경.
+	m_eCaptureStep = CAPTURESTEP::STEP_START;
 }
 
 void CAugustaCapture::OnUpdate(_float fTimeDelta)
@@ -66,13 +69,14 @@ void CAugustaCapture::OnExit()
 	m_pAugusta->Set_Gravity(true);
 	m_pAugusta->Set_Visible(true);
 	m_pAugusta->ClearCaptureState();
+	m_eCaptureStep = CAPTURESTEP::STEP_NONE;
 	//m_pAugusta->ResetPose();
 }
 
 void CAugustaCapture::Handle_Input()
 {
 	// 애니메이션 실행 도중에 그랩 상태가 제거된다면?
-	m_States[GRAB_EXIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE)); // 탈출 조건.
+	m_States[GRAB_EXIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE)) && CAPTURESTEP::STEP_END == m_eCaptureStep; // 탈출 조건.
 
 }
 
@@ -95,11 +99,12 @@ void CAugustaCapture::Check_StateTransition(_float fTimeDelta)
 	EAugustaCaptureType eCaptureType = static_cast<EAugustaCaptureType>(m_iCurrentAnimIdx);
 
 	// 올라갈때는 Fly로
-	if (m_IsAnimationEnd && eCaptureType == EAugustaCaptureType::BEHIT_FLY_START)
+	if (m_IsAnimationEnd && m_eCaptureStep == CAPTURESTEP::STEP_START)
 	{
 		//m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_LOOP);
 		m_pAugusta->Set_Visible(false);
 		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::CAPTURED);
+		m_eCaptureStep = CAPTURESTEP::STEP_END;
 		return;
 	}
 //	if (m_IsAnimationEnd && eCaptureType == EAugustaCaptureType::BEHIT_FLY_LOOP)

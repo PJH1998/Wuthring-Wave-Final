@@ -200,6 +200,7 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
@@ -316,6 +317,7 @@
     <ClInclude Include="..\Public\RoverAirFall.h" />
     <ClInclude Include="..\Public\RoverAirFly.h" />
     <ClInclude Include="..\Public\RoverAirJump.h" />
+    <ClInclude Include="..\Public\RoverCapture.h" />
     <ClInclude Include="..\Public\RoverDarkScythe.h" />
     <ClInclude Include="..\Public\RoverDarkWing.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
@@ -432,6 +434,7 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
@@ -539,6 +542,7 @@
     <ClCompile Include="..\Private\RopeAnchor.cpp" />
     <ClCompile Include="..\Private\RoverAirAttack.cpp" />
     <ClCompile Include="..\Private\RoverAirFly.cpp" />
+    <ClCompile Include="..\Private\RoverCapture.cpp" />
     <ClCompile Include="..\Private\RoverDarkScythe.cpp" />
     <ClCompile Include="..\Private\RoverDarkWing.cpp" />
     <ClCompile Include="..\Private\RoverGroundAttack.cpp" />

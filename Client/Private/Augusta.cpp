@@ -112,7 +112,8 @@ void CAugusta::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
-
+	
+	// 파츠 갱신.
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
@@ -123,63 +124,52 @@ void CAugusta::Update(_float fTimeDelta)
     m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	
-	// 3. 그랩 당할때? 애니메이션 컨디션 
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
-	{
-		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
-			nullptr != m_PendingCaptureDesc.pTransform)
-		{
-			
-			_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
-			
-			//_matrix matFinalWorld = matBone * m_PendingCaptureDesc.pTransform->Get_WorldMatrix(); // 2. 최종 행렬.
+	// 3. Physcis 업데이트
+	Update_Physics(fTimeDelta);
+	// 4. 카메라 업데이트
+	Update_Camera(fTimeDelta);
+	//if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	//{
+	//	if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
+	//		nullptr != m_PendingCaptureDesc.pTransform)
+	//	{
+	//		
+	//		_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
 
-			_vector vScale{}, vRotQuat{}, vTrans{};
-			_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
-			XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
-			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
+	//		_vector vScale{}, vRotQuat{}, vTrans{};
+	//		_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
+	//		XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
+	//		m_pTransformCom->Set_State(STATE::POSITION, vTrans);
 
-			CTransform* pMonsterTransform = m_PendingCaptureDesc.pTransform;
-			_vector vMonsterPos = pMonsterTransform->Get_State(STATE::POSITION);
-			_vector vMonsterLook = XMVector3Normalize(pMonsterTransform->Get_State(STATE::LOOK));
+	//		_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
+	//		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	//		vPos += vCameraLook * -3.f;
+	//		m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
+	//	}
+	//}
+	//else
+	//{
+	//	// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
+	//	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	//	if (!m_IsQTE)
+	//	{
+	//		// 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+	//		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-			_float fBackDistance = 6.0f; // 몬스터 뒤로 얼마나 떨어질지
-			_float fHeightOffset = 2.5f; // 카메라 높이
-
-			_vector vCamPos = vMonsterPos - (vMonsterLook * fBackDistance);
-			vCamPos += XMVectorSet(0.f, fHeightOffset, 0.f, 0.f);
-
-			//m_pSpringCamera->Update_Target(vCamPos, 1.2f);
-			_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
-			_vector vTargetPos = m_PendingCaptureDesc.pTransform->Get_State(STATE::POSITION);
-			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-			vPos += vCameraLook * -3.f;
-			m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
-		}
-	}
-	else
-	{
-		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
-		_vector vVelocity = m_pTransformCom->Get_Velocity();
-		if (!m_IsQTE)
-		{
-			// 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-			m_pColliderCom->Update(vVelocity / fTimeDelta);
-
-			// 5. Camera 갱신 => 위치 따라오게
-			m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-		}
-		else
-		{
-			m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
-		}
-		// 6. Land Check
-		m_IsLand = Is_LandCollider();
-	}
+	//		// 5. Camera 갱신 => 위치 따라오게
+	//		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
+	//	}
+	//	else
+	//	{
+	//		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
+	//	}
+	//	// 6. Land Check
+	//	m_IsLand = Is_LandCollider();
+	//}
 	
 
 	
-
+	// 4. 어택 볼륨 갱신.
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
@@ -218,17 +208,19 @@ void CAugusta::Late_Update(_float fTimeDelta)
 			pPart.second->Late_Update(fTimeDelta);
 	}
 
-	if (!m_IsVisible)
-		return;
+	if (m_IsVisible)
+	{
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+			return;
+
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+			return;
+
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+			return;
+	}
 	
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-        return;
-
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
-		return;
-
-	if(FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
-		return;
+    
 }
 
 void CAugusta::Render()
@@ -1049,6 +1041,53 @@ void CAugusta::Update_TargetDistance()
 	vDistance = XMVectorSetY(vDistance, 0.f);
 	m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 }
+
+void CAugusta::Update_Physics(_float fTimeDelta)
+{
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	{
+		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
+			nullptr != m_PendingCaptureDesc.pTransform)
+		{
+			_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
+
+			_vector vScale{}, vRotQuat{}, vTrans{};
+			_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
+			XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
+			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
+		}
+	}
+	else
+	{
+		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
+		_vector vVelocity = m_pTransformCom->Get_Velocity();
+		if (!m_IsQTE)
+			m_pColliderCom->Update(vVelocity / fTimeDelta);
+		else
+			m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
+		// 6. Land Check
+		m_IsLand = Is_LandCollider();
+	}
+}
+
+
+void CAugusta::Update_Camera(_float fTimeDelta)
+{
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	{
+		_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+		vPos += vCameraLook * -3.f;
+		m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
+	}
+	else if (!m_IsQTE)
+	{
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
+	}
+}
+
+
+
 #pragma endregion
 
 
@@ -1119,12 +1158,6 @@ void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
-
-    //_float3 vRadian = {
-    //    XMConvertToRadians(pDesc->vRotation.x),
-    //    XMConvertToRadians(pDesc->vRotation.y),
-    //    XMConvertToRadians(pDesc->vRotation.z) };
-    //m_pTransformCom->Rotation_Quaternion(vRadian);
 }
 
 

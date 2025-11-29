@@ -373,6 +373,13 @@ void CCharacter::ResetPose()
 	m_pTransformCom->Set_State(STATE::LOOK, vLook);
 }
 
+void CCharacter::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
+{
+	m_pGameInstance->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
+}
+
+
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {
