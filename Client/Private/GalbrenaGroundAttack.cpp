@@ -143,7 +143,7 @@ void CGalbrenaGroundAttack::Handle_Input()
 
     // 입력키 체크
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
-	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB)) || m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 
     // 스킬 체크
