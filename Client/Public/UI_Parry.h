@@ -47,6 +47,8 @@ private:
 
 	_float3*		m_pTargetPos = nullptr;
 
+	const _float	m_fPivotDistance = 40.f;
+
 	//_float3			m_vOriginSca = {};
 
 public:

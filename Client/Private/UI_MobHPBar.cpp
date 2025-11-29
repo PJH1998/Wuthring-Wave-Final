@@ -506,7 +506,7 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 
 		// calc scale factor
 		_float fScaleFactor = fPivotDistance / fDist;
-		fScaleFactor = fScaleFactor > fMaxScaleFactor ? fMaxScaleFactor : fScaleFactor; // 최대 1배까지만 확대
+		fScaleFactor = fScaleFactor > fMaxScaleFactor ? fMaxScaleFactor : fScaleFactor; // 최대 확대
 
 		// apply scale
 		vecInstDesc[i].vSInstRight = {

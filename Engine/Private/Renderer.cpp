@@ -744,6 +744,7 @@ void CRenderer::Render_Light()
 		CRASH("Failed Bind RT_Depth");
 	if(FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSS"), m_pShader, "g_SkinMaskTexture")))
 		CRASH("Failed Bind RT_SSS");
+
 	//Toon Ramp Texture
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;
@@ -763,7 +764,15 @@ void CRenderer::Render_Light()
 	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(m_pShader, "g_vClipDistances", "g_fLastDistance")))
 		return;
 
-	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
+	if (FAILED(m_pGameInstance->Bind_LightDatas(m_pShader)))
+		return;
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::LIGHT));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	/*m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);*/
 
 	m_pGameInstance->End_MRT();
 }
@@ -1264,7 +1273,7 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 
 #pragma region MRT_WATER
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_BackBuffer"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Diffuse"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Water"), TEXT("RT_Normal"))))
 		ASSERT_CRASH(false);

@@ -69,7 +69,7 @@ protected:
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 	class CModel* m_pModelCom = { nullptr };
-	class CRigidbody* m_pRigidbodyCom = { nullptr };
+	//class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CTransform* m_pParentTransform = { nullptr };
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	class CGameObject* m_pOwner = { nullptr };

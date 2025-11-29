@@ -48,6 +48,9 @@ HRESULT CWater::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Value("g_fMaxTickness", &m_fMaxTickness, sizeof(_float))))
 		CRASH("Failed Bind g_fStartOffset");
 
+	/*if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Diffuse"), pShader, "g_DiffuseTexture")))
+		CRASH("Failed to Bind DiffuseTexture");*/
+
 	if (FAILED(m_pGameInstance->Bind_EnvMapDatas(pShader, "g_EnvMapTexture", "g_EnvMapDatas", "g_HasEnvMap", "g_iNumEnvMaps")))
 		CRASH("Failed Bind EnvMapDatas");
 

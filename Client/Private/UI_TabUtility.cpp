@@ -120,6 +120,8 @@ void CUI_TabUtility::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_isFirstCheckedIndex = false;
 	m_isFirstCheckedSelectedUtil = false;
+
+	m_pGameSystem->Set_MouseFix(false);
 }
 
 void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
@@ -319,6 +321,8 @@ void CUI_TabUtility::Update_GoinDisable(_float fTimeDelta)
 
 		return;
 	}
+
+	m_pGameSystem->Set_MouseFix(true);
 
 	// 시간 경과 중 애니메이션 재생 (disable 시작 시 1회)
 	if (m_iAnimOrder == 0)

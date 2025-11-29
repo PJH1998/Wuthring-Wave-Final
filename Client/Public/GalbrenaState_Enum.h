@@ -20,6 +20,7 @@ enum class EGalbrenaGroundState : _uint
 	SKILL,			
 	BURST,			
 	SPECIAL,		
+	SPECIALDASH,
 	UNIQUE,			
 	LAND,		
 	QTE,
@@ -136,6 +137,14 @@ enum class EGalbrenaDashType : _uint
 	MOVE_F,
 	MOVE_LIMIT_B,
 	MOVE_LIMIT_F,
+	END
+
+
+};
+
+enum class EGalbrenaSpecialDashType : _uint
+{
+	ATTACK_CHARGE = 0,
 	END
 
 

@@ -14,7 +14,7 @@
 
 #define MAX_SECTOR 64
 
-struct VF_Light
+struct LightData
 {
     uint iType; // 0 = Directional, 1 = Point
     float fRange;
@@ -22,9 +22,11 @@ struct VF_Light
     float4 vDiffuse;
     float4 vDirection;
     float4 vPosition;
-} ;
+    float4 vAmbient;
+    float4 vSpecular;
+};
 
-StructuredBuffer<VF_Light> g_LightDatas : register(t0);
+StructuredBuffer<LightData> g_LightDatas : register(t0);
 
 Texture2D<float> g_MipDepthTexture : register(t1);
 Texture2DArray<float> g_ShadowMapTexture : register(t2);
@@ -364,7 +366,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         
     for (int i = 0; i < iLightCount; ++i)
     {
-        VF_Light Light = g_LightDatas[i];
+        LightData Light = g_LightDatas[i];
         
         float3 LightDirection = 0.f;
         float fAtt = 1.f;

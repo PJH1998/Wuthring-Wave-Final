@@ -24,6 +24,7 @@
 #include "SceneCamera.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
+#include "UI_GrafflePoint.h"
 
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
@@ -66,7 +67,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
+	//Ready_HavocWarrior();mm
 	//Ready_ElectroPredator();
 	//Ready_CoroSaurus();
 	//Ready_Spawner();
@@ -192,6 +193,11 @@ void CLevel_Test::Ready_Dummy()
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
+
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Leviatan_Alter");					//레비아탄(분신)
+	//DummyDesc.strInitAnimTag = "Stand2";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
+
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &DummyDesc)))
@@ -532,6 +538,11 @@ void CLevel_Test::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
+		CRASH("Failed Ready GrafflePoint");
+
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
 		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
@@ -919,6 +930,24 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+
+#pragma region [NUMPAD 0] KSTA_UITEST_GRAFFLEPOINT
+
+	static _bool isInitialized_GrafflePoint = false;
+
+	_uint iNumGraffleUI = 50;
+
+	if (!isInitialized_GrafflePoint)
+	{
+		for (_uint i = 0; i < iNumGraffleUI; i++)
+		{
+			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), nullptr);
+		}
+
+		isInitialized_GrafflePoint = true;
+	}
+
+#pragma endregion
 
 }
 
