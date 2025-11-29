@@ -258,6 +258,14 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 		cout << "플레이어 잡기 해제 호출!" << endl;
 #endif // _DEBUG
 	}
+	else if (wstrTypeTag == TEXT("CallVisible"))
+	{
+		m_pGameSystem->Call_PlayerVisible();
+#ifdef _DEBUG
+		cout << "플레이어 렌더링 호출!" << endl;
+#endif // _DEBUG
+
+	}
 }
 
 HRESULT CCorosaurus::Bind_Resources()
