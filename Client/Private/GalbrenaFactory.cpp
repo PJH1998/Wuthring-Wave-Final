@@ -13,6 +13,7 @@
 #include "GalbrenaGroundSkill.h"
 #include "GalbrenaGroundBurst.h"
 #include "GalbrenaGroundSpecial.h"
+#include "GalbrenaGroundSpecialDash.h"
 
 #include "GalbrenaGroundQTE.h"
 #include "GalbrenaGroundDodge.h"
@@ -29,6 +30,9 @@
 // Intraction 카테고리 State
 #include "GalbrenaRopeHook.h"
 #include "GalbrenaRopeDrag.h"
+
+// Capture state
+#include "GalbrenaCapture.h"
 
 void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbrena* pCharacter)
 {
@@ -49,6 +53,8 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIAL), CGalbrenaGroundSpecial::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE), CGalbrenaGroundQTE::Create(pCharacter));
 
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIALDASH), CGalbrenaGroundSpecialDash::Create(pCharacter));
+
 
 	// Air 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP), CGalbrenaAirJump::Create(pCharacter));
@@ -62,4 +68,11 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	// Intreaction 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEHOOK), CGalbrenaRopeHook::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEDRAG), CGalbrenaRopeDrag::Create(pCharacter));
+
+	// Capture 카테고리 하위 State들.
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EGalbrenaCaptureState::CAPTURE), CGalbrenaCapture::Create(pCharacter));
+
+
+
+
 }

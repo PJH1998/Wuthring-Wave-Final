@@ -98,6 +98,10 @@ _bool CAugustaGroundAttack::Hit_Judge()
 	if (nullptr == pDesc)
 		return false;
 
+	// Hit 상태이면서 Enemy Skill을 받았을때만 캔슬하고 Hit로
+	if (!m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)))
+		return false;
+
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pAugusta->GetPendingHitDesc()->iLayer);
 	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
 		IsHit = true;

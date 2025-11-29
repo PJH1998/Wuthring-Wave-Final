@@ -235,7 +235,7 @@ PS_OUT PS_TrailDefault(PS_IN In)
     return Out;
 }
 
-PS_OUT PS_TraillTest(PS_IN In)
+PS_OUT PS_TraillRightTail(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
@@ -437,7 +437,7 @@ PS_OUT PS_Y_IN(PS_IN In)
     return Out;
 }
 
-PS_OUT PS_TraillTestA(PS_IN In)
+PS_OUT PS_TraillLeftTail(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
@@ -825,18 +825,52 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
     return Out;
 }
 
-PS_OUT WBTEST(PS_IN In)
+PS_OUT PS_DefaultMeshRender(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
+    //그냥 팡 하고 나타나는거 어색할거 같으니, 임시로 스윕처리?
+    //스윕을 a에 박아줄까.
+    
+    float fAlpha = saturate(g_Sweep);
+    
+    float2 UV = In.vTexcoord;
+    
+    float Dissolve = g_DissolveTexture.Sample(DefaultSampler, UV).r;
+    
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
+
+    if (Dissolve - fRatio < 0.f)
+        discard;
+
     float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+
+    vColor.a = fAlpha;
     
-    float z = In.vProjPos.z / In.vProjPos.w;
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    if (Dissolve - fRatio <= 0.1f)
+    {
+        vColor.rgb *= 3.f;
+    }
     
-    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    float fWeight = Luminance(vColor.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(vColor.xyz, 1.f);
     
-    Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
-    Out.vAccumAlpha.r = vColor.a * Weight;
+    Out.vDiffuse = vColor;
+    
+    
+    // 단순 매쉬랜더는 웨이트블랜드 적용 안하는게 나을지도
+    //float z = In.vProjPos.z / In.vProjPos.w;
+    
+    //float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    //Out.vAccumColor = float4(vColor.rgb * vColor.a, vColor.a) * Weight;
+    //Out.vAccumAlpha.r = vColor.a * Weight;
     
     return Out;
 }
@@ -862,7 +896,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_TraillTest();
+        PixelShader = compile ps_5_0 PS_TraillRightTail();
     }
 
     pass TestPassA // 2
@@ -873,7 +907,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_TraillTestA();
+        PixelShader = compile ps_5_0 PS_TraillLeftTail();
     }
 
     pass PS_TraillTest //3
@@ -986,14 +1020,14 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TrailAlphaRight();
     }
 
-    pass WeightBlend
+    pass DefaultMeshRender //13
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_NoneCompare, 0);
-        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 WBTEST();
+        PixelShader = compile ps_5_0 PS_DefaultMeshRender();
     }
 }

@@ -38,14 +38,18 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+	void Attack_Active(_bool isActive);
+	//void Change_Visible(_bool isActive);
 
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
-	CAttackVolume* m_pMainAttackVolume = { nullptr };
+	CAttackVolume* m_pAttackVolume = { nullptr };
 
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	vector<_uint> m_ShaderPaths = {};
+	_float			m_fRateFX{};
+
 #ifdef _DEBUG
 	_float3 m_vOffsetPos = {};
 	_float3 m_vOffsetRot = {};
@@ -56,7 +60,8 @@ private:
 private:
 	HRESULT Bind_Resources();
 	void Ready_Component(LEVIBAYONET_DESC* pDesc);
-	void Ready_Volumes();
+	void Ready_Volumes(LEVIBAYONET_DESC* pDesc);
+	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 public:
 	static CLevi_Bayonet* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual	CGameObject* Clone(void* pArg) override;

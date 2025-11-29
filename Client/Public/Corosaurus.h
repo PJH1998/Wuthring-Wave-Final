@@ -59,6 +59,9 @@ private:
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;
 
+	const _float4x4*		m_pGrabSocket = { nullptr };
+	_float4x4				m_GrabCombinedMat = {};
+
 #pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
 	_uint					m_iCurrentAtkIndex{};
@@ -113,6 +116,7 @@ private:
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						test(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 

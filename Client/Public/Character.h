@@ -25,12 +25,12 @@ public:
 		CTransform* pTransform = { nullptr };
 	}PARRY_DESC;
 	
-	typedef struct tagGrabDesc {
+	typedef struct tagCaptureDesc {
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 		const _float4x4* pSocketMatrix = { nullptr };
-	}GRAB_DESC;
+	}CAPTURE_DESC;
 
 
 
@@ -132,7 +132,6 @@ public:
 	void Set_Gravity(_bool IsGravity);
 
 	// Collider
-	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = { 0.f, 0.f, 0.f });
 	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
 
 	_fvector Get_Velocity();
@@ -154,6 +153,9 @@ public:
 	_bool IsQTEend() { return m_IsQTEend;  }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
+	_bool IsVisible() { return m_IsVisible; }
+	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
+
 	virtual void Process_DelayedActions() {};
 	virtual void Calc_ChangeTimer(_float fTimeDelta) {}; // Timer 계산
 	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
@@ -162,9 +164,19 @@ public:
 	virtual void Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	virtual void End_SFX();
 
-
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
+
+	void Bind_GrabEscapePossible();
+	void Bind_GrabEscapeExecute();
+	void Bind_GrabVisible(_bool IsVisible);
+	void ResetPose();
+
+	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
+
 #pragma endregion
+
+
+
 
 #pragma region STATE
 public:
@@ -221,6 +233,11 @@ public:
 	void Set_Hit(_bool IsHit) { m_IsHit = IsHit; }
 	const HIT_DESC* GetPendingHitDesc() const { return &m_PendingHitDesc; } // 읽기 전용 정보 전달.
 	void ClearPendingHit() { m_PendingHitDesc = {}; }
+
+	// Capture
+	const CAPTURE_DESC* GetPendingCaputreDesc() const { return &m_PendingCaptureDesc; } // 읽기 전용 정보 전달.
+	void ActiveCaptureState();
+	void ClearCaptureState();
 
 	// KeyInput
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
@@ -350,7 +367,6 @@ protected:
 	
 
 	_float4 m_vQTEPos = {};
-	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
@@ -364,6 +380,7 @@ protected:
 	_bool m_IsLand = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
+	_bool m_IsVisible = { true };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 	queue<DELAYED_ACTION> m_DelayedActions;
@@ -371,7 +388,7 @@ protected:
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
-	GRAB_DESC m_PendingGrabDesc = {};
+	CAPTURE_DESC m_PendingCaptureDesc = {};
 
 
 	_float m_fDodgeableDuration = 0.2f;
@@ -393,8 +410,9 @@ protected:
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
-	
-	
+
+	_float4x4 m_GrabComibinedMatrix = {};
+
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

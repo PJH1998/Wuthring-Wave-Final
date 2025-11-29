@@ -807,7 +807,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\ShapeKey.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
-    </ClInclude> 
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1212,6 +1212,9 @@
       <Filter>97. ShaderFiles</Filter>
     </None>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Water.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Light.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
   </ItemGroup>

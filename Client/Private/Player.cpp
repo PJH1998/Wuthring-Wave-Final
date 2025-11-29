@@ -41,6 +41,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
+	// 0. 플레이어 GameSystem에 등록
+	m_pGameSystem->Register_Player(this);
 	
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
@@ -95,6 +97,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 		if (nullptr != m_Characters[i])
 			m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 	}
+
 
     return S_OK;
 }
@@ -425,18 +428,14 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	
 
 
-	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화 (Character.cpp의 Sync_Transform_FromPlayer 사용)
-	//    - Player의 WorldMatrix는 이전 캐릭터로부터 이미 동기화되어 있음 (Sync_Transform_FromCharacter에서).
+	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화
 	_fmatrix PlayerWorldMatrix = m_pTransformCom->Get_WorldMatrix();
 	m_Characters[m_iCurrentCharacterIdx]->Sync_Transform_FromPlayer(PlayerWorldMatrix, m_Characters[m_iPrevCharacterIdx]->Get_Velocity(), fTimeDelta);
 
-	// 4. 새 캐릭터의 콜라이더 초기화 (속도 0으로 리셋, 중력 등 상태 복원)
-	//    - CCharacter::m_pColliderCom->Update(XMVectorZero())로 속도 초기화.
-	//    - 필요 시 Set_Gravity(true) 등으로 물리 상태 재설정.
+	// 4. 새 캐릭터의 콜라이더 초기화 
 	m_Characters[m_iCurrentCharacterIdx]->Sync_Collider(XMVectorZero(), fTimeDelta);  // 속도 0으로 초기화
 
-	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작) => 새 캐릭터.
-	//    - 새 캐릭터의 StateContext 초기화 (e.g., IdleType 설정). => 모두 고정.
+	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작)
 	m_Characters[m_iCurrentCharacterIdx]->Set_Gravity(true);  // 중력 활성화 (필요 시)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
@@ -558,13 +557,12 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
-	CCharacter::HIT_DESC HitDesc{};
-	CCharacter::PARRY_DESC ParryDesc{};
-	CCharacter::GRAB_DESC GrabDesc{};
 	
+	// 추후 다른 어택 판정이 들어오면 그거에 맞는 판정을생성합니다.
 
 	if (COLLISIONLAYER::GRAB == eLayer)
 	{
+		CCharacter::CAPTURE_DESC GrabDesc{};
 		GrabDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		GrabDesc.fAttack = pClientDesc.fAttack;
 		GrabDesc.iLayer = iLayer;
@@ -573,6 +571,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
 	{
+		CCharacter::PARRY_DESC ParryDesc{};
 		// 2. Parry 판정
 		ParryDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		ParryDesc.fAttack = pClientDesc.fAttack;
@@ -581,6 +580,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	}
 	else
 	{
+		CCharacter::HIT_DESC HitDesc{};
 		// 3. Hit 판정.
 		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		HitDesc.fAttack = pClientDesc.fAttack;
@@ -610,6 +610,25 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 	return true;
 }
+
+#pragma region GameSystem 연계함수.
+void CPlayer::Notify_GrabVisible(_bool IsVisible)
+{
+	m_Characters[m_iCurrentCharacterIdx]->Set_Visible(IsVisible);
+}
+void CPlayer::Notify_EscapeGrabReady()
+{
+	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapePossible();
+	m_IsLockOn = true;
+}
+void CPlayer::Notify_EscapeGrabExecute()
+{
+	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapeExecute();
+	m_IsLockOn = false;
+}
+#pragma endregion
+
+
 
 void CPlayer::Sorting_Target()
 {

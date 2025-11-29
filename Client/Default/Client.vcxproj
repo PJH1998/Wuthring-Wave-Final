@@ -200,7 +200,9 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
     <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
@@ -254,6 +256,7 @@
     <ClInclude Include="..\Public\InteractionState.h" />
     <ClInclude Include="..\Public\Level_Heaven.h" />
     <ClInclude Include="..\public\Levi_Bayonet.h" />
+    <ClInclude Include="..\Public\Levi_Bow.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
@@ -314,6 +317,7 @@
     <ClInclude Include="..\Public\RoverAirFall.h" />
     <ClInclude Include="..\Public\RoverAirFly.h" />
     <ClInclude Include="..\Public\RoverAirJump.h" />
+    <ClInclude Include="..\Public\RoverCapture.h" />
     <ClInclude Include="..\Public\RoverDarkScythe.h" />
     <ClInclude Include="..\Public\RoverDarkWing.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
@@ -430,7 +434,9 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
     <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />
@@ -497,6 +503,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\Levi_Bayonet.cpp" />
+    <ClCompile Include="..\Private\Levi_Bow.cpp" />
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
     <ClCompile Include="..\Private\Loader_Heaven.cpp" />
@@ -535,6 +542,7 @@
     <ClCompile Include="..\Private\RopeAnchor.cpp" />
     <ClCompile Include="..\Private\RoverAirAttack.cpp" />
     <ClCompile Include="..\Private\RoverAirFly.cpp" />
+    <ClCompile Include="..\Private\RoverCapture.cpp" />
     <ClCompile Include="..\Private\RoverDarkScythe.cpp" />
     <ClCompile Include="..\Private\RoverDarkWing.cpp" />
     <ClCompile Include="..\Private\RoverGroundAttack.cpp" />

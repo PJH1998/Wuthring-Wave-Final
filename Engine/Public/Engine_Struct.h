@@ -29,6 +29,18 @@ namespace Engine
 		_float fRange;
 	}LIGHT_DESC;
 
+	typedef struct tagLightData
+	{
+		_uint iType;
+		_float fRange;
+		_float Padding[2];
+		_float4 vDiffuse;
+		_float4 vDirection;
+		_float4 vPosition;
+		_float4 vAmbient;
+		_float4 vSpecular;
+	}LIGHT_DATA;
+
 	typedef struct tagVF_Light {
 		_uint iType;		// 0 = Directional, 1 = Point
 		_float fRange;

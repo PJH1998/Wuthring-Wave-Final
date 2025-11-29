@@ -12,6 +12,7 @@ private:
 		DRAG,
 		FALL,
 		LAND,
+		GRAB_EXIT,
 		END
 	};
 
@@ -43,7 +44,7 @@ private:
 
 private:
 	virtual void Handle_Input() override;
-	void Update_RopeAnimation(_float fTimeDelta);
+	void Update_CaptureAnimation(_float fTimeDelta);
 	void Check_Physics(_float fTimeDelta);
 	void Check_StateTransition(_float fTimeDelta);
 

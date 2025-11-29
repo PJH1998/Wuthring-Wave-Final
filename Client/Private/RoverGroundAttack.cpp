@@ -87,6 +87,10 @@ _bool CRoverGroundAttack::Hit_Judge()
 	if (nullptr == pDesc)
 		return false;
 
+	// Hit 상태이면서 Enemy Skill을 받았을때만 캔슬하고 Hit로
+	if (!m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)))
+		return false;
+
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pRover->GetPendingHitDesc()->iLayer);
 	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
 		IsHit = true;
@@ -176,7 +180,10 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
-	if (m_States[HIT])
+
+
+
+	if (m_States[HIT]) // 강공 받았을때 Hit로 가버리므로.?
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
 		return;
@@ -188,6 +195,7 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
+	
 
 	
 	if (m_States[HEAVY_ATTACK_PENDING])

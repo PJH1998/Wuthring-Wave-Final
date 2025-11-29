@@ -59,6 +59,12 @@ private:
 
 		// Hit
 		EAugustaHitType m_eHitType = EAugustaHitType::END;
+
+		//Interaction
+		EAugustaRopeHookType m_eRopeHookType = EAugustaRopeHookType::END;
+
+		// Capture
+		EAugustaCaptureType m_eCaptureType = EAugustaCaptureType::END;
 		
 
 		// Prev Info
@@ -91,14 +97,17 @@ private:
 
 			
 
-
 			// Climb
 			m_eClimbIdleType = EAugustaClimbIdleType::END;
 			m_eClimbMoveType = EAugustaClimbMoveType::END;
 			m_eClimbExitType = EAugustaClimbExitType::END;
 			m_IsClimbSecondStep = false;
 
+			// Hit
 			m_eHitType = EAugustaHitType::END;
+
+			// Capture
+			m_eCaptureType = EAugustaCaptureType::END;
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
@@ -222,7 +231,9 @@ private:
 
 private:
 	void Update_TargetDistance();
-
+	void Update_Physics(_float fTimeDelta);
+	void Update_Camera(_float fTimeDelta);
+	
 
 private:
 	// Runtime 

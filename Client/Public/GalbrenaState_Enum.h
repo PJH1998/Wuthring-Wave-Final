@@ -20,6 +20,7 @@ enum class EGalbrenaGroundState : _uint
 	SKILL,			
 	BURST,			
 	SPECIAL,		
+	SPECIALDASH,
 	UNIQUE,			
 	LAND,		
 	QTE,
@@ -61,6 +62,12 @@ enum class EGalbrenaInteractionState : _uint
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
 	INTERACTION_END
+};
+
+enum class EGalbrenaCaptureState : _uint
+{
+	CAPTURE = 0,
+	CAPTURE_END
 };
 
 #pragma endregion
@@ -136,6 +143,14 @@ enum class EGalbrenaDashType : _uint
 	MOVE_F,
 	MOVE_LIMIT_B,
 	MOVE_LIMIT_F,
+	END
+
+
+};
+
+enum class EGalbrenaSpecialDashType : _uint
+{
+	ATTACK_CHARGE = 0,
 	END
 
 
@@ -394,6 +409,20 @@ enum class EGalbrenaRopeDragType : _uint
 };
 #pragma endregion
 
+#pragma region CAPTURED
+
+enum class EGalbrenaCaptureType : _uint
+{
+	CAPTURED = 0,
+	BEHIT_PUSH_LOOP,
+	BEHIT_FLY_START,
+	BEHIT_FLY_LOOP,
+	BEHIT_FLY_FALL,
+	BEHIT_PUSH_FALL,
+	BEHIT_PUSH_START,
+	END
+};
+#pragma endregion
 
 #pragma endregion
 

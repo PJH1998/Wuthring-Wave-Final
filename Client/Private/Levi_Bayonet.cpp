@@ -27,7 +27,7 @@ HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
 	m_pSocketMatrix = pDesc->pSocketMatrix;
 
 	Ready_Component(pDesc);
-	Ready_Volumes();
+	Ready_Volumes(pDesc);
 
 #ifdef _DEBUG
 	m_vOffsetPos = pDesc->vOffsetPos;
@@ -63,8 +63,9 @@ void CLevi_Bayonet::Update(_float fTimeDelta)
 	_vector vScale, vQuaternion, vTransition;
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
+	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
+	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
 }
 
 void CLevi_Bayonet::Late_Update(_float fTimeDelta)
@@ -107,11 +108,17 @@ void CLevi_Bayonet::Render()
 	}
 }
 
+void CLevi_Bayonet::Attack_Active(_bool isActive)
+{
+	m_pAttackVolume->TriggerActivate(isActive);
+}
+
 HRESULT CLevi_Bayonet::Bind_Resources()
 {
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+	//if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+	//	CRASH("Failed Bind Matrix");
+	if(FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
 		CRASH("Failed Bind Matrix");
-
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Failed Bind Matrix");
 
@@ -133,9 +140,32 @@ void CLevi_Bayonet::Ready_Component(LEVIBAYONET_DESC* pDesc)
 		CRASH("Model");
 }
 
-void CLevi_Bayonet::Ready_Volumes()
+void CLevi_Bayonet::Ready_Volumes(LEVIBAYONET_DESC* pDesc)
 {
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
+	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
+	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = pDesc->fAttackDmg;
+	TriggerDesc.eDamageType = pDesc->eType;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnCollide_Enter(iLayer, pOther, Manifold);
+		};
+	
+	m_pAttackVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAttackVolume)
+		CRASH(m_pAttackVolume);
+	m_pAttackVolume->TriggerActivate(false);
+}
 
+void CLevi_Bayonet::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
 }
 
 CLevi_Bayonet* CLevi_Bayonet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -169,5 +199,5 @@ void CLevi_Bayonet::Free()
 	__super::Free();
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
-	Safe_Release(m_pMainAttackVolume);
+	Safe_Release(m_pAttackVolume);
 }

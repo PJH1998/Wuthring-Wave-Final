@@ -29,6 +29,9 @@
 #include "RoverRopeHook.h"
 #include "RoverRopeDrag.h"
 
+// Capture 카테고리 State
+#include "RoverCapture.h"
+
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCharacter)
 {
@@ -59,11 +62,14 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 	// Climb 하위 State들
 	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(ERoverClimbState::CLIMB_MOVE), CRoverClimbMove::Create(pCharacter));
 	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(ERoverClimbState::CLIMB_EXIT), CRoverClimbExit::Create(pCharacter));
-	//
+	
 	//// Hit 하위 State
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT), CRoverHit::Create(pCharacter));
 
 	// Interaction 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEHOOK), CRoverRopeHook::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG), CRoverRopeDrag::Create(pCharacter));
+
+	// Capture 하위 State들.
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(ERoverCaptureState::CAPTURE), CRoverCapture::Create(pCharacter));
 }

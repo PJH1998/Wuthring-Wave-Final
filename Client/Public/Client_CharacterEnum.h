@@ -1,6 +1,11 @@
 ﻿#pragma once
 namespace Client
 {
+	enum class CHARACTER_EVENT : unsigned int {
+		EVENT = 0,
+		END
+	};
+
 	enum class ROPEDIR : unsigned int {
 		U = 0,
 		F,
@@ -38,6 +43,7 @@ namespace Client
 		ROPE_DRAG = 1 << 10, // Rope Drag 상태.
 		GRABED = 1 << 11, // Player가 Grab 된 상태
 		STATE_DELAY = 1 << 12,  // Player의 State 속도가 저하된 상태.
+		GRABRELEASE = 1 << 13,  // Player의 Grab이 해제된 상태.
 		END
 	};
 

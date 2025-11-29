@@ -34,6 +34,7 @@ private:
 	{
 		// Ground
 		EGalbrenaDashType m_eDashType = EGalbrenaDashType::END;
+		EGalbrenaSpecialDashType m_eSpecialDashType = EGalbrenaSpecialDashType::END;
 		EGalbrenaIdleType  m_eIdleType = EGalbrenaIdleType::END;
 		EGalbrenaRunType m_eRunType = EGalbrenaRunType::END;
 		EGalbrenaSprintType m_eSprintType = EGalbrenaSprintType::END;
@@ -66,6 +67,9 @@ private:
 		// Interaction
 		EGalbrenaRopeHookType m_eRopeHookType = EGalbrenaRopeHookType::END;
 
+		// Capture
+		EGalbrenaCaptureType m_eCaptureType = EGalbrenaCaptureType::END;
+
 		// Prev Info
 		_string m_strPrevInfo = {};
 		void Clear()
@@ -75,6 +79,7 @@ private:
 			m_eRunType = EGalbrenaRunType::END;
 			m_eSprintType = EGalbrenaSprintType::END;
 			m_eDashType = EGalbrenaDashType::END;
+			m_eSpecialDashType = EGalbrenaSpecialDashType::END;
 			m_eLandType = EGalbrenaLandType::END;
 			m_eDodgeType = EGalbrenaDodgeType::END;
 
@@ -103,7 +108,12 @@ private:
 
 			// Interaction
 			m_eRopeHookType = EGalbrenaRopeHookType::END;
+
+			// Capture
+			m_eCaptureType = EGalbrenaCaptureType::END;
+
 			m_strPrevInfo.clear(); // String 비우기.
+
 		};
 	};
 
@@ -163,6 +173,7 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
+	virtual void Grab_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
 	virtual void Bind_QTE(_bool IsQTE) override;
@@ -207,6 +218,8 @@ private:
 private:
 	void Bind_TargetToVolumes();
 	void Update_TargetDistance();
+	void Update_Physics(_float fTimeDelta);
+	void Update_Camera(_float fTimeDelta);
 
 private:
 	void Bind_Resources();

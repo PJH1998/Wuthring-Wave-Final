@@ -412,6 +412,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet">
       <UniqueIdentifier>{865ddfb4-ae01-44d4-923a-b046ed456f2d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bow">
+      <UniqueIdentifier>{2ced9772-e1c0-4614-b481-8f5a8903fee7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1039,12 +1042,26 @@
     <ClInclude Include="..\Public\CaptureState.h">
       <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Levi_Bayonet.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Levi_Bow.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaCapture.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaCapture.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverCapture.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1638,12 +1655,26 @@
     <ClCompile Include="..\Private\CaptureState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\private\Levi_Bayonet.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bayonet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Bow.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaCapture.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaCapture.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverCapture.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
