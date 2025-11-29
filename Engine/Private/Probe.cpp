@@ -267,12 +267,12 @@ void CProbe::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer_Rect, _uint iInd
 	m_pBackBuffer = nullptr;
 	m_pOriginDSV = nullptr;
 
-	ScratchImage CubeImage = {};
-	CaptureTexture(m_pDevice, m_pContext, m_pTexture, CubeImage);
+	//ScratchImage CubeImage = {};
+	//CaptureTexture(m_pDevice, m_pContext, m_pTexture, CubeImage);
 
-	_wstring strSaveName = TEXT("../../Client/Bin/Probe") + to_wstring(iIndex) + TEXT(".dds");
-	
-	SaveToDDSFile(CubeImage.GetImages(), CubeImage.GetImageCount(), CubeImage.GetMetadata(), DDS_FLAGS_NONE, strSaveName.c_str());
+	//_wstring strSaveName = TEXT("../../Client/Bin/Probe") + to_wstring(iIndex) + TEXT(".dds");
+	//
+	//SaveToDDSFile(CubeImage.GetImages(), CubeImage.GetImageCount(), CubeImage.GetMetadata(), DDS_FLAGS_NONE, strSaveName.c_str());
 
 	m_SkyBoxs.clear();
 	m_StaticObjects.clear();

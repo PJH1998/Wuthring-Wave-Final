@@ -152,11 +152,13 @@ public:
 #pragma endregion
 
 #pragma region LIGHT_MANAGER
-	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
-	void					Set_Active(const _wstring& strLightTag, _bool isActive);
-	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
-	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
-	HRESULT					Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
+	const LIGHT_DESC*			Get_LightDesc(const _wstring& strLightTag);
+	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	HRESULT						Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
+	HRESULT						Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT						Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
+	HRESULT						Bind_LightDatas(class CShader* pShader);
+	const vector<LIGHT_DATA>*	Get_LightDatas();
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
 #endif
@@ -331,7 +333,6 @@ public:
 
 #pragma region VOLUMETRIC_FOG
 public:
-	void						Add_LightData_ToVF(const VF_LIGHT& LightData);
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 #pragma endregion
 

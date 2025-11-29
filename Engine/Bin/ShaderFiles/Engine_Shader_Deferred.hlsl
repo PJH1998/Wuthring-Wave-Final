@@ -1,4 +1,4 @@
-#include "Engine_Shader_Shadow.hlsli"
+#include "Engine_Shader_Light.hlsli"
 #include "Engine_Shader_Water.hlsli"
 
 Texture2DArray<float4> g_LUT_Texture : register(t1);
@@ -71,32 +71,34 @@ float g_fLimitVelocity;
 float g_fLimitDepth;
 
 //Light
-vector  g_vLightDirection = 0.f;
-vector  g_vLightDiffuse = 1.f;
-vector  g_vLightAmbient = 1.f;
-vector  g_vLightPosition;
-float   g_fLightRange; 
-vector  g_vLightSpecular = 1.f;
-vector  g_vMtrlSpecular = 1.f;
+uint g_iNumLight;
 
-vector  g_vDynamicMtrlAmbient = 0.5f;
-vector  g_vStaticMtrlAmbient = 0.3f;
+//vector  g_vLightDirection = 0.f;
+//vector  g_vLightDiffuse = 1.f;
+//vector  g_vLightAmbient = 1.f;
+//vector  g_vLightPosition;
+//float   g_fLightRange; 
+//vector  g_vLightSpecular = 1.f;
+//vector  g_vMtrlSpecular = 1.f;
+
+//vector  g_vDynamicMtrlAmbient = 0.5f;
+//vector  g_vStaticMtrlAmbient = 0.3f;
 
 int g_DebugCSMIndex;
 
-//SHADOWMAP
-Texture2DArray<float> g_ShadowMap;
-bool g_HasShadowMap;
+////SHADOWMAP
+//Texture2DArray<float> g_ShadowMap;
+//bool g_HasShadowMap;
 
-//CASCADE
-Texture2DArray<float> g_Cascade : register(t2);
+////CASCADE
+//Texture2DArray<float> g_Cascade : register(t2);
 
-float4 g_vShadowLightDirection;
+//float4 g_vShadowLightDirection;
 
 //RIM_RIGHT
-bool g_IsCustomRimColor = false;
-float4 g_vRimColor = 0.f;
-float4 g_fRimIntensity = 0.8f;
+//bool g_IsCustomRimColor = false;
+//float4 g_vRimColor = 0.f;
+//float4 g_fRimIntensity = 0.8f;
 
 //SFX
 float g_fEffectIntensity;
@@ -191,246 +193,293 @@ struct PS_OUT_LIGHT
     float4 vLightAmbient : SV_TARGET2;
 };
 
-PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
+PS_OUT_LIGHT PS_LIGHT(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
         discard;
-        
+    
     float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-
-    float4 vWorldPos = 0.f;
-
-    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = vDepthDesc.x;
-    vWorldPos.w = 1.f;
-    
-    vWorldPos *= vDepthDesc.y;
-    
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-    
-//    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    
-    vector vLook = normalize(g_vCamPosition - vWorldPos);
-    
-    float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
-   
-    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
     
-    float fRimPower = 0.f;
+    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
-    if (vDepthDesc.w != 1.f)
-        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
-
-    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
+    float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
-    float3 vAmbient = 0.f;
+    bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
     
-    float3 vLightDiffuse = 0.f;
-    float3 vLightSpecular = 0.f;
-    
-    float3 vResultDiffuse = 0.f;
-    float3 vResultSpecular = 0.f;
-    
-    float4 vAmbientColor = 0.f;
-    
-    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    float fViewZ = vViewPos.z;
-
-    float fShadowMap = 1.f;
-    
-    float fShadowNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
-    
-    if (vPBRDesc.z)
+    for (uint i = 0; i < g_iNumLight; ++i)
     {
-        //float fToonShade = lerp(0.5f, 1.f, smoothstep(-0.4f, -0.2f, NdotL));
-
-        if (g_HasShadowMap)
+        LIGHT_RESULT Result = (LIGHT_RESULT) 0;
+        
+        switch (g_LightDatas[i].iType)
         {
-            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
+            case 0: // DIRECTIONAL
+                Result = Compute_Directional(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
+                break;
+            case 1: // POINT
+                Result = Compute_Point(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
+                break;
         }
         
-        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
+        Out.vLightDiffuse += float4(Result.vLightDiffuse, 1.f);
+        Out.vLightSpecular += float4(Result.vLightSpecular, 1.f);
+        Out.vLightAmbient += float4(Result.vLightAmbient, 1.f);
+    }
+    
+    Out.vLightDiffuse.w = 1.f;
+
+    Out.vLightSpecular.w = 1.f;
+
+    Out.vLightAmbient.w = 1.f;
+    
+    return Out;
+}
+
+//PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
+//{
+//    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+//    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+//    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
+//        discard;
         
-        Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
-        float3 vRim = (fRimPower * vRimColor);
-        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
-        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
+//    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
+
+//    float4 vWorldPos = 0.f;
+
+//    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+//    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+//    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+//    vWorldPos.z = vDepthDesc.x;
+//    vWorldPos.w = 1.f;
+    
+//    vWorldPos *= vDepthDesc.y;
+    
+//    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+//    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
+    
+////    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    
+//    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    
+//    float3 vLightDir = g_vLightDirection.xyz * -1.f;
+    
+//    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
+   
+//    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    
+//    float fRimPower = 0.f;
+    
+//    if (vDepthDesc.w != 1.f)
+//        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+
+//    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
+    
+//    float3 vAmbient = 0.f;
+    
+//    float3 vLightDiffuse = 0.f;
+//    float3 vLightSpecular = 0.f;
+    
+//    float3 vResultDiffuse = 0.f;
+//    float3 vResultSpecular = 0.f;
+    
+//    float4 vAmbientColor = 0.f;
+    
+//    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+//    float fViewZ = vViewPos.z;
+
+//    float fShadowMap = 1.f;
+    
+//    float fShadowNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
+    
+//    if (vPBRDesc.z)
+//    {
+//        //float fToonShade = lerp(0.5f, 1.f, smoothstep(-0.4f, -0.2f, NdotL));
+
+//        if (g_HasShadowMap)
+//        {
+//            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
+//        }
         
-        if (false == IsSkin)      // 금속 부분만 PBR 처리
-        {
+//        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
+        
+//        Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
+//        float3 vRim = (fRimPower * vRimColor);
+//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
+//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
+        
+//        if (false == IsSkin)      // 금속 부분만 PBR 처리
+//        {
           
-            Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
-            Out.vLightSpecular = float4(vLightSpecular, 1.f);
+//            Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
+//            Out.vLightSpecular = float4(vLightSpecular, 1.f);
             
-            vAmbientColor = vDiffuse;
-            vAmbient = g_vDynamicMtrlAmbient;
-        }
-        else
-        {
-            float3 vOrigin = vDiffuse.xyz * fShadowMap;
+//            vAmbientColor = vDiffuse;
+//            vAmbient = g_vDynamicMtrlAmbient;
+//        }
+//        else
+//        {
+//            float3 vOrigin = vDiffuse.xyz * fShadowMap;
             
-            Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, 0.6f), 1.f);
-            Out.vLightSpecular = float4(lerp(vRim, vLightSpecular, 0.6f), 1.f);
+//            Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, 0.6f), 1.f);
+//            Out.vLightSpecular = float4(lerp(vRim, vLightSpecular, 0.6f), 1.f);
             
-            vAmbientColor = vDiffuse;
-            vAmbient = g_vDynamicMtrlAmbient * 0.6f;
-        }
-    }
-    else
-    {
-        Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
+//            vAmbientColor = vDiffuse;
+//            vAmbient = g_vDynamicMtrlAmbient * 0.6f;
+//        }
+//    }
+//    else
+//    {
+//        Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         
-        //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-        //float fViewZ = vViewPos.z;
+//        //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+//        //float fViewZ = vViewPos.z;
 
-        //vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+//        //vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
 
     
-        if (g_HasShadowMap)
-        {
-            fShadowMap = Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap);
-        }
+//        if (g_HasShadowMap)
+//        {
+//            fShadowMap = Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap);
+//        }
    
-        float fShadow = Compute_Cascade(fViewZ, fShadowNdotL, vWorldPos, g_Cascade);
+//        float fShadow = Compute_Cascade(fViewZ, fShadowNdotL, vWorldPos, g_Cascade);
     
-        float fFinalShadow = min(fShadowMap, fShadow);
+//        float fFinalShadow = min(fShadowMap, fShadow);
     
-//        fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
+////        fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
         
-        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fFinalShadow));
-        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fFinalShadow));
-        Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
-        Out.vLightSpecular = float4(vLightSpecular, 1.f);
+//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fFinalShadow));
+//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fFinalShadow));
+//        Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
+//        Out.vLightSpecular = float4(vLightSpecular, 1.f);
         
-//        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fFinalShadow);
-        //vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
+////        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fFinalShadow);
+//        //vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
         
-        vAmbientColor = vDiffuse;
-        vAmbient = g_vStaticMtrlAmbient;
-    }
+//        vAmbientColor = vDiffuse;
+//        vAmbient = g_vStaticMtrlAmbient;
+//    }
     
     
-    Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient.xyz), 1.f);
+//    Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient.xyz), 1.f);
     
-    return Out;
-}
+//    return Out;
+//}
 
 
-PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
-{
-    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+//PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
+//{
+//    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+//    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
-        discard;
+//    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
+//        discard;
         
-    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
+//    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
-    float4 vWorldPos = 0.f;
+//    float4 vWorldPos = 0.f;
 
-    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+//    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = vDepthDesc.x;
-    vWorldPos.w = 1.f;
+//    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+//    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+//    vWorldPos.z = vDepthDesc.x;
+//    vWorldPos.w = 1.f;
     
-    vWorldPos *= vDepthDesc.y;
+//    vWorldPos *= vDepthDesc.y;
     
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
+//    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+//    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
-//    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+////    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
-    vector vLook = normalize(g_vCamPosition - vWorldPos);
+//    vector vLook = normalize(g_vCamPosition - vWorldPos);
     
-    float3 vLightDir = g_vLightPosition.xyz - vWorldPos.xyz;
+//    float3 vLightDir = g_vLightPosition.xyz - vWorldPos.xyz;
     
-    //bool IsLight = dot(normalize(vLightDir), vNormal.xyz) > 0.f;
+//    //bool IsLight = dot(normalize(vLightDir), vNormal.xyz) > 0.f;
     
-    //if(false == IsLight)
-    //    discard;
+//    //if(false == IsLight)
+//    //    discard;
     
-    float fDistance = length(vLightDir);
+//    float fDistance = length(vLightDir);
     
-    float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
+//    float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
     
-    if(fAtt == 0.f)
-        discard;
+//    if(fAtt == 0.f)
+//        discard;
     
-    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
+//    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
-    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+//    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
    
-    float fRimPower = 0.f;
+//    float fRimPower = 0.f;
     
-    if(vDepthDesc.w != 1.f)
-        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+//    if(vDepthDesc.w != 1.f)
+//        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
         
-    float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
+//    float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
  
-    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
+//    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
  
-    float3 vLightDiffuse = 0.f;
-    float3 vLightSpecular = 0.f;
+//    float3 vLightDiffuse = 0.f;
+//    float3 vLightSpecular = 0.f;
     
-    float3 vResultDiffuse = 0.f;
-    float3 vResultSpecular = 0.f;
+//    float3 vResultDiffuse = 0.f;
+//    float3 vResultSpecular = 0.f;
  
-    if (vPBRDesc.z)
-    {
-        Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
+//    if (vPBRDesc.z)
+//    {
+//        Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
         
-        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fToonShade));
-        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fToonShade)) + (fRimPower * vRimColor);
-        Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
-        Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
+//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fToonShade));
+//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fToonShade)) + (fRimPower * vRimColor);
+//        Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
+//        Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
         
-        //float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, normalize(vLightDir), vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse);
-        //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade)) + (fRimPower * vRimColor);
-        //Out.vLightAcc.xyz *= fAtt;
-    }
-    else
-    {
-        Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
+//        //float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, normalize(vLightDir), vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse);
+//        //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade)) + (fRimPower * vRimColor);
+//        //Out.vLightAcc.xyz *= fAtt;
+//    }
+//    else
+//    {
+//        Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
         
-        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse));
-        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular)) + (fRimPower * vRimColor);
-        Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
-        Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
+//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse));
+//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular)) + (fRimPower * vRimColor);
+//        Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
+//        Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
 
-        //float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
-        //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
-        //Out.vLightAcc.xyz *= fAtt;
-    }
+//        //float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
+//        //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
+//        //Out.vLightAcc.xyz *= fAtt;
+//    }
 
-    float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
+//    float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
    
-//    Out.vLightAcc.a = 1.f;
+////    Out.vLightAcc.a = 1.f;
     
-    float4 vAmbient = float4((vAmbientColor * g_vLightAmbient).xyz * fAtt, 1.f);
+//    float4 vAmbient = float4((vAmbientColor * g_vLightAmbient).xyz * fAtt, 1.f);
     
-    Out.vLightAmbient = vAmbient;
+//    Out.vLightAmbient = vAmbient;
     
-    //Out.vLightAcc.xyz += (vAmbientColor * g_vLightAmbient).xyz * fAtt;
+//    //Out.vLightAcc.xyz += (vAmbientColor * g_vLightAmbient).xyz * fAtt;
     
-    //Out.vLightAcc.a = 1.f;
+//    //Out.vLightAcc.a = 1.f;
     
-//    Out.vLightDiffuse = float4(vLightDiffuse, 1.f);  // Only Directional?
+////    Out.vLightDiffuse = float4(vLightDiffuse, 1.f);  // Only Directional?
     
-    return Out;
-}
+//    return Out;
+//}
 
 PS_OUT_BACKBUFFER PS_BLOOM(PS_IN In)
 {
@@ -767,23 +816,23 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
    
     if (fShadow != 1.f)
     {
-    switch (g_DebugCSMIndex)
-    {
-        case 0:
-            vColor = float4(fShadow, 0.f, 0.f, 1.f);
-            break;
-        case 1:
+        switch (g_DebugCSMIndex)
+        {
+            case 0:
+                vColor = float4(fShadow, 0.f, 0.f, 1.f);
+                break;
+            case 1:
             
-            vColor = float4(0.f, fShadow, 0.f, 1.f);
-            break;
-        case 2:
+                vColor = float4(0.f, fShadow, 0.f, 1.f);
+                break;
+            case 2:
             
-            vColor = float4(0.f, 0.f, fShadow, 1.f);
-            break;
-        case 3:
-            vColor = float4(fShadow, fShadow, fShadow, 1.f);
-            break;
-    }
+                vColor = float4(0.f, 0.f, fShadow, 1.f);
+                break;
+            case 3:
+                vColor = float4(fShadow, fShadow, fShadow, 1.f);
+                break;
+        }
     }
    
     Out.vColor = vColor;
@@ -886,28 +935,40 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_COMBINED();
     }
-    pass DirectionalPass // 4
+    
+    pass LightPass  //4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_LIGHT_DIRECTIONAL();
-    }
-    pass PointPass // 5
-    {
-        SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-
-        VertexShader = compile vs_5_0 VS_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_LIGHT_POINT();
+        PixelShader = compile ps_5_0 PS_LIGHT();
     }
     
-    pass Bloom // 6
+    //pass DirectionalPass // 4
+    //{
+    //    SetRasterizerState(RS_Default);
+    //    SetDepthStencilState(DSS_None, 0);
+    //    SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+    //    VertexShader = compile vs_5_0 VS_MAIN();
+    //    GeometryShader = NULL;
+    //    PixelShader = compile ps_5_0 PS_LIGHT_DIRECTIONAL();
+    //}
+    //pass PointPass // 5
+    //{
+    //    SetRasterizerState(RS_Default);
+    //    SetDepthStencilState(DSS_None, 0);
+    //    SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+    //    VertexShader = compile vs_5_0 VS_MAIN();
+    //    GeometryShader = NULL;
+    //    PixelShader = compile ps_5_0 PS_LIGHT_POINT();
+    //}
+    
+    pass Bloom // 5
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -918,7 +979,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_BLOOM();
     }
     
-    pass Distortion // 7
+    pass Distortion // 6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -929,7 +990,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DISTORTION();
     }
    
-    pass LUT // 8
+    pass LUT // 7
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -940,7 +1001,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LUT();
     }
     
-    pass Fog // 9
+    pass Fog // 8
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -951,7 +1012,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_FOG();
     }
     
-    pass SSAO // 10
+    pass SSAO // 9
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -962,7 +1023,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_SSAO();
     }
     
-    pass DOF // 11
+    pass DOF // 10
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -973,7 +1034,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOF();
     }
     
-    pass DOF_DEPTH // 12
+    pass DOF_DEPTH // 11
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -984,7 +1045,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOF_DEPTH();
     }
     
-    pass Blur   // 13
+    pass Blur   // 12
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -995,7 +1056,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_BLUR();
     }
     
-    pass VelocityMap // 14
+    pass VelocityMap // 13
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -1006,7 +1067,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_VELOCITY_MAP();
     }
     
-    pass MotionBlur // 15
+    pass MotionBlur // 14
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -1017,7 +1078,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MOTION_BLUR();
     }
     
-    pass WATER // SSR   16
+    pass WATER // SSR   15
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -1028,7 +1089,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_WATER(); // PS_SSR
     }
 
-    pass WEIGHTBLEND    //17
+    pass WEIGHTBLEND    //16
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
