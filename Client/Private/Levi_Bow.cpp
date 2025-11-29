@@ -1,23 +1,23 @@
 ﻿#include "ClientPch.h"
-#include "Levi_Bayonet.h"
+#include "Levi_Bow.h"
 #include "AttackVolume.h"
 
-CLevi_Bayonet::CLevi_Bayonet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLevi_Bow::CLevi_Bow(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CPartObject { pDevice, pContext }
 {
 }
 
-CLevi_Bayonet::CLevi_Bayonet(const CLevi_Bayonet& Prototype)
+CLevi_Bow::CLevi_Bow(const CLevi_Bow& Prototype)
 	: CPartObject { Prototype }
 {
 }
 
-HRESULT CLevi_Bayonet::Initialize_Prototype()
+HRESULT CLevi_Bow::Initialize_Prototype()
 {
 	return S_OK;
 }
 
-HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
+HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
@@ -27,7 +27,6 @@ HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
 	m_pSocketMatrix = pDesc->pSocketMatrix;
 
 	Ready_Component(pDesc);
-	Ready_Volumes(pDesc);
 
 #ifdef _DEBUG
 	m_vOffsetPos = pDesc->vOffsetPos;
@@ -43,13 +42,13 @@ HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
 	return S_OK;
 }
 
-void CLevi_Bayonet::Priority_Update(_float fTimeDelta)
+void CLevi_Bow::Priority_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
 }
 
-void CLevi_Bayonet::Update(_float fTimeDelta)
+void CLevi_Bow::Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
 	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
@@ -63,18 +62,17 @@ void CLevi_Bayonet::Update(_float fTimeDelta)
 	_vector vScale, vQuaternion, vTransition;
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
+	ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
-	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
 }
 
-void CLevi_Bayonet::Late_Update(_float fTimeDelta)
+void CLevi_Bow::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
 
-void CLevi_Bayonet::Render()
+void CLevi_Bow::Render()
 {
 	if (FAILED(Bind_Resources()))
 		CRASH("Failed to Bind Resources (Levi_Bayonet)");
@@ -108,17 +106,11 @@ void CLevi_Bayonet::Render()
 	}
 }
 
-void CLevi_Bayonet::Attack_Active(_bool isActive)
+HRESULT CLevi_Bow::Bind_Resources()
 {
-	m_pAttackVolume->TriggerActivate(isActive);
-}
-
-HRESULT CLevi_Bayonet::Bind_Resources()
-{
-	//if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
-	//	CRASH("Failed Bind Matrix");
-	if(FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
 		CRASH("Failed Bind Matrix");
+
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Failed Bind Matrix");
 
@@ -128,7 +120,7 @@ HRESULT CLevi_Bayonet::Bind_Resources()
 	return S_OK;
 }
 
-void CLevi_Bayonet::Ready_Component(LEVIBAYONET_DESC* pDesc)
+void CLevi_Bow::Ready_Component(LEVIBAYONET_DESC* pDesc)
 {
 	// 1. Components
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
@@ -140,64 +132,39 @@ void CLevi_Bayonet::Ready_Component(LEVIBAYONET_DESC* pDesc)
 		CRASH("Model");
 }
 
-void CLevi_Bayonet::Ready_Volumes(LEVIBAYONET_DESC* pDesc)
-{
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
-	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
-	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
-	TriggerDesc.eShape = SHAPE::BOX;
-	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP;
-	TriggerDesc.pParenTransform = m_pTransformCom;
-	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
-	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
-	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
-	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = pDesc->fAttackDmg;
-	TriggerDesc.eDamageType = pDesc->eType;
-	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
-		this->OnCollide_Enter(iLayer, pOther, Manifold);
-		};
-	
-	m_pAttackVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	if (nullptr == m_pAttackVolume)
-		CRASH(m_pAttackVolume);
-	m_pAttackVolume->TriggerActivate(false);
-}
-
-void CLevi_Bayonet::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+void CLevi_Bow::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 }
 
-CLevi_Bayonet* CLevi_Bayonet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLevi_Bow* CLevi_Bow::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CLevi_Bayonet* pInstance = new CLevi_Bayonet(pDevice, pContext);
+	CLevi_Bow* pInstance = new CLevi_Bow(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
-		MSG_BOX("Failed to Create : CLevi_Bayonet");
+		MSG_BOX("Failed to Create : CLevi_Bow");
 		Safe_Release(pInstance);
 	}
 
 	return pInstance;
 }
 
-CGameObject* CLevi_Bayonet::Clone(void* pArg)
+CGameObject* CLevi_Bow::Clone(void* pArg)
 {
-	CLevi_Bayonet* pClone = new CLevi_Bayonet(*this);
+	CLevi_Bow* pClone = new CLevi_Bow(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
-		MSG_BOX("Failed to Create : CLevi_Bayonet (Clone)");
+		MSG_BOX("Failed to Create : CLevi_Bow (Clone)");
 		Safe_Release(pClone);
 	}
 
 	return pClone;
 }
 
-void CLevi_Bayonet::Free()
+void CLevi_Bow::Free()
 {
 	__super::Free();
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
-	Safe_Release(m_pAttackVolume);
 }
