@@ -49,7 +49,9 @@ void CAugustaCapture::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaCapture::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::CAPTURED), "Captured", 1.5f, 20.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::CAPTURED), "Captured", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_PUSH_LOOP), "Behit_Push_Loop", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
 }
 
 void CAugustaCapture::State_Reset()
@@ -58,9 +60,19 @@ void CAugustaCapture::State_Reset()
 
 CAugustaCapture* CAugustaCapture::Create(CGameObject* pOwner)
 {
-	return nullptr;
+	CAugustaCapture* pInstance = new CAugustaCapture();
+
+	if (FAILED(pInstance->Initialize(pOwner)))
+	{
+		Safe_Release(pInstance);
+		MSG_BOX("Failed to Create : CAugustaCapture");
+		return nullptr;
+	}
+
+	return pInstance;
 }
 
 void CAugustaCapture::Free()
 {
+	CCaptureState::Free();
 }

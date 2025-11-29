@@ -62,6 +62,12 @@ enum class EAugustaInteractionState : _uint
 	INTERACTION_END
 };
 
+enum class EAugustaCaptureState : _uint
+{
+	CAPTURE = 0, 
+	CAPTURE_END
+};
+
 
 #pragma endregion
 
@@ -423,6 +429,8 @@ enum class EAugustaRopeDragType : _uint
 enum class EAugustaCaptureType : _uint
 {
 	CAPTURED = 0,
+	BEHIT_PUSH_LOOP,
+	BEHIT_FLY_LOOP,
 	END
 };
 #pragma endregion

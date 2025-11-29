@@ -25,12 +25,12 @@ public:
 		CTransform* pTransform = { nullptr };
 	}PARRY_DESC;
 	
-	typedef struct tagGrabDesc {
+	typedef struct tagCaptureDesc {
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 		const _float4x4* pSocketMatrix = { nullptr };
-	}GRAB_DESC;
+	}CAPTURE_DESC;
 
 
 
@@ -132,7 +132,6 @@ public:
 	void Set_Gravity(_bool IsGravity);
 
 	// Collider
-	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = { 0.f, 0.f, 0.f });
 	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
 
 	_fvector Get_Velocity();
@@ -221,6 +220,10 @@ public:
 	void Set_Hit(_bool IsHit) { m_IsHit = IsHit; }
 	const HIT_DESC* GetPendingHitDesc() const { return &m_PendingHitDesc; } // 읽기 전용 정보 전달.
 	void ClearPendingHit() { m_PendingHitDesc = {}; }
+
+	// Capture
+	const CAPTURE_DESC* GetPendingCaputreDesc() const { return &m_PendingCaptureDesc; } // 읽기 전용 정보 전달.
+	void ClearCaptureState();
 
 	// KeyInput
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
@@ -350,7 +353,6 @@ protected:
 	
 
 	_float4 m_vQTEPos = {};
-	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
@@ -371,7 +373,7 @@ protected:
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
-	GRAB_DESC m_PendingGrabDesc = {};
+	CAPTURE_DESC m_PendingCaptureDesc = {};
 
 
 	_float m_fDodgeableDuration = 0.2f;
@@ -393,8 +395,9 @@ protected:
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
-	
-	
+
+	_float4x4 m_GrabComibinedMatrix = {};
+
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

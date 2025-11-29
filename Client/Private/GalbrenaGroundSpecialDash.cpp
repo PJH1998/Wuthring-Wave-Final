@@ -182,6 +182,8 @@ _bool CGalbrenaGroundSpecialDash::Hit_Judge()
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pGalbrena->GetPendingHitDesc()->iLayer);
 	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
 		IsHit = true;
+
+	return IsHit;
 }
 
 CGalbrenaGroundSpecialDash* CGalbrenaGroundSpecialDash::Create(class CGameObject* pOwner)

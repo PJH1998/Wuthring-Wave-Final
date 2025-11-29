@@ -42,6 +42,9 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	m_fDragRange = pDesc->fDragRange;
 	m_fReachedHook = pDesc->fReacedRopeHook;
 
+	// 2. 그랩 용도 Matrix
+	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
+
     return S_OK;
 }
 
@@ -247,39 +250,6 @@ void CCharacter::Set_Gravity(_bool IsGravity)
 		ASSERT_CRASH(m_pQTEColliderCom);
 		m_pQTEColliderCom->Set_Gravity(IsGravity);
 	}
-		
-}
-
-
-
-void CCharacter::Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset)
-{
-	m_strColliderReferenceBone = strBoneName;
-
-	if (strBoneName.empty())
-	{
-		m_pColliderCom->Sync_Position(m_pTransformCom);
-		m_pColliderCom->Set_Offset(m_vColliderOffSet);    // 원본 오프셋으로 변경.
-		return;
-	}
-
-	// 1. RootBone의 위치 가져오기.
-	_matrix RootMatrix = XMLoadFloat4x4(m_pModelCom->Get_BoneMatrixPtr("Root"));
-	_matrix TargetMatrix = XMLoadFloat4x4(m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str()));
-
-	// 2. Root 본의 로컬 위치
-	_vector vRootPos = RootMatrix.r[3];
-	// 3. Target 본의 로컬 위치
-	_vector vTargetPos = TargetMatrix.r[3];
-	_vector vBoneOffset = (vTargetPos - vRootPos) * 0.01f - XMLoadFloat3(&vOffset);
-
-	_float3 vNewOffset = {};
-	XMStoreFloat3(&vNewOffset, XMLoadFloat3(&m_vColliderOffSet) + vBoneOffset); // 차이만큼 더한다.
-
-	m_pColliderCom->Set_Offset(vNewOffset);
-
-	m_vAnimColliderOffset = vOffset;
-
 }
 
 void CCharacter::Sync_Collider(_fvector vVelocity, _float fTimeDelta)
@@ -656,7 +626,17 @@ _bool CCharacter::Is_LockOn()
 }
 
 
+// 무조건 Grab Animation이 나오는게 아니라 들어간 상태에서 애니메이션을 선별할듯?
+void CCharacter::ClearCaptureState()
+{
+	// 1. 데이터 지우기
+	m_PendingGrabDesc = {}; 
 
+	// 2. Collider 충돌 처리 켜기.
+	m_pColliderCom->IsActivate(true);
+
+
+}
 
 _bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {

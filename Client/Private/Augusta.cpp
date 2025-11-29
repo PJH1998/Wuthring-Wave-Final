@@ -4,7 +4,6 @@
 #include "SpringCamera.h"
 #include "Collider.h"
 #include "Ability.h"
-
 #include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
@@ -12,7 +11,6 @@
 #include "AugustaGriffon.h"
 #include "AttackVolume.h"
 #include "Wing.h"
-
 #include "GameSystem.h"
 
 
@@ -69,6 +67,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_pQTEColliderCom->Set_Position(vPos);
 
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
+	
 	
     return S_OK;
 }
@@ -96,8 +96,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	
 	// 5. Change Timer 계산. => Dissolve에 사용
 	Calc_ChangeTimer(fTimeDelta);
-
-	
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -515,8 +513,6 @@ void CAugusta::Parry_Judge(void* pArg)
 
 	// 1. 패링 시 ? Layer 변경? => 잠시 무적
 	CCharacter::PARRY_DESC* pDesc = static_cast<PARRY_DESC*>(pArg);
-
-	
 }
 
 void CAugusta::Grab_Judge(void* pArg)
@@ -533,14 +529,23 @@ void CAugusta::Grab_Judge(void* pArg)
 	if (Check_AnyCondition(iFlag))
 		return;
 
-	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
-	_uint iCategory = eKey.iCategory;
-	_uint iSubState = eKey.iSubState;
+	// 2. Capture 데이터 캐스팅.
+	m_PendingCaptureDesc = *static_cast<CAPTURE_DESC*>(pArg);
 
-	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
-
+	// 데미지 처리.
+	m_pAbillityCom->Add_Hp(m_PendingCaptureDesc.fAttack * -1.f);
 	
+	// 3. 상태 추가.
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
 
+	// 4. 충돌처리 끄기.
+	m_pColliderCom->IsActivate(false);
+	
+	// 5. 상태 변경. => 애니메이션은 거기서 결정. => Grab일지 
+	// => 현재 애니메이션을 유지할지?
+	
+	
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EAugustaCaptureState::CAPTURE));
 }
 
 void CAugusta::Resolove_PerfectDodge()
