@@ -64,7 +64,8 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		break;
 	case EGalbrenaSpecialType::ATTACK08:
 		break;
-	case EGalbrenaSpecialType::ATTACK11:
+	case EGalbrenaSpecialType::ATTACK_H_01:
+		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack_H_01"), true);
 		break;
 	}
 
