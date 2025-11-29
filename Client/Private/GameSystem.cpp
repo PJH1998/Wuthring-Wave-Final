@@ -275,6 +275,11 @@ void CGameSystem::Attach_GrafflePoint(_float3* pTargetPos)
 	m_pUI_ControlHelper->Attach_GrafflePoint(pTargetPos);
 }
 
+void CGameSystem::Play_QTE(_float2 vSpawnPos)
+{
+	m_pUI_ControlHelper->Play_QTE(vSpawnPos);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);

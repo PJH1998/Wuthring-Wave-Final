@@ -18,7 +18,7 @@
 #include "UI_TabUtility.h"
 #include "UI_Ovfl_Palette.h"
 #include "UI_GrafflePoint.h"
-
+#include "UI_QTE.h"
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -61,6 +61,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_MobHPBar				= Find_RootUI (L"UI_MobHPBar");
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
 	m_pRootUI_GrafflePoint			= Find_RootUI (L"UI_GrafflePoint");
+	//m_pRootUI_QTE					= Find_RootUI (L"UI_QTE");
 
 	// MiniGames
 	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
@@ -304,14 +305,26 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 
 void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos)
 {
-	CCustom_UI* pRootUI = m_pRootUI_GrafflePoint;
-
-	if (!pRootUI)
-		return;
+	//CCustom_UI* pRootUI = m_pRootUI_GrafflePoint;
+	//
+	//if (!pRootUI)
+	//	return;
 
 	CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { pTargetPos };
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos)
+{
+	//CCustom_UI* pRootUI = m_pRootUI_QTE;
+
+	CUI_QTE::UI_QTE_DESC tDesc = { vSpawnPos };
+
+	//if (!pRootUI)
+	//	return;
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_QTE", _fmatrix(), &tDesc);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

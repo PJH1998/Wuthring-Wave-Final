@@ -115,8 +115,11 @@ public:
 	void		Close_Game_OverflowPalette();
 
 	// 그래플링 UI가 생길 지점의 점 위치를 할당합니다. (pooling 이용, 최대 50) 
-	// 크기 변화 기준 등 내부에서 정의 필요. 너무 멀면 렌더콜X
+	// 카메라 거리에 따른 크기 변화 기준 등 내부에서 상수로 변경 가능. 너무 멀면 렌더콜X
 	void		Attach_GrafflePoint(_float3* pTargetPos);
+
+	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. 0, 0이 중점, 우하단이 양수.
+	void		Play_QTE(_float2 vSpawnPos = _float2{0.f, 0.f});
 
 
 	// [WIP] 
