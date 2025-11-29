@@ -636,7 +636,6 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(Desc.ModelName, NameLength);
 
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-								if(Desc.iShaderPassIndex == 2)
 									File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
 
 								File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint));
