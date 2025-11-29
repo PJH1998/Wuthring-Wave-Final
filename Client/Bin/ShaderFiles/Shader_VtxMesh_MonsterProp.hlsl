@@ -6,6 +6,7 @@ Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
 
 bool g_HasNormal = false;
+float g_fRatio = 0.f;
 
 struct VS_IN
 {

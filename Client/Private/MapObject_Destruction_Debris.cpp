@@ -47,7 +47,7 @@ void CMapObject_Destruction_Debris::Priority_Update(_float fTimeDelta)
 		//위치가 다시 안돌아옴. ->SetPosition 안먹음.
 		m_pRigidbodyCom->IsActivate(true);
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_FixedPos));
-		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+		m_pRigidbodyCom->Set_Transform(m_pTransformCom->Get_WorldMatrix());
 		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pRigidbodyCom->Impulse(m_vImpulse);
 		m_IsTriggered = false;
@@ -163,7 +163,7 @@ void CMapObject_Destruction_Debris::Reset(const _fmatrix& WorldMatrix, void* pAr
 {
 	m_isActivate = true;
 	m_IsTriggered = true;
-	//m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	RESET_DESC* pDesc = static_cast<RESET_DESC*>(pArg);
 	XMStoreFloat4x4(&m_FixedPos, WorldMatrix);
 	m_vImpulse = pDesc->vImpulse;

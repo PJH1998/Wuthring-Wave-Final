@@ -173,6 +173,7 @@
     <ClInclude Include="..\Public\AugustaAirJump.h" />
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
+    <ClInclude Include="..\Public\AugustaCapture.h" />
     <ClInclude Include="..\Public\AugustaRopeDrag.h" />
     <ClInclude Include="..\Public\AugustaRopeHook.h" />
     <ClInclude Include="..\Public\Augusta_UltiPostSFX.h" />
@@ -198,6 +199,9 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
     <ClInclude Include="..\Public\GalbrenaRopeDrag.h" />
     <ClInclude Include="..\Public\Leviatan.h" />
     <ClInclude Include="..\Public\Coro_Rock.h" />
@@ -250,6 +254,7 @@
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\InteractionState.h" />
     <ClInclude Include="..\Public\Level_Heaven.h" />
+    <ClInclude Include="..\public\Levi_Bayonet.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
@@ -346,6 +351,7 @@
     <ClInclude Include="..\public\UI_Button_Interact.h" />
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
+    <ClInclude Include="..\public\UI_GrafflePoint.h" />
     <ClInclude Include="..\public\UI_HUD.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -364,6 +370,7 @@
     <ClInclude Include="..\public\UI_MobHPBar.h" />
     <ClInclude Include="..\public\UI_Ovfl_Palette.h" />
     <ClInclude Include="..\public\UI_Parry.h" />
+    <ClInclude Include="..\public\UI_QTE.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_TabUtility.h" />
     <ClInclude Include="..\public\UI_Text.h">
@@ -399,6 +406,7 @@
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
     <ClCompile Include="..\Private\AugustaAirSkill.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
+    <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
     <ClCompile Include="..\Private\AugustaFactory.cpp" />
@@ -422,6 +430,9 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
     <ClCompile Include="..\Private\GalbrenaRopeDrag.cpp" />
     <ClCompile Include="..\Private\Leviatan.cpp" />
     <ClCompile Include="..\Private\Coro_Rock.cpp" />
@@ -487,6 +498,7 @@
     <ClCompile Include="..\private\Level_Test_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\private\Levi_Bayonet.cpp" />
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
     <ClCompile Include="..\Private\Loader_Heaven.cpp" />
@@ -562,6 +574,7 @@
     <ClCompile Include="..\private\UI_Button_Interact.cpp" />
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
+    <ClCompile Include="..\private\UI_GrafflePoint.cpp" />
     <ClCompile Include="..\private\UI_HUD.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -579,6 +592,7 @@
     <ClCompile Include="..\private\UI_Logo.cpp" />
     <ClCompile Include="..\private\UI_MobHPBar.cpp" />
     <ClCompile Include="..\private\UI_Parry.cpp" />
+    <ClCompile Include="..\private\UI_QTE.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_TabUtility.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">

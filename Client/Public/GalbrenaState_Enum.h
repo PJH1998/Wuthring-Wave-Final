@@ -16,9 +16,11 @@ enum class EGalbrenaGroundState : _uint
 	DASH,			
 	DODGE,
 	ATTACK,			
+	HEAVYATTACK,			
 	SKILL,			
 	BURST,			
 	SPECIAL,		
+	SPECIALDASH,
 	UNIQUE,			
 	LAND,		
 	QTE,
@@ -140,6 +142,14 @@ enum class EGalbrenaDashType : _uint
 
 };
 
+enum class EGalbrenaSpecialDashType : _uint
+{
+	ATTACK_CHARGE = 0,
+	END
+
+
+};
+
 enum class EGalbrenaDodgeType : _uint
 {
 	MOVE_LIMIT_F = 0,
@@ -153,6 +163,14 @@ enum class EGalbrenaAttackType : _uint
 	ATTACK02,
 	ATTACK03,
 	ATTACK04,
+	END
+};
+
+enum class EGalbrenaHeavyAttackType : _uint
+{
+	ATTACK_H_0201 = 0,
+	ATTACK_H_0202,
+	ATTACK_H_0203,
 	END
 };
 
@@ -172,6 +190,8 @@ enum class EGalbrenaSpecialType : _uint
 	ATTACK07,
 	ATTACK08,
 	ATTACK08_H,
+	ATTACK11,
+	ATTACK_H_01,
 	END
 };
 

@@ -53,7 +53,6 @@ private:
 public:
 	HRESULT						Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	HRESULT						SetUp_FogNF();
-	void						Add_LightData(const VF_LIGHT& LightData);
 
 	void						Update_VF(_float fTimeDelta);
 
@@ -75,7 +74,7 @@ private:
 	_float3						m_vNoiseSize = {};
 
 	_uint						m_iMaxLight = {};
-	vector<VF_LIGHT>			m_LightDatas;
+	vector<LIGHT_DATA>			m_LightDatas;
 
 	CGameInstance*				m_pGameInstance = { nullptr };
 	ID3D11Device*				m_pDevice = { nullptr };

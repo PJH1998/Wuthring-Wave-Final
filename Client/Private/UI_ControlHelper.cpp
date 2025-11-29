@@ -17,6 +17,7 @@
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
 #include "UI_Ovfl_Palette.h"
+#include "UI_GrafflePoint.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -24,7 +25,7 @@ CUI_ControlHelper::CUI_ControlHelper()
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
 	Safe_AddRef(m_pGameInstance);
-	Safe_AddRef(m_pGameSystem);		// 상호참조 발생
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_ControlHelper::Initialize()
@@ -59,6 +60,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_Parry					= Find_RootUI (L"UI_Parry");
 	m_pRootUI_MobHPBar				= Find_RootUI (L"UI_MobHPBar");
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
+	m_pRootUI_GrafflePoint			= Find_RootUI (L"UI_GrafflePoint");
 
 	// MiniGames
 	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
@@ -300,6 +302,18 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
+void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos)
+{
+	CCustom_UI* pRootUI = m_pRootUI_GrafflePoint;
+
+	if (!pRootUI)
+		return;
+
+	CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { pTargetPos };
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
+}
+
 CUI_ControlHelper* CUI_ControlHelper::Create()
 {
 	CUI_ControlHelper* pInstance = new CUI_ControlHelper();
@@ -317,5 +331,5 @@ void CUI_ControlHelper::Free()
 {
 	__super::Free();
 	Safe_Release(m_pGameInstance);
-	Safe_Release(m_pGameSystem);		// 상호참조 발생
+	Safe_Release(m_pGameSystem);
 }

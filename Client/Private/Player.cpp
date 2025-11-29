@@ -542,6 +542,8 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	// 공격과 스킬이 아니라면 호출하지 않습니다.
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer && 
 		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::GRAB) != iLayer &&
 		ENUM_CLASS(COLLISIONLAYER::PARRY))
 		return;
 
@@ -552,15 +554,24 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	cout << "Player Crash" << endl;
 #endif // _DEBUG
 
-
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
 
 	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
 	CCharacter::HIT_DESC HitDesc{};
 	CCharacter::PARRY_DESC ParryDesc{};
+	CCharacter::GRAB_DESC GrabDesc{};
 	
 
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
+	if (COLLISIONLAYER::GRAB == eLayer)
+	{
+		GrabDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
+		GrabDesc.fAttack = pClientDesc.fAttack;
+		GrabDesc.iLayer = iLayer;
+		GrabDesc.pSocketMatrix = pClientDesc.pSocketMatrix;
+		m_Characters[m_iCurrentCharacterIdx]->Grab_Judge(&GrabDesc);
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
 	{
 		// 2. Parry 판정
 		ParryDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
@@ -570,14 +581,12 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	}
 	else
 	{
-		// 3. Hit 판정
+		// 3. Hit 판정.
 		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		HitDesc.fAttack = pClientDesc.fAttack;
 		HitDesc.iLayer = iLayer;
 		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&HitDesc);
 	}
-	
-
 }
 
 _bool CPlayer::Is_TargetValid(CTransform* pTarget)

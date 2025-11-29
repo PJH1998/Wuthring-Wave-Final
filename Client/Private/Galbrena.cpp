@@ -116,7 +116,7 @@ void CGalbrena::Update(_float fTimeDelta)
 	}
 
 	// 3. 상태 머신 갱신
-	m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -228,9 +228,6 @@ void CGalbrena::Render()
 		m_pColliderCom->Render();
 	else
 		m_pQTEColliderCom->Render();
-
-	/*if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();*/
 
 	m_pMainAttackVolume->Render();
 	Print_LookRay();
@@ -483,9 +480,13 @@ void CGalbrena::Hit_Judge(void* pArg)
 
 
 	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
-	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EGalbrenaGroundState::ATTACK);
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) 
+		&& eKey.iSubState == ENUM_CLASS(EGalbrenaGroundState::ATTACK);
+
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+	else
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
 	
 	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
@@ -667,6 +668,12 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 			}
 		}
 	}
+	else if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
+	{
+		m_fStateTimeRate = stof(var2);
+		m_fStateDelayTimer = stof(var3);
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
+	}
 
 	// GalbrenaWing|Bone
 
@@ -735,6 +742,19 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 			m_PendingConditions[HIT] = true;
 			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
 		}
+	}
+
+	_uint iDelayFlag = ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY);
+	if (Check_AnyCondition(iDelayFlag))
+	{
+		m_fStateDelayTimer -= fTimeDelta;
+		if (m_fStateDelayTimer <= 0.f)
+		{
+			Remove_Condition(iDelayFlag);
+			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
+			m_fStateDelayTimer = 0.f;
+		}
+
 	}
 
 

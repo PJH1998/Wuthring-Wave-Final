@@ -23,7 +23,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_vDefinition.y = 8;
 	m_vDefinition.z = 8;
 
-	m_iMaxLight = 32;
+	m_iMaxLight = 256;
 
 	m_VF_Data.fWinSizeX = static_cast<_float>(iWinSizeX);
 	m_VF_Data.fWinSizeY = static_cast<_float>(iWinSizeY);
@@ -78,14 +78,6 @@ HRESULT CVolumetricFog::SetUp_FogNF()
 	return S_OK;
 }
 
-void CVolumetricFog::Add_LightData(const VF_LIGHT& LightData)
-{
-	if (m_LightDatas.size() >= m_iMaxLight)
-		return;
-
-	m_LightDatas.push_back(LightData);
-}
-
 void CVolumetricFog::Update_VF(_float fTimeDelta)
 {
 	Update_Buffer(fTimeDelta);
@@ -115,7 +107,8 @@ void CVolumetricFog::Update_VF(_float fTimeDelta)
 
 	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Dispatch(iThreadGroupCountX, iThreadGroupCountY, 1);
 
-	m_LightDatas.clear();
+//	m_LightDatas.clear();
+
 }
 
 HRESULT CVolumetricFog::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
@@ -157,13 +150,10 @@ void CVolumetricFog::Update_Buffer(_float fTimeDelta)
 	Setting_VF();
 #endif
 
-	_uint iLightCount = static_cast<_uint>(m_LightDatas.size());
-
 	m_VF_Data.ViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
 	m_VF_Data.ProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
 	m_VF_Data.InvViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW);
 	m_VF_Data.InvProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ);
-	m_VF_Data.iLightCount = iLightCount;
 	m_VF_Data.fNoiseTimeDelta = fmodf((m_VF_Data.fNoiseTimeDelta + (fTimeDelta * 0.05f)), 1.f);
 	
 	//VF_DATA UPDATE
@@ -173,10 +163,17 @@ void CVolumetricFog::Update_Buffer(_float fTimeDelta)
 	m_pContext->Unmap(m_pBuffers[ENUM_CLASS(BUFFER::DATA)], 0);
 
 	//LIGHT_DATA UPDATE
+	const vector<LIGHT_DATA>* pLightDats = m_pGameInstance->Get_LightDatas();
+	ASSERT_CRASH(pLightDats);
+
+	_uint iLightCount = static_cast<_uint>((*pLightDats).size());
+
+	m_VF_Data.iLightCount = iLightCount;
+
 	if(iLightCount > 0)
 	{
-		D3D11_BOX Box = { 0, 0, 0, max(sizeof(VF_LIGHT) * iLightCount, 1), 1, 1 };
-		m_pContext->UpdateSubresource(m_pBuffers[ENUM_CLASS(BUFFER::LIGHT)], 0, &Box, m_LightDatas.data(), 0, 0);
+		D3D11_BOX Box = { 0, 0, 0, max(sizeof(LIGHT_DATA) * iLightCount, 1), 1, 1 };
+		m_pContext->UpdateSubresource(m_pBuffers[ENUM_CLASS(BUFFER::LIGHT)], 0, &Box, (*pLightDats).data(), 0, 0);
 	}
 }
 
@@ -309,10 +306,10 @@ HRESULT CVolumetricFog::Ready_Buffer()
 
 	//STRUCTURED BUFFER
 	D3D11_BUFFER_DESC StructureBufferDesc = {};
-	StructureBufferDesc.ByteWidth = sizeof(VF_LIGHT) * m_iMaxLight;
+	StructureBufferDesc.ByteWidth = sizeof(LIGHT_DATA) * m_iMaxLight;
 	StructureBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	StructureBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	StructureBufferDesc.StructureByteStride = sizeof(VF_LIGHT);
+	StructureBufferDesc.StructureByteStride = sizeof(LIGHT_DATA);
 	StructureBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	StructureBufferDesc.CPUAccessFlags = 0;
 

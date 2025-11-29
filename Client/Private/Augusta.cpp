@@ -122,7 +122,7 @@ void CAugusta::Update(_float fTimeDelta)
 	}
 
     // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+    m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	// 3. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -490,22 +490,17 @@ void CAugusta::Hit_Judge(void* pArg)
 	m_fDodgeableHitTimer = m_fDodgeableDuration;
 
 	
-	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
-	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
+	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시.
+	// => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) 
+		&& eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
+
 	if (!IsAttack)
-	{
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.1f); // Dodge 시간 동안 느리게하기?
-		//m_pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.1f, 1.f); // Dodge 시간 동안 느리게하기?
-		//m_pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.1f, 1.f); // Dodge 시간 동안 느리게하기?
-	}
-		//m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
-		
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+	else
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
 
-	// 4. Player 상태 바인딩
-	
-	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
-	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
 	
 	
 }
@@ -520,8 +515,56 @@ void CAugusta::Parry_Judge(void* pArg)
 
 	// 1. 패링 시 ? Layer 변경? => 잠시 무적
 	CCharacter::PARRY_DESC* pDesc = static_cast<PARRY_DESC*>(pArg);
+
 	
+}
+
+void CAugusta::Grab_Judge(void* pArg)
+{
+	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
+		return;
+
+	// 1. Grab이 안통하는 상태일때. => Dodge, Grabe, Invincible
+	_uint iFlag = {};
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::GRABED);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE);
+
+	if (Check_AnyCondition(iFlag))
+		return;
+
+	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+	_uint iCategory = eKey.iCategory;
+	_uint iSubState = eKey.iSubState;
+
+	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
+
 	
+
+}
+
+void CAugusta::Resolove_PerfectDodge()
+{
+	// 1. 회피 가능 상태인지 확인.
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+		return;
+
+	// 2. 조건 플래그 제거.
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	// 3. (데미지 무효화)
+	// DelayedActions 큐를 비워버리거나, HIT 타입만 제거하는 로직 필요
+	while (!m_DelayedActions.empty())
+	{
+		DELAYED_ACTION eAction = m_DelayedActions.front();
+		if (DELAYED_ACTION::TYPE::HIT == eAction.type) // Hit 면 정보 날리기.
+			m_DelayedActions.pop();
+	}
+
+	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
+	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
+
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 1.0f, 0.1f); // 시간 복구
 }
 
 
@@ -685,6 +728,12 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_HitStop(wStrObjectTag);
 	else if (var1 == TEXT("CAMERA"))
 		Process_CameraAction(wStrObjectTag);
+	else if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
+	{
+		m_fStateTimeRate = stof(var2);
+		m_fStateDelayTimer = stof(var3);
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
+	}
 	//else
 	//	Process_VolumeChange(wStrObjectTag);
 
@@ -718,11 +767,24 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 			
 			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
 			m_PendingConditions[HIT] = true;
-			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
+			m_DelayedActions.push({ DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc });
 		}
 	}
 
+	_uint iDelayFlag = ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY);
+	if (Check_AnyCondition(iDelayFlag))
+	{
+		m_fStateDelayTimer -= fTimeDelta;
+		if (m_fStateDelayTimer <= 0.f)
+		{
+			Remove_Condition(iDelayFlag);
+			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
+			m_fStateDelayTimer = 0.f;
+		}
+
+	}
 	
+	// Dodge가 아닐때만 추가되므로.
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
@@ -739,8 +801,10 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 				//m_pAbillityCom->Add_Hp(-10.f);
 				break;
 			}
-			case DELAYED_ACTION::TYPE::PARRY:
+			case DELAYED_ACTION::TYPE::GRAB:
 			{
+				//Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CAPTURED));
+				//m_pAbillityCom->Add_Hp(-m_PendingGrabDesc.fAttack);
 				break;
 			}
 			

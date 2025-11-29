@@ -83,18 +83,23 @@ void CAugustaGroundAttack::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false); 
 
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능 상태 제거
-
 
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 }
 
 _bool CAugustaGroundAttack::Hit_Judge()
 {
+	if (m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+		return false;
+
 	_bool IsHit = false;
 	const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
 
 	if (nullptr == pDesc)
+		return false;
+
+	// Hit 상태이면서 Enemy Skill을 받았을때만 캔슬하고 Hit로
+	if (!m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)))
 		return false;
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pAugusta->GetPendingHitDesc()->iLayer);
@@ -108,13 +113,11 @@ void CAugustaGroundAttack::Handle_Input()
 {
     EAugustaAttackType eAttackType = static_cast<EAugustaAttackType>(m_iCurrentAnimIdx);
 
-
-	// Dash 키입력 체크.
+	// Dash 도중에 Hit 당하면 Dodge
 	m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
-	m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	m_States[HIT_PENDING] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_States[HIT] = Hit_Judge(); // Hit_judge()가 True인 경우.
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
@@ -184,11 +187,17 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
-	// 1. 우선순위
-	if (m_States[DODGE])
+	if (m_States[HIT])
 	{
-		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
+	// 1. 우선순위 => 어떤 상황에도 변경 가능.
+	if (m_States[DASH])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
 

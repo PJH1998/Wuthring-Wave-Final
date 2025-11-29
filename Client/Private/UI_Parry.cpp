@@ -153,9 +153,9 @@ void CUI_Parry::Late_Update(_float fTimeDelta)
 		return;
 #endif // KSTA_UITEST_PARRY_TOZERO
 
-	Update_CamDistScale(m_pSectorA, 40.f);
-	Update_CamDistScale(m_pSectorAEff, 40.f);
-	Update_CamDistScale(m_pSectorACircEff, 40.f);
+	Update_CamDistScale(m_pSectorA, m_fPivotDistance);
+	Update_CamDistScale(m_pSectorAEff, m_fPivotDistance);
+	Update_CamDistScale(m_pSectorACircEff, m_fPivotDistance);
 
 	//Update_CamDistScale(this, 40.f);
 

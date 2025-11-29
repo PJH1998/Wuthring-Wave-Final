@@ -35,10 +35,12 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
+
+	m_pGrabSocket = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp004");
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 70.f;
+	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 5.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 5.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
@@ -51,6 +53,8 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 void CCorosaurus::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
+
+	XMStoreFloat4x4(&m_GrabCombinedMat, XMLoadFloat4x4(m_pGrabSocket) * m_pTransformCom->Get_WorldMatrix());
 
 	for (auto& Pair : m_PartObjects)
 	{
@@ -158,7 +162,7 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 		else if (wstrPartTag == TEXT("Weapon"))
 		{
 			m_pCoroRock->Change_CollisionActive(isActive);
-			m_pCoroRock->SetActivate(isActive);
+			//m_pCoroRock->SetActivate(isActive);
 		}
 		else
 		{
@@ -180,6 +184,10 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	else if (wstrTypeTag == TEXT("Distance"))
 	{
 		m_isDist_Interp_Enable = isActive;
+	}
+	else if (wstrTypeTag == TEXT("Weapon"))
+	{
+		m_pCoroRock->SetActivate(isActive);
 	}
 }
 
@@ -215,7 +223,7 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 		{
 			for (auto& pATKVolume : m_pAtkVolumes)
 				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
-			m_pCoroRock->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK));
+			//m_pCoroRock->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK));
 		}
 		else if (wstrAnimTag == TEXT("HARD"))
 		{
@@ -235,7 +243,21 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 				pATKVolume->Change_Layer(COLLISIONLAYER::GRAB);
 		}
 	}
+	else if (wstrTypeTag == TEXT("CallAnim"))
+	{
+		m_pGameSystem->Call_Animation();
+#ifdef _DEBUG
+		cout << "플레이어 애니메이션 호출!" << endl;
+#endif // _DEBUG
 
+	}
+	else if (wstrTypeTag == TEXT("GrabRelease"))
+	{
+		m_pGameSystem->Unbind_Grab();
+#ifdef _DEBUG
+		cout << "플레이어 잡기 해제 호출!" << endl;
+#endif // _DEBUG
+	}
 }
 
 HRESULT CCorosaurus::Bind_Resources()
@@ -362,6 +384,9 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
+	TriggerDesc.test = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer) {
+		this->test(iLayer, pOther, Manifold, eLayer);
+		};
 
 	m_pAtkVolumes[ATK_SOCKET::HEAD0] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD0])
@@ -372,6 +397,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.vExtent = _float3(3.f, 0.55f, 0.55f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.pGrabMatrix = &m_GrabCombinedMat;
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
 		CRASH(m_pAtkVolume);
@@ -383,6 +409,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.vExtent = _float3(2.f, 4.f, 4.f);
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, -4.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.pGrabMatrix = nullptr;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->ParryEnter(iLayer, pOther, Manifold);
 		};
@@ -560,6 +587,16 @@ void CCorosaurus::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& 
 #endif // _DEBUG
 }
 
+void CCorosaurus::test(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer)
+{
+	if (eLayer == COLLISIONLAYER::GRAB)
+	{
+#ifdef _DEBUG
+		cout << "Grab! (Coro)" << endl;
+#endif // _DEBUG
+	}
+}
+
 void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
@@ -698,6 +735,7 @@ _bool CCorosaurus::isKnockDown()
 
 _bool CCorosaurus::isAttackEnable()
 {
+	m_isAttack = false;
 	if (!m_isDetecting || !m_isAggro)
 		return false;
 	if (m_fDistance > 20.f)
@@ -770,7 +808,6 @@ _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 
 _bool CCorosaurus::CheckHit()
 {
-	m_isAttack = false;
 	if (m_beHit)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);

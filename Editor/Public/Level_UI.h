@@ -122,7 +122,7 @@ private:
 	vector<UI_ANIM_KEYFRAME_DESC> m_vecUIKeyFrameDescs = {};	// Temp Keyframe
 	UI_ANIM_KEYFRAME_DESC*		m_pSelectedKeyFrameDesc = { nullptr };
 	_int						m_iLerpType = 0;
-	_bool						m_isAnimLoop = true;
+	_bool						m_isAnimLoop = false;
 
 	// ?퀮nimList
 	_bool						m_isPlayAnimation = false;

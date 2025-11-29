@@ -1,0 +1,66 @@
+﻿#pragma once
+#include "GroundState.h"
+
+NS_BEGIN(Client)
+
+// Galbrena Attack State - Attack01~04, Attack_*, SpAttack* 처리
+class CGalbrenaGroundHeavyAttack final : public CGroundState
+{
+private:
+    enum ATTACKSTATE // 내부에서 전환 가능한 상태.
+    {
+		HEAVY_ATTACK1,
+		HEAVY_ATTACK2,
+		HEAVY_ATTACK3,
+		HEAVY_ATTACK_PENDING,
+        SKILL_Q,
+        SKILL_E,
+        SKILL_R,
+        MOVE,
+		HIT,
+		HIT_PENDING,
+        JUMP,
+		DASH,
+		BURST,
+        END
+    };
+
+private:
+    explicit CGalbrenaGroundHeavyAttack() = default;
+    virtual ~CGalbrenaGroundHeavyAttack() = default;
+
+public:
+    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual void OnEnter(void* pArg = nullptr) override;
+    virtual void OnUpdate(_float fTimeDelta) override;
+    virtual void OnExit() override;
+
+private:
+    class CGalbrena* m_pGalbrena = { nullptr };
+    _uint m_iComboCount = { 0 };  // 현재 콤보 단계 (0~4)
+
+    _float m_fAttackPressTime = { 0.f };
+    _float m_fAttackPressMaxTime = { 0.5f };
+    _bool m_States[ATTACKSTATE::END] = {};
+    _bool m_IsNextAttackInput = { false };
+    
+    
+private:
+	_bool Hit_Judge();
+
+private:
+    virtual void Handle_Input() override;
+    void Update_AttackAnimations(_float fTimeDelta);
+    void Check_Physics(_float fTimeDelta);
+    void LockOn_StateTransition(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta);
+
+    void SetUp_Animations();
+    void State_Reset();
+
+public:
+    static CGalbrenaGroundHeavyAttack* Create(class CGameObject* pOwner);
+    virtual void Free() override;
+};
+
+NS_END

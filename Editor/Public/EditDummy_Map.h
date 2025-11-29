@@ -2,7 +2,7 @@
 #include "EditDummy.h"
 
 NS_BEGIN(Engine)
-class CModel;
+class CModel_Streaming;
 class CShader;
 class CRigidbody;
 NS_END
@@ -32,7 +32,7 @@ public:
 	virtual		void				Render_Shadow() override;
 
 private:
-	CModel*						m_pModelCom = { nullptr };
+	CModel_Streaming*					m_pModelCom = { nullptr };
 	CShader*						m_pShaderCom = { nullptr };
 	CRigidbody*				m_pRigidbodyCom = { nullptr };
 

@@ -270,6 +270,11 @@ void CGameSystem::Close_Game_OverflowPalette()
 	m_pUI_ControlHelper->Close_Game_OverflowPalette();
 }
 
+void CGameSystem::Attach_GrafflePoint(_float3* pTargetPos)
+{
+	m_pUI_ControlHelper->Attach_GrafflePoint(pTargetPos);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
@@ -380,6 +385,15 @@ void CGameSystem::Set_MouseFix(_bool isFix)
 _bool CGameSystem::IsFix()
 {
     return m_pMouseController->IsFix();
+}
+#pragma endregion
+
+#pragma region GRAB_INTERACT
+void CGameSystem::Call_Animation()
+{
+}
+void CGameSystem::Unbind_Grab()
+{
 }
 #pragma endregion
 

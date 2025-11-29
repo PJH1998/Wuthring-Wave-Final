@@ -116,6 +116,11 @@ _bool CGalbrenaGroundAttack::Hit_Judge()
 	if (nullptr == pDesc)
 		return false;
 
+	// Hit 상태이면서 Enemy Skill을 받았을때만 캔슬하고 Hit로
+	if (!m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)))
+		return false;
+
+
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pGalbrena->GetPendingHitDesc()->iLayer);
 	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
 		IsHit = true;
@@ -134,8 +139,11 @@ void CGalbrenaGroundAttack::Handle_Input()
 	m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EGalbrenaAttackType::ATTACK01)
 		&& (m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
 
+	m_States[HEAVY_ATTACK] = m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime);
+
     // 입력키 체크
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
+	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 
     // 스킬 체크
@@ -209,16 +217,43 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
     EGalbrenaAttackType eAttackType = static_cast<EGalbrenaAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
-    
 	if (m_States[HIT])
 	{
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
 		return;
 	}
 
+	//if (m_States[DASH]) 
+	//{
+	//	m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+	//	return;
+	//}
+
+	if (m_States[DASH])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eSpecialDashType = EGalbrenaSpecialDashType::ATTACK_CHARGE;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIALDASH));
+		return;
+	}
+
+	// 강공 조건이 되었다면?
+	if (m_States[HEAVY_ATTACK] && IsEscapePossible)
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eHeavyAttackType = EGalbrenaHeavyAttackType::ATTACK_H_0201;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::HEAVYATTACK));
+		return;
+	}
+
 	// 1. 기본 공상태에서 Heavy_Attack_Pending이 아닌 경우?
 	if (eAttackType >= EGalbrenaAttackType::ATTACK01 && eAttackType < EGalbrenaAttackType::ATTACK04)
 	{
+		// 키 누르고 있다면 다른 상태전환하지 말고 계속 Attack01 실행. => 강공을 위해.
+		if (eAttackType == EGalbrenaAttackType::ATTACK01 && m_States[HEAVY_ATTACK_PENDING])
+		{
+			return;
+		}
+
 		if (m_IsNextAttackInput && IsEscapePossible)
 		{
 			switch (eAttackType)

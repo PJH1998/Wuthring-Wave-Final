@@ -1,5 +1,10 @@
 ﻿#include"EditorPch.h"
 #include "Edit_LightObject.h"
+#include"Event_Level.h"
+#include"Map_Interface.h"
+#include"Level_Map.h"
+
+_uint CEdit_LightObject::g_iLightIndex = 0;
 
 CEdit_LightObject::CEdit_LightObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice, pContext)
@@ -18,17 +23,17 @@ HRESULT CEdit_LightObject::Initialize_Prototype()
 
 HRESULT CEdit_LightObject::Initialize_Clone(void* pArg)
 {
-	LIGHT_DESC LightDesc{};
-	LightDesc.eType = LIGHT_DESC::DIRECTION;
-	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);
-	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
+	Ready_Component(pArg);
+	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&pDesc->vWorldPos));
 
-	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
-#ifdef _DEBUG
-	m_LightDesc = m_pGameInstance->Get_LightDesc_For_Map(TEXT("Test"));
-#endif
+	m_iLightIndex = g_iLightIndex++;
+	LIGHT_CREATE event(m_iLightIndex, this);
+
+	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Light_Create"), event);
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	return S_OK;
 }
 
@@ -38,14 +43,6 @@ void CEdit_LightObject::Priority_Update(_float fTimeDelta)
 
 void CEdit_LightObject::Update(_float fTimeDelta)
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_U) == KEYSTATE::DOWN)
-		m_LightDesc->vDiffuse = _float4(1.f, 0.f, 0.f, 1.f);
-	else if(m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-		m_LightDesc->vDiffuse = _float4(0.f, 1.f, 0.f, 1.f);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)
-		m_LightDesc->vDiffuse = _float4(0.f, 0.f, 1.f, 1.f);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_P) == KEYSTATE::DOWN)
-		m_LightDesc->vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 }
 
 void CEdit_LightObject::Late_Update(_float fTimeDelta)
@@ -58,6 +55,81 @@ void CEdit_LightObject::Render()
 
 void CEdit_LightObject::Render_Shadow()
 {
+}
+
+void CEdit_LightObject::Ready_Component(void* pArg)
+{
+	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	const LIGHT_DESC* CopyDesc = pDesc->CopyDesc;
+	LIGHT_DESC LightDesc{};
+	if (CopyDesc)
+	{
+		LightDesc.vAmbient = CopyDesc->vAmbient;
+		LightDesc.vDiffuse = CopyDesc->vDiffuse;
+		LightDesc.vSpecular = CopyDesc->vSpecular;
+		LightDesc.eType = CopyDesc->eType;
+
+		if (LightDesc.eType == LIGHT_DESC::DIRECTION)
+		{
+			LightDesc.vDirection = CopyDesc->vDirection;
+		}
+		else if (LightDesc.eType == LIGHT_DESC::POINT)
+		{
+			LightDesc.vPosition = CopyDesc->vPosition;
+			LightDesc.fRange = CopyDesc->fRange;
+		}
+	}
+	else
+	{
+		LightDesc.vAmbient = _float4(1.f,1.f,1.f,1.f);
+		LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+		LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+		LightDesc.eType = LIGHT_DESC::POINT;
+		LightDesc.vPosition = CLevel_Map::m_vPickedPos;
+		LightDesc.fRange = 5.f;
+	}
+	m_pGameInstance->Add_Light(to_wstring(g_iLightIndex), LightDesc);
+	m_LightDesc = m_pGameInstance->Get_LightDesc_For_Map(to_wstring(g_iLightIndex));
+}
+
+void CEdit_LightObject::Set_ImGuiOption()
+{
+	m_pMapInterface->Set_Transform(m_pTransformCom);
+	ImGui::Begin("Color");
+	ImGui::ColorPicker4("Light Color", m_vLightDiffuse.arr);
+	ImGui::End();
+	m_LightDesc->vDiffuse = m_vLightDiffuse.float_4;
+
+	ImGui::ColorPicker4("Set Diffuse", m_vLightDiffuse.arr);
+	m_LightDesc->vDiffuse = m_vLightDiffuse.float_4;
+	ImGui::InputFloat4("Set Ambient", m_vLightAmbient.arr);
+	m_LightDesc->vAmbient = m_vLightAmbient.float_4;
+	ImGui::InputFloat4("Set Specular", m_vLightSpec.arr);
+	m_LightDesc->vSpecular = m_vLightSpec.float_4;
+
+	if (m_LightDesc->eType == LIGHT_DESC::POINT)
+	{
+		XMStoreFloat4(&m_LightDesc->vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		ImGui::SliderFloat("fRange", &m_LightDesc->fRange, 0.1f, 100.f, "%.3f");
+	}
+
+	if (ImGui::Button("Copy"))
+		Copy();
+	if(ImGui::Button("Delete"))
+	{
+		m_isActivate = false;
+		m_pGameInstance->Set_Active(to_wstring(m_iLightIndex), false);
+	}
+}
+
+void CEdit_LightObject::Copy()
+{
+	MAP_LOAD CopyDesc{};
+	CopyDesc.CopyDesc = m_LightDesc;
+	XMStoreFloat4(&CopyDesc.vWorldPos, m_pTransformCom->Get_State(STATE::POSITION));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_LightObject"), ENUM_CLASS(LEVEL::MAP), TEXT("Layer_Light"), &CopyDesc);
+
+
 }
 
 CEdit_LightObject* CEdit_LightObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -89,4 +161,5 @@ void CEdit_LightObject::Free()
 {
 	__super::Free();
 	m_LightDesc = nullptr;
+	Safe_Release(m_pMapInterface);
 }

@@ -76,7 +76,7 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pTargetManager = CTarget_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pTargetManager);
 
-	m_pLight_Manager = CLight_Manager::Create();
+	m_pLight_Manager = CLight_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pLight_Manager);
 
 	m_pCamera_Manager = CCamera_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
@@ -180,6 +180,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 
+	m_pLight_Manager->Update_Light();
 	m_pVF->Update_VF(fTimeDelta);
 	m_pModel_Manager->Update(fTimeDelta);
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
@@ -578,6 +579,14 @@ HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 HRESULT CGameInstance::Render_LightEnvMap(CShader* pShader, CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding)
 {
 	return m_pLight_Manager->Render_EnvMap(pShader, pVIBuffer, pBounding);
+}
+HRESULT CGameInstance::Bind_LightDatas(CShader* pShader)
+{
+	return m_pLight_Manager->Bind_LightDatas(pShader);
+}
+const vector<LIGHT_DATA>* CGameInstance::Get_LightDatas()
+{
+	return m_pLight_Manager->Get_LightDatas();
 }
 #ifdef _DEBUG
 LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
@@ -1015,11 +1024,6 @@ ID3D11ShaderResourceView* CGameInstance::Get_HZB_Resource()
 #pragma endregion
 
 #pragma region VOLUMETRIC_FOG
-void CGameInstance::Add_LightData_ToVF(const VF_LIGHT& LightData)
-{
-	m_pVF->Add_LightData(LightData);
-}
-
 HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
 {
 	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
