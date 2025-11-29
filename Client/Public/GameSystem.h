@@ -167,6 +167,11 @@ public:
 	void						Unbind_Grab();
 #pragma endregion
 
+#pragma region PLAYER
+	void						Register_Player(class CPlayer* pPlayer);
+#pragma endregion
+
+
 private:
 	class	CParser*			m_pParser						= { nullptr };
 	class	CFactory*			m_pFactory						= { nullptr };
@@ -177,6 +182,7 @@ private:
 
 	class	CDirector*			m_pDirector 					= { nullptr };
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
+	class	CPlayer*			m_pPlayer						= { nullptr };
 	
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 
