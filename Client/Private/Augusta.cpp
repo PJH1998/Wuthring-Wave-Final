@@ -213,8 +213,12 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 			return;
 
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
-			return;
+		if (m_IsOutLineVisible)
+		{
+			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+				return;
+		}
+			
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;

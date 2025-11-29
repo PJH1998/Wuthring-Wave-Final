@@ -54,6 +54,9 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	
+
+	// Test
+	m_pAugusta->Set_OutLineVisible(false);
 }
 
 void CAugustaGroundBurst::OnUpdate(_float fTimeDelta)
@@ -87,6 +90,8 @@ void CAugustaGroundBurst::OnExit()
 
 	// 공격 콜라이더 비활성화
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
+
+	m_pAugusta->Set_OutLineVisible(true);
 }
 
 void CAugustaGroundBurst::Handle_Input()
