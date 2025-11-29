@@ -53,6 +53,7 @@ HRESULT CUI_QTE::Initialize_Clone(void* pArg)
 																							
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Initialize.json",				//
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Start.json",					
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Succeed.json",					
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE2A_FG_Initialize.json",				//
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE2A_FG_Triggered.json",				
 																							
@@ -378,6 +379,7 @@ void CUI_QTE::Update_QTE_Fillguage(_float fTimeDelta)
 	if (m_isGoinSuccess || m_isGoinFail)		// 끝나는 조건 시 QTE 종료
 	{
 		m_isQTEMode = false;
+		if (m_isGoinSuccess) m_pAnim_UI_SectorA_FG_Fillguage->Change_Animation(L"QTE1A_FG_Succeed");
 		//m_pAnim_RUI_All->Change_Animation(L"QTE1_FadeOut");
 		return;
 	}
@@ -472,7 +474,7 @@ void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
 
 	switch (m_eQTEType)
 	{
-	case Client::UI_QTE_TYPE::FILLGUAGE:	arrAnimTimings = { 0.f, 0.5f };	break;
+	case Client::UI_QTE_TYPE::FILLGUAGE:	arrAnimTimings = { 0.25f, 0.75f };	break;
 	case Client::UI_QTE_TYPE::TRIGGER:		arrAnimTimings = { 1.f, 1.5f};	break;
 	}
 
