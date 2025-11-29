@@ -19,6 +19,7 @@ void CResource_Manager::Load_Resource(const _char* pFolderPath)
 			continue;
 		if (Entry.path().extension() != ".dds" && Entry.path().extension() != ".png")
 			continue;
+
 			// Folder
 		//if (true == Entry.is_directory())
 		//{
@@ -32,6 +33,8 @@ void CResource_Manager::Load_Resource(const _char* pFolderPath)
 		{
 			_string strFilePath = Entry.path().string();
 			_string strResourceTag = Entry.path().stem().string();
+			if (Entry.path().string().find("Default") != string::npos)
+				int a = 0;
 			// 이미 존재할 경우 CRASH
 			if (nullptr != Find_Resource(strResourceTag))
 				continue;

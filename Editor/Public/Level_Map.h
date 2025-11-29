@@ -32,6 +32,8 @@ public:
 
 	void Ready_Map_Load_Prototype();
 	void Ready_Debris_Prototype(const _char* pModelName);
+	_bool NameCheck(const _string& ModelName, const _string& Name);
+	void ShaderChange(const _string& ModelName, _uint* pShaderIndex);
 private:
 	HRESULT Ready_Static_Component();
 	void Ready_Event();
@@ -39,7 +41,6 @@ private:
 	void Container_Info();
 
 	void Load_Foliage();
-
 public:
 	static _float3 m_vWorldPos;
 	static _float3 m_vWorldDir;

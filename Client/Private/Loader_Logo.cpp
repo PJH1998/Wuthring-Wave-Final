@@ -58,7 +58,7 @@ HRESULT CLoader_Logo::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Logo/Textures/");
 	//m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo_Test/", m_eCurLevel, "Logo");
+	m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo/", m_eCurLevel, "Logo");
 
 	_matrix PreTransformMatrix = XMMatrixTranslationFromVector(XMVectorSet(0.f, -25.f, 0.f, 1.f));//XMMatrixIdentity();//XMMatrixScaling(2.f, 2.f, 2.f) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(55.f), XMConvertToRadians(25.f)));
 
