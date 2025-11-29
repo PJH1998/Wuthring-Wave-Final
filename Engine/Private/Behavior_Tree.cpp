@@ -171,9 +171,9 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 
 			_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
 			*pState |= tData.iTargetState;
-#ifdef _DEBUG
-			cout << "State: " << *pState << ", Condition: " << tData.Conditions.ConditionName.c_str() << endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//			cout << "State: " << *pState << ", Condition: " << tData.Conditions.ConditionName.c_str() << endl;
+//#endif // _DEBUG
 			return CBT_Node::BT_STATE::SUCCESS;
 
 			});
