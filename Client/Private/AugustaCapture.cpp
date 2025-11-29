@@ -37,7 +37,7 @@ void CAugustaCapture::OnEnter(void* pArg)
 	m_pAugusta->Set_Gravity(false);
 
 	// 6.
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
 }
 
 void CAugustaCapture::OnUpdate(_float fTimeDelta)
@@ -64,6 +64,7 @@ void CAugustaCapture::OnExit()
 {
 	CCaptureState::OnExit();
 	m_pAugusta->Set_Gravity(true);
+	m_pAugusta->Set_Visible(true);
 	m_pAugusta->ClearCaptureState();
 	//m_pAugusta->ResetPose();
 }
@@ -97,6 +98,7 @@ void CAugustaCapture::Check_StateTransition(_float fTimeDelta)
 	if (m_IsAnimationEnd && eCaptureType == EAugustaCaptureType::BEHIT_FLY_START)
 	{
 		//m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_LOOP);
+		m_pAugusta->Set_Visible(false);
 		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::CAPTURED);
 		return;
 	}

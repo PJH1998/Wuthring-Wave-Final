@@ -123,11 +123,13 @@ void CAugusta::Update(_float fTimeDelta)
     m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	
+	// 3. 그랩 당할때? 애니메이션 컨디션 
 	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 	{
 		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
 			nullptr != m_PendingCaptureDesc.pTransform)
 		{
+			
 			_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
 			
 			//_matrix matFinalWorld = matBone * m_PendingCaptureDesc.pTransform->Get_WorldMatrix(); // 2. 최종 행렬.
@@ -135,15 +137,23 @@ void CAugusta::Update(_float fTimeDelta)
 			_vector vScale{}, vRotQuat{}, vTrans{};
 			_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
 			XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
-
-			//_matrix matCombined = XMMatrixAffineTransformation(vPlayerScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotQuat, vTrans);
-
 			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
-			//m_pTransformCom->Set_WorldMatrix(matCombined);
-			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-			_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
-			vPos += vCameraLook * -3.f;
 
+			CTransform* pMonsterTransform = m_PendingCaptureDesc.pTransform;
+			_vector vMonsterPos = pMonsterTransform->Get_State(STATE::POSITION);
+			_vector vMonsterLook = XMVector3Normalize(pMonsterTransform->Get_State(STATE::LOOK));
+
+			_float fBackDistance = 6.0f; // 몬스터 뒤로 얼마나 떨어질지
+			_float fHeightOffset = 2.5f; // 카메라 높이
+
+			_vector vCamPos = vMonsterPos - (vMonsterLook * fBackDistance);
+			vCamPos += XMVectorSet(0.f, fHeightOffset, 0.f, 0.f);
+
+			//m_pSpringCamera->Update_Target(vCamPos, 1.2f);
+			_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
+			_vector vTargetPos = m_PendingCaptureDesc.pTransform->Get_State(STATE::POSITION);
+			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+			vPos += vCameraLook * -3.f;
 			m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
 		}
 	}
@@ -207,6 +217,9 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		if (pPart.second->IsActivate())
 			pPart.second->Late_Update(fTimeDelta);
 	}
+
+	if (!m_IsVisible)
+		return;
 	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;

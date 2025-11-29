@@ -21,7 +21,7 @@ CGalbrena::CGalbrena(const CGalbrena& Prototype)
     : CCharacter(Prototype)
 {
 }
-
+ 
 HRESULT CGalbrena::Initialize_Prototype()
 {
     if (FAILED(CCharacter::Initialize_Prototype()))
