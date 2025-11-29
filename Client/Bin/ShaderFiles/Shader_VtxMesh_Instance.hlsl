@@ -56,18 +56,69 @@ struct VS_OUT
 VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
+// 1. 월드 위치 계산 (흔들리기 전)
+    float4 vWorldPos = mul(float4(In.vPosition, 1.f), In.TransformMatrix);
+
+    // -------------------------------------------------------------------------
+    // [개선 1] 랜덤 노이즈 생성 (위치 기반 해시)
+    // 인접한 풀이라도 서로 다른 '랜덤 값'을 갖게 하여 박자를 쪼갭니다.
+    // dot 연산 안의 숫자는 아무 소수(Prime Number)나 넣은 난수 생성 공식입니다.
+    float fRandom = frac(sin(dot(vWorldPos.xz, float2(12.9898f, 78.233f))) * 43758.5453f);
+    
+    // -------------------------------------------------------------------------
+    // [개선 2] 복합 파동 (큰 바람 + 잔떨림)
+    // 단순 sin 하나가 아니라, 주파수와 속도가 다른 두 개의 파동을 섞습니다.
+    
+    // 파동 1: 크고 느린 바람 (전체적인 휩쓸림)
+    float fMainWave = sin(g_fRaidan * 1.0f + vWorldPos.x * 0.5f + fRandom);
+    
+    // 파동 2: 작고 빠른 떨림 (바람 끝의 디테일) -> 3배 빠르고 3배 촘촘하게
+    float fDetailWave = sin(g_fRaidan * 3.0f + vWorldPos.z * 1.5f + fRandom * 5.0f) * 0.3f;
+
+    // 두 파동 합치기
+    float fCombinedWave = fMainWave + fDetailWave;
+
+    // -------------------------------------------------------------------------
+    // [개선 3] 휨 강도 곡선 (Stiffness)
+    // 단순히 y에 비례하는 게 아니라, 제곱을 하여 뿌리 부분은 단단하고 끝부분은 더 많이 휘게 합니다.
+    float fSwayFactor = In.vPosition.y;
+    fSwayFactor = pow(fSwayFactor, 2.0f); // 제곱 (곡선적인 휨)
+
+    // -------------------------------------------------------------------------
+    // 최종 적용
+    // 바람의 방향을 (1, 0, 1)로 고정하지 않고 노이즈를 살짝 섞어주면 더 자연스럽습니다.
+    float3 vWindDir = normalize(float3(1.0f, 0.f, 0.5f)); // 주 바람 방향
+    vWindDir.x += (fRandom - 0.5f) * 0.5f; // 방향에 약간의 노이즈 추가
+
+    // 최종 변위 계산
+    float3 vWavedOffset = vWindDir * fCombinedWave * 0.2f * fSwayFactor;
+    
+    // 위치 적용
+    vWorldPos.xyz += vWavedOffset;
+    
+    // -------------------------------------------------------------------------
+    // 나머지 행렬 연산
+    matrix matVP = mul(g_ViewMatrix, g_ProjMatrix);
+    Out.vPosition = mul(vWorldPos, matVP);
+    
+    // 노말 등은 회전된 걸 반영하지 않으면 어색할 수 있으나, 미세한 흔들림이면 원본 유지도 괜찮습니다.
+    // 정확하게 하려면 vWavedOffset에 따라 회전 행렬을 적용해야 하지만 보통 비용상 생략하거나 근사합니다.
+    Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), In.TransformMatrix));
+    Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), In.TransformMatrix));
+    Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), In.TransformMatrix));
+    Out.vTexcoord = In.vTexcoord;
+    Out.vProjPos = Out.vPosition;
+    return Out;
+}
+
+VS_OUT VS_NONSHAKE(VS_IN In)
+{
+    VS_OUT Out = (VS_OUT) 0;
     
     matrix matVP;
     matVP = mul(g_ViewMatrix, g_ProjMatrix);
     float4 vPos = mul(float4(In.vPosition, 1.f), In.TransformMatrix);
-    
-    float swayFactor = In.vPosition.y;
-    float InstancePhase = (vPos.x + vPos.z) * 0.4f;
-    
-    float WaveRate = sin(g_fRaidan + InstancePhase);
-    
-    float3 WavedPos = vector(1.f, 0.f, 1.f, 0.f) * WaveRate * 0.2f * swayFactor;
-    vPos.xyz += WavedPos;
+ 
     Out.vPosition = mul(vPos, matVP);
     Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), In.TransformMatrix));
     Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), In.TransformMatrix));
@@ -77,6 +128,7 @@ VS_OUT VS_MAIN(VS_IN In)
 
     return Out;
 }
+
 
 struct VS_OUT_SHADOW
 {
@@ -400,13 +452,23 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_TEST();
     }
-    pass ChangeColor // 2
+    pass Shake // 2
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_COLOR();
+    }
+    pass NonShake // 2
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_NONSHAKE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_COLOR();
     }
