@@ -980,9 +980,9 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
-	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
+	m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
@@ -1288,6 +1288,11 @@ _bool CLevel_Map::NameCheck(const _string& ModelName, const _string& Name)
 
 void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 {
+
+
+#pragma region MyRegion
+
+
 	if (NameCheck(ModelName, "SM_Lau_Mou_01AH"))
 		*pShaderIndex = 9;
 	else if (NameCheck(ModelName, "SM_Sev_Roc_21AL") ||
@@ -1350,7 +1355,11 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 		NameCheck(ModelName, "SM_Sev_Roc_40AS") ||
 		NameCheck(ModelName, "SM_Sev_Roc_46AS") ||
 		NameCheck(ModelName, "SM_Sev_Roc_49AS") ||
-		NameCheck(ModelName, "SM_Tab_APD_Roc_14AM"))
+		NameCheck(ModelName, "SM_Tab_APD_Roc_14AM") ||
+		NameCheck(ModelName, "SM_Sev_Tab_NonSonoro_Roc_15AM") ||
+		NameCheck(ModelName, "SM_Sev_Tab_NonSonoro_Roc_21AL") ||
+		NameCheck(ModelName, "SM_Sev_Tab_NonSonoro_Roc_38AS") ||
+		NameCheck(ModelName, "SM_Tab_NonSonoro_Roc_07AH"))
 	{
 		*pShaderIndex = 10;
 	}
@@ -1360,12 +1369,16 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 		NameCheck(ModelName, "SM_Com2_Roc_APD_06AL") ||
 		NameCheck(ModelName, "SM_Com2_Roc_APD_35AS") ||
 		NameCheck(ModelName, "SM_Sev_Roc_54AS") ||
+		NameCheck(ModelName, "SM_Tab_NonSonoro_Roc_17AS") ||
+		NameCheck(ModelName, "SM_Tab_APD_Roc_17AS") ||
+		NameCheck(ModelName, "SM_Com2_NonSonoro_Roc_14AM") ||
 		NameCheck(ModelName, "SM_Sev_Roc_49AS")
 		)
 	{
 		*pShaderIndex = 11;
 	}
 	else if (NameCheck(ModelName, "SM_Com2_Roc_APD_27AM") ||
+		NameCheck(ModelName, "SM_Com2_NonSonoro_Roc_27AM") ||
 		NameCheck(ModelName, "SM_Sev_Roc_58AS"))
 	{
 		*pShaderIndex = 12;
@@ -1379,6 +1392,68 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 	{
 		*pShaderIndex = 14;
 	}
+	else if (NameCheck(ModelName, "SM_Com2_Roc_APD_10AM") ||
+		NameCheck(ModelName, "SM_Tab_Roc_23AL") || 
+		NameCheck(ModelName, "SM_Tab_Roc_13BH") || 
+		NameCheck(ModelName, "SM_Com2_Roc_14AM") || 
+		NameCheck(ModelName, "SM_Com2_Roc_39AX") || 
+		NameCheck(ModelName, "SM_Tab_Roc_24AL") || 
+		NameCheck(ModelName, "SM_Tab_Roc_07AH") || 
+		NameCheck(ModelName, "SM_Tab_Roc_19AM") || 
+		NameCheck(ModelName, "SM_Tab_Roc_28AS"))
+	{
+		*pShaderIndex = 15;
+	}
+	else if (NameCheck(ModelName, "SM_Tab_Roc_08AH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_04AH") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_32AL") ||
+		NameCheck(ModelName, "SM_Com2_Roc_37BS") ||
+		NameCheck(ModelName, "SM_Com2_Roc_38CS") ||
+		NameCheck(ModelName, "SM_Tab_Roc_20BM") ||
+		NameCheck(ModelName, "SM_Tab_Roc_10AH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_20AM") ||
+		NameCheck(ModelName, "SM_Tab_Roc_17AS") ||
+		NameCheck(ModelName, "SM_Tab_Roc_15AM") ||
+		NameCheck(ModelName, "SM_Tab_Roc_02AH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_13AH") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_38AS") ||
+		NameCheck(ModelName, "SM_Tab_Roc_18BL") ||
+		NameCheck(ModelName, "SM_Tab_Roc_19BM") ||
+		NameCheck(ModelName, "SM_Tab_Roc_22AL") ||
+		NameCheck(ModelName, "SM_Tab_Roc_06AH") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_22AM") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_28AS") ||
+		NameCheck(ModelName, "SM_Com2_Roc_38BS") ||
+		NameCheck(ModelName, "SM_Tab_Roc_12AL") ||
+		NameCheck(ModelName, "SM_Com2_Roc_03AL") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_23AM") ||
+		NameCheck(ModelName, "SM_Com2_Roc_27AM") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_15AM") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_21AL") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_31AS") ||
+		NameCheck(ModelName, "SM_Com2_Roc_20AS") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_12AS") ||
+		NameCheck(ModelName, "SM_Com2_Roc_05AL") ||
+		NameCheck(ModelName, "SM_Com2_Roc_28AS") ||
+		NameCheck(ModelName, "SM_Com2_Roc_39BX") ||
+		NameCheck(ModelName, "SM_Tab_Roc_22BL") ||
+		NameCheck(ModelName, "SM_Tab_Roc_01EH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_18AL") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_05AL") ||
+		NameCheck(ModelName, "SM_Com2_Roc_17AL") ||
+		NameCheck(ModelName, "SM_Com2_Roc_24AS") ||
+		NameCheck(ModelName, "SM_Tab_Roc_09BH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_09AH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_05AH") ||
+		NameCheck(ModelName, "SM_Tab_Roc_14AM") ||
+		NameCheck(ModelName, "SM_Com2_Roc_39CX") ||
+		NameCheck(ModelName, "SM_Sev_Tab_Roc_37AS"))
+	{
+		*pShaderIndex = 16;
+	}
+
+#pragma endregion
+
 }
 
 //void CLevel_Map::Logo_Test()
