@@ -161,9 +161,16 @@ public:
 	virtual void Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	virtual void End_SFX();
 
-
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
+
+	void Bind_GrabEscapePossible();
+	void Bind_GrabEscapeExecute();
+	void ResetPose();
+
 #pragma endregion
+
+
+
 
 #pragma region STATE
 public:
@@ -223,6 +230,7 @@ public:
 
 	// Capture
 	const CAPTURE_DESC* GetPendingCaputreDesc() const { return &m_PendingCaptureDesc; } // 읽기 전용 정보 전달.
+	void ActiveCaptureState();
 	void ClearCaptureState();
 
 	// KeyInput

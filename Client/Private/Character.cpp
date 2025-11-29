@@ -317,6 +317,47 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
 }
 
+
+void CCharacter::Bind_GrabEscapePossible()
+{
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+}
+
+void CCharacter::Bind_GrabEscapeExecute()
+{
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
+	ResetPose();
+}
+
+void CCharacter::ResetPose()
+{
+	if (nullptr == m_pTransformCom)
+		return;
+
+	_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+	vLook = XMVectorSetY(vLook, 0.f); // 하늘/바닥 보는 성분 제거
+
+	if(XMVector3Equal(vLook, XMVectorZero()))
+		vLook = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+
+	vLook = XMVector3Normalize(vLook);
+
+	// (B) 월드 기준 Up 벡터 (0, 1, 0)
+	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+
+	_vector vRight = XMVector3Cross(vWorldUp, vLook);
+	vRight = XMVector3Normalize(vRight);
+
+	// (D) Up 벡터 다시 계산 (Look x Right) -> 수직 보장
+	_vector vUp = XMVector3Cross(vLook, vRight);
+	vUp = XMVector3Normalize(vUp);
+
+	// (E) Transform에 적용 (이제 캐릭터는 똑바로 서게 됨)
+	m_pTransformCom->Set_State(STATE::RIGHT, vRight);
+	m_pTransformCom->Set_State(STATE::UP, vUp);
+	m_pTransformCom->Set_State(STATE::LOOK, vLook);
+}
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {
@@ -626,16 +667,25 @@ _bool CCharacter::Is_LockOn()
 }
 
 
-// 무조건 Grab Animation이 나오는게 아니라 들어간 상태에서 애니메이션을 선별할듯?
+void CCharacter::ActiveCaptureState()
+{
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
+
+	// 4. 충돌 콜백 도중에는 하면 안된다.?
+	//m_pColliderCom->IsActivate(false);
+}
+
+// 무조건 Grab Animation이 나오는게 아니라 들어간 상태에서 애니메이션을 선별
 void CCharacter::ClearCaptureState()
 {
 	// 1. 데이터 지우기
-	m_PendingGrabDesc = {}; 
+	m_PendingCaptureDesc = {};
 
 	// 2. Collider 충돌 처리 켜기.
-	m_pColliderCom->IsActivate(true);
+	//m_pColliderCom->IsActivate(true);
 
-
+	// 3. 제거
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
 }
 
 _bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)

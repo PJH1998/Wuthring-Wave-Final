@@ -74,7 +74,7 @@ void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta*
 
     // Hit 하위 State
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT), CAugustaHit::Create(pCharacter));
-    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT), CAugustaCapture::Create(pCharacter));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EAugustaCaptureState::CAPTURE), CAugustaCapture::Create(pCharacter));
 
 	// Interaction 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK), CAugustaRopeHook::Create(pCharacter));

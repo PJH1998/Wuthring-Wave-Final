@@ -41,6 +41,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
+	// 0. 플레이어 GameSystem에 등록
+	m_pGameSystem->Register_Player(this);
 	
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
@@ -95,6 +97,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 		if (nullptr != m_Characters[i])
 			m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 	}
+
 
     return S_OK;
 }
@@ -607,6 +610,19 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 	return true;
 }
+
+#pragma region GameSystem 연계함수.
+void CPlayer::Notify_EscapeGrabReady()
+{
+	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapePossible();
+}
+void CPlayer::Notify_EscapeGrabExecute()
+{
+	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapeExecute();
+}
+#pragma endregion
+
+
 
 void CPlayer::Sorting_Target()
 {

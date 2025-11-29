@@ -68,9 +68,6 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 		m_pParentTransform->Get_WorldMatrix());
 
     _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-	/*if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);*/
-    //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
 
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
@@ -92,7 +89,6 @@ void CAugustaSkillWeapon::Late_Update(_float fTimeDelta)
 		if (nullptr != pAttackVolume)
 			pAttackVolume->Late_Update(fTimeDelta);
 	}
-    //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -127,7 +123,6 @@ void CAugustaSkillWeapon::Render()
     }
 
 #ifdef _DEBUG
-    m_pRigidbodyCom->Render();
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -192,19 +187,6 @@ void CAugustaSkillWeapon::Ready_Components(const PROP_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
-
-    CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
-    RigidbodyDesc.fRadius = 0.2f;
-    RigidbodyDesc.fHeight = 0.6f;
-    RigidbodyDesc.eShape = SHAPE::CAPSULE;
-    RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
-    RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
-    RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
-        , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");
 }
 
 void CAugustaSkillWeapon::Ready_Variables(const PROP_DESC* pDesc)

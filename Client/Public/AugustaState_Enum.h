@@ -430,7 +430,10 @@ enum class EAugustaCaptureType : _uint
 {
 	CAPTURED = 0,
 	BEHIT_PUSH_LOOP,
+	BEHIT_FLY_START,
 	BEHIT_FLY_LOOP,
+	BEHIT_FLY_FALL,
+	BEHIT_PUSH_FALL,
 	END
 };
 #pragma endregion

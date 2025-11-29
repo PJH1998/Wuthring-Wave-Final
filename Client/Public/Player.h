@@ -79,6 +79,14 @@ public:
 public:
 	_bool Is_TargetValid(class CTransform* pTarget); // 타겟이 유효한가?
 
+	
+#pragma region GAMESYSTEM과의 연계함수.
+public:
+	void Notify_EscapeGrabReady();
+	void Notify_EscapeGrabExecute();
+#pragma endregion
+
+
 
 private:
 	vector<class CCharacter*> m_Characters; 

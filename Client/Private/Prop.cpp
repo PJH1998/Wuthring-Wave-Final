@@ -64,10 +64,6 @@ void CProp::Activate(_bool IsActive)
 	{
 		Prop_Reset();
 	}
-
-    if (nullptr == m_pRigidbodyCom)
-        return;
-        
 }
 
 void CProp::Prop_Reset()
@@ -117,10 +113,10 @@ void CProp::Clear_Animation(const _string& strAnimName)
 #pragma region NOTIFY
 void CProp::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-	if (!IsActive)
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-	else
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+	//if (!IsActive)
+	//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+	//else
+	//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
 }
 void CProp::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -132,10 +128,10 @@ void CProp::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CProp::Collider_Active(_bool isActive)
 {
-    if (!isActive)
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-    else 
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+    //if (!isActive)
+    //    m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+    //else 
+    //    m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
 }
 
 
@@ -196,7 +192,7 @@ void CProp::Free()
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pComputeShaderCom);
     Safe_Release(m_pModelCom);
-    Safe_Release(m_pRigidbodyCom);
+    //Safe_Release(m_pRigidbodyCom);
 	
 	// AttackVolumes 제거.
 	for (auto& pAttackVolume : m_AttackVolumes)
