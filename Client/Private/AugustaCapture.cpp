@@ -37,7 +37,7 @@ void CAugustaCapture::OnEnter(void* pArg)
 	m_pAugusta->Set_Gravity(false);
 
 	// 6.
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
 }
 
 void CAugustaCapture::OnUpdate(_float fTimeDelta)

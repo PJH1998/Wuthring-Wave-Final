@@ -142,7 +142,7 @@ void CAugusta::Update(_float fTimeDelta)
 			//m_pTransformCom->Set_WorldMatrix(matCombined);
 			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 			_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
-			vPos += vCameraLook * -3.f;
+			vPos += vCameraLook * -2.f;
 
 			m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
 		}

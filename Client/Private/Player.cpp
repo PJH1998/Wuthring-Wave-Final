@@ -615,10 +615,12 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 void CPlayer::Notify_EscapeGrabReady()
 {
 	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapePossible();
+	m_IsLockOn = true;
 }
 void CPlayer::Notify_EscapeGrabExecute()
 {
 	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapeExecute();
+	m_IsLockOn = false;
 }
 #pragma endregion
 
