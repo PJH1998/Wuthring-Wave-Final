@@ -1023,7 +1023,7 @@ technique11 DefaultTechnique
     pass DefaultMeshRender //13
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();

@@ -198,9 +198,8 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 	MultiByteToWideChar(CP_ACP, 0, pDesc->ModelName, -1, Name, strlen(pDesc->ModelName));
 	lstrcat(Model, Name);
 
-	_wstring WModelName = Model;
-
-	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), WModelName,
+	m_szDebrisName = Model;
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), m_szDebrisName,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
 
@@ -271,7 +270,7 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 
 		XMStoreFloat3(&Desc.vImpulse, vDeltaPos * Power);
 		if (FAILED(m_pGameInstance->Add_PoolingObject(pDesc->iLevel, TEXT("Prototype_GameObject_MapObject_Destruction_Debris")
-			, pDesc->iLevel, TEXT("Layer_Destruction_Debris"), TEXT("24BS_Debris") + to_wstring(i), 3, &Desc)))
+			, pDesc->iLevel, TEXT("Layer_Destruction_Debris"), m_szDebrisName + to_wstring(i), 3, &Desc)))
 			return S_OK;
 	}
 	return S_OK;
@@ -305,7 +304,7 @@ void CMapObject_Destruction::Spawn_Particles()
 		
 		XMStoreFloat3(&ResetDesc.vImpulse, vDeltaPos * Power);
 		
-		m_pGameInstance->Spawn_PoolingObject(TEXT("24BS_Debris") + to_wstring(i), XMLoadFloat4x4(&Mat), &ResetDesc);
+		m_pGameInstance->Spawn_PoolingObject(m_szDebrisName + to_wstring(i), XMLoadFloat4x4(&Mat), &ResetDesc);
 	}
 }
 

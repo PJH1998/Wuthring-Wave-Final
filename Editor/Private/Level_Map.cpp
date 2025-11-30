@@ -980,9 +980,9 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
-	m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
+	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
@@ -1451,8 +1451,11 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 	{
 		*pShaderIndex = 16;
 	}
-	else if (NameCheck(ModelName, "Doo_") || NameCheck(ModelName, "SM_Sev_Bui_02"))
+	else if (NameCheck(ModelName, "Doo_"))
 		*pShaderIndex = 17;
+	else if(NameCheck(ModelName, "SM_Sev_Bui_02"))
+		*pShaderIndex = 0;
+
 #pragma endregion
 
 }

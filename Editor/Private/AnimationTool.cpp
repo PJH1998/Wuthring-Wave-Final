@@ -816,13 +816,6 @@ void CAnimationTool::LoadDat()
                 return;
             }
 
-            //_matrix		PreTransformMatrix = XMMatrixIdentity();
-            ////_float fSize = 1.f;
-            //_float fSize = 0.0001f;
-            //PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
-
-			
-
             wStrModelName = StringToWString(strModelName);
 
 			HRESULT hr = {};
@@ -835,7 +828,6 @@ void CAnimationTool::LoadDat()
 				PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
 				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str());
 			}
-				
 			else
 				hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
             

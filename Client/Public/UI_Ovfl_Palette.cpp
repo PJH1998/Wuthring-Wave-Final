@@ -164,7 +164,7 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	Trigger_ResetLevel(iTargetLevel);
 	m_isActivate = true;
 	m_IsGoinDisabled = false;
-
+	m_isFinishedEvent = false;
 	m_pGameSystem->Set_MouseFix(false);
 }
 
@@ -367,11 +367,12 @@ void CUI_Ovfl_Palette::Create_ChildText_DestColor()
 
 void CUI_Ovfl_Palette::Trigger_ResetLevel(_uint iLevelIndex)
 {
-	m_isGoinChange	= false;
-	m_isGoinOpen	= false;
-	m_isGoinSuccess	= false;
-	m_isGoinFail	= false;
-	m_fChangeRadius = 0.f;
+	m_isGoinChange		= false;
+	m_isGoinOpen		= false;
+	m_isGoinSuccess		= false;
+	m_isGoinFail		= false;
+	m_isFinishedEvent	= false;
+	m_fChangeRadius		= 0.f;
 
 	Load_LevelData(iLevelIndex);
 }
@@ -903,8 +904,10 @@ void CUI_Ovfl_Palette::Update_ResetBtn()
 
 void CUI_Ovfl_Palette::Update_FinishEvent()
 {
-	if (!(m_isGoinFail || m_isGoinSuccess))
+	if (!(m_isGoinFail || m_isGoinSuccess) || m_isFinishedEvent)
 		return;
+
+	m_isFinishedEvent = true;
 
 	if		(m_isGoinFail)
 	{
