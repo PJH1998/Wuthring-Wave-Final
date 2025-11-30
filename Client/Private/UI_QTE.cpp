@@ -40,21 +40,21 @@ HRESULT CUI_QTE::Initialize_Clone(void* pArg)
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_Initialize.json",					//
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_Initialize.json",					//	
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_FadeIn.json",						
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_FadeOut.json",						
 																							
 																							
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_BG_Initialize.json",				//
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_BG_Initialize.json",				//	
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_BG_Start.json",					
 																							
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_BG_Assemble_AlphaStrength.json",			
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_BG_Assemble_AlphaStrength.json",	
 																							
 																							
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Initialize.json",				//
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Initialize.json",				//	
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Start.json",					
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_FG_Succeed.json",					
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE2A_FG_Initialize.json",				//
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE2A_FG_Initialize.json",				//	
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE2A_FG_Triggered.json",				
 																							
 																							
@@ -62,11 +62,11 @@ HRESULT CUI_QTE::Initialize_Clone(void* pArg)
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1A_KeyGuide_FadeIn.json",			
 																							
 																							
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_FG_Arrow_Initialize.json",			//
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_FG_Arrow_LickLoop.json",			
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_FG_Arrow_Initialize.json",			//	
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_FG_Arrow_TickLoop.json",			
 																							
 																							
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_BG_FeedbackRing_Initialize.json",	//
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_BG_FeedbackRing_Initialize.json",	//	
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/QTE1_BG_FeedbackRing_TickLoop.json",    
 
 	};
@@ -115,7 +115,8 @@ void CUI_QTE::Update(_float fTimeDelta)
 	switch (m_eQTEType)		// m_isQTEMode 일 시 진행
 	{
 	case Client::UI_QTE_TYPE::FILLGUAGE:		Update_QTE_Fillguage(fTimeDelta);		break;
-	case Client::UI_QTE_TYPE::TRIGGER:			Update_QTE_Trigger(fTimeDelta);			break;
+	case Client::UI_QTE_TYPE::TRIGGER_ROPE:	
+	case Client::UI_QTE_TYPE::TRIGGER_EXECUTE:	Update_QTE_Trigger(fTimeDelta);			break;
 	}
 
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
@@ -175,6 +176,7 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pUI_KeyButtons->SetActivate(true);				// on
 		m_pUI_AbilityIconBG->SetActivate(false);			// off
 		m_pUI_AbilityIcons->SetActivate(false);				// off
+		m_pUI_ExtraIcons->SetActivate(false);				// off
 
 		m_pUI_SectorA_FG_Fillguage->SetActivate(true);		// on
 		m_pUI_SectorA_FG_Trigger->SetActivate(false);		// off
@@ -183,11 +185,26 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_fQTEFillAmount	= 0.1f;		// 조작 1회 당 차는 정도
 		m_fQTEMaxTime		= 3.f;		// QTE 제한시간.
 	}break;
-	case Client::UI_QTE_TYPE::TRIGGER:			
+	case Client::UI_QTE_TYPE::TRIGGER_ROPE:
 	{
 		m_pUI_KeyButtons->SetActivate(!true);				// !on
 		m_pUI_AbilityIconBG->SetActivate(!false);			// !off
 		m_pUI_AbilityIcons->SetActivate(!false);			// !off
+		m_pUI_ExtraIcons->SetActivate(false);				// off
+
+		m_pUI_SectorA_FG_Fillguage->SetActivate(!true);		// !on
+		m_pUI_SectorA_FG_Trigger->SetActivate(!false);		// !off
+
+		m_fQTEDropRate		= 0.0f;
+		m_fQTEFillAmount	= 1.0f;		// 사실상 한번만 누르면 바로 차게끔.	
+		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
+	}break;
+	case Client::UI_QTE_TYPE::TRIGGER_EXECUTE:
+	{
+		m_pUI_KeyButtons->SetActivate(!true);				// !on
+		m_pUI_AbilityIconBG->SetActivate(!false);			// !off
+		m_pUI_AbilityIcons->SetActivate(false);				// !off
+		m_pUI_ExtraIcons->SetActivate(!false);				// !off
 
 		m_pUI_SectorA_FG_Fillguage->SetActivate(!true);		// !on
 		m_pUI_SectorA_FG_Trigger->SetActivate(!false);		// !off
@@ -248,6 +265,7 @@ void CUI_QTE::PreAssign_ChildUIs()
 	m_pUI_BG_QTEFrame				= Find_ChildObject(L"QTE_Frame");
 	m_pUI_AbilityIconBG				= Find_ChildObject(L"AbilityIconBG");
 	m_pUI_AbilityIcons				= Find_ChildObject(L"AbilityIcons");
+	m_pUI_ExtraIcons				= Find_ChildObject(L"ExtraIcons");
 	m_pUI_BG_QTEAssemble			= Find_ChildObject(L"QTE_Assemble");
 	m_pUI_FG_QTEFeedbackRing		= Find_ChildObject(L"QTE_FeedbackRing");
 	m_pUI_FG_QTEGuageFrame			= Find_ChildObject(L"QTE_GuageFrame");
@@ -299,7 +317,7 @@ void CUI_QTE::Update_AnimOrder(_float fTimeDelta)
 		m_pAnim_RUI_All->Change_Animation(L"QTE1_FadeIn") ;
 		m_pAnim_UI_SectorA_BG->Change_Animation(L"QTE1A_BG_Start") ;
 		m_pAnim_UI_BG_QTEAssemble->Change_Animation(L"QTE1_BG_Assemble_AlphaStrength");
-		m_pAnim_UI_FG_QTEArrow->Change_Animation(L"QTE1_FG_Arrow_LickLoop");
+		m_pAnim_UI_FG_QTEArrow->Change_Animation(L"QTE1_FG_Arrow_TickLoop");
 		m_pAnim_UI_FG_QTEFeedbackRing->Change_Animation(L"QTE1_BG_FeedbackRing_TickLoop");
 
 		m_iAnimOrder++;
@@ -392,33 +410,11 @@ void CUI_QTE::Update_QTE_Trigger(_float fTimeDelta)
 	if (!m_isQTEMode)					// QTE가 켜질 시 진행.
 		return;
 
-	//// 1. 일정 시간마다 떨어진다.
-	//
-	//_float fDropAmount = fTimeDelta * m_fQTEDropRate;
-	//m_fQTEGuage = ((m_fQTEGuage - fDropAmount) >= 0.f) ? m_fQTEGuage - fDropAmount : 0.f;
-	//
-	//// 2. 지정된 버튼을 누를 시, 해당 버튼이 눌렸을 때에
-	//// 피드백 효과, 게이지 상승, 다 찼는지의 판별 여부 등을 진행한다. 앨단 F.
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-	//{
-	//	m_fQTEGuage = ((m_fQTEGuage + m_fQTEFillAmount) <= 1.f) ? m_fQTEGuage + m_fQTEFillAmount : 1.f;			// 1.f 되면 Success
-	//	if (m_fQTEGuage == 1.f)
-	//		m_isGoinSuccess = true;
-	//	
-	//}
-	//	
-	//std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
-	//
-	//if (!m_isGoinSuccess &&
-	//	m_fQTEElapsedTime >= m_fQTEMaxTime)
-	//	m_isGoinFail = true;
-	
 	_bool isTriggered = false;
 
 #ifdef KSTA_UITEST_TEMPTRIGGER
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_T) == KEYSTATE::DOWN)		// ksta : 나중에 외부로부터 성공 여부 받아오기.
+	if (m_pGameInstance->Get_DIKeyState(m_arrBtnMapping[ENUM_CLASS(m_eIconIndex)]) == KEYSTATE::DOWN)		// ksta : 나중에 외부로부터 성공 여부 받아오기.
 		isTriggered = true;
 #endif // KSTA_UITEST_TEMPTRIGGER
 
@@ -474,8 +470,9 @@ void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
 
 	switch (m_eQTEType)
 	{
-	case Client::UI_QTE_TYPE::FILLGUAGE:	arrAnimTimings = { 0.25f, 0.75f };	break;
-	case Client::UI_QTE_TYPE::TRIGGER:		arrAnimTimings = { 1.f, 1.5f};	break;
+	case Client::UI_QTE_TYPE::FILLGUAGE:			arrAnimTimings = { 0.25f, 0.75f };		break;
+	case Client::UI_QTE_TYPE::TRIGGER_ROPE:			
+	case Client::UI_QTE_TYPE::TRIGGER_EXECUTE:		arrAnimTimings = { 1.f, 1.5f};			break;
 	}
 
 

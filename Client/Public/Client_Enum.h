@@ -200,6 +200,6 @@ namespace Client
 	};
 
 	enum class UI_QTE_TYPE {
-		FILLGUAGE, TRIGGER, END
+		FILLGUAGE, TRIGGER_ROPE, TRIGGER_EXECUTE, END
 	};
 }
