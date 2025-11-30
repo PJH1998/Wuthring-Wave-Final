@@ -15,7 +15,8 @@ private:
 public:
 	HRESULT Initialize();
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects,_bool** SonoroMode);
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects,_bool** SonoroMode);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
+	_bool* Add_To_Management(INSTANCETYPE eType, class CMapObject_Instance* pObjects,_bool** SonoroMode);
 	void Update(_float fTimeDelta);
 	_bool  Change_Sonoro(_bool IsSonoro);
 	_bool IsSonoro() { return m_SonoroRender; }
@@ -23,6 +24,7 @@ public:
 private:
 	vector<class CMapObject_Sonoro*> m_SonoroObjects;
 	vector<class CMapObject_NonSonoro*> m_NonSonoroObjects;
+	vector<class CMapObject_Instance*> m_Instance;
 	_bool m_LastSonoroMode = { false };
 	class CGameInstance* m_pGameInstance = { nullptr };
 	_float m_fTriggerdTime = {};

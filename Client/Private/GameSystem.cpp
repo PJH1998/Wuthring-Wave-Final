@@ -339,6 +339,11 @@ _bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pO
 	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
+_bool* CGameSystem::Add_To_Management(INSTANCETYPE eType, CMapObject_Instance* pObjects, _bool** SonoroMode)
+{
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
+}
+
 void CGameSystem::Update(_float fTimeDelta)
 {
 	m_pSonoro_Manager->Update(fTimeDelta);

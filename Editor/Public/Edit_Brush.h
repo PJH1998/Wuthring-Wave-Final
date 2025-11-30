@@ -55,6 +55,7 @@ private:
 		_float arr[4];
 	};
 	MyFloat4 vDiffuseColor = {};
+	INSTANCETYPE m_eInstanceType = { INSTANCETYPE::DEFAULT };
 public:
 	static CEdit_Brush* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) { return nullptr; }
