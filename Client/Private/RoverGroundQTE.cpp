@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
-HRESULT CRoverGroundQTE::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundQTE::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     Setup_Animations();
@@ -99,12 +99,13 @@ void CRoverGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pRover->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
-
+	
 	if (m_fAnimationScale > 1.f)
 		m_fAnimationScale = 1.f;
 
     // 1. 애니메이션 실행부터
     CCharacterState::Play_Animation(m_pRover, fTimeDelta, m_fAnimationScale);
+    
 
 
 }
@@ -175,7 +176,7 @@ void CRoverGroundQTE::State_Reset()
 
 
 
-CRoverGroundQTE* CRoverGroundQTE::Create(class CGameObject* pOwner)
+CRoverGroundQTE* CRoverGroundQTE::Create(CCharacter* pOwner)
 {
     CRoverGroundQTE* pInstance = new CRoverGroundQTE();
 

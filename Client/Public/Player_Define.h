@@ -3,6 +3,9 @@
 #include "Character.h"
 #include "Prop.h"
 
+NS_BEGIN(Client)
+class CCharacter;
+NS_END
 typedef struct tagPlayerSpec
 {
 	_wstring strActorTag = {};

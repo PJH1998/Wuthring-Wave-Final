@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GameSystem.h"
 
-HRESULT CRoverGroundBurst::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundBurst::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     // 애니메이션 리스트 셋업.
@@ -171,7 +171,7 @@ void CRoverGroundBurst::State_Reset()
 }
 
 
-CRoverGroundBurst* CRoverGroundBurst::Create(class CGameObject* pOwner)
+CRoverGroundBurst* CRoverGroundBurst::Create(CCharacter* pOwner)
 {
     CRoverGroundBurst* pInstance = new CRoverGroundBurst();
 

@@ -46,7 +46,7 @@ private:
     virtual ~CAugustaGroundIdle() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(class CCharacter* pCharacter) override;
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
@@ -70,7 +70,7 @@ private:
     void State_Reset(); // 상태 초기화
 
 public:
-    static CAugustaGroundIdle* Create(class CGameObject* pOwner);
+    static CAugustaGroundIdle* Create(class CCharacter* pOwner);
     virtual void Free() override;
 };
 

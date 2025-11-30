@@ -3,12 +3,12 @@
 #include "Augusta.h"
 #include "StateMachine.h"
 
-HRESULT CAugustaGroundSkill::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundSkill::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -438,7 +438,7 @@ void CAugustaGroundSkill::Handle_Animation_SpecialState()
 }
 
 
-CAugustaGroundSkill* CAugustaGroundSkill::Create(class CGameObject* pOwner)
+CAugustaGroundSkill* CAugustaGroundSkill::Create(CCharacter* pOwner)
 {
     CAugustaGroundSkill* pInstance = new CAugustaGroundSkill();
 

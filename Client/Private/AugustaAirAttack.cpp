@@ -3,12 +3,12 @@
 #include "Augusta.h"
 #include "StateMachine.h"
 
-HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaAirAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -513,7 +513,7 @@ void CAugustaAirAttack::Handle_Animation_SpecialState()
 
 
 
-CAugustaAirAttack* CAugustaAirAttack::Create(class CGameObject* pOwner)
+CAugustaAirAttack* CAugustaAirAttack::Create(CCharacter* pOwner)
 {
     CAugustaAirAttack* pInstance = new CAugustaAirAttack();
 

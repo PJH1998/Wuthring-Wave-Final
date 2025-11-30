@@ -3,12 +3,12 @@
 #include "Galbrena.h"
 #include "StateMachine.h"
 
-HRESULT CGalbrenaGroundSkill::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundSkill::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -280,7 +280,7 @@ void CGalbrenaGroundSkill::Handle_Animation_SpecialState()
 }
 
 
-CGalbrenaGroundSkill* CGalbrenaGroundSkill::Create(class CGameObject* pOwner)
+CGalbrenaGroundSkill* CGalbrenaGroundSkill::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundSkill* pInstance = new CGalbrenaGroundSkill();
 

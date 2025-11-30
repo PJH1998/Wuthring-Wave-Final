@@ -179,12 +179,13 @@ void CRover::Late_Update(_float fTimeDelta)
 	//else
 	//	m_pQTEColliderCom->Sync_Position(m_pTransformCom);
 	//
-	//if (m_IsQTEend)
-	//{
-	//	Notify_HarmonyEnd();
-	//	m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
-	//	m_IsQTEend = false;
-	//}
+
+	if (m_IsQTEend)
+	{
+		Notify_HarmonyEnd();
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
+		m_IsQTEend = false;
+	}
 
 
 	if (m_IsVisible)

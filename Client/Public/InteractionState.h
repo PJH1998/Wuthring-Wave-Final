@@ -10,7 +10,7 @@ protected:
 	virtual ~CInteractionState() = default;
 
 public:
-	virtual HRESULT Initialize(class CGameObject* pOwner) override;
+	virtual HRESULT Initialize(CCharacter* pOwner) override;
 	virtual void OnEnter(void* pArg = nullptr) override;
 	virtual void OnUpdate(_float fTimeDelta) override;
 	virtual void OnExit() override;

@@ -5,12 +5,12 @@
 #include "RoverSword.h"
 #include "Ability.h"
 
-HRESULT CRoverGroundAttack::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     // 애니메이션 리스트 셋업.
@@ -325,7 +325,7 @@ void CRoverGroundAttack::State_Reset()
         m_States[i] = false;
 }
 
-CRoverGroundAttack* CRoverGroundAttack::Create(class CGameObject* pOwner)
+CRoverGroundAttack* CRoverGroundAttack::Create(CCharacter* pOwner)
 {
     CRoverGroundAttack* pInstance = new CRoverGroundAttack();
 

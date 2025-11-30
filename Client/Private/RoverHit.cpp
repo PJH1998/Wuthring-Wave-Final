@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
-HRESULT CRoverHit::Initialize(class CGameObject* pOwner)
+HRESULT CRoverHit::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CHitState::Initialize(pOwner)))
+    if (FAILED(CHitState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     Setup_Animations();
@@ -252,7 +252,7 @@ void CRoverHit::State_Reset()
 
 
 
-CRoverHit* CRoverHit::Create(class CGameObject* pOwner)
+CRoverHit* CRoverHit::Create(CCharacter* pOwner)
 {
     CRoverHit* pInstance = new CRoverHit();
 

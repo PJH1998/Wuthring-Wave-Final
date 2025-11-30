@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 
 // OMNI 상태에서만 탈출 가능.
-HRESULT CGalbrenaGroundSpecial::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundSpecial::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -268,7 +268,7 @@ void CGalbrenaGroundSpecial::State_Reset()
 }
 
 
-CGalbrenaGroundSpecial* CGalbrenaGroundSpecial::Create(class CGameObject* pOwner)
+CGalbrenaGroundSpecial* CGalbrenaGroundSpecial::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundSpecial* pInstance = new CGalbrenaGroundSpecial();
 

@@ -33,7 +33,7 @@ private:
     virtual ~CRoverAirFly() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(class CCharacter* pCharacter) override;
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
@@ -68,7 +68,7 @@ private:
     void State_Reset();
 
 public:
-    static CRoverAirFly* Create(class CGameObject* pOwner);
+    static CRoverAirFly* Create(class CCharacter* pOwner);
     virtual void Free() override;
 };
 

@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-HRESULT CAugustaClimbExit::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaClimbExit::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CClimbState::Initialize(pOwner)))
+    if (FAILED(CClimbState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -209,7 +209,7 @@ void CAugustaClimbExit::State_Reset()
 
 
 
-CAugustaClimbExit* CAugustaClimbExit::Create(class CGameObject* pOwner)
+CAugustaClimbExit* CAugustaClimbExit::Create(CCharacter* pOwner)
 {
     CAugustaClimbExit* pInstance = new CAugustaClimbExit();
 
