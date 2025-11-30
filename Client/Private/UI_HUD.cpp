@@ -1095,40 +1095,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 			fBossMaxSA = 1.f;
 			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
 		}
-		
-		//fBossSA		= *m_pCurBossSA;
-		//fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
-
-
-		// fBossHP = { 10000.f };            // boss hitpoint
-		// fBossBackHP = fBossBackHP;
-		//fBossMaxHP = { 10000.f };
-		//
-		// fBossSA = { 4000.f };             // boss superarmor
-		// fBossBackSA = fBossSA;
-		//fBossMaxSA = { 4000.f };
-		//isSABreak = false;
-
 	}
-
-#pragma region old 
-
-	//if (pBoss == nullptr)
-	//    return;
-
-
-	//static _float fBossHP = { 10000.f };            // boss hitpoint
-	//static _float fBossBackHP = fBossBackHP;
-	//const _float fBossMaxHP = { 10000.f };
-	//
-	//static _float fBossSA = { 4000.f };             // boss superarmor
-	//static _float fBossBackSA = fBossSA;
-	//const _float fBossMaxSA = { 4000.f };
-	//static _bool isSABreak = false;
-
-#pragma endregion
-
-	
 	
 	//static _bool isHit = false;
     static _float fHPReduceLeftTime = 0.f;
@@ -1202,27 +1169,6 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	}
 
 
-    //if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
-    //{
-    //    if (fBossHP == 0) fBossHP = fBossMaxHP;
-    //    if (fBossSA == 0) fBossSA = fBossMaxSA;
-    //    isHit = true;
-    //}
-	//
-    //if (isHit == true)
-    //{
-    //    _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
-    //    _float fRandSADamage = fRandDamage * 0.8f;
-	//
-    //    // HP�� ��� ����
-    //    fBossHP -= fRandDamage;
-    //    fBossSA -= fRandSADamage;
-	//
-    //    if (fBossHP < 0) fBossHP = 0;
-    //    if (fBossSA < 0) fBossSA = 0;
-	//
-    //    fHPReduceLeftTime = fHPReduceTime;
-    //}
 
     // change
     vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };

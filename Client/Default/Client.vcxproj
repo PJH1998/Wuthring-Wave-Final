@@ -359,6 +359,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\public\UI_HUD_Sector_Minimap.h" />
+    <ClInclude Include="..\public\UI_HUD_Sector_FuncIcons.h" />
     <ClInclude Include="..\public\UI_Image.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -585,6 +587,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\private\UI_HUD_Sector_Minimap.cpp" />
+    <ClCompile Include="..\private\UI_HUD_Sector_FuncIcons.cpp" />
     <ClCompile Include="..\private\UI_Image.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
