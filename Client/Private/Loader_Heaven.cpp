@@ -49,6 +49,8 @@
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+#include "AugustaFxObject.h"
+#include "AugustaEnergyBlade.h"
 #include "Augusta.h"
 
 // Rover
@@ -306,7 +308,40 @@ HRESULT CLoader_Heaven::Load_Augusta()
 		, wStrGriffonTag
 		, CAugustaGriffon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_FxObject";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/FxObject/FxObject.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationZ(XMConvertToRadians(-90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrFxObjectTag = TEXT("Prototype_GameObject_Augusta_FxObject");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrFxObjectTag
+		, CAugustaFxObject::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+	// EnergyBlade의 경우는 FxObject가 소유 => FxObject의 뼈에 붙을예정.
+	wStrModelTag = L"Prototype_Component_Model_Augusta_EnergyBlade";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/EnergyBlade/EnergyBlade.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrEnergyBladeTag = TEXT("Prototype_GameObject_Augusta_EnergyBlade");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrEnergyBladeTag
+		, CAugustaEnergyBlade::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
+
+
+
 	return S_OK;
 }
 

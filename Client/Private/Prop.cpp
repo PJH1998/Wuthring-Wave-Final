@@ -86,6 +86,9 @@ void CProp::Volume_Activate(_bool IsActive)
 void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
 {
     ASSERT_CRASH(m_pModelCom);
+	if (!m_isActivate)
+		return;
+
 
 	// 1. Dissolve 면 return;
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));

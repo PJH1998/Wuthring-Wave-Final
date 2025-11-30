@@ -9,6 +9,7 @@
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+#include "AugustaFxObject.h"
 #include "AttackVolume.h"
 #include "Wing.h"
 #include "GameSystem.h"
@@ -57,6 +58,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_pSkillWeapon->SetActivate(false);
     m_pGriffon->SetActivate(false);
 	m_pWing->SetActivate(false);
+	m_pFxObject->SetActivate(false);
     
 	
 	m_IsQTE = false;
@@ -390,6 +392,9 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     case PART_GRIFFON:
 		m_pGriffon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+    case PART_FXOBJECT:
+		m_pFxObject->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+        break;
     case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
@@ -402,13 +407,15 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     {
     case PART_BAYONET:
         m_pBayonet->Activate(IsActive);
-		
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Activate(IsActive);
         break;
     case PART_GRIFFON:
         m_pGriffon->Activate(IsActive);
+        break;
+    case PART_FXOBJECT:
+        m_pFxObject->Activate(IsActive);
         break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
@@ -490,6 +497,9 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
         break;
     case PART_GRIFFON:
         m_pGriffon->Set_SocketMatrix(pSocketMatrix);
+        break;
+    case PART_FXOBJECT:
+        m_pFxObject->Set_SocketMatrix(pSocketMatrix);
         break;
     }
 }
@@ -777,8 +787,12 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		m_fStateDelayTimer = stof(var3);
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
-	//else
-	//	Process_VolumeChange(wStrObjectTag);
+	else if (var1 == TEXT("FXOBJECT")) // 30 ~ 60fps?
+	{
+		Process_FxObject(wStrObjectTag);
+		
+	}
+
 
 	return;
 }
@@ -1027,6 +1041,25 @@ void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
 	}
 }
 
+void CAugusta::Process_FxObject(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|'); 
+	getline(wss, var2, L'|'); 
+	getline(wss, var3, L'|'); 
+
+	if (var2 == TEXT("VISIBLE"))
+	{
+		if (var3 == TEXT("TRUE"))
+			m_pFxObject->Set_Visible(true);
+		else if (var3 == TEXT("FALSE"))
+			m_pFxObject->Set_Visible(false);
+	}
+	
+		
+}
+
 void CAugusta::Update_TargetDistance()
 {
 	const _float4x4* pTargetMatrix = nullptr;
@@ -1239,6 +1272,24 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             Safe_AddRef(m_pGriffon);
             break;
 
+		case PARTTYPE::PART_FXOBJECT:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetAugustaFxObjectCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pFxObject = dynamic_cast<CAugustaFxObject*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pFxObject);
+			Safe_AddRef(m_pFxObject);
+			break;
+
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
 			vPosition = { 0.f, 0.f, 0.f };
@@ -1365,5 +1416,6 @@ void CAugusta::Free()
     Safe_Release(m_pBayonet);
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
+    Safe_Release(m_pFxObject);
 	Safe_Release(m_pWing);
 }
