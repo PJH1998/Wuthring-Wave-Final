@@ -1063,6 +1063,9 @@
     <ClInclude Include="..\Public\RoverCapture.h">
       <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Levi_Alter.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1675,6 +1678,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverCapture.cpp">
       <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Alter.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -40,6 +40,7 @@ HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
 #endif // _DEBUG
 
 	m_ShaderPaths.resize(SHADERPATH::END);
+	m_vBaseColor = pDesc->vBaseColor;
 	return S_OK;
 }
 
@@ -106,6 +107,11 @@ void CLevi_Bayonet::Render()
 
 		m_pShaderCom->UndBind_All_VS_SRV();
 	}
+}
+
+void CLevi_Bayonet::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	m_pAttackVolume->TriggerActivate(false);
 }
 
 void CLevi_Bayonet::Attack_Active(_bool isActive)

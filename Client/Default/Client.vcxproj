@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -255,6 +255,7 @@
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\InteractionState.h" />
     <ClInclude Include="..\Public\Level_Heaven.h" />
+    <ClInclude Include="..\public\Levi_Alter.h" />
     <ClInclude Include="..\public\Levi_Bayonet.h" />
     <ClInclude Include="..\Public\Levi_Bow.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
@@ -502,6 +503,7 @@
     <ClCompile Include="..\private\Level_Test_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\private\Levi_Alter.cpp" />
     <ClCompile Include="..\private\Levi_Bayonet.cpp" />
     <ClCompile Include="..\Private\Levi_Bow.cpp" />
     <ClCompile Include="..\Private\Loader.cpp" />

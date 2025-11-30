@@ -30,6 +30,10 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
+	m_fHP = pDesc->fHP;
+	m_fAttackDmg = pDesc->fAttackDmg;
+	m_fMaxStamina = pDesc->fMaxStamina;
+	m_fStamina = m_fMaxStamina;
 
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK3] = 25.f;
@@ -54,11 +58,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	_float temp{};
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
-	m_iPhase = PHASE::TWO;
-	m_fHP = pDesc->fHP;
-	m_fAttackDmg = pDesc->fAttackDmg;
-	m_fMaxStamina = pDesc->fMaxStamina;
-	m_fStamina = m_fMaxStamina;
+	//m_iPhase = PHASE::TWO;
+	
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
 	m_ShaderIndices[LEVIATAN_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
@@ -236,7 +237,6 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
-
 		m_isTrigger = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
@@ -739,8 +739,21 @@ _bool CLeviatan::isAttackEnable()
 {
 	if (!m_isDetecting || !m_isAggro)
 		return false;
+	_bool bResult{};
+	if (m_iPhase == PHASE::ONE)
+	{
+		for (_uint i = 0; i < ATK_PATTERN::ATTACK1; ++i)
+			if (m_fAttackAcc[m_iPhase][i] < 0.f) 
+				bResult = true;
+	}
+	else if (m_iPhase == PHASE::TWO)
+	{
+		for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+			if (m_fAttackAcc[m_iPhase][i] < 0.f)
+				bResult = true;
+	}
 
-	return true;
+	return bResult;
 }
 
 _bool CLeviatan::DodgeCooldown()
