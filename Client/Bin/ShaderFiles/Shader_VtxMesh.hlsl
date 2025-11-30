@@ -707,7 +707,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_MA(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -758,7 +759,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_GREEN(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -809,7 +811,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_BLUE(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -860,7 +863,8 @@ PS_OUT_LIGHT PS_NONGRASS_ROCK_MA(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -910,7 +914,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_NONDETAIL(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -961,7 +966,8 @@ PS_OUT_LIGHT PS_ROCK_SONORO(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -1012,7 +1018,8 @@ PS_OUT_LIGHT PS_ROCK_SONORO_BIG(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 

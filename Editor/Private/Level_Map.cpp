@@ -652,6 +652,7 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&vBoundingPos), sizeof(_float3));
 								File.read(reinterpret_cast<char*>(&vBoundingExtends), sizeof(_float3));
 								Desc.IsLoaded = true;
+								File.read(reinterpret_cast<char*>(&Desc.eInstanceType), sizeof(INSTANCETYPE));
 
 								//이거를 프로토타입으로 만든 이후 바로 클론하기.
 
@@ -979,10 +980,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";

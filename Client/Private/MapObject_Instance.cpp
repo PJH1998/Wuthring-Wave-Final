@@ -1,5 +1,6 @@
 ﻿#include"ClientPch.h"
 #include "MapObject_Instance.h"
+#include"GameSystem.h"
 
 CMapObject_Instance::CMapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CStaticObject{ pDevice, pContext }
@@ -8,8 +9,9 @@ CMapObject_Instance::CMapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceCont
 }
 
 CMapObject_Instance::CMapObject_Instance(const CMapObject_Instance& Prototype)
-	: CStaticObject{ Prototype }
+	: CStaticObject{ Prototype }, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMapObject_Instance::Initialize_Prototype()
@@ -28,7 +30,15 @@ HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
 	//m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	//AddRef();
 	//Sync_Sectors();
-    return S_OK;
+	_bool* Test;
+	m_bSonoroMode = m_pGameSystem->Add_To_Management(m_eInstanceType, this, &Test);
+
+	if (m_eInstanceType == INSTANCETYPE::SONORO)
+		m_TypeMode = true;
+	else if (m_eInstanceType == INSTANCETYPE::NONSONORO)
+		m_TypeMode = false;
+
+	return S_OK;
 }
 
 void CMapObject_Instance::Priority_Update(_float fTimeDelta)
@@ -44,7 +54,12 @@ void CMapObject_Instance::Update(_float fTimeDelta)
 
 void CMapObject_Instance::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	_bool IsRender = true;
+	if (!(m_eInstanceType == INSTANCETYPE::DEFAULT))
+		if (m_TypeMode != *m_bSonoroMode)
+			IsRender = false;
+	if (IsRender)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CMapObject_Instance::Render()
@@ -113,6 +128,7 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_vDiffuseColor = pDesc->vDiffuseColor;
+	m_eInstanceType = pDesc->eInstanceType;
 
 		_char ModelName[MAX_PATH] = {};
 		sprintf_s(ModelName, "Com_Model%d", 0);
@@ -189,4 +205,5 @@ void CMapObject_Instance::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pModelCom);
+	Safe_Release(m_pGameSystem);
 }

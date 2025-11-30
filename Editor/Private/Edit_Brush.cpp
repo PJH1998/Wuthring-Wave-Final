@@ -107,6 +107,9 @@ HRESULT CEdit_Brush::Initialize_Prototype()
 
 			event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxPos), sizeof(_float3));
 			event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxExtends), sizeof(_float3));
+
+			INSTANCETYPE Type = Pair.second[0]->Get_Type();
+			event.File.write(reinterpret_cast<const _char*>(&Type), sizeof(INSTANCETYPE));
 		}
 		});
 
@@ -127,30 +130,42 @@ void CEdit_Brush::Priority_Update(_float fTimeDelta)
 
 	About_InstanceInfo();
 
-	if (m_iShaderPassIndex == 2)
-	{
-		ImGui::Begin("Color");
-		ImGui::ColorPicker4("SelectColor", vDiffuseColor.arr);
+	ImGui::Begin("Color");
+	ImGui::ColorPicker4("SelectColor", vDiffuseColor.arr);
 
-		if (!m_SaveInstanceObjects[m_iCurSaveIndex].empty())
+	if (!m_SaveInstanceObjects[m_iCurSaveIndex].empty())
+	{
+		for (auto& pObject : m_SaveInstanceObjects[m_iCurSaveIndex])
+			pObject->Set_Color(vDiffuseColor.float_4);
+	}
+	ImGui::End();
+
+	const _char* pObejceTType[] = { "Default","Sonoro","NonSonoro" };
+
+	if (ImGui::BeginCombo("Instance_Type", pObejceTType[ENUM_CLASS(m_eInstanceType)]))
+	{
+		for (_uint i = 0; i < ENUM_CLASS(INSTANCETYPE::END); ++i)
 		{
-			for (auto& pObject : m_SaveInstanceObjects[m_iCurSaveIndex])
-				pObject->Set_Color(vDiffuseColor.float_4);
+			if (ImGui::Selectable(pObejceTType[i]))
+			{
+				m_eInstanceType = static_cast<INSTANCETYPE>(i);
+				for (auto& pObject : m_SaveInstanceObjects[m_iCurSaveIndex])
+					pObject->Set_Type(m_eInstanceType);
+			}
 		}
-		ImGui::End();
+		ImGui::EndCombo();
 	}
 	//이게 하나만 쓰다보니 애들이 다 바뀜.
-	//m_SaveInstanceObjects[m_iCurSaveIndex][0].ㅎ
 	ImGui::InputScalar("Instance ShaderPass: ", ImGuiDataType_U32, &m_iShaderPassIndex);
 
-    ImGui::InputFloat("Range : ", &m_fRange);
-    ImGui::SliderFloat("Range Slider : ", &m_fRange, 1.f, 4000.f, "%.1f");
+	ImGui::InputFloat("Range : ", &m_fRange);
+	ImGui::SliderFloat("Range Slider : ", &m_fRange, 1.f, 4000.f, "%.1f");
 	ImGui::InputScalar("Instance Num Value : ", ImGuiDataType_U32, &m_iNumInstance, &minus, &plus);
-    ImGui::SliderScalar("Instance Num Value Slider : ", ImGuiDataType_U32, &m_iNumInstance, &m_iMinNum, &m_iMaxNum, "%d");
+	ImGui::SliderScalar("Instance Num Value Slider : ", ImGuiDataType_U32, &m_iNumInstance, &m_iMinNum, &m_iMaxNum, "%d");
 
-    ImGui::SliderFloat("Min Degree", &m_vMinRotation, 0.0f, 359.9f, "%.1f");
-    ImGui::SliderFloat("Max Degree", &m_vMaxRotation, 0.0f, 360.f, "%.1f");
-	
+	ImGui::SliderFloat("Min Degree", &m_vMinRotation, 0.0f, 359.9f, "%.1f");
+	ImGui::SliderFloat("Max Degree", &m_vMaxRotation, 0.0f, 360.f, "%.1f");
+
 	//버튼으로 되게.
 	ImGui::InputScalar("Instance SaveIndex: ", ImGuiDataType_U32, &m_iCurSaveIndex, &plus);
 	//객체들중에서도 선택하고, 그 선택된 놈 중에서도 지들이 가진 매트릭스를 넣어서 위치 수정 가능하게..
@@ -223,6 +238,7 @@ void CEdit_Brush::About_InstanceInfo()
 		{
 			ImGui::SameLine();
 			m_iShaderPassIndex = m_SaveInstanceObjects[m_iCurSaveIndex][0]->ShaderPassWindow();
+			m_eInstanceType = m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Type();
 			if (m_iShaderPassIndex == 2 && !XMVector4Equal(vDiffuseColor.Vec, XMLoadFloat4(m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color())))
 				vDiffuseColor.float_4 = *m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color();
 
@@ -378,6 +394,8 @@ void CEdit_Brush::Foliage()
 			Desc.iSaveIndex = m_iCurSaveIndex;
 			Desc.iShaderPassIndex = m_iShaderPassIndex;
 			Desc.IsLoaded = false;
+			Desc.eInstanceType = m_eInstanceType;
+
             m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_MapObject_Instance")
                 , ENUM_CLASS(LEVEL::MAP), TEXT("Layer_Instance"), &Desc);
             Safe_Delete_Array(pTransformMatrix);

@@ -25,6 +25,7 @@ public:
 		_float4 vDiffuseColor;
 		_float3 vBoundingPos;
 		_float3 vBoundingExtends;
+		INSTANCETYPE eInstanceType = { INSTANCETYPE::DEFAULT };
 	}MAP_LOAD;
 
 private:
@@ -54,6 +55,10 @@ private:
 	_uint						m_iShaderPassIndex = {};
 	_float4						m_vDiffuseColor = {};
 	_float						m_fTotalTime = {};
+	class CGameSystem*			m_pGameSystem = { nullptr };
+	INSTANCETYPE m_eInstanceType = { INSTANCETYPE::DEFAULT };
+	_bool*						m_bSonoroMode = { nullptr };
+	_bool						m_TypeMode = { false };
 private:
 	void						Ready_Component(void* pArg);
 
