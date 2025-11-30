@@ -86,6 +86,7 @@ private:
 	_bool					m_beHit{};
 	_bool					m_isAggro{};
 	_bool					m_isDist_Interp_Enable{};
+	_bool					m_isRender{};
 #pragma endregion
 	
 #pragma region STATUS

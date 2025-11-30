@@ -25,7 +25,6 @@ public:
 		//const _float4x4* pWorldMatrix;
 		_float3 vInitPosition{};
 		_float3 vLookAt{};
-		_float fChangeTrackPos;
 		_string strPatternKey;
 		//const _float4x4* pRootMatrix;
 		ATTACK_TYPE eType;
@@ -77,6 +76,7 @@ private:
 	void			OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void			OnDetect_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void			UnActive_Resources();
+	void			Reset_NotifyInteraction();
 
 public:
 	static CLevi_Alter* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

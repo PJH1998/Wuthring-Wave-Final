@@ -67,6 +67,9 @@ void CLevi_Bayonet::Update(_float fTimeDelta)
 	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
 	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
+
+	if (m_pAttackVolume)
+		m_pAttackVolume->Update(fTimeDelta);
 }
 
 void CLevi_Bayonet::Late_Update(_float fTimeDelta)
@@ -107,6 +110,12 @@ void CLevi_Bayonet::Render()
 
 		m_pShaderCom->UndBind_All_VS_SRV();
 	}
+
+#ifdef _DEBUG
+	if (m_pAttackVolume)
+		m_pAttackVolume->Render();
+#endif // _DEBUG
+
 }
 
 void CLevi_Bayonet::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -156,7 +165,7 @@ void CLevi_Bayonet::Ready_Volumes(LEVIBAYONET_DESC* pDesc)
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
 	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
-	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = pDesc->fAttackDmg;
 	TriggerDesc.eDamageType = pDesc->eType;
