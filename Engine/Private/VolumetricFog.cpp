@@ -35,7 +35,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fPhaseFunctionG = 0.5f;
 	m_VF_Data.fDensityScale = 0.01f;
 
-	m_VF_Data.fFogMinHeight = 120.f;
+	m_VF_Data.fFogMinHeight = 5.f;
 	m_VF_Data.fFogMaxHeight = 200.f;
 
 	//m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
@@ -44,6 +44,8 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fGroundFallOff = 0.02f;
 	m_VF_Data.fDistanceFallOff = 0.02f;
 	m_VF_Data.fNoiseScale = 0.002f;
+
+	m_IsFirst = true;
 
 	if (FAILED(Ready_FroxelVolume()))
 		return E_FAIL;
@@ -64,10 +66,8 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 HRESULT CVolumetricFog::SetUp_FogNF()
 {
-	_float fFar = m_pGameInstance->Get_CurrentCamera_Far();
-
-	m_vFogRange.x = 0.1f; // m_pGameInstance->Get_CurrentCamera_Near(); //fFar * 0.3f; //
-	m_vFogRange.y = 2000.f;
+	m_vFogRange.x = m_pGameInstance->Get_CurrentCamera_Near();//m_pGameInstance->Get_CurrentCamera_Near(); 
+	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far();
 
 	m_VF_Data.fNear = m_vFogRange.x;
 	m_VF_Data.fFar = m_vFogRange.y;
@@ -78,8 +78,23 @@ HRESULT CVolumetricFog::SetUp_FogNF()
 	return S_OK;
 }
 
+void CVolumetricFog::Begin_VF()
+{
+	m_IsUpdate = true;
+}
+
+void CVolumetricFog::Clear()
+{
+	m_IsUpdate = false;
+	m_IsFirst = true;
+	m_VF_Data.IsTemporal = false;
+}
+
 void CVolumetricFog::Update_VF(_float fTimeDelta)
 {
+	if (false == m_IsUpdate)
+		return;
+
 	Update_Buffer(fTimeDelta);
 
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_ConstantBuffer("VF_Data", m_pBuffers[ENUM_CLASS(BUFFER::DATA)]);
@@ -89,8 +104,11 @@ void CVolumetricFog::Update_VF(_float fTimeDelta)
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("g_MipDepthTexture", m_pGameInstance->Get_HZB_Resource());
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("g_ShadowMapTexture", m_pGameInstance->Get_ShadowMapDownSampleSRV());
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("g_NoiseTexture", m_pSRVs[ENUM_CLASS(SRV::VF_NOISE)]);
+	
+	if(m_VF_Data.IsTemporal)
+		m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("PrevVFLightTexture", m_pSRVs[m_iReadIndex]);
 
-	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_UAV("OutputTexture", m_pUAVs[ENUM_CLASS(UAV::VF_LIGHT)]);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_UAV("OutputTexture", m_pUAVs[m_iWriteIndex]);
 
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_Sampler(0, m_pDefaultSampler);
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_Sampler(1, m_pShadowSampler);
@@ -102,13 +120,12 @@ void CVolumetricFog::Update_VF(_float fTimeDelta)
 	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Dispatch(iThreadGroupCountX, iThreadGroupCountY, iThreadGroupCountZ);
 
 	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_ConstantBuffer("VF_Data", m_pBuffers[ENUM_CLASS(BUFFER::DATA)]);
-	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_SRV("VFLightTexture", m_pSRVs[ENUM_CLASS(SRV::VF_LIGHT)]);
+	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_SRV("VFLightTexture", m_pSRVs[m_iWriteIndex]);
 	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_UAV("OutputTexture", m_pUAVs[ENUM_CLASS(UAV::VF_BEER)]);
-
+	
 	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Dispatch(iThreadGroupCountX, iThreadGroupCountY, 1);
 
-//	m_LightDatas.clear();
-
+	swap(m_iWriteIndex, m_iReadIndex);
 }
 
 HRESULT CVolumetricFog::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
@@ -123,7 +140,7 @@ HRESULT CVolumetricFog::Bind_VF_Resource(CShader* pShader, const _char* pTexture
 	return S_OK;
 }
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 void CVolumetricFog::Setting_VF()
 {
 	ImGui::Begin("VolumetricFog");
@@ -142,25 +159,25 @@ void CVolumetricFog::Setting_VF()
 
 	ImGui::End();
 }
-#endif
+//#endif
 
 void CVolumetricFog::Update_Buffer(_float fTimeDelta)
 {
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	Setting_VF();
-#endif
+//#endif
 
-	m_VF_Data.ViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
-	m_VF_Data.ProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
+	m_VF_Data.PrevViewMatrix = *m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::VIEW);
+	m_VF_Data.PrevProjMatrix = *m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::PROJ);
 	m_VF_Data.InvViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW);
 	m_VF_Data.InvProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ);
 	m_VF_Data.fNoiseTimeDelta = fmodf((m_VF_Data.fNoiseTimeDelta + (fTimeDelta * 0.05f)), 1.f);
-	
-	//VF_DATA UPDATE
-	D3D11_MAPPED_SUBRESOURCE VF_SubResource = {};
-	m_pContext->Map(m_pBuffers[ENUM_CLASS(BUFFER::DATA)], 0, D3D11_MAP_WRITE_DISCARD, 0, &VF_SubResource);
-	memcpy(VF_SubResource.pData, &m_VF_Data, sizeof(VF_DATA));
-	m_pContext->Unmap(m_pBuffers[ENUM_CLASS(BUFFER::DATA)], 0);
+	m_VF_Data.vCamPos = *m_pGameInstance->Get_CamPos();
+	m_VF_Data.iRandCount = (m_VF_Data.iRandCount + 1) % 16;
+	m_VF_Data.IsTemporal = m_IsFirst ? false : true;
+
+	if (m_IsFirst)
+		m_IsFirst = false;
 
 	//LIGHT_DATA UPDATE
 	const vector<LIGHT_DATA>* pLightDats = m_pGameInstance->Get_LightDatas();
@@ -172,14 +189,24 @@ void CVolumetricFog::Update_Buffer(_float fTimeDelta)
 
 	if(iLightCount > 0)
 	{
-		D3D11_BOX Box = { 0, 0, 0, max(sizeof(LIGHT_DATA) * iLightCount, 1), 1, 1 };
+		D3D11_BOX Box = { 0, 0, 0, sizeof(LIGHT_DATA) * iLightCount, 1, 1 };
 		m_pContext->UpdateSubresource(m_pBuffers[ENUM_CLASS(BUFFER::LIGHT)], 0, &Box, (*pLightDats).data(), 0, 0);
 	}
+
+	//VF_DATA UPDATE
+	D3D11_MAPPED_SUBRESOURCE VF_SubResource = {};
+	m_pContext->Map(m_pBuffers[ENUM_CLASS(BUFFER::DATA)], 0, D3D11_MAP_WRITE_DISCARD, 0, &VF_SubResource);
+	memcpy(VF_SubResource.pData, &m_VF_Data, sizeof(VF_DATA));
+	m_pContext->Unmap(m_pBuffers[ENUM_CLASS(BUFFER::DATA)], 0);
+
 }
 
 HRESULT CVolumetricFog::Ready_FroxelVolume()
 {
-	if (FAILED(Ready_FogTexture(ENUM_CLASS(UAV::VF_LIGHT))))
+	if (FAILED(Ready_FogTexture(ENUM_CLASS(UAV::VF_LIGHT_FIRST))))
+		return E_FAIL;
+
+	if (FAILED(Ready_FogTexture(ENUM_CLASS(UAV::VF_LIGHT_SECOND))))
 		return E_FAIL;
 
 	if (FAILED(Ready_FogTexture(ENUM_CLASS(UAV::VF_BEER))))
@@ -188,6 +215,9 @@ HRESULT CVolumetricFog::Ready_FroxelVolume()
 	if (FAILED(Ready_Buffer()))
 		return E_FAIL;
 	
+	m_iWriteIndex = ENUM_CLASS(UAV::VF_LIGHT_FIRST);
+	m_iReadIndex = ENUM_CLASS(UAV::VF_LIGHT_SECOND);
+
     return S_OK;
 }
 

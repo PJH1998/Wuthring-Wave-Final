@@ -181,8 +181,11 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 
 	m_pLight_Manager->Update_Light();
+
 	m_pVF->Update_VF(fTimeDelta);
+
 	m_pModel_Manager->Update(fTimeDelta);
+
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
 }
 
@@ -1028,6 +1031,10 @@ HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureN
 {
 	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
 }
+void CGameInstance::Begin_VF()
+{
+	m_pVF->Begin_VF();
+}
 #pragma endregion
 HRESULT CGameInstance::RegisterPrototype(const _char* pFilePath, CModel_Streaming* pModel)
 {
@@ -1207,6 +1214,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
 	m_pEnvMap->Clear();
+	m_pVF->Clear();
 	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))

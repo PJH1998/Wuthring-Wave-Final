@@ -2,7 +2,7 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
+float4 g_GrassColor = float4(0.7019f, 0.24705f, 0.24705f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
