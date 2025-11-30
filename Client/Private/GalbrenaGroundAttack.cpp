@@ -102,8 +102,8 @@ void CGalbrenaGroundAttack::OnExit()
     // 콤보 카운트 초기화
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
-    m_pGalbrena->PartActivate(m_iPartType, false); 
-    m_pGalbrena->PartActivate(m_iSubPartType, false); 
+    //m_pGalbrena->PartActivate(m_iPartType, false); 
+    //m_pGalbrena->PartActivate(m_iSubPartType, false); 
 
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 

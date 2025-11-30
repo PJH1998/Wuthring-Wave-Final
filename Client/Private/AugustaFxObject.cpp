@@ -80,13 +80,10 @@ void CAugustaFxObject::Late_Update(_float fTimeDelta)
 
 	if (m_IsVisible)
 	{
-		cout << " : Fx Visible" << endl;
 		for (auto& pEnergyBlade : m_EnergyBlades)
 			pEnergyBlade->Late_Update(fTimeDelta);
 	}
 	
-	/*for (auto& pEnergyBlade : m_EnergyBlades)
-		pEnergyBlade->Late_Update(fTimeDelta);*/
 
 #ifdef _DEBUG
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -111,7 +108,7 @@ void CAugustaFxObject::Activate(_bool IsActivate)
 	m_pModelCom->Clear_Animation(m_strCurrentAnimName);
 
 	for (auto& pObj : m_EnergyBlades)
-		pObj->Activate(false);
+		pObj->Activate(IsActivate);
 }
 
 

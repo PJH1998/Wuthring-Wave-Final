@@ -1052,9 +1052,16 @@ void CAugusta::Process_FxObject(const _wstring& wStrObjectTag)
 	if (var2 == TEXT("VISIBLE"))
 	{
 		if (var3 == TEXT("TRUE"))
+		{
 			m_pFxObject->Set_Visible(true);
+			//PartActivate(PARTTYPE::PART_FXOBJECT, true);
+		}
 		else if (var3 == TEXT("FALSE"))
+		{
 			m_pFxObject->Set_Visible(false);
+			//PartActivate(PARTTYPE::PART_FXOBJECT, false);
+		}
+			
 	}
 	
 		

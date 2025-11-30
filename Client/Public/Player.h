@@ -61,6 +61,8 @@ public:
 	_bool IsQTEPossible(CHARACTERTYPE eCharacterType);
 	void ExecuteQTE(CHARACTERTYPE eCharacterType);
 
+	_vector Get_LookVector();
+	_vector Get_Position();
 #pragma endregion
 	
 

@@ -36,12 +36,21 @@ HRESULT CAugustaEnergyBlade::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Scale({ 2.f, 2.f, 2.f }); // 크기 조정.
 
+	m_fTime = 0.f;
+	//m_vEnergyColor = { 1.0f, 0.6f, 0.1f, 1.0f };
+	m_vEnergyColor = { 1.0f, 0.1f, 0.05f, 1.0f };
+	m_vScrollSpeed = { 1.f, 0.f };
+	m_fEnergyIntensity = 3.f;
+	//m_fEnergyIntensity = 3.f;
+
     return S_OK;
 }
 
 void CAugustaEnergyBlade::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+
+	m_fTime += fTimeDelta;
 
 	if (m_IsAnimationEnd)
 		m_isActivate = false;
@@ -79,6 +88,9 @@ void CAugustaEnergyBlade::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+
+	//if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this)))
+	//	return;
 }
 
 void CAugustaEnergyBlade::Render()
@@ -99,10 +111,26 @@ void CAugustaEnergyBlade::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
+		
+		if (FAILED(m_pShaderCom->Bind_Value("g_vEnergyColor", &m_vEnergyColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fTime", &m_fTime, sizeof(_float))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vScrollSpeed", &m_vScrollSpeed, sizeof(_float2))))
+			CRASH("Ready EnergyColor"); 
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fEnergyIntensity", &m_fEnergyIntensity, sizeof(_float))))
+			CRASH("Ready EnergyColor");
+
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //    CRASH("Ready Shader Begin Failed");
+
+        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -114,7 +142,7 @@ void CAugustaEnergyBlade::Activate(_bool IsActivate)
 {
     SetActivate(IsActivate);
 
-	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+	//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
@@ -122,6 +150,7 @@ void CAugustaEnergyBlade::Activate(_bool IsActivate)
 
 	if (false == IsActivate)
 	{
+		m_fTime = 0.f;
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 	}
@@ -161,8 +190,10 @@ void CAugustaEnergyBlade::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	//for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+	//	m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::ENERGY_BLADE);
 }
 
 void CAugustaEnergyBlade::Ready_Positions(const PROP_DESC* pDesc)

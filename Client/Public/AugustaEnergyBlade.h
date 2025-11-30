@@ -15,7 +15,7 @@ public:
 
 public:
 	typedef struct tagAugustaSkillWeaponDesc : public CProp::PROP_DESC {
-		
+
 	} AUGUSTA_SKILLPROP_DESC;
 
 private:
@@ -45,6 +45,12 @@ private:
 	const _float4x4* m_pParentWorldMatrix = { nullptr };
 
 
+	// Shader 변수
+	_float4 m_vEnergyColor = {};
+	_float  m_fTime = { };
+	_float  m_fEnergyIntensity = {};
+	_float2 m_vScrollSpeed = {}; // x, y
+	
 
 private:
 	void Ready_Components(const PROP_DESC* pDesc);
