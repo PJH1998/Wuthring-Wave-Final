@@ -194,4 +194,12 @@ namespace Client
 
 		NOTHING			// UI OFF 시 아무것도 선택되지 않음
 	};
+
+	enum class UI_QTE_BTN {
+		F, E, Q, R, T, END
+	};
+
+	enum class UI_QTE_TYPE {
+		FILLGUAGE, TRIGGER, END
+	};
 }
