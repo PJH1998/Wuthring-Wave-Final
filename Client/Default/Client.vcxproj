@@ -258,6 +258,7 @@
     <ClInclude Include="..\public\Levi_Alter.h" />
     <ClInclude Include="..\public\Levi_Bayonet.h" />
     <ClInclude Include="..\Public\Levi_Bow.h" />
+    <ClInclude Include="..\public\Levi_Ray.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
@@ -506,6 +507,7 @@
     <ClCompile Include="..\private\Levi_Alter.cpp" />
     <ClCompile Include="..\private\Levi_Bayonet.cpp" />
     <ClCompile Include="..\Private\Levi_Bow.cpp" />
+    <ClCompile Include="..\private\Levi_Ray.cpp" />
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
     <ClCompile Include="..\Private\Loader_Heaven.cpp" />
