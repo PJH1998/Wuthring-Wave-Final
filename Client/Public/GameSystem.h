@@ -67,8 +67,8 @@ public:
 	class CCustom_UI*	Find_RootUI(_wstring strName);
 	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
 	
-	HRESULT		HUD_FadeOut();	// 보스 체력바를 제외한 HUD를 FadeOut 합니다.
-	HRESULT		HUD_FadeIn();	// 보스 체력바를 제외한 HUD를 FadeIn  합니다.
+	HRESULT		HUD_FadeOut(_bool isForceChange = false);	// 보스 체력바를 제외한 HUD를 FadeOut 합니다.
+	HRESULT		HUD_FadeIn(_bool isForceChange = false);	// 보스 체력바를 제외한 HUD를 FadeIn  합니다.
 
 	//HRESULT		HUD_FadeOut_BossHPBar();	// 보스 체력바 UI를 FadeOut 합니다.	// HUD_Toggle_BossStatusUI 에 통합.
 	//HRESULT		HUD_FadeIn_BossHPBar();		// 보스 체력바 UI를 FadeIn  합니다.	// HUD_Toggle_BossStatusUI 에 통합.
@@ -76,7 +76,7 @@ public:
 	// 보스 체력바에 필요한 정보를 할당합니다.
 	void		HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
 	// 보스 체력바를 토글합니다. 정보 할당 없이 On 시도 시 Crash.
-	void		HUD_Toggle_BossStatusUI(_bool isOn);
+	void		HUD_Toggle_BossStatusUI(_bool isOn, _bool isForceChange = false);
 
 	// 상호작용 UI를 켭니다. / strText : 출력될 글자.
 	void		Show_InteractUI(_wstring strText);

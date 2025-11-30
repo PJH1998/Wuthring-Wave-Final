@@ -1225,12 +1225,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 
                 //vFinalColorTex.rgb = lerp(vCurrColor, vDestColor, smoothstep(0, 1, fChangeRatio));
                 
-                const float fNoiseCoordScale = .5f;
-                
-                float2 fNoiseAppliedCoord = In.vTexcoord.xy * fNoiseCoordScale.xx;
-                float vNoiseTex1 = g_TextureExtra1.Sample(DefaultSampler, fNoiseAppliedCoord).r;
-                float vNoiseTex2 = g_TextureExtra2.Sample(DefaultSampler, fNoiseAppliedCoord).r;
-                float vNoiseTex3 = g_TextureExtra3.Sample(DefaultSampler, fNoiseAppliedCoord).r;
+                static const float g_fNoiseTileSize = 128.0f; // 상수로 제어
+
+                float2 vNoiseUV = vFixedScreenPos / g_fNoiseTileSize;
+                vNoiseUV = frac(vNoiseUV);
+
+                float vNoiseTex1 = g_TextureExtra1.Sample(DefaultSampler, vNoiseUV).r;
+                float vNoiseTex2 = g_TextureExtra2.Sample(DefaultSampler, vNoiseUV).r;
+                float vNoiseTex3 = g_TextureExtra3.Sample(DefaultSampler, vNoiseUV).r;
                 
                 // 컷아웃 할 때 처럼, 알파를 fchangeratio 에 따라 비교.
                 

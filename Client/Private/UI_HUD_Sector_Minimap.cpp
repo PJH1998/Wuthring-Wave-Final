@@ -34,7 +34,9 @@ HRESULT CUI_HUD_Sector_Minimap::Initialize_Clone(void* pArg)
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
-		//L"../../Client/Bin/Resource/UI/FJson/UIAnim/TabUtil_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_Minimap_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_Minimap_FadeOut.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_Minimap_FadeIn.json",
 	};
 	Load_Animations(vecAnimFilePaths);
 
@@ -44,7 +46,7 @@ HRESULT CUI_HUD_Sector_Minimap::Initialize_Clone(void* pArg)
 	//m_isActivate = false;
 
 	m_isClone = true;
-	m_pGameInstance->Add_RootUI(L"Root_HUD_Sector_Minimap", this);
+	m_pGameInstance->Add_RootUI(L"UI_HUD_Sector_Minimap", this);
 
 	return S_OK;
 }

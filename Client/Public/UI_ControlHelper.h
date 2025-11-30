@@ -19,14 +19,14 @@ public:
 	class CCustom_UI*	Find_RootUI(_wstring strName);
 	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
 
-	HRESULT				HUD_FadeOut();
-	HRESULT				HUD_FadeIn();
+	HRESULT				HUD_FadeOut(_bool isForceChange);
+	HRESULT				HUD_FadeIn(_bool isForceChange);
 
-	HRESULT				HUD_FadeOut_BossHPBar();
-	HRESULT				HUD_FadeIn_BossHPBar();
+	HRESULT				HUD_FadeOut_BossHPBar(_bool isForceChange);
+	HRESULT				HUD_FadeIn_BossHPBar(_bool isForceChange);
 
 	void				HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
-	void				HUD_Toggle_BossStatusUI(_bool isOn);
+	void				HUD_Toggle_BossStatusUI(_bool isOn, _bool isForceChange);
 
 
 	//void				Toggle_InteractUI(_bool isOn, _wstring strText);
@@ -64,6 +64,11 @@ private:
 	CCustom_UI*			m_pUI_HUD_SectorA					= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorRB_SkillIcons		= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorT_BossStatus		= { nullptr };
+
+	CCustom_UI*			m_pUI_UHD_SectorA_Minimap_All		= { nullptr };
+	CCustom_UI*			m_pUI_UHD_SectorA_FuncIcons_All		= { nullptr };
+
+
 	CCustom_UI*			m_pRootUI_Interact					= { nullptr };
 	CCustom_UI*			m_pTextUI_Interact					= { nullptr };
 	CCustom_UI*			m_pUI_Interact_Normal				= { nullptr };

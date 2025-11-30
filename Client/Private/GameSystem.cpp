@@ -179,14 +179,14 @@ CCustom_UI* CGameSystem::Find_ChildUI(_wstring strRootUIName, _wstring strChildU
 	return m_pUI_ControlHelper->Find_ChildUI(strRootUIName, strChildUIName);
 }
 
-HRESULT CGameSystem::HUD_FadeOut()
+HRESULT CGameSystem::HUD_FadeOut(_bool isForceChange)
 {
-	return m_pUI_ControlHelper->HUD_FadeOut();
+	return m_pUI_ControlHelper->HUD_FadeOut(isForceChange);
 }
 
-HRESULT CGameSystem::HUD_FadeIn()
+HRESULT CGameSystem::HUD_FadeIn(_bool isForceChange)
 {
-	return m_pUI_ControlHelper->HUD_FadeIn();
+	return m_pUI_ControlHelper->HUD_FadeIn(isForceChange);
 }
 
 //HRESULT CGameSystem::HUD_FadeOut_BossHPBar()
@@ -203,9 +203,9 @@ void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMon
 	return m_pUI_ControlHelper->HUD_Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
 }
 
-void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
+void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn, _bool isForceChange)
 {
-	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
+	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn, isForceChange);
 }	
 
 //void CGameSystem::Toggle_InteractUI(_bool isOn, _wstring strText)

@@ -34,7 +34,9 @@ HRESULT CUI_HUD_Sector_FuncIcons::Initialize_Clone(void* pArg)
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
-		//L"../../Client/Bin/Resource/UI/FJson/UIAnim/TabUtil_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_FuncIcons_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_FuncIcons_FadeOut.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_FuncIcons_FadeIn.json",
 	};
 	Load_Animations(vecAnimFilePaths);
 
@@ -44,7 +46,7 @@ HRESULT CUI_HUD_Sector_FuncIcons::Initialize_Clone(void* pArg)
 	//m_isActivate = false;
 
 	m_isClone = true;
-	//m_pGameInstance->Add_RootUI(L"UI_HUD_Sector_FuncIcons", this);
+	m_pGameInstance->Add_RootUI(L"UI_HUD_Sector_FuncIcons", this);
 
 	return S_OK;
 }
@@ -128,8 +130,8 @@ CGameObject* CUI_HUD_Sector_FuncIcons::Clone(void* pArg)
 
 void CUI_HUD_Sector_FuncIcons::Free()
 {
-	//if (m_isClone)
-	//	m_pGameInstance->Remove_RootUI(L"UI_HUD_Sector_FuncIcons");
+	if (m_isClone)
+		m_pGameInstance->Remove_RootUI(L"UI_HUD_Sector_FuncIcons");
 
 	__super::Free();
 
