@@ -106,6 +106,8 @@ void CGalbrenaGroundAttack::OnExit()
     m_pGalbrena->PartActivate(m_iSubPartType, false); 
 
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
+
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 _bool CGalbrenaGroundAttack::Hit_Judge()
