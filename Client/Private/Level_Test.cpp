@@ -504,7 +504,9 @@ void CLevel_Test::Ready_UI()
 	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
 	const _wstring strPrototypeTag_UI[] = {
-		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+		 L"Prototype_GameObject_Custom_UI_Container_HUD",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{

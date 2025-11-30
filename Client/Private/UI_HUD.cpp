@@ -98,7 +98,7 @@ void CUI_HUD::Update(_float fTimeDelta)
 
 	m_pAbility = m_pPlayerStatus->Get_Ability(m_iSelectedCHIndex);
 
-	Ready_Presets();
+	//Ready_Presets();
 
 	Update_UI_SkillSection(fTimeDelta);
 	Update_UI_SkillSection_BG(fTimeDelta);
