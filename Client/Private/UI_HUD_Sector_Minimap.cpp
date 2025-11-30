@@ -128,7 +128,7 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 	
 	m_fCamDirDegree = camDegreeByY;
 
-	std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
+	//std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
 
 	// 이후 플레이어 방향 정보 가져올 수 있게 된다면 그에 맞게 회전값 적용
 	m_fPlayerDirDegree = camDegreeByY;
@@ -167,7 +167,7 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 
 		_matrix matResult = XMMatrixScalingFromVector(vSca) * matRot * XMMatrixTranslationFromVector(vPos);
 		_float4x4 matStoreResult = {}; XMStoreFloat4x4(&matStoreResult, matResult);
-		OutPutDebugMatrix(L"MatResult", matStoreResult); 
+		//OutPutDebugMatrix(L"MatResult", matStoreResult); 
 
 
 		camPlayerInstDesc[i].vSInstRight	= *reinterpret_cast<_float4*>(&matStoreResult._11);
@@ -175,8 +175,6 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 		camPlayerInstDesc[i].vSInstLook		= *reinterpret_cast<_float4*>(&matStoreResult._31);
 		camPlayerInstDesc[i].vSInstTrans	= *reinterpret_cast<_float4*>(&matStoreResult._41);
 	}
-
-	m_pUI_InstCamAndPlayer->Set_UIDesc(camPlayerDesc);
 }
 
 CUI_HUD_Sector_Minimap* CUI_HUD_Sector_Minimap::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

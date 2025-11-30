@@ -347,7 +347,7 @@ void CUI_QTE::Update_Instances(_float fTImeDelta)
 	// 내부 게이지 (m_pUI_FG_QTEGuage) 에 한해, m_fQTEGuage  값을 따라 원형 변화 필요.
 	// 6시 방향부터 반시계로 참.
 
-	auto guageDesc = m_pUI_FG_QTEGuage->Get_UIDesc();
+	auto& guageDesc = m_pUI_FG_QTEGuage->Get_UIDesc();
 	auto& guageInstDesc = guageDesc.vecInstanceDescs;
 
 	vector<_float4x4> vecGuageVariantMat = { _float4x4()};

@@ -138,7 +138,7 @@ void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
 
 
 	// selected indicator
-	auto targetDesc = m_pUI_InstSelected->Get_UIDesc();
+	auto& targetDesc = m_pUI_InstSelected->Get_UIDesc();
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 	for (_uint i = 0; i < targetInstDesc.size(); i++)		// 현재 인덱스에 해당하는 인스턴스만 보이게 하고, 나머지는 가림.
@@ -148,7 +148,7 @@ void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
 			_float2{ 0.f, 0.f };
 	}
 
-	m_pUI_InstSelected->Set_UIDesc(targetDesc);
+	//m_pUI_InstSelected->Set_UIDesc(targetDesc);
 
 
 	// selected icon on center
@@ -158,7 +158,7 @@ void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
 	targetInstDesc[0].vSInstCoordX = m_arrCoordPresets[m_iCharSelectedIndex][0]; // 현재 인덱스에 해당하는 coord로 변경.
 	targetInstDesc[0].vSInstCoordY = m_arrCoordPresets[m_iCharSelectedIndex][1];
 
-	m_pUI_CHSelectedIcon->Set_UIDesc(targetDesc);
+	//m_pUI_CHSelectedIcon->Set_UIDesc(targetDesc);
 
 
 	// Text on Center
@@ -237,7 +237,7 @@ void CUI_TabUtility::Update_MouseSelection()
 	{
 		dynamic_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Show", true);
 		
-		auto targetDesc = m_pUI_InstHover->Get_UIDesc();
+		auto& targetDesc = m_pUI_InstHover->Get_UIDesc();
 		auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 		for (_uint i = 0; i < targetInstDesc.size(); i++)		// 현재 인덱스에 해당하는 인스턴스만 보이게 하고, 나머지는 가림.
@@ -247,7 +247,7 @@ void CUI_TabUtility::Update_MouseSelection()
 				_float2{ 0.f, 0.f };
 		}
 
-		m_pUI_InstHover->Set_UIDesc(targetDesc);
+		//m_pUI_InstHover->Set_UIDesc(targetDesc);
 	}
 	else if (isIndexChanged && (m_iSelectedIndex == ENUM_CLASS(UI_TAB_UTILITY::NOTHING)))	// 선택 해제함 (커서가 화면 중앙으로 감)
 		dynamic_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Hide");
@@ -277,7 +277,7 @@ void CUI_TabUtility::Update_MouseSelection()
 
 
 		// 아이콘 변화
-		auto iconDesc = m_pUI_CHSelectedIcon->Get_UIDesc();
+		auto& iconDesc = m_pUI_CHSelectedIcon->Get_UIDesc();
 		auto& iconInstDesc = iconDesc.vecInstanceDescs;
 
 		iconInstDesc[0].vSInstCoordX = m_arrCoordPresets[m_iSelectedIndex][0]; // 현재 인덱스에 해당하는 coord로 변경.
@@ -376,8 +376,8 @@ void CUI_TabUtility::Create_ChildText_CurUtil()
 	);
 
 	CCustom_UI* pAttacher = m_pUI_GuideCircle;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	pAttacher->Add_Child(pFont);
@@ -388,7 +388,7 @@ void CUI_TabUtility::Create_ChildText_CurUtil()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
@@ -420,7 +420,7 @@ void CUI_TabUtility::Create_ChildText_IsUsing()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);

@@ -312,9 +312,9 @@ void CUI_MobHPBar::Update_Instances()
 
 	for (auto& floatingUI : vecFloatingUIs)
 	{
-		auto resizedDesc = floatingUI->Get_UIDesc();
+		auto& resizedDesc = floatingUI->Get_UIDesc();
 		resizedDesc.vecInstanceDescs.resize(m_vecMobInfo.size());
-		floatingUI->Set_UIDesc(resizedDesc);
+		//floatingUI->Set_UIDesc(resizedDesc);
 
 
 		Calc_ApplyTargetPos(floatingUI);
@@ -331,7 +331,7 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 {
 	// 인스턴스 별 화면상의 위치만을 반영.
 
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 
 	_float4x4 matCombined = pTargetUI->Get_CombinedMatrix();
@@ -388,7 +388,7 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 	}
 
 	// apply desc. finally.
-	pTargetUI->Set_UIDesc(targetDesc);
+	//pTargetUI->Set_UIDesc(targetDesc);
 
 #pragma region old variant (bar type hp)
 
@@ -480,7 +480,7 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 	const _float fMaxScaleFactor = 0.6f;
 
 
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 	
 	for (_uint i = 0; i < m_vecMobInfo.size(); i++)
@@ -547,7 +547,7 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 
 		// 이제 다시 적용
 		// apply inst desc.
-		pTargetUI->Set_UIDesc(targetDesc);
+		//pTargetUI->Set_UIDesc(targetDesc);
 	}
 }
 
@@ -555,10 +555,10 @@ void CUI_MobHPBar::Calc_HBEff()
 {
 	// 여기서 variant desc 재정의 및  변수 전달, 색상 수정 ㅇㅇ
 
-	auto targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
-	auto targetInvDesc = m_pUI_HB_Inv->Get_UIDesc();		// for Normal Desc
-	auto targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
-	auto targetLineDesc = m_pUI_Line->Get_UIDesc();	// for Line Normal Desc
+	auto& targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
+	auto& targetInvDesc = m_pUI_HB_Inv->Get_UIDesc();		// for Normal Desc
+	auto& targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
+	auto& targetLineDesc = m_pUI_Line->Get_UIDesc();	// for Line Normal Desc
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 	auto& vecInvInstDesc = targetInvDesc.vecInstanceDescs;
 	auto& vecBGInstDesc = targetBGDesc.vecInstanceDescs;
@@ -732,18 +732,18 @@ void CUI_MobHPBar::Calc_HBEff()
 	};
 
 	targetDesc.vecInstanceDescs = vecInstDesc;
-	m_pUI_HB->Set_UIDesc(targetDesc);
+	//m_pUI_HB->Set_UIDesc(targetDesc);
 	m_pUI_HB->Set_VariantUIDesc(tVariantDesc);
 
 	targetInvDesc.vecInstanceDescs = vecInvInstDesc;
-	m_pUI_HB_Inv->Set_UIDesc(targetInvDesc);
+	//m_pUI_HB_Inv->Set_UIDesc(targetInvDesc);
 	m_pUI_HB_Inv->Set_VariantUIDesc(tInvVariantDesc);
 
 	targetLineDesc.vecInstanceDescs = vecLineInstDesc;
-	m_pUI_Line->Set_UIDesc(targetLineDesc);
+	//m_pUI_Line->Set_UIDesc(targetLineDesc);
 	m_pUI_Line->Set_VariantUIDesc(tLineVariantDesc);
 
-	m_pUI_Frame->Set_UIDesc(targetBGDesc);
+	//m_pUI_Frame->Set_UIDesc(targetBGDesc);
 	m_pUI_Frame->Set_VariantUIDesc(tBGVariantDesc);
 }
 

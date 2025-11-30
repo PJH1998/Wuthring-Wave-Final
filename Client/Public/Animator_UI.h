@@ -112,6 +112,8 @@ private:
 	UI_ANIM_KEYFRAME_DESC	m_tCombinedKeyFrameDesc = {};
 
 	CCustom_UI*				m_pOwner = { nullptr };
+	CTransform*				m_pOwnerTransformCom = { nullptr };
+	CShader*				m_pOwnerShaderCom = { nullptr };
 
 	_float					m_fElapsedTime = {};
 	_uint					m_iDisableFlag = {};

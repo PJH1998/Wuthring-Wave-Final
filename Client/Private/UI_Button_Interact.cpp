@@ -224,8 +224,8 @@ void CUI_Button_Interact::Create_ChildText()
 	);
 
 	CCustom_UI* pAttacher = m_pRUI_Interact_Multiplier;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
@@ -237,7 +237,7 @@ void CUI_Button_Interact::Create_ChildText()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 }
 

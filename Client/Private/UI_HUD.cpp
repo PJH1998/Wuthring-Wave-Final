@@ -44,6 +44,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 
     Ready_Components(pArg);
     __super::Ready_Events();
+	Ready_Presets();
 
     // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
     _wstring strFilePath = 
@@ -97,8 +98,6 @@ void CUI_HUD::Update(_float fTimeDelta)
 		int i = 10;
 
 	m_pAbility = m_pPlayerStatus->Get_Ability(m_iSelectedCHIndex);
-
-	//Ready_Presets();
 
 	Update_UI_SkillSection(fTimeDelta);
 	Update_UI_SkillSection_BG(fTimeDelta);
@@ -276,8 +275,8 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 	);
 
 	CCustom_UI* pAttacher = m_pUI_SectorT_BossStatus;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
@@ -289,7 +288,6 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 
@@ -316,8 +314,8 @@ HRESULT CUI_HUD::Ready_PlayerHPText()
 	);
 	
 	CCustom_UI* pAttacher = m_pUI_SectorB_Status;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
@@ -329,7 +327,6 @@ HRESULT CUI_HUD::Ready_PlayerHPText()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	// 중앙 정렬
@@ -528,8 +525,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	CCustom_UI* pSkillReadyUI = m_pUI_Skill_ReadyFrame;
 
-	auto readyDesc = pSkillReadyUI->Get_UIDesc();
-	auto readyInstDesc = pSkillReadyUI->Get_UIDesc().vecInstanceDescs;
+	auto& readyDesc = pSkillReadyUI->Get_UIDesc();
+	auto& readyInstDesc = pSkillReadyUI->Get_UIDesc().vecInstanceDescs;
 	for (auto& instDesc : readyInstDesc)
 		instDesc.vClipTexcoordX = { 0.f, 0.f };
 	
@@ -608,7 +605,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	if (iIndex_PrevLBBtn != iIndex_LBBtn)	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
 
 	readyDesc.vecInstanceDescs = readyInstDesc;
-	pSkillReadyUI->Set_UIDesc(readyDesc);
 	pSkillReadyUI->Set_VariantUIDesc(tVariantDesc);
 
 	iIndex_PrevEBtn = iIndex_EBtn;
@@ -633,7 +629,7 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 {
 	CCustom_UI* pTargetUI = m_pUI_Skill_Utility;
 
-	auto utilDesc = pTargetUI->Get_UIDesc();
+	auto& utilDesc = pTargetUI->Get_UIDesc();
 	auto& utilInstDesc = utilDesc.vecInstanceDescs[0];
 
 
@@ -641,8 +637,6 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][0];
 	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][1];
-
-	pTargetUI->Set_UIDesc(utilDesc);
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
@@ -847,7 +841,7 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
     const _float fLifeTime = .5f;
     _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
 
-    auto uiDesc = pFeedbackUI->Get_UIDesc();
+    auto& uiDesc = pFeedbackUI->Get_UIDesc();
     auto& uiInstDescs = uiDesc.vecInstanceDescs;
 
 
@@ -887,7 +881,6 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
             uiInstDescs.erase(uiInstDescs.begin() + i);
 
             uiDesc.vecInstanceDescs = uiInstDescs; // ����
-            pFeedbackUI->Set_UIDesc(uiDesc);
             i--;
         }
         else
@@ -913,7 +906,7 @@ void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
         vecPosIndex.push_back(vPos);
     }
 
-    auto uiDesc = pFeedbackUI->Get_UIDesc();
+    auto& uiDesc = pFeedbackUI->Get_UIDesc();
     auto& uiInstDescs = uiDesc.vecInstanceDescs;
 
 
@@ -926,7 +919,6 @@ void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
 
     uiInstDescs.push_back(tDesc);
     uiDesc.vecInstanceDescs = uiInstDescs;
-    pFeedbackUI->Set_UIDesc(uiDesc);
 }
 
 void CUI_HUD::Update_Text_PlayerHP()
@@ -1227,7 +1219,7 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 
     // ĳ���Ϳ� ���� Ű ���̵� ���̱� ���� �б�
     CCustom_UI* pKeyButtonUI = m_pUI_KeyButton;
-    auto keyButtonDesc = pKeyButtonUI->Get_UIDesc();
+    auto& keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
     switch (m_iSelectedCHIndex)
     {
@@ -1247,7 +1239,6 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
         keyButtonDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.0f, 0.0f }; 
         break;
     }
-    pKeyButtonUI->Set_UIDesc(keyButtonDesc);
 }
 
 void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
@@ -1499,10 +1490,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vBackSpectrumHeights[VALUE].resize(iNumSpectrums);
     vBackSpectrumHeights[TARGET].resize(iNumSpectrums);
 
-    vector<_bool> vIsVisible = {};							// visible mask for front & back indices information
-    vIsVisible.resize(iNumSpectrums);
-    vector<_bool> vIsVisibleStatic = {};					// visible mask for static indices information
-    vIsVisibleStatic.resize(iNumSpectrums);
+    array<_bool, iNumSpectrums> arrIsVisible = {};							// visible mask for front & back indices information
+    array<_bool, iNumSpectrums> arrIsVisibleStatic = {};					// visible mask for static indices information
+
 
 
 
@@ -1518,31 +1508,31 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
                 vSingleColor[1] = vecColorPreset[ENCL_ROVER_NORMAL][1];
 
-                //vIsVisible.assign(vIsVisible.size(), true);                    // isvisible
+                //arrIsVisible.assign(arrIsVisible.size(), true);                    // isvisible
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // applying player energy
-                fill(vIsVisible.begin(), vIsVisible.end() - (41 - iVisibleBarRange), true);
+                fill(arrIsVisible.begin(), arrIsVisible.end() - (41 - iVisibleBarRange), true);
 
                 // applying player energy - not filled
-                for (_uint i = 0; i < vIsVisible.size(); i++)
-                    vIsVisibleStatic[i] = !vIsVisible[i];
+                for (_uint i = 0; i < arrIsVisible.size(); i++)
+                    arrIsVisibleStatic[i] = !arrIsVisible[i];
             }
             else if (isIn_Rover_BurstMode)     /* Ult    */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
                 vSingleColor[1] = vecColorPreset[ENCL_ROVER_NORMAL][1]; 
 
-                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
-                fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
+                //arrIsVisible.assign(arrIsVisible.size(), true);                     // isvisible
+                fill(arrIsVisible.begin() + 16, arrIsVisible.end() - 16, false);
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 16.f);      // applying player energy
-                fill(vIsVisible.begin() + (16 - iVisibleBarRange), vIsVisible.end() - 25, true);
-                fill(vIsVisible.end() - 16, vIsVisible.end() - (16 - iVisibleBarRange), true);
+                fill(arrIsVisible.begin() + (16 - iVisibleBarRange), arrIsVisible.end() - 25, true);
+                fill(arrIsVisible.end() - 16, arrIsVisible.end() - (16 - iVisibleBarRange), true);
 
                 // applying player energy - not filled
-                for (_uint i = 0; i < vIsVisible.size(); i++)
-                    vIsVisibleStatic[i] = !vIsVisible[i];
-                fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
+                for (_uint i = 0; i < arrIsVisible.size(); i++)
+                    arrIsVisibleStatic[i] = !arrIsVisible[i];
+                fill(arrIsVisibleStatic.begin() + 16, arrIsVisibleStatic.end() - 16, false);
             }
         }break;
     case CH_AUGUSTA:   
@@ -1553,19 +1543,19 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_NORMAL][0];       // color
                 vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_NORMAL][1]; 
 
-                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
-                fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
+                //arrIsVisible.assign(arrIsVisible.size(), true);                     // isvisible
+                fill(arrIsVisible.begin() + 16, arrIsVisible.end() - 16, false);
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // applying player energy
-                fill(vIsVisible.begin(), 
-                    (iVisibleBarRange > 16)? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
-                fill(vIsVisible.end() - 16,
-                    vIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
+                fill(arrIsVisible.begin(), 
+                    (iVisibleBarRange > 16)? arrIsVisible.begin() + 16 : arrIsVisible.begin() + iVisibleBarRange, true);
+                fill(arrIsVisible.end() - 16,
+                    arrIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
 
                 // applying player energy - not filled
-                for (_uint i = 0; i < vIsVisible.size(); i++)
-                    vIsVisibleStatic[i] = !vIsVisible[i];
-                fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
+                for (_uint i = 0; i < arrIsVisible.size(); i++)
+                    arrIsVisibleStatic[i] = !arrIsVisible[i];
+                fill(arrIsVisibleStatic.begin() + 16, arrIsVisibleStatic.end() - 16, false);
             }
             else if(!isIn_Augusta_AdvUlt &&
 					(fCurPlayerEnergyRatio == 1.f))     /* Ult?   */
@@ -1573,23 +1563,23 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_ULT][0];          // color
                 vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_ULT][1]; 
 
-                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
-                fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
+                //arrIsVisible.assign(arrIsVisible.size(), true);                     // isvisible
+                fill(arrIsVisible.begin() + 16, arrIsVisible.end() - 16, false);
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // applying player energy
-                fill(vIsVisible.begin(),
-                    (iVisibleBarRange > 16) ? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
-                fill(vIsVisible.end() - 16,
-                    vIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
+                fill(arrIsVisible.begin(),
+                    (iVisibleBarRange > 16) ? arrIsVisible.begin() + 16 : arrIsVisible.begin() + iVisibleBarRange, true);
+                fill(arrIsVisible.end() - 16,
+                    arrIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
 
                 // applying player energy - not filled
-                for (_uint i = 0; i < vIsVisible.size(); i++)
-                    vIsVisibleStatic[i] = !vIsVisible[i];
-                fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
+                for (_uint i = 0; i < arrIsVisible.size(); i++)
+                    arrIsVisibleStatic[i] = !arrIsVisible[i];
+                fill(arrIsVisibleStatic.begin() + 16, arrIsVisibleStatic.end() - 16, false);
             }
             else if (isIn_Augusta_AdvUlt)
             {
-                fill(vIsVisibleStatic.begin(), vIsVisibleStatic.end(), false);
+                fill(arrIsVisibleStatic.begin(), arrIsVisibleStatic.end(), false);
             }
         }break;
     case CH_GALBRENA:  
@@ -1603,20 +1593,20 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 vExtraColor  [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][0]; 
                 vExtraColor  [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][1]; 
 
-                fill(vIsVisible.begin() + 11, vIsVisible.end() - 26, false);    // isvisible
+                fill(arrIsVisible.begin() + 11, arrIsVisible.end() - 26, false);    // isvisible
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 26.f);      // applying player energy
-                fill(vIsVisible.end() - 26, vIsVisible.end() - 26 + iVisibleBarRange, true);
+                fill(arrIsVisible.end() - 26, arrIsVisible.end() - 26 + iVisibleBarRange, true);
 
                 // [Galbrena] applying echo energy
                 _uint iVisibleBarRange_Echo = static_cast<_uint>(fGalbEchoEnergy / fGalbMaxEchoEnergy * 11.f);
-                fill(vIsVisible.begin() + 11 - iVisibleBarRange_Echo, vIsVisible.begin() + 11, true);
+                fill(arrIsVisible.begin() + 11 - iVisibleBarRange_Echo, arrIsVisible.begin() + 11, true);
 
 
                 // applying player energy - not filled
-                for (_uint i = 0; i < vIsVisible.size(); i++)
-                    vIsVisibleStatic[i] = !vIsVisible[i];
-                fill(vIsVisibleStatic.begin() + 11, vIsVisibleStatic.end() - 26, false);
+                for (_uint i = 0; i < arrIsVisible.size(); i++)
+                    arrIsVisibleStatic[i] = !arrIsVisible[i];
+                fill(arrIsVisibleStatic.begin() + 11, arrIsVisibleStatic.end() - 26, false);
             }
             else if(isIn_Galbrena_BurstMode		)     /* Burst   */
             { 
@@ -1625,14 +1615,14 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 vExtraColor  [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][0]; 
                 vExtraColor  [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][1]; 
 
-                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+                //arrIsVisible.assign(arrIsVisible.size(), true);                     // isvisible
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // applying player energy
-                fill(vIsVisible.begin(), vIsVisible.begin() + iVisibleBarRange, true);
+                fill(arrIsVisible.begin(), arrIsVisible.begin() + iVisibleBarRange, true);
 
                 // applying player energy - not filled
-                for (_uint i = 0; i < vIsVisible.size(); i++)
-                    vIsVisibleStatic[i] = !vIsVisible[i];
+                for (_uint i = 0; i < arrIsVisible.size(); i++)
+                    arrIsVisibleStatic[i] = !arrIsVisible[i];
             }
         }break;
     }
@@ -1658,36 +1648,32 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     }
 
 
-    vector<_float4x4> vecVariantMat = {};
-    vecVariantMat.resize(41);
-    vector<_float4x4> vecVariantBackMat = {};
-    vecVariantBackMat.resize(41);
-    vector<_float4x4> vecVariantStaticMat = {};
-    vecVariantStaticMat.resize(41);
+    array<_float4x4, 41> arrVariantMat = {};
+	array<_float4x4, 41> arrVariantBackMat = {};
+	array<_float4x4, 41> arrVariantStaticMat = {};
 
-
-    for (uint i = 0; i < vecVariantMat.size(); i++)         // front spectrum.
+    for (uint i = 0; i < arrVariantMat.size(); i++)         // front spectrum.
     {
-        *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSingleColor[0];
-        *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSingleColor[1];
-        vecVariantMat[i]._31 = static_cast<_float>(vIsVisible[i]);
-        vecVariantMat[i]._32 = vSpectrumHeights[VALUE][i];
+        *reinterpret_cast<_float4*>(&arrVariantMat[i]._11) = vSingleColor[0];
+        *reinterpret_cast<_float4*>(&arrVariantMat[i]._21) = vSingleColor[1];
+        arrVariantMat[i]._31 = static_cast<_float>(arrIsVisible[i]);
+        arrVariantMat[i]._32 = vSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantBackMat.size(); i++)     // back spectrum. 
+    for (uint i = 0; i < arrVariantBackMat.size(); i++)     // back spectrum. 
     {
-        *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._11) = vBackColor[0];
-        *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._21) = vBackColor[1];
-        vecVariantBackMat[i]._31 = static_cast<_float>(vIsVisible[i]);
+        *reinterpret_cast<_float4*>(&arrVariantBackMat[i]._11) = vBackColor[0];
+        *reinterpret_cast<_float4*>(&arrVariantBackMat[i]._21) = vBackColor[1];
+		arrVariantBackMat[i]._31 = static_cast<_float>(arrIsVisible[i]);
         //vecVariantBackMat[i]._31 = false;
-        vecVariantBackMat[i]._32 = vBackSpectrumHeights[VALUE][i];
+		arrVariantBackMat[i]._32 = vBackSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum.
+    for (uint i = 0; i < arrVariantStaticMat.size(); i++)   // static spectrum.
     {
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];
-        vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);               
+        *reinterpret_cast<_float4*>(&arrVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];
+        *reinterpret_cast<_float4*>(&arrVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];
+		arrVariantStaticMat[i]._31 = static_cast<_float>(arrIsVisibleStatic[i]);
         //vecVariantStaticMat[i]._31 = false;                                                
-        vecVariantStaticMat[i]._32 = 1.f;                                                    
+		arrVariantStaticMat[i]._32 = 1.f;
     }
 
 
@@ -1698,33 +1684,36 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
         if (!isIn_Galbrena_BurstMode)
         {
-            for (uint i = 0; i < vecVariantMat.size(); i++)
+            for (uint i = 0; i < arrVariantMat.size(); i++)
                 if (i >= 15)
                 {
-                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraColor[0];
-                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraColor[1];
+                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._11) = vExtraColor[0];
+                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._21) = vExtraColor[1];
                 }
-            for (uint i = 0; i < vecVariantBackMat.size(); i++)
+            for (uint i = 0; i < arrVariantBackMat.size(); i++)
                 if (i >= 15)
                 {
                     _float4 vExtraBackColor[2];
                     vExtraBackColor[0] = vExtraColor[0];   vExtraBackColor[0].w = 0.5f;
                     vExtraBackColor[1] = vExtraColor[1];   vExtraBackColor[1].w = 0.5f;
-                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraBackColor[0];
-                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraBackColor[1];
+                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._11) = vExtraBackColor[0];
+                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._21) = vExtraBackColor[1];
                 }   
         }
     }
 
-    vecVariantBackMat.insert(vecVariantBackMat.end(),           // combine two vector. -> size = 41 + 41 = 82
-        make_move_iterator(vecVariantMat.begin()),
-        make_move_iterator(vecVariantMat.end()));
-    vecVariantBackMat.insert(vecVariantBackMat.end(),           // combine two vector. -> size = 82 + 41 = 123
-        make_move_iterator(vecVariantStaticMat.begin()),
-        make_move_iterator(vecVariantStaticMat.end()));
+	static vector<_float4x4> vecResultVariantMat = {};
+	vecResultVariantMat.resize(123);
+
+	for (_uint i = 0; i < 41; i++)
+		vecResultVariantMat[i] = arrVariantBackMat[i];
+	for (_uint i = 41; i < 82; i++)
+		vecResultVariantMat[i] = arrVariantMat[i - 41];
+	for (_uint i = 82; i < 123; i++)
+		vecResultVariantMat[i] = arrVariantStaticMat[i - 82];
 
     CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-        vecVariantBackMat,
+		vecResultVariantMat,
         ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_TRANSMIT),
         true
     };
@@ -1819,9 +1808,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 
 
-    auto bladeDesc = pBladeUI->Get_UIDesc();
+    auto& bladeDesc = pBladeUI->Get_UIDesc();
 
-    auto ultBladeDesc = pUltBladeUI->Get_UIDesc();
+    auto& ultBladeDesc = pUltBladeUI->Get_UIDesc();
     
     // Į �ڿ�
     // �׳� ������ ���� ������ ���� �����ֱ�. alpha pass �̿�.
@@ -1841,8 +1830,6 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     break;
     }
 
-    pBladeUI->Set_UIDesc(bladeDesc);
-    
 
 
     vector<_float4x4> vecPointVariantMat = { _float4x4() };
@@ -1872,8 +1859,6 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     if (ultRatio <= fPreUltRatio)	fPreUltRatio = ultRatio;
 
     ultBladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, fPreUltRatio };
-
-    pUltBladeUI->Set_UIDesc(ultBladeDesc);
 
 }
 
@@ -1906,7 +1891,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 {
 
-	auto roverUIDesc = m_pUI_Skill[CH_ROVER]->Get_UIDesc();
+	auto& roverUIDesc = m_pUI_Skill[CH_ROVER]->Get_UIDesc();
 
 	UI_ROVER_STATE eState_Rover_E = static_cast<UI_ROVER_STATE>(skillSlots[CAbility::KEY_E].iStateType);
 	UI_ROVER_STATE eState_Rover_R = static_cast<UI_ROVER_STATE>(skillSlots[CAbility::KEY_R].iStateType);
@@ -1947,7 +1932,7 @@ void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 		break;
 	}
 
-	m_pUI_Skill[CH_ROVER]->Set_UIDesc(roverUIDesc);
+	//m_pUI_Skill[CH_ROVER]->Set_UIDesc(roverUIDesc);
 
 }
 
@@ -1955,7 +1940,7 @@ void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 
 void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 {
-	auto augustaUIDesc = m_pUI_Skill[CH_AUGUSTA]->Get_UIDesc();
+	auto& augustaUIDesc = m_pUI_Skill[CH_AUGUSTA]->Get_UIDesc();
 
 	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
@@ -2076,13 +2061,13 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 
 
 
-	m_pUI_Skill[CH_AUGUSTA]->Set_UIDesc(augustaUIDesc);
+	//m_pUI_Skill[CH_AUGUSTA]->Set_UIDesc(augustaUIDesc);
 
 }
 
 void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 {
-	auto galbrenaUIDesc = m_pUI_Skill[CH_GALBRENA]->Get_UIDesc();
+	auto& galbrenaUIDesc = m_pUI_Skill[CH_GALBRENA]->Get_UIDesc();
 
 	UI_GALBRENA_STATE eState_Galbrena_E = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
 	UI_GALBRENA_STATE eState_Galbrena_R = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
@@ -2144,7 +2129,7 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 	
 
 
-	m_pUI_Skill[CH_GALBRENA]->Set_UIDesc(galbrenaUIDesc);
+	//m_pUI_Skill[CH_GALBRENA]->Set_UIDesc(galbrenaUIDesc);
 }
 
 
