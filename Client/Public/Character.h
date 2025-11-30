@@ -153,6 +153,9 @@ public:
 	_bool IsQTEend() { return m_IsQTEend;  }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
+	_bool IsVisible() { return m_IsVisible; }
+	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
+
 	virtual void Process_DelayedActions() {};
 	virtual void Calc_ChangeTimer(_float fTimeDelta) {}; // Timer 계산
 	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
@@ -165,7 +168,10 @@ public:
 
 	void Bind_GrabEscapePossible();
 	void Bind_GrabEscapeExecute();
+	void Bind_GrabVisible(_bool IsVisible);
 	void ResetPose();
+
+	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 
 #pragma endregion
 
@@ -374,6 +380,7 @@ protected:
 	_bool m_IsLand = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
+	_bool m_IsVisible = { true };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 	queue<DELAYED_ACTION> m_DelayedActions;

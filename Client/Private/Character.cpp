@@ -320,13 +320,28 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 void CCharacter::Bind_GrabEscapePossible()
 {
+	// 컨디션이 Grab이 아니라면? 호출 정지.
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		return;
+
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
 }
 
 void CCharacter::Bind_GrabEscapeExecute()
 {
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		return;
+
 	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
-	ResetPose();
+	//ResetPose();
+}
+
+void CCharacter::Bind_GrabVisible(_bool IsVisible)
+{
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		return;
+
+	Set_Visible(IsVisible);
 }
 
 void CCharacter::ResetPose()
@@ -357,6 +372,13 @@ void CCharacter::ResetPose()
 	m_pTransformCom->Set_State(STATE::UP, vUp);
 	m_pTransformCom->Set_State(STATE::LOOK, vLook);
 }
+
+void CCharacter::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
+{
+	m_pGameInstance->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
+}
+
+
 
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
@@ -670,9 +692,6 @@ _bool CCharacter::Is_LockOn()
 void CCharacter::ActiveCaptureState()
 {
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
-
-	// 4. 충돌 콜백 도중에는 하면 안된다.?
-	//m_pColliderCom->IsActivate(false);
 }
 
 // 무조건 Grab Animation이 나오는게 아니라 들어간 상태에서 애니메이션을 선별

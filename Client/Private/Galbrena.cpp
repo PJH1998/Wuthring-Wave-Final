@@ -21,7 +21,7 @@ CGalbrena::CGalbrena(const CGalbrena& Prototype)
     : CCharacter(Prototype)
 {
 }
-
+ 
 HRESULT CGalbrena::Initialize_Prototype()
 {
     if (FAILED(CCharacter::Initialize_Prototype()))
@@ -119,28 +119,29 @@ void CGalbrena::Update(_float fTimeDelta)
 	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
-	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	Update_Physics(fTimeDelta);
+	Update_Camera(fTimeDelta);
 
-	_bool IsSelect = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
-
-	if (!m_IsQTE)
-	{
-		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-		m_pColliderCom->Update(vVelocity / fTimeDelta);
-
-		// 6. Camera 갱신 => 위치 따라오게
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
-	}
-	else
-	{
-		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
-	}
-
-	// 7. Land Check
-	m_IsLand = Is_LandCollider();
+	//_vector vVelocity = m_pTransformCom->Get_Velocity();
+	//
+	//if (!m_IsQTE)
+	//{
+	//	// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+	//	m_pColliderCom->Update(vVelocity / fTimeDelta);
+	//
+	//	// 6. Camera 갱신 => 위치 따라오게
+	//	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
+	//}
+	//else
+	//{
+	//	m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
+	//}
+	//
+	//// 7. Land Check
+	//m_IsLand = Is_LandCollider();
 
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	//Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -161,10 +162,19 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
 	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-	if (!m_IsQTE)
-		m_pColliderCom->Sync_Position(m_pTransformCom);
+
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	{
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+	}
 	else
-		m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+	{
+		// 2. QTE인 경우 Collider 갱신하지 않음.
+		if (!m_IsQTE)
+			m_pColliderCom->Sync_Position(m_pTransformCom);
+		else
+			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+	}
 
 	if (m_IsQTEend)
 	{
@@ -173,15 +183,19 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 		m_IsQTEend = false;
 	}
 
+	if (m_IsVisible)
+	{
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+			return;
 
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-        return;
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+			return;
 
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
-		return;
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+			return;
+	}
 
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
-		return;
+    
 }
 
 void CGalbrena::Render()
@@ -494,6 +508,30 @@ void CGalbrena::Hit_Judge(void* pArg)
 
 }
 
+void CGalbrena::Grab_Judge(void* pArg)
+{
+	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
+		return;
+
+	// 1. Grab이 안통하는 상태일때. => Dodge, Grabe, Invincible
+	_uint iFlag = {};
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::GRABED);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE);
+
+	if (Check_AnyCondition(iFlag))
+		return;
+
+	// 2. Capture 데이터 캐스팅.
+	m_PendingCaptureDesc = *static_cast<CAPTURE_DESC*>(pArg);
+
+	// 데미지 처리.
+	m_pAbillityCom->Add_Hp(m_PendingCaptureDesc.fAttack * -1.f);
+
+	// 3. 콜백 함수 내에서는 Jolt에 대한 변경작업을 진행하면 안된다. => Priority Update로 진행 넘기기.
+	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
+}
+
 void CGalbrena::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -772,8 +810,11 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
 			break;
 		}
-		case DELAYED_ACTION::TYPE::PARRY:
+		case DELAYED_ACTION::TYPE::GRAB:
 		{
+			ActiveCaptureState();
+			GetStateContextForWrite().m_eCaptureType = EGalbrenaCaptureType::BEHIT_FLY_START;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EGalbrenaCaptureState::CAPTURE));
 			break;
 		}
 
@@ -831,6 +872,49 @@ void CGalbrena::Update_TargetDistance()
 	_vector vDistance = m_pTransformCom->Get_State(STATE::POSITION) - vTargetPos;
 	vDistance = XMVectorSetY(vDistance, 0.f);
 	m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+}
+
+void CGalbrena::Update_Physics(_float fTimeDelta)
+{
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	{
+		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
+			nullptr != m_PendingCaptureDesc.pTransform)
+		{
+			_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
+
+			_vector vScale{}, vRotQuat{}, vTrans{};
+			_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
+			XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
+			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
+		}
+	}
+	else
+	{
+		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
+		_vector vVelocity = m_pTransformCom->Get_Velocity();
+		if (!m_IsQTE)
+			m_pColliderCom->Update(vVelocity / fTimeDelta);
+		else
+			m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
+		// 6. Land Check
+		m_IsLand = Is_LandCollider();
+	}
+}
+
+void CGalbrena::Update_Camera(_float fTimeDelta)
+{
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	{
+		_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+		vPos += vCameraLook * -3.f;
+		m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
+	}
+	else if (!m_IsQTE)
+	{
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
+	}
 }
 
 void CGalbrena::Bind_Resources()

@@ -612,13 +612,19 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 }
 
 #pragma region GameSystem 연계함수.
+void CPlayer::Notify_GrabVisible(_bool IsVisible)
+{
+	m_Characters[m_iCurrentCharacterIdx]->Set_Visible(IsVisible);
+}
 void CPlayer::Notify_EscapeGrabReady()
 {
 	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapePossible();
+	m_IsLockOn = true;
 }
 void CPlayer::Notify_EscapeGrabExecute()
 {
 	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapeExecute();
+	m_IsLockOn = false;
 }
 #pragma endregion
 

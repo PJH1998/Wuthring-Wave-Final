@@ -33,7 +33,8 @@ void CRoverHit::OnEnter(void* pArg)
     State_Reset();
 
 	// 5. Hit Description을 이용하여 시작 초기 작업을 정의합니다.
-	Enter_Hit();
+	if (m_strPrevInfo.empty())
+		Enter_Hit();
 	
 	// 6. 중력 적용
     m_pRover->Set_Gravity(true);
@@ -65,8 +66,8 @@ void CRoverHit::OnExit()
     m_pRover->Set_Gravity(false);
 
 	// Hit 판정 끝났으므로 정보 초기화
-	m_pRover->Set_Hit(false);
 	m_pRover->ClearPendingHit();
+	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 

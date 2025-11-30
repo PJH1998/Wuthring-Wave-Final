@@ -62,6 +62,7 @@ private:
 
 	_uint m_iTriggerIndex = {};
 	class CGameSystem* m_pGameSystem = { nullptr };
+	_wstring m_szDebrisName;
 public:
 	static CMapObject_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

@@ -1,6 +1,11 @@
 ﻿#pragma once
 namespace Client
 {
+	enum class CHARACTER_EVENT : unsigned int {
+		EVENT = 0,
+		END
+	};
+
 	enum class ROPEDIR : unsigned int {
 		U = 0,
 		F,
