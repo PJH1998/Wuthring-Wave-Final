@@ -8,6 +8,10 @@ public:
 	typedef struct tagMapload {
 		_float4 vWorldPos = {};
 		const LIGHT_DESC* CopyDesc = {};
+		_bool IsCopy = { false };
+		_float4 vLightDiffuse = {};
+		_float4 vLightAmbient = {};
+		_float4 vLightSpec = {};
 	}MAP_LOAD;
 
 	union MyFloat4 {

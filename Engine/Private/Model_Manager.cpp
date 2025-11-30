@@ -18,17 +18,18 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	m_ModelPrototypes = new unordered_map<_string, class CModel_Streaming*>[iMaxLevel];
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
+#ifndef _DEBUG
 	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 60, 20);
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 45, 10);
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 25, 6);
 	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 10, 3);
-
-	/*
+#else
+	
 		m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 128, sizeof(VTXMESH));
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
 	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
-	*/
+#endif
 	D3D11_BUFFER_DESC StagingDesc = {};
 	StagingDesc.ByteWidth = 1024 * 1024 * 64;
 	StagingDesc.Usage = D3D11_USAGE_STAGING;
@@ -422,9 +423,9 @@ void CModel_Manager::LoadLastLOD()
 		//Data의 Data.LoadData 개수가 메쉬의 개수.
 		vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
 		pData->clear();
-		for (_uint i = 0; i < Data.LoadData.size(); ++i)
+		for (_uint i = 0; i < static_cast<_uint>(Data.LoadData.size()); ++i)
 		{
-			_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
+			_uint VertexSize = static_cast<_uint>(Data.LoadData[i].VertexData.size()) * sizeof(VTXMESH);
 			_uint VertexOffset = m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
 
 			if (VertexOffset == -1)
@@ -442,7 +443,7 @@ void CModel_Manager::LoadLastLOD()
 			m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
 
 
-			_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
+			_uint IndexSize = static_cast<_uint>(Data.LoadData[i].IndexData.size()) * sizeof(_uint);
 			_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
 			if (IndexOffSet == -1)

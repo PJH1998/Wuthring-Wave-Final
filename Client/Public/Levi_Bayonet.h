@@ -40,7 +40,7 @@ public:
 	virtual	void Render() override;
 
 
-	virtual		void Reset(const _fmatrix& WorldMatrix, void* pArg);
+	virtual		void Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 	void Attack_Active(_bool isActive);
 	//void Change_Visible(_bool isActive);
 
