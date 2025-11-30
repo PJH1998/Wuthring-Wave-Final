@@ -245,7 +245,7 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("CallAnim"))
 	{
-		m_pGameSystem->Call_Animation();
+		m_pGameSystem->Bind_Condition_ToPlayer("GrabRelease");
 #ifdef _DEBUG
 		cout << "플레이어 애니메이션 호출!" << endl;
 #endif // _DEBUG
@@ -253,19 +253,19 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("GrabRelease"))
 	{
-		m_pGameSystem->Unbind_Grab();
+		m_pGameSystem->Bind_Condition_ToPlayer("GrabUnbined");
 #ifdef _DEBUG
 		cout << "플레이어 잡기 해제 호출!" << endl;
 #endif // _DEBUG
 	}
-	else if (wstrTypeTag == TEXT("CallVisible"))
-	{
-		m_pGameSystem->Call_PlayerVisible();
-#ifdef _DEBUG
-		cout << "플레이어 렌더링 호출!" << endl;
-#endif // _DEBUG
-
-	}
+//	else if (wstrTypeTag == TEXT("CallVisible"))
+//	{
+//		m_pGameSystem->Call_PlayerVisible();
+//#ifdef _DEBUG
+//		cout << "플레이어 렌더링 호출!" << endl;
+//#endif // _DEBUG
+//
+//	}
 }
 
 HRESULT CCorosaurus::Bind_Resources()

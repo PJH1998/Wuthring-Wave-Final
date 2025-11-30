@@ -20,6 +20,7 @@ public:
 		_float3 vOffsetRadian;
 		_float fAttackDmg;
 		TEXT_COLOR_TYPE eType;
+		_float4 vBaseColor{ 1.f, 1.f, 1.f, 1.f };
 	}LEVIBAYONET_DESC;
 
 private:
@@ -38,6 +39,8 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+
+	virtual		void Reset(const _fmatrix& WorldMatrix, void* pArg);
 	void Attack_Active(_bool isActive);
 	//void Change_Visible(_bool isActive);
 
@@ -49,6 +52,7 @@ private:
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	vector<_uint> m_ShaderPaths = {};
 	_float			m_fRateFX{};
+	_float4			m_vBaseColor{};
 
 #ifdef _DEBUG
 	_float3 m_vOffsetPos = {};

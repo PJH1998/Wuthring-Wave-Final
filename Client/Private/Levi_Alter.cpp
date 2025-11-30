@@ -301,11 +301,8 @@ void CLevi_Alter::UnActive_Resources()
 
 	for (auto& Pair : m_PartObjects)
 	{
-		if (Pair.second->IsActivate())
-		{
-			Pair.second->SetActivate(false);
-			Pair.second->Reset(XMMatrixIdentity(), nullptr);
-		}
+		Pair.second->SetActivate(false);
+		Pair.second->Reset(XMMatrixIdentity(), nullptr);
 	}
 }
 
