@@ -636,7 +636,6 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(Desc.ModelName, NameLength);
 
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-								if(Desc.iShaderPassIndex == 2)
 									File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
 
 								File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint));
@@ -1451,10 +1450,21 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 	{
 		*pShaderIndex = 16;
 	}
-	else if (NameCheck(ModelName, "Doo_"))
+	else if (NameCheck(ModelName, "Doo_") ||
+		NameCheck(ModelName, "Cru_Bui_09DH") || 
+		NameCheck(ModelName, "Cru_Bui_09CH") || 
+		NameCheck(ModelName, "Cru_Bui_41AH") ||
+		NameCheck(ModelName, "Cru_Bui_11CH") ||
+		NameCheck(ModelName, "Cru_Bui_13AH") ||
+		NameCheck(ModelName, "Cru_Bui_21") ||
+		NameCheck(ModelName, "Cru_Bui_42") ||
+		NameCheck(ModelName, "Cru_Bui_11BH"))
 		*pShaderIndex = 17;
-	else if(NameCheck(ModelName, "SM_Sev_Bui_02"))
+	else if(NameCheck(ModelName, "SM_Sev_Bui_02")||
+		NameCheck(ModelName, "Lig_04AS"))
 		*pShaderIndex = 0;
+	else if(NameCheck(ModelName, "Lig_") && ModelName.find("11BS") == string::npos)
+		*pShaderIndex = 4;
 
 #pragma endregion
 
