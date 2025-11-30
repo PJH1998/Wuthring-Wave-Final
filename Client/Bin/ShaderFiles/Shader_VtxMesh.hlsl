@@ -1038,8 +1038,12 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_GLASS(PS_IN In)
         Out.vDiffuse = vDiffuse;
     }
 
+    //if (vMask.a == 1.f)
+    //    Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.4f, 1.f);
+
+    //천국에 엄청 큰 애들은 좀 더 낮춰야할지도?
     if (vMask.a == 1.f)
-        Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.4f, 1.f);
+        Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.2f, 1.f);
 
     Out.vDiffuse.w = 1.f;
     
@@ -1289,7 +1293,7 @@ technique11 DefaultTechnique
 
     pass Asphodel_Glass // 16
     {
-        SetRasterizerState(RS_Default);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 

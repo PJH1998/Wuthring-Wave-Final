@@ -98,6 +98,7 @@ void CGalbrenaGroundHeavyAttack::OnExit()
 
     // 콤보 카운트 초기화
     m_iComboCount = 0;
+	m_iCurrentAnimIdx = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
     m_pGalbrena->PartActivate(m_iPartType, false); 
     m_pGalbrena->PartActivate(m_iSubPartType, false); 
@@ -133,7 +134,7 @@ void CGalbrenaGroundHeavyAttack::Handle_Input()
     // 입력키 체크
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
-    m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB)) || m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+    m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
     // 스킬 체크
     m_States[SKILL_Q] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
@@ -226,6 +227,9 @@ void CGalbrenaGroundHeavyAttack::Check_StateTransition(_float fTimeDelta)
 				break;
 			case EGalbrenaHeavyAttackType::ATTACK_H_0202:
 				m_pGalbrena->GetStateContextForWrite().m_eHeavyAttackType = EGalbrenaHeavyAttackType::ATTACK_H_0203;
+				break;
+			case EGalbrenaHeavyAttackType::ATTACK_H_0203: // 203인 경우에는 바꾸지 않도록.
+				return;
 				break;
 			}
 			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::HEAVYATTACK));

@@ -69,6 +69,7 @@
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
 #include "UI_GrafflePoint.h"
+#include "UI_QTE.h"
 
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
@@ -793,6 +794,9 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_GrafflePoint = "../../Client/Bin/Resource/UI/FJson/UITree/Root_GrafflePoint.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_GrafflePoint));
 
+	_string strFilePath_UI_QTE = "../../Client/Bin/Resource/UI/FJson/UITree/Root_QTE1.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_QTE));
+
 
 	
 	
@@ -908,6 +912,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_GrafflePoint",
 		CUI_GrafflePoint::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_GrafflePoint Load Failed. The UI_GrafflePoint may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_QTE",
+		CUI_QTE::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
 
 	// Custom UI (MiniGames)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",

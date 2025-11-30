@@ -56,6 +56,9 @@ private:
 		// Hit
 		ERoverHitType m_eHitType = ERoverHitType::END;
 
+		// Capture
+		ERoverCaptureType m_eCaptureType = ERoverCaptureType::END;
+
 		// Prev Info
 		_string m_strPrevInfo = {};
 		void Clear()
@@ -86,7 +89,11 @@ private:
 			m_eClimbExitType = ERoverClimbExitType::END;
 			m_IsClimbSecondStep = false;
 
+			// Hit
 			m_eHitType = ERoverHitType::END;
+
+			// Capture
+			m_eCaptureType = ERoverCaptureType::END;
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
@@ -146,6 +153,7 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
+	virtual void Grab_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
 	virtual void Bind_QTE(_bool IsQTE) override;
@@ -187,6 +195,10 @@ private:
 	vector<class CAttackVolume*> m_AttackVolumes;
 
 	_bool m_PendingConditions[CONDITION_END] = {};
+
+private:
+	void Update_Physics(_float fTimeDelta);
+	void Update_Camera(_float fTimeDelta);
 
 private:
 	void Bind_Resources();

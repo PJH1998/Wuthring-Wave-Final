@@ -87,8 +87,7 @@ void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, cons
 				File.read(Desc.ModelName, NameLength);
 
 				File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-				if (Desc.iShaderPassIndex == 2)
-					File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
+				File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
 
 				File.read(reinterpret_cast<char*>(&MeshDesc.iNumInstance), sizeof(_uint));
 				MeshDesc.pTransformMatrix = new _float4x4[MeshDesc.iNumInstance];

@@ -133,7 +133,7 @@ protected:
 	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
 
 public:
-	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
+	CUSTOM_UI_DESC&			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ 
 		m_tUIDesc = tUIDesc; 
 	}

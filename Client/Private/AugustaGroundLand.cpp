@@ -105,7 +105,7 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 
     if (m_IsAnimationEnd)
     {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         return;
     }

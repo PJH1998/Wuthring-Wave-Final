@@ -63,8 +63,6 @@ HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
 
 		event.Objectmatrix.push_back(m_pTransformCom->Get_State(STATE::POSITION));
 		});
-
-    m_iShaderPassIndex = 2;
 	
     return S_OK;
 }
@@ -132,8 +130,7 @@ void CEdit_MapObject_Instance::Render()
 		m_pShaderCom->Bind_Value("g_fRaidan", &m_fTotalTime, sizeof(_float));
 
 #ifdef _DEBUG
-		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "ChangeColor"))
-			m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4));
+		m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4));
 #endif // _DEBUG
 
 		
