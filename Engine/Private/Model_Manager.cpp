@@ -18,17 +18,18 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	m_ModelPrototypes = new unordered_map<_string, class CModel_Streaming*>[iMaxLevel];
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
+#ifndef _DEBUG
 	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 60, 20);
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 45, 10);
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 25, 6);
 	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 10, 3);
-
-	/*
+#else
+	
 		m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 128, sizeof(VTXMESH));
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
 	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
-	*/
+#endif
 	D3D11_BUFFER_DESC StagingDesc = {};
 	StagingDesc.ByteWidth = 1024 * 1024 * 64;
 	StagingDesc.Usage = D3D11_USAGE_STAGING;
