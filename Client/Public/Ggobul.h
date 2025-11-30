@@ -68,7 +68,6 @@ private:
 	_uint		m_iState{};
 
 	_float		m_fAttackDmg{};
-	CALLBACK_CLIENT			m_CallBack{};
 
 private:
 	void			Bind_Resources();

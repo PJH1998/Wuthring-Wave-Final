@@ -64,6 +64,12 @@ enum class EGalbrenaInteractionState : _uint
 	INTERACTION_END
 };
 
+enum class EGalbrenaCaptureState : _uint
+{
+	CAPTURE = 0,
+	CAPTURE_END
+};
+
 #pragma endregion
 
 #pragma region DEPTH2
@@ -403,6 +409,20 @@ enum class EGalbrenaRopeDragType : _uint
 };
 #pragma endregion
 
+#pragma region CAPTURED
+
+enum class EGalbrenaCaptureType : _uint
+{
+	CAPTURED = 0,
+	BEHIT_PUSH_LOOP,
+	BEHIT_FLY_START,
+	BEHIT_FLY_LOOP,
+	BEHIT_FLY_FALL,
+	BEHIT_PUSH_FALL,
+	BEHIT_PUSH_START,
+	END
+};
+#pragma endregion
 
 #pragma endregion
 

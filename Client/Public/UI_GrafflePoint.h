@@ -44,7 +44,7 @@ private:
 	const _float	m_fPivotDistance = 10.f;		// 거리에 따른 크기 조절용. 이 거리일 때 최대 크기로 보임.
 
 	const _float	m_fTriggerDistance = 50.f;		// 상호작용 가이드가 뜰 범위
-	const _float	m_fVisibleDistance = 80.f;		// 보이기 시작할 범위
+	const _float	m_fVisibleDistance = 80.f;		// 보이기 시작할 범위 (가까워질수록.. 안보임 -> 보임 -> 애니메이션도 보임 순)
 	
 	CCustom_UI*		m_pRUI_All		= nullptr;
 	CCustom_UI*		m_pStaticUI		= nullptr;

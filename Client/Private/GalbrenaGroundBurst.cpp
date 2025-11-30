@@ -42,7 +42,6 @@ void CGalbrenaGroundBurst::OnEnter(void* pArg)
 
 	// 7. 타겟 바라보기
 	m_pGalbrena->Rotate_Target();
-
 	
 }
 
@@ -87,7 +86,7 @@ void CGalbrenaGroundBurst::OnExit()
 
 	// 공격 콜라이더 비활성화
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
-	
+
 }
 
 void CGalbrenaGroundBurst::Handle_Input()

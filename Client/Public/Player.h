@@ -82,6 +82,7 @@ public:
 	
 #pragma region GAMESYSTEM과의 연계함수.
 public:
+	void Notify_GrabVisible(_bool IsVisible);
 	void Notify_EscapeGrabReady();
 	void Notify_EscapeGrabExecute();
 #pragma endregion

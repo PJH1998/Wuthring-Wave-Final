@@ -139,7 +139,8 @@ HRESULT CMorphChannel::Initialize(ifstream& InputFile)
 	
 
 	_string strName = m_szName;
-	_bool IsDeleteChannel = strName._Starts_with("M_") || strName._Starts_with("L_") || strName._Starts_with("B_Anger"); // M_ Channel 지우면 입 안벌림.
+	//_bool IsDeleteChannel = strName._Starts_with("M_") || strName._Starts_with("L_") || strName._Starts_with("B_Anger"); // M_ Channel 지우면 입 안벌림.
+	_bool IsDeleteChannel = strName._Starts_with("L_") || strName._Starts_with("B_Anger"); // M_ Channel 지우면 입 안벌림.
 
 
 	// 3. Key Frame 데이터 로드
