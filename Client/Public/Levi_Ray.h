@@ -16,6 +16,7 @@ class CLevi_Ray final : public CGameObject
 		_uint				iLayer;
 		vector<_uint>		iTargetLayers;
 		_float				fAttackDamage;
+		_float3				vExtent;
 		TEXT_COLOR_TYPE		eType;
 	}LEVIRAY_DESC;
 

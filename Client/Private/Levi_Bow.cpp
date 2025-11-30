@@ -22,7 +22,7 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	LEVIBAYONET_DESC* pDesc = static_cast<LEVIBAYONET_DESC*>(pArg);
+	LEVIBOW_DESC* pDesc = static_cast<LEVIBOW_DESC*>(pArg);
 	m_pParentTransform = pDesc->pParentTransform;
 	m_pSocketMatrix = pDesc->pSocketMatrix;
 
@@ -38,7 +38,10 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 
-	m_ShaderPaths.resize(SHADERPATH::END);
+	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+
+
+
 	return S_OK;
 }
 
@@ -62,8 +65,11 @@ void CLevi_Bow::Update(_float fTimeDelta)
 	_vector vScale, vQuaternion, vTransition;
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
+	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
+	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
+
+	m_pModelCom->Play_Animation_CPU("Stand2_Ex", fTimeDelta, nullptr, false, false, false, false);
 }
 
 void CLevi_Bow::Late_Update(_float fTimeDelta)
@@ -96,6 +102,8 @@ void CLevi_Bow::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
+		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
+
 		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
 			CRASH("Ready Shader Begin Failed");
 
@@ -104,6 +112,11 @@ void CLevi_Bow::Render()
 
 		m_pShaderCom->UndBind_All_VS_SRV();
 	}
+#ifdef _DEBUG
+	_float4 temp{};
+	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
+#endif // _DEBUG
+
 }
 
 HRESULT CLevi_Bow::Bind_Resources()
@@ -120,15 +133,15 @@ HRESULT CLevi_Bow::Bind_Resources()
 	return S_OK;
 }
 
-void CLevi_Bow::Ready_Component(LEVIBAYONET_DESC* pDesc)
+void CLevi_Bow::Ready_Component(LEVIBOW_DESC* pDesc)
 {
 	// 1. Components
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
-		, TEXT("Prototype_Component_Shader_MonsterProp"), TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("Shader");
 
 	if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel()
-		, TEXT("Prototype_Component_Model_Leviatan_Bayonet"), TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		, TEXT("Prototype_Component_Model_Leviatan_Bow"), TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
 }
 

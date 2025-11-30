@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Levi_Alter.h"
 #include "Levi_Bayonet.h"
+#include "Levi_Bow.h"
 
 CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -22,7 +23,20 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-    return S_OK;
+	ALTER_DESC* pDesc = static_cast<ALTER_DESC*>(pArg);
+	m_fAttackDmg = pDesc->fAttackDmg;
+
+	Ready_Component(pDesc);
+	Ready_PartObject(pDesc);
+	m_Tracks.emplace(make_pair("Attack18", make_pair(0.f, 195.f)));
+	m_Tracks.emplace(make_pair("Attack19", make_pair(0.f, 195.f)));
+	m_Tracks.emplace(make_pair("Attack_20|1", make_pair(30.f, 49.f)));
+	m_Tracks.emplace(make_pair("Attack_20|2", make_pair(60.f, 72.f)));
+	m_Tracks.emplace(make_pair("Attack_20|3", make_pair(120.f, 138.f)));
+	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12, 50)));
+	m_isActivate = false;
+	m_vBaseColor = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	return S_OK;
 }
 
 void CLevi_Alter::Priority_Update(_float fTimeDelta)
@@ -48,7 +62,12 @@ void CLevi_Alter::Update(_float fTimeDelta)
 	_float fTrackPos{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta, &fTrackPos, true, false, true, 1.f);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-
+	if (fTrackPos >= m_Tracks[m_strPatternKey].second)
+	{
+		Reset_NotifyInteraction();
+		UnActive_Resources();
+		return;
+	}
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if (m_isDist_Interp_Enable)
 	{
@@ -71,7 +90,9 @@ void CLevi_Alter::Update(_float fTimeDelta)
 void CLevi_Alter::Late_Update(_float fTimeDelta)
 {
 	m_pColliderCom->Sync_Position(m_pTransformCom);
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) return;
+
 	for (auto& Pair : m_PartObjects)
 	{
 		if (Pair.second->IsActivate())
@@ -109,9 +130,6 @@ void CLevi_Alter::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
 			CRASH("Ready g_HasSkinMask Failed");
 
-		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
-			CRASH("Bind Morph Result Failed");
-
 		m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
@@ -143,20 +161,32 @@ void CLevi_Alter::Render_Shadow()
 void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	ALTER_RESET* pDesc = static_cast<ALTER_RESET*>(pArg);
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
-	m_pTransformCom->LookAt_KeepUp(XMVectorSetW(XMLoadFloat3(&pDesc->vLookAt),1.f));
-	m_strAnimKey = pDesc->strPatternKey;
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_strPatternKey = pDesc->strPatternKey;
+	size_t Index = pDesc->strPatternKey.find("|");
+	_string wstrAnimTag = pDesc->strPatternKey.substr(0, Index);
+	_string wstrTypeTag = pDesc->strPatternKey.substr(Index + 1);
+	m_strAnimKey = wstrAnimTag;
 	//m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
-	m_pModelCom->Set_TrackPosition(m_strAnimKey, m_Tracks[m_strAnimKey].first);
+	if(Index == pDesc->strPatternKey.npos)
+		m_pModelCom->Set_TrackPosition(m_strAnimKey, m_Tracks[m_strAnimKey].first);
+	else
+	{
+		m_pModelCom->Set_TrackPosition(m_strAnimKey, m_Tracks[m_strPatternKey].first);
+	}
 	if (pDesc->eType == ATTACK_TYPE::SWORD)
 	{
-
+		CLevi_Bayonet* pWeapon = dynamic_cast<CLevi_Bayonet*>(m_PartObjects[TEXT("Part_Bayonet")]);
+		pWeapon->SetActivate(true);
 	}
 	else if (pDesc->eType == ATTACK_TYPE::BOW)
 	{
-
+		m_PartObjects[TEXT("Part_Bow")]->SetActivate(true);
 	}
+	m_pColliderCom->Set_Gravity(false);
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_isActivate = true;
 }
 
 void CLevi_Alter::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
@@ -229,6 +259,7 @@ void CLevi_Alter::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
 }
 
 void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
@@ -280,11 +311,34 @@ void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
-	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA));
 }
 
 void CLevi_Alter::Ready_PartObject(ALTER_DESC* pDesc)
 {
+	CLevi_Bayonet::LEVIBAYONET_DESC BayonetDesc{};
+	BayonetDesc.eType = TEXT_COLOR_TYPE::DARK;
+	BayonetDesc.fAttackDmg = m_fAttackDmg;
+	BayonetDesc.pParentTransform = m_pTransformCom;
+	BayonetDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+	BayonetDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	BayonetDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bayonet"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"), &BayonetDesc)))
+		CRASH("Failed to Add Part : Bayonet");
+	m_PartObjects[TEXT("Part_Bayonet")]->SetActivate(false);
+
+	CLevi_Bow::LEVIBOW_DESC BowDesc{};
+	BowDesc.fAttackDmg = m_fAttackDmg;
+	BowDesc.pParentTransform = m_pTransformCom;
+	BowDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	BowDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	BowDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(-90.f), XMConvertToRadians(0.f));
+
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bow"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bow"), &BowDesc)))
+		CRASH("Failed to Add Part : Bow");
+
+	m_PartObjects[TEXT("Part_Bow")]->SetActivate(false);
 }
 
 void CLevi_Alter::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -311,6 +365,7 @@ void CLevi_Alter::UnActive_Resources()
 		Pair.second->SetActivate(false);
 		Pair.second->Reset(XMMatrixIdentity(), nullptr);
 	}
+	m_isActivate = false;
 }
 
 void CLevi_Alter::Reset_NotifyInteraction()

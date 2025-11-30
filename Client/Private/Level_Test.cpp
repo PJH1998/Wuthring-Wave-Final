@@ -12,6 +12,7 @@
 #include "Corosaurus.h"
 #include "PatternDummy.h"
 #include "Leviatan.h"
+#include "Levi_Alter.h"
 #pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
@@ -495,7 +496,23 @@ void CLevel_Test::Ready_Leviatan()
 	MobDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &MobDesc)))
-		CRASH("Failed Ready MonsterTest");
+		CRASH("Failed Ready Leviatan");
+
+	CLevi_Alter::ALTER_DESC AlterDesc{};
+	AlterDesc.eCurLevel = m_eCurLevel;
+	AlterDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	AlterDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	AlterDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Levi_Alter"));
+	AlterDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	AlterDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	AlterDesc.fSpeedPerSec = 10.f;
+	AlterDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
+	AlterDesc.fAttackDmg = pInfo->fAttack;
+	AlterDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Alter"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviAlter"), 8, &AlterDesc)))
+		CRASH("Failed Ready Alter");
 }
 
 void CLevel_Test::Ready_UI()

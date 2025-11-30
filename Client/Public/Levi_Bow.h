@@ -11,13 +11,13 @@ NS_BEGIN(Client)
 class CLevi_Bow final : public CPartObject
 {
 public:
-	typedef struct tagLeviBayynet : public CPartObject::PART_DESC
+	typedef struct tagLeviBow : public CPartObject::PART_DESC
 	{
 		const _float4x4* pSocketMatrix;
 		_float3 vOffsetPos;
 		_float3 vOffsetRadian;
 		_float fAttackDmg;
-	}LEVIBAYONET_DESC;
+	}LEVIBOW_DESC;
 
 private:
 	enum SHADERPATH{ BASE, BAOSHI, SUISHI, LINE, END };
@@ -30,10 +30,12 @@ private:
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
 	virtual	HRESULT	Initialize_Clone(void* pArg) override;
-	virtual	void Priority_Update(_float fTimeDelta) override;
-	virtual	void Update(_float fTimeDelta) override;
-	virtual	void Late_Update(_float fTimeDelta) override;
-	virtual	void Render() override;
+	virtual	void	Priority_Update(_float fTimeDelta) override;
+	virtual	void	Update(_float fTimeDelta) override;
+	virtual	void	Late_Update(_float fTimeDelta) override;
+	virtual	void	Render() override;
+
+	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg) {};
 
 private:
 	CShader* m_pShaderCom = { nullptr };
@@ -52,7 +54,7 @@ private:
 
 private:
 	HRESULT Bind_Resources();
-	void Ready_Component(LEVIBAYONET_DESC* pDesc);
+	void Ready_Component(LEVIBOW_DESC* pDesc);
 	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 public:
 	static CLevi_Bow* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
