@@ -979,13 +979,13 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
 
@@ -1460,7 +1460,8 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 		NameCheck(ModelName, "Cru_Bui_42") ||
 		NameCheck(ModelName, "Cru_Bui_11BH"))
 		*pShaderIndex = 17;
-	else if(NameCheck(ModelName, "SM_Sev_Bui_02"))
+	else if(NameCheck(ModelName, "SM_Sev_Bui_02")||
+		NameCheck(ModelName, "Lig_04AS"))
 		*pShaderIndex = 0;
 	else if(NameCheck(ModelName, "Lig_") && ModelName.find("11BS") == string::npos)
 		*pShaderIndex = 4;
