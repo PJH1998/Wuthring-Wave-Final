@@ -121,7 +121,7 @@ HRESULT CLevel_Effect::Initialize()
 	m_pMap_Interface = CMap_Interface::Create(m_pDevice, m_pContext);
 
 
-	//Ready_Map("../../Client/Bin/Resource/Map/MapData/Effect_Map/");
+	Ready_Map("../../Client/Bin/Resource/Map/MapData/Effect_Map/");
 
 
 	LIGHT_DESC LightDesc{};
