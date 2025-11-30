@@ -159,26 +159,29 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	}
 }
 
-void CLevi_Alter::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
+void CLevi_Alter::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
 	size_t Index = wStrColliderTag.find(TEXT("|"));
 	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
 	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
 	if (wstrTypeTag == TEXT("Attack"))
 	{
-
+		if (wstrPartTag == TEXT("Sword"))
+		{
+			dynamic_cast<CLevi_Bayonet*>(m_PartObjects[TEXT("Part_Bayonet")])->Attack_Active(IsActive);
+		}
 	}
 	else if (wstrTypeTag == TEXT("Gravity"))
 	{
-		m_pColliderCom->Set_Gravity(Isactive);
+		m_pColliderCom->Set_Gravity(IsActive);
 	}
 	else if (wstrTypeTag == TEXT("Lerp"))
 	{
-		m_isTurnLerp = Isactive;
+		m_isTurnLerp = IsActive;
 	}
 	else if (wstrTypeTag == TEXT("Distance"))
 	{
-		m_isDist_Interp_Enable = Isactive;
+		m_isDist_Interp_Enable = IsActive;
 	}
 }
 
@@ -211,10 +214,14 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(0.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
 	}
-	//else if (wstrTypeTag == TEXT("Reset"))
-	//{
-	//	Reset_NotifyInteraction();
-	//}
+	else if (wstrTypeTag == TEXT("Ray"))
+	{
+		
+	}
+	else if (wstrTypeTag == TEXT("Reset"))
+	{
+		Reset_NotifyInteraction();
+	}
 }
 
 void CLevi_Alter::Bind_Resources()
@@ -248,7 +255,7 @@ void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
-	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ALTER);
 	ColliderDesc.fHeight = 1.8f;
 	ColliderDesc.fRadius = 0.4f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
@@ -304,6 +311,14 @@ void CLevi_Alter::UnActive_Resources()
 		Pair.second->SetActivate(false);
 		Pair.second->Reset(XMMatrixIdentity(), nullptr);
 	}
+}
+
+void CLevi_Alter::Reset_NotifyInteraction()
+{
+	m_isTurnLerp = false;
+	m_isDist_Interp_Enable = false;
+
+	m_pColliderCom->Set_Gravity(true);
 }
 
 CLevi_Alter* CLevi_Alter::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
