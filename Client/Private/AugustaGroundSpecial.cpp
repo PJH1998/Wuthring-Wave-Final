@@ -54,6 +54,8 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
+
+	m_pAugusta->Set_OutLineVisible(false);
 }
 
 void CAugustaGroundSpecial::OnUpdate(_float fTimeDelta)
@@ -93,6 +95,8 @@ void CAugustaGroundSpecial::OnExit()
 
 	// 공격 콜라이더 비활성화
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
+
+	m_pAugusta->Set_OutLineVisible(true);
 
 }
 

@@ -7,6 +7,7 @@ Texture2D g_NormalTexture;
 
 bool g_HasNormal = false;
 float g_fRatio = 0.f;
+float4 g_vBaseColor = 1.f;
 
 struct VS_IN
 {
@@ -98,7 +99,7 @@ PS_OUT PS_MAIN(PS_IN In)
         vNormal = vNormal * 0.5f + 0.5f;
     }
     
-    Out.vDiffuse = vDiffuse;
+    Out.vDiffuse = vDiffuse * g_vBaseColor;
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;

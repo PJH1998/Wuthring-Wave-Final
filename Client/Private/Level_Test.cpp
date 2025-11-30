@@ -25,6 +25,7 @@
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_GrafflePoint.h"
+#include "UI_QTE.h"
 
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
@@ -69,10 +70,10 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();mm
 	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
+	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -514,9 +515,9 @@ void CLevel_Test::Ready_UI()
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
-	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tTimedTextDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tTimedTextDesc)))
 		CRASH("Failed Ready Text_Damage");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
@@ -542,6 +543,11 @@ void CLevel_Test::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
 		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
 		CRASH("Failed Ready GrafflePoint");
+
+	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
+		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
+		CRASH("Failed Ready QTE");
 
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
@@ -931,7 +937,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [NUMPAD 0] KSTA_UITEST_GRAFFLEPOINT
+#pragma region [INSTANT] KSTA_UITEST_GRAFFLEPOINT
 
 	static _bool isInitialized_GrafflePoint = false;
 
@@ -948,6 +954,22 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	}
 
 #pragma endregion
+
+#pragma region  [NUMPAD 0] KSTA_UITEST_QTE
+	static _bool isQTETrigger = false;
+
+	if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE);
+		isQTETrigger = !isQTETrigger;
+	}
+	else if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER, UI_QTE_BTN::F);
+		isQTETrigger = !isQTETrigger;
+	}
+#pragma endregion
+
 
 }
 

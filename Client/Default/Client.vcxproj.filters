@@ -1042,7 +1042,6 @@
     <ClInclude Include="..\Public\CaptureState.h">
       <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
@@ -1054,6 +1053,21 @@
     </ClInclude>
     <ClInclude Include="..\Public\Levi_Bow.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaCapture.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaCapture.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverCapture.h">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Levi_Alter.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Levi_Ray.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Ray</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1647,7 +1661,6 @@
     <ClCompile Include="..\Private\CaptureState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Capture</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
@@ -1659,6 +1672,21 @@
     </ClCompile>
     <ClCompile Include="..\Private\Levi_Bow.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Bow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaCapture.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaCapture.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverCapture.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Alter.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Ray.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Ray</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

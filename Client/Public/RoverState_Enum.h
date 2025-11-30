@@ -62,6 +62,12 @@ enum class ERoverInteractionState : _uint
 	INTERACTION_END
 };
 
+enum class ERoverCaptureState : _uint
+{
+	CAPTURE = 0,
+	CAPTURE_END
+};
+
 #pragma endregion
 
 #pragma region DEPTH2
@@ -375,6 +381,21 @@ enum class ERoverRopeDragType : _uint
 	DRAG_START_D,
 	DRAG_START_F,
 	DRAG_START_U,
+	END
+};
+#pragma endregion
+
+#pragma region CAPTURED
+
+enum class ERoverCaptureType : _uint
+{
+	CAPTURED = 0,
+	BEHIT_PUSH_LOOP,
+	BEHIT_FLY_START,
+	BEHIT_FLY_LOOP,
+	BEHIT_FLY_FALL,
+	BEHIT_PUSH_FALL,
+	BEHIT_PUSH_START,
 	END
 };
 #pragma endregion

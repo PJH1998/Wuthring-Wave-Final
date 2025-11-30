@@ -165,7 +165,7 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 애니메이션 끝나면?
 	if (m_IsAnimationEnd)
 	{
-		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
+		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
 		return;
 	}
