@@ -422,9 +422,9 @@ void CModel_Manager::LoadLastLOD()
 		//Data의 Data.LoadData 개수가 메쉬의 개수.
 		vector< SHARED_DATA_DESC>* pData = Data.pModel->Get_MeshDesc(Data.iLODIndex);
 		pData->clear();
-		for (_uint i = 0; i < Data.LoadData.size(); ++i)
+		for (_uint i = 0; i < static_cast<_uint>(Data.LoadData.size()); ++i)
 		{
-			_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
+			_uint VertexSize = static_cast<_uint>(Data.LoadData[i].VertexData.size()) * sizeof(VTXMESH);
 			_uint VertexOffset = m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
 
 			if (VertexOffset == -1)
@@ -442,7 +442,7 @@ void CModel_Manager::LoadLastLOD()
 			m_pContext->UpdateSubresource(m_pBufferPool[Data.iLODIndex]->Get_VertexBuffer(), 0, &PoolBox, Data.LoadData[i].VertexData.data(), 0, 0);
 
 
-			_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
+			_uint IndexSize = static_cast<_uint>(Data.LoadData[i].IndexData.size()) * sizeof(_uint);
 			_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
 			if (IndexOffSet == -1)
