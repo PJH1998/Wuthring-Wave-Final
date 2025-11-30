@@ -164,7 +164,7 @@ void CRoverGroundQTE::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundQTE::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverQTEType::SKILL_QTE), "SkillQte", 1.f, 60.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverQTEType::SKILL_QTE), "SkillQte", 1.5f, 60.f);
 }
 
 void CRoverGroundQTE::State_Reset()

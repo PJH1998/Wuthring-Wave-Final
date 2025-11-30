@@ -344,7 +344,7 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 	{
 		case CHARACTER_TRANSITIONTYPE::IDLE:
 		{
-			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
+			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 			break;
 		}
@@ -361,7 +361,7 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 			m_pColliderCom->Set_Position(vPos);
 			m_pColliderCom->IsActivate(true);
 
-			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 
 			GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));

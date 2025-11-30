@@ -163,7 +163,7 @@ void CGalbrenaGroundQTE::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundQTE::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaQTEType::SKILL_QTE), "Attack07", 1.f, 100.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaQTEType::SKILL_QTE), "Attack07", 1.5f, 100.f);
 }
 
 void CGalbrenaGroundQTE::State_Reset()
