@@ -446,6 +446,17 @@ void CGameSystem::Register_Player(CPlayer* pPlayer)
 	m_pPlayer = pPlayer;
 	Safe_AddRef(m_pPlayer);
 }
+
+_vector CGameSystem::Get_PlayerLookVector()
+{
+	return m_pPlayer->Get_LookVector();
+}
+_vector CGameSystem::Get_PlayerPosition()
+{
+	return m_pPlayer->Get_Position();
+}
+
+
 #pragma endregion
 
 

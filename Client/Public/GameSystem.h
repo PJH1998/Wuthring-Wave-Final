@@ -181,6 +181,8 @@ public:
 
 #pragma region PLAYER
 	void						Register_Player(class CPlayer* pPlayer);
+	_vector						Get_PlayerLookVector();
+	_vector						Get_PlayerPosition();
 #pragma endregion
 
 

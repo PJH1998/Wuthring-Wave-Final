@@ -58,7 +58,8 @@ private:
 	_float				m_fCamDirDegree			= 0;
 	_float				m_fPlayerDirDegree		= 0;
 	
-	
+	vector<_float3>		m_vecTmpRelativeObjects = {};
+	vector<_float2>		m_vecTmpCacledRelativeObjects = {};
 	
 	class CGameSystem*	m_pGameSystem		= { nullptr };
 

@@ -2,6 +2,7 @@
 #include "Animator_UI.h"
 #include "UI_HUD_Sector_Minimap.h"
 #include "GameSystem.h"
+#include "PlayerStatus.h"
 
 CUI_HUD_Sector_Minimap::CUI_HUD_Sector_Minimap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CCustom_UI(pDevice, pContext)
@@ -111,6 +112,10 @@ void CUI_HUD_Sector_Minimap::PreAssign_ChildUIs()
 
 void CUI_HUD_Sector_Minimap::PreAssign_Presets()
 {
+	m_vecTmpCacledRelativeObjects.reserve(16);
+	m_vecTmpRelativeObjects.reserve(16);
+
+	m_vecTmpRelativeObjects.push_back(_float3(0.f, -10.f, 0.f));
 }
 
 void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
@@ -130,24 +135,30 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 	
 	m_fCamDirDegree = camDegreeByY;
 
-	//std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
+	std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
 
-	//_vector vPlayerLook = m_pGameSystem->Get_PlayerLook();
-	//vPlayerLook = XMVector3Normalize(vPlayerLook);
-	//_float fPlayerLookDirX = XMVectorGetX(vPlayerLook);
-	//_float fPlayerLookDirZ = XMVectorGetZ(vPlayerLook);
-	//
-	//_float fPlayerDegreeByY = (360.f - RadiansToDegrees(atan2f(fPlayerLookDirX, fPlayerLookDirZ)));				// 사잇각의 degree 화 및 -+ 데이터 포함. 그냥 acos는 -+ 정보포함X
-	//if (fPlayerDegreeByY >= 360.f)	fPlayerDegreeByY = fPlayerDegreeByY - 360.f;
-	//if (fPlayerDegreeByY < 0.f)		fPlayerDegreeByY = fPlayerDegreeByY + 360.f;
+	_vector vPlayerLook = m_pGameSystem->Get_PlayerLookVector();
+	vPlayerLook = XMVector3Normalize(vPlayerLook);
+	_float fPlayerLookDirX = XMVectorGetX(vPlayerLook);
+	_float fPlayerLookDirZ = XMVectorGetZ(vPlayerLook);
+	
+	_float fPlayerDegreeByY = (360.f - RadiansToDegrees(atan2f(fPlayerLookDirX, fPlayerLookDirZ)));				// 사잇각의 degree 화 및 -+ 데이터 포함. 그냥 acos는 -+ 정보포함X
+	if (fPlayerDegreeByY >= 360.f)	fPlayerDegreeByY = fPlayerDegreeByY - 360.f;
+	if (fPlayerDegreeByY < 0.f)		fPlayerDegreeByY = fPlayerDegreeByY + 360.f;
 
 	// 이후 플레이어 방향 정보 가져올 수 있게 된다면 그에 맞게 회전값 적용
-	m_fPlayerDirDegree = camDegreeByY;
+	m_fPlayerDirDegree = fPlayerDegreeByY;
 }
 
 void CUI_HUD_Sector_Minimap::Update_RelativePos()
 {
-	// ㅁ?ㄹ
+	for (auto objectPos : m_vecTmpRelativeObjects)
+		m_vecTmpCacledRelativeObjects.push_back(Calc_RelativePos(&objectPos, 0.01f));
+
+	
+
+
+	m_vecTmpCacledRelativeObjects.clear();
 }
 
 void CUI_HUD_Sector_Minimap::Update_Instances()
