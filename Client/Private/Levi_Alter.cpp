@@ -68,7 +68,7 @@ void CLevi_Alter::Update(_float fTimeDelta)
 		UnActive_Resources();
 		return;
 	}
-	if(m_eType == ATTACK_TYPE::SWORD)
+	//if(m_eType == ATTACK_TYPE::SWORD)
 	{
 		_vector vVelocity = m_pTransformCom->Get_Velocity();
 		if (m_isDist_Interp_Enable)
@@ -79,8 +79,8 @@ void CLevi_Alter::Update(_float fTimeDelta)
 		else
 			m_pColliderCom->Update(vVelocity / fTimeDelta);
 	}
-	else if(m_eType == ATTACK_TYPE::BOW)
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	//else if(m_eType == ATTACK_TYPE::BOW)
+	//	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 

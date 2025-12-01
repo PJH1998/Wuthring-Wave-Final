@@ -907,22 +907,22 @@ HRESULT CLoader_Heaven::Load_Leviatan()
 		CRASH("Prototype Create Failed");
 
 	// Prototype_Component_BehaviorTree_Leviatan1
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Leviatan1"),
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_BehaviorTree_Leviatan1"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan_BT.json"))))
 		CRASH("BehaviorTree Create Failed");
 
 	// Prototype_Component_AnimMachine_Leviatan_Phase1
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase1"),
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase1"),
 		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Animation/Leviatan_StateMachine.json"))))
 		CRASH("Monster AnimMachine Create Failed");
 
 	// Prototype_Component_BehaviorTree_Leviatan2
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Leviatan2"),
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_BehaviorTree_Leviatan2"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan_BT2.json"))))
 		CRASH("BehaviorTree Create Failed");
 
 	// Prototype_Component_AnimMachine_Leviatan_Phase2
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase2"),
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase2"),
 		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Animation/Leviatan_StateMachine2.json"))))
 		CRASH("Monster AnimMachine Create Failed");
 
