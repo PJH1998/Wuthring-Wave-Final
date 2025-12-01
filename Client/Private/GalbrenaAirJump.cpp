@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GalbrenaState_Enum.h"
 
-HRESULT CGalbrenaAirJump::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaAirJump::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -179,7 +179,7 @@ void CGalbrenaAirJump::Setup_Animations()
 
 
 
-CGalbrenaAirJump* CGalbrenaAirJump::Create(class CGameObject* pOwner)
+CGalbrenaAirJump* CGalbrenaAirJump::Create(CCharacter* pOwner)
 {
     CGalbrenaAirJump* pInstance = new CGalbrenaAirJump();
 

@@ -3,12 +3,12 @@
 #include "Augusta.h"
 #include "StateMachine.h"
 
-HRESULT CAugustaGroundSkill::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundSkill::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -121,9 +121,12 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 		{
 			_string strBoneName = "WeaponProp05"; 
 			m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON; 
+			m_iSubPartType = CAugusta::PARTTYPE::PART_FXOBJECT;
 			m_pAugusta->PartActivate(m_iPartType, true);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 			m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+
+			m_pAugusta->PartActivate(m_iSubPartType, true);
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
@@ -178,6 +181,7 @@ void CAugustaGroundSkill::OnExit()
     
 
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
 	/* 컨디션 제거*/
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
@@ -228,6 +232,17 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 	{
 		m_pAugusta->Play_PartAnimation(
 			m_iPartType,
+			m_Animations[m_iCurrentAnimIdx].strAnimName,
+			fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
+		);
+	}
+
+	if (m_iSubPartType == CAugusta::PARTTYPE::PART_FXOBJECT)
+	{
+
+		cout << "Skill TrackPosition : " << m_fTrackPosition;
+		m_pAugusta->Play_PartAnimation(
+			m_iSubPartType,
 			m_Animations[m_iCurrentAnimIdx].strAnimName,
 			fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
 		);
@@ -438,7 +453,7 @@ void CAugustaGroundSkill::Handle_Animation_SpecialState()
 }
 
 
-CAugustaGroundSkill* CAugustaGroundSkill::Create(class CGameObject* pOwner)
+CAugustaGroundSkill* CAugustaGroundSkill::Create(CCharacter* pOwner)
 {
     CAugustaGroundSkill* pInstance = new CAugustaGroundSkill();
 

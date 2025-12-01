@@ -2,7 +2,7 @@
 #include "HitState.h"
 #include "StateMachine.h"
 
-HRESULT CHitState::Initialize(class CGameObject* pOwner)
+HRESULT CHitState::Initialize(CCharacter* pOwner)
 {
     if (FAILED(CCharacterState::Initialize(pOwner)))
         return E_FAIL;

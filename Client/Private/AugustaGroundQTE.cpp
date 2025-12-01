@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-HRESULT CAugustaGroundQTE::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundQTE::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -196,7 +196,7 @@ void CAugustaGroundQTE::State_Reset()
 
 
 
-CAugustaGroundQTE* CAugustaGroundQTE::Create(class CGameObject* pOwner)
+CAugustaGroundQTE* CAugustaGroundQTE::Create(CCharacter* pOwner)
 {
     CAugustaGroundQTE* pInstance = new CAugustaGroundQTE();
 

@@ -11,7 +11,7 @@ protected:
     virtual ~CHitState() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(CCharacter* pOwner);
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;

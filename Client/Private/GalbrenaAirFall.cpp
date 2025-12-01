@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GalbrenaState_Enum.h"
 
-HRESULT CGalbrenaAirFall::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaAirFall::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -155,7 +155,7 @@ void CGalbrenaAirFall::State_Reset()
 
 
 
-CGalbrenaAirFall* CGalbrenaAirFall::Create(class CGameObject* pOwner)
+CGalbrenaAirFall* CGalbrenaAirFall::Create(CCharacter* pOwner)
 {
     CGalbrenaAirFall* pInstance = new CGalbrenaAirFall();
 

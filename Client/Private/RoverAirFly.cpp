@@ -3,12 +3,12 @@
 #include "Rover.h"
 #include "StateMachine.h"
 
-HRESULT CRoverAirFly::Initialize(class CGameObject* pOwner)
+HRESULT CRoverAirFly::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     // 애니메이션 리스트 셋업.
@@ -398,7 +398,7 @@ void CRoverAirFly::State_Reset()
         m_States[i] = false;
 }
 
-CRoverAirFly* CRoverAirFly::Create(class CGameObject* pOwner)
+CRoverAirFly* CRoverAirFly::Create(CCharacter* pOwner)
 {
     CRoverAirFly* pInstance = new CRoverAirFly();
 

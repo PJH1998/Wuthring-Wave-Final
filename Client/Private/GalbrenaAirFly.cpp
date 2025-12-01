@@ -3,12 +3,12 @@
 #include "Galbrena.h"
 #include "StateMachine.h"
 
-HRESULT CGalbrenaAirFly::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaAirFly::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -398,7 +398,7 @@ void CGalbrenaAirFly::State_Reset()
         m_States[i] = false;
 }
 
-CGalbrenaAirFly* CGalbrenaAirFly::Create(class CGameObject* pOwner)
+CGalbrenaAirFly* CGalbrenaAirFly::Create(CCharacter* pOwner)
 {
     CGalbrenaAirFly* pInstance = new CGalbrenaAirFly();
 

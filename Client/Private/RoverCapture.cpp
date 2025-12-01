@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
-HRESULT CRoverCapture::Initialize(CGameObject* pOwner)
+HRESULT CRoverCapture::Initialize(CCharacter* pCharacter)
 {
-	if (FAILED(CCaptureState::Initialize(pOwner)))
+	if (FAILED(CCaptureState::Initialize(pCharacter)))
 		return E_FAIL;
 
-	m_pRover = dynamic_cast<CRover*>(pOwner);
+	m_pRover = dynamic_cast<CRover*>(pCharacter);
 	ASSERT_CRASH(m_pRover);
 
 	// 1. 애니메이션 설정
@@ -139,7 +139,7 @@ void CRoverCapture::State_Reset()
 		m_States[i] = false;
 }
 
-CRoverCapture* CRoverCapture::Create(CGameObject* pOwner)
+CRoverCapture* CRoverCapture::Create(CCharacter* pOwner)
 {
 	CRoverCapture* pInstance = new CRoverCapture();
 

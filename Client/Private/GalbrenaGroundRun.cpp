@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GalbrenaState_Enum.h"
 
-HRESULT CGalbrenaGroundRun::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundRun::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -395,7 +395,7 @@ void CGalbrenaGroundRun::State_Reset()
 
 
 
-CGalbrenaGroundRun* CGalbrenaGroundRun::Create(class CGameObject* pOwner)
+CGalbrenaGroundRun* CGalbrenaGroundRun::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundRun* pInstance = new CGalbrenaGroundRun();
 

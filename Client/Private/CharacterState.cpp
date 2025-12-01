@@ -2,14 +2,15 @@
 #include "CharacterState.h"
 #include "Character.h"
 
-HRESULT CCharacterState::Initialize(class CGameObject* pOwner)
+HRESULT CCharacterState::Initialize(class CCharacter* pOwner)
 {
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::W);
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::A);
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::S);
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::D);
 
-
+	m_pOwner = pOwner;
+	
 
     return S_OK;
 }
@@ -33,6 +34,10 @@ void CCharacterState::OnExit()
 {
 	m_IsPartAnimationEnd = false; //
 	m_IsSubPartAnimationEnd = false; //
+
+	// 현재 애니메이션을 Cleaar한다.
+	if (nullptr != m_pOwner)
+		m_pOwner->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 }
 
 _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate)

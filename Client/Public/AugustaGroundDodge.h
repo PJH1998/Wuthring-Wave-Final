@@ -25,7 +25,7 @@ private:
     virtual ~CAugustaGroundDodge() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(class CCharacter* pCharacter) override;
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
@@ -42,7 +42,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundDodge* Create(class CGameObject* pOwner);
+    static CAugustaGroundDodge* Create(class CCharacter* pOwner);
     virtual void Free() override;
 };
 
