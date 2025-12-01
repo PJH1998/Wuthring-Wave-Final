@@ -1183,6 +1183,15 @@ void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& Re
 	if (RectJson.contains("Loop"))
 		Desc.IsLoop = RectJson["Loop"].get<_bool>();
 
+	if (RectJson.contains("Sprite"))
+		Desc.IsSprite = RectJson["Sprite"].get<_bool>();
+
+	if (RectJson.contains("Row"))
+		Desc.iRows = RectJson["Row"].get<_int>();
+
+	if (RectJson.contains("Col"))
+		Desc.iCols = RectJson["Col"].get<_int>();
+
 	if (RectJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(RectJson["TextureTag"].get<_string>());
 
