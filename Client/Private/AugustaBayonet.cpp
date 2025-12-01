@@ -38,6 +38,8 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
 	Ready_AttackVolumes();
 
 	m_fMaxDissolveTime = 0.35f;
+	m_vDissolveColor = { 1.f, 0.2f, 0.1f, 1.f };
+
     return S_OK;
 }
 
@@ -45,8 +47,7 @@ void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 	
-	// 2. Dissolve 체크.
-
+	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 
 	if (IsDissolve)
@@ -138,6 +139,9 @@ void CAugustaBayonet::Render()
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
         //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
         //    CRASH("Ready Shader Begin Failed");
         if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
@@ -173,7 +177,7 @@ void CAugustaBayonet::Activate(_bool IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
-		Bind_DissolveTimer();
+		Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_AUGUSTAWEAPON));
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 	}
 }

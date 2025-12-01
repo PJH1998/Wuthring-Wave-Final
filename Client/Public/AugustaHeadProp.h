@@ -23,10 +23,13 @@ public:
 	virtual	void Render() override;
 
 
-
 public:
 	virtual void Activate(_bool IsActivate) override;
 
+private:
+	// Shader 변수
+	_float  m_fTime = { };
+	_float2 m_vScrollSpeed = {}; // x, y
 
 
 

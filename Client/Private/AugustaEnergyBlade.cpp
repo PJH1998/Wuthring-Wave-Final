@@ -38,20 +38,41 @@ HRESULT CAugustaEnergyBlade::Initialize_Clone(void* pArg)
 
 	m_fTime = 0.f;
 	m_vScrollSpeed = { 1.f, 0.f };
-	m_vEnergyColor = { 0.3f, 0.1f, 0.05f, 1.0f };
-	m_fEnergyIntensity = 3.f;
+	m_vEmissiveColor = { 0.3f, 0.1f, 0.05f, 1.0f };
+	m_fEmissiveIntensity = 3.f;
+	m_vDissolveColor = { 1.f, 0.15f, 0.03f, 1.f };
+
+	m_fMaxDissolveTime = 0.35f;
+
+	m_isActivate = false;
 
     return S_OK;
 }
 
 void CAugustaEnergyBlade::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
     CProp::Priority_Update(fTimeDelta);
 
 	m_fTime += fTimeDelta;
 
-	if (m_IsAnimationEnd)
-		m_isActivate = false;
+	// Dissolve 체크.
+	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Prop_Reset();
+		}
+	}
 
 #ifdef _DEBUG
 
@@ -62,7 +83,14 @@ void CAugustaEnergyBlade::Priority_Update(_float fTimeDelta)
 
 void CAugustaEnergyBlade::Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
     CProp::Update(fTimeDelta);
+
+	
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 
     // Augusta StateMachine
 	_matrix matParentWorld = XMMatrixIdentity();
@@ -73,13 +101,15 @@ void CAugustaEnergyBlade::Update(_float fTimeDelta)
 		matParentWorld = m_pParentTransform->Get_WorldMatrix();
 	//matParentWorld = m_pParentTransform->Get_WorldMatrix();
 
-	
-
 	// Last :  Combined 
-	XMStoreFloat4x4(&m_CombinedMatrix,
-		m_pTransformCom->Get_WorldMatrix() *
-		XMLoadFloat4x4(m_pSocketMatrix) *
-		matParentWorld);
+	if (!IsDissolve)
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			XMLoadFloat4x4(m_pSocketMatrix) *
+			matParentWorld);
+	}
+	
 
     _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 
@@ -87,8 +117,10 @@ void CAugustaEnergyBlade::Update(_float fTimeDelta)
 
 void CAugustaEnergyBlade::Late_Update(_float fTimeDelta)
 {
-    CProp::Late_Update(fTimeDelta);
+	if (!m_isActivate)
+		return;
 
+    CProp::Late_Update(fTimeDelta);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -102,6 +134,16 @@ void CAugustaEnergyBlade::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+	}
+
     for (_uint i = 0; i < iNumMeshes; i++)
     {
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
@@ -116,7 +158,10 @@ void CAugustaEnergyBlade::Render()
 			CRASH("Ready g_HasNormal Failed");
 
 		
-		if (FAILED(m_pShaderCom->Bind_Value("g_vEnergyColor", &m_vEnergyColor, sizeof(_float4))))
+		if (FAILED(m_pShaderCom->Bind_Value("g_vEmissiveColor", &m_vEmissiveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
 			CRASH("Ready EnergyColor");
 
 		if (FAILED(m_pShaderCom->Bind_Value("g_fTime", &m_fTime, sizeof(_float))))
@@ -125,8 +170,10 @@ void CAugustaEnergyBlade::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_vScrollSpeed", &m_vScrollSpeed, sizeof(_float2))))
 			CRASH("Ready EnergyColor"); 
 
-		if (FAILED(m_pShaderCom->Bind_Value("g_fEnergyIntensity", &m_fEnergyIntensity, sizeof(_float))))
+		if (FAILED(m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &m_fEmissiveIntensity, sizeof(_float))))
 			CRASH("Ready EnergyColor");
+
+		
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -144,19 +191,38 @@ void CAugustaEnergyBlade::Render()
 
 void CAugustaEnergyBlade::Activate(_bool IsActivate)
 {
-    SetActivate(IsActivate);
+ //   SetActivate(IsActivate);
 
-	//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+	////m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+
+	//PREFAB_INFO effecInfo{};
+	//effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	//effecInfo.pModelPtr = m_pModelCom;
+
+	//if (false == IsActivate)
+	//{
+	//	m_fTime = 0.f;
+	//	_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+	//	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+	//}
+
+	m_pModelCom->Clear_Animation(m_strCurrentAnimName);
 
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	effecInfo.pModelPtr = m_pModelCom;
 
+	if (true == IsActivate)
+	{
+		Prop_Reset();
+		m_isActivate = IsActivate;
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::ENERGY_BLADE);
+	}
 	if (false == IsActivate)
 	{
-		m_fTime = 0.f;
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_AUGUSTAWEAPON));
 	}
 }
 
