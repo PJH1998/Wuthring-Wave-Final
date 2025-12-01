@@ -11,7 +11,7 @@ protected:
     virtual ~CCharacterState() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(class CCharacter* pOwner);
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
@@ -39,7 +39,7 @@ protected:
 	_float m_fAnimationScale = { 1.f }; // 거리에 따른 루트모션 비율. * (원본 애니메이션 루트모션 비율)
 
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
-
+	class CCharacter* m_pOwner = { nullptr };
 
 
 

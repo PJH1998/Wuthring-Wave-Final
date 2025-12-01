@@ -300,6 +300,7 @@ void CGalbrena::Render_Shadow()
 // 캐릭터 전환시 Idle로 상태 전환..
 void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
+	// 현재 애니메이션 제거.
 	m_pStateMachineCom->Exit_State();
 
 	switch (eTransitionType)
@@ -313,7 +314,7 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 		}
 		case CHARACTER_TRANSITIONTYPE::QTE:
 		{
-			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.4f, 2.f);
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			// 애니메이션 변경할 값.
 			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));

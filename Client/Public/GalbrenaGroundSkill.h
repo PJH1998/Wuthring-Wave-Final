@@ -32,7 +32,7 @@ private:
     virtual ~CGalbrenaGroundSkill() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(class CCharacter* pCharacter) override;
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
@@ -55,7 +55,7 @@ private:
 
 
 public:
-    static CGalbrenaGroundSkill* Create(class CGameObject* pOwner);
+    static CGalbrenaGroundSkill* Create(class CCharacter* pOwner);
     virtual void Free() override;
 };
 

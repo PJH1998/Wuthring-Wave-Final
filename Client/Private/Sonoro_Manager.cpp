@@ -3,6 +3,7 @@
 #include"MapObject_Sonoro.h"
 #include"MapObject_NonSonoro.h"
 #include "SonoraChange.h"
+#include"MapObject_Instance.h"
 
 CSonoro_Manager::CSonoro_Manager()
 	:m_pGameInstance(CGameInstance::GetInstance())
@@ -48,6 +49,19 @@ _bool* CSonoro_Manager::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro
 	}
 
 	CRASH("Failed");
+	return nullptr;
+}
+
+_bool* CSonoro_Manager::Add_To_Management(INSTANCETYPE eType, CMapObject_Instance* pObjects, _bool** SonoroMode)
+{
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_Instance.push_back(pObjects);
+		*SonoroMode = &m_SonoroRigidActive;
+		Safe_AddRef(pObjects);
+		return &m_SonoroRender;
+	}
+
 	return nullptr;
 }
 

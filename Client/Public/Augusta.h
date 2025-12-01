@@ -135,7 +135,8 @@ public:
 		PART_BAYONET = 0, // Bayonet
 		PART_SKILLWEAPON = 1, // SKill Weapon
 		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
-		PART_WING = 3,
+		PART_FXOBJECT = 3,
+		PART_WING = 4,
 		TYPE_END
 	};
 
@@ -207,6 +208,7 @@ private:
 	class CAugustaBayonet* m_pBayonet = { nullptr };
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
+	class CAugustaFxObject* m_pFxObject = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
 	_string m_strPreAnimation = {};
@@ -225,6 +227,7 @@ private:
 	void Process_HitStop(const _wstring& wStrObjectTag);
 	void Process_CameraAction(const _wstring& wStrObjectTag);
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
+	void Process_FxObject(const _wstring& wStrObjectTag);
 	
 #pragma endregion
 

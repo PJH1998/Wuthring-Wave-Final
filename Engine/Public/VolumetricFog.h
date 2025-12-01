@@ -6,13 +6,14 @@ NS_BEGIN(Engine)
 class CGameInstance;
 class CComputeShader;
 class CShader;
+class CTexture;
 
 class CVolumetricFog final : public CBase
 {
 private:
 	typedef struct tagVF_Data{
-		_float4x4 ViewMatrix;	
-		_float4x4 ProjMatrix;
+		_float4x4 PrevViewMatrix;	
+		_float4x4 PrevProjMatrix;
 		_float4x4 InvViewMatrix;
 		_float4x4 InvProjMatrix;
 		_float fNear;				// 0
@@ -36,16 +37,17 @@ private:
 		_float fGroundFallOff;		// 80
 		_float fNoiseScale;			// 84
 		_float fNoiseTimeDelta;
-		_float Padding1;			
+		_bool  IsTemporal; 
+		_float4 vCamPos;
 		_float3 vFogColor;			// 96
-		_float Padding2;
+		_uint iRandCount;
 	}VF_DATA;
 
 	enum class CS { VF_LIGHT, VF_BEER, VF_NOISE, END};
-	enum class UAV { VF_LIGHT, VF_BEER, VF_NOISE, END};
-	enum class SRV { VF_LIGHT, VF_BEER, VF_NOISE, LIGHT, END };
+	enum class UAV { VF_LIGHT_FIRST, VF_LIGHT_SECOND, VF_BEER, VF_NOISE, END};
+	enum class SRV { VF_LIGHT_FIRST, VF_LIGHT_SECOND, VF_BEER, VF_NOISE, LIGHT, END };
 	enum class BUFFER { DATA, LIGHT, END};
-
+	
 private:
 	CVolumetricFog(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CVolumetricFog() = default;
@@ -54,15 +56,17 @@ public:
 	HRESULT						Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	HRESULT						SetUp_FogNF();
 
+	void						Begin_VF();
+	void						Clear();
 	void						Update_VF(_float fTimeDelta);
 
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 public:
 	void						Setting_VF();
 	_float TestScale = {  };
-#endif
+//#endif
 
 private:
 	_float3						m_vFroxelSize = {};
@@ -71,6 +75,8 @@ private:
 	_float3						m_vDefinition = {};
 	VF_DATA						m_VF_Data = {};
 
+	_bool						m_IsUpdate = { false };
+	_bool						m_IsFirst = { false };
 	_float3						m_vNoiseSize = {};
 
 	_uint						m_iMaxLight = {};
@@ -87,6 +93,9 @@ private:
 	ID3D11ShaderResourceView*	m_pSRVs[ENUM_CLASS(SRV::END)] = { nullptr };
 
 	ID3D11Buffer*				m_pBuffers[ENUM_CLASS(BUFFER::END)] = {nullptr};
+
+	_uint						m_iWriteIndex = {};
+	_uint						m_iReadIndex = {};
 
 	ID3D11SamplerState*			m_pDefaultSampler = { nullptr };
 	ID3D11SamplerState*			m_pShadowSampler = { nullptr };

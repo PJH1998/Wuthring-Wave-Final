@@ -37,6 +37,7 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
 
+	m_fMaxDissolveTime = 0.35f;
     return S_OK;
 }
 
@@ -44,7 +45,20 @@ void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 	
+	// 2. Dissolve 체크.
 
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Prop_Reset();
+		}
+	}
 }
 
 void CAugustaBayonet::Update(_float fTimeDelta)
@@ -53,11 +67,16 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
     CProp::Update(fTimeDelta);
 
-	// Combined Matrix 
-	XMStoreFloat4x4(&m_CombinedMatrix,
-		m_pTransformCom->Get_WorldMatrix() *
-		XMLoadFloat4x4(m_pSocketMatrix) *
-		m_pParentTransform->Get_WorldMatrix());
+	// 1. Combine 행렬 계산
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (!IsDissolve) // Dissolve가 아니라면 업데이트 계속.
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			XMLoadFloat4x4(m_pSocketMatrix) *
+			m_pParentTransform->Get_WorldMatrix());
+	}
 
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
 
@@ -89,6 +108,17 @@ void CAugustaBayonet::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+
+	}
+
     for (_uint i = 0; i < iNumMeshes; i++)
     {
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
@@ -102,11 +132,15 @@ void CAugustaBayonet::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
+		// 3. Mask Texture
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //    CRASH("Ready Shader Begin Failed");
+        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -121,17 +155,25 @@ void CAugustaBayonet::Render()
 
 void CAugustaBayonet::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActivate);
+	//CProp::Activate(IsActivate);
 	m_pModelCom->Clear_Animation(m_strCurrentAnimName);
 
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	effecInfo.pModelPtr = m_pModelCom;
 
+	if (true == IsActivate)
+	{
+		Prop_Reset();
+		m_isActivate = IsActivate;
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	}
+
 	if (false == IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		Bind_DissolveTimer();
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 	}
 }

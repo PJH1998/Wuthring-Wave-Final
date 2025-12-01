@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-HRESULT CAugustaHit::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaHit::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CHitState::Initialize(pOwner)))
+    if (FAILED(CHitState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -259,7 +259,7 @@ void CAugustaHit::State_Reset()
 
 
 
-CAugustaHit* CAugustaHit::Create(class CGameObject* pOwner)
+CAugustaHit* CAugustaHit::Create(CCharacter* pOwner)
 {
     CAugustaHit* pInstance = new CAugustaHit();
 

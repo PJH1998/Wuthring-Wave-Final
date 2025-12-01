@@ -5,12 +5,12 @@
 #include "AugustaState_Enum.h"
 
 // 이건 이동 Rope 로만 사용하자.
-HRESULT CAugustaRopeHook::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaRopeHook::Initialize(CCharacter* pCharacter)
 {
-	if (FAILED(CInteractionState::Initialize(pOwner)))
+	if (FAILED(CInteractionState::Initialize(pCharacter)))
 		return E_FAIL;
 
-	m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+	m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
 	ASSERT_CRASH(m_pAugusta);
 
 	Setup_Animations();
@@ -263,7 +263,7 @@ void CAugustaRopeHook::State_Reset()
 
 
 
-CAugustaRopeHook* CAugustaRopeHook::Create(class CGameObject* pOwner)
+CAugustaRopeHook* CAugustaRopeHook::Create(CCharacter* pOwner)
 {
 	CAugustaRopeHook* pInstance = new CAugustaRopeHook();
 

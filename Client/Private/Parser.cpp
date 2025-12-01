@@ -98,6 +98,7 @@ void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, cons
 
 				File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
 				File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+				File.read(reinterpret_cast<char*>(&Desc.eInstanceType), sizeof(INSTANCETYPE));
 
 				Desc.iLevel = ENUM_CLASS(eLevel);
 

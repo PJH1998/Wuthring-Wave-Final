@@ -47,6 +47,8 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Bake_EnvMaps();
 
+	m_pGameInstance->Begin_VF();
+
     return S_OK;
 }
 
