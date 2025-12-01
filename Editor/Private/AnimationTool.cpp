@@ -255,10 +255,14 @@ void CAnimationTool::RenderUI_EditAnimation()
     static int iSelectedIndex = -1;
     _uint id = 0;
 
+	
+
     // 1. 액터 선택.
     for (auto& actorName : m_ActorNames)
     {
-        if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
+		_bool isSelected = (id == iSelectedIndex);
+
+        if (ImGui::Selectable(actorName.c_str(), isSelected))
         {
             iSelectedIndex = id;
             m_Selected_AnimActorTag = actorName;
@@ -272,8 +276,8 @@ void CAnimationTool::RenderUI_EditAnimation()
 				m_IsVisibleNotify = false; // Notifiy 끄기?
 			}
 			// 선택할때마다 NotifyVisible 끄기?
-
         }
+		id++;
     }
     ImGui::EndChild();
 
@@ -772,7 +776,7 @@ void CAnimationTool::LoadDat()
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(70.0f);
 			ImGui::InputFloat("fRadianY", &fRadians[1]);
-			PreTransformMatrix *= XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(fRadians[1]));
+			PreTransformMatrix *= XMMatrixRotationY(XMConvertToRadians(fRadians[1]));
 		}
 		if (IsRotation[2])
 		{
@@ -863,12 +867,16 @@ void CAnimationTool::RenderUI_ModelPrototype()
 
     for (auto& modelName : m_ModelNames)
     {
-        if (ImGui::Selectable(modelName.c_str(), id == iSelectedIndex))
+		_bool isSelected = (id == iSelectedIndex);
+
+        if (ImGui::Selectable(modelName.c_str(), isSelected))
         {
             iSelectedIndex = id;
             m_Selected_PrototypeModelTag = modelName;
             m_wSelected_PrototypeModelTag = StringToWString(modelName);
         }
+
+		id++;
     }
     ImGui::EndChild();
 
@@ -893,12 +901,15 @@ void CAnimationTool::RenderUI_EditModel()
 
 	for (auto& actorName : m_ActorNames)
 	{
-		if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
+		_bool isSelected = (id == iSelectedIndex);
+
+		if (ImGui::Selectable(actorName.c_str(), isSelected))
 		{
 			iSelectedIndex = id;
 			m_Selected_AnimActorTag = actorName;
 			m_wSelected_AnimActorTag = StringToWString(actorName);
 		}
+		id++;
 	}
 	ImGui::EndChild();
 
@@ -1123,14 +1134,28 @@ void CAnimationTool::Render_Model_Detail()
             return;
         }
 
+		static _uint iID = 0;
+		_bool IsExist = { false };
+		for (auto& animActor : m_AnimationActors)
+		{
+			_wstring strTag = animActor.first;
+			if (strTag == wstrObjTag)
+				IsExist = true;
+		}
 
-        if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-            , wstrObjTag
-            , CAnimationActor::Create(m_pDevice, m_pContext))))
-        {
-            MSG_BOX("Animation Actor Prototype");
-            return;
-        }
+
+		if (!IsExist)
+		{
+			if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+				, wstrObjTag
+				, CAnimationActor::Create(m_pDevice, m_pContext))))
+			{
+				MSG_BOX("Animation Actor Prototype");
+				return;
+			}
+			iID = 0;
+		}
+        
 
         CAnimationActor* pActor = dynamic_cast<CAnimationActor*>(
             m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel)
@@ -1145,6 +1170,11 @@ void CAnimationTool::Render_Model_Detail()
             return; 
         }
 
+		if (IsExist)
+		{
+			iID += 1;
+			wstrObjTag += to_wstring(iID);
+		}
         m_ActorNames.emplace_back(WStringToString(wstrObjTag));
 
         Safe_AddRef(pActor);
@@ -1182,6 +1212,17 @@ void CAnimationTool::Render_EditModel()
 		pTransformCom->Set_State(STATE::POSITION, vPos);
 	}
 
+	static float fScale[3] = { 0.f, 0.f, 0.f };
+	ImGui::InputFloat3("Scale", fScale);
+
+	if (ImGui::Button("Apply Scale"))
+	{
+		_float3 vS = {};
+		memcpy(&vS, fScale, sizeof(_float3));
+
+		pTransformCom->Scale(vS);
+	}
+
 
 	static float fDegree[3] = { 0.f, 0.f, 0.f };
 	ImGui::InputFloat3("Degree", fDegree);
@@ -1196,6 +1237,16 @@ void CAnimationTool::Render_EditModel()
 		vR.z = XMConvertToRadians(vR.z);
 		
 		pTransformCom->Rotation_Quaternion(vR);
+	}
+
+	_string strBoneName = {};
+	static char szName[MAX_PATH] = {};
+	ImGui::InputText("Bone Name", szName, sizeof(szName));
+
+	if (ImGui::Button("Change Bone"))
+	{
+		strBoneName = szName;
+		m_AnimationActors.at(m_wSelected_AnimActorTag)->Change_BoneMatrixPtr(strBoneName);
 	}
 	
 

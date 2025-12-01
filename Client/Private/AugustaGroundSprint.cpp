@@ -5,12 +5,12 @@
 #include "AugustaState_Enum.h"
 #include "GameInstance.h"
 
-HRESULT CAugustaGroundSprint::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundSprint::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -393,7 +393,7 @@ void CAugustaGroundSprint::State_Reset()
 
 
 
-CAugustaGroundSprint* CAugustaGroundSprint::Create(class CGameObject* pOwner)
+CAugustaGroundSprint* CAugustaGroundSprint::Create(CCharacter* pOwner)
 {
     CAugustaGroundSprint* pInstance = new CAugustaGroundSprint();
 

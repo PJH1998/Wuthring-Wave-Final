@@ -3,7 +3,7 @@
 #include "StateMachine.h"
 
 
-HRESULT CClimbState::Initialize(class CGameObject* pOwner)
+HRESULT CClimbState::Initialize(CCharacter* pOwner)
 {
     if (FAILED(CCharacterState::Initialize(pOwner)))
         return E_FAIL;

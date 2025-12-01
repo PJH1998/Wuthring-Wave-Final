@@ -49,6 +49,8 @@
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+#include "AugustaFxObject.h"
+#include "AugustaEnergyBlade.h"
 #include "Augusta.h"
 
 // Rover
@@ -235,15 +237,13 @@ HRESULT CLoader_Heaven::Load_Augusta()
 	//_float fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
-
 	// 1. 모델 초기화.
-		//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-		//    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
-		//    CRASH("Prototype Create Failed");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+	//    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+	//    CRASH("Prototype Create Failed");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
-
 
 
 	// 2. StateMachine 초기화
@@ -261,9 +261,10 @@ HRESULT CLoader_Heaven::Load_Augusta()
 		, CAugusta::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
+
 #pragma region Parts
 	wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Bayonet.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/Bayonet/Bayonet.dat";
 	fSize = 0.01f;
 	//fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
@@ -282,7 +283,7 @@ HRESULT CLoader_Heaven::Load_Augusta()
 
 
 	wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/SkillWeapon/SkillWeapon.dat";
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
@@ -295,7 +296,7 @@ HRESULT CLoader_Heaven::Load_Augusta()
 		CRASH("Prototype Create Failed");
 
 	wStrModelTag = L"Prototype_Component_Model_Augusta_Griffon";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Griffon/Griffon.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/Griffon/Griffon.dat";
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
 	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -307,7 +308,38 @@ HRESULT CLoader_Heaven::Load_Augusta()
 		, wStrGriffonTag
 		, CAugustaGriffon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_FxObject";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/FxObject/FxObject.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationZ(XMConvertToRadians(-90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrFxObjectTag = TEXT("Prototype_GameObject_Augusta_FxObject");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrFxObjectTag
+		, CAugustaFxObject::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+	// EnergyBlade의 경우는 FxObject가 소유 => FxObject의 뼈에 붙을예정.
+	wStrModelTag = L"Prototype_Component_Model_Augusta_EnergyBlade";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/EnergyBlade/EnergyBlade.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrEnergyBladeTag = TEXT("Prototype_GameObject_Augusta_EnergyBlade");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrEnergyBladeTag
+		, CAugustaEnergyBlade::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
+
 
 
 	return S_OK;
@@ -350,7 +382,7 @@ HRESULT CLoader_Heaven::Load_Rover()
 
 #pragma region Parts
 	wStrModelTag = L"Prototype_Component_Model_Rover_Sword";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Sword/Sword.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/RoverFacial/Weapon/Sword/Sword.dat";
 	fSize = 0.01f;
 	//fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
@@ -361,14 +393,14 @@ HRESULT CLoader_Heaven::Load_Rover()
 		CRASH("Prototype Create Failed");
 
 	// 2. 객체 초기화.
-	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Sword");
+	_wstring wstrSwordTag = TEXT("Prototype_GameObject_Rover_Sword");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-		, wstrBayonetTag
+		, wstrSwordTag
 		, CRoverSword::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 	wStrModelTag = L"Prototype_Component_Model_Rover_DarkWing";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkWing/DarkRoverWing.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/RoverFacial/Weapon/DarkWing/DarkRoverWing.dat";
 	fSize = 0.01f;
 	//fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
@@ -386,7 +418,7 @@ HRESULT CLoader_Heaven::Load_Rover()
 		CRASH("Prototype Create Failed");
 
 	wStrModelTag = L"Prototype_Component_Model_Rover_DarkScythe";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkScythe/DarkScythe.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/RoverFacial/Weapon/DarkScythe/DarkScythe.dat";
 	fSize = 0.01f;
 	//fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
@@ -402,6 +434,7 @@ HRESULT CLoader_Heaven::Load_Rover()
 		, wstrDarkScytheTag
 		, CRoverDarkScythe::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
 #pragma endregion
 
 	return S_OK;
@@ -442,7 +475,7 @@ HRESULT CLoader_Heaven::Load_Galbrena()
 
 #pragma region Parts
 	wStrModelTag = L"Prototype_Component_Model_Galbrena_ShotGun";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Weapon/ShotGun/ShotGun.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/GalbrenaFacial/Weapon/ShotGun/ShotGun.dat";
 	fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
 	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
@@ -454,7 +487,7 @@ HRESULT CLoader_Heaven::Load_Galbrena()
 
 	// DarkWing
 	wStrModelTag = L"Prototype_Component_Model_Galbrena_DarkWing";
-	strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Weapon/DarkWing/DarkWing.dat";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/GalbrenaFacial/Weapon/DarkWing/DarkWing.dat";
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
@@ -480,8 +513,8 @@ HRESULT CLoader_Heaven::Load_Galbrena()
 		, CGalbrenaDarkWing::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
-#pragma endregion
 
+#pragma endregion
 	return S_OK;
 }
 

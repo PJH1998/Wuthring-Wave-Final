@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 
 // OMNI 상태에서만 탈출 가능.
-HRESULT CAugustaGroundSpecial::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundSpecial::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -348,7 +348,7 @@ void CAugustaGroundSpecial::State_Reset()
 }
 
 
-CAugustaGroundSpecial* CAugustaGroundSpecial::Create(class CGameObject* pOwner)
+CAugustaGroundSpecial* CAugustaGroundSpecial::Create(CCharacter* pOwner)
 {
     CAugustaGroundSpecial* pInstance = new CAugustaGroundSpecial();
 

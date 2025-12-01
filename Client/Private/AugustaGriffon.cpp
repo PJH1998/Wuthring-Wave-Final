@@ -35,6 +35,8 @@ HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
+
+	m_fMaxDissolveTime = 0.5f;
     return S_OK;
 }
 
@@ -42,14 +44,13 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
-	// MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
 			pAttackVolume->Priority_Update(fTimeDelta);
 	}
+
+	
 }
 
 
@@ -57,11 +58,11 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 {
     CProp::Update(fTimeDelta);
 
-    XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());
-
+	// 1. Combine 행렬 계산
+	XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		XMLoadFloat4x4(m_pSocketMatrix) *
+		m_pParentTransform->Get_WorldMatrix());
 	// MainAttackVolume 설정
 	//if (nullptr != m_pMainAttackVolume)
 	//	m_pMainAttackVolume->Update(fTimeDelta);
@@ -76,18 +77,13 @@ void CAugustaGriffon::Late_Update(_float fTimeDelta)
 {
     CProp::Late_Update(fTimeDelta);
 
-	// MainAttackVolume 설정
-	/*if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);*/
+
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
 			pAttackVolume->Late_Update(fTimeDelta);
 	}
-    //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
-
-    /*if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
-        return;*/
+  
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }

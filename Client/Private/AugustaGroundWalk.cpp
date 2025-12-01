@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 
 
-HRESULT CAugustaGroundWalk::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundWalk::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
         
 
@@ -46,7 +46,7 @@ void CAugustaGroundWalk::Check_StateTransition()
 
 }
 
-CAugustaGroundWalk* CAugustaGroundWalk::Create(class CGameObject* pOwner)
+CAugustaGroundWalk* CAugustaGroundWalk::Create(CCharacter* pOwner)
 {
     CAugustaGroundWalk* pInstance = new CAugustaGroundWalk();
 

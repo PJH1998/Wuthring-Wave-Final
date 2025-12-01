@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GalbrenaState_Enum.h"
 
-HRESULT CGalbrenaHit::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaHit::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CHitState::Initialize(pOwner)))
+    if (FAILED(CHitState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -252,7 +252,7 @@ void CGalbrenaHit::State_Reset()
 
 
 
-CGalbrenaHit* CGalbrenaHit::Create(class CGameObject* pOwner)
+CGalbrenaHit* CGalbrenaHit::Create(CCharacter* pOwner)
 {
     CGalbrenaHit* pInstance = new CGalbrenaHit();
 

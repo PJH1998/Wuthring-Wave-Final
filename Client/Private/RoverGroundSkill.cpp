@@ -3,12 +3,12 @@
 #include "Rover.h"
 #include "StateMachine.h"
 
-HRESULT CRoverGroundSkill::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundSkill::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     // 애니메이션 리스트 셋업.
@@ -203,7 +203,7 @@ void CRoverGroundSkill::State_Reset()
 
 
 
-CRoverGroundSkill* CRoverGroundSkill::Create(class CGameObject* pOwner)
+CRoverGroundSkill* CRoverGroundSkill::Create(CCharacter* pOwner)
 {
     CRoverGroundSkill* pInstance = new CRoverGroundSkill();
 

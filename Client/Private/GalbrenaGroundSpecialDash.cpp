@@ -5,12 +5,12 @@
 #include "GalbrenaState_Enum.h"
 
 
-HRESULT CGalbrenaGroundSpecialDash::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundSpecialDash::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -186,7 +186,7 @@ _bool CGalbrenaGroundSpecialDash::Hit_Judge()
 	return IsHit;
 }
 
-CGalbrenaGroundSpecialDash* CGalbrenaGroundSpecialDash::Create(class CGameObject* pOwner)
+CGalbrenaGroundSpecialDash* CGalbrenaGroundSpecialDash::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundSpecialDash* pInstance = new CGalbrenaGroundSpecialDash();
 

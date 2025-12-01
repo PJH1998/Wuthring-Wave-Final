@@ -1,7 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "CaptureState.h"
 
-HRESULT CCaptureState::Initialize(CGameObject* pOwner)
+HRESULT CCaptureState::Initialize(CCharacter* pOwner)
 {
 	if (FAILED(CCharacterState::Initialize(pOwner)))
 		return E_FAIL;

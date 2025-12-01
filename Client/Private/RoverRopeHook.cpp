@@ -5,12 +5,12 @@
 #include "RoverState_Enum.h"
 
 // 이건 이동 Rope 로만 사용하자.
-HRESULT CRoverRopeHook::Initialize(class CGameObject* pOwner)
+HRESULT CRoverRopeHook::Initialize(CCharacter* pCharacter)
 {
-	if (FAILED(CInteractionState::Initialize(pOwner)))
+	if (FAILED(CInteractionState::Initialize(pCharacter)))
 		return E_FAIL;
 
-	m_pRover = dynamic_cast<CRover*>(pOwner);
+	m_pRover = dynamic_cast<CRover*>(pCharacter);
 	ASSERT_CRASH(m_pRover);
 
 	Setup_Animations();
@@ -263,7 +263,7 @@ void CRoverRopeHook::State_Reset()
 
 
 
-CRoverRopeHook* CRoverRopeHook::Create(class CGameObject* pOwner)
+CRoverRopeHook* CRoverRopeHook::Create(CCharacter* pOwner)
 {
 	CRoverRopeHook* pInstance = new CRoverRopeHook();
 

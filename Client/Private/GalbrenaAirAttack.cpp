@@ -3,12 +3,12 @@
 #include "Galbrena.h"
 #include "StateMachine.h"
 
-HRESULT CGalbrenaAirAttack::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaAirAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -367,7 +367,7 @@ void CGalbrenaAirAttack::Handle_Animation_SpecialState()
 
 
 
-CGalbrenaAirAttack* CGalbrenaAirAttack::Create(class CGameObject* pOwner)
+CGalbrenaAirAttack* CGalbrenaAirAttack::Create(CCharacter* pOwner)
 {
     CGalbrenaAirAttack* pInstance = new CGalbrenaAirAttack();
 

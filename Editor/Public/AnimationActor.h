@@ -87,6 +87,8 @@ public:
 	void Print_WorldMatrix();
 
 	void Set_AnimationSpeed(_float fSpeed) { m_fAnimationSpeed = fSpeed; }
+
+	void Change_BoneMatrixPtr(const _string& strBoneName);
 	
 #endif // _DEBUG
 

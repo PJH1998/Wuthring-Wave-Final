@@ -1,7 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "InteractionState.h"
 
-HRESULT CInteractionState::Initialize(CGameObject* pOwner)
+HRESULT CInteractionState::Initialize(CCharacter* pOwner)
 {
 	if (FAILED(CCharacterState::Initialize(pOwner)))
 		return E_FAIL;
