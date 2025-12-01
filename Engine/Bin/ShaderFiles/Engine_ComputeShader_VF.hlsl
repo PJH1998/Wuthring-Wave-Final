@@ -14,6 +14,37 @@
 
 #define MAX_SECTOR 64
 
+#define MAX_HALTON_SEQUENCE 16
+
+static const float3 HALTON_SEQUENCE[MAX_HALTON_SEQUENCE] =
+{
+    float3(0.5f, 0.333333f, 0.2f),
+    float3(0.25f, 0.666667f, 0.4f),
+    float3(0.75f, 0.111111f, 0.6f),
+	float3(0.125f, 0.444444f, 0.8f),
+	float3(0.625f, 0.777778f, 0.04f),
+	float3(0.375f, 0.222222f, 0.24f),
+	float3(0.875f, 0.555556f, 0.44f),
+	float3(0.0625f, 0.888889f, 0.64f),
+	float3(0.5625f, 0.037037f, 0.84f),
+	float3(0.3125f, 0.37037f, 0.08f),
+	float3(0.8125f, 0.703704f, 0.28f),
+	float3(0.1875f, 0.148148f, 0.48f),
+	float3(0.6875f, 0.481482f, 0.68f),
+	float3(0.4375f, 0.814815f, 0.88f),
+	float3(0.9375f, 0.259259f, 0.12f),
+	float3(0.03125f, 0.592593f, 0.32f)
+};
+
+float3 JITTER(uint2 XY, uint RandCount)
+{
+    float3 Jitter = HALTON_SEQUENCE[((RandCount + XY.x + XY.y) * 2) % MAX_HALTON_SEQUENCE];
+    
+    Jitter -= 0.5f;
+    
+    return Jitter;
+}
+
 struct LightData
 {
     uint iType; // 0 = Directional, 1 = Point
@@ -32,7 +63,11 @@ Texture2D<float> g_MipDepthTexture : register(t1);
 Texture2DArray<float> g_ShadowMapTexture : register(t2);
 
 Texture3D<float4> VFLightTexture : register(t3);
-Texture3D<float> g_NoiseTexture : register(t4);
+Texture3D<float4> PrevVFLightTexture : register(t4);
+
+Texture3D<float> g_NoiseTexture : register(t5);
+
+Texture2D<float4> g_TestNoiseTexture : register(t6);
 
 RWTexture3D<float4> OutputTexture : register(u0);
 
@@ -41,33 +76,35 @@ SamplerComparisonState ShadowSampler : register(s1);
 
 cbuffer VF_Data : register(b0)
 {
-    float4x4 ViewMatrix;
-    float4x4 ProjMatrix;
+    float4x4 PrevViewMatrix;
+    float4x4 PrevProjMatrix;
     float4x4 InvViewMatrix;
     float4x4 InvProjMatrix;
-    float fFogNear;
-    float fFogFar;
-    uint iSliceCount;
-    uint iLightCount;
-    float3 vFroxelSize;
-    float Padding;
-    float fCamNear;
-    float fCamFar;
-    float fScreenX;
-    float fScreenY;
-    float fLightIntensity;
-    float fDensity;
-    float fPhaseFunctionG;
-    float fDensityScale;
-    float fFogMaxHeight; 
-    float fFogMinHeight; 
-    float fHegihtFallOff;
-    float fDistanceFallOff; 
-    float fGroundFallOff; 
-    float fNoiseScale;
-    float fNoiseTimeDelta;
-    float Padding1;
-    float3 vFogColor;
+    float fFogNear; // 0
+    float fFogFar; // 4
+    uint iSliceCount; // 8
+    uint iLightCount; // 12
+    float3 vFroxelSize; // 16
+    float Padding; // 28
+    float fCamNear; // 32
+    float fCamFar; // 36
+    float fWinSizeX; // 40
+    float fWinSizeY; // 44
+    float fLightIntensity; // 48
+    float fDensity; // 52
+    float fPhaseFunctionG; // 56
+    float fDensityScale; // 60
+    float fFogMaxHeight; // 64
+    float fFogMinHeight; // 68
+    float fHegihtFallOff; // 72
+    float fDistanceFallOff; // 76
+    float fGroundFallOff; // 80
+    float fNoiseScale; // 84
+    float fNoiseTimeDelta; //88
+    bool IsTemporal;        // 92
+    float4 vCamPos;         // 96
+    float3 vFogColor; // 112
+    uint iRandCount;
 };
 
 cbuffer ShadowMap_Data : register(b1)
@@ -79,20 +116,20 @@ cbuffer ShadowMap_Data : register(b1)
     int iNumSector;
     int iNumSectorX;
     int iNumSectorToLayer;
-    float Padding2;
+    float Padding3;
     
     float2 vSectorWorldSize;
-    float2 Padding3;
+    float2 Padding4;
     
     float2 vMin;
-    float2 Padding4;
+    float2 Padding5;
     
     float2 vShadowMapSize;
 }
 
-float ComputeSliceDepth(uint iSlice, uint iSliceCount, float fFogNear, float fFogFar)
+float ComputeSliceDepth(float fSlice, uint iSliceCount, float fFogNear, float fFogFar)
 {
-    return fFogNear * pow(fFogFar / fFogNear, (float) iSlice / (float(iSliceCount - 1)));
+    return fFogNear * pow(fFogFar / fFogNear, fSlice / (float) iSliceCount);
 }
 
 float ComputeDepthToProjZ(float fViewZ, float fNear, float fFar)
@@ -137,7 +174,7 @@ float ReturnMinDepth(uint iMipLevel, uint2 DTID, float2 vScreenSize, float2 vFro
 float HenyeyGreensteinPhasefunction(float3 LightDir, float3 LightOutDir, float G)
 {
     float cosTheta = dot(LightDir, LightOutDir);
-    float G2 = pow(G, 2);
+    float G2 = G * G;
     float Denom = pow(1.f + G2 - 2.f * G * cosTheta, 3.f / 2.f);
     
     return (1.f / (4.f * PI)) * ((1.f - G2) / max(Denom, EPSILON)); /**/
@@ -271,7 +308,7 @@ float Compute_NeighborShadow(int2 vNeighborSector, float4 vWorldPos, Texture2DAr
     return fShadow;
 }
 
-float Compute_ShadowMap(float fViewZ, float4 vWorldPos, Texture2DArray<float> ShadowMapTexture)
+float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture)
 {
     float fShadow = 1.f;
     
@@ -316,53 +353,72 @@ float Compute_ShadowMap(float fViewZ, float4 vWorldPos, Texture2DArray<float> Sh
 }
 /*------------------------------------ SHADOW_MAP ------------------------------------*/
 
+float4 ComputeWorldPosToDTidJitter(uint3 DTID)
+{
+    float3 vJitterID = (float3)DTID + JITTER(DTID.xy, iRandCount);
+    
+    float fViewZ = ComputeSliceDepth(vJitterID.z + 0.5f, iSliceCount, fFogNear, fFogFar);
+
+    float2 vUV = (vJitterID.xy + 0.5f) / vFroxelSize.xy;
+        
+    float fNdcZ = ComputeDepthToProjZ(fViewZ, fCamNear, fCamFar) / fViewZ;
+    
+    float2 vNdcXY = float2(vUV.x * 2.f - 1.f, vUV.y * -2.f + 1.f);
+   
+    float4 vProjPos = float4(vNdcXY, fNdcZ, 1.f);
+    
+    vProjPos *= fViewZ;
+    
+    float4 vViewPos = mul(vProjPos, InvProjMatrix);
+    
+    float4 vWorldPos = mul(float4(vViewPos.xyz, 1.f), InvViewMatrix);
+
+    return vWorldPos;
+}
+
+float4 ComputeWorldPosToDTid(uint3 DTID)
+{
+    float fViewZ = ComputeSliceDepth((float) (DTID.z) + 0.5f, iSliceCount, fFogNear, fFogFar);
+
+    float2 vUV = ((float2) (DTID.xy) + 0.5f) / float2(vFroxelSize.xy);
+        
+    float fNdcZ = ComputeDepthToProjZ(fViewZ, fCamNear, fCamFar) / fViewZ;
+    
+    float2 vNdcXY = float2(vUV.x * 2.f - 1.f, vUV.y * -2.f + 1.f);
+   
+    float4 vProjPos = float4(vNdcXY, fNdcZ, 1.f);
+    
+    vProjPos *= fViewZ;
+    
+    float4 vViewPos = mul(vProjPos, InvProjMatrix);
+    
+    float4 vWorldPos = mul(float4(vViewPos.xyz, 1.f), InvViewMatrix);
+
+    return vWorldPos;
+}
+
 [numthreads(THREAD_X, THREAD_Y, LIGHT_THREAD_Z)]
 void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {   
     if (any(DTID >= vFroxelSize))
         return;
         
-    float fViewZ = ComputeSliceDepth(DTID.z, iSliceCount, fFogNear, fFogFar);
-    //float fViewZ = ComputeSliceDepth(DTID.z, iSliceCount, fCamNear, fCamFar);
-    
-    float2 vUV = (float2) (DTID.xy + 0.5f) / float2(vFroxelSize.xy);
-    
-    float vNdcZ = ComputeDepthToProjZ(fViewZ, fCamNear, fCamFar) / fViewZ;
-    
-    float2 vNdcXY = float2(vUV.x * 2.f - 1.f, vUV.y * -2.f + 1.f);
+    float4 vWorldPosJitter = ComputeWorldPosToDTidJitter(DTID);
    
-    float4 vProjPos = float4(vNdcXY, vNdcZ, 1.f);
-    vProjPos *= fViewZ;
-    
-    float4 vViewPos = mul(vProjPos, InvProjMatrix);
-    
-    float4 vWorldPos = mul(vViewPos, InvViewMatrix);
-    
     float3 vLighting = 0.f;
     
-    //uint iMipLevel = ComputeMipLevel(ProjMatrix, fViewZ, fScreenX, fScreenY);
-    //float fMinDetph = ReturnMinDepth(iMipLevel, DTID.xy, float2(fScreenX, fScreenY), vFroxelSize.xy);
-    //
-    //fMinDetph = fMinDetph == 0.f ? fViewZ : fMinDetph;
-    //
-    //if (fMinDetph < fViewZ)
-    //{
-    //    OutputTexture[DTID.xyz] = float4(vLighting, fDensity);
-    //    return;
-    //}
+    float fSkyWeight = saturate(exp(-fHegihtFallOff * (vWorldPosJitter.y - fFogMaxHeight)));
     
-    float fSkyWeight = saturate(exp(-fHegihtFallOff * (vWorldPos.y - fFogMaxHeight)));
-    float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPos.y)));
+    //float fGroundWeight = saturate(exp(fGroundFallOff * ((vCamPos.y + fFogMinHeight) - vWorldPos.y)));
+    float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPosJitter.y)));
     
-    float fHeightWeight = fSkyWeight; //max(fSkyWeight, fGroundWeight);
+    float fHeightWeight = max(fSkyWeight, fGroundWeight); //fSkyWeight; //max(fSkyWeight, fGroundWeight);
     
-    float fDistance = length(vViewPos.xyz);
+    float fDistance = length(vCamPos.xyz - vWorldPosJitter.xyz);
     
     float fDistanceWeight = saturate(1.f - exp(-fDistance * fDistanceFallOff));
     
-    float3 vOutDir = normalize(vViewPos.xyz * -1.f);
-    
-    float fVisible = max(Compute_ShadowMap(fViewZ, vWorldPos, g_ShadowMapTexture), 0.5f);
+    float3 vOutDir = normalize(vCamPos.xyz - vWorldPosJitter.xyz); //normalize(vViewPos.xyz * -1.f);
         
     for (int i = 0; i < iLightCount; ++i)
     {
@@ -374,36 +430,81 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         switch (Light.iType)
         {
             case 0: // DIRECTIONAL
-                LightDirection = normalize(Light.vDirection);
+                LightDirection = normalize(Light.vDirection * -1.f);
+                float fVisible = Compute_ShadowMap(vWorldPosJitter, g_ShadowMapTexture);
                 fAtt = fVisible;
                 break;
             case 1: // POINT
-                LightDirection = normalize(vWorldPos.xyz - Light.vPosition.xyz);
-                fAtt = saturate((Light.fRange - length(LightDirection)) / Light.fRange);
+                LightDirection = Light.vPosition.xyz - vWorldPosJitter.xyz;
+                float fLength = length(LightDirection);
+                LightDirection = normalize(LightDirection);
+                fAtt = saturate((Light.fRange - fLength) / Light.fRange);
                 break;
         }
         
         float PhaseFunction = HenyeyGreensteinPhasefunction(LightDirection, vOutDir, fPhaseFunctionG);
-        
-        float3 vFinalColor = lerp(vFogColor, (Light.vDiffuse.xyz), 0.3f);
+  
+        float3 vFinalColor = Light.vDiffuse.xyz;
+//        float3 vFinalColor = lerp(vFogColor, (Light.vDiffuse.xyz), 0.5f);
         
         vLighting += vFinalColor * fAtt * PhaseFunction;
     }
     
-    float3 vNoiseUV = (vWorldPos.xyz) * fNoiseScale;
+    float3 vNoiseUV = (vWorldPosJitter.xyz) * fNoiseScale;
     vNoiseUV.x += fNoiseTimeDelta;
+    
     float fNoise = g_NoiseTexture.SampleLevel(DefaultSampler, vNoiseUV, 0);
     
     fNoise += fGroundWeight;
     
-    float fFinalDensity = fDensity * fDistanceWeight * fHeightWeight * fNoise;
+    float fFinalDensity = fDensity; //* fDistanceWeight * fHeightWeight;
    
-    OutputTexture[DTID.xyz] = float4(vLighting * fLightIntensity * fFinalDensity, fFinalDensity);
+   // Temporal Reprojection
+    float4 vCurScatterning = float4(vLighting * fLightIntensity * fFinalDensity, fFinalDensity);
+    
+    float4 vFinalScatterning = 0.f;
+   
+    if (IsTemporal)
+    {
+        float4 vWorldPos = ComputeWorldPosToDTid(DTID);
+        
+        float4 vPrevViewPos = mul(vWorldPos, PrevViewMatrix);
+        
+        float4 vPrevProjPos = mul(vPrevViewPos, PrevProjMatrix);
+        
+        float fPrevViewZ = vPrevViewPos.z;
+        
+        vPrevProjPos.xyz /= vPrevProjPos.w;
+
+        float3 vTexcoord = 0.f;
+            
+        float fNdcZ = saturate(log(fPrevViewZ / fFogNear) / log(fFogFar / fFogNear)); //ComputeDepthToProjZ(fPrevViewZ, fFogNear, fFogFar) / fPrevViewZ;
+    
+        vTexcoord.x = vPrevProjPos.x * 0.5f + 0.5f;
+        vTexcoord.y = vPrevProjPos.y * -0.5f + 0.5f;
+        vTexcoord.z = fNdcZ;
+    
+        if (all(vTexcoord.xy <= 1.f) && all(vTexcoord.xy >= 0.f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
+        {
+            float4 vPrevScattering = PrevVFLightTexture.SampleLevel(DefaultSampler, vTexcoord, 0.f);
+        
+            vFinalScatterning = lerp(vPrevScattering, vCurScatterning, 0.25f);
+        }
+        else
+            vFinalScatterning = vCurScatterning;
+    }
+    else
+    {
+       vFinalScatterning = vCurScatterning;
+    }
+   
+    OutputTexture[DTID.xyz] = vFinalScatterning;// * fNoise;
 }
 
 float4 ScatterStep(float3 AccumLight, float AccumTransmittance, float3 SliceLight, float SliceDensity, float Tickness)
 {
-    float Density = max(SliceDensity, 0.000001f);
+    float Density = max(SliceDensity, 1e-5);
+    
     Density *= fDensityScale;
     
     float SliceTransmittance = exp(-Density * Tickness);
@@ -431,7 +532,7 @@ void VolumetricFog(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID,
         
         float4 vLighting = VFLightTexture.Load(int4(vIndex, 0));
    
-        uint iNextSlice = clamp(iSlice + 1, 0, vFroxelSize.z - 1);
+        uint iNextSlice = clamp(iSlice + 1, 0, vFroxelSize.z);
         
         float fTickness = ComputeSliceDepth(iNextSlice, iSliceCount, fFogNear, fFogFar) - ComputeSliceDepth(iSlice, iSliceCount, fFogNear, fFogFar);
         

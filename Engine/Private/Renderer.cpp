@@ -745,6 +745,9 @@ void CRenderer::Render_Light()
 	if(FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSS"), m_pShader, "g_SkinMaskTexture")))
 		CRASH("Failed Bind RT_SSS");
 
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
+		CRASH("Failed Bind ViewMatrixInv");
+
 	//Toon Ramp Texture
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;

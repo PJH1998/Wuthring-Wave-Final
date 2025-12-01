@@ -78,6 +78,17 @@ void CEdit_LightObject::Ready_Component(void* pArg)
 			LightDesc.vPosition = CopyDesc->vPosition;
 			LightDesc.fRange = CopyDesc->fRange;
 		}
+
+		if (pDesc->IsCopy)
+		{
+			LightDesc.vDiffuse = pDesc->vLightDiffuse;
+			LightDesc.vAmbient = pDesc->vLightAmbient;
+			LightDesc.vSpecular = pDesc->vLightSpec;
+
+			m_vLightDiffuse.float_4 = pDesc->vLightDiffuse;
+			m_vLightAmbient.float_4 = pDesc->vLightAmbient;
+			m_vLightSpec.float_4 = pDesc->vLightSpec;
+		}
 	}
 	else
 	{
@@ -126,7 +137,12 @@ void CEdit_LightObject::Copy()
 {
 	MAP_LOAD CopyDesc{};
 	CopyDesc.CopyDesc = m_LightDesc;
-	XMStoreFloat4(&CopyDesc.vWorldPos, m_pTransformCom->Get_State(STATE::POSITION));
+	CopyDesc.vWorldPos = CLevel_Map::m_vPickedPos;
+	CopyDesc.IsCopy = true;
+	CopyDesc.vLightDiffuse = m_vLightDiffuse.float_4;
+	CopyDesc.vLightAmbient = m_vLightAmbient.float_4;
+	CopyDesc.vLightSpec = m_vLightSpec.float_4;
+
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_LightObject"), ENUM_CLASS(LEVEL::MAP), TEXT("Layer_Light"), &CopyDesc);
 
 

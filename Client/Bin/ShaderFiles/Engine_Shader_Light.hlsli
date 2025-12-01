@@ -40,16 +40,16 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
 {
     LIGHT_RESULT Out = (LIGHT_RESULT) 0;
     
-    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    float3 vLook = normalize(g_vCamPosition.xyz - vWorldPos.xyz);
     
-    float3 vLightDir = g_LightDatas[iLightIndex].vDirection.xyz * -1.f;
+    float3 vLightDir = normalize(g_LightDatas[iLightIndex].vDirection.xyz * -1.f);
    
-    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    float NdotL = dot(vLightDir, vNormal.xyz);
      
     float fRimPower = 0.f;
     
     if (IsDynamic)
-        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+        fRimPower = Compute_RimPower(vNormal.xyz, vLook, NdotL);
 
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_LightDatas[iLightIndex].vDiffuse.xyz;
     
@@ -79,7 +79,7 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
 //        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
         
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
-        float3 vRim = (fRimPower * vRimColor);
+        float3 vRim = (vRimColor * fRimPower);
         vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
         vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
         
@@ -137,7 +137,7 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
 {
     LIGHT_RESULT Out = (LIGHT_RESULT) 0;
 
-    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    float3 vLook = normalize(g_vCamPosition.xyz - vWorldPos.xyz);
     
     float3 vLightDir = g_LightDatas[iLightIndex].vPosition.xyz - vWorldPos.xyz;
     
@@ -148,17 +148,19 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
     
     float fDistance = length(vLightDir);
     
+    vLightDir = normalize(vLightDir);
+    
     float fAtt = saturate((g_LightDatas[iLightIndex].fRange - fDistance) / g_LightDatas[iLightIndex].fRange);
     
     if (fAtt == 0.f)
         return Out;
     
-    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    float NdotL = dot(vLightDir, vNormal.xyz);
    
     float fRimPower = 0.f;
     
     if (IsDynamic)
-        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+        fRimPower = Compute_RimPower(vNormal.xyz, vLook, NdotL);
         
     float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
  
@@ -174,8 +176,8 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
     {
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
         
-        vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse * fToonShade));
-        vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular * fToonShade)) + (fRimPower * vRimColor);
+        vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse /* * fToonShade */));
+        vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular /* * fToonShade */)) + (fRimPower * vRimColor);
         
         Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
         Out.vLightSpecular= float4(vLightSpecular * fAtt, 1.f);
@@ -192,9 +194,10 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
 
     }
 
-    float4 vAmbientColor = lerp(vDiffuse, g_LightDatas[iLightIndex].vDiffuse, g_LightDatas[iLightIndex].vAmbient);
-   
-    float4 vAmbient = float4((vAmbientColor * g_LightDatas[iLightIndex].vAmbient).xyz * fAtt, 1.f);
+    //float4 vAmbientColor = vDiffuse * g_LightDatas[iLightIndex].vDiffuse; //Ambient 조절 전까지 임시
+    float4 vAmbientColor = lerp(vDiffuse, g_LightDatas[iLightIndex].vDiffuse, g_LightDatas[iLightIndex].vAmbient.r);
+    float4 vAmbient = float4((vAmbientColor * g_LightDatas[iLightIndex].vAmbient.r).xyz * fAtt, 1.f);
+    //float4 vAmbient = float4((vAmbientColor.xyz * 0.5f) * fAtt, 1.f);
     
     Out.vLightAmbient = vAmbient;
     

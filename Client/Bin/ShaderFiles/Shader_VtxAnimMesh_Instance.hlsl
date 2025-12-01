@@ -183,8 +183,9 @@ struct PS_OUT
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-
+    
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
     
     //if (In.vProjPos.z > 1.f)
@@ -210,10 +211,9 @@ PS_OUT PS_MAIN(PS_IN In)
 PS_OUT PS_NORMALTEX(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-
+    
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-
     vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     float3 vNormal;
         

@@ -334,6 +334,7 @@ public:
 #pragma region VOLUMETRIC_FOG
 public:
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
+	void						Begin_VF();
 #pragma endregion
 
 #pragma region MODEL_STREAMING

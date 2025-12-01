@@ -92,6 +92,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Skybox();
 	Ready_SFX();
 
+	m_pGameInstance->Begin_VF();
+
 //	m_pGameInstance->Bake_EnvMaps();
 
 	return S_OK;
