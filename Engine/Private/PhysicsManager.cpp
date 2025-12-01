@@ -67,6 +67,11 @@ void CPhysicsManager::Remove_Virtual(CharacterVirtual* pVirtual)
 	m_pCVCCollision->Remove(pVirtual);
 }
 
+void CPhysicsManager::Clear_Resource()
+{
+	m_pContactListener->Clear_Resource();
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);

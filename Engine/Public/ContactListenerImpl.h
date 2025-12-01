@@ -12,6 +12,7 @@ public:
 
 public:
 	void		Remove_Update();
+	void		Clear_Resource();
 
 public:
 	virtual		ValidateResult	OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult) override;

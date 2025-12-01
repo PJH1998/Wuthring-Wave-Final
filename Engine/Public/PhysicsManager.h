@@ -50,6 +50,8 @@ public:
 	void					Register_Virtual(CharacterVirtual* pVirtual);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 
+	void					Clear_Resource();
+
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
 	void				Update(_float fTimeDelta);
