@@ -31,7 +31,8 @@ HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
 	//AddRef();
 	//Sync_Sectors();
 	_bool* Test;
-	m_bSonoroMode = m_pGameSystem->Add_To_Management(m_eInstanceType, this, &Test);
+	if (m_eInstanceType != INSTANCETYPE::DEFAULT)
+		m_bSonoroMode = m_pGameSystem->Add_To_Management(m_eInstanceType, this, &Test);
 
 	if (m_eInstanceType == INSTANCETYPE::SONORO)
 		m_TypeMode = true;
