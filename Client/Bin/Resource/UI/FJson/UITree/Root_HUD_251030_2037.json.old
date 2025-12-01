@@ -52,6 +52,48 @@
         {
             "tUIDesc": {
                 "fCutout": 0.30000001192092896,
+                "fUIScale": 0.0,
+                "iNumFiles": 1,
+                "iPassType": 2,
+                "iUIType": 0,
+                "isInstance": false,
+                "isInverseScreenDiscard": false,
+                "strFileName": "Element_Back",
+                "strFilePath": "..\\..\\Client\\Bin\\Resource\\UI\\EResource\\Props_PlayerStatus\\Element_Back.png",
+                "strParentName": "EnergyBar",
+                "strUIName": "Icon_ElementBack",
+                "vSectorBorder": [
+                    0.0,
+                    0.0
+                ],
+                "vecChildNames": [],
+                "vecInstanceDescs": [],
+                "vecSize": [
+                    [
+                        100.0,
+                        95.0
+                    ]
+                ]
+            },
+            "vPos": [
+                -210.0,
+                -455.0,
+                0.0
+            ],
+            "vRot": [
+                -0.0,
+                0.0,
+                -0.0
+            ],
+            "vSca": [
+                67.0,
+                65.0,
+                1.0
+            ]
+        },
+        {
+            "tUIDesc": {
+                "fCutout": 0.30000001192092896,
                 "fUIScale": 1.0,
                 "iNumFiles": 1,
                 "iPassType": 2,
@@ -714,7 +756,8 @@
                     "Skill_Augusta",
                     "Skill_Galbrena",
                     "Skill_OnFeedback",
-                    "Skill_ReadyFrame"
+                    "Skill_ReadyFrame",
+                    "Skill_Utility"
                 ],
                 "vecInstanceDescs": [],
                 "vecSize": [
@@ -7367,6 +7410,7 @@
                     0.0
                 ],
                 "vecChildNames": [
+                    "Icon_ElementBack",
                     "Inst_EnergyItems",
                     "Group_Rover",
                     "Group_Augusta",
@@ -8941,7 +8985,7 @@
                 1.0,
                 1.0
             ]
-        },        
+        },
         {
             "tUIDesc": {
                 "fCutout": 0.30000001192092896,
@@ -9174,8 +9218,93 @@
                 ],
                 "vecSize": [
                     [
-                        224.0,
-                        224.0
+                        416.0,
+                        416.0
+                    ]
+                ]
+            },
+            "vPos": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "vRot": [
+                -0.0,
+                0.0,
+                -0.0
+            ],
+            "vSca": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "tUIDesc": {
+                "fCutout": 0.30000001192092896,
+                "fUIScale": 0.0,
+                "iNumFiles": 1,
+                "iPassType": 2,
+                "iUIType": 0,
+                "isInstance": true,
+                "isInverseScreenDiscard": false,
+                "strFileName": "Skill_Icon_0",
+                "strFilePath": "..\\..\\Client\\Bin\\Resource\\UI\\EResource\\Props_TabUI\\AbilitySkill\\Skill_Icon_0.png",
+                "strParentName": "SectorRB_SkillIcons",
+                "strUIName": "Skill_Utility",
+                "vSectorBorder": [
+                    0.0,
+                    0.0
+                ],
+                "vecChildNames": [],
+                "vecInstanceDescs": [
+                    {
+                        "vClipTexcoordX": [
+                            0.0,
+                            1.0
+                        ],
+                        "vClipTexcoordY": [
+                            0.0,
+                            1.0
+                        ],
+                        "vSInstCoordX": [
+                            0.25,
+                            0.5
+                        ],
+                        "vSInstCoordY": [
+                            0.75,
+                            1.0
+                        ],
+                        "vSInstLook": [
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "vSInstRight": [
+                            80.0,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "vSInstTrans": [
+                            550.0,
+                            -415.0,
+                            0.0,
+                            1.0
+                        ],
+                        "vSInstUp": [
+                            0.0,
+                            80.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                ],
+                "vecSize": [
+                    [
+                        512.0,
+                        512.0
                     ]
                 ]
             },

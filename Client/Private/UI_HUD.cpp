@@ -152,6 +152,7 @@ void CUI_HUD::PreAssign_ChildUIs()
 
 
 	m_pUI_Skill_ReadyFrame = Find_ChildObject(L"Skill_ReadyFrame");
+	m_pUI_Skill_ReadyWave = Find_ChildObject(L"Skill_ReadyWave");
 	m_pUI_Skill_BG = Find_ChildObject(L"Skill_BackgroundImage");
 
 	m_pUI_SectorRB_SkillIcons = Find_ChildObject(L"SectorRB_SkillIcons");
@@ -387,34 +388,24 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		2.f, 2.f, 2.f
 	};
 
-
 	// ==============================
 
-
-
-
-
-    switch (m_iSelectedCHIndex)
-    {
-    case CH_ROVER:
-        m_pUI_Skill[0]->Set_Active(true);
-        m_pUI_Skill[1]->Set_Active(false);
-        m_pUI_Skill[2]->Set_Active(false);
-        break;
-    case CH_AUGUSTA:
-        m_pUI_Skill[0]->Set_Active(false);
-        m_pUI_Skill[1]->Set_Active(true);
-        m_pUI_Skill[2]->Set_Active(false);
-        break;
-    case CH_GALBRENA:
-        m_pUI_Skill[0]->Set_Active(false);
-        m_pUI_Skill[1]->Set_Active(false);
-        m_pUI_Skill[2]->Set_Active(true);
-        break;
+    switch (m_iSelectedCHIndex)   {
+    case CH_ROVER:		m_pUI_Skill[0]->Set_Active(true);
+						m_pUI_Skill[1]->Set_Active(false);
+						m_pUI_Skill[2]->Set_Active(false);	break;
+    case CH_AUGUSTA:	m_pUI_Skill[0]->Set_Active(false);
+        				m_pUI_Skill[1]->Set_Active(true);
+        				m_pUI_Skill[2]->Set_Active(false);	break;
+    case CH_GALBRENA:	m_pUI_Skill[0]->Set_Active(false);
+						m_pUI_Skill[1]->Set_Active(false);
+						m_pUI_Skill[2]->Set_Active(true);	break;
     }
 
-	
-	for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
+	// ==============================
+	// * [Skill Icon Updates] Apply CD Value.
+	// ==============================
+	for (_uint i = 0; i < CH_END; i++)
 	{
 		auto targetUI = m_pUI_Skill[i];
 
@@ -448,30 +439,22 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         targetUI->Set_VariantUIDesc(tVariantDesc);
 
 
-
 		auto& UISlots = m_pAbility->Get_UISkillSlots();
 		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(m_iSelectedCHIndex);
 		switch (eCharacterType)
 		{
-			// ==============================
 			// * [SK Icon Update] Rover
-			// ==============================
 		case UI_CHARACTERTYPE::ROVER:
-			// Rover
 			Update_Icon_Rover(UISlots);
 			break;
-			// ==============================
+
 			// * [SK Icon Update] Augusta
-			// ==============================
 		case UI_CHARACTERTYPE::AUGUSTA:
-			// Augusta
 			Update_Icon_Augusta(UISlots);
 			break;
-			// ==============================
+
 			// * [SK Icon Update] Galbrena
-			// ==============================
 		case UI_CHARACTERTYPE::GALBRENA:
-			// Galbrena
 			Update_Icon_Galbrena(UISlots);
 			break;
 		}
@@ -479,9 +462,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     }
 
 
-
     // ==============================
-	// * [Change Update] CH Change Cooldown
+	// * [CH Change Update] CH Change Cooldown
 	// ==============================
     for (_uint i = 0; i < CH_END; i++)
     {
@@ -505,7 +487,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
 	// ==============================
-	// * [Skill Ready] Skill Ready Indicator
+	// * [Skill Ready Circle] Skill Ready Indicator
 	// ==============================
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
@@ -521,6 +503,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	static _uint iIndex_LBBtn = 4;		static _uint iIndex_PrevLBBtn ;
 	//_uint iIndex_TBtn = ..
 
+
+	// 스킬 배치 변경
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
 	{
 	case CH_AUGUSTA:
@@ -542,7 +526,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		break;
 	}
 
-	
 
 	CCustom_UI* pSkillReadyUI = m_pUI_Skill_ReadyFrame;
 
@@ -563,22 +546,18 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
 	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
-	//cout << fUltGuage << endl;
-	
 	vector<_float4> matCustomColor = { }; matCustomColor.resize(CH_END);
 	
 	switch (m_iSelectedCHIndex)
 	{
 	case CH_ROVER:		matCustomColor[CH_ROVER]	= _float4{ 0.808f, 0.322f, 0.612f, 1.0f };		break;
 	case CH_AUGUSTA:	matCustomColor[CH_AUGUSTA]	=
-					(	isIn_Augusta_AdvUlt ||
-						pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?
+					(	isIn_Augusta_AdvUlt ||											// 궁 사용중이거나
+						pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
 													  _float4{ 0.992f, 0.749f, 0.341f, 1.0f } :
 													  _float4{ 0.969f, 0.451f, 1.000f, 1.0f };		break;
 	case CH_GALBRENA:	matCustomColor[CH_GALBRENA] = _float4{ 1.000f, 0.416f, 0.416f, 1.0f };		break;
 	}
-
-
 
 	// - 활성화 여부 지정
 	// - R
@@ -595,21 +574,10 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	}
 
 
-
-
 	
 	readyInstDesc[iIndex_RBtn].vClipTexcoordX = (is_RBtn_Active) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };
 
 	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
-
-	//static _float fDistortStrength = 0.f;
-	//if (m_pGameInstance->Rand_Normal() <= 0.1f)
-	//	fDistortStrength += 0.2f;
-	//fDistortStrength = (fDistortStrength - 0.03f < 0) ? 0.f : fDistortStrength - 0.03f;
-	//_bool isDistortOn = (fUltGuage == 1.f);
-	//
-	//if (fDistortStrength != 0.f)
-	//	int i = 10;
 
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._11) = (1.f - fUltGuage / 1.f);		// CD or Resource Rate
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._12) = 0.f;							// ColorMul1
@@ -618,22 +586,11 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21) = matCustomColor[m_iSelectedCHIndex];	// CustomColor
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._31) = 0.f;							// CD Start Degree
 
-	//*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._32) = static_cast<_float>(isDistortOn);	// isDistort
-	//*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._33) = m_fElapsedTime;				// timeElapsed
-	//*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._34) = fDistortStrength * 2.f;		// distortStrength // 랜덤하게 여기서 보간넣고 줘야..
-	//
-	//std::cout << "[UI_HUD::Update_UI_SkillSection] Strength : " << fDistortStrength << std::endl;
-
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
 		true
 	};
-
-
-
-
-
 
 	// 만약 버튼 인덱스가 바뀐다면, 꼬임 방지를 위한 이전 버튼 인덱스의 비활성화.
 	if (iIndex_PrevEBtn != iIndex_EBtn)		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
@@ -646,19 +603,36 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	iIndex_PrevEBtn = iIndex_EBtn;
 	iIndex_PrevRBtn = iIndex_RBtn;
 	iIndex_PrevLBBtn = iIndex_LBBtn;
+}
+
+void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
+{
+	CCustom_UI* pTargetUI = m_pUI_Skill_ReadyWave;
+
+	auto& waveDesc = pTargetUI->Get_UIDesc();
+	auto& waveInstDesc = waveDesc.vecInstanceDescs;
+	waveInstDesc.resize(1);
+
+	vector<_float4x4> vecVariantMat = {};
+
+	// ===== Variant Edit.. ===== 
+	// Test..
+
+	
+	
 
 
 
 
-#ifdef KSTA_UI_COOLDOWNTEST
-    std::cout << "[UI_HUD][Update_UI_Cooldown] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_Cooldown] 1 fChangeCD : " << fChangeCD[CH_ROVER] << std::endl;
-    std::cout << "[UI_HUD][Update_UI_Cooldown] 2 fChangeCD : " << fChangeCD[CH_AUGUSTA] << std::endl;
-    std::cout << "[UI_HUD][Update_UI_Cooldown] 3 fChangeCD : " << fChangeCD[CH_GALBRENA] << std::endl;
-    std::cout << "[UI_HUD][Update_UI_Cooldown] E fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_E] << std::endl;
-    std::cout << "[UI_HUD][Update_UI_Cooldown] R fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
-#endif // KSTA_UI_COOLDOWNTEST
+	// ==============================
 
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_WAVECIRCLE),
+		true
+	};
+	
+	pTargetUI->Set_VariantUIDesc(tVariantDesc);
 }
 
 void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)

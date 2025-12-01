@@ -48,6 +48,7 @@ private:
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
+	void					Update_UI_SkillSection_Wave(_float fTimeDelta);
 	void					Update_UI_SkillSection_Utility(_float fTimeDelta);
 	void					Update_UI_SkillSection_BG(_float fTimeDelta);
 	void					Update_UI_SkillFeedback_Trigger(_float fTimeDelta);
@@ -76,53 +77,54 @@ private:
 	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
 
 private:
-	CCustom_UI* m_pUI_SectorT_BossStatus = nullptr;
-	CCustom_UI* m_pUI_SectorB_Status = nullptr;
-	CCustom_UI* m_pUI_Skill[3] = { };
-	CCustom_UI* m_pUI_Change[3] = { };
+	CCustom_UI* m_pUI_SectorT_BossStatus					= nullptr;
+	CCustom_UI* m_pUI_SectorB_Status						= nullptr;
+	CCustom_UI* m_pUI_Skill[3]								= { };
+	CCustom_UI* m_pUI_Change[3]								= { };
 
-	CCustom_UI* m_pUI_Skill_ReadyFrame = nullptr;
-	CCustom_UI* m_pUI_Skill_BG = nullptr;
-	CCustom_UI* m_pUI_SectorRB_SkillIcons = nullptr;
-	CCustom_UI* m_pUI_Skill_Utility = nullptr;
-	CCustom_UI* m_pUI_Feedback = nullptr;
-	CCustom_UI* m_pUI_HPBar = nullptr;
-	CCustom_UI* m_pUI_BossHPBar = nullptr;
-	CCustom_UI* m_pUI_BossSABar = nullptr;
-	CCustom_UI* m_pUI_KeyButton = nullptr;
+	CCustom_UI* m_pUI_Skill_ReadyFrame						= nullptr;
+	CCustom_UI* m_pUI_Skill_ReadyWave						= nullptr;
+	CCustom_UI* m_pUI_Skill_BG								= nullptr;
+	CCustom_UI* m_pUI_SectorRB_SkillIcons					= nullptr;
+	CCustom_UI* m_pUI_Skill_Utility							= nullptr;
+	CCustom_UI* m_pUI_Feedback								= nullptr;
+	CCustom_UI* m_pUI_HPBar									= nullptr;
+	CCustom_UI* m_pUI_BossHPBar								= nullptr;
+	CCustom_UI* m_pUI_BossSABar								= nullptr;
+	CCustom_UI* m_pUI_KeyButton								= nullptr;
 
-	CCustom_UI* m_pUI_Group_Rover = nullptr;
-	CCustom_UI* m_pUI_Group_Augusta = nullptr;
-	CCustom_UI* m_pUI_Group_Galbrena = nullptr;
+	CCustom_UI* m_pUI_Group_Rover							= nullptr;
+	CCustom_UI* m_pUI_Group_Augusta							= nullptr;
+	CCustom_UI* m_pUI_Group_Galbrena						= nullptr;
 
-	CCustom_UI* m_pUI_Frame_Rover_Dark = nullptr;
-	CCustom_UI* m_pUI_Frame_Augusta = nullptr;
-	CCustom_UI* m_pUI_FrameGroup_Augusta_OtherEnergy = nullptr;
-	CCustom_UI* m_pUI_FrameGroup_Augusta_UltMode = nullptr;
-	CCustom_UI* m_pUI_Frame_Galbrena = nullptr;
-	CCustom_UI* m_pUI_Frame_Galbrena_Icon = nullptr;
-	CCustom_UI* m_pUI_FrameGroup_Galbrena_RageMode = nullptr;
+	CCustom_UI* m_pUI_Frame_Rover_Dark						= nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta							= nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Augusta_OtherEnergy		= nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Augusta_UltMode			= nullptr;
+	CCustom_UI* m_pUI_Frame_Galbrena						= nullptr;
+	CCustom_UI* m_pUI_Frame_Galbrena_Icon					= nullptr;
+	CCustom_UI* m_pUI_FrameGroup_Galbrena_RageMode			= nullptr;
 
-	CCustom_UI* m_pUI_Icon_ElementDark = nullptr;
-	CCustom_UI* m_pUI_Icon_ElementThunder = nullptr;
-	CCustom_UI* m_pUI_Icon_ElementFire = nullptr;
-	CCustom_UI* m_pUI_Icon_ElementGuage = nullptr;
+	CCustom_UI* m_pUI_Icon_ElementDark						= nullptr;
+	CCustom_UI* m_pUI_Icon_ElementThunder					= nullptr;
+	CCustom_UI* m_pUI_Icon_ElementFire						= nullptr;
+	CCustom_UI* m_pUI_Icon_ElementGuage						= nullptr;
 
-	CCustom_UI* m_pUI_EnergyInstItems = nullptr;
+	CCustom_UI* m_pUI_EnergyInstItems						= nullptr;
 
-	CCustom_UI* m_pUI_Frame_Augusta_Inst_SwordEnergy = nullptr;
-	CCustom_UI* m_pUI_Frame_Augusta_Inst_CenterPointEnergy = nullptr;
-	CCustom_UI* m_pUI_Frame_Augusta_Inst_UltModeEnergy = nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_SwordEnergy		= nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_CenterPointEnergy	= nullptr;
+	CCustom_UI* m_pUI_Frame_Augusta_Inst_UltModeEnergy		= nullptr;
 
-	CCustom_UI* m_pTextUI_PlayerHP = nullptr;
-	CCustom_UI* m_pTextUI_BossName = nullptr;
+	CCustom_UI* m_pTextUI_PlayerHP							= nullptr;
+	CCustom_UI* m_pTextUI_BossName							= nullptr;
 
 
 private:
-	class CGameSystem*		m_pGameSystem = { nullptr };
+	class CGameSystem*		m_pGameSystem			= { nullptr };
 
-	class CPlayerStatus*	m_pPlayerStatus = { nullptr };
-	class CAbility*			m_pAbility = { nullptr };
+	class CPlayerStatus*	m_pPlayerStatus			= { nullptr };
+	class CAbility*			m_pAbility				= { nullptr };
 	
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};

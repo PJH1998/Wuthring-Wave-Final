@@ -49,8 +49,10 @@ float g_UIScale = 1.f; // UI Scaler
 
 #define UIFLAG_OVFL_PALETTE         8
 #define UIFLAG_SIMPLE_COLORIZE      9
+#define UIFLAG_WAVECIRCLE           10
+//#define UIFLAG_.. distort? dessolve?
 
-#define UIFLAG_END                  10
+#define UIFLAG_END                  11
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -841,7 +843,70 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             float fCooldownAngle = 2.f * PI * fCooldown;  // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
             
             
-
+            // 텍스쳐 샘플링 전에 선제적으로 UV 제어
+            //if (isDistort)      // for line 600
+            //{
+            //    const float fAdditionalStrength = 0.2f;
+            //    const float fUVSlideMutiplier = 0.2f;
+            //    
+            //    // 여기서 이제 받아온 값에 따른 변화..?
+            //    
+            //    
+            //    // 1. 시간에 따라 x축으로 uv 슬라이딩 (노이즈들 한정)
+            //    float2 calcedCoord      = In.vTexcoord;
+            //    calcedCoord.x += ( fTimeElapsed * fUVSlideMutiplier );
+            //    calcedCoord.x = frac(calcedCoord.x);
+            //    
+            //    float2 distortSample    = g_TextureExtra0.Sample(DefaultSampler, calcedCoord).xy;  // xy (0 ~ 1)
+            //    float  noiseSample      = g_TextureExtra1.Sample(DefaultSampler, calcedCoord).x;   // x  (0 ~ 1)
+            //    
+            //    float fFinalStrength = fAdditionalStrength * fDistortStrength * noiseSample;        // 0 ~ 0.2 (fAdditionalStrength)
+            //    
+            //    
+            //    // 2. 일단, 0~1 의 값을 -1 ~ 1 로 변경 후 multiply ..   -0.2 ~ 0.2 (-+fAdditionalStrength)
+            //    distortSample = lerp(-1.f, 1.f, distortSample);
+            //    distortSample *= fFinalStrength; // 값 제어
+            //    
+            //    //noiseSample = lerp(-1.f, 1.f, noiseSample);
+            //    //noiseSample *= fFinalStrength;
+            //    
+            //    
+            //    // 3. fixedUV 제어?
+            //    fixedUV += distortSample;
+            //}
+            
+            
+            //if (isDistort)
+            //{
+            //    const float fAdditionalStrength = 0.2f;
+            //    const float fUVSlideMutiplier = 0.2f;
+            //    
+            //    float2 noiseUV   = localUV * 2.0f;
+            //    noiseUV.x += fTimeElapsed * fUVSlideMutiplier;
+            //    float  noiseSample  = g_TextureExtra1.Sample(DefaultSampler, noiseUV).r; // 0~1
+            //    
+            //    // 1. 로컬 UV 기준으로 중심에서의 방향/거리 계산
+            //    float2 center     = float2(0.5f, 0.5f);     // 로컬 UV의 중앙
+            //    float2 fromCenter = localUV - center;       // 현재 포커싱중인 점의 중점기준 상대위치를 구함
+            //    float  dist       = length(fromCenter);     // dist화
+            //
+            //    // 거리 벡터의 normalize. 단 중점은 0나누기하면 안되니까 예외처리.   
+            //    // 이는 최종적으로 가중치에 의해 변화할 uv 변환량임. 정규화를 하였으므로, 정중앙이 아니라면 가중치를 주었을 때에 일정한 방향으로 밀릴 것.
+            //    float2 dirNormal = (dist > 0.0001f) ? fromCenter / dist : float2(0.0f, 0.0f);           // <<< 
+            //    
+            //    float fFinalStrength = fAdditionalStrength * fDistortStrength * noiseSample;
+            //    
+            //    
+            //    
+            //
+            //    // 4. 최종 오프셋 크기
+            //    //float offsetAmount = wave * radialFalloff * fDistortStrength * fMaxOffset * noiseSample;
+            //    float offsetAmount = fDistortStrength * fFinalStrength;
+            //
+            //    // 5. UV를 "중심 방향"으로만 밀어줌 (방사형)
+            //    fixedUV += dirNormal * -offsetAmount;
+            //
+            //}
             
             
             
@@ -1290,10 +1355,66 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             return Out;
         }
-        default:
+        case UIFLAG_WAVECIRCLE:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
-            return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+            return Out;
+            
+            //// ==============================
+            //// * [10] Wave Circle
+            //// ==============================
+            //// * matrix info
+            //// [ISDISTORT] [TIMEELAPSED] [DISTORTSTRENGTH]
+            //// 
+            //// ==============================
+            //bool isDistort          = _BOOL(In.mExtra0.x);
+            //float fTimeElapsed      = In.mExtra0.y;
+            //float fDistortStrength  = In.mExtra0.z;
+            //
+            //float2 localUV = In.vTexcoord;
+            //
+            //    
+            //
+            //if (isDistort)
+            //{
+            //    const float fAdditionalStrength = 0.2f;
+            //    const float fUVSlideMutiplier = 0.2f;
+            //    
+            //    float2 noiseUV   = localUV * 2.0f;
+            //    noiseUV.x += fTimeElapsed * fUVSlideMutiplier;
+            //    float  noiseSample  = g_TextureExtra1.Sample(DefaultSampler, noiseUV).r; // 0~1
+            //    
+            //    // 1. 로컬 UV 기준으로 중심에서의 방향/거리 계산
+            //    float2 center     = float2(0.5f, 0.5f);     // 로컬 UV의 중앙
+            //    float2 fromCenter = localUV - center;       // 현재 포커싱중인 점의 중점기준 상대위치를 구함
+            //    float  dist       = length(fromCenter);     // dist화
+            //
+            //    // 거리 벡터의 normalize. 단 중점은 0나누기하면 안되니까 예외처리.   
+            //    // 이는 최종적으로 가중치에 의해 변화할 uv 변환량임. 정규화를 하였으므로, 정중앙이 아니라면 가중치를 주었을 때에 일정한 방향으로 밀릴 것.
+            //    float2 dirNormal = (dist > 0.0001f) ? fromCenter / dist : float2(0.0f, 0.0f);           // <<< 
+            //    
+            //    float fFinalStrength = fAdditionalStrength * fDistortStrength * noiseSample;
+            //    
+            //    
+            //    
+            //
+            //    // 4. 최종 오프셋 크기
+            //    //float offsetAmount = wave * radialFalloff * fDistortStrength * fMaxOffset * noiseSample;
+            //    float offsetAmount = fDistortStrength * fFinalStrength;
+            //
+            //    // 5. UV를 "중심 방향"으로만 밀어줌 (방사형)
+            //    fixedUV += dirNormal * -offsetAmount;
+            //
+            //}
+            //
+            //
+            //
+            //Out.vColor.a = vColorTex.a * (1.f - g_AlphaStrength);
+        }
+        default:
+        {
+                Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+                return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
         }
     }
     
