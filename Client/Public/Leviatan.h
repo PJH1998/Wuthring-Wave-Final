@@ -69,6 +69,8 @@ private:
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
 	CAttackVolume* m_pParryVolume = { nullptr, };
 	vector<_uint>			m_ShaderIndices;
+	vector<_float3>			m_BowOffsets;
+	const _float4x4*		m_pBowSocket = { nullptr };
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};

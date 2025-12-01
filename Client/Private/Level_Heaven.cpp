@@ -10,6 +10,9 @@
 #include "Corosaurus.h"
 #include "Projectile.h"
 #include "AoEDoT.h"
+#include "Leviatan.h"
+#include "Levi_Alter.h"
+#include "Levi_Ray.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -316,6 +319,66 @@ void CLevel_Heaven::Ready_CoroSaurus()
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &CoroDesc)))
 		CRASH("Failed Ready Monster");
+}
+
+void CLevel_Heaven::Ready_Leviatan()
+{
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("Leviatan");
+
+	CLeviatan::LEVIATAN_DESC MobDesc{};
+	MobDesc.eCurLevel = m_eCurLevel;
+	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
+	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
+	MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Leviatan"));
+	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	MobDesc.fSpeedPerSec = 10.f;
+	MobDesc.vInitPosition = _float3(0.f, 0.f, 0.f);
+	MobDesc.pAnimationTag = "Stand2";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
+	MobDesc.fHP = pInfo->fMaxHp;
+	MobDesc.fAttackDmg = pInfo->fAttack;
+	MobDesc.fMaxStamina = pInfo->fMaxStamina;
+	MobDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
+	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &MobDesc)))
+		CRASH("Failed Ready Leviatan");
+
+	CLevi_Alter::ALTER_DESC AlterDesc{};
+	AlterDesc.eCurLevel = m_eCurLevel;
+	AlterDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	AlterDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	AlterDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Levi_Alter"));
+	AlterDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	AlterDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	AlterDesc.fSpeedPerSec = 10.f;
+	AlterDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
+	AlterDesc.fAttackDmg = pInfo->fAttack;
+	AlterDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
+
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Alter"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviAlter"), 8, &AlterDesc)))
+		CRASH("Failed Ready Alter");
+
+	CLevi_Ray::LEVIRAY_DESC RayDesc{};
+	RayDesc.eType = TEXT_COLOR_TYPE::DARK;
+	RayDesc.fLifeTime = 1.f;
+	RayDesc.fAttackDamage = pInfo->fAttack;
+	RayDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	RayDesc.iTargetLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	RayDesc.vExtent = _float3(1.f, 1.f, 100.f);
+	//RayDesc.wstrEffectTag = ;
+
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviRay_S"), 16, &RayDesc)))
+		CRASH("Failed Ready Ray");
+
+	RayDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL);
+	RayDesc.fAttackDamage = pInfo->fAttack * 1.5f;
+	RayDesc.vExtent = _float3(2.f, 2.f, 100.f);
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviRay_B"), 2, &RayDesc)))
+		CRASH("Failed Ready Ray");
 }
 
 void CLevel_Heaven::Ready_Effect()

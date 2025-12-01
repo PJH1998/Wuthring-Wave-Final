@@ -57,7 +57,7 @@ public:
 
 private:
 	//CAnimMachine* m_pAnimMachineCom = { nullptr };
-
+	ATTACK_TYPE				m_eType{};
 	_float4					m_vBaseColor{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};

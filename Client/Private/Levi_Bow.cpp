@@ -119,6 +119,20 @@ void CLevi_Bow::Render()
 
 }
 
+void CLevi_Bow::Change_Offset(LEVIBOW_DESC& Desc)
+{
+#ifdef _DEBUG
+	m_vOffsetPos = Desc.vOffsetPos;
+	m_vOffsetRot = Desc.vOffsetRadian;
+#else
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+		XMQuaternionRotationRollPitchYaw(Desc.vOffsetRadian.x, Desc.vOffsetRadian.y, Desc.vOffsetRadian.z),
+		XMVectorSetW(XMLoadFloat3(&Desc.vOffsetPos), 1.f));
+	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
+#endif // _DEBUG
+
+}
+
 HRESULT CLevi_Bow::Bind_Resources()
 {
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))

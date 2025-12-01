@@ -183,6 +183,7 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
 	m_fHP = pDesc->fMaxHp;
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));

@@ -37,6 +37,8 @@ public:
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg) {};
 
+
+	void			Change_Offset(LEVIBOW_DESC& Desc);
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };

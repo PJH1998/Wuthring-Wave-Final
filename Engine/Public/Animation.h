@@ -13,7 +13,8 @@ private:
 public:
 	const _char*		Get_Name() { return m_szName; }
 	const vector<class CChannel*>& Get_Channels() const { return m_Channels; }
-	void				Set_CurrentTrackPosition(_float fTrackPos) { m_fCurrentTrackPosition = fTrackPos; m_iNotifyIndex = 0; }
+	//void				Set_CurrentTrackPosition(_float fTrackPos) { m_fCurrentTrackPosition = fTrackPos; m_iNotifyIndex = 0; }
+	void				Set_CurrentTrackPosition(_float fTrackPos);
 	_float				Get_Duration() { return m_fDuration; }
 	
 #ifdef _DEBUG

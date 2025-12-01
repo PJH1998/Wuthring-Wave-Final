@@ -13,6 +13,7 @@
 #include "PatternDummy.h"
 #include "Leviatan.h"
 #include "Levi_Alter.h"
+#include "Levi_Ray.h"
 #pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
@@ -513,6 +514,26 @@ void CLevel_Test::Ready_Leviatan()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Alter"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviAlter"), 8, &AlterDesc)))
 		CRASH("Failed Ready Alter");
+
+	CLevi_Ray::LEVIRAY_DESC RayDesc{};
+	RayDesc.eType = TEXT_COLOR_TYPE::DARK;
+	RayDesc.fLifeTime = 1.f;
+	RayDesc.fAttackDamage = pInfo->fAttack;
+	RayDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	RayDesc.iTargetLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	RayDesc.vExtent = _float3(1.f, 1.f, 100.f);
+	//RayDesc.wstrEffectTag = ;
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviRay_S"), 16, &RayDesc)))
+		CRASH("Failed Ready Ray");
+
+	RayDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL);
+	RayDesc.fAttackDamage = pInfo->fAttack * 1.5f;
+	RayDesc.vExtent = _float3(2.f, 2.f, 100.f);
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviRay_B"), 2, &RayDesc)))
+		CRASH("Failed Ready Ray");
 }
 
 void CLevel_Test::Ready_UI()

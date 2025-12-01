@@ -25,6 +25,7 @@
 #include "Levi_Alter.h"
 #include "Levi_Bayonet.h"
 #include "Levi_Bow.h"
+#include "Levi_Ray.h"
 #pragma endregion
 
 
@@ -440,6 +441,11 @@ HRESULT CLoader_Test::Load_Leviatan()
 	// Prototype_GameObject_Levi_Bow
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Bow"),
 		CLevi_Bow::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Ray
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
+		CLevi_Ray::Create(m_pDevice, m_pContext))))
 		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;

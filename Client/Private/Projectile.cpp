@@ -25,6 +25,7 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	m_iTargetLayers = pDesc->iTargetLayers;
 	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_isCollisionDestroy = pDesc->isCollisionDestroy;
 	m_fDelay = 0.2f;
 	m_isActivate = false;
     return S_OK;
@@ -59,7 +60,8 @@ void CProjectile::Late_Update(_float fTimeDelta)
 {
 	if (m_isCollision)
 	{
-		m_isActivate = false;
+		if(m_isCollisionDestroy || m_fLifeTime >= 10.f)
+			m_isActivate = false;
 		m_pRigidBodyCom->IsActivate(false);
 		return;
 	}

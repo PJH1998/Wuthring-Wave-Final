@@ -68,16 +68,21 @@ void CLevi_Alter::Update(_float fTimeDelta)
 		UnActive_Resources();
 		return;
 	}
-	_vector vVelocity = m_pTransformCom->Get_Velocity();
-	if (m_isDist_Interp_Enable)
+	if(m_eType == ATTACK_TYPE::SWORD)
 	{
-		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
-		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
+		_vector vVelocity = m_pTransformCom->Get_Velocity();
+		if (m_isDist_Interp_Enable)
+		{
+			_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
+			//m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
+		}
+		else
+			m_pColliderCom->Update(vVelocity / fTimeDelta);
 	}
-	else
-		m_pColliderCom->Update(vVelocity / fTimeDelta);
+	else if(m_eType == ATTACK_TYPE::BOW)
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 
-
+	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	//5. 파츠 갱신
 	for (auto& Pair : m_PartObjects)
@@ -162,6 +167,7 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	ALTER_RESET* pDesc = static_cast<ALTER_RESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_pTransformCom->Save_PreviousPosition();
 	m_strPatternKey = pDesc->strPatternKey;
 	size_t Index = pDesc->strPatternKey.find("|");
 	_string wstrAnimTag = pDesc->strPatternKey.substr(0, Index);
@@ -169,6 +175,7 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_strAnimKey = wstrAnimTag;
 	//m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
+	m_eType = pDesc->eType;
 	if(Index == pDesc->strPatternKey.npos)
 		m_pModelCom->Set_TrackPosition(m_strAnimKey, m_Tracks[m_strAnimKey].first);
 	else
@@ -183,7 +190,10 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	else if (pDesc->eType == ATTACK_TYPE::BOW)
 	{
 		m_PartObjects[TEXT("Part_Bow")]->SetActivate(true);
+		m_isTurnLerp = true;
 	}
+	m_pColliderCom->IsActivate(true);
+	m_pRigidBodyCom->IsActivate(true);
 	m_pColliderCom->Set_Gravity(false);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_isActivate = true;
@@ -333,7 +343,7 @@ void CLevi_Alter::Ready_PartObject(ALTER_DESC* pDesc)
 	BowDesc.pParentTransform = m_pTransformCom;
 	BowDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	BowDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
-	BowDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(-90.f), XMConvertToRadians(0.f));
+	BowDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
 	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bow"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bow"), &BowDesc)))
 		CRASH("Failed to Add Part : Bow");
@@ -365,6 +375,8 @@ void CLevi_Alter::UnActive_Resources()
 		Pair.second->SetActivate(false);
 		Pair.second->Reset(XMMatrixIdentity(), nullptr);
 	}
+	m_pColliderCom->IsActivate(false);
+	m_pRigidBodyCom->IsActivate(false);
 	m_isActivate = false;
 }
 
