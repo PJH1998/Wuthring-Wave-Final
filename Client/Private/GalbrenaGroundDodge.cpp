@@ -6,12 +6,12 @@
 #include "GameInstance.h"
 
 
-HRESULT CGalbrenaGroundDodge::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundDodge::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -178,7 +178,7 @@ void CGalbrenaGroundDodge::State_Reset()
         m_States[i] = false;
 }
 
-CGalbrenaGroundDodge* CGalbrenaGroundDodge::Create(class CGameObject* pOwner)
+CGalbrenaGroundDodge* CGalbrenaGroundDodge::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundDodge* pInstance = new CGalbrenaGroundDodge();
 

@@ -643,6 +643,23 @@ void CAnimationActor::Print_WorldMatrix()
 
 	OutPutDebugMatrix(TEXT("AnimActor World Matrix : "), matWorld);
 }
+
+void CAnimationActor::Change_BoneMatrixPtr(const _string& strBoneName)
+{
+	// 1. 부모 객체가 없으면 반환
+	if (nullptr == m_pParentActor)
+		return;
+
+	// 2. 부모 객체에 뼈행렬 없어도반환
+	const _float4x4* pSocketMatrix = { nullptr };
+	pSocketMatrix = m_pParentActor->Get_BoneMatrix(strBoneName);
+
+	if (nullptr == pSocketMatrix)
+		return;
+
+	m_pSocketMatrix = pSocketMatrix;
+
+}
 #endif
 
 // 1. 행렬 

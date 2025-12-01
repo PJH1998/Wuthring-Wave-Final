@@ -5,12 +5,12 @@
 #include "GalbrenaShotGun.h"
 #include "Ability.h"
 
-HRESULT CGalbrenaGroundAttack::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -102,10 +102,12 @@ void CGalbrenaGroundAttack::OnExit()
     // 콤보 카운트 초기화
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
-    m_pGalbrena->PartActivate(m_iPartType, false); 
-    m_pGalbrena->PartActivate(m_iSubPartType, false); 
+    //m_pGalbrena->PartActivate(m_iPartType, false); 
+    //m_pGalbrena->PartActivate(m_iSubPartType, false); 
 
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
+
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 _bool CGalbrenaGroundAttack::Hit_Judge()
@@ -357,7 +359,7 @@ void CGalbrenaGroundAttack::State_Reset()
         m_States[i] = false;
 }
 
-CGalbrenaGroundAttack* CGalbrenaGroundAttack::Create(class CGameObject* pOwner)
+CGalbrenaGroundAttack* CGalbrenaGroundAttack::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundAttack* pInstance = new CGalbrenaGroundAttack();
 

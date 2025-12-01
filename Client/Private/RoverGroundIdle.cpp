@@ -6,12 +6,12 @@
 #include "RoverState_Enum.h"
 
 
-HRESULT CRoverGroundIdle::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundIdle::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     // Idle 애니메이션 리스트 셋업
@@ -342,7 +342,7 @@ void CRoverGroundIdle::State_Reset()
         m_States[i] = false;
 }
 
-CRoverGroundIdle* CRoverGroundIdle::Create(class CGameObject* pOwner)
+CRoverGroundIdle* CRoverGroundIdle::Create(CCharacter* pOwner)
 {
     CRoverGroundIdle* pInstance = new CRoverGroundIdle();
 

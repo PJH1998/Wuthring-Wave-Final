@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaBayonet.h"
 
-HRESULT CAugustaGroundAttack::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -298,7 +298,7 @@ void CAugustaGroundAttack::State_Reset()
         m_States[i] = false;
 }
 
-CAugustaGroundAttack* CAugustaGroundAttack::Create(class CGameObject* pOwner)
+CAugustaGroundAttack* CAugustaGroundAttack::Create(CCharacter* pOwner)
 {
     CAugustaGroundAttack* pInstance = new CAugustaGroundAttack();
 

@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-HRESULT CAugustaGroundIdle::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundIdle::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // Idle 애니메이션 리스트 셋업
@@ -444,7 +444,7 @@ void CAugustaGroundIdle::State_Reset()
         m_States[i] = false;
 }
 
-CAugustaGroundIdle* CAugustaGroundIdle::Create(class CGameObject* pOwner)
+CAugustaGroundIdle* CAugustaGroundIdle::Create(CCharacter* pOwner)
 {
     CAugustaGroundIdle* pInstance = new CAugustaGroundIdle();
 

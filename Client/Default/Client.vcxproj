@@ -174,6 +174,8 @@
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
     <ClInclude Include="..\Public\AugustaCapture.h" />
+    <ClInclude Include="..\Public\AugustaEnergyBlade.h" />
+    <ClInclude Include="..\Public\AugustaFxObject.h" />
     <ClInclude Include="..\Public\AugustaRopeDrag.h" />
     <ClInclude Include="..\Public\AugustaRopeHook.h" />
     <ClInclude Include="..\Public\Augusta_UltiPostSFX.h" />
@@ -416,7 +418,9 @@
     <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
+    <ClCompile Include="..\Private\AugustaEnergyBlade.cpp" />
     <ClCompile Include="..\Private\AugustaFactory.cpp" />
+    <ClCompile Include="..\Private\AugustaFxObject.cpp" />
     <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />

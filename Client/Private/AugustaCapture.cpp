@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-HRESULT CAugustaCapture::Initialize(CGameObject* pOwner)
+HRESULT CAugustaCapture::Initialize(CCharacter* pCharacter)
 {
-	if (FAILED(CCaptureState::Initialize(pOwner)))
+	if (FAILED(CCaptureState::Initialize(pCharacter)))
 		return E_FAIL;
 
-	m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+	m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
 	ASSERT_CRASH(m_pAugusta);
 
 	// 1. 애니메이션 설정
@@ -145,7 +145,7 @@ void CAugustaCapture::State_Reset()
 		m_States[i] = false;
 }
 
-CAugustaCapture* CAugustaCapture::Create(CGameObject* pOwner)
+CAugustaCapture* CAugustaCapture::Create(CCharacter* pOwner)
 {
 	CAugustaCapture* pInstance = new CAugustaCapture();
 

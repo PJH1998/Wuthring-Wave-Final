@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GameSystem.h"
 
-HRESULT CAugustaGroundBurst::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundBurst::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -189,7 +189,7 @@ void CAugustaGroundBurst::State_Reset()
 }
 
 
-CAugustaGroundBurst* CAugustaGroundBurst::Create(class CGameObject* pOwner)
+CAugustaGroundBurst* CAugustaGroundBurst::Create(CCharacter* pOwner)
 {
     CAugustaGroundBurst* pInstance = new CAugustaGroundBurst();
 

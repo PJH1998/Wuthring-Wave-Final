@@ -142,6 +142,7 @@ namespace Client
 		, OUNTLINE // 3
 		, DEFAULT_WEAPON // 4
 		, DISSOLVE_WEAPON // 5
+		, ENERGY_BLADE // 6
 		, END
 	};
 

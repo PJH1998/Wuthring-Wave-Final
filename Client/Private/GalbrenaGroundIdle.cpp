@@ -6,12 +6,12 @@
 #include "GalbrenaState_Enum.h"
 
 
-HRESULT CGalbrenaGroundIdle::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundIdle::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // Idle 애니메이션 리스트 셋업
@@ -344,7 +344,7 @@ void CGalbrenaGroundIdle::State_Reset()
         m_States[i] = false;
 }
 
-CGalbrenaGroundIdle* CGalbrenaGroundIdle::Create(class CGameObject* pOwner)
+CGalbrenaGroundIdle* CGalbrenaGroundIdle::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundIdle* pInstance = new CGalbrenaGroundIdle();
 

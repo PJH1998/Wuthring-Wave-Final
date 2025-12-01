@@ -179,12 +179,13 @@ void CRover::Late_Update(_float fTimeDelta)
 	//else
 	//	m_pQTEColliderCom->Sync_Position(m_pTransformCom);
 	//
-	//if (m_IsQTEend)
-	//{
-	//	Notify_HarmonyEnd();
-	//	m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
-	//	m_IsQTEend = false;
-	//}
+
+	if (m_IsQTEend)
+	{
+		Notify_HarmonyEnd();
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
+		m_IsQTEend = false;
+	}
 
 
 	if (m_IsVisible)
@@ -323,7 +324,7 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			m_pColliderCom->Set_Position(vPos);
 			m_pColliderCom->IsActivate(true);
 
-			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			// 애니메이션 변경할 값.
 			GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));

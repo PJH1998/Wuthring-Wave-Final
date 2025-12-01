@@ -264,6 +264,20 @@ void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 
 
 }
+_vector CPlayer::Get_LookVector()
+{
+	if (nullptr == m_pTransformCom)
+		return XMVectorZero();
+	return m_pTransformCom->Get_State(STATE::LOOK);
+}
+
+_vector CPlayer::Get_Position()
+{
+	if (nullptr == m_pTransformCom)
+		return XMVectorZero();
+	return m_pTransformCom->Get_State(STATE::POSITION);
+}
+
 #pragma endregion
 
 void CPlayer::Player_KeyInput()

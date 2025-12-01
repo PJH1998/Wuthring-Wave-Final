@@ -3,12 +3,12 @@
 #include "Augusta.h"
 #include "StateMachine.h"
 
-HRESULT CAugustaAirFly::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaAirFly::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     // 애니메이션 리스트 셋업.
@@ -398,7 +398,7 @@ void CAugustaAirFly::State_Reset()
         m_States[i] = false;
 }
 
-CAugustaAirFly* CAugustaAirFly::Create(class CGameObject* pOwner)
+CAugustaAirFly* CAugustaAirFly::Create(CCharacter* pOwner)
 {
     CAugustaAirFly* pInstance = new CAugustaAirFly();
 

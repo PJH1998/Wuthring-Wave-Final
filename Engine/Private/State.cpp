@@ -3,7 +3,7 @@
 #include "StateMachine.h"
 
 
-HRESULT CState::Initialize(class CGameObject* pOwner)
+HRESULT CState::Initialize(CGameObject* pOwner)
 {
     return S_OK;
 }

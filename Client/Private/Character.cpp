@@ -709,16 +709,28 @@ void CCharacter::ClearCaptureState()
 
 _bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
-    ASSERT_CRASH(m_pInputControllerCom);
+	if (nullptr == m_pInputControllerCom)
+		return false;
     return m_pInputControllerCom->Check_AnyInput(iKeyFlag, eKeyState);
 }
 
 _bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
-    ASSERT_CRASH(m_pInputControllerCom);
+	if (nullptr == m_pInputControllerCom)
+		return false;
     return m_pInputControllerCom->Check_AllInput(iKeyFlag, eKeyState);
 }
 
+
+void CCharacter::Clear_Animation(const _string& strAnimName, _float fTrackPosition)
+{
+	if (nullptr == m_pModelCom)
+		return;
+
+	m_pModelCom->Clear_Animation(strAnimName, fTrackPosition);
+
+	
+}
 
 _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
@@ -726,6 +738,8 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
     //_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+
+	
 	
     return IsPlayAnimationEnd;
 }

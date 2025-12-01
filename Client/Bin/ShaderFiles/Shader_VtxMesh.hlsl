@@ -1110,6 +1110,68 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_GLASS(PS_IN In)
     return Out;
 }
 
+PS_OUT_LIGHT PS_MAIN_EMISSIVE_GRASS(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    if (length(vDiffuse) == 0.f)
+        vDiffuse = 1.f;
+    
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+
+
+    Out.vDiffuse = vDiffuse;
+
+    if (vMask.r == 0.f)
+        Out.vEmissive = float4((vMask.xyz), 1.f);
+
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+    
+    float4 vNormal;
+    
+    if (g_HasNormal)
+    {
+
+        vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+		
+	        
+        vNormal = normalize(vDefaultNormal * 2.f - 1.f);
+        if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        vNormal = vNormal * 0.5f + 0.5f;
+    }
+    
+    Out.vNormal = float4(vNormal.xyz, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+
+    return Out;
+}
 
 technique11 DefaultTechnique
 {
@@ -1298,7 +1360,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_ROCK_SONORO_BIG();
     }
 
-    pass Asphodel_Glass // 16
+    pass Asphodel_Glass // 17
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -1307,5 +1369,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_EMISSIVE_GLASS();
+    }
+
+    pass Emissive_Grass // 18
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_EMISSIVE_GRASS();
     }
 }

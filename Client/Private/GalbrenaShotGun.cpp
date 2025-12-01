@@ -37,6 +37,8 @@ HRESULT CGalbrenaShotGun::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
+	
+	m_fMaxDissolveTime = 0.35f;
 
     return S_OK;
 }
@@ -71,10 +73,16 @@ void CGalbrenaShotGun::Update(_float fTimeDelta)
     CProp::Update(fTimeDelta);
 
     // 1. Combine 행렬 계산
-    XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (!IsDissolve) // Dissolve가 아니라면 업데이트 계속.
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			XMLoadFloat4x4(m_pSocketMatrix) *
+			m_pParentTransform->Get_WorldMatrix());
+	}
+    
 
 	// 2. 어택 볼륨 업데이트
 	if (nullptr != m_pMainAttackVolume)
@@ -166,7 +174,6 @@ void CGalbrenaShotGun::Activate(_bool IsActivate)
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		Bind_DissolveTimer();
-
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 		
 	}

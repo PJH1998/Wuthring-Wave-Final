@@ -6,12 +6,12 @@
 #include "GameInstance.h"
 
 
-HRESULT CAugustaGroundDodge::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundDodge::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -182,7 +182,7 @@ void CAugustaGroundDodge::State_Reset()
         m_States[i] = false;
 }
 
-CAugustaGroundDodge* CAugustaGroundDodge::Create(class CGameObject* pOwner)
+CAugustaGroundDodge* CAugustaGroundDodge::Create(CCharacter* pOwner)
 {
     CAugustaGroundDodge* pInstance = new CAugustaGroundDodge();
 

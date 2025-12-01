@@ -5,12 +5,12 @@
 #include "GalbrenaState_Enum.h"
 
 // 이건 이동 Rope 로만 사용하자.
-HRESULT CGalbrenaRopeDrag::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaRopeDrag::Initialize(CCharacter* pCharacter)
 {
-	if (FAILED(CInteractionState::Initialize(pOwner)))
+	if (FAILED(CInteractionState::Initialize(pCharacter)))
 		return E_FAIL;
 
-	m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+	m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
 	ASSERT_CRASH(m_pGalbrena);
 
 	Setup_Animations();
@@ -264,7 +264,7 @@ void CGalbrenaRopeDrag::State_Reset()
 
 
 
-CGalbrenaRopeDrag* CGalbrenaRopeDrag::Create(class CGameObject* pOwner)
+CGalbrenaRopeDrag* CGalbrenaRopeDrag::Create(CCharacter* pOwner)
 {
 	CGalbrenaRopeDrag* pInstance = new CGalbrenaRopeDrag();
 
