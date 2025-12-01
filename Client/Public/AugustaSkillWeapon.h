@@ -18,7 +18,7 @@ public:
 		
 	} AUGUSTA_SKILLPROP_DESC;
 
-protected:
+private:
 	explicit CAugustaSkillWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAugustaSkillWeapon(const CPartObject& Prototype);
 	virtual ~CAugustaSkillWeapon() = default;

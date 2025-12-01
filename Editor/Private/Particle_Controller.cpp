@@ -240,6 +240,8 @@ void CParticle_Controller::Particle_Tab()
 
 					ImGui::Checkbox("Pivot", &(m_pSelectedParticleDesc->IsPivot));
 
+					ImGui::Checkbox("IsLoop", &(m_pSelectedParticleDesc->IsLoop));
+
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
                     ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass), 1.f, 0, 6);

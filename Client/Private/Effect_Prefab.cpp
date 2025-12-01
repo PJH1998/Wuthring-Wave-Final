@@ -41,9 +41,10 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
     //m_vLifeTime = pDesc->vLifeTime;
     //프리팹 라이프 타임 필요할까 ?
 
-    m_vLifeTime.y = 8.f;
+    m_vLifeTime.y = pDesc->vLifeTime.y;
     m_vLifeTime.x = 0.f;
-
+	m_IsLoop = pDesc->IsLoop;
+	
     m_isActivate = false;
   
     XMStoreFloat4x4(&m_SpawnMatrix, XMMatrixIdentity());
@@ -89,13 +90,16 @@ void CEffect_Prefab::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if (m_vLifeTime.x >= m_vLifeTime.y)
-    {
-        m_isActivate = false;
-        Reset_Prefab_Info();
-    }
-    else
-        m_vLifeTime.x += fTimeDelta;
+	if (!m_IsLoop)
+	{
+		if (m_vLifeTime.x >= m_vLifeTime.y)
+		{
+			m_isActivate = false;
+			Reset_Prefab_Info();
+		}
+		else
+			m_vLifeTime.x += fTimeDelta;
+	}
 
     for (auto& Children : m_EffectChildren)
     {

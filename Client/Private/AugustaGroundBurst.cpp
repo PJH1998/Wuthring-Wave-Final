@@ -37,26 +37,26 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 
     _string strBoneName = "WeaponProp02";
     m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
+	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	
+	m_pAugusta->PartActivate(m_iSubPartType, true);
+	m_pAugusta->Clear_PartAnimation(CAugusta::PARTTYPE::PART_HEADPROP, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
+	
+	//m_pAugusta->Set_AnimationToParts(CAugusta::PARTTYPE::PART_HEADPROP, "Burst01");
 
-	m_pAugusta->Set_Gravity(false);
-
-	// 궁극기 실행 시?
-	//m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
-	// 끝나고 유지 시킬것인지, 돌아올것인지
 
 
-	///ASSERT_CRASH(m_pTransformCom);
-	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f); // Dodge 시간 동안 느리게하기?
+	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	
-
-	// Test
-	m_pAugusta->Set_OutLineVisible(false);
+	m_pAugusta->Set_Gravity(false);
+	m_pAugusta->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
 }
 
 void CAugustaGroundBurst::OnUpdate(_float fTimeDelta)
@@ -84,13 +84,12 @@ void CAugustaGroundBurst::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
+	m_pAugusta->PartActivate(m_iSubPartType, false);
+
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
-
-	// 공격 콜라이더 비활성화
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
-
 	m_pAugusta->Set_OutLineVisible(true);
 }
 
@@ -104,19 +103,25 @@ void CAugustaGroundBurst::Handle_Input()
 void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
 {
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
-
-    // Target이 존재한다면? => Auto Target
-    // m_pAugusta->Rotate_Target();
-
-    if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
-    {
-       /* m_pAugusta->Play_PartAnimation(
-            m_iPartType,
-            m_Animations[m_iCurrentAnimIdx].strAnimName,
-            fTimeDelta, nullptr, 1.f // 파츠 애니메이션 적용하는게 아님. => 적용해서 떴던거.
-        );*/
-    }
     
+	EAugustaBurstType eBurstType = static_cast<EAugustaBurstType>(m_iCurrentAnimIdx);
+
+	if (eBurstType == EAugustaBurstType::BURST01)
+	{
+		m_pAugusta->Play_PartAnimation(
+			CAugusta::PARTTYPE::PART_HEADPROP,
+			"Burst01",
+			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+		);
+	}
+	else
+	{
+		m_pAugusta->Play_PartAnimation(
+			CAugusta::PARTTYPE::PART_HEADPROP,
+			"Stand1_idle",
+			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+		);
+	}
 }
 
 void CAugustaGroundBurst::Check_Physcis(_float fTimeDelta)
@@ -162,6 +167,7 @@ void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaBurstType::BURST_STAND);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+			m_pAugusta->Set_AnimationToParts(CAugusta::PARTTYPE::PART_HEADPROP, "Stand1_idle");
             //m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaBurstType::BURST_STAND));
             return;
         }

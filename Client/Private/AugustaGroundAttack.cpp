@@ -37,13 +37,19 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 
 
 	// 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
-	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; 
+	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
 
 	_string strBoneName = "WeaponProp02";
 	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
 	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
+
+
+	m_pAugusta->PartActivate(m_iSubPartType, true);
+	m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 
 	// 6. Target이 존재한다면? => Auto Target
 	m_pAugusta->Rotate_Target();
@@ -81,6 +87,7 @@ void CAugustaGroundAttack::OnExit()
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
     m_pAugusta->PartActivate(m_iPartType, false); 
+    m_pAugusta->PartActivate(m_iSubPartType, false); 
 
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
@@ -160,15 +167,19 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
     if (m_States[HEAVY_ATTACK_PENDING])
         m_fAttackPressTime += fTimeDelta;
 	
-	// 5. Target이 존재한다면? => Auto Target
-	//m_pAugusta->Rotate_Target();
-
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     m_pAugusta->Play_PartAnimation(
         m_iPartType,
         m_Animations.at(m_iCurrentAnimIdx).strAnimName,
         fTimeDelta, nullptr
     );
+
+	// HeadProp은 계속실행.
+	m_pAugusta->Play_PartAnimation(
+		CAugusta::PARTTYPE::PART_HEADPROP,
+		"Stand1_idle",
+		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+	);
 }
 
 void CAugustaGroundAttack::Check_Physics(_float fTimeDelta)

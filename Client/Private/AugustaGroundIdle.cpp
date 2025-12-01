@@ -36,7 +36,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
-
+	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
     if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02)
     {
         _string strBoneName = "Root";
@@ -51,6 +51,10 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 		m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+
+		m_pAugusta->PartActivate(m_iSubPartType, true);
+		m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 	}
 
 	if (eIdleType == EAugustaIdleType::STANDCHANGE)
@@ -59,6 +63,10 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 		m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+
+		m_pAugusta->PartActivate(m_iSubPartType, true);
+		m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 	}
 
     // 3. Idle 상태 초기화
@@ -95,6 +103,8 @@ void CAugustaGroundIdle::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
+	m_pAugusta->PartActivate(m_iSubPartType, false);
+
 	m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_fFallTime = 0.f;
 }
@@ -166,6 +176,20 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 		);
     }
+
+	if (eIdleType != EAugustaIdleType::STAND1_ACTION02)
+	{
+		// HeadProp은 계속 실행.
+		m_pAugusta->Play_PartAnimation(
+			m_iSubPartType,
+			"Stand1_idle",
+			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+		);
+	}
+	
+	cout << m_Animations.at(m_iCurrentAnimIdx).strAnimName << endl;
+
+	
     
 }
 

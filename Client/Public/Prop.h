@@ -40,6 +40,9 @@ public:
 	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) {};
 	virtual void Volume_Activate(_bool IsActive);
 
+
+	void Set_AnimationName(const _string& strAnimName) { m_strCurrentAnimName = strAnimName; } // 계속 애니메이션 구동할 아이들.
+
 	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
 	_bool Is_Visible() { return m_IsVisible; }
 public:
