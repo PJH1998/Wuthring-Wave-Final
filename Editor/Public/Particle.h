@@ -28,6 +28,7 @@ public:
 		_int	iMaskFlag = 0;
 
 		_bool	IsPivot = false;
+		_bool	IsLoop = false;
 
 		_bool	IsSprite = false;
 		_int    iRows = 0;
@@ -74,6 +75,7 @@ private:
 
 	_int						m_iMaskFlag = 0;
 
+	_bool						m_IsLoop = false;
 	_bool						m_IsPivot = false;
 	_bool						m_IsRoot = false;
 	_float4x4					m_ComBindMatrix = {  };
