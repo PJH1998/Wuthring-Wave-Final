@@ -296,12 +296,18 @@ PS_OUT PS_ENERGY_BLADE(PS_IN In) // Dissolve Ãß°¡.
     
     float fBladeMask = step(0.88f, In.vTexcoord.y);
     
-    float3 vOrangeColor = float3(1.f, 0.2f, 0.f);
+    // °Ë³¯ ºÎºÐÀ» Á¦¿ÜÇÑ ºÎºÐÀº ¹à±â¸¦ Á¦¾î.
+    float fGlowRatio = lerp(0.05f, 1.f, fBladeMask);
     
-    float fIntensity = 5.f; // ºí·ë¸Ôµµ·Ï ÁõÆø.
     // ÃÖÁ¾ ¹ß±¤ »ö»ó °è»ê.
-    Out.vEmissive = float4(vOrangeColor * fIntensity * fBladeMask, 1.0f);
     
+    float3 vColor = g_vEnergyColor.rgb;
+    float fIntensity = g_fEnergyIntensity; // ºí·ë¸Ôµµ·Ï ÁõÆø.
+    
+    //float fWeight = Luminance(vColor);
+    //if (fWeight >= g_fEmissiveThreshold)
+    //    Out.vEmissive = float4(vColor * fIntensity * fGlowRatio, 1.0f);
+    Out.vEmissive = float4(vColor * fIntensity * fGlowRatio, 1.0f);
 
     vNormal.xyz = vNormal * 0.5f + 0.5f;
     Out.vNormal = vNormal;

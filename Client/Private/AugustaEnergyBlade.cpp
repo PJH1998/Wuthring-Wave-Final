@@ -37,11 +37,9 @@ HRESULT CAugustaEnergyBlade::Initialize_Clone(void* pArg)
 	m_pTransformCom->Scale({ 2.f, 2.f, 2.f }); // 크기 조정.
 
 	m_fTime = 0.f;
-	m_vEnergyColor = { 1.0f, 0.6f, 0.1f, 1.0f };
-	//m_vEnergyColor = { 1.0f, 0.1f, 0.05f, 1.0f };
 	m_vScrollSpeed = { 1.f, 0.f };
+	m_vEnergyColor = { 0.3f, 0.1f, 0.05f, 1.0f };
 	m_fEnergyIntensity = 3.f;
-	//m_fEnergyIntensity = 3.f;
 
     return S_OK;
 }
@@ -54,6 +52,12 @@ void CAugustaEnergyBlade::Priority_Update(_float fTimeDelta)
 
 	if (m_IsAnimationEnd)
 		m_isActivate = false;
+
+#ifdef _DEBUG
+
+#endif // _DEBUG
+
+
 }
 
 void CAugustaEnergyBlade::Update(_float fTimeDelta)
