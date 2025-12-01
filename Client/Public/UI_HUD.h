@@ -40,6 +40,7 @@ public:
 
 private:
 	HRESULT					Ready_Components(void* pArg);
+	HRESULT					Ready_ChildExtraComponents();
 	HRESULT					Ready_Presets();
 
 	HRESULT					Ready_BossUINameText();
@@ -127,7 +128,7 @@ private:
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
 	array<array<_float2, 2>, 5>						m_arrUtilCoordPresets = {};
 	_uint m_iSelectedCHIndex = 0;
-
+	_float m_fElapsedTime = 0.f;
 
 private:
 	_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);

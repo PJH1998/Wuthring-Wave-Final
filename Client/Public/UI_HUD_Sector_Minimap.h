@@ -31,8 +31,12 @@ private:
 
 private:
 	void			Update_TargetDegrees();
+	void			Update_RelativePos();
 
 	void			Update_Instances();
+
+private:
+	_float2			Calc_RelativePos(_float3* pTargetPos, _float fMultiplierRatio);
 
 private:
 	// 매 프레임 돌릴만한 건 캐싱..

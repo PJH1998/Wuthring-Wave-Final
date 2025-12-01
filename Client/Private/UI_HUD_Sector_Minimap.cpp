@@ -132,8 +132,22 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 
 	//std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
 
+	//_vector vPlayerLook = m_pGameSystem->Get_PlayerLook();
+	//vPlayerLook = XMVector3Normalize(vPlayerLook);
+	//_float fPlayerLookDirX = XMVectorGetX(vPlayerLook);
+	//_float fPlayerLookDirZ = XMVectorGetZ(vPlayerLook);
+	//
+	//_float fPlayerDegreeByY = (360.f - RadiansToDegrees(atan2f(fPlayerLookDirX, fPlayerLookDirZ)));				// 사잇각의 degree 화 및 -+ 데이터 포함. 그냥 acos는 -+ 정보포함X
+	//if (fPlayerDegreeByY >= 360.f)	fPlayerDegreeByY = fPlayerDegreeByY - 360.f;
+	//if (fPlayerDegreeByY < 0.f)		fPlayerDegreeByY = fPlayerDegreeByY + 360.f;
+
 	// 이후 플레이어 방향 정보 가져올 수 있게 된다면 그에 맞게 회전값 적용
 	m_fPlayerDirDegree = camDegreeByY;
+}
+
+void CUI_HUD_Sector_Minimap::Update_RelativePos()
+{
+	// ㅁ?ㄹ
 }
 
 void CUI_HUD_Sector_Minimap::Update_Instances()
@@ -177,6 +191,21 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 		camPlayerInstDesc[i].vSInstLook		= *reinterpret_cast<_float4*>(&matStoreResult._31);
 		camPlayerInstDesc[i].vSInstTrans	= *reinterpret_cast<_float4*>(&matStoreResult._41);
 	}
+}
+
+_float2 CUI_HUD_Sector_Minimap::Calc_RelativePos(_float3* pTargetPos, _float fMultiplierRatio)
+{
+	_float2 vTargetPos = _float2(pTargetPos->x, pTargetPos->y);		// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
+	_float2 vPlayerPos = _float2(0.f, 0.f);							// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
+
+	_float2 vRelativePos = _float2(
+		vTargetPos.x - vPlayerPos.x,
+		vTargetPos.y - vPlayerPos.y
+	);
+
+	_float2 vRatioEnabledPos = _float2(vRelativePos.x * fMultiplierRatio, vRelativePos.y * fMultiplierRatio);
+
+	return vRatioEnabledPos;
 }
 
 CUI_HUD_Sector_Minimap* CUI_HUD_Sector_Minimap::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

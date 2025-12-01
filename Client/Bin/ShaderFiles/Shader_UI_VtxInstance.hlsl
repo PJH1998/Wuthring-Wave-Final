@@ -811,7 +811,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * matrix info [size : 2] (skillbtn_e, skillbtn_r)
             // [CDRATE] [COLORMUL_1] [COLORMUL_2] [IS_USECUSTOMCOLOR]
             // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
-            // [STARTRATIO(DEG)] -
+            // [STARTRATIO(DEG)] [ISDISTORT(OPTION)] [TIMEELAPSED(OPTION)] [DISTORTSTRENGTH(OPTION)]
+            // -
             // ==============================
             float fCooldown = In.mExtra0.x; // 0 ~ 1.
             float fColorMul1 = In.mExtra0.y;
@@ -819,6 +820,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             bool isUseCustomColor = _BOOL(In.mExtra0.w);
             float4 vCustomColor = In.mExtra1.rgba;
             float fStartRatio = In.mExtra2.x;       // 각도(degree) 및 시계방향 기준. 0 기준 12시부터 시작.
+            
+            bool isDistort = _BOOL(In.mExtra2.y);
+            float fTimeElapsed = In.mExtra2.z;
+            float fDistortStrength = In.mExtra2.w;
             
             // g_fLeftCDRate 가 1 일때는 밝은 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
@@ -836,7 +841,15 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             float fCooldownAngle = 2.f * PI * fCooldown;  // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
             
             
+
+            
+            
+            
+            
             Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+            
+            
+
             
             if (angle <= fCooldownAngle)
             {
@@ -859,6 +872,9 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 Out.vColor.a *= (1 - g_AlphaStrength);
                 return Out;
             }
+            
+            
+            
             
         } break;
         
@@ -1225,7 +1241,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 
                 //vFinalColorTex.rgb = lerp(vCurrColor, vDestColor, smoothstep(0, 1, fChangeRatio));
                 
-                static const float g_fNoiseTileSize = 128.0f; // 상수로 제어
+                const float g_fNoiseTileSize = 128.0f; // 상수로 제어
 
                 float2 vNoiseUV = vFixedScreenPos / g_fNoiseTileSize;
                 vNoiseUV = frac(vNoiseUV);

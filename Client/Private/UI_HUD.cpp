@@ -51,6 +51,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
         L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json";
     Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
+	Ready_ChildExtraComponents();
 
     // Load Animations from json.
     vector<_wstring> vecAnimFilePaths = {
@@ -115,6 +116,8 @@ void CUI_HUD::Update(_float fTimeDelta)
 
 	Update_Text_PlayerHP();
 
+
+	m_fElapsedTime += fTimeDelta;
     __super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
@@ -224,6 +227,19 @@ HRESULT CUI_HUD::Ready_Components(void* pArg)
     return S_OK;
 }
 
+HRESULT CUI_HUD::Ready_ChildExtraComponents()
+{
+	//m_pUI_Skill_ReadyFrame 에 추가 텍스쳐 적용
+
+	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_DistortionMap0_DM");	// Extra 0
+	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_Caustic_Noise");		// Extra 1
+
+
+
+
+	return S_OK;
+}
+
 HRESULT CUI_HUD::Ready_Presets()
 {
 	// ========== Image Sizes ==========
@@ -260,6 +276,11 @@ HRESULT CUI_HUD::Ready_Presets()
 	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::FLIGHT)]	= {_float2(0.25f, 0.50f), _float2(0.75f, 1.00f)}; 
 	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::LEVITATOR)]= {_float2(0.25f, 0.50f), _float2(0.50f, 0.75f)}; 
 	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::NOTHING)]	= {_float2(0.75f, 1.00f), _float2(0.75f, 1.00f)};
+
+
+
+
+
 
 	return S_OK;
 }
@@ -460,7 +481,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
     // ==============================
-	// * [Change Update] Cooldown
+	// * [Change Update] CH Change Cooldown
 	// ==============================
     for (_uint i = 0; i < CH_END; i++)
     {
@@ -581,12 +602,27 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
 
+	//static _float fDistortStrength = 0.f;
+	//if (m_pGameInstance->Rand_Normal() <= 0.1f)
+	//	fDistortStrength += 0.2f;
+	//fDistortStrength = (fDistortStrength - 0.03f < 0) ? 0.f : fDistortStrength - 0.03f;
+	//_bool isDistortOn = (fUltGuage == 1.f);
+	//
+	//if (fDistortStrength != 0.f)
+	//	int i = 10;
+
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._11) = (1.f - fUltGuage / 1.f);		// CD or Resource Rate
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._12) = 0.f;							// ColorMul1
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._13) = (fUltGuage >= 1.f) ? 1.f : 0.85f ;							// ColorMul2
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._14) = static_cast<_float>(true);	// Is Use CustomColor?
 	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21) = matCustomColor[m_iSelectedCHIndex];	// CustomColor
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._31) = 0.f;							// CD Start Degree
+
+	//*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._32) = static_cast<_float>(isDistortOn);	// isDistort
+	//*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._33) = m_fElapsedTime;				// timeElapsed
+	//*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._34) = fDistortStrength * 2.f;		// distortStrength // 랜덤하게 여기서 보간넣고 줘야..
+	//
+	//std::cout << "[UI_HUD::Update_UI_SkillSection] Strength : " << fDistortStrength << std::endl;
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
