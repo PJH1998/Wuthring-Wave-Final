@@ -1387,6 +1387,7 @@ void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRe
 	Rect["MyType"] = pRectDesc->eMyType;
 	Rect["Root"] = pRectDesc->IsRootOn;
 	Rect["Loop"] = pRectDesc->IsLoop;
+	Rect["Sprite"] = pRectDesc->IsSprite;
 
 	Rect["TextureTag"] = WStringToString(pRectDesc->strTextureTag);
 
@@ -1399,6 +1400,9 @@ void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRe
 
 	Rect["SizeX"] = pRectDesc->fXSize;
 	Rect["SizeY"] = pRectDesc->fYSize;
+
+	Rect["Row"] = pRectDesc->iRows;
+	Rect["Col"] = pRectDesc->iCols;
 
 	json PosJson = json::array();
 	PosJson.push_back(pRectDesc->vPos.x);
