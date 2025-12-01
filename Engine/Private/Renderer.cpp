@@ -180,13 +180,15 @@ HRESULT CRenderer::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 
 void CRenderer::Render()
 {
-	//m_pGameInstance->Wait_Thread_End();
+#ifndef _DEBUG
 	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
 	{
 		//m_IsSSAO = !m_IsSSAO;
 		m_IsFog = !m_IsFog;
 	}
+#endif // !_DEBUG
 
+	//m_pGameInstance->Wait_Thread_End();
 	m_iCurTime = (++m_iCurTime) % m_iInterval;
 	
 	Render_Priority();
