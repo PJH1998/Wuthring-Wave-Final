@@ -37,8 +37,8 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 
 
 	// 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
-	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
-	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP; // 추후 애니메이션에 따른. 분기문 필요.
+	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; 
+	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
 
 	_string strBoneName = "WeaponProp02";
 	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
