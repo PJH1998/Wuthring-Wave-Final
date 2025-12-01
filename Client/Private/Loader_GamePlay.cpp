@@ -62,6 +62,7 @@
 #include "AugustaGriffon.h"
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
+#include "AugustaHeadProp.h"
 #include "Augusta.h"
 
 // Rover
@@ -137,7 +138,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1130_third/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1201_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1201_second/", m_eCurLevel, "The_False_Sovereign");
@@ -360,6 +361,20 @@ HRESULT CLoader_GamePlay::Load_Augusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrEnergyBladeTag
 		, CAugustaEnergyBlade::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_HeadProp";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/HeadProp/HeadProp.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrHeadPropTag = TEXT("Prototype_GameObject_Augusta_HeadProp");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrHeadPropTag
+		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 #pragma endregion
 

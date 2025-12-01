@@ -10,6 +10,7 @@
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
 #include "AugustaFxObject.h"
+#include "AugustaHeadProp.h"
 #include "AttackVolume.h"
 #include "Wing.h"
 #include "GameSystem.h"
@@ -59,7 +60,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_pGriffon->SetActivate(false);
 	m_pWing->SetActivate(false);
 	m_pFxObject->SetActivate(false);
-    
+	m_pHeadProp->SetActivate(false);
 	
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
@@ -130,46 +131,6 @@ void CAugusta::Update(_float fTimeDelta)
 	Update_Physics(fTimeDelta);
 	// 4. 카메라 업데이트
 	Update_Camera(fTimeDelta);
-	//if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
-	//{
-	//	if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
-	//		nullptr != m_PendingCaptureDesc.pTransform)
-	//	{
-	//		
-	//		_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
-
-	//		_vector vScale{}, vRotQuat{}, vTrans{};
-	//		_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
-	//		XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
-	//		m_pTransformCom->Set_State(STATE::POSITION, vTrans);
-
-	//		_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
-	//		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-	//		vPos += vCameraLook * -3.f;
-	//		m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
-	//	}
-	//}
-	//else
-	//{
-	//	// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
-	//	_vector vVelocity = m_pTransformCom->Get_Velocity();
-	//	if (!m_IsQTE)
-	//	{
-	//		// 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-	//		m_pColliderCom->Update(vVelocity / fTimeDelta);
-
-	//		// 5. Camera 갱신 => 위치 따라오게
-	//		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-	//	}
-	//	else
-	//	{
-	//		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
-	//	}
-	//	// 6. Land Check
-	//	m_IsLand = Is_LandCollider();
-	//}
-	
-
 	
 	// 4. 어택 볼륨 갱신.
 	for (auto& pAttackVolume : m_AttackVolumes)
@@ -395,6 +356,9 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     case PART_FXOBJECT:
 		m_pFxObject->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+    case PART_HEADPROP:
+		m_pHeadProp->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+        break;
     case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
@@ -416,6 +380,9 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
         break;
     case PART_FXOBJECT:
         m_pFxObject->Activate(IsActive);
+        break;
+    case PART_HEADPROP:
+        m_pHeadProp->Activate(IsActive);
         break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
@@ -473,6 +440,12 @@ void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
     case PART_GRIFFON:
         m_pGriffon->Clear_Animation(strAnimName);
         break;
+	case PART_FXOBJECT:
+		m_pFxObject->Clear_Animation(strAnimName);
+		break;
+    case PART_HEADPROP:
+        m_pHeadProp->Clear_Animation(strAnimName);
+        break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
 		break;
@@ -502,6 +475,31 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
         m_pFxObject->Set_SocketMatrix(pSocketMatrix);
         break;
     }
+}
+
+void CAugusta::Set_AnimationToParts(_uint iPartType, const _string& strAnimName)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Set_AnimationName(strAnimName);
+		break;
+	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Set_AnimationName(strAnimName);
+		break;
+	case PART_GRIFFON:
+		m_pGriffon->Set_AnimationName(strAnimName);
+		break;
+	case PART_FXOBJECT:
+		m_pFxObject->Set_AnimationName(strAnimName);
+		break;
+	case PART_HEADPROP:
+		m_pHeadProp->Set_AnimationName(strAnimName);
+		break;
+	case PART_WING:
+		m_pWing->Set_AnimationName(strAnimName);
+		break;
+	}
 }
 
 
@@ -1297,6 +1295,24 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 			Safe_AddRef(m_pFxObject);
 			break;
 
+		case PARTTYPE::PART_HEADPROP:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetAugustaHeadPropCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pHeadProp = dynamic_cast<CAugustaHeadProp*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pHeadProp);
+			Safe_AddRef(m_pHeadProp);
+			break;
+
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
 			vPosition = { 0.f, 0.f, 0.f };
@@ -1424,5 +1440,6 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
     Safe_Release(m_pFxObject);
+    Safe_Release(m_pHeadProp);
 	Safe_Release(m_pWing);
 }

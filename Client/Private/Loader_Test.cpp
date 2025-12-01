@@ -41,6 +41,7 @@
 #include "AugustaGriffon.h"
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
+#include "AugustaHeadProp.h"
 #include "Augusta.h"
 
 // Galbrena
@@ -585,6 +586,23 @@ HRESULT CLoader_Test::Load_Augusta()
 		, wStrEnergyBladeTag
 		, CAugustaEnergyBlade::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_HeadProp";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/HeadProp/HeadProp.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrHeadPropTag = TEXT("Prototype_GameObject_Augusta_HeadProp");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrHeadPropTag
+		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	
 #pragma endregion
 
   
