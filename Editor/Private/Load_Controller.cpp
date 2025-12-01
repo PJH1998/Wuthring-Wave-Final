@@ -842,6 +842,15 @@ void CLoad_Controller::Load_FXRect_FromJson(const _string& strFilePath, const _w
 	if (RectJson.contains("ColorFlag"))
 		Desc.iColorFlag = RectJson["ColorFlag"].get<_int>();
 
+	if (RectJson.contains("Sprite"))
+		Desc.IsSprite = RectJson["Sprite"].get<_bool>();
+
+	if (RectJson.contains("Row"))
+		Desc.iRows = RectJson["Row"].get<_int>();
+
+	if (RectJson.contains("Col"))
+		Desc.iCols = RectJson["Col"].get<_int>();
+
 	if (RectJson.contains("SweepSpeed"))
 		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();
 
