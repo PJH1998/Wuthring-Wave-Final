@@ -448,37 +448,4 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     g_OutLocalMatrices[boneIndex] = result_matrix;
    
 }
-//[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-//void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
-//{
-//    // 현재 본 Index 가져오기.
-//    uint boneIndex = dispatchThreadID.x;
-    
-//      // 1. Action Animation의 SRT 가져오기
-//    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
-   
-//    matrix result_matrix;
-    
-//    // Ribbon Animation을 사용한다면?
-//    if (g_IsRibAnimUsed)
-//    {
-//        // 2. Ribbon Animation의 SRT 가져오기
-//        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        
-//        // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
-//        float4 finalScale = ribbonSRT.scale * actionSRT.scale;
-//        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
-//        float4 finalTranslation = ribbonSRT.translation +
-//                                 (actionSRT.translation - float4(0, 0, 0, 1)); // delta 적용
-//        result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
-//    }
-//    else
-//    {
-//        result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
-//    }
-    
-//    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
-//    g_OutLocalMatrices[boneIndex] = result_matrix;
-   
-//}
 

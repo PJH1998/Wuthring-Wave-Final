@@ -37,8 +37,8 @@ HRESULT CAugustaEnergyBlade::Initialize_Clone(void* pArg)
 	m_pTransformCom->Scale({ 2.f, 2.f, 2.f }); // 크기 조정.
 
 	m_fTime = 0.f;
-	//m_vEnergyColor = { 1.0f, 0.6f, 0.1f, 1.0f };
-	m_vEnergyColor = { 1.0f, 0.1f, 0.05f, 1.0f };
+	m_vEnergyColor = { 1.0f, 0.6f, 0.1f, 1.0f };
+	//m_vEnergyColor = { 1.0f, 0.1f, 0.05f, 1.0f };
 	m_vScrollSpeed = { 1.f, 0.f };
 	m_fEnergyIntensity = 3.f;
 	//m_fEnergyIntensity = 3.f;

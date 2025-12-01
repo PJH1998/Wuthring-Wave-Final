@@ -258,169 +258,62 @@ PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
 }
 
 
-//PS_OUT PS_ENERGY_BLADE(PS_IN In) // Dissolve 추가.
-//{
-//    PS_OUT Out = (PS_OUT) 0;
-
-//    // 1. 텍스쳐 샘플링.
-//    float2 vNoiseUV = In.vTexcoord * float2(3.0f, 1.0f) + (g_vScrollSpeed * g_fTime);
-//    float4 vNoiseColor = g_MaskTexture[0].Sample(DefaultSampler, vNoiseUV);
-    
-    
-//    // 2. Pattern Texture
-//    float4 vPatternColor = g_MaskTexture[1].Sample(DefaultSampler, In.vTexcoord);
-    
-//    float4 vDiffuseColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-//    //Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-//    // 2. 노말 매핑
-    
-//    float3 vNormal = In.vNormal.xyz;
-    
-//    float4 vNormalDesc = float4(0, 0, 0, 0); // PBR 출력을 위해 변수 선언
-    
-//    if (g_HasNormal)
-//    {
-//        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-//        vNormal = normalize(vNormalDesc * 2.f - 1.f);
-        
-//        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-//            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-            
-//        float3 vTangent = In.vTangent.xyz;
-//        float3 vBinormal = In.vBinormal.xyz * -1.f;
-//        float3 vInNormal = In.vNormal.xyz;
-        
-//        float3x3 WorldMatrix;
-//        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-//        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-        
-//        // 항상 Emissive
-//        float fWeight = Luminance(Out.vDiffuse.xyz);
-
-//        if (fWeight >= g_fEmissiveThreshold)
-//            Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-
-//        Out.vEmissive.xyz *= Out.vDiffuse.a;
-        
-        
-//    }
-//    else
-//    {
-//        vNormal = In.vNormal;
-//    }
-    
-//    // 3. 에너지 효과 계산.
-    
-//    // 프레넬 효과
-//    float fNDotV = 1.f - saturate(dot(normalize(vNormal), float3(0, 0, -1)));
-//    float fFresnel = pow(fNDotV, 3.0f); // 경계를 더 날카롭게
-    
-//    // 최종 색상 합성.
-//    // - 기본 : 에너지 색상 * 노이즈(흐름)
-//    // - 추가 : 에너지 색상 * 패턴 * 프레넬(가장자리) * 2.0(강조)
-//    float3 vFinalColor = g_vEnergyColor.rgb * vNoiseColor.r;
-//    float3 vEdgeGlow = g_vEnergyColor.rgb * vPatternColor.r * fFresnel * 2.f;
-    
-//    // 강도(Intensity) 적용 => HDR 효과
-//    vFinalColor = (vFinalColor + vEdgeGlow) * g_fEnergyIntensity;
-    
-//    // 4. Output
-//    Out.vDiffuse = float4(0.f, 0.f, 0.f, 1.f);
-//    Out.vEmissive = float4(vFinalColor, 1.0f);
-    
-
-//    //vNormal.xyz = vNormal * 0.5f + 0.5f;
-    
-//    Out.vNormal = float4(vNormal * 0.5f + 0.5f, 0.0f);
-//    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-//    Out.vDepth.y = In.vProjPos.w;
-//    Out.vDepth.z = 1.f;
-    
-//    if (g_HasNormal)
-//    {
-//        Out.vPBR.x = vNormalDesc.b; // Metallic
-//        Out.vPBR.y = vNormalDesc.a; // Roughness
-//    }
-//    else
-//    {
-//        Out.vPBR.x = g_fGlobalDynamicMetallic; // 기본값
-//        Out.vPBR.y = g_fGlobalDynamicRoughness; // 기본값
-//    }
-    
-//    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-    
-//    return Out;
-//}
-
 PS_OUT PS_ENERGY_BLADE(PS_IN In) // Dissolve 추가.
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    // 1. Distortion 계산.
-    float2 vDistortUV = In.vTexcoord * 0.5f + (g_fTime * g_vScrollSpeed * 0.3f);
-    float4 vDistortColor = g_MaskTexture[1].Sample(DefaultSampler, vDistortUV);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    float2 vDistortOffset = (vDistortColor.rg - 0.5f) * 0.1f; // 왜곡의 세기
-    
-    // 2. 메인 노이즈 샘플링.
-    float2 vNoiseUV = (In.vTexcoord * float2(1.0f, 1.0f)) + (g_vScrollSpeed * g_fTime) + vDistortOffset;
-    float4 vNoiseColor = g_MaskTexture[0].Sample(DefaultSampler, vNoiseUV);
+    float4 vNormal = 0.f;
     
     
-    // 3. 검 형태 유지를 위한 Diffuse 샘플링.
-    float4 vDiffuseColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    // 4. Noise 샘플링
-    float fNoiseSharp = pow(vNoiseColor.r, 4.0f);
-    
-    // 5. 색상 그라데이션
-    float3 vRedColor = g_vEnergyColor.rgb;
-    float3 vYellowColor = float3(1.f, 0.9f, 0.5f); // 아주 밝은 노랑
-    
-    float3 vFireColor = lerp(vRedColor, vYellowColor, fNoiseSharp); // 붉은색 -> 노란색으로 변하도록 섞음.
-    
-    // 6. 프레넬 (가장자리 발광)
-    float3 vNormal = In.vNormal.xyz;
-  
-    if(g_HasNormal)
+    if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        float3 vTangentNormal = normalize(vNormalDesc.xyz * 2.f - 1.f);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
         if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vTangentNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
-
-        float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-        vNormal = normalize(mul(vTangentNormal, WorldMatrix));
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
         Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
     }
     else
     {
+        vNormal = In.vNormal;
         Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
     
-    float fNDotV = 1.0f - saturate(dot(normalize(vNormal), float3(0, 0, -1)));
-    float fFresnel = pow(fNDotV, 3.0f);
-  
-    float3 vBaseSword = vDiffuseColor.rgb * 0.05f; // 원본 검은 아주 어둡게 (실루엣만)
-    float3 vFinalColor = vBaseSword + (vFireColor * fNoiseSharp * g_fEnergyIntensity) + (vFireColor * fFresnel * 2.0f);
+    float fBladeMask = step(0.88f, In.vTexcoord.y);
     
-    Out.vDiffuse = float4(0.0f, 0.0f, 0.0f, 1.0f);
-    Out.vEmissive = float4(vFinalColor, 1.0f); // Emissive에 저장 -> Bloom 효과
+    float3 vOrangeColor = float3(1.f, 0.2f, 0.f);
     
-    Out.vNormal = float4(vNormal * 0.5f + 0.5f, 0.0f);
-    Out.vDepth = float4(In.vProjPos.z / In.vProjPos.w, In.vProjPos.w, 1.f, 0.f);
+    float fIntensity = 5.f; // 블룸먹도록 증폭.
+    // 최종 발광 색상 계산.
+    Out.vEmissive = float4(vOrangeColor * fIntensity * fBladeMask, 1.0f);
     
-  
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    Out.vNormal = vNormal;
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
     
     return Out;
 }
-
-
 
 
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/

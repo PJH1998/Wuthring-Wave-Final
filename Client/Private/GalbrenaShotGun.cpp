@@ -37,8 +37,8 @@ HRESULT CGalbrenaShotGun::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
-
-	m_fMaxDissolveTime = 0.5f;
+	
+	m_fMaxDissolveTime = 0.35f;
 
     return S_OK;
 }
