@@ -346,7 +346,12 @@ PS_OUT PS_Y_OUT(PS_IN In)
 
     fVisibleX = fTailFad * fHeadFad;
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    float4 vColor;
+    
+    if(g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
 
     vColor.rgb = saturate(vColor.rgb);
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
@@ -402,8 +407,14 @@ PS_OUT PS_Y_IN(PS_IN In)
 
     fVisibleX = fTailFad * fHeadFad;
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
-
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
+    
+    
     vColor.rgb = saturate(vColor.rgb);
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;
@@ -461,7 +472,12 @@ PS_OUT PS_TraillLeftTail(PS_IN In)
 
     fVisibleX = fTailFad * fHeadFad;
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
 
     float fAlpha = fVisibleY * fVisibleX * MaskR;
 
@@ -739,7 +755,12 @@ PS_OUT PS_TrailAlphaLeft(PS_IN In)
 
     float fAge = saturate(1.f - Sweep / FadeRange);
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
 
     vColor.rgb = saturate(vColor.rgb);
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
@@ -795,7 +816,12 @@ PS_OUT PS_TrailAlphaRight(PS_IN In)
 
     float fAge = saturate(1.f - Sweep / FadeRange);
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
 
     vColor.rgb = saturate(vColor.rgb);
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
