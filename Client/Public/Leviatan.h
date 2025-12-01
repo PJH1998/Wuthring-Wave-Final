@@ -120,6 +120,7 @@ private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(LEVIATAN_DESC* pDesc);
 	void						Ready_PartObjects(LEVIATAN_DESC* pDesc);
+	void						Ready_Volumes(LEVIATAN_DESC* pDesc);
 
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);

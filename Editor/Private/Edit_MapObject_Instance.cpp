@@ -63,8 +63,6 @@ HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
 
 		event.Objectmatrix.push_back(m_pTransformCom->Get_State(STATE::POSITION));
 		});
-
-    m_iShaderPassIndex = 2;
 	
     return S_OK;
 }
@@ -190,6 +188,7 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 	memcpy(m_pInstanceMatrix, pDesc->InstanceWorldMatrix, sizeof(_float4x4) * pDesc->iNumInstance);
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_vDiffuseColor = pDesc->vDiffuseColor;
+	m_eInstanceType = pDesc->eInstanceType;
 
 	_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
 

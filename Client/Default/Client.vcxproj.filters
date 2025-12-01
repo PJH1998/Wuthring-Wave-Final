@@ -1069,6 +1069,12 @@
     <ClInclude Include="..\public\UI_HUD_Sector_FuncIcons.h">
       <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Levi_Alter.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Levi_Ray.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Ray</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1687,6 +1693,12 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_HUD_Sector_FuncIcons.cpp">
       <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Alter.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Levi_Ray.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Ray</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

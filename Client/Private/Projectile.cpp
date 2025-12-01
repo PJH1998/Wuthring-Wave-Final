@@ -143,10 +143,13 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("Arrow/Com_Shader");
 
-	// Com_Model
-	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->wstrModelTag,
-		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-		CRASH("Arrow/Com_Model");
+	if(0 != pDesc->wstrModelTag.length())
+	{
+		// Com_Model
+		if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->wstrModelTag,
+			TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+			CRASH("Arrow/Com_Model");
+	}
 }
 
 void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)

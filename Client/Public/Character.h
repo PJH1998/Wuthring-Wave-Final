@@ -156,6 +156,9 @@ public:
 	_bool IsVisible() { return m_IsVisible; }
 	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
 
+	_bool Is_OutLineVisible() { return m_IsOutLineVisible; }
+	void Set_OutLineVisible(_bool IsVisible) { m_IsOutLineVisible = IsVisible; }
+
 	virtual void Process_DelayedActions() {};
 	virtual void Calc_ChangeTimer(_float fTimeDelta) {}; // Timer 계산
 	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
@@ -381,6 +384,7 @@ protected:
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
 	_bool m_IsVisible = { true };
+	_bool m_IsOutLineVisible = { true };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 	queue<DELAYED_ACTION> m_DelayedActions;

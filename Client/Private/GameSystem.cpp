@@ -339,6 +339,11 @@ _bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pO
 	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
+_bool* CGameSystem::Add_To_Management(INSTANCETYPE eType, CMapObject_Instance* pObjects, _bool** SonoroMode)
+{
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
+}
+
 void CGameSystem::Update(_float fTimeDelta)
 {
 	m_pSonoro_Manager->Update(fTimeDelta);
@@ -399,7 +404,14 @@ _bool CGameSystem::IsFix()
 #pragma region GRAB_INTERACT
 void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition)
 {
-	
+	if (strTransition == "GrabRelease")
+	{
+		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
+	}
+	else if (strTransition == "GrabUnbined")
+	{
+		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
+	}
 }
 void CGameSystem::Call_Animation() // => 땅에 부딪혔을 때 => 탈출 가능한 지점.
 {

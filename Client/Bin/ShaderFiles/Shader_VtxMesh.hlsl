@@ -2,7 +2,7 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
+float4 g_GrassColor = float4(0.7019f, 0.24705f, 0.24705f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
@@ -707,7 +707,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_MA(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -758,7 +759,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_GREEN(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -809,7 +811,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_BLUE(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -860,7 +863,8 @@ PS_OUT_LIGHT PS_NONGRASS_ROCK_MA(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -910,7 +914,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_NONDETAIL(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -961,7 +966,8 @@ PS_OUT_LIGHT PS_ROCK_SONORO(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -1012,7 +1018,8 @@ PS_OUT_LIGHT PS_ROCK_SONORO_BIG(PS_IN In)
     
     Out.vPBR.y = g_fGlobalStaticRoughness;
     Out.vPBR.x = g_fGlobalStaticMetallic;
-    
+    Out.vDepth.w = 1.f;
+
     return Out;
 }
 
@@ -1038,8 +1045,12 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_GLASS(PS_IN In)
         Out.vDiffuse = vDiffuse;
     }
 
+    //if (vMask.a == 1.f)
+    //    Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.4f, 1.f);
+
+    //천국에 엄청 큰 애들은 좀 더 낮춰야할지도?
     if (vMask.a == 1.f)
-        Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.4f, 1.f);
+        Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.2f, 1.f);
 
     Out.vDiffuse.w = 1.f;
     
@@ -1289,7 +1300,7 @@ technique11 DefaultTechnique
 
     pass Asphodel_Glass // 16
     {
-        SetRasterizerState(RS_Default);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
