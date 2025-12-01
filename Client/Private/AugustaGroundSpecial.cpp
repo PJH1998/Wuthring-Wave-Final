@@ -36,9 +36,15 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 
     // 5. 애니메이션 타입에 맞는 파츠 설정.
     m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
+	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
+
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
     m_pAugusta->Set_Gravity(true);
+
+	m_pAugusta->PartActivate(m_iSubPartType, true);
+	m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 
 	if (eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
 	{
@@ -83,6 +89,7 @@ void CAugustaGroundSpecial::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
+    m_pAugusta->PartActivate(m_iSubPartType, false);
     m_iComboCount = 0;
     m_pAugusta->Set_Gravity(true); 
 
@@ -127,14 +134,6 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     {
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.1f);
     }
-    else if (eSpType == EAugustaSpecialType::SPWALK_DASH_ROOT)
-    {
-
-    }
-    else
-    {
-        //m_pAugusta->Rotate_Target();
-    }
 
     
 	m_pAugusta->Play_PartAnimation(
@@ -142,6 +141,14 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
 		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 	);
+
+	m_pAugusta->Play_PartAnimation(
+		m_iSubPartType,
+		"Stand1_idle",
+		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+	);
+
+
 }
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)

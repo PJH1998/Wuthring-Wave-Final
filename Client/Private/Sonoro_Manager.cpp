@@ -176,5 +176,9 @@ void CSonoro_Manager::Free()
 		Safe_Release(pObject);
 	m_NonSonoroObjects.clear();
 
+	for (auto& pInstance : m_Instance)
+		Safe_Release(pInstance);
+	m_Instance.clear();
+
 	Safe_Release(m_pGameInstance);
 }

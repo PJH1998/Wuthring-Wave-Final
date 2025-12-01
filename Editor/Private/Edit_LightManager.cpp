@@ -62,6 +62,10 @@ void CEdit_LightManager::Set_ImGuiOption()
 		if (ImGui::Button(to_string(iter->first).c_str())) {
 			m_pPickedLight = iter->second;
 		}
+		if (ImGui::IsItemHovered())
+		{
+			m_pGameInstance->Use_Gizmo(dynamic_cast<CTransform*>(iter->second->Get_Component(TEXT("Com_Transform"))));
+		}
 
 		if (!iter->second->IsActivate())
 		{
