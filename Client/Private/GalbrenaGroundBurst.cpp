@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GameSystem.h"
 
-HRESULT CGalbrenaGroundBurst::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundBurst::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(__super::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -193,7 +193,7 @@ void CGalbrenaGroundBurst::State_Reset()
 }
 
 
-CGalbrenaGroundBurst* CGalbrenaGroundBurst::Create(class CGameObject* pOwner)
+CGalbrenaGroundBurst* CGalbrenaGroundBurst::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundBurst* pInstance = new CGalbrenaGroundBurst();
 

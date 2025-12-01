@@ -5,12 +5,12 @@
 #include "GalbrenaShotGun.h"
 #include "Ability.h"
 
-HRESULT CGalbrenaGroundHeavyAttack::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundHeavyAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     // 애니메이션 리스트 셋업.
@@ -319,7 +319,7 @@ void CGalbrenaGroundHeavyAttack::State_Reset()
         m_States[i] = false;
 }
 
-CGalbrenaGroundHeavyAttack* CGalbrenaGroundHeavyAttack::Create(class CGameObject* pOwner)
+CGalbrenaGroundHeavyAttack* CGalbrenaGroundHeavyAttack::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundHeavyAttack* pInstance = new CGalbrenaGroundHeavyAttack();
 

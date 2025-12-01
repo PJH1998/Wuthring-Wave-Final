@@ -218,6 +218,7 @@ public:
 	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
+	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) {};
 
 	// Look Vector
 	_vector Get_LookVector();
@@ -248,6 +249,7 @@ public:
 
 	// Animation
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
+	virtual void Clear_Animation(const _string& strAnimName, _float fTrackPosition = 0.f);
 	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
 		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 

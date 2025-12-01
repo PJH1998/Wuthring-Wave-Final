@@ -5,12 +5,12 @@
 #include "RoverState_Enum.h"
 
 
-HRESULT CRoverGroundDash::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundDash::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     Setup_Animations();
@@ -166,7 +166,7 @@ void CRoverGroundDash::State_Reset()
         m_States[i] = false;
 }
 
-CRoverGroundDash* CRoverGroundDash::Create(class CGameObject* pOwner)
+CRoverGroundDash* CRoverGroundDash::Create(CCharacter* pOwner)
 {
     CRoverGroundDash* pInstance = new CRoverGroundDash();
 

@@ -135,7 +135,9 @@ public:
 		PART_BAYONET = 0, // Bayonet
 		PART_SKILLWEAPON = 1, // SKill Weapon
 		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
-		PART_WING = 3,
+		PART_FXOBJECT = 3,
+		PART_HEADPROP = 4,
+		PART_WING = 5,
 		TYPE_END
 	};
 
@@ -166,6 +168,7 @@ public:
 	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
+	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	virtual void Parry_Judge(void* pArg = nullptr) override;
 	virtual void Grab_Judge(void* pArg = nullptr) override;
@@ -207,6 +210,8 @@ private:
 	class CAugustaBayonet* m_pBayonet = { nullptr };
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
+	class CAugustaFxObject* m_pFxObject = { nullptr };
+	class CAugustaHeadProp* m_pHeadProp = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
 	_string m_strPreAnimation = {};
@@ -225,6 +230,7 @@ private:
 	void Process_HitStop(const _wstring& wStrObjectTag);
 	void Process_CameraAction(const _wstring& wStrObjectTag);
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
+	void Process_FxObject(const _wstring& wStrObjectTag);
 	
 #pragma endregion
 

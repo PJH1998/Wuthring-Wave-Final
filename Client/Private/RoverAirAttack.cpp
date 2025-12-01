@@ -3,12 +3,12 @@
 #include "Rover.h"
 #include "StateMachine.h"
 
-HRESULT CRoverAirAttack::Initialize(class CGameObject* pOwner)
+HRESULT CRoverAirAttack::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     // 애니메이션 리스트 셋업.
@@ -270,7 +270,7 @@ void CRoverAirAttack::Handle_Animation_SpecialState()
 
 
 
-CRoverAirAttack* CRoverAirAttack::Create(class CGameObject* pOwner)
+CRoverAirAttack* CRoverAirAttack::Create(CCharacter* pOwner)
 {
     CRoverAirAttack* pInstance = new CRoverAirAttack();
 

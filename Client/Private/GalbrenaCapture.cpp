@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "GalbrenaState_Enum.h"
 
-HRESULT CGalbrenaCapture::Initialize(CGameObject* pOwner)
+HRESULT CGalbrenaCapture::Initialize(CCharacter* pCharacter)
 {
-	if (FAILED(CCaptureState::Initialize(pOwner)))
+	if (FAILED(CCaptureState::Initialize(pCharacter)))
 		return E_FAIL;
 
-	m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+	m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
 	ASSERT_CRASH(m_pGalbrena);
 
 	// 1. 애니메이션 설정
@@ -139,7 +139,7 @@ void CGalbrenaCapture::State_Reset()
 		m_States[i] = false;
 }
 
-CGalbrenaCapture* CGalbrenaCapture::Create(CGameObject* pOwner)
+CGalbrenaCapture* CGalbrenaCapture::Create(CCharacter* pOwner)
 {
 	CGalbrenaCapture* pInstance = new CGalbrenaCapture();
 

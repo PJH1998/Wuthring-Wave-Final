@@ -4,8 +4,6 @@
 
 NS_BEGIN(Engine)
 
-using InputCondition = function<bool()>;
-
 class ENGINE_DLL CState abstract : public CBase
 {
 public:

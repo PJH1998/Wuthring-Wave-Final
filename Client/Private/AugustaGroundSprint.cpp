@@ -5,12 +5,12 @@
 #include "AugustaState_Enum.h"
 #include "GameInstance.h"
 
-HRESULT CAugustaGroundSprint::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaGroundSprint::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -33,6 +33,7 @@ void CAugustaGroundSprint::OnEnter(void* pArg)
 
     // 4. 현재 상태 초기화
     State_Reset();
+	
 
 	// 5. 중력 켰다.
     m_pAugusta->Set_Gravity(true);
@@ -66,7 +67,6 @@ void CAugustaGroundSprint::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->Set_Gravity(true);
-
 	m_fFallTime = 0.f;
 
 	// 1. SFX 모션 끄기
@@ -156,6 +156,7 @@ void CAugustaGroundSprint::Update_RunAnimation(_float fTimeDelta)
     
 	// 1. 회전 및 이동.
 	m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
+	
 }
 
 void CAugustaGroundSprint::Check_Physics(_float fTimeDelta)
@@ -393,7 +394,7 @@ void CAugustaGroundSprint::State_Reset()
 
 
 
-CAugustaGroundSprint* CAugustaGroundSprint::Create(class CGameObject* pOwner)
+CAugustaGroundSprint* CAugustaGroundSprint::Create(CCharacter* pOwner)
 {
     CAugustaGroundSprint* pInstance = new CAugustaGroundSprint();
 

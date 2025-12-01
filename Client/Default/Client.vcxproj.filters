@@ -1069,6 +1069,15 @@
     <ClInclude Include="..\public\Levi_Ray.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Ray</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaEnergyBlade.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaFxObject.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaHeadProp.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1687,6 +1696,15 @@
     </ClCompile>
     <ClCompile Include="..\private\Levi_Ray.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Ray</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaEnergyBlade.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaFxObject.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaHeadProp.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

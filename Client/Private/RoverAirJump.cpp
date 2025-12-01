@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
-HRESULT CRoverAirJump::Initialize(class CGameObject* pOwner)
+HRESULT CRoverAirJump::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     Setup_Animations();
@@ -179,7 +179,7 @@ void CRoverAirJump::Setup_Animations()
 
 
 
-CRoverAirJump* CRoverAirJump::Create(class CGameObject* pOwner)
+CRoverAirJump* CRoverAirJump::Create(CCharacter* pOwner)
 {
     CRoverAirJump* pInstance = new CRoverAirJump();
 

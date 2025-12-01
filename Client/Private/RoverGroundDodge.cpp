@@ -6,12 +6,12 @@
 #include "GameInstance.h"
 
 
-HRESULT CRoverGroundDodge::Initialize(class CGameObject* pOwner)
+HRESULT CRoverGroundDodge::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pRover = dynamic_cast<CRover*>(pOwner);
+    m_pRover = dynamic_cast<CRover*>(pCharacter);
     ASSERT_CRASH(m_pRover);
 
     Setup_Animations();
@@ -172,7 +172,7 @@ void CRoverGroundDodge::State_Reset()
         m_States[i] = false;
 }
 
-CRoverGroundDodge* CRoverGroundDodge::Create(class CGameObject* pOwner)
+CRoverGroundDodge* CRoverGroundDodge::Create(CCharacter* pOwner)
 {
     CRoverGroundDodge* pInstance = new CRoverGroundDodge();
 

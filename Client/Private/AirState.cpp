@@ -2,7 +2,7 @@
 #include "AirState.h"
 #include "StateMachine.h"
 
-HRESULT CAirState::Initialize(class CGameObject* pOwner)
+HRESULT CAirState::Initialize(CCharacter* pOwner)
 {
     if (FAILED(CCharacterState::Initialize(pOwner)))
         return E_FAIL;

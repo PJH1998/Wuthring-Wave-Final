@@ -3,7 +3,7 @@
 #include "StateMachine.h"
 
 
-HRESULT CGroundState::Initialize(class CGameObject* pOwner)
+HRESULT CGroundState::Initialize(CCharacter* pOwner)
 {
     if (FAILED(CCharacterState::Initialize(pOwner)))
         return E_FAIL;

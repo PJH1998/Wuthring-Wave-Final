@@ -5,12 +5,12 @@
 #include "GalbrenaState_Enum.h"
 #include "GameInstance.h"
 
-HRESULT CGalbrenaGroundSprint::Initialize(class CGameObject* pOwner)
+HRESULT CGalbrenaGroundSprint::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CGroundState::Initialize(pOwner)))
+    if (FAILED(CGroundState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pCharacter);
     ASSERT_CRASH(m_pGalbrena);
 
     Setup_Animations();
@@ -384,7 +384,7 @@ void CGalbrenaGroundSprint::State_Reset()
 
 
 
-CGalbrenaGroundSprint* CGalbrenaGroundSprint::Create(class CGameObject* pOwner)
+CGalbrenaGroundSprint* CGalbrenaGroundSprint::Create(CCharacter* pOwner)
 {
     CGalbrenaGroundSprint* pInstance = new CGalbrenaGroundSprint();
 

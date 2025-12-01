@@ -7,6 +7,7 @@ class CProp abstract : public CPartObject
 public:
 	typedef struct tagPropDesc : public CPartObject::PART_DESC 
 	{
+		LEVEL eLevel = { LEVEL::END };
 		const _float4x4* pSocketMatrix = { nullptr };
 		pair<LEVEL, _wstring> shaderData = {};
 		pair<LEVEL, _wstring> computeShaderData = {};
@@ -38,6 +39,12 @@ public:
 	virtual void Change_Volume(_uint iVolumeIdx) {};
 	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) {};
 	virtual void Volume_Activate(_bool IsActive);
+
+
+	void Set_AnimationName(const _string& strAnimName) { m_strCurrentAnimName = strAnimName; } // 계속 애니메이션 구동할 아이들.
+
+	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
+	_bool Is_Visible() { return m_IsVisible; }
 public:
 	_bool Is_AnimationEnd() { return m_IsAnimationEnd; }
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false); 
@@ -65,6 +72,7 @@ public:
 
 
 protected:
+	LEVEL m_eCurLevel = { LEVEL::END };
 	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
@@ -83,6 +91,7 @@ protected:
 	_uint m_iShaderPath = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
 
+	_bool m_IsVisible = {};
 
 #pragma region Condition 관리
 protected:

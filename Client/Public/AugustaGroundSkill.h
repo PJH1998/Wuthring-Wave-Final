@@ -40,7 +40,7 @@ private:
     virtual ~CAugustaGroundSkill() = default;
 
 public:
-    virtual HRESULT Initialize(class CGameObject* pOwner) override;
+    virtual HRESULT Initialize(class CCharacter* pCharacter) override;
     virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
@@ -63,7 +63,7 @@ private:
 	void Handle_Animation_SpecialState(); // 특수한 애니메이션 상태를 처리한다.
 
 public:
-    static CAugustaGroundSkill* Create(class CGameObject* pOwner);
+    static CAugustaGroundSkill* Create(class CCharacter* pOwner);
     virtual void Free() override;
 };
 

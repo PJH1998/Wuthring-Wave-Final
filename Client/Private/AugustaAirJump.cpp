@@ -4,12 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-HRESULT CAugustaAirJump::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaAirJump::Initialize(CCharacter* pCharacter)
 {
-    if (FAILED(CAirState::Initialize(pOwner)))
+    if (FAILED(CAirState::Initialize(pCharacter)))
         return E_FAIL;
 
-    m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
     Setup_Animations();
@@ -178,7 +178,7 @@ void CAugustaAirJump::Setup_Animations()
 
 
 
-CAugustaAirJump* CAugustaAirJump::Create(class CGameObject* pOwner)
+CAugustaAirJump* CAugustaAirJump::Create(CCharacter* pOwner)
 {
     CAugustaAirJump* pInstance = new CAugustaAirJump();
 
