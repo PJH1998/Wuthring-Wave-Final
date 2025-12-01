@@ -222,7 +222,18 @@ PS_OUT_LIGHT PS_LIGHT(PS_IN In)
                 Result = Compute_Directional(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
                 break;
             case 1: // POINT
-                Result = Compute_Point(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
+              Result = Compute_Point(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
+              //{
+              //      float3 vLightDir = g_LightDatas[i].vPosition.xyz - vWorldPos.xyz;
+    
+              //      float fDistance = length(vLightDir);
+    
+              //      vLightDir = normalize(vLightDir);
+    
+              //      float fAtt = saturate((g_LightDatas[i].fRange - fDistance) / g_LightDatas[i].fRange);
+                    
+              //      Result.vLightDiffuse = float4(fAtt, fAtt, fAtt, 1.f);
+              //  }
                 break;
         }
         
@@ -583,14 +594,12 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     float3 vUV = float3(In.vTexcoord, fZ);
     
-    float4 VF = g_VoulmetricTexture.Sample(DefaultSampler, vUV);
+    float4 VF = g_VoulmetricTexture.Sample(ClampSampler, vUV);
     
-    float3 vFogColor = saturate(VF.xyz);
+    float3 vFogColor = ToneMap(VF.xyz);
     float fAlpha = saturate(1.f - VF.a);
     
-  //  fAlpha = lerp(0.8f, 0.f, saturate(VF.a));
-    
-    Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor, fAlpha);
+    Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor.xyz, fAlpha);
     Out.vColor.a = 1.f;
     
     return Out;

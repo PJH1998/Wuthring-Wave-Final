@@ -28,17 +28,26 @@ float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistrib
     float RoughnessSqr = pow(Roughness, 2.f);                       
     float Distribution = NdotH * NdotH * (RoughnessSqr - 1.f) + 1.f; // 내적(노말, 반사) * 내적(노말, 반사) * ( 거칠기 - 1.f ) + 1.f 
     
-    float NDF = RoughnessSqr / (PI * Distribution * Distribution); 
+    float fDenom = max((PI * Distribution * Distribution), 1e-4f);
+    
+    float NDF = RoughnessSqr / fDenom;
     
     return NDF;
 }
 
 float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeometricShadowingFunction    , 미세면끼리의 자기 그림자
 {
-    float k = Roughness / 2.f;
+    //float k = Roughness / 2.f;
     
-    float SmithL = (NdotL) / (NdotL * (1.f - k) + k);
-    float SmithV = (NdotV) / (NdotV * (1.f - k) + k);
+    float k = (Roughness + 1.f) * (Roughness + 1.f) / 8.f;
+    
+    float fDenomL = NdotL * (1.f - k) + k;
+    float fDenomV = NdotV * (1.f - k) + k;
+    
+    fDenomL = max(fDenomL, 1e-4f);
+    fDenomV = max(fDenomV, 1e-4f);
+    float SmithL = (NdotL) / fDenomL;
+    float SmithV = (NdotV) / fDenomV;
     
     float GS = (SmithL * SmithV);
     
@@ -70,11 +79,13 @@ void Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 
     
     float3 Fresnel = Compute_Fresnel(vF0, LdotH);                               // LdotH가 크면 수치가 낮음 ( 수치는 F0, Specular Color )
         
-    float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
+    float fClampRoughness = saturate(max(fRoughness, 0.04f));
+        
+    float GSF = Compute_GSF(NdotL, NdotV, fClampRoughness);
     
-    float NDF = Compute_NDF(NdotH, fRoughness);
+    float NDF = Compute_NDF(NdotH, fClampRoughness);
     
-    float3 vSpecular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
+    float3 vSpecular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 1e-4f);
     
     float3 kd = (1.f - Fresnel) * (1.f - fMetallic);                            // Diffuse 색상에 기여하는 비율 ( 정면 일수록 Diffuse 색)
     
@@ -99,9 +110,11 @@ void Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, flo
     
     float3 Fresnel = Compute_Fresnel(vF0, LdotH);
         
-    float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
+    float fClampRoughness = max(fRoughness, 0.04f);
     
-    float NDF = Compute_NDF(NdotH, fRoughness);
+    float GSF = Compute_GSF(NdotL, NdotV, fClampRoughness);
+    
+    float NDF = Compute_NDF(NdotH, fClampRoughness);
     
     float3 vSpecular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
@@ -114,7 +127,7 @@ void Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, flo
     //return (vDiffuse + vSpecular);
 }
 
-float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
+float Compute_RimPower(float3 vNormal, float3 vLook, float NdotL)
 {
     float fRimPower = 0.f;
     
@@ -164,7 +177,7 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
 {
     float4 vViewPos = 0.f;
     
-    vector vDepthDesc = DepthTexture.Sample(DefaultSampler, vTexcoord);
+    vector vDepthDesc = DepthTexture.Sample(PointSampler, vTexcoord);
     
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
@@ -173,6 +186,8 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
     
     vViewPos = vViewPos * vDepthDesc.y;
     vViewPos = mul(vViewPos, g_ProjMatrixInv);
+    
+    vViewPos = float4(vViewPos.xyz, 1.f);
     
     return vViewPos;
 }
@@ -216,10 +231,10 @@ float4 Compute_ViewPos_SSAO(float2 vTexcoord, Texture2D DepthTexture)
 
 float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord)
 {
-    float4 vNormal = NormalTexture.Sample(Sampler, vTexcoord);
-    vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
+    float4 vNormalDesc = NormalTexture.Sample(Sampler, vTexcoord);
+    float3 vNormal = normalize(vNormalDesc.xyz * 2.f - 1.f);
     
-    return vNormal;
+    return float4(vNormal, 0.f);
 }
 
 bool Outline(sampler Sampler, float2 UV, float fCompareDepth, float fWeight, Texture2D DepthTexture)

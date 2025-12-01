@@ -23,6 +23,7 @@ public:
 		_uint iSaveIndex;
 		_float4 vDiffuseColor = _float4(1.f, 1.f, 1.f, 1.f);
 		_bool IsLoaded;
+		INSTANCETYPE eInstanceType = { INSTANCETYPE::DEFAULT };
 	}MAP_LOAD;
 
 private:
@@ -51,6 +52,8 @@ public:
 	_uint ShaderPassWindow();
 	void Set_Color(_float4 vColor) { m_vDiffuseColor = vColor; }
 	_float4* Get_Color(){ return &m_vDiffuseColor; }
+	INSTANCETYPE Get_Type() { return m_eInstanceType; }
+	void Set_Type(INSTANCETYPE eType) { m_eInstanceType = eType; }
 private:
 	void Ready_Events();
 	
@@ -59,6 +62,7 @@ private:
 	CModel_Instance* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 	class CMap_Interface* m_pMapInterface = { nullptr };
+	INSTANCETYPE m_eInstanceType = { INSTANCETYPE::DEFAULT };
 
 private:
 	_char m_ModelName[MAX_PATH];
