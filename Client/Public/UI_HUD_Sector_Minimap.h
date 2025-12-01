@@ -48,6 +48,8 @@ private:
 	CCustom_UI*			m_pUI_InstIcons				= { nullptr };
 	CCustom_UI*			m_pUI_InstMinimapBG			= { nullptr };
 	CCustom_UI*			m_pUI_InstCamAndPlayer		= { nullptr };
+
+	CCustom_UI*			m_pUI_InstObjectIndicator	= { nullptr };
 	
 	//CCustom_UI*			m_pUI_LT_Minimap_StaticBG	= { nullptr };
 	//CCustom_UI*			m_pUI_LT_Minimap_TurnPoint	= { nullptr };

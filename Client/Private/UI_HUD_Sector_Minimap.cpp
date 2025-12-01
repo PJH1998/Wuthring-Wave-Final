@@ -67,6 +67,7 @@ void CUI_HUD_Sector_Minimap::Update(_float fTimeDelta)
 
 	// implement
 	Update_TargetDegrees();
+	Update_RelativePos();
 
 	__super::Update(fTimeDelta);
 }
@@ -106,6 +107,8 @@ void CUI_HUD_Sector_Minimap::PreAssign_ChildUIs()
 	m_pUI_InstMinimapBG			= Find_ChildObject(L"InstMinimapBG");
 	m_pUI_InstCamAndPlayer		= Find_ChildObject(L"InstCamAndPlayer");
 
+	m_pUI_InstObjectIndicator	= Find_ChildObject(L"InstObjectIndicator");
+
 	//m_pUI_LT_Minimap_StaticBG	= Find_ChildObject(L"LT_Minimap_StaticBG");
 	//m_pUI_LT_Minimap_TurnPoint	= Find_ChildObject(L"LT_Minimap_TurnPoint");
 }
@@ -115,7 +118,10 @@ void CUI_HUD_Sector_Minimap::PreAssign_Presets()
 	m_vecTmpCacledRelativeObjects.reserve(16);
 	m_vecTmpRelativeObjects.reserve(16);
 
-	m_vecTmpRelativeObjects.push_back(_float3(0.f, -10.f, 0.f));
+	m_vecTmpRelativeObjects.push_back(_float3(10.f, -10.f, -10.f));
+	m_vecTmpRelativeObjects.push_back(_float3(-10.f, -10.f, 10.f));
+	m_vecTmpRelativeObjects.push_back(_float3(-10.f, -10.f, 10.f));
+	m_vecTmpRelativeObjects.push_back(_float3(10.f, -10.f, -10.f));
 }
 
 void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
@@ -153,12 +159,13 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 void CUI_HUD_Sector_Minimap::Update_RelativePos()
 {
 	for (auto objectPos : m_vecTmpRelativeObjects)
-		m_vecTmpCacledRelativeObjects.push_back(Calc_RelativePos(&objectPos, 0.01f));
+		m_vecTmpCacledRelativeObjects.push_back(Calc_RelativePos(&objectPos, 1.f));
 
 	
 
 
-	m_vecTmpCacledRelativeObjects.clear();
+
+	
 }
 
 void CUI_HUD_Sector_Minimap::Update_Instances()
@@ -202,12 +209,30 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 		camPlayerInstDesc[i].vSInstLook		= *reinterpret_cast<_float4*>(&matStoreResult._31);
 		camPlayerInstDesc[i].vSInstTrans	= *reinterpret_cast<_float4*>(&matStoreResult._41);
 	}
+
+
+	auto& objectIndicatorDesc = m_pUI_InstObjectIndicator->Get_UIDesc();
+	auto& objIndIinstDesc = objectIndicatorDesc.vecInstanceDescs;
+	objIndIinstDesc.resize(m_vecTmpCacledRelativeObjects.size());
+
+	for (_uint i = 0; i < m_vecTmpCacledRelativeObjects.size(); i++)
+	{
+		auto objdesc = objIndIinstDesc[i];
+		auto targetPos = m_vecTmpCacledRelativeObjects[i];
+
+		objdesc.vSInstTrans = _float4(targetPos.x, targetPos.y, 0.f, 1.f);
+	}
+
+	// 색상은 나중에 variantDesc 사용해서 그걸로 적용..
+	
+
+	m_vecTmpCacledRelativeObjects.clear();
 }
 
 _float2 CUI_HUD_Sector_Minimap::Calc_RelativePos(_float3* pTargetPos, _float fMultiplierRatio)
 {
 	_float2 vTargetPos = _float2(pTargetPos->x, pTargetPos->y);		// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
-	_float2 vPlayerPos = _float2(0.f, 0.f);							// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
+	_float2 vPlayerPos = _float2(XMVectorGetX(m_pGameSystem->Get_PlayerPosition()), XMVectorGetZ(m_pGameSystem->Get_PlayerPosition()));							// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
 
 	_float2 vRelativePos = _float2(
 		vTargetPos.x - vPlayerPos.x,
