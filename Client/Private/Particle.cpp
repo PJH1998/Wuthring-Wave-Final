@@ -36,6 +36,7 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
 	m_iMaskFlag = m_tDesc.iMaskFlag;
 	m_IsRoot = m_tDesc.IsRootOn;
 	m_IsPivot = m_tDesc.IsPivot;
+	m_IsLoop = m_tDesc.IsLoop;
 
     _vector Pos = XMVectorSet(m_tDesc.vPos.x, m_tDesc.vPos.y, m_tDesc.vPos.z, 1.f);
 
@@ -65,15 +66,18 @@ void CParticle::Update(_float fTimeDelta)
     m_pVIBufferCom->Bind_CS_Speed(fTimeDelta);
     m_pVIBufferCom->Bind_CSResources(m_pComputeShader);
 
-   m_vLifeTime.x += fTimeDelta;
-
    if (m_IsRoot)
 	   Update_Root_Transform();
 
-   if (m_vLifeTime.x >= m_vLifeTime.y)
+   if (!m_IsLoop)
    {
-       m_isActivate = false;
-       m_vLifeTime.x = 0.f;
+	   m_vLifeTime.x += fTimeDelta;
+
+	   if (m_vLifeTime.x >= m_vLifeTime.y)
+	   {
+		   m_isActivate = false;
+		   m_vLifeTime.x = 0.f;
+	   }
    }
 }
 
