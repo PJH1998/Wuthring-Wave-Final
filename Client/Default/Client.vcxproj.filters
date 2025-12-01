@@ -1075,6 +1075,9 @@
     <ClInclude Include="..\Public\AugustaFxObject.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaHeadProp.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1698,6 +1701,9 @@
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaFxObject.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaHeadProp.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
   </ItemGroup>

@@ -64,7 +64,6 @@ void CAugustaGroundRun::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->Set_Gravity(true);
-
 	m_fFallTime = 0.f;
 }
 
