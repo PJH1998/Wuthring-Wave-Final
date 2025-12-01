@@ -20,8 +20,6 @@ typedef struct tagPartSpec
 
 
 
-
-
 namespace PlayerData
 {
 
@@ -54,6 +52,7 @@ namespace PlayerData
             make_pair(L"SkillWeapon", L"Prototype_GameObject_Augusta_SkillWeapon"),
             make_pair(L"Griffon", L"Prototype_GameObject_Augusta_Griffon"),
 			make_pair(L"FxObject", L"Prototype_GameObject_Augusta_FxObject"),
+			make_pair(L"HeadProp", L"Prototype_GameObject_Augusta_HeadProp"),
 			make_pair(L"Wing", L"Prototype_GameObject_Wing"),
 			
         };
@@ -157,6 +156,25 @@ namespace PlayerData
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_EnergyBlade"));
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
 		Desc.strBoneName = "Bone00";
+		Desc.eWeaponType = WEAPONTYPE::ANIM;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+		return Desc;
+	}
+
+	static CProp::PROP_DESC GetAugustaHeadPropCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CProp::PROP_DESC Desc{};
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.fSpeedPerSec = 10.f;
+		Desc.pSocketMatrix = { nullptr }; // Augusta
+		Desc.pParentTransform = { nullptr }; // Augusta
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_HeadProp"));
+		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+		Desc.strBoneName = "Bone_Hair001_M";
 		Desc.eWeaponType = WEAPONTYPE::ANIM;
 		Desc.vScale = vScale;
 		Desc.vRotation = vRotation;
