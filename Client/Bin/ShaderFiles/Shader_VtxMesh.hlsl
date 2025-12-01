@@ -1172,6 +1172,88 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_GRASS(PS_IN In)
 
     return Out;
 }
+PS_OUT_LIGHT PS_MAIN_TREE_GRASS(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+
+    if (g_HasMask)
+    {
+        Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
+        Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+
+    }
+    else
+    {
+        Out.vDiffuse = vDiffuse;
+    }
+    
+    if (Out.vDiffuse.g > 0.7f && Out.vDiffuse.a <0.1f)
+        discard;
+    
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+    
+    if (g_IsDynamicObject)
+    {
+        Out.vDepth.z = 1.f;
+    }
+    
+    float4 vNormal;
+    
+    if (g_HasNormal)
+    {
+        if (g_HasMask)
+        {
+            vector vDefaultNormal = g_NormalTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0);
+            
+            float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
+            vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+
+            vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+            
+            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+        }
+        else
+        {
+            vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+		
+	        
+            vNormal = normalize(vDefaultNormal * 2.f - 1.f);
+            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+                vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+        }
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        vNormal = vNormal * 0.5f + 0.5f;
+    }
+    
+    Out.vNormal = float4(vNormal.xyz, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    
+    return Out;
+}
 
 technique11 DefaultTechnique
 {
@@ -1380,5 +1462,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_EMISSIVE_GRASS();
+    }
+
+    pass Tree_Grass // 18
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_TREE_GRASS();
     }
 }
