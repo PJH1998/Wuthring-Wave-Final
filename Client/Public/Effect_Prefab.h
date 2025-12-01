@@ -22,7 +22,8 @@ public:
 		_int	ChildrenCount;
 		vector<FRAME_DESC> FrameDesc;
 
-		_float2	vLifeTime = { 0.f, 0.f };
+		_bool	IsLoop = false;
+		_float2	vLifeTime = { 0.f, 10.f };
 		_string strBoneTag;
 		_uint	CurrentLevel;
 	}PREFAB_DESC;
@@ -74,6 +75,7 @@ private:
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
+	_bool								 m_IsLoop = false;
 
 	//자식들 주소
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 

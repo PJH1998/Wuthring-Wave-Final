@@ -22,7 +22,8 @@ public:
 		_int	ChildrenCount;
 		vector<FRAME_DESC> FrameDesc;
 
-		_float2	vLifeTime = { 0.f, 0.f };
+		_bool	IsLoop = false;
+		_float2	vLifeTime = { 0.f, 10.f };
 		_string strBoneTag;
 	}PREFAB_DESC;
 
@@ -56,6 +57,9 @@ public:
 	void Set_BoneTag(_string BoneTag) {
 		m_strBoneTag = BoneTag;
 	}
+	void Set_Loop(_bool IsLoop) {
+		m_IsLoop = IsLoop;
+	}
 
 public:
 	void Bind_FrameDesc(PREFAB_DESC& PrefabDesc);
@@ -85,6 +89,7 @@ private:
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
+	_bool								 m_IsLoop = false;
 
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
 	vector<FRAME_DESC>					 m_vFrames;

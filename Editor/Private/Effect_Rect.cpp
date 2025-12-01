@@ -47,6 +47,7 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
 	m_iRow = pDesc->iRows;
 	m_iCol = pDesc->iCols;
 	m_IsRoot = pDesc->IsRootOn;
+	m_IsLoop = pDesc->IsLoop;
 
     m_isActivate = true;
 
@@ -55,6 +56,8 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
 
 void CEffect_Rect::Priority_Update(_float fTimeDelta)
 {
+	if (m_fPhase >= 1.f)
+		m_fPhase -= 1.f;
 }
 
 void CEffect_Rect::Update(_float fTimeDelta)
@@ -62,7 +65,6 @@ void CEffect_Rect::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-   m_vLifeTime.x += fTimeDelta;
    m_fSweep += fTimeDelta * m_fSweepSpeed;
 
    if (m_IsSprite)
@@ -71,13 +73,20 @@ void CEffect_Rect::Update(_float fTimeDelta)
    if (m_IsRoot)
 	   Update_Root_Transform();
 
-   if (m_vLifeTime.x >= m_vLifeTime.y)
+   if (!m_IsLoop)
    {
-       m_isActivate = false;
-       m_vLifeTime.x = 0.f;
-	   m_fSweep = 0.f;
-	   m_fPhase = 0.f;
+	   m_vLifeTime.x += fTimeDelta;
+
+	   if (m_vLifeTime.x >= m_vLifeTime.y)
+	   {
+		   m_isActivate = false;
+		   m_vLifeTime.x = 0.f;
+		   m_fSweep = 0.f;
+		   m_fPhase = 0.f;
+	   }
    }
+   //일정주기마다 초기화 해줘야하나 ?
+
 }
 
 void CEffect_Rect::Late_Update(_float fTimeDelta)

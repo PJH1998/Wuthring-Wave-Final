@@ -78,6 +78,8 @@ void CRect_Controller::Rect_Tab()
                 {
                     ImGui::Checkbox("Root", &(m_pSelectedRectDesc->IsRootOn));
 
+					ImGui::Checkbox("Loop", &(m_pSelectedRectDesc->IsLoop));
+
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
                     ImGui::DragInt("##ShaderPass", &(m_pSelectedRectDesc->iShaderPass), 1.f, 0, 6);
