@@ -101,6 +101,8 @@ public:
 	// 몬스터 HP바 표시를 위한 정보를 할당합니다. / &tDesc : 필요 정보 구조체
 	// 살아 있는 동안 매 프레임 호출이 필요하며, 요구 구조체 내의 iMonsterPtrKey 는 몹 주소를 reinterpret_cast 를 통해 할당해주시면 됩니다.
 	void		Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
+	// 몬스터, 객체 등을 미니맵에 띄우기 위한 정보를 할당합니다.
+
 
 	// 탭 유틸리티 UI를 켭니다. /  iCurSelectedUtilityIndex : 현재 선택중인 유틸리티 인덱스 (UI_TAB_UTILITY Enum을 따름)
 	// 마우스 커서 락 해제 필요.(wip)
@@ -128,7 +130,12 @@ public:
 	);		// 여기에 정보 받기용으로 out 포인터 인자라도 만들거나, status 같은 곳에 호출? 
 
 
-	// [WIP] 
+	// [WIP] 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
+	void				Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);			// 몬스터 등과 같이 실시간 갱신이 필요한 경우. Update_MobStatus 에 내장됨.
+	void				Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우
+	void				Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
+
+
 #pragma endregion
 
 #pragma region PLAYER STATUS

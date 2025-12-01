@@ -10,6 +10,12 @@ public:
 		//?
 	} UI_HUD_MINIMAP_DESC;
 
+private:
+	typedef struct tUIMinimapObjDesc {
+		UI_MINIMAP_OBJTYPE	eType = UI_MINIMAP_OBJTYPE::END;
+		_float3				vTargetPos = {};
+	} UI_MINIMAP_OBJ_DESC;
+
 public:
 	explicit CUI_HUD_Sector_Minimap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CUI_HUD_Sector_Minimap(const CUI_HUD_Sector_Minimap& Prototype);
@@ -22,6 +28,11 @@ public: // 생성/복제
 	virtual void    Update(_float fTimeDelta)						override;
 	virtual void    Late_Update(_float fTimeDelta)					override;
 	virtual void    Render()										override;
+
+public:
+	void			Bind_ObjectPos_PerFrame(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);
+	void			Attach_ObjectPos(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 객체 저장 방식 사용 시에 객체의 고유 key 필요
+	void			Detach_ObjectPos(void* pOwner);
 
 private:
 	HRESULT			Ready_Components(void* pArg);
@@ -63,6 +74,12 @@ private:
 	vector<_float3>		m_vecTmpRelativeObjects = {};
 	vector<_float2>		m_vecTmpCacledRelativeObjects = {};
 	
+
+	vector<UI_MINIMAP_OBJ_DESC>					m_vecObjectPos_PerFrame = {};
+	unordered_map<void*, UI_MINIMAP_OBJ_DESC>	m_mapObjectPos_Attached = {};
+
+
+
 	class CGameSystem*	m_pGameSystem		= { nullptr };
 
 public:

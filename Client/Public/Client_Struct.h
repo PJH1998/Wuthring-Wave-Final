@@ -179,7 +179,7 @@ namespace Client
 
 	typedef struct tUIMobsInfoDesc
 	{
-		uintptr_t	iMonsterPtrKey = {};		// 오브젝트의 고유한 키. reinterpret_cast 필요
+		void*	pMonsterPtrKey = {};		// 오브젝트의 고유한 키로써 사용할 목적
 
 		_bool	isAtkedCurFrame = false;
 
@@ -187,7 +187,7 @@ namespace Client
 		_float	fMobCurHP = 500.f;
 		_float	fMobMaxHP = 500.f;
 
-		_float3 vMobPos = { 0.f, -10.f, 0.f };
+		_float3 vMobPos = _float3{ 0.f, -10.f, 0.f };
 
 	} UI_MOBINFO_DESC;
 

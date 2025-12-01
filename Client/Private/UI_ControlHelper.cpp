@@ -19,6 +19,7 @@
 #include "UI_Ovfl_Palette.h"
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
+#include "UI_HUD_Sector_Minimap.h"
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -49,6 +50,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pUI_HUD_SectorRB_SkillIcons	= Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons");
 	m_pUI_HUD_SectorT_BossStatus	= Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus");
 
+	m_pRootUI_HUD_Minimap			= Find_RootUI(L"UI_HUD_Sector_Minimap");
 	m_pUI_UHD_SectorA_Minimap_All	= Find_ChildUI(L"UI_HUD_Sector_Minimap", L"Sub_All");	
 	m_pUI_UHD_SectorA_FuncIcons_All	= Find_ChildUI(L"UI_HUD_Sector_FuncIcons", L"Sub_All");	
 
@@ -91,10 +93,12 @@ HRESULT CUI_ControlHelper::HUD_FadeOut(_bool isForceChange)
 	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorRB_SkillIcons->Get_Component(L"Com_Animator_UI"))->Change_Animation(0, isForceChange)))
 		return E_FAIL;
 
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_Minimap_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_Minimap_FadeOut", isForceChange)))
-		return E_FAIL;
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_FuncIcons_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_FuncIcons_FadeOut", isForceChange)))
-		return E_FAIL;
+	if (m_pUI_UHD_SectorA_Minimap_All)
+		if (FAILED (static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_Minimap_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_Minimap_FadeOut", isForceChange)))
+			return E_FAIL;
+	if (m_pUI_UHD_SectorA_FuncIcons_All)
+		if (FAILED (static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_FuncIcons_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_FuncIcons_FadeOut", isForceChange)))
+			return E_FAIL;
 
 
 	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
@@ -114,10 +118,12 @@ HRESULT CUI_ControlHelper::HUD_FadeIn(_bool isForceChange)
 	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorRB_SkillIcons->Get_Component(L"Com_Animator_UI"))->Change_Animation(1, isForceChange)))
 		return E_FAIL;
 
-	if (FAILED(static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_Minimap_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_Minimap_FadeIn", isForceChange)))
-		return E_FAIL;
-	if (FAILED(static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_FuncIcons_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_FuncIcons_FadeIn", isForceChange)))
-		return E_FAIL;
+	if (m_pUI_UHD_SectorA_Minimap_All)
+		if (FAILED(static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_Minimap_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_Minimap_FadeIn", isForceChange)))
+			return E_FAIL;
+	if (m_pUI_UHD_SectorA_FuncIcons_All)
+		if (FAILED(static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_FuncIcons_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_FuncIcons_FadeIn", isForceChange)))
+			return E_FAIL;
 
 
 	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
@@ -259,6 +265,8 @@ void CUI_ControlHelper::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	if (pRootUI && !pRootUI->IsActivate())	// 풀링 꺼져있으면 켬
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
 
+	Bind_ObjectPos_PerFrame_ToMinimap(tDesc.vMobPos, UI_MINIMAP_OBJTYPE::MONSTER);
+
 	static_cast<CUI_MobHPBar*>(pRootUI)->Update_MobStatus(tDesc);
 }
 
@@ -340,6 +348,36 @@ void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE
 	//	return;
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_QTE", _fmatrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType)
+{
+	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
+
+	if (pRootUI)
+		return;
+
+	pRootUI->Bind_ObjectPos_PerFrame(vPosition, eType);
+}
+
+void CUI_ControlHelper::Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner)
+{
+	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
+
+	if (pRootUI)
+		return;
+
+	pRootUI->Attach_ObjectPos(vPosition, eType, pOwner);
+}
+
+void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
+{
+	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
+
+	if (pRootUI)
+		return;
+
+	pRootUI->Detach_ObjectPos(pOwner);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

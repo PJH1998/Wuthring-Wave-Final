@@ -189,7 +189,7 @@ namespace Client
 	};
 
 	enum class UI_TAB_UTILITY : unsigned int {
-		GRAPPLE = 0,		// 그래플
+		GRAPPLE = 0,	// 그래플
 		SENSOR,			// 스캔
 		FLIGHT,			// 활공
 		LEVITATOR,		// 컨트롤
@@ -204,4 +204,9 @@ namespace Client
 	enum class UI_QTE_TYPE {
 		FILLGUAGE, TRIGGER_ROPE, TRIGGER_EXECUTE, END
 	};
+
+	enum class UI_MINIMAP_OBJTYPE {
+		MONSTER, END	// 나중에 더 필요한 것 있으면 추가? 상호작용 요소..
+	};
+
 }

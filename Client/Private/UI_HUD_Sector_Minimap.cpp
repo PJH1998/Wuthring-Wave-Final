@@ -49,6 +49,8 @@ HRESULT CUI_HUD_Sector_Minimap::Initialize_Clone(void* pArg)
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_HUD_Sector_Minimap", this);
 
+	m_vecObjectPos_PerFrame.reserve(16);
+
 	return S_OK;
 }
 
@@ -56,6 +58,8 @@ void CUI_HUD_Sector_Minimap::Priority_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	m_vecObjectPos_PerFrame.clear();
 
 	__super::Priority_Update(fTimeDelta);
 }
@@ -65,9 +69,10 @@ void CUI_HUD_Sector_Minimap::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	// implement
-	Update_TargetDegrees();
-	Update_RelativePos();
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3(-10.f, -10.f, -10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3(-10.f, -10.f,  10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3( 10.f, -10.f,  10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3( 10.f, -10.f, -10.f) });
 
 	__super::Update(fTimeDelta);
 }
@@ -76,6 +81,9 @@ void CUI_HUD_Sector_Minimap::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_TargetDegrees();
+	Update_RelativePos();
 
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
@@ -89,6 +97,25 @@ void CUI_HUD_Sector_Minimap::Render()
 {
 	if (!m_isActivate)
 		return;
+}
+
+void CUI_HUD_Sector_Minimap::Bind_ObjectPos_PerFrame(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType)
+{
+	UI_MINIMAP_OBJ_DESC pDesc = { eType, vPosition };
+	m_vecObjectPos_PerFrame.push_back(pDesc);
+}
+
+void CUI_HUD_Sector_Minimap::Attach_ObjectPos(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner)
+{
+	UI_MINIMAP_OBJ_DESC pDesc = { eType, vPosition };
+	m_mapObjectPos_Attached.emplace(pOwner, pDesc);
+}
+
+void CUI_HUD_Sector_Minimap::Detach_ObjectPos(void* pOwner)
+{
+	auto it = m_mapObjectPos_Attached.find(pOwner);
+	if (it != m_mapObjectPos_Attached.end())
+		m_mapObjectPos_Attached.erase(it);
 }
 
 HRESULT CUI_HUD_Sector_Minimap::Ready_Components(void* pArg)
@@ -117,11 +144,6 @@ void CUI_HUD_Sector_Minimap::PreAssign_Presets()
 {
 	m_vecTmpCacledRelativeObjects.reserve(16);
 	m_vecTmpRelativeObjects.reserve(16);
-
-	m_vecTmpRelativeObjects.push_back(_float3(10.f, -10.f, -10.f));
-	m_vecTmpRelativeObjects.push_back(_float3(-10.f, -10.f, 10.f));
-	m_vecTmpRelativeObjects.push_back(_float3(-10.f, -10.f, 10.f));
-	m_vecTmpRelativeObjects.push_back(_float3(10.f, -10.f, -10.f));
 }
 
 void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
@@ -141,7 +163,7 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 	
 	m_fCamDirDegree = camDegreeByY;
 
-	std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
+	//std::cout << "[UI_HUD_Sector_Minimap::Update_TargetDegrees] Target Degree : " << camDegreeByY << std::endl;
 
 	_vector vPlayerLook = m_pGameSystem->Get_PlayerLookVector();
 	vPlayerLook = XMVector3Normalize(vPlayerLook);
@@ -158,14 +180,34 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 
 void CUI_HUD_Sector_Minimap::Update_RelativePos()
 {
-	for (auto objectPos : m_vecTmpRelativeObjects)
-		m_vecTmpCacledRelativeObjects.push_back(Calc_RelativePos(&objectPos, 1.f));
+	//const _float fMinimapUIRadius = m_pUI_InstMinimapBG->Get_UIDesc().vecSize[0].x;
+	//const _float fUnvisibleOffset = -5.f;
 
-	
+	const _float fMinimapRadius = 120.f;				// UI 창 반지름보다 약간 좁게
 
 
+	for (auto& objectPos : m_vecTmpRelativeObjects)
+	{	// Test
+		_float2 relativePos = Calc_RelativePos(&objectPos, 1.f);
+		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
+			m_vecTmpCacledRelativeObjects.push_back(relativePos);
+	}
 
-	
+	for (auto& objectDesc : m_vecObjectPos_PerFrame)
+	{	// This Frame Only.
+		_float2 relativePos = Calc_RelativePos(&objectDesc.vTargetPos, 1.f);
+		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
+			m_vecTmpCacledRelativeObjects.push_back(relativePos);
+	}
+
+	for (auto& objectDesc : m_mapObjectPos_Attached)
+	{	// contained
+		_float2 relativePos = Calc_RelativePos(&objectDesc.second.vTargetPos, 1.f);
+		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
+			m_vecTmpCacledRelativeObjects.push_back(relativePos);
+	}
+
+
 }
 
 void CUI_HUD_Sector_Minimap::Update_Instances()
@@ -217,10 +259,13 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 
 	for (_uint i = 0; i < m_vecTmpCacledRelativeObjects.size(); i++)
 	{
-		auto objdesc = objIndIinstDesc[i];
-		auto targetPos = m_vecTmpCacledRelativeObjects[i];
+		auto& objdesc = objIndIinstDesc[i];
+		auto& targetPos = m_vecTmpCacledRelativeObjects[i];
 
+		_float vInstSca = 16.f;
 		objdesc.vSInstTrans = _float4(targetPos.x, targetPos.y, 0.f, 1.f);
+		objdesc.vSInstRight = _float4(vInstSca, 0.f, 0.f, 0.f);
+		objdesc.vSInstUp	= _float4(0.f, vInstSca, 0.f, 0.f);
 	}
 
 	// 색상은 나중에 variantDesc 사용해서 그걸로 적용..
@@ -231,16 +276,16 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 
 _float2 CUI_HUD_Sector_Minimap::Calc_RelativePos(_float3* pTargetPos, _float fMultiplierRatio)
 {
-	_float2 vTargetPos = _float2(pTargetPos->x, pTargetPos->y);		// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
-	_float2 vPlayerPos = _float2(XMVectorGetX(m_pGameSystem->Get_PlayerPosition()), XMVectorGetZ(m_pGameSystem->Get_PlayerPosition()));							// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
+	_float2 vTargetPos = _float2(pTargetPos->x, pTargetPos->z);		// x, z 좌표를 받아와서 이용해야 하며(여기의 x, y는 ui 상의 x, y로 변환함을 가정), 방향도 반전된 것이 없는지의 확인 필요.
+	_vector vPlayerPosLoad = m_pGameSystem->Get_PlayerPosition();
+	_float2 vPlayerPos2D = _float2(XMVectorGetX(vPlayerPosLoad), XMVectorGetZ(vPlayerPosLoad));
 
 	_float2 vRelativePos = _float2(
-		vTargetPos.x - vPlayerPos.x,
-		vTargetPos.y - vPlayerPos.y
+		vTargetPos.x - vPlayerPos2D.x,
+		vTargetPos.y - vPlayerPos2D.y
 	);
 
 	_float2 vRatioEnabledPos = _float2(vRelativePos.x * fMultiplierRatio, vRelativePos.y * fMultiplierRatio);
-
 	return vRatioEnabledPos;
 }
 

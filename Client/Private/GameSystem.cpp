@@ -283,6 +283,21 @@ void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN e
 	m_pUI_ControlHelper->Play_QTE(vSpawnPos, eQTEType, eIconIndex, vScale);
 }
 
+void CGameSystem::Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType)
+{
+	m_pUI_ControlHelper->Bind_ObjectPos_PerFrame_ToMinimap(vPosition, eType);
+}
+
+void CGameSystem::Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner)
+{
+	m_pUI_ControlHelper->Attach_ObjectPos_ToMinimap(vPosition, eType, pOwner);
+}
+
+void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
+{
+	m_pUI_ControlHelper->Detach_ObjectPos_ToMinimap(pOwner);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
