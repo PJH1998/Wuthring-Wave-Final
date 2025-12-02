@@ -39,6 +39,7 @@ public:
 	// Owner의 게이지 채우기?
 	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
+	void Child_Activate(_bool IsActivate);
 
 private:
 	vector<_uint> m_ShaderPaths = {};

@@ -42,6 +42,10 @@ HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
 
 void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
+
     CProp::Priority_Update(fTimeDelta);
 
 	for (auto& pAttackVolume : m_AttackVolumes)
@@ -56,6 +60,9 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 
 void CAugustaGriffon::Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
     CProp::Update(fTimeDelta);
 
 	// 1. Combine 행렬 계산
@@ -63,9 +70,7 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 		m_pTransformCom->Get_WorldMatrix() *
 		XMLoadFloat4x4(m_pSocketMatrix) *
 		m_pParentTransform->Get_WorldMatrix());
-	// MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Update(fTimeDelta);
+	
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
@@ -75,6 +80,9 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
     CProp::Late_Update(fTimeDelta);
 
 

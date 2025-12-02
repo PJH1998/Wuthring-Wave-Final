@@ -167,8 +167,7 @@ void CGalbrenaDarkWing::Activate(_bool IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
-		Bind_DissolveTimer();
-		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
+		Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_GALBRENAWEAPON));
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 		
 	}

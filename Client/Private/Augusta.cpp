@@ -115,17 +115,16 @@ void CAugusta::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
-	
+
+    // 2. 상태 머신 갱신
+    m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+
 	// 파츠 갱신.
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
-
-    // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
-
 	
 	// 3. Physcis 업데이트
 	Update_Physics(fTimeDelta);
@@ -502,6 +501,31 @@ void CAugusta::Set_AnimationToParts(_uint iPartType, const _string& strAnimName)
 	}
 }
 
+void CAugusta::Part_ShaderPathChange(_uint iPartType, _uint iShaderPath)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_GRIFFON:
+		m_pGriffon->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_FXOBJECT:
+		m_pFxObject->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_HEADPROP:
+		m_pHeadProp->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_WING:
+		m_pWing->Change_ShaderPath(iShaderPath);
+		break;
+	}
+}
+
 
 // Hit 판정. => QTE 상태면 안맞음.
 void CAugusta::Hit_Judge(void* pArg)
@@ -788,7 +812,6 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	else if (var1 == TEXT("FXOBJECT")) // 30 ~ 60fps?
 	{
 		Process_FxObject(wStrObjectTag);
-		
 	}
 
 
@@ -1050,15 +1073,9 @@ void CAugusta::Process_FxObject(const _wstring& wStrObjectTag)
 	if (var2 == TEXT("VISIBLE"))
 	{
 		if (var3 == TEXT("TRUE"))
-		{
-			m_pFxObject->Set_Visible(true);
-			//PartActivate(PARTTYPE::PART_FXOBJECT, true);
-		}
+			m_pFxObject->Child_Activate(true); // 여기서 
 		else if (var3 == TEXT("FALSE"))
-		{
-			m_pFxObject->Set_Visible(false);
-			//PartActivate(PARTTYPE::PART_FXOBJECT, false);
-		}
+			 m_pFxObject->Child_Activate(false); // 여기서 
 			
 	}
 	

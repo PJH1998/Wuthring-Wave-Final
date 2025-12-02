@@ -23,10 +23,12 @@ bool g_HasNormal = false;
 cbuffer GlobalConstants
 {
     int g_iNumBlendWeightsToUse = 2; 
-    float4 g_vEnergyColor; 
-    float g_fTime;         
-    float g_fEnergyIntensity;
+    float g_fTime;
+    float g_fEmissiveIntensity;
+    float4 g_vDissolveColor = float4(0.407f, 0.619f, 1.f, 1.f);
+    float4 g_vEmissiveColor; 
     float2 g_vScrollSpeed;
+    
 }
 
 
@@ -189,7 +191,7 @@ PS_OUT PS_DEFAULT_WEAPON(PS_IN In) // Dissolve 추가.
     return Out;
 }
 
-PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
+PS_OUT PS_DISSOLVE_GALBRENAWEAPON(PS_IN In) // Dissolve 추가.
 {
     PS_OUT Out = (PS_OUT) 0;
 
@@ -261,11 +263,9 @@ PS_OUT PS_DISSOLVE_WEAPON(PS_IN In) // Dissolve 추가.
 PS_OUT PS_ENERGY_BLADE(PS_IN In) // Dissolve 추가.
 {
     PS_OUT Out = (PS_OUT) 0;
-
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     float4 vNormal = 0.f;
-    
     
     if (g_HasNormal)
     {
@@ -301,8 +301,8 @@ PS_OUT PS_ENERGY_BLADE(PS_IN In) // Dissolve 추가.
     
     // 최종 발광 색상 계산.
     
-    float3 vColor = g_vEnergyColor.rgb;
-    float fIntensity = g_fEnergyIntensity; // 블룸먹도록 증폭.
+    float3 vColor = g_vEmissiveColor.rgb;
+    float fIntensity = g_fEmissiveIntensity; // 블룸먹도록 증폭.
     
     //float fWeight = Luminance(vColor);
     //if (fWeight >= g_fEmissiveThreshold)
@@ -321,6 +321,137 @@ PS_OUT PS_ENERGY_BLADE(PS_IN In) // Dissolve 추가.
     return Out;
 }
 
+
+PS_OUT PS_AUGUSTA_HEADPROP(PS_IN In) // Dissolve 추가.
+{
+    PS_OUT Out = (PS_OUT) 0;
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        Out.vPBR.x = vNormalDesc.b;
+        Out.vPBR.y = vNormalDesc.a;
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic;  
+        Out.vPBR.y = g_fGlobalDynamicRoughness; 
+    }
+    
+    
+    float3 vEmissiveColor = g_vEmissiveColor.rgb;
+    float3 vWhiteColor = float3(1.0f, 1.0f, 1.0f); // 가장 밝은 부분 흰색주기.
+    float fIntensity = g_fEmissiveIntensity; // 블룸먹도록 증폭.
+    //Out.vEmissive = float4(vEmissiveColor * fIntensity, 1.f);
+    
+    // 1. 텍스쳐 밝기 구하기.
+    float fLuminance = dot(Out.vDiffuse.rgb, float3(0.299, 0.587, 0.114));
+    
+    // 2. 색상 혼합.
+    float3 vFinalColor = lerp(vEmissiveColor, vWhiteColor, pow(fLuminance, 2.0f));
+    
+    // 3. 발광 
+    float3 vEmissiveResult = Out.vDiffuse.rgb * vFinalColor * fIntensity;
+    
+    //float3 vFinalEmissive = Out.vDiffuse.rgb * vEmissiveColor * fIntensity * step(0.5f, fLuminance);
+    Out.vEmissive = float4(vEmissiveResult, 1.0f);
+    
+    
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    Out.vNormal = vNormal;
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    Out.vPBR.z = 1.f;
+    
+    return Out;
+}
+
+PS_OUT PS_DISSOLVE_AUGUSTAWEAPON(PS_IN In) // Dissolve 추가.
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    // 1. 디졸브 텍스처(g_MaskTexture[0])에서 마스크 값을 샘플링.
+    float fDissolveMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (fDissolveMask.r - g_fDissolveRate < 0.f) // 0.f 면 Discard;
+        discard;
+    
+    //clip(fDissolveMask.r - g_fDissolveRate);
+    
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    
+    
+    float3 vColor = g_vDissolveColor.rgb;
+    if (fDissolveMask.r - g_fDissolveRate < 0.3f) // 0.3f 보다 작은 (사라지기 직전)
+        Out.vDiffuse.rgb = vColor * 3.f; // 이러면 쨍하게 들어간다. 
+    
+    // Emissive 0.3f 초과인 얘들은 Emissive가 기본으로 들어가고, 0.3f 이하인 얘들은 Emmisive가 지정한 색상에 더 크게 적용된다.
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    return Out;
+}
 
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
@@ -534,7 +665,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DEFAULT_WEAPON();
     }
 
-    pass DissolveWeapon // 5
+    pass DissolveGalbrenaWeapon // 5
     {
         SetRasterizerState(RS_Cull_Front);
         SetDepthStencilState(DSS_Default, 0);
@@ -542,7 +673,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_DISSOLVE_WEAPON();
+        PixelShader = compile ps_5_0 PS_DISSOLVE_GALBRENAWEAPON();
     }
 
     pass EnergyBlade // 6
@@ -556,8 +687,26 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_ENERGY_BLADE();
     }
 
+    pass AugustaHeadProp // 7
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_AUGUSTA_HEADPROP();
+    }
     
+    pass DissolveAugustaWeapon // 8
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_DISSOLVE_AUGUSTAWEAPON();
+    }
 
 }
