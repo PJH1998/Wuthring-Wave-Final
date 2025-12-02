@@ -114,6 +114,8 @@ void CLevi_Bayonet::Render()
 #ifdef _DEBUG
 	if (m_pAttackVolume)
 		m_pAttackVolume->Render();
+	_float4 temp{};
+	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif // _DEBUG
 
 }
@@ -165,7 +167,7 @@ void CLevi_Bayonet::Ready_Volumes(LEVIBAYONET_DESC* pDesc)
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
 	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetPos = _float3(1.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = pDesc->fAttackDmg;
 	TriggerDesc.eDamageType = pDesc->eType;

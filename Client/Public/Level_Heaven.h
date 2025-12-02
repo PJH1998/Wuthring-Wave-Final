@@ -21,6 +21,7 @@ private:
 	void						Ready_HavocWarrior();
 	void						Ready_ElectroPredator();
 	void						Ready_CoroSaurus();
+	void						Ready_Leviatan();
 	void						Ready_Effect();
 	void						Ready_Skybox();
 	void						Ready_UI();

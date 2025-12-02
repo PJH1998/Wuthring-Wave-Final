@@ -69,6 +69,12 @@ private:
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
 	CAttackVolume* m_pParryVolume = { nullptr, };
 	vector<_uint>			m_ShaderIndices;
+	//vector<_float3>			m_BowOffsets;
+	const _float4x4*		m_pBowSocket = { nullptr };
+	const _float4x4*		m_pSwordSocket = { nullptr };
+
+	_float3					m_vSpawnPos[4]{};
+	_uint					m_iSpawnIndex{};
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};
@@ -76,7 +82,7 @@ private:
 	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
-	_float					m_fAttackCoolTime[PHASE::P_END][ATK_PATTERN::ATK_END]{};
+	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
 	_float					m_fAttackAcc[PHASE::P_END][ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
 	_float					m_fDistanceNonY{};
@@ -93,6 +99,7 @@ private:
 	_bool					m_isAggro{};
 	_bool					m_isDist_Interp_Enable{};
 	_bool					m_isRender{};
+	_bool					m_isAreaAttack{};
 	_uint					m_iPhase{};
 #pragma endregion
 
@@ -103,11 +110,14 @@ private:
 	_float					m_fMaxStamina{};
 	_float					m_fHitStopRatio{};
 	_bool					m_fHitAcc{};
+	_float					m_fFenceAcc{};
+	_float					m_fDropAcc{};
 #pragma endregion
 
 #pragma region PHYSICS
 	_bool					m_isTurnLerp{};
 	_float3					m_vBeHit_Normal{};
+	_float4x4				m_PreTransform{};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
@@ -130,6 +140,7 @@ private:
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
+	void						AreaAttack(_float fTimeDelta);
 	void						TurnFix();
 	void						TurnLerp(_bool isActive);
 	void						DistanceInterpolate(_bool isActive);

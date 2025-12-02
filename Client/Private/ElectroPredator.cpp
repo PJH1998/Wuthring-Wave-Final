@@ -51,6 +51,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
+	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 	return S_OK;
 }
 
@@ -162,7 +163,12 @@ void CElectroPredator::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		_bool HasNormal = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
+
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
    		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
@@ -183,6 +189,7 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
 	m_fHP = pDesc->fMaxHp;
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
@@ -255,6 +262,7 @@ HRESULT CElectroPredator::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
 
 	return S_OK;
 }

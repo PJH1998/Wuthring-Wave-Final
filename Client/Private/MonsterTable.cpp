@@ -85,6 +85,15 @@ const vector<NPCINFO>& CMonsterTable::Get_NpcData(_uint iType) const
 	return m_NPCTable[NPCTYPE(iType)];
 }
 
+void CMonsterTable::Clear_NPCData()
+{
+	for (size_t i = 0; i < NPCTYPE::END; i++)
+	{
+		m_NPCTable[i].clear();
+		m_NPCTable[i].shrink_to_fit();
+	}
+}
+
 CMonsterTable* CMonsterTable::Create()
 {
 	return new CMonsterTable();
@@ -96,5 +105,9 @@ void CMonsterTable::Free()
 
 	m_MonsterKey.clear();
 	m_MonsterTable.clear();
-
+	for (size_t i = 0; i < NPCTYPE::END; i++)
+	{
+		m_NPCTable[i].clear();
+		m_NPCTable[i].shrink_to_fit();
+	}
 }

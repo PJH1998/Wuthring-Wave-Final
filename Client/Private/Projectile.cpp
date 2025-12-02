@@ -25,6 +25,8 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	m_iTargetLayers = pDesc->iTargetLayers;
 	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_isCollisionDestroy = pDesc->isCollisionDestroy;
+	m_fMaxLifeTime = pDesc->fLifeTime;
 	m_fDelay = 0.2f;
 	m_isActivate = false;
     return S_OK;
@@ -32,7 +34,7 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 
 void CProjectile::Priority_Update(_float fTimeDelta)
 {
-	if (m_fLifeTime < 10.f)
+	if (m_fLifeTime < m_fMaxLifeTime)
 		m_fLifeTime += fTimeDelta;
 	else
 		m_isCollision = true;
@@ -59,9 +61,12 @@ void CProjectile::Late_Update(_float fTimeDelta)
 {
 	if (m_isCollision)
 	{
-		m_isActivate = false;
-		m_pRigidBodyCom->IsActivate(false);
-		return;
+		if(m_isCollisionDestroy || m_fLifeTime >= m_fMaxLifeTime)
+		{
+			m_isActivate = false;
+			m_pRigidBodyCom->IsActivate(false);
+			return;
+		}
 	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
 		return;
@@ -72,20 +77,27 @@ void CProjectile::Render()
 	if (FAILED(Bind_Resources()))
 		CRASH("Falied to Bind Resources");
 
-
-	_uint iNumMesh = m_pModelCom->Get_NumMesh();
-	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
-	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
-	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
-	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
-
-	for (_uint i = 0; i < iNumMesh; ++i)
+	if(m_pModelCom)
 	{
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
-		m_pShaderCom->Begin(0);
+		_uint iNumMesh = m_pModelCom->Get_NumMesh();
+		ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+		m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+		m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+		m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
-		m_pModelCom->Render(i);
+		for (_uint i = 0; i < iNumMesh; ++i)
+		{
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+			_bool HasNormal { false };
+			if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = true;
+			if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+				CRASH("Ready g_HasNormal Failed");
+			m_pShaderCom->Begin(0);
+
+			m_pModelCom->Render(i);
+		}
 	}
 #ifdef _DEBUG
 	m_pRigidBodyCom->Render();

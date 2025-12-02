@@ -50,6 +50,7 @@ private:
 	//const _float4x4*		m_pArrowMatrix = { nullptr };
 
 	queue<_float3>			m_PatrolPoints;
+	_float4					m_vBaseColor{};
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};

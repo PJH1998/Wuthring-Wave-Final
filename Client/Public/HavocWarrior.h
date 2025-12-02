@@ -52,6 +52,7 @@ private:
 	CGameSystem*			m_pGameSystem = { nullptr };
 
 	queue<_float3>			m_PatrolPoints;
+	_float4					m_vBaseColor{};
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};

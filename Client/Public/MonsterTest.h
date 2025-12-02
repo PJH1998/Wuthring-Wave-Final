@@ -63,6 +63,7 @@ private:
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 	CAttackVolume*			m_pParryVolume = {nullptr,};
 	vector<_uint>			m_ShaderIndices;
+	_float4					m_vBaseColor{};
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};
