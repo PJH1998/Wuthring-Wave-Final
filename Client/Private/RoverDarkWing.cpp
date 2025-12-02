@@ -41,27 +41,50 @@ HRESULT CRoverDarkWing::Initialize_Clone(void* pArg)
 
 void CRoverDarkWing::Priority_Update(_float fTimeDelta)
 {
-    CProp::Priority_Update(fTimeDelta);
-	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+	if (!m_isActivate)
+		return;
 
-	if (m_IsAnimationEnd) // 애니메이션 끝나면 자동으로 비활성화
-		m_isActivate = false;
+	
+    CProp::Priority_Update(fTimeDelta);
 
 	// 1. Attack Volume 갱신
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+
+	// 2. Dissolve 체크
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Prop_Reset();
+		}
+
+	}
 }
 
 void CRoverDarkWing::Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
     CProp::Update(fTimeDelta);
 
-    // Augusta StateMachine
-    // Last :  Combined 
-    XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());
+	// 1. Combine 행렬 계산
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (!IsDissolve) // Dissolve가 아니라면 업데이트 계속.
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			XMLoadFloat4x4(m_pSocketMatrix) *
+			m_pParentTransform->Get_WorldMatrix());
+	}
+    
 
 	// 1. Attack Volume 갱신
 	if (nullptr != m_pMainAttackVolume)
@@ -71,13 +94,12 @@ void CRoverDarkWing::Update(_float fTimeDelta)
 
 void CRoverDarkWing::Late_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
 
     CProp::Late_Update(fTimeDelta);
 
-	m_pModelCom->Play_Animation_CPU("G_Ex_Attack01", fTimeDelta, &m_fTrackPosition, false, true);
-    //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
-
-	// Attack Volume 갱신.
+	// 6. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
@@ -90,10 +112,26 @@ void CRoverDarkWing::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &m_fEmissiveIntensity, sizeof(_float))))
+			CRASH("Ready EnergyColor");
+	}
+
     for (_uint i = 0; i < iNumMeshes; i++)
     {
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			continue;// Diffuse 없는 놈도 있음.
+			continue; // Diffuse 없으면 무시.
 
 		_bool HasNormal = { false };
 
@@ -103,10 +141,13 @@ void CRoverDarkWing::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
+		// 3. Mask Texture
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
+
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -122,6 +163,33 @@ void CRoverDarkWing::Render()
 
 void CRoverDarkWing::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+}
+
+void CRoverDarkWing::Activate(_bool IsActivate)
+{
+	
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (true == IsActivate)
+	{
+		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // Animation 클리어.
+		Prop_Reset();
+		m_isActivate = IsActivate;
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	}
+
+	if (false == IsActivate)
+	{
+		if (Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE))) // 이미 Disolve인데 반복되지 않기 위함.
+			return;
+
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_ROVERWEAPON));
+		//Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_GALBRENAWEAPON));
+	}
 }
 
 void CRoverDarkWing::Ready_Components(const PROP_DESC* pDesc)
@@ -147,7 +215,12 @@ void CRoverDarkWing::Ready_Variables(const PROP_DESC* pDesc)
     m_pParentTransform = pDesc->pParentTransform;
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+
+	// Shader 변수
+	m_fMaxDissolveTime = 0.35f;
+	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
+	m_fEmissiveIntensity = 30.f;
 }
 
 void CRoverDarkWing::Ready_Positions(const PROP_DESC* pDesc)

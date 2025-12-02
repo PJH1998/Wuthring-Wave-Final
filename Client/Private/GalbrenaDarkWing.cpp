@@ -50,7 +50,6 @@ void CGalbrenaDarkWing::Priority_Update(_float fTimeDelta)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 
 	// 2. Dissolve 체크.
-
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 
 	if (IsDissolve)
@@ -115,8 +114,6 @@ void CGalbrenaDarkWing::Render()
 	// 2. Render
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-		//	continue;
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			continue;
 

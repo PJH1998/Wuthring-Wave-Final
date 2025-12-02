@@ -79,6 +79,9 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
+	m_fEmissiveIntensity = 30.f;
+
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -116,8 +119,6 @@ void CRover::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
-
-
 
 	
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
@@ -206,7 +207,7 @@ void CRover::Render()
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	if (IsDissolve)
 	{
-		m_vDissolveColor = { 0.5f, 0.5f, 0.5f, 1.f};
+		
 
 		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
 		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
@@ -497,10 +498,13 @@ void CRover::Hit_Judge(void* pArg)
 	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND)
 		&& eKey.iSubState == ENUM_CLASS(ERoverGroundState::ATTACK);
 
-	if (!IsAttack)
+	_bool IsSpecialAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND)
+		&& eKey.iSubState == ENUM_CLASS(ERoverGroundState::SPECIAL);
+
+	if (!IsAttack && !IsSpecialAttack)
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Attack은 살짝만 느려지게
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f); // Attack은 살짝만 느려지게
 
 	
 	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
@@ -680,14 +684,33 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 
 	// GalbrenaWing|Bone
 	// 자르는거야.
-
-	_uint iVolumeIdx = stoul(var3);
-
 	if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
 	{
 		m_fStateTimeRate = stof(var2);
 		m_fStateDelayTimer = stof(var3);
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
+	}
+
+	if (var1 == TEXT("DarkScythe"))
+	{
+		if (var2 == TEXT("Activate"))
+		{
+			if (var3 == TEXT("false"))
+				PartActivate(PARTTYPE::PART_DARKSCYTHE, false);
+			else if(var3 == TEXT("true"))
+				PartActivate(PARTTYPE::PART_DARKSCYTHE, true);
+		}
+	}
+
+	if (var1 == TEXT("DarkWing"))
+	{
+		if (var2 == TEXT("Activate"))
+		{
+			if (var3 == TEXT("false"))
+				PartActivate(PARTTYPE::PART_DARKWING, false);
+			else if (var3 == TEXT("true"))
+				PartActivate(PARTTYPE::PART_DARKWING, true);
+		}
 	}
 	
 
@@ -1040,7 +1063,7 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 	// Shader Vlaue 추가
 	m_fDissolveTimer = 0.f;
 	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 0.15f, 0.15f, 0.15f, 1.f };
+	m_vDissolveColor = { 0.5f, 0.5f, 0.5f, 1.f };
 	m_fEmissiveIntensity = 3.f;
 }
 

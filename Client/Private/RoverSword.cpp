@@ -43,6 +43,20 @@ void CRoverSword::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
+	// Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Prop_Reset();
+		}
+	}
+
 	// 1. Attack Volume 갱신
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
@@ -52,11 +66,16 @@ void CRoverSword::Update(_float fTimeDelta)
 {
     CProp::Update(fTimeDelta);
 
-    // 1. Combine 행렬 계산
-    XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());
+	// 1. Combine 행렬 계산
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (!IsDissolve) // Dissolve가 아니라면 업데이트 계속.
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			XMLoadFloat4x4(m_pSocketMatrix) *
+			m_pParentTransform->Get_WorldMatrix());
+	}
 
 	// 2. 어택 볼륨 업데이트
 	if (nullptr != m_pMainAttackVolume)
@@ -66,7 +85,6 @@ void CRoverSword::Update(_float fTimeDelta)
 
 void CRoverSword::Late_Update(_float fTimeDelta)
 {
-
     CProp::Late_Update(fTimeDelta);
 
 	// Attack Volume 갱신.
@@ -83,6 +101,22 @@ void CRoverSword::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &m_fEmissiveIntensity, sizeof(_float))))
+			CRASH("Ready EnergyColor");
+	}
+
     for (_uint i = 0; i < iNumMeshes; i++)
     {
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
@@ -96,10 +130,13 @@ void CRoverSword::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
+		// 3. Mask Texture
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
+
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -113,11 +150,24 @@ void CRoverSword::Render()
 
 void CRoverSword::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActivate);
-	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (true == IsActivate)
+	{
+		Prop_Reset();
+		m_isActivate = IsActivate;
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	}
 
 	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+		Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_ROVERWEAPON));
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
+	}
 }
 
 void CRoverSword::Change_Volume(_uint iVolumeIdx)
@@ -179,6 +229,11 @@ void CRoverSword::Ready_Variables(const PROP_DESC* pDesc)
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+
+	// Shader 변수
+	m_fMaxDissolveTime = 0.35f;
+	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
+	m_fEmissiveIntensity = 30.f;
 }
 
 void CRoverSword::Ready_Positions(const PROP_DESC* pDesc)

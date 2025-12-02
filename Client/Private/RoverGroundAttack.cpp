@@ -198,7 +198,6 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
-	
 
 	
 	if (m_States[HEAVY_ATTACK_PENDING])
@@ -302,7 +301,7 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 	//공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
 	if (m_IsAnimationEnd)
 	{
-		m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+		m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDCHANGE;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 		m_IsNextAttackInput = false;
 		return;
