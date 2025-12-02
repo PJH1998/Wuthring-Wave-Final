@@ -91,6 +91,8 @@ void CAugustaGroundSpecial::OnExit()
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
     m_pAugusta->PartActivate(m_iSubPartType, false);
+	m_pAugusta->Clear_PartAnimation(m_iPartType, "Sword_Open_Loop");
+	m_pAugusta->Clear_PartAnimation(m_iPartType, "Sword_Open_Loop_2");
     m_iComboCount = 0;
     m_pAugusta->Set_Gravity(true); 
 
@@ -137,7 +139,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.1f);
     }
 
-    
+    // Burst Weapon
 	m_pAugusta->Play_PartAnimation(
 		m_iPartType,
 		m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
@@ -352,15 +354,15 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_R), "SpWalk_Stop_R", 1.f, 0.f);
 
 	m_PartsAnimations.emplace("SpAttack01", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("SpAttack02", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpAttack02", "Sword_Open_Loop_2");
 	m_PartsAnimations.emplace("SpAttack03", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("SpAttackOmni", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpAttackOmni", "Sword_Open_Loop_2");
 	m_PartsAnimations.emplace("SpWalk_Dash", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("SpWalk_Dash_Root", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Dash_Root", "Sword_Open_Loop_2");
 	m_PartsAnimations.emplace("SpWalk_F", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("SpWalk_Stand", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("SpWalk_Stop_L", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("SpWalk_Stop_R", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Stand", "Sword_Open_Loop_2");
+	m_PartsAnimations.emplace("SpWalk_Stop_L", "Sword_Open_Loop_2");
+	m_PartsAnimations.emplace("SpWalk_Stop_R", "Sword_Open_Loop_2");
 }
 
 void CAugustaGroundSpecial::State_Reset()

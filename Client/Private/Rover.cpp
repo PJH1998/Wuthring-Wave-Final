@@ -958,6 +958,8 @@ void CRover::Render_Eye(_uint iMeshIndex)
 		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
 		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
 		_float fEmissiveIntensity = { 5.f };
+		//_float4 vEmissiveColor = { 0.693f, 0.481f, 1.f, 1.f };
+		//_float  fEmissiveIntensity = 10.f;
 		_float fGalbrenaEyeAlpha = 0.6f;
 		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
 		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));

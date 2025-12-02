@@ -12,6 +12,13 @@ public:
 		VOLUME_END
 	};
 
+	enum MESHTYPE
+	{
+		MESH_DEFAULT = 0,
+		MESH_EFFECT = 1,
+		MESH_END
+	};
+
 public:
 	typedef struct tagAugustaSkillWeaponDesc : public CProp::PROP_DESC {
 		
@@ -31,6 +38,11 @@ public:
 	virtual	void Render() override;
 
 
+#ifdef _DEBUG
+	void Debug_Emissive(_float4 vEmissiveColor, _float fIntensity);
+#endif // _DEBUG
+
+	
 
 public:
 	virtual void Activate(_bool IsActivate) override;
@@ -43,7 +55,14 @@ public:
 private:
 	vector<_uint> m_ShaderPaths = {};
 
+	// Shader 변수
+	_float m_fTime = {}; // UV 흐름을 주기 위한 변수.
 
+private:
+	_bool IsEffect(_uint iMeshIndex);
+
+	void Render_Default(_uint iMeshIndex);
+	void Render_Effect(_uint iMeshIndex);
 
 private:
 	void Ready_Components(const PROP_DESC* pDesc);

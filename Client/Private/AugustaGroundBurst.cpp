@@ -107,7 +107,7 @@ void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
     
 	EAugustaBurstType eBurstType = static_cast<EAugustaBurstType>(m_iCurrentAnimIdx);
 
-
+	// Burst
 	m_pAugusta->Play_PartAnimation(
 		m_iPartType,
 		m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
@@ -196,7 +196,7 @@ void CAugustaGroundBurst::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaBurstType::BURST_STAND), "Burst_Stand", 1.f, 0.f);
 
 	m_PartsAnimations.emplace("Burst01", "Sword_Open_Loop");
-	m_PartsAnimations.emplace("Burst_Stand", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("Burst_Stand", "Sword_Open_Loop_2");
 }
 
 void CAugustaGroundBurst::State_Reset()

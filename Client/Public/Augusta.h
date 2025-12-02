@@ -222,6 +222,12 @@ public:
 	virtual void Bind_DefaultShaderPath() override;
 	virtual void Bind_DissolveShaderPath() override;
 	virtual void Activate(_bool IsActivate) override;
+
+
+#ifdef _DEBUG
+	void Debug_BurstWeapon();
+#endif // _DEBUG
+
 #pragma endregion
 
 

@@ -65,6 +65,7 @@
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
 #include "AugustaHeadProp.h"
+#include "AugustaBurstWeapon.h"
 #include "Augusta.h"
 
 // Rover
@@ -372,6 +373,19 @@ HRESULT CLoader_Heaven::Load_Augusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrHeadPropTag
 		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_BurstWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/BurstWeapon/AugustaBurstWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrBurstWeaponTag = TEXT("Prototype_GameObject_Augusta_BurstWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrBurstWeaponTag
+		, CAugustaBurstWeapon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 #pragma endregion
 

@@ -53,6 +53,8 @@ void CAugustaBurstWeapon::Priority_Update(_float fTimeDelta)
 		if (nullptr != pAttackVolume)
 			pAttackVolume->Priority_Update(fTimeDelta);
 	}
+
+	m_fTime += fTimeDelta; // UV 흐름을 주기위함.
 }
 
 void CAugustaBurstWeapon::Update(_float fTimeDelta)
@@ -60,6 +62,8 @@ void CAugustaBurstWeapon::Update(_float fTimeDelta)
     CProp::Update(fTimeDelta);
 
     // Augusta StateMachine
+	if (m_IsAnimationEnd)
+		m_pModelCom->Clear_Animation(m_strCurrentAnimName, 0.f);
 
 	// Last :  Combined 
 	XMStoreFloat4x4(&m_CombinedMatrix,
@@ -101,16 +105,10 @@ void CAugustaBurstWeapon::Render()
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-            CRASH("Ready Diffuse Texture Failed");
-
-		_bool HasNormal = { false };
-
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-			HasNormal = true;
-
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
+		if (IsEffect(i))
+			Render_Effect(i);
+		else
+			Render_Default(i);
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -128,21 +126,37 @@ void CAugustaBurstWeapon::Render()
 #endif // _DEBUG
 }
 
+#ifdef _DEBUG
+void CAugustaBurstWeapon::Debug_Emissive(_float4 vEmissiveColor, _float fIntensity)
+{
+	m_vEmissiveColor = vEmissiveColor;
+	m_fEmissiveIntensity = fIntensity;
+}
+#endif // _DEBUG
+
+
+
 void CAugustaBurstWeapon::Activate(_bool IsActivate)
 {
     SetActivate(IsActivate);
-
-	m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
-
 	PREFAB_INFO effecInfo{};
 	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	effecInfo.pModelPtr = m_pModelCom;
 
+	if (true == IsActivate)
+	{
+		Prop_Reset();
+		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+	}
+
 	if (false == IsActivate)
 	{
+		m_fTime = 0.f;
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
+
+		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 	}
 }
 
@@ -173,6 +187,53 @@ void CAugustaBurstWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactMa
 		return;
 }
 
+
+_bool CAugustaBurstWeapon::IsEffect(_uint iMeshIndex)
+{
+	if (MESHTYPE::MESH_EFFECT == iMeshIndex)
+		return true;
+	return false;
+}
+
+void CAugustaBurstWeapon::Render_Default(_uint iMeshIndex)
+{
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		CRASH("Ready Diffuse Texture Failed");
+
+	_bool HasNormal = { false };
+
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+
+	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK);
+
+	_float4 vEmissiveColor = { 1.0f, 0.35f, 0.05f, 1.0f };
+	_float fEmissiveIntensity = 0.3f;
+
+	m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &fEmissiveIntensity, sizeof(_float));
+}
+
+void CAugustaBurstWeapon::Render_Effect(_uint iMeshIndex)
+{
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		CRASH("Ready Diffuse Texture Failed");
+
+	// MaskTexture 배열을 바인딩.
+	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK);
+
+	_float4 vEmissiveColor = { 0.35f, 0.07f, 0.035f, 1.f };
+	_float fEmissiveIntensity = { 1.948f };
+
+	m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &fEmissiveIntensity, sizeof(_float));
+	m_pShaderCom->Bind_Value("g_fTime", &m_fTime, sizeof(_float));
+
+}
+
 void CAugustaBurstWeapon::Ready_Components(const PROP_DESC* pDesc)
 {
     // 1. Components
@@ -195,8 +256,9 @@ void CAugustaBurstWeapon::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+	m_ShaderPaths[MESHTYPE::MESH_DEFAULT] = ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_BURSTWEAPON);
+
+	m_ShaderPaths[MESHTYPE::MESH_EFFECT] = ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_BURSTWEAPON_EFFECT);
 }
 
 void CAugustaBurstWeapon::Ready_Positions(const PROP_DESC* pDesc)

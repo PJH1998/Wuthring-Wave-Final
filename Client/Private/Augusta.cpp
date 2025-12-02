@@ -213,6 +213,11 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
 void CAugusta::Render()
 {
+#ifdef _DEBUG
+	Debug_BurstWeapon();
+#endif // _DEBUG
+
+	
 
     Bind_Resources();
 
@@ -1014,6 +1019,30 @@ void CAugusta::Activate(_bool IsActivate)
 
 	
 }
+
+#ifdef _DEBUG
+void CAugusta::Debug_BurstWeapon()
+{
+	static float vEmissive[3] = {};
+	static float fIntensity = { 0.1f };
+	ImGui::Begin("BurstWeapon ImGui");
+
+	ImGui::SliderFloat3("Emissive Color", vEmissive, 0.0f, 1.0f);
+	ImGui::SliderFloat("Emissive Intensity", &fIntensity, 0.f, 30.f);
+
+	if (ImGui::Button("Apply BurstWeapon"))
+	{
+		_float4 vEmissiveColor = { vEmissive[0], vEmissive[1], vEmissive[2], 1.0f };
+		_float fEmissiveIntensity = fIntensity;
+		m_pBurstWeapon->Debug_Emissive(vEmissiveColor, fEmissiveIntensity);
+	}
+	ImGui::End();
+
+}
+#endif // _DEBUG
+
+
+
 #pragma endregion
 
 
@@ -1224,10 +1253,12 @@ void CAugusta::Render_Eye(_uint iMeshIndex)
 	if (IsCutScene)
 	{
 		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
-		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
-		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
-		_float fEmissiveIntensity = { 5.f };
-		_float fGalbrenaEyeAlpha = 0.6f;
+		//_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
+		//_float fEmissiveIntensity = { 5.f };
+		//_float4 vEmissiveColor = { 0.9f, 0.7f, 0.1f, 1.0f };
+		_float4 vEmissiveColor = { 0.5f, 0.3f, 0.1f, 1.0f };
+		_float fEmissiveIntensity = { 3.f };
+		_float fGalbrenaEyeAlpha = 0.5f;
 		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
 		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
