@@ -51,6 +51,8 @@ private:
 	//HRESULT					Ready_ChangeCooldownText();		// 여기서 셋 다 생성?
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
+	void					Update_Presets();
+
 	void					Update_UI_SkillSection(_float fTimeDelta);
 	void					Update_UI_SkillSection_Wave(_float fTimeDelta);
 	void					Update_UI_SkillSection_Utility(_float fTimeDelta);
@@ -59,7 +61,7 @@ private:					// �ڽ� UI�� ���� ��� ������ ��
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
 	void					Update_UI_BossHPBar(_float fTimeDelta);
 	void					Update_UI_KeyGuide(_float fTimeDelta);
-
+	
 	void					Update_UI_PlayerEnergyFrame(_float fTimeDelta);				// [Energy] Only Frame
 	void					Update_UI_Icon_HarmonyReady(_float fTimeDelta);				// Harmony Ready
 	void					Update_UI_PlayerEnergyBar(_float fTimeDelta);				// [Energy] Normal Energy. shared.
@@ -147,8 +149,12 @@ private:
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
 	array<array<_float2, 2>, 5>						m_arrUtilCoordPresets = {};
 	array<_float4, 4>								m_arrPlayerSymbolicColors = {};
+	array<_float4, 4>								m_arrPlayerAdvSymbolicColors = {};
 	_uint m_iSelectedCHIndex = 0;
 	_float m_fElapsedTime = 0.f;
+
+	array<_float4, CH_END>							m_arrPlayerColors = {};			// 위의 상태별 심볼릭 컬러에서 요구 색상을 정제함.
+	array<_float4, CH_END>							m_arrPlayerAdvColors = {};
 
 private:
 	_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);

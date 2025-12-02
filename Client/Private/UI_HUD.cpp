@@ -6,26 +6,6 @@
 #include "GameSystem.h"
 #include "PlayerStatus.h"
 #include "UI_Text.h"
-#include <d3d11.h>
-#include <dinput.h>
-#include <Windows.h>
-#include <algorithm>
-#include <array>
-#include <iostream>
-#include <ostream>
-#include <vector>
-#include <Client_CharacterEnum.h>
-#include <Client_Define.h>
-#include <Client_Enum.h>
-#include <Client_Struct.h>
-#include <Custom_UI.h>
-#include <VIBuffer_Rect_Instance_UI.h>
-#include <Engine_Enum.h>
-#include <Engine_Function.h>
-#include <Engine_Macro.h>
-#include <Engine_Typedef.h>
-#include <GameObject.h>
-#include <Jolt/Core/Core.h>
 
 //#define KSTA_UI_COOLDOWNTEST
 //#define KSTA_UI_HPBARTEST
@@ -119,6 +99,8 @@ void CUI_HUD::Update(_float fTimeDelta)
 		int i = 10;
 
 	m_pAbility = m_pPlayerStatus->Get_Ability(m_iSelectedCHIndex);
+
+	Update_Presets();
 
 	Update_UI_SkillSection(fTimeDelta);
 	Update_UI_SkillSection_Wave(fTimeDelta);
@@ -305,11 +287,15 @@ HRESULT CUI_HUD::Ready_Presets()
 	m_arrUtilCoordPresets[ENUM_CLASS(UI_TAB_UTILITY::NOTHING)]	= {_float2(0.75f, 1.00f), _float2(0.75f, 1.00f)};
 
 
-	m_arrPlayerSymbolicColors[CLR_ROVER]		 = _float4(0.808f, 0.322f, 0.612f, 1.0f); // ksta : 이거 채우고 이거 쓰게 적용
-	m_arrPlayerSymbolicColors[CLR_AUGUSTA]		 = _float4(0.969f, 0.451f, 1.000f, 1.0f);
-	m_arrPlayerSymbolicColors[CLR_GALBRENA]		 = _float4(1.000f, 0.416f, 0.416f, 1.0f);
-	m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT]	 = _float4(0.992f, 0.749f, 0.341f, 1.0f);
+	m_arrPlayerSymbolicColors[CLR_ROVER]			= _float4(0.808f, 0.322f, 0.612f, 1.0f);
+	m_arrPlayerSymbolicColors[CLR_AUGUSTA]			= _float4(0.969f, 0.451f, 1.000f, 1.0f);
+	m_arrPlayerSymbolicColors[CLR_GALBRENA]			= _float4(1.000f, 0.416f, 0.416f, 1.0f);
+	m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT]		= _float4(0.992f, 0.749f, 0.341f, 1.0f);
 
+	m_arrPlayerAdvSymbolicColors[CLR_ROVER]			= _float4(0.485f, 0.193f, 0.367f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA]		= _float4(0.581f, 0.271f, 0.600f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_GALBRENA]		= _float4(0.600f, 0.250f, 0.250f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT]	= _float4(0.595f, 0.449f, 0.205f, 1.0f);
 
 
 	return S_OK;
@@ -440,6 +426,34 @@ HRESULT CUI_HUD::Ready_SkillCooldownText()
 //{
 //	return S_OK;
 //}
+
+void CUI_HUD::Update_Presets()
+{
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+	switch (m_iSelectedCHIndex)
+	{
+	case CH_ROVER:		m_arrPlayerColors[CH_ROVER]			= m_arrPlayerSymbolicColors[CLR_ROVER];
+						m_arrPlayerAdvColors[CH_ROVER]		= m_arrPlayerAdvSymbolicColors[CLR_ROVER];		break;
+	case CH_AUGUSTA:	m_arrPlayerColors[CH_AUGUSTA]		=
+					(	isIn_Augusta_AdvUlt ||													// 궁 사용중이거나
+						m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
+															  m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT] :
+															  m_arrPlayerSymbolicColors[CLR_AUGUSTA];		
+						m_arrPlayerAdvColors[CH_AUGUSTA]		=
+					(	isIn_Augusta_AdvUlt ||													// 궁 사용중이거나
+						m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
+															  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT] :
+															  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA];
+																										break;
+	case CH_GALBRENA:	m_arrPlayerColors[CH_GALBRENA]		= m_arrPlayerSymbolicColors[CLR_GALBRENA];
+						m_arrPlayerAdvColors[CH_GALBRENA]	= m_arrPlayerAdvSymbolicColors[CLR_GALBRENA];	break;
+	}
+}
 
 void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 {
@@ -627,17 +641,26 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
 	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
-	vector<_float4> matCustomColor = { }; matCustomColor.resize(CH_END);
+	vector<_float4> vecCustomColor		= { };		vecCustomColor.resize(CH_END);
+	vector<_float4> vecAdvCustomColor	= { };		vecAdvCustomColor.resize(CH_END);
 	
 	switch (m_iSelectedCHIndex)
 	{
-	case CH_ROVER:		matCustomColor[CH_ROVER]	= m_arrPlayerSymbolicColors[CLR_ROVER];		break;
-	case CH_AUGUSTA:	matCustomColor[CH_AUGUSTA]	=
+	case CH_ROVER:		vecCustomColor[CH_ROVER]		= m_arrPlayerSymbolicColors[CLR_ROVER];		
+						vecAdvCustomColor[CH_ROVER]		= m_arrPlayerAdvSymbolicColors[CLR_ROVER];		break;
+	case CH_AUGUSTA:	vecCustomColor[CH_AUGUSTA]		=
 					(	isIn_Augusta_AdvUlt ||											// 궁 사용중이거나
 						pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
-													  m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT] :
-													  m_arrPlayerSymbolicColors[CLR_AUGUSTA];		break;
-	case CH_GALBRENA:	matCustomColor[CH_GALBRENA] = m_arrPlayerSymbolicColors[CLR_GALBRENA];		break;
+													      m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT] :
+													      m_arrPlayerSymbolicColors[CLR_AUGUSTA];		
+						vecAdvCustomColor[CH_AUGUSTA]	=
+					(	isIn_Augusta_AdvUlt ||											// 궁 사용중이거나
+						pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
+														  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT] :
+														  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA];
+																										break;
+	case CH_GALBRENA:	vecCustomColor[CH_GALBRENA]		= m_arrPlayerSymbolicColors[CLR_GALBRENA];		
+						vecAdvCustomColor[CH_GALBRENA]	= m_arrPlayerAdvSymbolicColors[CLR_GALBRENA];	break;
 	}
 
 	// - 활성화 여부 지정
@@ -664,8 +687,13 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._12) = 0.f;							// ColorMul1
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._13) = (fUltGuage >= 1.f) ? 1.f : 0.85f ;							// ColorMul2
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._14) = static_cast<_float>(true);	// Is Use CustomColor?
-	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21) = matCustomColor[m_iSelectedCHIndex];	// CustomColor
+	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21)= vecCustomColor[m_iSelectedCHIndex];	// CustomColor
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._31) = 0.f;							// CD Start Degree
+
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._33) = m_fElapsedTime;							// Elapsed Time
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._34) = 0.2f;							// UV Scroll Speed
+	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._41)= vecAdvCustomColor[m_iSelectedCHIndex];						// Mask Color
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
@@ -728,7 +756,7 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 	_float fUVRotateSpeed = -10.f / 60.f;
 
 
-	_float4 vDestColor = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
+	_float4 vDestColor = m_arrPlayerAdvColors[m_iSelectedCHIndex];
 	*reinterpret_cast<_float4*>(&vecVariantMat[0]._11) = vDestColor;					// dest color
 	*reinterpret_cast<_float*>(&vecVariantMat[0]._21) = static_cast<_float>(true);	// is Distort On?
 	*reinterpret_cast<_float*>(&vecVariantMat[0]._22) = m_fElapsedTime;				// ElapsedTime. for transforming UV
@@ -1594,13 +1622,13 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 
 	for (auto& variantMat : vecVariantMat)		// Background Circle
 	{
-		_float4 vDestColor = _float4(1.f, 1.f, 1.f, 0.1f);
+		_float4 vDestColor = _float4(1.f, 1.f, 1.f, 0.2f);
 		*reinterpret_cast<_float4*>(&variantMat._11) = vDestColor;					// dest color
 		*reinterpret_cast<_float*>(&variantMat._21) = static_cast<_float>(true);	// is Distort On?
 		*reinterpret_cast<_float*>(&variantMat._22) = m_fElapsedTime;				// ElapsedTime. for transforming UV
-		*reinterpret_cast<_float*>(&variantMat._23) = fLateDistortStrength;		// distort strength.
+		*reinterpret_cast<_float*>(&variantMat._23) = fLateDistortStrength;			// distort strength.
 		*reinterpret_cast<_float*>(&variantMat._24) = fUVRotateSpeed;				// rotate speed (deg per sec).
-		*reinterpret_cast<_float*>(&variantMat._31) = 1.0f;						// fAlphaMultiplier.
+		*reinterpret_cast<_float*>(&variantMat._31) = 1.0f;							// fAlphaMultiplier.
 		*reinterpret_cast<_float*>(&variantMat._32) = static_cast<_float>(true);	// isDisableNormalize (deg per sec).
 	}
 
