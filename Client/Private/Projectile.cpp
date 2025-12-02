@@ -149,7 +149,7 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 	//m_tCallDesc.strEffectTag = ;
 	m_CallBack.eType = pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
-
+	m_pRigidBodyCom->IsActivate(false);
 	// Com_Shader 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MonsterProp"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
