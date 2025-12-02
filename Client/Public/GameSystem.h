@@ -14,6 +14,7 @@ private:
 public:
 #pragma region GAMESYSTEM
 	void		Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	void		Clear_Resource();
 #pragma endregion
 
 #pragma region PARSER

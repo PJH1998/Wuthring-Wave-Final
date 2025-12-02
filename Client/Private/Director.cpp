@@ -65,6 +65,11 @@ void CDirector::Stop_Action()
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
 }
 
+void CDirector::Clear_Action()
+{
+	m_CameraActions.clear();
+}
+
 const CDirector::CAMERA_ACTION& CDirector::Find_Action(const _wstring& strActionTag)
 {
 	auto iter = m_CameraActions.find(strActionTag);

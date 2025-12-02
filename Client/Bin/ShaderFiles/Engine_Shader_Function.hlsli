@@ -154,25 +154,6 @@ float2 Compute_Texcoord(float2 vProjXY)
     return vTexcoord;
 }
 
-float4 Compute_WorldPos(float2 vTexcoord, Texture2D DepthTexture)
-{
-    float4 vWorldPos = 0.f;
-
-    vector vDepthDesc = DepthTexture.Sample(DefaultSampler, vTexcoord);
-    
-    vWorldPos.x = vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = vDepthDesc.x;
-    vWorldPos.w = 1.f;
-    
-    vWorldPos *= vDepthDesc.y;
-    
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-    
-    return vWorldPos;
-}
-
 float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
 {
     float4 vViewPos = 0.f;
@@ -190,6 +171,17 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
     vViewPos = float4(vViewPos.xyz, 1.f);
     
     return vViewPos;
+}
+
+float4 Compute_WorldPos(float2 vTexcoord, Texture2D DepthTexture)
+{
+    float4 vWorldPos = 0.f;
+    
+    float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
+    
+    vWorldPos = mul(float4(vViewPos.xyz, 1.f), g_ViewMatrixInv);
+    
+    return float4(vWorldPos.xyz, 1.f);
 }
 
 float4 Compute_ViewPos_Sampler(float2 vTexcoord, Texture2D DepthTexture, sampler Sampler)
