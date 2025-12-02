@@ -43,7 +43,6 @@ public:
 private:
 	vector<_uint> m_ShaderPaths = {};
 
-
 private:
 	void Ready_Components(const PROP_DESC* pDesc);
 	void Ready_Variables(const PROP_DESC* pDesc);

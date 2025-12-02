@@ -7,7 +7,7 @@ float4 g_fRimIntensity = 0.8f;
 bool g_HasShadowMap;
 
 vector g_vDynamicMtrlAmbient = 0.5f;
-vector g_vStaticMtrlAmbient = 0.3f;
+vector g_vStaticMtrlAmbient = 0.4f;
 
 Texture2DArray<float> g_ShadowMap;
 

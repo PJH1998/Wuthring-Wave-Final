@@ -1461,11 +1461,15 @@ void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 		NameCheck(ModelName, "Cru_Bui_42") ||
 		NameCheck(ModelName, "Cru_Bui_11BH"))
 		*pShaderIndex = 17;
-	else if(NameCheck(ModelName, "SM_Sev_Bui_02")||
-		NameCheck(ModelName, "Lig_04AS"))
-		*pShaderIndex = 0;
-	else if(NameCheck(ModelName, "Lig_") && ModelName.find("11BS") == string::npos)
-		*pShaderIndex = 4;
+	//else if(NameCheck(ModelName, "SM_Sev_Bui_02"))
+	//	*pShaderIndex = 0;
+	//else if (NameCheck(ModelName, "Lig_"))
+	//{
+	//	if (ModelName.find("11BS") == string::npos)
+	//		*pShaderIndex = 4;
+	//	if (ModelName.find("04AS") != string::npos || ModelName.find("13") != string::npos)
+	//		*pShaderIndex = 0;
+	//}
 
 #pragma endregion
 

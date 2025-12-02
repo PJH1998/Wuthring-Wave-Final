@@ -36,10 +36,10 @@ HRESULT CAugustaHeadProp::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
 
 	/*m_strCurrentAnimName = "Stand1_idle";*/
+	//CProp::Play_Animation("Stand1_idle", 0.f, nullptr);
 
-	CProp::Play_Animation("Stand1_idle", 0.f, nullptr);
+	
 
-	m_fMaxDissolveTime = 0.35f;
 
     return S_OK;
 }
@@ -47,6 +47,10 @@ HRESULT CAugustaHeadProp::Initialize_Clone(void* pArg)
 void CAugustaHeadProp::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+
+	m_vEmissiveColor = { 1.0f, 0.65f, 0.15f, 1.0f };
+	//m_fEmissiveIntensity = 3.f;
+	m_fEmissiveIntensity = 5.f;
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 	if (IsDissolve)
@@ -114,7 +118,6 @@ void CAugustaHeadProp::Render()
 
 	}
 
-
     for (_uint i = 0; i < iNumMeshes; i++)
     {
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
@@ -127,6 +130,15 @@ void CAugustaHeadProp::Render()
 
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vEmissiveColor", &m_vEmissiveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &m_fEmissiveIntensity, sizeof(_float))))
+			CRASH("Ready EnergyColor");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -151,14 +163,14 @@ void CAugustaHeadProp::Activate(_bool IsActivate)
 	{
 		Prop_Reset();
 		m_isActivate = IsActivate;
-		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+		m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_HEADPROP);
 	}
 
 	if (false == IsActivate)
 	{
 		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
-		Bind_DissolveTimer();
+		Bind_DissolveTimer(ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_AUGUSTAWEAPON));
 	}
 }
 
@@ -183,7 +195,12 @@ void CAugustaHeadProp::Ready_Variables(const PROP_DESC* pDesc)
 {
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
+	m_fMaxDissolveTime = 0.35f;
+	m_vEmissiveColor = { 1.f, 0.6f, 0.1f, 1.0f };
+	m_fEmissiveIntensity = 3.0f;
+	m_vDissolveColor = { 1.f, 0.2f, 0.1f, 1.f };
 
+	//m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_HEADPROP);
 	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 

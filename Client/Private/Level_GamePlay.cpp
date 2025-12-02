@@ -97,6 +97,16 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
+	
+	PREFAB_INFO Info{};
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 377.2f, 1587.7f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 318.1f, 1624.f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 316.6f, 1647.9f, 1.f)), &Info);
+
+	//m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 381.2f, 1587.7f, 1.f)), &Info);
+	//m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 322.1f, 1624.f, 1.f)), &Info);
+	//m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 320.6f, 1647.9f, 1.f)), &Info);
+
 
 	return S_OK;
 }
