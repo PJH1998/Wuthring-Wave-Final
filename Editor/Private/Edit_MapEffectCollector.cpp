@@ -21,6 +21,12 @@ void CEdit_MapEffectCollector::Set_ImGuiOption()
 		m_EffectInfo[m_iEffectIndex].vPos = CLevel_Map::m_vPickedPos;
 }
 
+void CEdit_MapEffectCollector::Map_Load(ETERNAL_EFFECT EffectDesc)
+{
+	m_EffectInfo.emplace(m_iEffectIndex, EffectDesc);
+	m_iEffectIndex++;
+}
+
 CEdit_MapEffectCollector* CEdit_MapEffectCollector::Create()
 {
 	CEdit_MapEffectCollector* pInstance = new CEdit_MapEffectCollector();

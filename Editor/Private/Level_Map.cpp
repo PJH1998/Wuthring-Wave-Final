@@ -19,6 +19,7 @@
 #include"Edit_MapObject_Water.h"
 #include"Edit_MapObject_Collaps.h"
 #include"Edit_LightManager.h"
+#include"Edit_MapEffectCollector.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -51,7 +52,8 @@ HRESULT CLevel_Map::Initialize()
 
 	LEVEL m_eCurLevel = LEVEL::MAP;
 	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
-
+	m_pEffectCollector = CEdit_MapEffectCollector::Create();
+	m_SaveObjects["Map_Effect"].push_back(nullptr);
 	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
 	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
