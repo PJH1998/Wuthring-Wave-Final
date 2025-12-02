@@ -82,12 +82,28 @@ namespace Engine
 
 	typedef struct tagDecalData
 	{
+		// Input Data
 		enum TYPE { STATIC, NONSTATIC};
 		TYPE eType;
 		_matrix WorldMatrix;
+		_matrix EndWorldMatrix;
+		_float fBlendTime;
 		_float fLifeTime;
 		_float4 vColor;
 		_float fEmissiveIntensity;
+		
+		
+		// Non Input Data
+		_bool IsEqual;
+		_float fCurrentTime;
+
+		_vector vStartScale;
+		_vector vStartRotation;
+		_vector vStartPosition;
+
+		_vector vEndScale;
+		_vector vEndRotation;
+		_vector vEndPosition;
 	}DECAL_DATA;
 
 	typedef struct tagNotify
@@ -135,8 +151,8 @@ namespace Engine
 		_float		fDuration = {};		// Shake 지속시간
 		_float		fFrequency = {};	// 주파수 (초당 흔들림 빈도)
 		_float		fAmplitude = {};	// 흔들림 세기
-		_float3	vTranslation = {};	// Pos 흔들기위한 강도
-		_float3	vRotation = {};		// Rotation 강도
+		_float3		vTranslation = {};	// Pos 흔들기위한 강도
+		_float3		vRotation = {};		// Rotation 강도
 		_float		fFovKick = {};		// Fovy 변동
 	}CAMERA_SHAKE;
 

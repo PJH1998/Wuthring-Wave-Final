@@ -11,7 +11,8 @@ class CGameInstance;
 class ENGINE_DLL CDecal final : public CBase
 {
 private:
-	typedef pair<DECAL_DATA::TYPE, VTXINSTANCE_DECAL> DECAL_INSTANCE;
+	typedef pair<DECAL_DATA, VTXINSTANCE_DECAL> DECAL_INSTANCE_DATA;
+	typedef pair<DECAL_DATA::TYPE, DECAL_INSTANCE_DATA> DECAL_INSTANCE;
 
 private:
 	CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -23,14 +24,14 @@ public:
 	void						Render(CShader* pShader);
 	
 	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance);
-	HRESULT						Add_DecalData(const DECAL_DATA& Decal);
+	HRESULT						Add_DecalData(DECAL_DATA& Decal);
 	ID3D11ShaderResourceView*	Get_DecalSRV(TEXTURETYPE eTextureType);
 	
-
 private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*				m_pGameInstance = { nullptr };
+
 	list<DECAL_INSTANCE>		m_DecalDatas;
 	
 	_uint						m_iNumDecals = {};
@@ -40,6 +41,7 @@ private:
 	CVIBuffer_Decal*			m_pVIBuffer_Decal = { nullptr };
 
 private:
+	_bool						Update_InstanceData(DECAL_INSTANCE_DATA& Data, _float fTimeDelta);
 	HRESULT						Bind_Resources(CShader* pShader);
 
 public:

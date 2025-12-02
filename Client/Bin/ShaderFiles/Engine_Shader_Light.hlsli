@@ -7,7 +7,7 @@ float4 g_fRimIntensity = 0.8f;
 bool g_HasShadowMap;
 
 vector g_vDynamicMtrlAmbient = 0.5f;
-vector g_vStaticMtrlAmbient = 0.5f;
+vector g_vStaticMtrlAmbient = 0.4f;
 
 Texture2DArray<float> g_ShadowMap;
 
@@ -75,7 +75,8 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
         {
             fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
         }
-        
+ 
+ //       float fToonShade = 0.f; //smoothstep(-0.3f, -0.1f, NdotL);
 //        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
         
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
@@ -83,7 +84,7 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
         vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
         vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
         
-        if (false == IsSkin)      // ±Ý¼Ó ºÎºÐ¸¸ PBR Ã³¸®
+        if (false == IsSkin)      // ï¿½Ý¼ï¿½ ï¿½ÎºÐ¸ï¿½ PBR Ã³ï¿½ï¿½
         {
           
             Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
@@ -105,6 +106,7 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
     }
     else
     {
+    //    Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
         Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
     
         if (g_HasShadowMap)
@@ -194,7 +196,7 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
 
     }
 
-    //float4 vAmbientColor = vDiffuse * g_LightDatas[iLightIndex].vDiffuse; //Ambient Á¶Àý Àü±îÁö ÀÓ½Ã
+    //float4 vAmbientColor = vDiffuse * g_LightDatas[iLightIndex].vDiffuse; //Ambient ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ó½ï¿½
     float4 vAmbientColor = lerp(vDiffuse, g_LightDatas[iLightIndex].vDiffuse, g_LightDatas[iLightIndex].vAmbient.r);
     float4 vAmbient = float4((vAmbientColor * g_LightDatas[iLightIndex].vAmbient.r).xyz * fAtt, 1.f);
     //float4 vAmbient = float4((vAmbientColor.xyz * 0.5f) * fAtt, 1.f);

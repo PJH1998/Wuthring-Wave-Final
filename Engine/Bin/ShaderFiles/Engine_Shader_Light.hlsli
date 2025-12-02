@@ -75,7 +75,8 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
         {
             fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
         }
-        
+ 
+ //       float fToonShade = 0.f; //smoothstep(-0.3f, -0.1f, NdotL);
 //        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
         
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
@@ -105,6 +106,7 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
     }
     else
     {
+    //    Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
         Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
     
         if (g_HasShadowMap)
