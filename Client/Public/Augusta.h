@@ -150,7 +150,8 @@ public:
 		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
 		PART_FXOBJECT = 3,
 		PART_HEADPROP = 4,
-		PART_WING = 5,
+		PART_BURSTWEAPON = 5,
+		PART_WING = 6,
 		TYPE_END
 	};
 
@@ -231,6 +232,7 @@ private:
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CAugustaFxObject* m_pFxObject = { nullptr };
 	class CAugustaHeadProp* m_pHeadProp = { nullptr };
+	class CAugustaBurstWeapon* m_pBurstWeapon = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
 	_string m_strPreAnimation = {};

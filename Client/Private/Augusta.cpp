@@ -8,6 +8,7 @@
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
+#include "AugustaBurstWeapon.h"
 #include "AugustaGriffon.h"
 #include "AugustaFxObject.h"
 #include "AugustaHeadProp.h"
@@ -61,6 +62,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_pWing->SetActivate(false);
 	m_pFxObject->SetActivate(false);
 	m_pHeadProp->SetActivate(false);
+	m_pBurstWeapon->SetActivate(false);
 	
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
@@ -369,6 +371,9 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     case PART_HEADPROP:
 		m_pHeadProp->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
     case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
@@ -394,6 +399,9 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     case PART_HEADPROP:
         m_pHeadProp->Activate(IsActive);
         break;
+    case PART_BURSTWEAPON:
+        m_pBurstWeapon->Activate(IsActive);
+        break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
 		break;
@@ -413,6 +421,9 @@ void CAugusta::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	case PART_GRIFFON:
 		m_pGriffon->Change_Volume(iVolumeIdx);
 		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Change_Volume(iVolumeIdx);
+		break;
 	case PART_WING:
 		m_pWing->Change_Volume(iVolumeIdx);
 		break;
@@ -431,6 +442,9 @@ void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_GRIFFON:
 		m_pGriffon->Volume_Activate(IsActive); // MainVolume 켜기
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Volume_Activate(IsActive);
 		break;
 	case PART_WING:
 		break;
@@ -455,6 +469,9 @@ void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 		break;
     case PART_HEADPROP:
         m_pHeadProp->Clear_Animation(strAnimName);
+        break;
+    case PART_BURSTWEAPON:
+		m_pBurstWeapon->Clear_Animation(strAnimName);
         break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
@@ -484,6 +501,9 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     case PART_FXOBJECT:
         m_pFxObject->Set_SocketMatrix(pSocketMatrix);
         break;
+    case PART_BURSTWEAPON:
+        m_pBurstWeapon->Set_SocketMatrix(pSocketMatrix);
+        break;
     }
 }
 
@@ -505,6 +525,9 @@ void CAugusta::Set_AnimationToParts(_uint iPartType, const _string& strAnimName)
 		break;
 	case PART_HEADPROP:
 		m_pHeadProp->Set_AnimationName(strAnimName);
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Set_AnimationName(strAnimName);
 		break;
 	case PART_WING:
 		m_pWing->Set_AnimationName(strAnimName);
@@ -530,6 +553,9 @@ void CAugusta::Part_ShaderPathChange(_uint iPartType, _uint iShaderPath)
 		break;
 	case PART_HEADPROP:
 		m_pHeadProp->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Change_ShaderPath(iShaderPath);
 		break;
 	case PART_WING:
 		m_pWing->Change_ShaderPath(iShaderPath);
@@ -716,7 +742,6 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	// Main Attack Volume의 TriggerActivate
 	if (var1 == TEXT("Bayonet"))
 	{
-		
 		if (var2 == TEXT("ATK"))
 			iVolumeIdx = CAugustaBayonet::VOLUME::VOLUME_ATTACK;
 		if (var2 == TEXT("STRATK"))
@@ -765,6 +790,22 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pGriffon->Volume_Activate(IsActive);
 	}
+	else if (var1 == TEXT("BurstWeapon"))
+	{
+		if (var2 == TEXT("SWORD_ATTACK"))
+			iVolumeIdx = CAugustaBurstWeapon::VOLUME::VOLUME_SWORD_ATTACK;
+		else if (var2 == TEXT("SWORD_ULTI"))
+			iVolumeIdx = CAugustaBurstWeapon::VOLUME::VOLUME_SWORD_ULTI;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pBurstWeapon->Volume_Activate(IsActive);
+	}
 	else if (var1 == TEXT("Augusta"))
 	{
 		if (var2 == TEXT("RISE_ZERO"))
@@ -787,6 +828,7 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
+
 
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
@@ -1477,6 +1519,23 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 			ASSERT_CRASH(m_pHeadProp);
 			Safe_AddRef(m_pHeadProp);
 			break;
+		case PARTTYPE::PART_BURSTWEAPON:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetAugustaBurstWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pBurstWeapon = dynamic_cast<CAugustaBurstWeapon*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pBurstWeapon);
+			Safe_AddRef(m_pBurstWeapon);
+			break;
 
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
@@ -1606,5 +1665,6 @@ void CAugusta::Free()
     Safe_Release(m_pGriffon);
     Safe_Release(m_pFxObject);
     Safe_Release(m_pHeadProp);
+    Safe_Release(m_pBurstWeapon);
 	Safe_Release(m_pWing);
 }

@@ -35,7 +35,8 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
     State_Reset();
 
     // 5. 애니메이션 타입에 맞는 파츠 설정.
-    m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
+    //m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
+    m_iPartType = CAugusta::PARTTYPE::PART_BURSTWEAPON;
 	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
 
     m_pAugusta->PartActivate(m_iPartType, true);
@@ -139,7 +140,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     
 	m_pAugusta->Play_PartAnimation(
 		m_iPartType,
-		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+		m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
 		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 	);
 
@@ -349,6 +350,17 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STAND), "SpWalk_Stand", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_L), "SpWalk_Stop_L", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_R), "SpWalk_Stop_R", 1.f, 0.f);
+
+	m_PartsAnimations.emplace("SpAttack01", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpAttack02", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpAttack03", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpAttackOmni", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Dash", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Dash_Root", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_F", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Stand", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Stop_L", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("SpWalk_Stop_R", "Sword_Open_Loop");
 }
 
 void CAugustaGroundSpecial::State_Reset()

@@ -36,7 +36,8 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
     State_Reset();
 
     _string strBoneName = "WeaponProp02";
-    m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
+    //m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
+    m_iPartType = CAugusta::PARTTYPE::PART_BURSTWEAPON;
 	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
@@ -55,6 +56,8 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+
+
 }
 
 void CAugustaGroundBurst::OnUpdate(_float fTimeDelta)
@@ -103,6 +106,13 @@ void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
     
 	EAugustaBurstType eBurstType = static_cast<EAugustaBurstType>(m_iCurrentAnimIdx);
+
+
+	m_pAugusta->Play_PartAnimation(
+		m_iPartType,
+		m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+	);
 
 	if (eBurstType == EAugustaBurstType::BURST01)
 	{
@@ -184,6 +194,9 @@ void CAugustaGroundBurst::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaBurstType::BURST01), "Burst01", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaBurstType::BURST_STAND), "Burst_Stand", 1.f, 0.f);
+
+	m_PartsAnimations.emplace("Burst01", "Sword_Open_Loop");
+	m_PartsAnimations.emplace("Burst_Stand", "Sword_Open_Loop");
 }
 
 void CAugustaGroundBurst::State_Reset()
