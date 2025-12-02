@@ -239,7 +239,7 @@ PS_OUT PS_DISSOLVE_GALBRENAWEAPON(PS_IN In) // Dissolve 추가.
     if (fDissolveMask.r - g_fDissolveRate < 0.3f) // 0.3f 보다 작은 (사라지기 직전)
         Out.vDiffuse.rgb = vColor * 3.f; // 이러면 쨍하게 들어간다. 
     
-    // Emissive 0.3f 초과인 얘들은 Emissive가 기본으로 들어가고, 0.3f 이하인 얘들은 Emmisive가 지정한 색상에 더 크게 적용된다.
+    // Emissive 0.3f 초과인 얘들은 Emissive가 기본으로 들어가고, 0.3f 이하인 얘들은 Emissive가 지정한 색상에 더 크게 적용된다.
     float fWeight = Luminance(Out.vDiffuse.xyz);
 
     if (fWeight >= g_fEmissiveThreshold)
@@ -396,8 +396,6 @@ PS_OUT PS_DISSOLVE_AUGUSTAWEAPON(PS_IN In) // Dissolve 추가.
     
     if (fDissolveMask.r - g_fDissolveRate < 0.f) // 0.f 면 Discard;
         discard;
-    
-    //clip(fDissolveMask.r - g_fDissolveRate);
     
     float4 vNormal = 0.f;
     

@@ -203,6 +203,11 @@ public:
 	virtual void Calc_ChangeTimer(_float fTimeDelta) override; // Timer 계산
 	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
 	virtual void Render_Damage(const HIT_DESC* pDesc) override; 
+
+	virtual void Bind_DissolveTimer() override;
+	virtual void Bind_DefaultShaderPath() override;
+	virtual void Bind_DissolveShaderPath() override;
+	virtual void Activate(_bool IsActivate) override;
 #pragma endregion
 
 

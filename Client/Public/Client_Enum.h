@@ -51,8 +51,9 @@ namespace Client
 		UIFLAG_SIMPLEMASK,			// 단순 마스킹용
 		UIFLAG_ACTIVEFEEDBACK,		// 조작 피드백 (스케일 커지며 사라지는 것)
 		UIFLAG_ENEMY_HP,			// 적 체력바용
-		UIFLAG_OVFL_PALETTE,		// 팔레트
+		UIFLAG_OVFL_PALETTE,		// 다채화용 각 박스에 사용
 		UIFLAG_SIMPLE_COLORIZE,		// 단순 이미지 색상 평균값을 통한 색상화
+		UIFLAG_WAVECIRCLE,			// 원의 중점으로부터 바깥쪽 방향으로의 파동 효과.
 
 		UIFLAG_END
 	};
@@ -132,7 +133,9 @@ namespace Client
 		, GALBRENA // 6
 		, NORMAL_YELLOW // 7
 		, LOGOROVER // 8
-		, DISSOLVE_NORMAL // 9
+		, GALBRENABACK // 9
+		, DISSOLVE_CHARACTER // 10
+		, GALBRENAEYE // 11
 		, END };
 
 	enum class SHADER_PROPANIMMESH {
@@ -178,6 +181,7 @@ namespace Client
 		TT_BOSSNAME,
 		TT_PLAYERHP,
 		TT_TABUTIL,
+		TT_SKILLCD,
 
 		END
 	};
@@ -191,7 +195,7 @@ namespace Client
 	};
 
 	enum class UI_TAB_UTILITY : unsigned int {
-		GRAPPLE = 0,		// 그래플
+		GRAPPLE = 0,	// 그래플
 		SENSOR,			// 스캔
 		FLIGHT,			// 활공
 		LEVITATOR,		// 컨트롤
@@ -204,6 +208,11 @@ namespace Client
 	};
 
 	enum class UI_QTE_TYPE {
-		FILLGUAGE, TRIGGER, END
+		FILLGUAGE, TRIGGER_ROPE, TRIGGER_EXECUTE, END
 	};
+
+	enum class UI_MINIMAP_OBJTYPE {
+		MONSTER, END	// 나중에 더 필요한 것 있으면 추가? 상호작용 요소..
+	};
+
 }

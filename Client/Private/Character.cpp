@@ -1137,6 +1137,7 @@ void CCharacter::Remove_Condition_FromPlayer(_uint iCondition)
 
 
 
+
 #pragma endregion
 
 

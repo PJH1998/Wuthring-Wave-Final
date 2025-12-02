@@ -6,7 +6,7 @@ NS_BEGIN(Client)
 class CUI_Text : public CCustom_UI
 {
 public:
-	typedef struct tagUITextDesc : public CUSTOM_UI_DESC, FONT_SINGLEDESC {// 근데 당장에 Font_SingleDesc 반영하는 코드가 있긴함?
+	typedef struct tagUITextDesc : public CUSTOM_UI_DESC, FONT_SINGLEDESC {
 
 		TEXT_ALIGN_TYPE eTextAlignmentType = {};
 
@@ -39,6 +39,7 @@ public:
 	void					Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType = TEXT_ALIGN_TYPE::END);
 
 	void					Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType = TEXT_ALIGN_TYPE::END);
+	HRESULT					Attach_AsChildToUI(CCustom_UI* pAttachTargetUI);
 
 protected:
 	HRESULT					Bind_Description(void* pArg);

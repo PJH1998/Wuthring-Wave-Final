@@ -176,6 +176,11 @@ public:
 public:
 	virtual void Process_DelayedActions(_float fTimeDelta);
 	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
+
+	virtual void Bind_DissolveTimer() override;
+	virtual void Bind_DefaultShaderPath() override;
+	virtual void Bind_DissolveShaderPath() override;
+	virtual void Activate(_bool IsActivate) override;
 #pragma endregion
 
 #pragma endregion

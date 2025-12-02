@@ -139,6 +139,10 @@ private:
 	_uint m_iCondition = {};
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING }; // Player에서 관리.
 
+	// Timer 관리.
+	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END];
+	_float m_fChangeCoolTime = {};
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);

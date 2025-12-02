@@ -275,8 +275,6 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 	}
 
 
-
-
 	// Sprint => 빠르게 달리기.
 	if (m_States[SPRINT])
 	{
@@ -321,6 +319,33 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
         m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN)); // 상위, 하위 상태
         return;
     }
+
+	if (m_IsAnimationEnd)
+	{
+		switch (static_cast<EGalbrenaIdleType>(m_iCurrentAnimIdx))
+		{
+		case EGalbrenaIdleType::STANDCHANGE:
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case EGalbrenaIdleType::STANDCHANGE02:
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case EGalbrenaIdleType::STAND1_ACTION02:
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case EGalbrenaIdleType::STAND1_ACTION01:
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case EGalbrenaIdleType::STAND2:
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		default:
+			break;
+		}
+
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+		return;
+	}
 }
 
 
@@ -334,6 +359,7 @@ void CGalbrenaGroundIdle::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EGalbrenaIdleType::STAND2), "Stand2", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaIdleType::STANDCHANGE), "StandChange", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaIdleType::STANDCHANGE02), "StandChange02", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaIdleType::STANDUP), "StandUp", 1.f, 0.f);
 }
 

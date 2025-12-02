@@ -254,8 +254,8 @@ void CUI_Ovfl_Palette::Create_ChildText_InfoText()
 	);
 
 	CCustom_UI* pAttacher = m_pRUI_All;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	pAttacher->Add_Child(pFont);
@@ -266,7 +266,7 @@ void CUI_Ovfl_Palette::Create_ChildText_InfoText()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	m_pTextUI_InfoText = pFont;
@@ -283,8 +283,8 @@ void CUI_Ovfl_Palette::Create_ChildText_LeftChance()
 	);
 
 	CCustom_UI* pAttacher = m_pRUI_All;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	pAttacher->Add_Child(pFont);
@@ -295,7 +295,7 @@ void CUI_Ovfl_Palette::Create_ChildText_LeftChance()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	m_pTextUI_LeftChance = pFont;
@@ -312,8 +312,8 @@ void CUI_Ovfl_Palette::Create_ChildText_Description()
 	);
 
 	CCustom_UI* pAttacher = m_pRUI_All;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	pAttacher->Add_Child(pFont);
@@ -324,7 +324,7 @@ void CUI_Ovfl_Palette::Create_ChildText_Description()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	m_pTextUI_Description = pFont;
@@ -343,8 +343,8 @@ void CUI_Ovfl_Palette::Create_ChildText_DestColor()
 	);
 
 	CCustom_UI* pAttacher = m_pRUI_All;
-	auto fontDesc = pFont->Get_UIDesc();
-	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+	auto& fontDesc = pFont->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
 
 	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
 	pAttacher->Add_Child(pFont);
@@ -355,7 +355,7 @@ void CUI_Ovfl_Palette::Create_ChildText_DestColor()
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
 
-	pFont->Set_UIDesc(fontDesc);
+	//pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
 	m_pTextUI_DestColor = pFont;
@@ -456,7 +456,7 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 	}
 
 	// 적용
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 	for (_uint i = 0; i < targetInstDesc.size(); i++)
@@ -466,7 +466,7 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 		instDesc.vClipTexcoordX = (iHoveredIndex == i) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f }; // 마우스를 올린 게 있으면 {0.f, 1.f} 가 들어가야 함
 	}
 
-	pTargetUI->Set_UIDesc(targetDesc);
+	//pTargetUI->Set_UIDesc(targetDesc);
 }
 
 HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
@@ -491,7 +491,7 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 	_bool isLoaded = false;
 
 	CCustom_UI* pTargetFrameUI = m_pUI_BGFrame;
-	auto frameDesc = pTargetFrameUI->Get_UIDesc();
+	auto& frameDesc = pTargetFrameUI->Get_UIDesc();
 	auto& frameInstDesc = frameDesc.vecInstanceDescs;
 
 	vector<_float4x4> vecFrameVariantMat = { _float4x4() };
@@ -680,7 +680,7 @@ _bool CUI_Ovfl_Palette::Check_ClickedBlockInstance(_uint* OutIndex)
 
 _float2 CUI_Ovfl_Palette::Calc_InstBlock_ScrnPos(_uint iInstIndex)
 {
-	auto targetInstDesc = m_pUI_InstBlocks->Get_UIDesc().vecInstanceDescs[iInstIndex];
+	auto& targetInstDesc = m_pUI_InstBlocks->Get_UIDesc().vecInstanceDescs[iInstIndex];
 
 	_float2 vTargetPos = *reinterpret_cast<_float2*>(&targetInstDesc.vSInstTrans);
 
@@ -696,7 +696,7 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 
 	CCustom_UI* pTargetUI = m_pUI_InstColorBtns;
 
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 	_uint iNumTargetInst = static_cast<_uint>(targetInstDesc.size());
@@ -750,11 +750,11 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 
 	// [Interact] 클릭 및 호버 시 피드백
 	CCustom_UI* pSelectedRing	= m_pUI_InstSelectedRing;
-	auto selectedDesc			= pSelectedRing->Get_UIDesc();
+	auto& selectedDesc			= pSelectedRing->Get_UIDesc();
 	auto& selectedInstDesc		= selectedDesc.vecInstanceDescs;
 
 	CCustom_UI* pHoveredRing	= m_pUI_InstHoveredRing; 
-	auto hoveredDesc			= pHoveredRing->Get_UIDesc();
+	auto& hoveredDesc			= pHoveredRing->Get_UIDesc();
 	auto& hoveredInstDesc		= hoveredDesc.vecInstanceDescs;
 
 
@@ -812,8 +812,8 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 	}
 
 
-	pSelectedRing->Set_UIDesc(selectedDesc);
-	pHoveredRing->Set_UIDesc(hoveredDesc);
+	//pSelectedRing->Set_UIDesc(selectedDesc);
+	//pHoveredRing->Set_UIDesc(hoveredDesc);
 }
 
 void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
@@ -882,7 +882,7 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 void CUI_Ovfl_Palette::Update_ResetBtn()
 {
 	CCustom_UI* pTargetUI = m_pUI_ResetHover;
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 	if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0))
@@ -932,7 +932,7 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 	// [COLORDEST.x] [COLORDEST.y] [COLORDEST.z] [COLORDEST.w]
 	// [CHGFRMPOS.x] [CHGFRMPOS.y] [IS_CHANGING] [CHNG_RADIUS] 
 
-	auto blocksDesc = m_pUI_InstBlocks->Get_UIDesc();
+	auto& blocksDesc = m_pUI_InstBlocks->Get_UIDesc();
 	
 	_uint iNumTargetDesc = static_cast<_uint>(blocksDesc.vecInstanceDescs.size());
 	vector<_float4x4> vecPaletteVariantMat = {};
