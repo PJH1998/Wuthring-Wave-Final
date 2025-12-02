@@ -28,6 +28,19 @@ public:
 		VOLUME_END
 	};
 
+	enum MESHTYPE
+	{
+		MESH_BANGS = 0,
+		MESH_HAIR,
+		MESH_FACE,
+		MESH_UP,
+		MESH_DOWN,
+		MESH_CLOTH,
+		MESH_EYE,
+		MESH_EYE_OL,
+		MESH_END
+	};
+
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -195,6 +208,7 @@ public:
 public:
 	virtual void Process_DelayedActions(_float fTimeDelta);
 	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
+
 #pragma endregion
 
 #pragma endregion
@@ -220,6 +234,7 @@ private:
 	void Update_TargetDistance();
 	void Update_Physics(_float fTimeDelta);
 	void Update_Camera(_float fTimeDelta);
+	_bool IsSkin(_uint iMeshIndex);
 
 private:
 	void Bind_Resources();

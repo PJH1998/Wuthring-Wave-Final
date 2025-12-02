@@ -216,15 +216,23 @@ void CGalbrena::Render()
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
 
-		_bool HasMask = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
-			HasMask = true;
+		
+
+		_bool HasSkinMask = { false };
+		if (IsSkin(i)) // Skin인 경우에만?
+		{
+			if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 1)))
+				HasSkinMask = true;
+		}
+		
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasSkinMask, sizeof(_bool))))
+			CRASH("Ready g_HasSkinMask Failed");
 
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
-			CRASH("Ready g_HasSkinMask Failed");
+		
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -920,6 +928,17 @@ void CGalbrena::Update_Camera(_float fTimeDelta)
 	{
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 	}
+}
+
+_bool CGalbrena::IsSkin(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_FACE ||
+		iMeshIndex == MESH_UP ||
+		iMeshIndex == MESH_DOWN)
+		return true;
+		
+
+	return false;
 }
 
 void CGalbrena::Bind_Resources()
