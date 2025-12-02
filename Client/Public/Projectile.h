@@ -20,6 +20,8 @@ public:
 		vector<_uint>		iTargetLayers;
 		_float				fRadius;
 		_float				fAttackDamage;
+		_float				fLifeTime{ 10.f };
+		_bool				isCollisionDestroy;
 		TEXT_COLOR_TYPE		eType;
 	}PROJECTILEDESC;
 
@@ -49,7 +51,9 @@ private:
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
+	_bool				m_isCollisionDestroy{};
 	_float				m_fLifeTime{};
+	_float				m_fMaxLifeTime{};
 	_float				m_fDelay{};
 	// Effect?
 	_wstring			m_wstrEffectTag;

@@ -590,16 +590,22 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
         return Out;
     }
         
-    float fZ = log(fViewZ / g_vFogRange.x) / log(g_vFogRange.y / g_vFogRange.x);
+    float fZ = saturate(log(fViewZ / g_vFogRange.x) / log(g_vFogRange.y / g_vFogRange.x));
     
     float3 vUV = float3(In.vTexcoord, fZ);
     
     float4 VF = g_VoulmetricTexture.Sample(ClampSampler, vUV);
     
     float3 vFogColor = ToneMap(VF.xyz);
-    float fAlpha = saturate(1.f - VF.a);
     
+    float fAlpha = saturate(1.f - VF.a);
+  
     Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor.xyz, fAlpha);
+    
+    //float fAlpha = saturate(VF.a);
+  
+//    Out.vColor.xyz = vOriginColor.xyz * fAlpha + vFogColor.xyz;
+  
     Out.vColor.a = 1.f;
     
     return Out;

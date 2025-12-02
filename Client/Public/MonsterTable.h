@@ -16,12 +16,12 @@ private:
 
 public:
 	//HRESULT Initialize();
-	HRESULT LoadDataTable(const _char* pFilePath);
-	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
-	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
-	_uint Get_NumNPCInstance(_uint iType) const { return m_NPCTable[iType].size(); }
-	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
-
+	HRESULT						LoadDataTable(const _char* pFilePath);
+	HRESULT						LoadNPCDataTable(const _char* pFilePath, _uint iType);
+	MONSTER_INFO*				Get_MonsterInfo(const _char* pMonsterKey) const;
+	_uint						Get_NumNPCInstance(_uint iType) const { return m_NPCTable[iType].size(); }
+	const vector<NPCINFO>&		Get_NpcData(_uint iType) const;
+	void						Clear_NPCData();
 private:
 	map<const _string, _uint> m_MonsterKey;
 	map<_uint, MONSTER_INFO> m_MonsterTable;
