@@ -61,6 +61,11 @@ private:
 	virtual ~CVolumetricFog() = default;
 
 public:
+	void						Set_FogMaxHeight(_float fFogMaxHeight) { m_VF_Data.fFogMaxHeight = fFogMaxHeight; }
+	void						Set_FogDistanceFallOff(_float fDistanceFallOf) { m_VF_Data.fDistanceFallOff = fDistanceFallOf; }
+	void						Set_FogRayDensityScale(_float fFogRayDensityScale) { m_VF_Data.fRayDensityScale = fFogRayDensityScale; }
+
+public:
 	HRESULT						Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	HRESULT						SetUp_FogNF();
 
@@ -69,6 +74,7 @@ public:
 	void						Update_VF(_float fTimeDelta);
 
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
+
 
 //#ifdef _DEBUG
 public:

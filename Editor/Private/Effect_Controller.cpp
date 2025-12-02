@@ -1430,6 +1430,8 @@ void CEffect_Controller::Decal_To_Json(json& Decal, CEffect_Decal::DECAL_DESC* p
 
 	Decal["DecalTag"] = WStringToString(pDecalDesc->wstrDecalTag);
 	Decal["LifeTime"] = pDecalDesc->LifeTime;
+	Decal["BlendTime"] = pDecalDesc->fBlendTime;
+	Decal["EmissiveIntensity"] = pDecalDesc->fEmissiveIntensity;
 	
 	json ColorJson = json::array();
 	ColorJson.push_back(pDecalDesc->vColor.x);

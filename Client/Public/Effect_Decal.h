@@ -13,6 +13,8 @@ public:
 		_wstring wstrDecalTag = {};
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float LifeTime = {};
+		_float fBlendTime = 0.f;
+		_float fEmissiveIntensity = 0.f;
 	}DECAL_DESC;
 
 private:
@@ -40,6 +42,8 @@ private:
 	_wstring					m_wstrMyTag = {};
 	_float4						m_vColor = {};
 	_float						m_LifeTime = {};
+	_float						m_fBlendTime = {};
+	_float						m_fEmissiveIntensity = {};
 
 	_matrix						m_ComBindMatrix = {};
 

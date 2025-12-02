@@ -110,6 +110,11 @@ namespace Engine
 		return t * t * (3.f - 2.f * t);
 	}
 
+	inline _float Saturate(_float fValue)
+	{
+		return max(min(fValue, 1.f), 0.f);
+	}
+
 #ifdef _DEBUG
 	inline void OutPutDebugFloat4(_wstring strPrePix, _float4 fVector)
 	{

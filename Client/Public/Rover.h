@@ -22,6 +22,17 @@ public:
 		VOLUME_END
 	};
 
+	enum MESHTYPE
+	{
+		MESH_HAIR = 0,
+		MESH_FACE,
+		MESH_UP,
+		MESH_DOWN,
+		MESH_EYE,
+		MESH_MASK,
+		MESH_END
+	};
+
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -204,6 +215,13 @@ private:
 private:
 	void Update_Physics(_float fTimeDelta);
 	void Update_Camera(_float fTimeDelta);
+	void Update_TargetDistance(_float fTimeDelta);
+
+	void Render_Default(_uint iMeshIndex);
+	void Render_Skin(_uint iMeshIndex);
+	void Render_Eye(_uint iMeshIndex);
+	_bool IsSkin(_uint iMeshIndex);
+	_bool IsEye(_uint iMeshIndex);
 
 private:
 	void Bind_Resources();

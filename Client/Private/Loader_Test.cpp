@@ -98,7 +98,7 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
-
+	m_iNumLoadingThread = 15;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -488,6 +488,7 @@ HRESULT CLoader_Test::Load_Effect()
 
 	//m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
 
     return S_OK;
 }

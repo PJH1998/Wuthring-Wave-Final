@@ -1267,22 +1267,10 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_SONORO(PS_IN In)
     
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
 
-    if (g_HasMask)
-    {
-        Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
-        Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
-    }
-    else
-    {
-        Out.vDiffuse = vDiffuse;
-    }
+    Out.vDiffuse = vDiffuse;
 
-    //if (vMask.a == 1.f)
-    //    Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.4f, 1.f);
-
-    //천국에 엄청 큰 애들은 좀 더 낮춰야할지도?
-    if (Out.vDiffuse.g > Out.vDiffuse.r && Out.vDiffuse.g > Out.vDiffuse.b)
-        Out.vEmissive = float4((Out.vDiffuse.xyz) * 1.f, 1.f);
+    if (vMask.a != 0.f)
+        Out.vEmissive = float4(0.1f, 0.2f, 0.6f, 1.f);
 
     Out.vDiffuse.w = 1.f;
     
@@ -1341,6 +1329,7 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_SONORO(PS_IN In)
 
     return Out;
 }
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
