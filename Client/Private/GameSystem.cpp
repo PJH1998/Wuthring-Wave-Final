@@ -186,14 +186,14 @@ CCustom_UI* CGameSystem::Find_ChildUI(_wstring strRootUIName, _wstring strChildU
 	return m_pUI_ControlHelper->Find_ChildUI(strRootUIName, strChildUIName);
 }
 
-HRESULT CGameSystem::HUD_FadeOut()
+HRESULT CGameSystem::HUD_FadeOut(_bool isForceChange)
 {
-	return m_pUI_ControlHelper->HUD_FadeOut();
+	return m_pUI_ControlHelper->HUD_FadeOut(isForceChange);
 }
 
-HRESULT CGameSystem::HUD_FadeIn()
+HRESULT CGameSystem::HUD_FadeIn(_bool isForceChange)
 {
-	return m_pUI_ControlHelper->HUD_FadeIn();
+	return m_pUI_ControlHelper->HUD_FadeIn(isForceChange);
 }
 
 //HRESULT CGameSystem::HUD_FadeOut_BossHPBar()
@@ -210,9 +210,9 @@ void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMon
 	return m_pUI_ControlHelper->HUD_Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
 }
 
-void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
+void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn, _bool isForceChange)
 {
-	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
+	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn, isForceChange);
 }	
 
 //void CGameSystem::Toggle_InteractUI(_bool isOn, _wstring strText)
@@ -288,6 +288,21 @@ void CGameSystem::Attach_GrafflePoint(_float3* pTargetPos)
 void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)
 {
 	m_pUI_ControlHelper->Play_QTE(vSpawnPos, eQTEType, eIconIndex, vScale);
+}
+
+void CGameSystem::Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType)
+{
+	m_pUI_ControlHelper->Bind_ObjectPos_PerFrame_ToMinimap(vPosition, eType);
+}
+
+void CGameSystem::Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner)
+{
+	m_pUI_ControlHelper->Attach_ObjectPos_ToMinimap(vPosition, eType, pOwner);
+}
+
+void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
+{
+	m_pUI_ControlHelper->Detach_ObjectPos_ToMinimap(pOwner);
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
@@ -453,6 +468,17 @@ void CGameSystem::Register_Player(CPlayer* pPlayer)
 	m_pPlayer = pPlayer;
 	Safe_AddRef(m_pPlayer);
 }
+
+_vector CGameSystem::Get_PlayerLookVector()
+{
+	return m_pPlayer->Get_LookVector();
+}
+_vector CGameSystem::Get_PlayerPosition()
+{
+	return m_pPlayer->Get_Position();
+}
+
+
 #pragma endregion
 
 

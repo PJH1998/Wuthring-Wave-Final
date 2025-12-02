@@ -88,54 +88,54 @@ void CUI_MobHPBar::Update(_float fTimeDelta)
 
 
 #ifdef KSTA_CUSTOMTEST
-	static _float fTmpHP = 70.f;
-	_bool isHitTmp = false;
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-	{
-		fTmpHP -= 10.f;
-		std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-	{
-		fTmpHP += 10.f;
-		std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-	{
-		isHitTmp = true;
-		std::cout << "[CUI_MobHPBar::Update] Triggered! " << fTmpHP << std::endl;
-	}
+	//static _float fTmpHP = 70.f;
+	//_bool isHitTmp = false;
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	//{
+	//	fTmpHP -= 10.f;
+	//	std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+	//}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	//{
+	//	fTmpHP += 10.f;
+	//	std::cout << "[CUI_MobHPBar::Update] fTmpHP : " << fTmpHP << std::endl;
+	//}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	//{
+	//	isHitTmp = true;
+	//	std::cout << "[CUI_MobHPBar::Update] Triggered! " << fTmpHP << std::endl;
+	//}
 
 	
 	
 
 	//if (isActiveMobHPBar)
 	//{
-	UI_MOBINFO_DESC tTmpDesc = {};
-
-	const _uint iNumTestMobs = 5;
-
-	for (_uint i = 0; i < iNumTestMobs; i++)
-	{
-		if (i == 3)
-			continue;
-		//_float3 fTestOffset = {
-		//	m_pGameInstance->Rand(-10.f, 10.f),
-		//	m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
-		//	m_pGameInstance->Rand(-10.f, 10.f)
-		//};
-
-		_float3 fTestOffset = { 0.f, -10.f * i, 0.f };
-
-		tTmpDesc.vMobPos = fTestOffset;
-		tTmpDesc.fMobCurHP = (i == 2) ? fTmpHP : 50.f;
-		tTmpDesc.fMobMaxHP = 100.f;
-		tTmpDesc.isAtkedCurFrame = isHitTmp;
-
-		tTmpDesc.iMonsterPtrKey = i;
-
-		m_pGameSystem->Update_MobStatus(tTmpDesc);
-	}
+	//UI_MOBINFO_DESC tTmpDesc = {};
+	//
+	//const _uint iNumTestMobs = 5;
+	//
+	//for (_uint i = 0; i < iNumTestMobs; i++)
+	//{
+	//	if (i == 3)
+	//		continue;
+	//	//_float3 fTestOffset = {
+	//	//	m_pGameInstance->Rand(-10.f, 10.f),
+	//	//	m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
+	//	//	m_pGameInstance->Rand(-10.f, 10.f)
+	//	//};
+	//
+	//	_float3 fTestOffset = { 0.f, -10.f * i, 0.f };
+	//
+	//	tTmpDesc.vMobPos = fTestOffset;
+	//	tTmpDesc.fMobCurHP = (i == 2) ? fTmpHP : 50.f;
+	//	tTmpDesc.fMobMaxHP = 100.f;
+	//	tTmpDesc.isAtkedCurFrame = isHitTmp;
+	//
+	//	tTmpDesc.iMonsterPtrKey = i;
+	//
+	//	m_pGameSystem->Update_MobStatus(tTmpDesc);
+	//}
 #endif // KSTA_TEST
 
 
@@ -238,7 +238,7 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 			UI_MOBINFO_DESC& pCachedMobInfo = mobRTInfo.tInfoDesc;
 
 			// 찾음! -> 정보 갱신
-			if (pCachedMobInfo.iMonsterPtrKey == mobInfo.iMonsterPtrKey)
+			if (pCachedMobInfo.pMonsterPtrKey == mobInfo.pMonsterPtrKey)	// ksta : uintptr_t 에서 void* 로 바꿈
 			{
 				mobRTInfo.isUpdatedThisFrame = true;
 				mobRTInfo.fCurElapsedTime += fTimeDelta;
@@ -312,9 +312,9 @@ void CUI_MobHPBar::Update_Instances()
 
 	for (auto& floatingUI : vecFloatingUIs)
 	{
-		auto resizedDesc = floatingUI->Get_UIDesc();
+		auto& resizedDesc = floatingUI->Get_UIDesc();
 		resizedDesc.vecInstanceDescs.resize(m_vecMobInfo.size());
-		floatingUI->Set_UIDesc(resizedDesc);
+		//floatingUI->Set_UIDesc(resizedDesc);
 
 
 		Calc_ApplyTargetPos(floatingUI);
@@ -331,7 +331,7 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 {
 	// 인스턴스 별 화면상의 위치만을 반영.
 
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 
 	_float4x4 matCombined = pTargetUI->Get_CombinedMatrix();
@@ -388,7 +388,7 @@ void CUI_MobHPBar::Calc_ApplyTargetPos(CCustom_UI* pTargetUI)
 	}
 
 	// apply desc. finally.
-	pTargetUI->Set_UIDesc(targetDesc);
+	//pTargetUI->Set_UIDesc(targetDesc);
 
 #pragma region old variant (bar type hp)
 
@@ -480,7 +480,7 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 	const _float fMaxScaleFactor = 0.6f;
 
 
-	auto targetDesc = pTargetUI->Get_UIDesc();
+	auto& targetDesc = pTargetUI->Get_UIDesc();
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 	
 	for (_uint i = 0; i < m_vecMobInfo.size(); i++)
@@ -547,7 +547,7 @@ void CUI_MobHPBar::Calc_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistanc
 
 		// 이제 다시 적용
 		// apply inst desc.
-		pTargetUI->Set_UIDesc(targetDesc);
+		//pTargetUI->Set_UIDesc(targetDesc);
 	}
 }
 
@@ -555,10 +555,10 @@ void CUI_MobHPBar::Calc_HBEff()
 {
 	// 여기서 variant desc 재정의 및  변수 전달, 색상 수정 ㅇㅇ
 
-	auto targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
-	auto targetInvDesc = m_pUI_HB_Inv->Get_UIDesc();		// for Normal Desc
-	auto targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
-	auto targetLineDesc = m_pUI_Line->Get_UIDesc();	// for Line Normal Desc
+	auto& targetDesc = m_pUI_HB->Get_UIDesc();		// for Normal Desc
+	auto& targetInvDesc = m_pUI_HB_Inv->Get_UIDesc();		// for Normal Desc
+	auto& targetBGDesc = m_pUI_Frame->Get_UIDesc();	// for BG Normal Desc
+	auto& targetLineDesc = m_pUI_Line->Get_UIDesc();	// for Line Normal Desc
 	auto& vecInstDesc = targetDesc.vecInstanceDescs;
 	auto& vecInvInstDesc = targetInvDesc.vecInstanceDescs;
 	auto& vecBGInstDesc = targetBGDesc.vecInstanceDescs;
@@ -732,18 +732,18 @@ void CUI_MobHPBar::Calc_HBEff()
 	};
 
 	targetDesc.vecInstanceDescs = vecInstDesc;
-	m_pUI_HB->Set_UIDesc(targetDesc);
+	//m_pUI_HB->Set_UIDesc(targetDesc);
 	m_pUI_HB->Set_VariantUIDesc(tVariantDesc);
 
 	targetInvDesc.vecInstanceDescs = vecInvInstDesc;
-	m_pUI_HB_Inv->Set_UIDesc(targetInvDesc);
+	//m_pUI_HB_Inv->Set_UIDesc(targetInvDesc);
 	m_pUI_HB_Inv->Set_VariantUIDesc(tInvVariantDesc);
 
 	targetLineDesc.vecInstanceDescs = vecLineInstDesc;
-	m_pUI_Line->Set_UIDesc(targetLineDesc);
+	//m_pUI_Line->Set_UIDesc(targetLineDesc);
 	m_pUI_Line->Set_VariantUIDesc(tLineVariantDesc);
 
-	m_pUI_Frame->Set_UIDesc(targetBGDesc);
+	//m_pUI_Frame->Set_UIDesc(targetBGDesc);
 	m_pUI_Frame->Set_VariantUIDesc(tBGVariantDesc);
 }
 

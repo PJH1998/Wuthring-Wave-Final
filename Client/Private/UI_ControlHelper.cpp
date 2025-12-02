@@ -19,6 +19,7 @@
 #include "UI_Ovfl_Palette.h"
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
+#include "UI_HUD_Sector_Minimap.h"
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -49,6 +50,10 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pUI_HUD_SectorRB_SkillIcons	= Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons");
 	m_pUI_HUD_SectorT_BossStatus	= Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus");
 
+	m_pRootUI_HUD_Minimap			= Find_RootUI(L"UI_HUD_Sector_Minimap");
+	m_pUI_UHD_SectorA_Minimap_All	= Find_ChildUI(L"UI_HUD_Sector_Minimap", L"Sub_All");	
+	m_pUI_UHD_SectorA_FuncIcons_All	= Find_ChildUI(L"UI_HUD_Sector_FuncIcons", L"Sub_All");	
+
 	// Props
 	m_pRootUI_Interact				= Find_RootUI (L"UI_Interact");
 	m_pTextUI_Interact				= Find_ChildUI(L"UI_Interact", L"UI_Text_Interact");
@@ -77,19 +82,24 @@ CCustom_UI* CUI_ControlHelper::Find_ChildUI(_wstring strRootUIName, _wstring str
 	return dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(strRootUIName))->Find_ChildObject(strChildUIName);
 }
 
-HRESULT CUI_ControlHelper::HUD_FadeOut()
+HRESULT CUI_ControlHelper::HUD_FadeOut(_bool isForceChange)
 {
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorR_PartyFrame->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorR_PartyFrame->Get_Component(L"Com_Animator_UI"))->Change_Animation(0, isForceChange)))
+		return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorB_Status->Get_Component(L"Com_Animator_UI"))->Change_Animation(0, isForceChange)))
+		return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorA->Get_Component(L"Com_Animator_UI"))->Change_Animation(0, isForceChange)))
+		return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorRB_SkillIcons->Get_Component(L"Com_Animator_UI"))->Change_Animation(0, isForceChange)))
 		return E_FAIL;
 
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorB_Status->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
-		return E_FAIL;
+	if (m_pUI_UHD_SectorA_Minimap_All)
+		if (FAILED (static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_Minimap_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_Minimap_FadeOut", isForceChange)))
+			return E_FAIL;
+	if (m_pUI_UHD_SectorA_FuncIcons_All)
+		if (FAILED (static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_FuncIcons_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_FuncIcons_FadeOut", isForceChange)))
+			return E_FAIL;
 
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorA->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
-		return E_FAIL;
-
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorRB_SkillIcons->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
-		return E_FAIL;
 
 	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
 	//	return E_FAIL;
@@ -97,19 +107,24 @@ HRESULT CUI_ControlHelper::HUD_FadeOut()
 	return S_OK;
 }
 
-HRESULT CUI_ControlHelper::HUD_FadeIn()
+HRESULT CUI_ControlHelper::HUD_FadeIn(_bool isForceChange)
 {
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorR_PartyFrame->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorR_PartyFrame->Get_Component(L"Com_Animator_UI"))->Change_Animation(1, isForceChange)))
+		return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorB_Status->Get_Component(L"Com_Animator_UI"))->Change_Animation(1, isForceChange)))
+		return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorA->Get_Component(L"Com_Animator_UI"))->Change_Animation(1, isForceChange)))
+		return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorRB_SkillIcons->Get_Component(L"Com_Animator_UI"))->Change_Animation(1, isForceChange)))
 		return E_FAIL;
 
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorB_Status->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
-		return E_FAIL;
+	if (m_pUI_UHD_SectorA_Minimap_All)
+		if (FAILED(static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_Minimap_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_Minimap_FadeIn", isForceChange)))
+			return E_FAIL;
+	if (m_pUI_UHD_SectorA_FuncIcons_All)
+		if (FAILED(static_cast<CAnimator_UI*>(m_pUI_UHD_SectorA_FuncIcons_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"HUD_FuncIcons_FadeIn", isForceChange)))
+			return E_FAIL;
 
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorA->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
-		return E_FAIL;
-
-	if (FAILED (static_cast<CAnimator_UI*>(m_pUI_HUD_SectorRB_SkillIcons->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
-		return E_FAIL;
 
 	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
 	//	return E_FAIL;
@@ -117,17 +132,17 @@ HRESULT CUI_ControlHelper::HUD_FadeIn()
 	return S_OK;
 }
 
-HRESULT CUI_ControlHelper::HUD_FadeOut_BossHPBar()
+HRESULT CUI_ControlHelper::HUD_FadeOut_BossHPBar(_bool isForceChange)
 {
-	if (FAILED(static_cast<CAnimator_UI*>(m_pUI_HUD_SectorT_BossStatus->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeOut")))
+	if (FAILED(static_cast<CAnimator_UI*>(m_pUI_HUD_SectorT_BossStatus->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeOut", isForceChange)))
 		return E_FAIL;
 
 	return S_OK;
 }
 
-HRESULT CUI_ControlHelper::HUD_FadeIn_BossHPBar()
+HRESULT CUI_ControlHelper::HUD_FadeIn_BossHPBar(_bool isForceChange)
 {
-	if (FAILED(static_cast<CAnimator_UI*>(m_pUI_HUD_SectorT_BossStatus->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeIn")))
+	if (FAILED(static_cast<CAnimator_UI*>(m_pUI_HUD_SectorT_BossStatus->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeIn", isForceChange)))
 		return E_FAIL;
 
 	return S_OK;
@@ -139,10 +154,10 @@ void CUI_ControlHelper::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char
 	pTargetUI->Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
 }
 
-void CUI_ControlHelper::HUD_Toggle_BossStatusUI(_bool isOn)
+void CUI_ControlHelper::HUD_Toggle_BossStatusUI(_bool isOn, _bool isForceChange)
 {
-	if (isOn)	HUD_FadeIn_BossHPBar();
-	else		HUD_FadeOut_BossHPBar();
+	if (isOn)	HUD_FadeIn_BossHPBar(isForceChange);
+	else		HUD_FadeOut_BossHPBar(isForceChange);
 
 	CUI_HUD* pTargetUI = dynamic_cast<CUI_HUD*>(m_pRootUI_HUD);
 	pTargetUI->Toggle_BossStatusUI(isOn);
@@ -250,6 +265,8 @@ void CUI_ControlHelper::Update_MobStatus(const UI_MOBINFO_DESC& tDesc)
 	if (pRootUI && !pRootUI->IsActivate())	// 풀링 꺼져있으면 켬
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
 
+	Bind_ObjectPos_PerFrame_ToMinimap(tDesc.vMobPos, UI_MINIMAP_OBJTYPE::MONSTER);
+
 	static_cast<CUI_MobHPBar*>(pRootUI)->Update_MobStatus(tDesc);
 }
 
@@ -331,6 +348,36 @@ void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE
 	//	return;
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_QTE", _fmatrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType)
+{
+	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
+
+	if (pRootUI)
+		return;
+
+	pRootUI->Bind_ObjectPos_PerFrame(vPosition, eType);
+}
+
+void CUI_ControlHelper::Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner)
+{
+	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
+
+	if (pRootUI)
+		return;
+
+	pRootUI->Attach_ObjectPos(vPosition, eType, pOwner);
+}
+
+void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
+{
+	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
+
+	if (pRootUI)
+		return;
+
+	pRootUI->Detach_ObjectPos(pOwner);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

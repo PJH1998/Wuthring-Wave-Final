@@ -37,13 +37,20 @@
 #include "Custom_UI.h"
 #include "UI_Button.h"
 #include "UI_Image.h"
-#include "UI_Text.h"
+#include "UI_Text_Damage.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
-#include "UI_Text_Damage.h"
+#include "UI_HUD_Sector_FuncIcons.h"
+#include "UI_HUD_Sector_Minimap.h"
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
+#include "UI_MobHPBar.h"
+#include "UI_TabUtility.h"
+#include "UI_GrafflePoint.h"
+#include "UI_QTE.h"
+
+#include "UI_Ovfl_Palette.h"
 #pragma endregion
 
 
@@ -552,7 +559,7 @@ HRESULT CLoader_Heaven::Load_UI()
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Texture" << endl;
+	cout << "[Loader_Test] Texture" << endl;
 	// ==============================
 
 	vector<CCustom_UI::CUSTOM_UITREE_DESC> vecDescs = {};       // parsed data from json
@@ -560,11 +567,50 @@ HRESULT CLoader_Heaven::Load_UI()
 	// * Json Parse                 // for pre-loading textures
 	// UI_HUD
 	//_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
-	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
+	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
 
-	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
+	_string strFilePath_UI_HUD_Sector_Minimap = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_Minimap.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_Minimap));
+
+	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
+
+
+
+	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
+
+	_string strFilePath_UI_LockOn = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LockOn.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_LockOn));
+
+	_string strFilePath_UI_Parry = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Parry.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Parry));
+
+	_string strFilePath_UI_MobHP = "../../Client/Bin/Resource/UI/FJson/UITree/Root_MobHPBarDynamic.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_MobHP));
+
+	_string strFilePath_UI_TabUtility = "../../Client/Bin/Resource/UI/FJson/UITree/Root_TabUtility.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_TabUtility));
+
+	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
+
+	_string strFilePath_UI_GrafflePoint = "../../Client/Bin/Resource/UI/FJson/UITree/Root_GrafflePoint.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_GrafflePoint));
+
+	_string strFilePath_UI_QTE = "../../Client/Bin/Resource/UI/FJson/UITree/Root_QTE1.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_QTE));
+
+
+
+
+	_string strFilePath_UI_ExtraTexturesLoad = "../../Client/Bin/Resource/UI/FJson/UITree/Root_LoadDummy.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_ExtraTexturesLoad));
+	// Prototype_Component_Texture_Custom_ ...
+	// Palette_BG
+
+
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -574,46 +620,48 @@ HRESULT CLoader_Heaven::Load_UI()
 			const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
 			const   _uint       iNumFiles = infoDesc.tUIDesc.iNumFiles;
 
-			if (strFileName == L"T_JiabeilinaEnergyBgCombined")
-				int i = 10;
-
 			infoDesc.tUIDesc.strFilePath;
 			if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
 				CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-				OutputDebugString(L"[CLoader_Test_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+			{
+				OutputDebugString(L"[Loader_Test::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+			}
 		}
 	}
 
+
+
+
 	// ==============================
-	cout << "[CLoader_Test_UI] Model" << endl;
+	cout << "[Loader_Test] Model" << endl;
 	// ==============================
 	// 
 	// VIBuffer_Rect
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
 		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
 
 	// VIBuffer_Rect_Instance_UI
 	CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
 	tRectInstDesc.iNumInstance = 500U;
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
 		CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Shader" << endl;
+	cout << "[Loader_Test] Shader" << endl;
 	// ==============================
 
 	// Shader
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader Load Failed. The Shader may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader Load Failed. The Shader may have already been loaded.\n");
 
 	// Shader_Instance
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
 
 	// Shader_Font
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_Text_Instance"),
@@ -622,7 +670,7 @@ HRESULT CLoader_Heaven::Load_UI()
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI] Object" << endl;
+	cout << "[Loader_Test] Object" << endl;
 	// ==============================
 
 	// * Components Load
@@ -631,40 +679,71 @@ HRESULT CLoader_Heaven::Load_UI()
 		CAnimator_UI::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[CCustom_UI::Load_Shader] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
 
+
+
 	// * Objects Load
 	// Custom UI
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button",
 		CUI_Button::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI:Load_Object] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test:Load_Object] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image",
 		CUI_Image::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text",
 		CUI_Text::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
 
 	// Custom Text
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
 		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+
+	// Custom UI (Props)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
 		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
-	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
-	//	CUI_LockOn::Create(m_pDevice, m_pContext))))
-	//	OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
-	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
-	//	CUI_Parry::Create(m_pDevice, m_pContext))))
-	//	OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_LockOn",
+		CUI_LockOn::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_LockOn Load Failed. The UI_LockOn may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Parry",
+		CUI_Parry::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Parry Load Failed. The UI_Parry may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_MobHPBar",
+		CUI_MobHPBar::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_MobHPBar Load Failed. The UI_MobHPBar may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
+		CUI_TabUtility::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_GrafflePoint",
+		CUI_GrafflePoint::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_GrafflePoint Load Failed. The UI_GrafflePoint may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_QTE",
+		CUI_QTE::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
+
+	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
+		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
+
+
 
 
 	// ==============================
-	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
+	cout << "[Loader_Test][UI Custom] Prototype" << endl;
 	// ==============================
 
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		CUI_HUD_Sector_Minimap::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_Minimap Load Failed. The UI_HUD_Sector_Minimap may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+
+
 	return S_OK;
 }
 

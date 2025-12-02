@@ -398,6 +398,12 @@
     <Filter Include="01. Utility\04. Component\Model\Mesh\ShapeKey">
       <UniqueIdentifier>{5e9d27af-5e70-4c26-8439-18f578372255}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\16. Decal\Rect">
+      <UniqueIdentifier>{10d5c260-f91f-4f35-a3a4-200ebad09ff4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Decal\Cube">
+      <UniqueIdentifier>{aeca2a29-2bc2-452c-ba24-3ac0a2cca864}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -808,6 +814,9 @@
     <ClInclude Include="..\Public\ShapeKey.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\VIBuffer_Decal_Cube.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1193,6 +1202,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ShapeKey.cpp">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

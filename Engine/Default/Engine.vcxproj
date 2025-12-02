@@ -109,6 +109,7 @@
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
+    <ClInclude Include="..\public\VIBuffer_Decal_Cube.h" />
     <ClInclude Include="..\public\Water.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
@@ -244,6 +245,7 @@
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
+    <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp" />
     <ClCompile Include="..\private\Water.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />

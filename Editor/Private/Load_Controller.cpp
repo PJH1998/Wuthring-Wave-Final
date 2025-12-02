@@ -915,6 +915,12 @@ void CLoad_Controller::Load_FXDecal_FromJson(const _string& strFilePath, const _
 	if (DecalJson.contains("LifeTime"))
 		Desc.LifeTime = DecalJson["LifeTime"].get<_float>();
 
+	if (DecalJson.contains("BlendTime"))
+		Desc.fBlendTime = DecalJson["BlendTime"].get<_float>();
+
+	if (DecalJson.contains("EmissiveIntensity"))
+		Desc.fEmissiveIntensity = DecalJson["EmissiveIntensity"].get<_float>();
+
 	if (DecalJson.contains("Color") && DecalJson["Color"].is_array())
 	{
 		json ColorJson = DecalJson["Color"];
@@ -925,7 +931,6 @@ void CLoad_Controller::Load_FXDecal_FromJson(const _string& strFilePath, const _
 	}
 
 	m_tDecalDesc.emplace(DecalTag, Desc);
-
 }
 
 void CLoad_Controller::Load_FXRadial_FromJson(const _string& strFilePath, const _wstring& RadialTag)
