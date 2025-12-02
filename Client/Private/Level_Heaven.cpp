@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+#include "UI_QTE.h"
 
 //SFX
 #ifdef _DEBUG
@@ -343,37 +344,62 @@ void CLevel_Heaven::Ready_Skybox()
 void CLevel_Heaven::Ready_UI()
 {
 	// UI
-	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
-	const _wstring strLayertag_UI = L"Layer_Custom_UI";
-	const _wstring strPrototypeTag_UI[] = {
-		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+	const   _uint   iDestLevel = m_pGameInstance->Get_CurrentLevel();;
+	const _wstring	strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring	strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_HUD",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-	//	if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-	//		CRASH("Failed to Add RootUI to UI_Manager.");
+
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
-	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tTimedTextDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
+		iDestLevel, TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tTimedTextDesc)))
 		CRASH("Failed Ready Text_Damage");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
-		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+		iDestLevel, TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1)))
 		CRASH("Failed Ready Button_Interact");
 
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
-	//	iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
-	//	CRASH("Failed Ready LockOn");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_LockOn"),
+		iDestLevel, TEXT("Layer_Custom_UI_LockOn"), TEXT("Pool_Button_LockOn"), 1)))
+		CRASH("Failed Ready LockOn");
 
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
-	//	iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
-	//	CRASH("Failed Ready Parry");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Parry"),
+		iDestLevel, TEXT("Layer_Custom_UI_Parry"), TEXT("Pool_Image_Parry"), 1)))
+		CRASH("Failed Ready Parry");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_MobHPBar"),
+		iDestLevel, TEXT("Layer_Custom_UI_MobHPBar"), TEXT("Pool_Image_MobHPBar"), 1)))
+		CRASH("Failed Ready MobHPBar");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
+		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
+		CRASH("Failed Ready TabUtility");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
+		CRASH("Failed Ready GrafflePoint");
+
+	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
+		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
+		CRASH("Failed Ready QTE");
+
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
+		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
+		CRASH("Failed Ready Ovfl_Palette");
+
+
+	m_pGameSystem->PreAssign_TargetUIs();
 	// _UI
 }
 

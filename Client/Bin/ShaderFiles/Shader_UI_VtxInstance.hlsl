@@ -165,6 +165,23 @@ float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2
     return resultUV;
 }
 
+float2 RotateUV(float2 uv, float angle, float2 center = float2(0.5f, 0.5f))
+{
+    float s = sin(angle);
+    float c = cos(angle);
+
+    // 중심 기준으로 이동
+    float2 p = uv - center;
+
+    // 2D 회전
+    float2 r;
+    r.x = p.x * c - p.y * s;
+    r.y = p.x * s + p.y * c;
+
+    // 다시 원래 좌표계로
+    return r + center;
+}
+
 
 // ==============================
 // * Vertex Shader
@@ -1357,59 +1374,72 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         }
         case UIFLAG_WAVECIRCLE:
         {
-            Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
-            return Out;
+            //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+            //return Out;
             
-            //// ==============================
-            //// * [10] Wave Circle
-            //// ==============================
-            //// * matrix info
-            //// [ISDISTORT] [TIMEELAPSED] [DISTORTSTRENGTH]
-            //// 
-            //// ==============================
-            //bool isDistort          = _BOOL(In.mExtra0.x);
-            //float fTimeElapsed      = In.mExtra0.y;
-            //float fDistortStrength  = In.mExtra0.z;
-            //
-            //float2 localUV = In.vTexcoord;
-            //
-            //    
-            //
-            //if (isDistort)
-            //{
-            //    const float fAdditionalStrength = 0.2f;
-            //    const float fUVSlideMutiplier = 0.2f;
-            //    
-            //    float2 noiseUV   = localUV * 2.0f;
-            //    noiseUV.x += fTimeElapsed * fUVSlideMutiplier;
-            //    float  noiseSample  = g_TextureExtra1.Sample(DefaultSampler, noiseUV).r; // 0~1
-            //    
-            //    // 1. 로컬 UV 기준으로 중심에서의 방향/거리 계산
-            //    float2 center     = float2(0.5f, 0.5f);     // 로컬 UV의 중앙
-            //    float2 fromCenter = localUV - center;       // 현재 포커싱중인 점의 중점기준 상대위치를 구함
-            //    float  dist       = length(fromCenter);     // dist화
-            //
-            //    // 거리 벡터의 normalize. 단 중점은 0나누기하면 안되니까 예외처리.   
-            //    // 이는 최종적으로 가중치에 의해 변화할 uv 변환량임. 정규화를 하였으므로, 정중앙이 아니라면 가중치를 주었을 때에 일정한 방향으로 밀릴 것.
-            //    float2 dirNormal = (dist > 0.0001f) ? fromCenter / dist : float2(0.0f, 0.0f);           // <<< 
-            //    
-            //    float fFinalStrength = fAdditionalStrength * fDistortStrength * noiseSample;
-            //    
-            //    
-            //    
-            //
-            //    // 4. 최종 오프셋 크기
-            //    //float offsetAmount = wave * radialFalloff * fDistortStrength * fMaxOffset * noiseSample;
-            //    float offsetAmount = fDistortStrength * fFinalStrength;
-            //
-            //    // 5. UV를 "중심 방향"으로만 밀어줌 (방사형)
-            //    fixedUV += dirNormal * -offsetAmount;
-            //
-            //}
-            //
-            //
-            //
-            //Out.vColor.a = vColorTex.a * (1.f - g_AlphaStrength);
+            // ==============================
+            // * [10] Wave Circle
+            // ==============================
+            // * matrix info
+            // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
+            // [ISDISTORT] [TIMEELAPSED] [DISTORTSTRENGTH] [ROTATESPEED(DRG)]
+            // [DISABLENORMALIZE] [fAlphaMultiplier]
+            // ==============================
+            float4 fCurColor        = In.mExtra0.rgba;
+            bool isDistort          = _BOOL(In.mExtra1.x);
+            float fTimeElapsed      = In.mExtra1.y;
+            float fDistortStrength  = In.mExtra1.z;
+            float fRotateSpeed      = In.mExtra1.w;
+            float fAlphaMultiplier  = In.mExtra2.x;
+            bool isDisableNormalize = _BOOL(In.mExtra2.y);
+            
+            float2 localUV = In.vTexcoord;
+            //const float fAlphaMultiplier = 1.5f;        // 너무 알파 날아가서 보정
+            
+            
+            if (isDistort)
+            {
+                const float fAdditionalStrength = 0.2f;
+                const float fUVSlideMultiplier = 0.2f;
+                const float fUVMultiplier = 0.75f;
+                
+                float2 noiseUV   = localUV * fUVMultiplier;
+                //noiseUV.x += fTimeElapsed * fUVSlideMultiplier;
+                float2 rotatedUV = RotateUV(noiseUV, fTimeElapsed * fRotateSpeed);
+                float  noiseSample  = g_TextureExtra0.Sample(DefaultSampler, rotatedUV).r; // 0~1
+                
+                // 1. 로컬 UV 기준으로 중심에서의 방향/거리 계산ㅡ
+                float2 center     = float2(0.5f, 0.5f);     // 로컬 UV의 중앙
+                float2 fromCenter = localUV - center;       // 현재 포커싱중인 점의 중점기ㅡ준 상대위치를 구함
+                float  dist       = length(fromCenter);     // dist화
+            
+                // 거리 벡터의 normalize. 단 중점은 0나누기하면 안되니까 예외처리.   
+                // 이는 최종적으로 가중치에 의해 변화할 uv 변환량임. 정규화를 하였으므로, 정중앙이 아니라면 가중치를 주었을 때에 일정한 크기만큼 밀릴 것.
+                float2 dirNormal = (dist > 0.0001f) ? fromCenter / dist : float2(0.0f, 0.0f);           // <<< 
+                float fFinalStrength = fAdditionalStrength * fDistortStrength * noiseSample;
+                
+                
+                // 같은 각도 상의 다른 픽셀들도 다른 값들을 가지므로 이로 인해 한 경로 상에 하나의 줄만 생기지 않는 등의 문제 발생?
+                float2 dirScaled = fromCenter / 0.5f;
+                
+            
+                // 4. 최종 오프셋 크기
+                //float offsetAmount = wave * radialFalloff * fDistortStrength * fMaxOffset * noiseSample;
+                float offsetAmount = fDistortStrength * fFinalStrength;
+            
+                // 5. UV를 "중심 방향"으로만 밀어줌 (방사형)
+                float2 dirScale = (isDisableNormalize)? dirScaled : dirNormal;     // 정규화 안하는 선택지 적용
+                fixedUV += dirScale * -offsetAmount;
+            
+            }
+            
+            
+            
+            float4 vColorTex = g_Texture.Sample(DefaultSampler, fixedUV);
+            
+            Out.vColor.rgb = fCurColor.rgb;
+            Out.vColor.a = vColorTex.a * (1.f - g_AlphaStrength) * fCurColor.a * fAlphaMultiplier;
+            return Out;
         }
         default:
         {

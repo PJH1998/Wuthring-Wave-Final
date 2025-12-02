@@ -177,6 +177,7 @@ namespace Client
 		TT_BOSSNAME,
 		TT_PLAYERHP,
 		TT_TABUTIL,
+		TT_SKILLCD,
 
 		END
 	};

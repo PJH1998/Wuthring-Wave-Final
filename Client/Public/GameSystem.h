@@ -208,7 +208,7 @@ private:
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
-	class	CMouseController*		m_pMouseController = { nullptr };
+	class	CMouseController*	m_pMouseController				= { nullptr };
 
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
