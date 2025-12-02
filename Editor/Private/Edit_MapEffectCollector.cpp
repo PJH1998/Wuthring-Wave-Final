@@ -16,7 +16,6 @@ void CEdit_MapEffectCollector::Set_ImGuiOption()
 	//ImGui::
 	m_EffectInfo[m_iEffectIndex];
 
-	ImGui::
 	ImGui::SameLine();
 	if (ImGui::Button("Get PickPos"))
 		m_EffectInfo[m_iEffectIndex].vPos = CLevel_Map::m_vPickedPos;
