@@ -95,6 +95,16 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
+	
+	PREFAB_INFO Info{};
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 377.2f, 1587.7f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 318.1f, 1624.f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 316.6f, 1647.9f, 1.f)), &Info);
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 381.2f, 1587.7f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 322.1f, 1624.f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 320.6f, 1647.9f, 1.f)), &Info);
+
 
 	return S_OK;
 }
@@ -106,14 +116,7 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		m_pGameSystem->Set_MouseFix(false);
-	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
 	{
-		//if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-		//{
-		//	m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
-		//	m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f+3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-		//}
-
 		m_pGameSystem->Update(fTimeDelta);
 	}
 
