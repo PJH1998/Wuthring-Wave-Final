@@ -162,7 +162,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
-	m_pPhysicsManager->Late_Update();
+	//m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	
@@ -1009,7 +1009,7 @@ HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFil
 {
 	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath, vEmissiveLuminance);
 }
-HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
+HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const  DECAL_DATA& Decal)
 {
 	return m_pDecal_Manager->Add_DecalData(strDecalTag, Decal);
 }
@@ -1030,6 +1030,18 @@ ID3D11ShaderResourceView* CGameInstance::Get_HZB_Resource()
 HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
 {
 	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
+}
+void CGameInstance::Set_FogMaxHeight(_float fFogMaxHeight)
+{
+	m_pVF->Set_FogMaxHeight(fFogMaxHeight);
+}
+void CGameInstance::Set_FogDistanceFallOff(_float fDistanceFallOf)
+{
+	m_pVF->Set_FogDistanceFallOff(fDistanceFallOf);
+}
+void CGameInstance::Set_FogRayDensityScale(_float fFogRayDensityScale)
+{
+	m_pVF->Set_FogRayDensityScale(fFogRayDensityScale);
 }
 void CGameInstance::Begin_VF()
 {
@@ -1205,6 +1217,8 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 
 HRESULT CGameInstance::Clear_Memory()
 {
+	m_pPhysicsManager->Clear_Resource();
+	m_pResource_Manager->Clear_Resource();
 	m_pRenderer->Clear_Resource();
 	m_pOctoTree->Clear_OctoTree();
 	m_pSound_Manager->Stop_All();

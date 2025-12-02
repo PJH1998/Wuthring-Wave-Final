@@ -89,7 +89,6 @@ void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float
 	if (!m_isActivate)
 		return;
 
-
 	// 1. Dissolve 면 return;
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 	if (IsDissolve)
@@ -161,11 +160,11 @@ void CProp::Remove_AllCondition()
 {
 	m_iCondition = 0;
 }
-void CProp::Bind_DissolveTimer()
+void CProp::Bind_DissolveTimer(_uint iShaderPath)
 {
 	Add_Condition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 	m_fDissolveTimer = 0.f;
-	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DISSOLVE_WEAPON);
+	m_iShaderPath = iShaderPath;
 }
 #pragma endregion
 

@@ -77,12 +77,15 @@ void CMainApp::Post_Update()
 
 		m_isChangeLevel = false;
 
-		// Memory Clear (Sound, Camera, Light, ETC)
-		if (FAILED(m_pGameInstance->Clear_Memory()))
-			return;
-
 		if (true == m_isLoad)
 		{
+			// Memory Clear (Sound, Camera, Light, ETC)
+			if (FAILED(m_pGameInstance->Clear_Memory()))
+				CRASH("Clear");
+
+			// GameSystem Clear
+			m_pGameSystem->Clear_Resource();
+
 			if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(LEVEL::LOADING))))
 				CRASH("Clear Resource");
 

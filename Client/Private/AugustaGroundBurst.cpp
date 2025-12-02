@@ -45,10 +45,8 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	m_pAugusta->PartActivate(m_iSubPartType, true);
 	m_pAugusta->Clear_PartAnimation(CAugusta::PARTTYPE::PART_HEADPROP, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
+	m_pAugusta->Part_ShaderPathChange(m_iSubPartType, ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_HEADPROP));
 	
-	//m_pAugusta->Set_AnimationToParts(CAugusta::PARTTYPE::PART_HEADPROP, "Burst01");
-
-
 
 	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));

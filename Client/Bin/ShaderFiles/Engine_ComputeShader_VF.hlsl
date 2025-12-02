@@ -506,6 +506,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
     //uint iRayDensity = (uint) round(fCurRayDensity * 255.f);
   
     //float fFinalDensity = ((float) (iRayDensity << 8 | iLightDensity)) / 65535.f;
+    
     float fFinalDensity = fLightDensity + fCurRayDensity; //max(fLightDensity + fCurRayDensity, 0.0005f);
     
    // Temporal Reprojection
@@ -526,12 +527,12 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         float3 vTexcoord = 0.f;
             
         float fNdcZ = saturate(log(fPrevViewZ / fFogNear) / log(fFogFar / fFogNear)); //ComputeDepthToProjZ(fPrevViewZ, fFogNear, fFogFar) / fPrevViewZ;
-    
+     
         vTexcoord.x = vPrevProjPos.x * 0.5f + 0.5f;
         vTexcoord.y = vPrevProjPos.y * -0.5f + 0.5f;
         vTexcoord.z = fNdcZ;
     
-        if (all(vTexcoord.xy <= 1.f) && all(vTexcoord.xy >= 0.f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
+        if (all(vTexcoord.xy < 0.995f) && all(vTexcoord.xy > 0.005f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
         {
             float4 vPrevScattering = PrevVFLightTexture.SampleLevel(DefaultSampler, vTexcoord, 0.f);
         

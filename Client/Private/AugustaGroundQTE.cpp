@@ -127,7 +127,7 @@ void CAugustaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 	m_pAugusta->Play_PartAnimation(
 		m_iPartType,
 		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
-		fTimeDelta, nullptr
+		fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr
 	);
 
 }

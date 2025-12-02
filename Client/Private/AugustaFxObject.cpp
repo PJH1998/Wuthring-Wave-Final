@@ -38,6 +38,7 @@ HRESULT CAugustaFxObject::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
 	Ready_PartObjects(pDesc);
 
+
 	m_pTransformCom->Scale({ 0.7f, 0.7f, 0.7f }); // 간격 조정.
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(80.f, -70.f, 0.f, 1.f)); // 오프셋 조절.
 
@@ -50,6 +51,14 @@ void CAugustaFxObject::Priority_Update(_float fTimeDelta)
 	
 	for (auto& pEnergyBlade : m_EnergyBlades)
 		pEnergyBlade->Priority_Update(fTimeDelta);
+
+	/*if (!m_IsVisible)
+	{
+		for (auto& pEnergyBlade : m_EnergyBlades)
+			pEnergyBlade->Activate(false);
+
+		m_IsVisible = true;
+	}*/
 }
 
 void CAugustaFxObject::Update(_float fTimeDelta)
@@ -77,12 +86,9 @@ void CAugustaFxObject::Late_Update(_float fTimeDelta)
 {
     CProp::Late_Update(fTimeDelta);
 	
+	for (auto& pEnergyBlade : m_EnergyBlades)
+		pEnergyBlade->Late_Update(fTimeDelta);
 
-	if (m_IsVisible)
-	{
-		for (auto& pEnergyBlade : m_EnergyBlades)
-			pEnergyBlade->Late_Update(fTimeDelta);
-	}
 	
 
 #ifdef _DEBUG
@@ -107,14 +113,19 @@ void CAugustaFxObject::Activate(_bool IsActivate)
 	CProp::Activate(IsActivate);
 	m_pModelCom->Clear_Animation(m_strCurrentAnimName);
 
-	for (auto& pObj : m_EnergyBlades)
-		pObj->Activate(IsActivate);
 }
 
 
 void CAugustaFxObject::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	
+}
+
+// 자식 객체에 대한 Activate 시점은 FxObject에 대한 시점과 차이가 있다.
+void CAugustaFxObject::Child_Activate(_bool IsActivate)
+{
+	for (auto& pObj : m_EnergyBlades)
+		pObj->Activate(IsActivate);
 }
 
 void CAugustaFxObject::Ready_Components(const PROP_DESC* pDesc)
@@ -188,6 +199,7 @@ void CAugustaFxObject::Ready_PartObjects(const PROP_DESC* pDesc)
 
 		ASSERT_CRASH(pEnergyBlade);
 		pEnergyBlade->Set_ParentMatrixPtr(&m_CombinedMatrix);
+		pEnergyBlade->SetActivate(false);
 		m_EnergyBlades.emplace_back(pEnergyBlade);
 	}
 }
