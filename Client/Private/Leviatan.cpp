@@ -48,14 +48,14 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::BURST] = 90.f;
 	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK18] = 40.f;
 
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 25.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 25.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 22.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 10.f;
-	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 10.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
+	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 120.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 10.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 10.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 80.f;
 #pragma endregion
 	Ready_Component(pDesc);
@@ -631,10 +631,10 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 	pBlackBoard1->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard1->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
 	pBlackBoard1->Add_Condition("ATKArrange", [this]() ->_bool { return Attack_Arrange(); });
-	pBlackBoard1->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 3.f); });
+	pBlackBoard1->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 5.f); });
 	pBlackBoard1->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 4.f); });
-	pBlackBoard1->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 5.f); });
-	pBlackBoard1->Add_Condition("Attack13", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK13, 6.f); });
+	pBlackBoard1->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 1.f); });
+	pBlackBoard1->Add_Condition("Attack13", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK13, 50.f); });
 	pBlackBoard1->Add_Condition("Attack15", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 35.f); });
 	pBlackBoard1->Add_Condition("Attack18", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK18, 10.f); });
 	pBlackBoard1->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
@@ -657,11 +657,11 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 	pBlackBoard2->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard2->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
 	pBlackBoard2->Add_Condition("ATKArrange", [this]() ->_bool { return Attack_Arrange(); });
-	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 3.f); });
-	pBlackBoard2->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 4.f); });
-	pBlackBoard2->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 5.f); });
+	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 5.f); });
+	pBlackBoard2->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 5.f); });
+	pBlackBoard2->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 4.f); });
 	pBlackBoard2->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 6.f); });
-	pBlackBoard2->Add_Condition("Attack13", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK13, 8.f); });
+	pBlackBoard2->Add_Condition("Attack13", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK13, 50.f); });
 	pBlackBoard2->Add_Condition("Attack14", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 100.f); });
 	pBlackBoard2->Add_Condition("Attack18", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK18, 10.f); });
 	pBlackBoard2->Add_Condition("Attack20", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK20, 10.f); });
@@ -1031,8 +1031,8 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK20)
-		return false;
+	//if (iIndex != ATK_PATTERN::ATTACK20)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{

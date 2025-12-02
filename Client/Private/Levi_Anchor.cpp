@@ -81,6 +81,11 @@ void CLevi_Anchor::Render()
 		for (_uint i = 0; i < iNumMesh; ++i)
 		{
 			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			_bool HasNormal = { false };
+			if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = true;
+			if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+				CRASH("Ready g_HasNormal Failed");
 			//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 			m_pShaderCom->Begin(0);
 
