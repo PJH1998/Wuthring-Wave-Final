@@ -68,6 +68,7 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 void CGameSystem::Clear_Resource()
 {
 	m_pDirector->Clear_Action();
+	m_pMonsterTable->Clear_NPCData();
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)

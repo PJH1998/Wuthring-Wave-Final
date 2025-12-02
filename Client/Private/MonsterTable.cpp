@@ -105,5 +105,9 @@ void CMonsterTable::Free()
 
 	m_MonsterKey.clear();
 	m_MonsterTable.clear();
-
+	for (size_t i = 0; i < NPCTYPE::END; i++)
+	{
+		m_NPCTable[i].clear();
+		m_NPCTable[i].shrink_to_fit();
+	}
 }
