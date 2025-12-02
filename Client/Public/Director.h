@@ -18,6 +18,7 @@ public:
 	void		Add_Action(const _char* pFolderPath);
 	void		Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain, _bool isEscape); // Tag / true : 유지, false : 끝나면 자동 Recovery
 	void		Stop_Action();
+	void		Clear_Action();
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };

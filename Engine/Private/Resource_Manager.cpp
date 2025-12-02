@@ -64,6 +64,13 @@ ID3D11ShaderResourceView* CResource_Manager::Get_Resource(const _string& strReso
 	return pInstance;
 }
 
+void CResource_Manager::Clear_Resource()
+{
+	for (auto& Pair : m_Resources)
+		Safe_Release(Pair.second);
+	m_Resources.clear();
+}
+
 ID3D11ShaderResourceView* CResource_Manager::Find_Resource(const _string& strResourceTag)
 {
 	auto iter = m_Resources.find(strResourceTag);

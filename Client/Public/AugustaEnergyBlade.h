@@ -46,9 +46,9 @@ private:
 
 
 	// Shader 변수
-	_float4 m_vEnergyColor = {};
+	//_float4 m_vEnergyColor = {};
 	_float  m_fTime = { };
-	_float  m_fEnergyIntensity = {};
+	//_float  m_fEnergyIntensity = {};
 	_float2 m_vScrollSpeed = {}; // x, y
 	
 

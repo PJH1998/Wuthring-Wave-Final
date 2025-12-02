@@ -155,6 +155,9 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
     if(PrefabJson.contains("Bone_Name"))
         PrefabDesc.strBoneTag = PrefabJson["Bone_Name"].get<string>();
 
+	if (PrefabJson.contains("Loop"))
+		PrefabDesc.IsLoop = PrefabJson["Loop"].get<_bool>();
+
     if (PrefabJson.contains("Prefab_LifeTime") && PrefabJson["Prefab_LifeTime"].is_array())
     {
         json LifeTime = PrefabJson["Prefab_LifeTime"];
@@ -464,6 +467,9 @@ void CLoad_Controller::Load_Particle_OB_FromJson(const _string& strFilePath, con
 
 	if (ParticleJson.contains("Pivot"))
 		Desc.IsPivot = ParticleJson["Pivot"].get<_bool>();
+
+	if (ParticleJson.contains("Loop"))
+		Desc.IsLoop = ParticleJson["Loop"].get<_bool>();
 
     if (ParticleJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(ParticleJson["TextureTag"].get<_string>());
@@ -821,6 +827,9 @@ void CLoad_Controller::Load_FXRect_FromJson(const _string& strFilePath, const _w
 	if (RectJson.contains("Root"))
 		Desc.IsRootOn = RectJson["Root"].get<_bool>();
 
+	if (RectJson.contains("Loop"))
+		Desc.IsLoop = RectJson["Loop"].get<_bool>();
+
 	if (RectJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(RectJson["TextureTag"].get<_string>());
 
@@ -832,6 +841,15 @@ void CLoad_Controller::Load_FXRect_FromJson(const _string& strFilePath, const _w
 
 	if (RectJson.contains("ColorFlag"))
 		Desc.iColorFlag = RectJson["ColorFlag"].get<_int>();
+
+	if (RectJson.contains("Sprite"))
+		Desc.IsSprite = RectJson["Sprite"].get<_bool>();
+
+	if (RectJson.contains("Row"))
+		Desc.iRows = RectJson["Row"].get<_int>();
+
+	if (RectJson.contains("Col"))
+		Desc.iCols = RectJson["Col"].get<_int>();
 
 	if (RectJson.contains("SweepSpeed"))
 		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();

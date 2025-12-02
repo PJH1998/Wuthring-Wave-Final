@@ -661,7 +661,22 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 
 void CEffect_Controller::Selected_Prefab_Info()
 {
-    
+	if (ImGui::CollapsingHeader("Prefab Offset", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		if (m_pSelectedPrefabDesc != nullptr)
+		{
+			if (ImGui::Checkbox("Loop", &(m_pSelectedPrefabDesc->IsLoop)))
+				m_pSelectedPrefab->Set_Loop(m_pSelectedPrefabDesc->IsLoop);
+
+			ImGui::Text("LifeTime");
+			ImGui::PushItemWidth(60);
+			ImGui::InputFloat("##PrefabLifeTime.x", &(m_pSelectedPrefabDesc->vLifeTime.x));
+			ImGui::SameLine();
+			ImGui::InputFloat("##PrefabLifeTime.y", &(m_pSelectedPrefabDesc->vLifeTime.y));
+			ImGui::PopItemWidth();
+		}
+	}
+
     //선택 되어있는 프리팹에 자식들 설정값 넣어줘야하고, 저장하기 위한 Desc에도 넣어줘야할거 같음.
     //Desc 에 들어갈 정보, 자식의 태그 이름 -> 이건 자식들 생서할때, 프리팹과 Desc에 생성한 자식 이름 같이 넣어주자.
     //자식의 활성화 시점 -> 현재 선택한 프리팹의 자식이 있을 경우, 활성화 타임 지정할 수 있는 Info 띄우고 세팅해주면, 미리 넣어놓은 자식 태그로 Desc에저장, 프리팹애 던져주자.
@@ -836,6 +851,7 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
     PrefabJson["Prefab_Name"] = WStringToString(Prefab->second.strPrefabTag);
     PrefabJson["Children_Number"] = Prefab->second.ChildrenCount;
     PrefabJson["Bone_Name"] = Prefab->second.strBoneTag;
+	PrefabJson["Loop"] = Prefab->second.IsLoop;
     
     //배열 저장할려면 array() 사용해야됨.
     json LifeTimeJson = json::array();
@@ -1161,6 +1177,7 @@ void CEffect_Controller::Particle_OB_To_Json(json& ParticleJson, CParticle::PART
     ParticleJson["MyType"] = pParticleDesc->eMyType;
     ParticleJson["Root"] = pParticleDesc->IsRootOn;
 	ParticleJson["Pivot"] = pParticleDesc->IsPivot;
+	ParticleJson["Loop"] = pParticleDesc->IsLoop;
 
     ParticleJson["TextureTag"] = WStringToString(pParticleDesc->strTextureTag);
     ParticleJson["VIBufferTag"] = WStringToString(pParticleDesc->strVIBufferTag);
@@ -1369,6 +1386,8 @@ void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRe
 	Rect["MyTag"] = WStringToString(pRectDesc->strMyTag);
 	Rect["MyType"] = pRectDesc->eMyType;
 	Rect["Root"] = pRectDesc->IsRootOn;
+	Rect["Loop"] = pRectDesc->IsLoop;
+	Rect["Sprite"] = pRectDesc->IsSprite;
 
 	Rect["TextureTag"] = WStringToString(pRectDesc->strTextureTag);
 
@@ -1381,6 +1400,9 @@ void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRe
 
 	Rect["SizeX"] = pRectDesc->fXSize;
 	Rect["SizeY"] = pRectDesc->fYSize;
+
+	Rect["Row"] = pRectDesc->iRows;
+	Rect["Col"] = pRectDesc->iCols;
 
 	json PosJson = json::array();
 	PosJson.push_back(pRectDesc->vPos.x);

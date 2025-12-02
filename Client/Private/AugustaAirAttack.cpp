@@ -236,7 +236,6 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 	// Griffon
 	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
 	{
-		
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
 			m_PartsAnimations.at(m_Animations[m_iCurrentAnimIdx].strAnimName),
@@ -261,15 +260,6 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-		//// 모션 끝날때까지 기달리기.
-		//if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
-		//{
-		//	m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END;
-		//	m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
-		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
-		//	return;
-		//}
-
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_START)
         {
             if (m_States[DOUBLE_JUMP])
@@ -295,6 +285,8 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 			// 스킬 그리폰 막타
 			if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
 			{
+				m_pAugusta->PartActivate(CAugusta::PARTTYPE::PART_GRIFFON, false);
+
 				if (m_States[MOVE])
 				{
 					m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
@@ -302,15 +294,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 					return;
 				}
 
-				if (!m_States[MOVE])
-				{
-					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
-					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-					return;
-				}
 				/*if (!m_States[MOVE])
 				{
-					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 					return;
 				}*/

@@ -32,6 +32,11 @@ void CContactListenerImpl::Remove_Update()
 	m_RemoveIDs.clear();
 }
 
+void CContactListenerImpl::Clear_Resource()
+{
+	m_RemoveIDs.clear();
+}
+
 ValidateResult CContactListenerImpl::OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult)
 {
     return ValidateResult();

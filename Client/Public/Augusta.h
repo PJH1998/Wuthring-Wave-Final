@@ -169,6 +169,7 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) override;
+	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	virtual void Parry_Judge(void* pArg = nullptr) override;
 	virtual void Grab_Judge(void* pArg = nullptr) override;

@@ -35,6 +35,9 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
     // 4. 상태 초기화
     State_Reset();
 
+	m_pAugusta->PartActivate(CAugusta::PARTTYPE::PART_HEADPROP, true);
+	m_pAugusta->Part_ShaderPathChange(CAugusta::PARTTYPE::PART_HEADPROP, ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON));
+
     // 5. 애니메이션 타입에 맞는 파츠 설정.
     switch(eSkillType)
     {
@@ -47,7 +50,6 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
             m_iPartType = CAugusta::PARTTYPE::PART_GRIFFON;
             m_pAugusta->PartActivate(m_iPartType, true);
             m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-            //m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
             
 			// 진입할때 한번만 회전 => Griffon
 			m_pAugusta->Rotate_Target();
@@ -71,6 +73,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
         {
             m_pAugusta->Set_Gravity(false);
 			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+			m_pAugusta->Part_ShaderPathChange(CAugusta::PARTTYPE::PART_HEADPROP, ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_HEADPROP));
             break;
         }
 
@@ -167,6 +170,8 @@ void CAugustaGroundSkill::OnExit()
 	CGroundState::OnExit();
 
 
+	m_pAugusta->PartActivate(CAugusta::PARTTYPE::PART_HEADPROP, false);
+
 	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
 	{
 		m_pAugusta->PartActivate(m_iPartType, false);
@@ -214,17 +219,21 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
 	Handle_Animation_SpecialState();
-
-
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
+
+	m_pAugusta->Play_PartAnimation(
+		CAugusta::PARTTYPE::PART_HEADPROP,
+		"Stand1_idle",
+		fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
+	);
 
     // Target이 존재한다면? => Auto Target
     if (m_iPartType == CAugusta::PARTTYPE::PART_GRIFFON)
     {
         m_pAugusta->Play_PartAnimation(
             m_iPartType,
-            m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-            fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
+            m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+            fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
         );
     }
 
@@ -232,19 +241,17 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 	{
 		m_pAugusta->Play_PartAnimation(
 			m_iPartType,
-			m_Animations[m_iCurrentAnimIdx].strAnimName,
-			fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
 		);
 	}
 
 	if (m_iSubPartType == CAugusta::PARTTYPE::PART_FXOBJECT)
 	{
-
-		cout << "Skill TrackPosition : " << m_fTrackPosition;
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
-			m_Animations[m_iCurrentAnimIdx].strAnimName,
-			fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
 		);
 	}
      
