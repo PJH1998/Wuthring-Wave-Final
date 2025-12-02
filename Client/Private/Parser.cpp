@@ -1293,6 +1293,12 @@ void CParser::Load_FXDecal_FromJson(const _string& strFilePath, const _string& D
 	if (DecalJson.contains("LifeTime"))
 		Desc.LifeTime = DecalJson["LifeTime"].get<_float>();
 
+	if (DecalJson.contains("BlendTime"))
+		Desc.fBlendTime = DecalJson["BlendTime"].get<_float>();
+
+	if (DecalJson.contains("EmissiveIntensity"))
+		Desc.fEmissiveIntensity = DecalJson["EmissiveIntensity"].get<_float>();
+
 	if (DecalJson.contains("Color") && DecalJson["Color"].is_array())
 	{
 		json ColorJson = DecalJson["Color"];

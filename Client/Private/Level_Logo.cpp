@@ -23,7 +23,7 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->Add_Probe(_float3(-36.f, 8.f, 25.f), 150.f);
 	
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
-	m_pGameInstance->SettingFog(false);
+	m_pGameInstance->SettingFog(true);
 
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
@@ -46,6 +46,10 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
 
 	m_pGameInstance->Bake_EnvMaps();
+
+	m_pGameInstance->Set_FogDistanceFallOff(0.005f);
+	m_pGameInstance->Set_FogMaxHeight(0.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.f);
 
 	m_pGameInstance->Begin_VF();
 
