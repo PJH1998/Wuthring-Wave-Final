@@ -923,6 +923,19 @@ void CAugusta::Render_Damage(const HIT_DESC* pDesc)
 	//m_pGameSystem->Render_Damage(vTextPosition, static_cast<_int>(pDesc->fAttack), TEXT_COLOR_TYPE::TT_PROGRESS);
 	m_pGameSystem->Render_Damage(vTextPosition, static_cast<_int>(pDesc->fAttack), TEXT_COLOR_TYPE::ELEC);
 }
+void CAugusta::Bind_DissolveTimer()
+{
+}
+void CAugusta::Bind_DefaultShaderPath()
+{
+}
+void CAugusta::Bind_DissolveShaderPath()
+{
+}
+void CAugusta::Activate(_bool IsActivate)
+{
+	m_isActivate = IsActivate; // 임시.
+}
 #pragma endregion
 
 

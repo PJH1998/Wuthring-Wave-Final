@@ -173,6 +173,8 @@ public:
 	virtual	void	Render() override;
 	virtual	void	Render_OutLine() override;
 	virtual void	Render_Shadow() override;
+
+
 #pragma endregion
 
 
@@ -209,6 +211,10 @@ public:
 	virtual void Process_DelayedActions(_float fTimeDelta);
 	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
 
+	virtual void Bind_DissolveTimer() override;
+	virtual void Bind_DefaultShaderPath() override;
+	virtual void Bind_DissolveShaderPath() override;
+	virtual void Activate(_bool IsActivate) override;
 #pragma endregion
 
 #pragma endregion
@@ -228,13 +234,23 @@ private:
 
 	_bool m_PendingConditions[CONDITION_END] = {};
 
+	// Shader Value
+	_uint m_iGalbrenaMaskIndex = {};
+	_float4 m_vMaskEmssiveColor = {};
+
 
 private:
 	void Bind_TargetToVolumes();
 	void Update_TargetDistance();
 	void Update_Physics(_float fTimeDelta);
 	void Update_Camera(_float fTimeDelta);
+	void Render_Default(_uint iMeshIndex);
+	void Render_Skin(_uint iMeshIndex);
+	void Render_Mask(_uint iMeshIndex);
 	_bool IsSkin(_uint iMeshIndex);
+	_bool IsMask(_uint iMeshIndex);
+
+
 
 private:
 	void Bind_Resources();
