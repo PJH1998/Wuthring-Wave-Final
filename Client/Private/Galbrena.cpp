@@ -64,12 +64,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	XMStoreFloat4(&m_vQTEPos, vPos);
 	m_pQTEColliderCom->Set_Position(vPos);
 
-	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
-	m_fCameraOriginOffset = 1.2f;
-	m_fCameraOffset = 1.2f;
 
-	m_fDissolveTimer = 0.f;
-	m_fMaxDissolveTime = 0.35f;
 
 	m_pMainAttackVolume->TriggerActivate(false);
     return S_OK;
@@ -96,7 +91,7 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 	// 3. 몬스터와 타겟간의 거리 계산하기.
 	Update_TargetDistance();
 
-	// 4. AttackVolume 바인딩.
+	// 4. AttackVolume 몬스터에 바인딩.
 	Bind_TargetToVolumes();
 
 	// 5. MainAttackVolume 설정
@@ -125,12 +120,7 @@ void CGalbrena::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 2. 파츠 갱신.?
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
-	}
+	
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
@@ -142,6 +132,13 @@ void CGalbrena::Update(_float fTimeDelta)
 		// 4. Physcics, Camera 업데이트
 		Update_Physics(fTimeDelta);
 		Update_Camera(fTimeDelta);
+	}
+
+	// 2. 파츠 갱신.?
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
 	}
 	
 
@@ -155,12 +152,7 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-    // 1. 파츠 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Late_Update(fTimeDelta);
-    }
+   
 
 	// 2. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -204,6 +196,13 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 			return;
 	}
 
+
+	//  파츠 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
+	}
     
 }
 
@@ -1158,17 +1157,23 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 
 void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
-    m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
+	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+	m_fCameraOriginOffset = 1.2f;
+	m_fCameraOffset = 1.2f;
+
+    m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
 
 	m_ShaderPaths[MESH_EYE_OL] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENABACK);
-
+	
 	// Shader Value 추가.
 	m_vEmissiveColor = {};
 	m_vMaskEmssiveColor = {};
 
+	m_fDissolveTimer = 0.f;
+	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
 	m_fEmissiveIntensity = 3.f;
 }

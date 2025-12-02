@@ -25,6 +25,19 @@ public:
 		VOLUME_HACKDOWN = 2,
 		VOLUME_END
 	};
+
+	enum MESHTYPE
+	{
+		MESH_BANGS = 0,
+		MESH_HAIR,
+		MESH_FACE,
+		MESH_UP,
+		MESH_DOWN,
+		MESH_CLOTH,
+		MESH_ALPHA,
+		MESH_EYE,
+		MESH_END
+	};
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -238,6 +251,11 @@ private:
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
 	void Process_FxObject(const _wstring& wStrObjectTag);
 	
+	void Render_Default(_uint iMeshIndex);
+	void Render_Skin(_uint iMeshIndex);
+	void Render_Eye(_uint iMeshIndex);
+	_bool IsSkin(_uint iMeshIndex);
+	_bool IsEye(_uint iMeshIndex);
 #pragma endregion
 
 
