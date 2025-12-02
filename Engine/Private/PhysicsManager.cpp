@@ -67,6 +67,11 @@ void CPhysicsManager::Remove_Virtual(CharacterVirtual* pVirtual)
 	m_pCVCCollision->Remove(pVirtual);
 }
 
+void CPhysicsManager::Clear_Resource()
+{
+	m_pContactListener->Clear_Resource();
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);
@@ -127,6 +132,7 @@ void CPhysicsManager::Update(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIKeyState(DIK_DELETE) == KEYSTATE::DOWN)
 		m_isRenderAll = !m_isRenderAll;
 #endif
+	m_pContactListener->Clear_Resource();
 	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
 
 	for (_uint i = 0; i < m_iNumObjectLayer; ++i)

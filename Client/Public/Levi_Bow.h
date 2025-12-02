@@ -11,13 +11,13 @@ NS_BEGIN(Client)
 class CLevi_Bow final : public CPartObject
 {
 public:
-	typedef struct tagLeviBayynet : public CPartObject::PART_DESC
+	typedef struct tagLeviBow : public CPartObject::PART_DESC
 	{
 		const _float4x4* pSocketMatrix;
 		_float3 vOffsetPos;
 		_float3 vOffsetRadian;
 		_float fAttackDmg;
-	}LEVIBAYONET_DESC;
+	}LEVIBOW_DESC;
 
 private:
 	enum SHADERPATH{ BASE, BAOSHI, SUISHI, LINE, END };
@@ -30,11 +30,15 @@ private:
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
 	virtual	HRESULT	Initialize_Clone(void* pArg) override;
-	virtual	void Priority_Update(_float fTimeDelta) override;
-	virtual	void Update(_float fTimeDelta) override;
-	virtual	void Late_Update(_float fTimeDelta) override;
-	virtual	void Render() override;
+	virtual	void	Priority_Update(_float fTimeDelta) override;
+	virtual	void	Update(_float fTimeDelta) override;
+	virtual	void	Late_Update(_float fTimeDelta) override;
+	virtual	void	Render() override;
 
+	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg) {};
+
+
+	void			Change_Offset(LEVIBOW_DESC& Desc);
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
@@ -42,7 +46,7 @@ private:
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	vector<_uint> m_ShaderPaths = {};
 	_float			m_fRateFX{};
-
+	_float4			m_vBaseColor{};
 #ifdef _DEBUG
 	_float3 m_vOffsetPos = {};
 	_float3 m_vOffsetRot = {};
@@ -52,7 +56,7 @@ private:
 
 private:
 	HRESULT Bind_Resources();
-	void Ready_Component(LEVIBAYONET_DESC* pDesc);
+	void Ready_Component(LEVIBOW_DESC* pDesc);
 	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 public:
 	static CLevi_Bow* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

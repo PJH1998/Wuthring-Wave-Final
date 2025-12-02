@@ -13,18 +13,18 @@ public:
 
 
 public:
-	typedef struct tagHitDesc{
+	typedef struct tagHitDesc {
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 	}HIT_DESC;
 
-	typedef struct tagParryDesc{
+	typedef struct tagParryDesc {
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 	}PARRY_DESC;
-	
+
 	typedef struct tagCaptureDesc {
 		_uint iLayer;
 		_float fAttack;
@@ -54,8 +54,8 @@ public:
 
 	}
 
-	void Clear_HarmonyEndCallback() { 
-		m_OnEnsembleEnd = nullptr; 
+	void Clear_HarmonyEndCallback() {
+		m_OnEnsembleEnd = nullptr;
 
 	}
 
@@ -68,7 +68,7 @@ public:
 		pair<LEVEL, _wstring> facialComputeShaderData = {};
 		//pair<LEVEL, _wstring> controllerData = {};
 		vector<pair<_wstring, _wstring>> PartPrototypes;
-		_float3 vScale = { 1.f, 1.f, 1.f};
+		_float3 vScale = { 1.f, 1.f, 1.f };
 		_float3 vRotation = { 0.f, 0.f, 0.f };
 		_float3 vPosition = { 0.f, 0.f, 0.f };
 		_float fHookRange = { 25.f };
@@ -76,7 +76,7 @@ public:
 		_float fReacedRopeHook = { 1.f };
 
 	}CHARACTER_DESC;
-	
+
 
 #pragma region 
 protected:
@@ -150,7 +150,7 @@ public:
 #pragma region EVENT 
 public:
 	virtual void Bind_QTE(_bool IsQTE) {};
-	_bool IsQTEend() { return m_IsQTEend;  }
+	_bool IsQTEend() { return m_IsQTEend; }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
 	_bool IsVisible() { return m_IsVisible; }
@@ -189,10 +189,10 @@ public:
 
 	// Ability에서 확인 받기 => 상태 판별?
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
-	
+
 	// T 사용시 컨디션 공유. Interaction Type 설정.
 	UI_TAB_UTILITY Get_UtilityType();
-	
+
 	// Grapple Target 전달.
 	void Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo);
 	void Rotate_GrappleTarget();
@@ -217,8 +217,9 @@ public:
 	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) {};
 	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) {};
-	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {};
 	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) {};
+	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) {};
 
 	// Look Vector
 	_vector Get_LookVector();
@@ -337,6 +338,12 @@ public:
 
 	virtual void Reset_QTECamera() {};
 	virtual void Bind_QTECamera() {};
+
+	virtual void Bind_DissolveTimer() {};
+	virtual void Bind_DefaultShaderPath() {};
+	virtual void Bind_DissolveShaderPath() {};
+
+	virtual void Activate(_bool IsActivate) {};
 #pragma endregion
 
 
@@ -375,11 +382,15 @@ protected:
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
+	// Shader 변수.
+	_float m_fMaxDissolveTime = { 0.5f };
+	_float m_fDissolveTimer = {};
+	_float4 m_vDissolveColor = { };
+	_float4 m_vEmissiveColor = {};
+	_float  m_fEmissiveIntensity = {};
 
-
+	_float4x4 m_DissolveWorldMatrix = {};
 protected:
-	//queue<EVENT_DESC> m_EventQueue; // 특정한 이벤트가 발생해서 StateMachine 외부에서 상태가 변경되야 하는 경우 ex) Hit 등등
-
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
@@ -416,9 +427,9 @@ protected:
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
-
 	_float4x4 m_GrabComibinedMatrix = {};
 
+	
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

@@ -28,6 +28,7 @@ public:
 		_int	iColorFlag = 0;
 		_int	iShaderPass = 0;
 
+		_bool	IsLoop = false;
 		_bool	IsSprite = false;
 		_int    iRows = 0;
 		_int	iCols = 0;
@@ -87,6 +88,7 @@ private:
 	_int						m_iCol = {};
 	_float						m_fPhase = 0.f;
 
+	_bool						m_IsLoop = false;
 	_bool						m_IsRoot = false;
 	_float4x4					m_ComBindMatrix = {  };
 

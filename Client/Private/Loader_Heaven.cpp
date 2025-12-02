@@ -25,6 +25,12 @@
 #include "AoEDoT.h"
 #include "Projectile.h"
 #include "Corosaurus.h"
+#include "Leviatan.h"
+#include "Levi_Alter.h"
+#include "Levi_Bayonet.h"
+#include "Levi_Bow.h"
+#include "Levi_Ray.h"
+#include "Levi_Anchor.h"
 #pragma endregion
 
 #pragma region UI
@@ -108,6 +114,7 @@ HRESULT CLoader_Heaven::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Leviatan(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -193,6 +200,13 @@ HRESULT CLoader_Heaven::Load_Object()
 	
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
 		CSpawner::Create(m_pDevice, m_pContext));
+#pragma endregion
+
+#pragma region SPAWN_OBJECT
+	// Prototype_GameObject_Projectile
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		CProjectile::Create(m_pDevice, m_pContext))))
+		CRASH("Projectile Create Failed");
 #pragma endregion
 	return S_OK;
 }
@@ -928,11 +942,6 @@ HRESULT CLoader_Heaven::Load_Monster()
 		CElectroPredator::Create(m_pDevice, m_pContext))))
 		CRASH("Electro Predator Prototype Create Failed");
 
-	// Prototype_GameObject_Projectile
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
-		CProjectile::Create(m_pDevice, m_pContext))))
-		CRASH("Projectile Create Failed");
-
 	// Prototype_GameObject_AOEDOT
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		CAoEDoT::Create(m_pDevice, m_pContext))))
@@ -965,6 +974,109 @@ HRESULT CLoader_Heaven::Load_Monster()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		CCorosaurus::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+	return S_OK;
+}
+
+HRESULT CLoader_Heaven::Load_Leviatan()
+{
+	cout << "Leviatan" << endl;
+
+	// Prototype_Component_Model_Leviatan
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_BehaviorTree_Leviatan1
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_BehaviorTree_Leviatan1"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
+
+	// Prototype_Component_AnimMachine_Leviatan_Phase1
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase1"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Animation/Leviatan_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_BehaviorTree_Leviatan2
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_BehaviorTree_Leviatan2"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Leviatan_BT2.json"))))
+		CRASH("BehaviorTree Create Failed");
+
+	// Prototype_Component_AnimMachine_Leviatan_Phase2
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_Leviatan_Phase2"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Monster/Leviatan/Animation/Leviatan_StateMachine2.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Leviatan
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
+		CLeviatan::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+#pragma region ALTER
+	// Prototype_Component_Model_Levi_Alter
+	_fmatrix PreAlterMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Levi_Alter"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreAlterMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Alter/Levi_Alter.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Alter
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Alter"),
+		CLevi_Alter::Create(m_pDevice, m_pContext))))
+		CRASH("Levi_Alter Prototype Create Failed");
+#pragma endregion
+
+#pragma region WEAPON
+	// Prototype_Component_Model_Leviatan_Bayonet
+	_matrix PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Bayonet"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Levi_Dajian/Levi_Dajian.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Bayonet
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"),
+		CLevi_Bayonet::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_Component_Model_Leviatan_Bow
+	//PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Bow"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Bow/Levi_Bow.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_Model_Leviatan_Projectile
+	PreWeaponMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Projectile"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Projectile/SwordProjectile.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_Model_Leviatan_SwordAura
+	PreWeaponMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_SwordAura"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/SwordAura/SwordAura.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_Model_Leviatan_Anchor
+	PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Anchor"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Anchor/Levi_Anchor.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Bow
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Bow"),
+		CLevi_Bow::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Ray
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
+		CLevi_Ray::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Anchor
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
+		CLevi_Anchor::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;
 }

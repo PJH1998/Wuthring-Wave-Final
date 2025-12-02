@@ -65,6 +65,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 
 			// CutScene 실행?
 			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"));
+			m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			m_pGalbrena->Set_OutLineVisible(false);
 			break;
 		}
@@ -234,9 +235,20 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
     {
         if (m_States[LAND])
         {
-			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-			return;
+
+			if (eSkillType == EGalbrenaSkillType::BURST01)
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE02;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+				return;
+			}
+			else
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+				return;
+			}
+			
         }
 
         if (!m_States[LAND])

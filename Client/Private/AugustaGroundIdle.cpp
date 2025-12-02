@@ -65,6 +65,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
 		m_pAugusta->PartActivate(m_iSubPartType, true);
+		m_pAugusta->Part_ShaderPathChange(m_iSubPartType, ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON));
 		m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 	}
@@ -104,7 +105,6 @@ void CAugustaGroundIdle::OnExit()
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
 	m_pAugusta->PartActivate(m_iSubPartType, false);
-
 	m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_fFallTime = 0.f;
 }
@@ -186,9 +186,6 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 		);
 	}
-	
-	cout << m_Animations.at(m_iCurrentAnimIdx).strAnimName << endl;
-
 	
     
 }

@@ -44,6 +44,7 @@ void CGalbrenaGroundQTE::OnEnter(void* pArg)
 	_bool IsSelect = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 	if (IsSelect) // 선택된 캐릭터일때만?
 		m_pGalbrena->Bind_QTECamera();
+		
 }
 
 void CGalbrenaGroundQTE::OnUpdate(_float fTimeDelta)

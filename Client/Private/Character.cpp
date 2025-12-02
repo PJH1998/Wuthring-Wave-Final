@@ -998,6 +998,7 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 	
 	// 0. World Matrix
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);  // 위치 설정
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
@@ -1133,6 +1134,7 @@ void CCharacter::Remove_Condition_FromPlayer(_uint iCondition)
 {
 	m_iCondition &= ~iCondition;
 }
+
 
 
 

@@ -169,6 +169,7 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) override;
+	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	virtual void Parry_Judge(void* pArg = nullptr) override;
 	virtual void Grab_Judge(void* pArg = nullptr) override;
@@ -202,6 +203,11 @@ public:
 	virtual void Calc_ChangeTimer(_float fTimeDelta) override; // Timer 계산
 	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
 	virtual void Render_Damage(const HIT_DESC* pDesc) override; 
+
+	virtual void Bind_DissolveTimer() override;
+	virtual void Bind_DefaultShaderPath() override;
+	virtual void Bind_DissolveShaderPath() override;
+	virtual void Activate(_bool IsActivate) override;
 #pragma endregion
 
 

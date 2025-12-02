@@ -492,6 +492,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_LightManager.h" />
+    <ClInclude Include="..\Public\Edit_MapEffectCollector.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -734,6 +735,7 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Edit_LightManager.cpp" />
+    <ClCompile Include="..\Private\Edit_MapEffectCollector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

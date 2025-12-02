@@ -116,6 +116,7 @@ void CAugustaGroundSpecial::Handle_Input()
 
 void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 {
+
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
@@ -142,11 +143,13 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 	);
 
+	// HeadProp 먼저 업데이트.
 	m_pAugusta->Play_PartAnimation(
 		m_iSubPartType,
 		"Stand1_idle",
 		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 	);
+
 
 
 }

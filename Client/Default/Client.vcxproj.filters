@@ -415,6 +415,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Bow">
       <UniqueIdentifier>{2ced9772-e1c0-4614-b481-8f5a8903fee7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Anchor">
+      <UniqueIdentifier>{5db8e06d-ff67-4b7d-820b-cebd945a1f1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1084,6 +1087,9 @@
     <ClInclude Include="..\Public\AugustaHeadProp.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Levi_Anchor.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1717,6 +1723,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaHeadProp.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Anchor.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

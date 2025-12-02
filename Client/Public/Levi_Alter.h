@@ -57,11 +57,13 @@ public:
 
 private:
 	//CAnimMachine* m_pAnimMachineCom = { nullptr };
-
+	ATTACK_TYPE				m_eType{};
+	_float4					m_vBaseColor{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
 	_float					m_fDistanceNonY{};
 	_string					m_strAnimKey;
+	_string					m_strPatternKey;
 	_float					m_fAttackDmg{};
 	vector<_uint>			m_ShaderIndices;
 	map<const _string, pair<_float, _float>> m_Tracks;

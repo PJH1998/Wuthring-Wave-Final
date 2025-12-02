@@ -17,6 +17,8 @@
 #include "UI_Parry.h"
 #include "UI_QTE.h"
 
+#include "Event_Level.h"
+
 //SFX
 #ifdef _DEBUG
 #include "SonoraChange.h"
@@ -96,6 +98,16 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
+	
+	PREFAB_INFO Info{};
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 377.2f, 1587.7f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 318.1f, 1624.f, 1.f)), &Info);
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 316.6f, 1647.9f, 1.f)), &Info);
+
+	//m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 381.2f, 1587.7f, 1.f)), &Info);
+	//m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 322.1f, 1624.f, 1.f)), &Info);
+	//m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 320.6f, 1647.9f, 1.f)), &Info);
+
 
 	return S_OK;
 }
@@ -104,19 +116,16 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("GamePlay"));
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		m_pGameSystem->Set_MouseFix(false);
-	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
-	{
-		//if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-		//{
-		//	m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
-		//	m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f+3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-		//}
 
-		m_pGameSystem->Update(fTimeDelta);
-	}
+	m_pGameSystem->Update(fTimeDelta);
 
 #ifdef _DEBUG
 	DEBUG_FUNCTION();
@@ -441,6 +450,7 @@ void CLevel_GamePlay::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 20);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 200);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
 }
 
 void CLevel_GamePlay::Ready_Skybox()

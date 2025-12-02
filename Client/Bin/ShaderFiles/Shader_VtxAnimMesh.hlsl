@@ -16,6 +16,7 @@ float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
+float4 g_vBaseColor = 1.f;
 
 matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
@@ -123,7 +124,7 @@ PS_OUT PS_NORMALTEX(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * g_vBaseColor;
     
     vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
@@ -164,8 +165,8 @@ PS_OUT PS_NORMAL_YELLOW(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    //Out.vPBR.x = vNormal1.b; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-    Out.vPBR.y = vNormal1.a; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+    //Out.vPBR.x = vNormal1.b; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+    Out.vPBR.y = vNormal1.a; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     //Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;
     
@@ -176,7 +177,7 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * g_vBaseColor;
     
     // 
     float4 vNormal = 0.f;
@@ -191,7 +192,7 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
         //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // Í∑∏ÎåÄÎ°ú ÏÇ¨Ïö©
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // ±◊¥Î∑Œ ªÁøÎ
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -201,17 +202,17 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
-        //Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        //Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        //Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        //Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
         
-        Out.vPBR.x = vNormalDesc.b; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = vNormalDesc.a; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     else
     {
         vNormal = In.vNormal;
-        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     
     if(g_HasSkinMask)
@@ -253,7 +254,7 @@ PS_OUT PS_ROVER(PS_IN In)
         //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
         //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // Í∑∏ÎåÄÎ°ú ÏÇ¨Ïö©
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // ±◊¥Î∑Œ ªÁøÎ
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -263,14 +264,14 @@ PS_OUT PS_ROVER(PS_IN In)
         WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
-        Out.vPBR.x = vNormalDesc.b; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = vNormalDesc.a; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     else
     {
         vNormal = In.vNormal;
-        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     if (g_HasSkinMask)
     {
@@ -311,7 +312,7 @@ PS_OUT PS_GALBRENA(PS_IN In)
         //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
         //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // Í∑∏ÎåÄÎ°ú ÏÇ¨Ïö©
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // ±◊¥Î∑Œ ªÁøÎ
                  
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -321,14 +322,14 @@ PS_OUT PS_GALBRENA(PS_IN In)
         WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
-        Out.vPBR.x = vNormalDesc.b; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = vNormalDesc.a; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     else
     {
         vNormal = In.vNormal;
-        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     if (g_HasSkinMask)
     {
@@ -369,7 +370,7 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
         //vNormal = normalize(vNormalDesc * 2.f - 1.f);
         
         //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // Í∑∏ÎåÄÎ°ú ÏÇ¨Ïö©
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // ±◊¥Î∑Œ ªÁøÎ
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -379,14 +380,14 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
         WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
-        Out.vPBR.x = vNormalDesc.b; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = vNormalDesc.a; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     else
     {
         vNormal = In.vNormal;
-        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Blue, Z Í∞í
-        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ÎÖ∏Îßê ÌÖçÏä§Ï≤ò Alpha Í∞í
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = ≥Î∏ª ≈ÿΩ∫√≥ Blue, Z ∞™
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = ≥Î∏ª ≈ÿΩ∫√≥ Alpha ∞™
     }
     if (g_HasSkinMask)
     {

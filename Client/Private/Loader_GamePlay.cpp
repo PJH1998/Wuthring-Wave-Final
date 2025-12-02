@@ -142,7 +142,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1201_second/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1201_third/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1201_second/", m_eCurLevel, "The_False_Sovereign");
@@ -765,7 +765,7 @@ HRESULT CLoader_GamePlay::Load_Effect()
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
-
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);
 
 	return S_OK;
 }

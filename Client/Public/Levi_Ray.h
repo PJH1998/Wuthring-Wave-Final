@@ -9,13 +9,16 @@ NS_END
 NS_BEGIN(Client)
 class CLevi_Ray final : public CGameObject
 {
+public:
 	typedef struct tagLeviRayDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_wstring			wstrEffectTag;
-		_wstring			wstrModelTag;
+		//_wstring			wstrModelTag;
 		_uint				iLayer;
-		vector<_uint>		iTargetLayers;
+		_uint				iTargetLayer;
 		_float				fAttackDamage;
+		_float				fLifeTime;
+		_float3				vExtent;
 		TEXT_COLOR_TYPE		eType;
 	}LEVIRAY_DESC;
 
@@ -40,11 +43,11 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	CRigidbody* m_pRigidBodyCom = { nullptr };
-	_uint				m_iLayer{};
-	vector<_uint>		m_iTargetLayers;
+	CRigidbody*			m_pRigidBodyCom = { nullptr };
+	_uint				m_iLayer{ ENUM_CLASS(COLLISIONLAYER::END) };
+	_uint				m_iTargetLayer{ENUM_CLASS(COLLISIONLAYER::END)};
 	_float				m_fLifeTime{};
-	_float				m_fDelay{};
+	_float				m_fLifeAcc{};
 	// Effect?
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};

@@ -36,6 +36,14 @@ CAnimation::CAnimation(const CAnimation& Prototype)
 		Safe_AddRef(pMorphChannel);
 }
 
+void CAnimation::Set_CurrentTrackPosition(_float fTrackPos)
+{
+	m_fCurrentTrackPosition = fTrackPos; 
+	m_iNotifyIndex = 0;
+	while(m_iNotifyIndex < m_AnimNotifies.size() && m_fCurrentTrackPosition > m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
+		m_iNotifyIndex++;
+}
+
 #ifdef _DEBUG
 void CAnimation::Print_MorphKeyIndices()
 {

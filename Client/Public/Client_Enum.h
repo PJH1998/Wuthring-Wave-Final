@@ -133,7 +133,9 @@ namespace Client
 		, GALBRENA // 6
 		, NORMAL_YELLOW // 7
 		, LOGOROVER // 8
-		, DISSOLVE_NORMAL // 9
+		, GALBRENABACK // 9
+		, DISSOLVE_CHARACTER // 10
+		, GALBRENAEYE // 11
 		, END };
 
 	enum class SHADER_PROPANIMMESH {
@@ -142,8 +144,10 @@ namespace Client
 		, SHADOW // 2
 		, OUNTLINE // 3
 		, DEFAULT_WEAPON // 4
-		, DISSOLVE_WEAPON // 5
+		, DISSOLVE_GALBRENAWEAPON // 5
 		, ENERGY_BLADE // 6
+		, AUGUSTA_HEADPROP // 7
+		, DISSOLVE_AUGUSTAWEAPON // 8
 		, END
 	};
 

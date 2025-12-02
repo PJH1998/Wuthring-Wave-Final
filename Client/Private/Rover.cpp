@@ -174,11 +174,6 @@ void CRover::Late_Update(_float fTimeDelta)
 		else
 			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
 	}
-	//if (!m_IsQTE)
-	//	m_pColliderCom->Sync_Position(m_pTransformCom);
-	//else
-	//	m_pQTEColliderCom->Sync_Position(m_pTransformCom);
-	//
 
 	if (m_IsQTEend)
 	{
@@ -779,6 +774,19 @@ void CRover::Bind_ChangeEffect()
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
 
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), matWorld, &effecInfo);
+}
+void CRover::Bind_DissolveTimer()
+{
+}
+void CRover::Bind_DefaultShaderPath()
+{
+}
+void CRover::Bind_DissolveShaderPath()
+{
+}
+void CRover::Activate(_bool IsActivate)
+{
+	m_isActivate = IsActivate;
 }
 #pragma endregion
 

@@ -49,6 +49,7 @@ public:
 	_bool Is_AnimationEnd() { return m_IsAnimationEnd; }
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false); 
 	void Set_SocketMatrix(const _float4x4* pSocketMatrix) { m_pSocketMatrix = pSocketMatrix; }
+	void Change_ShaderPath(_uint iShaderPath) { m_iShaderPath = iShaderPath; }
 	void Clear_Animation(const _string& strAnimName);
 
 #pragma region NOTIFY
@@ -67,7 +68,7 @@ public:
 	void Remove_Condition(_uint iConditionFlag);
 	void Remove_AllCondition();
 
-	void Bind_DissolveTimer();
+	void Bind_DissolveTimer(_uint iShaderPath);
 #pragma endregion
 
 
@@ -96,9 +97,14 @@ protected:
 #pragma region Condition 관리
 protected:
 	_uint m_iCondition = {}; // Condition;
+	// Shader 변수.
 	_float m_fMaxDissolveTime = { 0.5f };
 	_float m_fDissolveTimer = {};
 
+	
+	_float4 m_vDissolveColor = { };
+	_float4 m_vEmissiveColor = {};
+	_float  m_fEmissiveIntensity = {};
 #pragma endregion
 
 
