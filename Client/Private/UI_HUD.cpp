@@ -756,7 +756,7 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 	_float fUVRotateSpeed = -10.f / 60.f;
 
 
-	_float4 vDestColor = m_arrPlayerAdvColors[m_iSelectedCHIndex];
+	_float4 vDestColor = m_arrPlayerColors[m_iSelectedCHIndex];
 	*reinterpret_cast<_float4*>(&vecVariantMat[0]._11) = vDestColor;					// dest color
 	*reinterpret_cast<_float*>(&vecVariantMat[0]._21) = static_cast<_float>(true);	// is Distort On?
 	*reinterpret_cast<_float*>(&vecVariantMat[0]._22) = m_fElapsedTime;				// ElapsedTime. for transforming UV
