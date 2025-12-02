@@ -51,6 +51,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
+	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 	return S_OK;
 }
 
@@ -256,6 +257,7 @@ HRESULT CElectroPredator::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
 
 	return S_OK;
 }

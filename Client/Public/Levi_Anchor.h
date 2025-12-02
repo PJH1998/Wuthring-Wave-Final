@@ -9,30 +9,23 @@ class CModel;
 NS_END
 
 NS_BEGIN(Client)
-class CProjectile final : public CGameObject
+class CLevi_Anchor final : public CGameObject
 {
 public:
-	typedef struct tagProjectileDesc : public CGameObject::GAMEOBJECT_DESC
+	typedef struct tagAnchorDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_wstring			wstrEffectTag;
-		_wstring			wstrModelTag;
-		_uint				iLayer;
-		vector<_uint>		iTargetLayers;
-		_float				fRadius;
 		_float				fAttackDamage;
-		_float				fLifeTime{ 10.f };
-		_bool				isCollisionDestroy;
-		TEXT_COLOR_TYPE		eType;
-	}PROJECTILEDESC;
+	}ANCHORDESC;
 
-	typedef struct tagProjectileReset
+	typedef struct tagAnchorReset
 	{
 		_float3				vTargetPos;
-	}PROJECTILERESET;
+	}ANCHORRESET;
 private:
-	explicit CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CProjectile(const CProjectile& Prototype);
-	virtual ~CProjectile() = default;
+	explicit CLevi_Anchor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CLevi_Anchor(const CLevi_Anchor& Prototype);
+	virtual ~CLevi_Anchor() = default;
 
 public:
 	virtual		HRESULT					Initialize_Prototype() override;
@@ -48,24 +41,21 @@ private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	CModel*				m_pModelCom = { nullptr };
 	CShader*			m_pShaderCom = { nullptr };
-	_uint				m_iLayer{};
-	vector<_uint>		m_iTargetLayers;
-	_bool				m_isCollision{};
-	_bool				m_isCollisionDestroy{};
 	_float				m_fLifeTime{};
 	_float				m_fMaxLifeTime{};
-	_float				m_fDelay{};
+	_float3				m_vTargetPos{};
+	_bool				m_isDisolve{};
 	// Effect?
 	_wstring			m_wstrEffectTag;
-	CALLBACK_CLIENT m_CallBack{};
+	CALLBACK_CLIENT		m_CallBack{};
 
 private:
 	HRESULT		Bind_Resources();
-	void		Ready_Component(PROJECTILEDESC* pDesc);
+	void		Ready_Component(ANCHORDESC* pDesc);
 	void		OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
-	static		CProjectile* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CLevi_Anchor* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 };

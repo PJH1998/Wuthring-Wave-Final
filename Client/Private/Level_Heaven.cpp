@@ -84,7 +84,7 @@ HRESULT CLevel_Heaven::Initialize()
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_CoroSaurus();
-	Ready_Leviatan();
+	//Ready_Leviatan();
 
 	//m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test

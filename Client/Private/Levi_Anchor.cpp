@@ -1,78 +1,71 @@
 ﻿#include "ClientPch.h"
-#include "Projectile.h"
+#include "Levi_Anchor.h"
 
-CProjectile::CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLevi_Anchor::CLevi_Anchor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
 {
 }
 
-CProjectile::CProjectile(const CProjectile& Prototype)
+CLevi_Anchor::CLevi_Anchor(const CLevi_Anchor& Prototype)
 	: CGameObject { Prototype }
 {
 }
 
-HRESULT CProjectile::Initialize_Prototype()
+HRESULT CLevi_Anchor::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CProjectile::Initialize_Clone(void* pArg)
+HRESULT CLevi_Anchor::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	PROJECTILEDESC* pDesc = static_cast<PROJECTILEDESC*>(pArg);
+	ANCHORDESC* pDesc = static_cast<ANCHORDESC*>(pArg);
 	Ready_Component(pDesc);
-	m_iTargetLayers = pDesc->iTargetLayers;
-	m_wstrEffectTag = pDesc->wstrEffectTag;
-	m_isCollisionDestroy = pDesc->isCollisionDestroy;
-	m_fMaxLifeTime = pDesc->fLifeTime;
-	m_fDelay = 0.2f;
+	//m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_fMaxLifeTime = 1.f;
 	m_isActivate = false;
     return S_OK;
 }
 
-void CProjectile::Priority_Update(_float fTimeDelta)
+void CLevi_Anchor::Priority_Update(_float fTimeDelta)
 {
-	if (m_fLifeTime < m_fMaxLifeTime)
+	if (m_isDisolve && m_fLifeTime < m_fMaxLifeTime)
 		m_fLifeTime += fTimeDelta;
-	else
-		m_isCollision = true;
 }
 
-void CProjectile::Update(_float fTimeDelta)
+void CLevi_Anchor::Update(_float fTimeDelta)
 {
-	m_pTransformCom->Go_Straight(fTimeDelta);
-
-	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-	if (m_fDelay <= 0.f)
-	{
-		PREFAB_INFO EffectDesc{};
-		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-		EffectDesc.pModelPtr = nullptr;
-		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
-		m_fDelay = 1.f;
-	}
+	_vector vDir = XMVectorSetW(XMLoadFloat3(&m_vTargetPos) - m_pTransformCom->Get_State(STATE::POSITION), 1.f);
+	if (XMVectorGetX(XMVector3Dot(m_pTransformCom->Get_State(STATE::LOOK), vDir)) >= 0.f)
+		m_pTransformCom->Go_Straight(fTimeDelta);
 	else
-		m_fDelay -= fTimeDelta;
-}
-
-void CProjectile::Late_Update(_float fTimeDelta)
-{
-	if (m_isCollision)
 	{
-		if(m_isCollisionDestroy || m_fLifeTime >= m_fMaxLifeTime)
+		if (false == m_isDisolve)
 		{
-			m_isActivate = false;
+			m_isDisolve = true;
 			m_pRigidBodyCom->IsActivate(false);
-			return;
 		}
 	}
+	
+	if(false == m_isDisolve)
+		m_pRigidBodyCom->Update_Rigidbody(XMMatrixTranslation(0.f, 0.f, -1.f) * m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+}
+
+void CLevi_Anchor::Late_Update(_float fTimeDelta)
+{
+	if(m_fLifeTime >= m_fMaxLifeTime)
+	{
+		m_isActivate = false;
+		return;
+	}
+	
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
 		return;
 }
 
-void CProjectile::Render()
+void CLevi_Anchor::Render()
 {
 	if (FAILED(Bind_Resources()))
 		CRASH("Falied to Bind Resources");
@@ -99,19 +92,18 @@ void CProjectile::Render()
 #endif
 }
 
-void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
+void CLevi_Anchor::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	PROJECTILERESET* pDesc = static_cast<PROJECTILERESET*>(pArg);
+	ANCHORRESET* pDesc = static_cast<ANCHORRESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->LookAt(XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
-	m_isCollision = false;
+	m_vTargetPos = pDesc->vTargetPos;
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
-	m_fDelay = 0.2f;
 }
 
-HRESULT CProjectile::Bind_Resources()
+HRESULT CLevi_Anchor::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
@@ -120,14 +112,14 @@ HRESULT CProjectile::Bind_Resources()
 	return S_OK;
 }
 
-void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
+void CLevi_Anchor::Ready_Component(ANCHORDESC* pDesc)
 {
-	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::SPHERE;
+	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = pDesc->iLayer;
-	RigidbodyDesc.fRadius = pDesc->fRadius;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL);
+	RigidbodyDesc.vExtent = _float3(1.4f, 1.f, 1.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -142,66 +134,58 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 	m_CallBack.fAttack = pDesc->fAttackDamage;
 	//m_CallBack.pCondition = &m_iState;
 	//m_tCallDesc.strEffectTag = ;
-	m_CallBack.eType = pDesc->eType;
+	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 
 	// Com_Shader 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MonsterProp"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-		CRASH("Arrow/Com_Shader");
+		CRASH("Anchor/Com_Shader");
 
-	if(0 != pDesc->wstrModelTag.length())
-	{
-		// Com_Model
-		if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->wstrModelTag,
-			TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-			CRASH("Arrow/Com_Model");
-	}
+	// Com_Model
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_Model_Leviatan_Anchor"),
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("Anchor/Com_Model");
+	
 }
 
-void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+void CLevi_Anchor::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	for( auto& iTarget : m_iTargetLayers)
+	if(iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
-		if (iLayer == iTarget)
-		{
-			m_isCollision = true;
 #ifdef _DEBUG
-			cout << "On Hit! (Projectile)" << endl;
+		cout << "On Hit! (Levi Anchor)" << endl;
 #endif // _DEBUG
-			return;
-		}
 	}
-
 }
 
-CProjectile* CProjectile::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLevi_Anchor* CLevi_Anchor::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CProjectile* pInstance = new CProjectile(pDevice, pContext);
+	CLevi_Anchor* pInstance = new CLevi_Anchor(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
-		MSG_BOX("Failed to Create : CProjectile");
+		MSG_BOX("Failed to Create : CLevi_Anchor");
 		Safe_Release(pInstance);
 	}
 
 	return pInstance;
 }
 
-CGameObject* CProjectile::Clone(void* pArg)
+CGameObject* CLevi_Anchor::Clone(void* pArg)
 {
-	CProjectile* pClone = new CProjectile(*this);
+	CLevi_Anchor* pClone = new CLevi_Anchor(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
-		MSG_BOX("Failed to Create : CProjectile (Clone)");
+		MSG_BOX("Failed to Create : CLevi_Anchor (Clone)");
 		Safe_Release(pClone);
 	}
 
 	return pClone;
 }
 
-void CProjectile::Free()
+void CLevi_Anchor::Free()
 {
 	__super::Free();
 

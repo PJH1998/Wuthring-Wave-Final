@@ -14,6 +14,7 @@
 #include "Leviatan.h"
 #include "Levi_Alter.h"
 #include "Levi_Ray.h"
+#include "Levi_Anchor.h"
 #pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
@@ -530,6 +531,33 @@ void CLevel_Test::Ready_Leviatan()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Ray"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), TEXT("Pool_LeviRay_B"), 2, &RayDesc)))
 		CRASH("Failed Ready Ray");
+
+	CProjectile::PROJECTILEDESC Projectile{};
+	Projectile.fAttackDamage = pInfo->fAttack;
+	Projectile.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
+	Projectile.fRadius = 0.7f;
+	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_Projectile");
+	Projectile.eType = TEXT_COLOR_TYPE::DARK;
+	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviSword"), 4, &Projectile)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_SwordAura");
+	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviAura"), 4, &Projectile)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Anchor::ANCHORDESC Anchor{};
+	Anchor.fSpeedPerSec = 10.f;
+	Anchor.fAttackDamage = pInfo->fAttack;
+	//Anchor.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviAnchor"), 4, &Anchor)))
+		CRASH("Failed Ready Projectile (Leviatan)");
 }
 
 void CLevel_Test::Ready_UI()

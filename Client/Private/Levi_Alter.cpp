@@ -28,6 +28,7 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	Ready_PartObject(pDesc);
+	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_Tracks.emplace(make_pair("Attack18", make_pair(0.f, 195.f)));
 	m_Tracks.emplace(make_pair("Attack19", make_pair(0.f, 195.f)));
 	m_Tracks.emplace(make_pair("Attack_20|1", make_pair(30.f, 49.f)));
@@ -58,9 +59,13 @@ void CLevi_Alter::Update(_float fTimeDelta)
 	m_fDistanceNonY = XMVectorGetX(XMVector3Length(XMVectorSetY(vTargetPos, 0.f) - XMVectorSetY(vPosition, 0.f)));
 	vDir = XMVector3Normalize(vDir);
 	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
-
+	_float temp{1.f};
 	_float fTrackPos{};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta, &fTrackPos, true, false, true, 1.f);
+	if (m_isDist_Interp_Enable)
+	{
+		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
+	}
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta, &fTrackPos, true, false, true, 1.f * temp);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPos >= m_Tracks[m_strPatternKey].second)
 	{
@@ -68,20 +73,16 @@ void CLevi_Alter::Update(_float fTimeDelta)
 		UnActive_Resources();
 		return;
 	}
-	//if(m_eType == ATTACK_TYPE::SWORD)
-	{
-		_vector vVelocity = m_pTransformCom->Get_Velocity();
-		if (m_isDist_Interp_Enable)
-		{
-			_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
-			//m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
-		}
-		else
-			m_pColliderCom->Update(vVelocity / fTimeDelta);
-	}
-	//else if(m_eType == ATTACK_TYPE::BOW)
-	//	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
-
+	
+	//_vector vVelocity = m_pTransformCom->Get_Velocity();
+	//if (m_isDist_Interp_Enable)
+	//{
+	//	_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
+	//	//m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
+	//}
+	//else
+	//	m_pColliderCom->Update(vVelocity / fTimeDelta);
+	
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	//5. 파츠 갱신
@@ -94,7 +95,7 @@ void CLevi_Alter::Update(_float fTimeDelta)
 
 void CLevi_Alter::Late_Update(_float fTimeDelta)
 {
-	m_pColliderCom->Sync_Position(m_pTransformCom);
+	//m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) return;
 
@@ -184,6 +185,7 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	}
 	if (pDesc->eType == ATTACK_TYPE::SWORD)
 	{
+		m_pTransformCom->LookAt_KeepUp(XMVectorSetW(XMLoadFloat3(&pDesc->vLookAt), 1.f));
 		CLevi_Bayonet* pWeapon = dynamic_cast<CLevi_Bayonet*>(m_PartObjects[TEXT("Part_Bayonet")]);
 		pWeapon->SetActivate(true);
 	}
@@ -192,10 +194,10 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_PartObjects[TEXT("Part_Bow")]->SetActivate(true);
 		m_isTurnLerp = true;
 	}
-	m_pColliderCom->IsActivate(true);
+	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
-	m_pColliderCom->Set_Gravity(false);
-	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	//m_pColliderCom->Set_Gravity(false);
+	//m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_isActivate = true;
 }
 
@@ -211,10 +213,10 @@ void CLevi_Alter::Collider_Active(const _wstring& wStrColliderTag, _bool IsActiv
 			dynamic_cast<CLevi_Bayonet*>(m_PartObjects[TEXT("Part_Bayonet")])->Attack_Active(IsActive);
 		}
 	}
-	else if (wstrTypeTag == TEXT("Gravity"))
-	{
-		m_pColliderCom->Set_Gravity(IsActive);
-	}
+	//else if (wstrTypeTag == TEXT("Gravity"))
+	//{
+	//	m_pColliderCom->Set_Gravity(IsActive);
+	//}
 	else if (wstrTypeTag == TEXT("Lerp"))
 	{
 		m_isTurnLerp = IsActive;
@@ -290,23 +292,24 @@ void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnDetect_During(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider
-	CCollider::COLLIDER_DESC ColliderDesc = {};
-	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
-	ColliderDesc.eType = EMotionType::Kinematic;
-	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ALTER);
-	ColliderDesc.fHeight = 1.8f;
-	ColliderDesc.fRadius = 0.4f;
-	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
-		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
-	ASSERT_CRASH(m_pColliderCom);
+	//CCollider::COLLIDER_DESC ColliderDesc = {};
+	//XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
+	//ColliderDesc.eType = EMotionType::Kinematic;
+	//ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ALTER);
+	//ColliderDesc.fHeight = 1.8f;
+	//ColliderDesc.fRadius = 0.4f;
+	//Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
+	//	TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
+	//ASSERT_CRASH(m_pColliderCom);
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
 	//m_tCallDesc.strEffectTag = ;
 	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
-
+	//m_pColliderCom->IsActivate(false);
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -343,7 +346,7 @@ void CLevi_Alter::Ready_PartObject(ALTER_DESC* pDesc)
 	BowDesc.pParentTransform = m_pTransformCom;
 	BowDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	BowDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
-	BowDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	BowDesc.vOffsetRadian = _float3(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
 	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bow"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bow"), &BowDesc)))
 		CRASH("Failed to Add Part : Bow");
@@ -375,7 +378,7 @@ void CLevi_Alter::UnActive_Resources()
 		Pair.second->SetActivate(false);
 		Pair.second->Reset(XMMatrixIdentity(), nullptr);
 	}
-	m_pColliderCom->IsActivate(false);
+	//m_pColliderCom->IsActivate(false);
 	m_pRigidBodyCom->IsActivate(false);
 	m_isActivate = false;
 }
@@ -385,7 +388,7 @@ void CLevi_Alter::Reset_NotifyInteraction()
 	m_isTurnLerp = false;
 	m_isDist_Interp_Enable = false;
 
-	m_pColliderCom->Set_Gravity(true);
+	//m_pColliderCom->Set_Gravity(true);
 }
 
 CLevi_Alter* CLevi_Alter::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

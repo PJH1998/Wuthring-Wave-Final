@@ -124,7 +124,7 @@ PS_OUT PS_NORMALTEX(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * g_vBaseColor;
     
     vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;

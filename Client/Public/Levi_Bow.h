@@ -46,7 +46,7 @@ private:
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	vector<_uint> m_ShaderPaths = {};
 	_float			m_fRateFX{};
-
+	_float4			m_vBaseColor{};
 #ifdef _DEBUG
 	_float3 m_vOffsetPos = {};
 	_float3 m_vOffsetRot = {};

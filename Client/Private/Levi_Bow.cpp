@@ -40,7 +40,7 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 
 	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
-
+	m_vBaseColor = _float4(0.1f, 0.1f, 0.1f, 1.f);
 
 	return S_OK;
 }
@@ -144,6 +144,7 @@ HRESULT CLevi_Bow::Bind_Resources()
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Failed Proj Matrix");
 
+	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
 	return S_OK;
 }
 

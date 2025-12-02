@@ -86,7 +86,7 @@ void CLevi_Ray::Ready_Component(LEVIRAY_DESC* pDesc)
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
+	RigidbodyDesc.iLayer =pDesc->iLayer;
 	RigidbodyDesc.vExtent = pDesc->vExtent;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
