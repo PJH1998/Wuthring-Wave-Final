@@ -7,6 +7,7 @@
 #include "Levi_Ray.h"
 #include "Projectile.h"
 #include "Levi_Anchor.h"
+#include "Levi_Drop.h"
 #include "GameSystem.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -945,6 +946,17 @@ void CLeviatan::AreaAttack(_float fTimeDelta)
 	if (m_fDropAcc >= 0.5f)
 	{
 		m_fDropAcc = 0.f;
+		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
+		_float fRange = m_pGameInstance->Rand(0.5f, 5.f);
+		_float3 vSpawnPos = m_vTargetPosition;
+		vSpawnPos.x -= sin(fRadius) * fRange;
+		vSpawnPos.y = m_PreTransform.m[3][1];
+		vSpawnPos.z -= cos(fRadius) * fRange;
+
+		CLevi_Drop::DROPRESET Drop{};
+		Drop.vTargetPos = vSpawnPos;
+		Drop.vTargetPos.y = m_pTransformCom->Get_State(STATE::POSITION).m128_f32[1];
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviDrop"), XMMatrixTranslation(vSpawnPos.x, vSpawnPos.y, vSpawnPos.z), &Drop);
 	}
 	if (m_fFenceAcc >= 0.375f)
 	{

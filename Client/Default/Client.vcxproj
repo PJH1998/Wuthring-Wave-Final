@@ -262,6 +262,7 @@
     <ClInclude Include="..\Public\Levi_Anchor.h" />
     <ClInclude Include="..\public\Levi_Bayonet.h" />
     <ClInclude Include="..\Public\Levi_Bow.h" />
+    <ClInclude Include="..\Public\Levi_Drop.h" />
     <ClInclude Include="..\public\Levi_Ray.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
@@ -515,6 +516,7 @@
     <ClCompile Include="..\Private\Levi_Anchor.cpp" />
     <ClCompile Include="..\private\Levi_Bayonet.cpp" />
     <ClCompile Include="..\Private\Levi_Bow.cpp" />
+    <ClCompile Include="..\Private\Levi_Drop.cpp" />
     <ClCompile Include="..\private\Levi_Ray.cpp" />
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />

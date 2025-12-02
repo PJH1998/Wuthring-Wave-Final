@@ -418,6 +418,9 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Anchor">
       <UniqueIdentifier>{5db8e06d-ff67-4b7d-820b-cebd945a1f1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Drop">
+      <UniqueIdentifier>{c46f1815-4eb2-4d0c-a16d-2ac0aefd0cc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1084,6 +1087,9 @@
     <ClInclude Include="..\Public\Levi_Anchor.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Levi_Drop.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Drop</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1714,6 +1720,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Levi_Anchor.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Drop.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Drop</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,7 @@
 #include "Levi_Alter.h"
 #include "Levi_Ray.h"
 #include "Levi_Anchor.h"
+#include "Levi_Drop.h"
 #pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
@@ -504,7 +505,7 @@ void CLevel_Test::Ready_Leviatan()
 	AlterDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	AlterDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	AlterDesc.fSpeedPerSec = 10.f;
-	AlterDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
+	AlterDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
 	AlterDesc.fAttackDmg = pInfo->fAttack;
 	AlterDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
 
@@ -557,6 +558,14 @@ void CLevel_Test::Ready_Leviatan()
 	//Anchor.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviAnchor"), 4, &Anchor)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Drop::DROPDESC Drop{};
+	Drop.fAttackDamage = pInfo->fAttack * 0.5f;
+	Drop.fSpeedPerSec = 10.f;
+	//Drop.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviDrop"), 5, &Drop)))
 		CRASH("Failed Ready Projectile (Leviatan)");
 }
 

@@ -341,7 +341,7 @@ void CLevel_Heaven::Ready_Leviatan()
 	MobDesc.fHP = pInfo->fMaxHp;
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
-	MobDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
+	MobDesc.vDetectRange = _float3(50.f, 25.f, 50.f);
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &MobDesc)))
 		CRASH("Failed Ready Leviatan");
