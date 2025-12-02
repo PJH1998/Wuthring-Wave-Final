@@ -69,6 +69,8 @@ void CGameSystem::Clear_Resource()
 {
 	m_pDirector->Clear_Action();
 	m_pMonsterTable->Clear_NPCData();
+
+	Safe_Release(m_pPlayer);
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
