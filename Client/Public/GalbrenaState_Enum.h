@@ -86,6 +86,7 @@ enum class EGalbrenaIdleType : _uint
 	STAND2,
 	STAND_CONTROL,
 	STANDCHANGE,
+	STANDCHANGE02,
 	STANDUP,
 	END
 };

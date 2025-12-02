@@ -118,8 +118,10 @@ void CGalbrenaGroundSpecial::OnExit()
 
 void CGalbrenaGroundSpecial::Handle_Input()
 {
+	EGalbrenaSpecialType eSpecialType = static_cast<EGalbrenaSpecialType>(m_iCurrentAnimIdx);
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
-    m_States[DASH] = m_States[MOVE] && m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+    m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB))
+		&& (eSpecialType == EGalbrenaSpecialType::ATTACK05 || eSpecialType == EGalbrenaSpecialType::ATTACK06);
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
@@ -167,6 +169,13 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
     EGalbrenaSpecialType eSpType = static_cast<EGalbrenaSpecialType>(m_iCurrentAnimIdx);
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
+
+	if (m_States[DASH])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eSpecialDashType = EGalbrenaSpecialDashType::ATTACK_CHARGE;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIALDASH));
+		return;
+	}
 
 	// 1. 탈출 가능한 시점에서
 	if (IsEscapePossible)

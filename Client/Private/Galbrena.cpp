@@ -231,8 +231,10 @@ void CGalbrena::Render()
 
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-		if (IsMask(i))
-			Render_Mask(i);
+		if (IsBack(i))
+			Render_Back(i);
+		else if (IsEye(i))
+			Render_Eye(i);
 		else if (IsSkin(i))
 			Render_Skin(i);
 		else
@@ -1008,7 +1010,7 @@ void CGalbrena::Render_Skin(_uint iMeshIndex)
 		CRASH("Ready g_HasNormal Failed");
 }
 
-void CGalbrena::Render_Mask(_uint iMeshIndex)
+void CGalbrena::Render_Back(_uint iMeshIndex)
 {
 	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
@@ -1028,6 +1030,35 @@ void CGalbrena::Render_Mask(_uint iMeshIndex)
 
 }
 
+void CGalbrena::Render_Eye(_uint iMeshIndex)
+{
+	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+
+	if (IsCutScene)
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
+		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
+		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
+		_float fEmissiveIntensity = { 5.f };
+		_float fGalbrenaEyeAlpha = 0.6f;
+		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
+		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
+	}
+	else
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+}
+
 
 _bool CGalbrena::IsSkin(_uint iMeshIndex)
 {
@@ -1040,9 +1071,17 @@ _bool CGalbrena::IsSkin(_uint iMeshIndex)
 	return false;
 }
 
-_bool CGalbrena::IsMask(_uint iMeshIndex)
+_bool CGalbrena::IsBack(_uint iMeshIndex)
 {
 	if (iMeshIndex == MESH_EYE_OL)
+		return true;
+
+	return false;
+}
+
+_bool CGalbrena::IsEye(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_EYE)
 		return true;
 
 	return false;

@@ -134,6 +134,7 @@ namespace Client
 		, LOGOROVER // 8
 		, GALBRENABACK // 9
 		, DISSOLVE_CHARACTER // 10
+		, GALBRENAEYE // 11
 		, END };
 
 	enum class SHADER_PROPANIMMESH {

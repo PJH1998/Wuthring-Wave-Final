@@ -246,9 +246,11 @@ private:
 	void Update_Camera(_float fTimeDelta);
 	void Render_Default(_uint iMeshIndex);
 	void Render_Skin(_uint iMeshIndex);
-	void Render_Mask(_uint iMeshIndex);
+	void Render_Back(_uint iMeshIndex);
+	void Render_Eye(_uint iMeshIndex);
 	_bool IsSkin(_uint iMeshIndex);
-	_bool IsMask(_uint iMeshIndex);
+	_bool IsBack(_uint iMeshIndex);
+	_bool IsEye(_uint iMeshIndex);
 
 
 
