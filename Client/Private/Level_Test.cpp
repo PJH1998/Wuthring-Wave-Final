@@ -16,6 +16,7 @@
 #include "Levi_Ray.h"
 #include "Levi_Anchor.h"
 #include "Levi_Drop.h"
+#include "Levi_Wave.h"
 #pragma endregion
 #include "Player.h"
 #include "ShadowMap.h"
@@ -565,7 +566,15 @@ void CLevel_Test::Ready_Leviatan()
 	Drop.fSpeedPerSec = 10.f;
 	//Drop.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviDrop"), 5, &Drop)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviDrop"), 8, &Drop)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Wave::WAVEDESC Wave{};
+	Wave.fAttackDamage = pInfo->fAttack;
+	Wave.fSpeedPerSec = 15.f;
+	//Wave.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviWave"), 4, &Wave)))
 		CRASH("Failed Ready Projectile (Leviatan)");
 }
 

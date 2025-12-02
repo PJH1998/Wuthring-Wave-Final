@@ -28,6 +28,8 @@
 #include "Levi_Ray.h"
 #include "Levi_Anchor.h"
 #include "Levi_Drop.h"
+#include "Levi_Wave.h"
+#include "Levi_Augusta.h"
 #pragma endregion
 
 
@@ -479,6 +481,16 @@ HRESULT CLoader_Test::Load_Leviatan()
 	// Prototype_GameObject_Levi_Drop
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
 		CLevi_Drop::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Wave
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		CLevi_Wave::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Augusta
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Augusta"),
+		CLevi_Augusta::Create(m_pDevice, m_pContext))))
 		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;
