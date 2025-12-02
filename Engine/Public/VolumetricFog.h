@@ -16,31 +16,39 @@ private:
 		_float4x4 PrevProjMatrix;
 		_float4x4 InvViewMatrix;
 		_float4x4 InvProjMatrix;
-		_float fNear;				// 0
-		_float fFar;				// 4
-		_uint iSliceCount;			// 8
-		_uint iLightCount;			// 12
-		_float3 vFroxelSize;		// 16
-		_float Padding;				// 28
-		_float fCamNear;			// 32
-		_float fCamFar;				// 36
-		_float fWinSizeX;			// 40
-		_float fWinSizeY;			// 44
-		_float fLightIntensity;		// 48
-		_float fDensity;			// 52
-		_float fPhaseFunctionG;		// 56
-		_float fDensityScale;		// 60
-		_float fFogMaxHeight;		// 64
-		_float fFogMinHeight;		// 68
-		_float fHegihtFallOff;		// 72
-		_float fDistanceFallOff;	// 76
-		_float fGroundFallOff;		// 80
-		_float fNoiseScale;			// 84
+		_float4 vCamPos;			// --
+		_float3 vFogColor;
+		_float fPadding123;			// --
+		_float3 vFroxelSize;
+		_float Padding;				//--
+		_float fNear;				
+		_float fFar;				
+		_uint iSliceCount;			
+		_uint iLightCount;			//--
+		_float fCamNear;			
+		_float fCamFar;				
+		_float fWinSizeX;			
+		_float fWinSizeY;			// --
+		_float fLightIntensity;		
+		_float fDensity;			
+		_float fPhaseFunctionG;		
+		_float fDensityScale;		// --
+		_float fFogMaxHeight;		
+		_float fFogMinHeight;		
+		_float fHegihtFallOff;		
+		_float fDistanceFallOff;	// --
+		_float fGroundFallOff;		
+		_float fNoiseScale;			
 		_float fNoiseTimeDelta;
-		_bool  IsTemporal; 
-		_float4 vCamPos;
-		_float3 vFogColor;			// 96
-		_uint iRandCount;
+		_bool  IsTemporal;			// --
+		_uint iRandCount;			
+		_float fRayPhaseFunctionG;	
+		_float fRayIntensity;
+		_float fScatterWeight;		// --
+		_float fFogBaseIntensity;
+		_float fRayDensity;
+		_float fRayDensityScale;
+		_float fPadding2;
 	}VF_DATA;
 
 	enum class CS { VF_LIGHT, VF_BEER, VF_NOISE, END};

@@ -56,7 +56,7 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 {
 	_bool HasShadowMap = true;
 
-	if (m_iNumSector <= 0)
+	if (m_iNumSector <= 0 || nullptr == m_pShadowMapSRV)
 	{
 		HasShadowMap = false;
 		if (FAILED(pShader->Bind_Value("g_HasShadowMap", &HasShadowMap, sizeof(_bool))))
@@ -163,6 +163,8 @@ void CShadowMap::Clear()
 		Safe_Delete(pBounding);
 	m_Boundings.clear();
 	
+	m_iNumSector = 0;
+
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
 	Safe_Release(m_pDS_UAV);
@@ -427,6 +429,7 @@ HRESULT CShadowMap::Ready_Buffer()
 	Data.iNumSectorToLayer = m_iNumSectorToLayer;
 	Data.vSectorWorldSize = _float2(m_MapDesc.vExtents.x * 2.f, m_MapDesc.vExtents.z * 2.f);
 	Data.vMin = _float2(m_MapDesc.vCenterPos.x, m_MapDesc.vCenterPos.z);
+	Data.vMax = _float2(m_MapDesc.vCenterPos.x + (Data.vSectorWorldSize.x * m_MapDesc.iNumSectorX), m_MapDesc.vCenterPos.z + (Data.vSectorWorldSize.y * m_MapDesc.iNumSectorZ));
 	Data.vShadowMapSize = _float2(static_cast<_float>(m_iShadowMapSizeX >> 1), static_cast<_float>(m_iShadowMapSizeY >> 1));
 
 	memcpy(Data.SectorViewMatrix, m_Matrices[ENUM_CLASS(D3DTS::VIEW)].data(), sizeof(_float4x4) * m_iNumSector);

@@ -210,7 +210,7 @@ NeighborData Check_Neighbor(float2 vTexcoord, int2 vSector, float fNeighborDista
         int iSectorOffset = vOffset.x + vOffset.y;
         int iNeighborSector = vSector.x + iSectorOffset;
         
-        if (iNeighborSector >= iNumSector)
+        if (iNeighborSector >= iNumSector || iNeighborSector < 0)
             continue;
             
         int iLayer = floor(iNeighborSector / iNumSectorToLayer);

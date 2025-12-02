@@ -382,9 +382,9 @@ void CLevel_Heaven::Ready_SFX()
 	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::HEAVEN));
 
 #pragma region SFX
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_SonoraChange"),
-		ENUM_CLASS(LEVEL::HEAVEN), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
-		CRASH("Failed Add Pool SONORA_CHANGE");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_SonoraChange"),
+	//	ENUM_CLASS(LEVEL::HEAVEN), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
+	//	CRASH("Failed Add Pool SONORA_CHANGE");
 
 	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
 	//	ENUM_CLASS(LEVEL::HEAVEN), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
@@ -417,7 +417,7 @@ void CLevel_Heaven::DEBUG_FUNCTION()
 		//Desc.fEffectTime = 3.f;
 		//Desc.fRadialTime = 1.f;
 		//Desc.fFadeTime = 1.f;
-		  
+
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 
@@ -439,9 +439,9 @@ void CLevel_Heaven::DEBUG_FUNCTION()
 	{
 
 		ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
-		
+
 		m_pGameInstance->SettingHDR(m_fExposure);
-	
+
 	}
 	if (ImGui::CollapsingHeader("LUT"))
 	{
@@ -467,16 +467,6 @@ void CLevel_Heaven::DEBUG_FUNCTION()
 	}
 
 	ImGui::End();
-	//if (ImGui::CollapsingHeader("MOTION_BLUR"))
-	//{
-	//	ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
-
-	//	ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
-
-	//	ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
-
-	//	m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
-	//}
 }
 #endif
 
