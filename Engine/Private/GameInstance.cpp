@@ -1009,7 +1009,7 @@ HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFil
 {
 	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath, vEmissiveLuminance);
 }
-HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, DECAL_DATA& Decal)
+HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const  DECAL_DATA& Decal)
 {
 	return m_pDecal_Manager->Add_DecalData(strDecalTag, Decal);
 }

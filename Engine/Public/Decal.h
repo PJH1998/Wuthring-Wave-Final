@@ -11,7 +11,26 @@ class CGameInstance;
 class ENGINE_DLL CDecal final : public CBase
 {
 private:
-	typedef pair<DECAL_DATA, VTXINSTANCE_DECAL> DECAL_INSTANCE_DATA;
+	typedef struct tagDecalUpdateData
+	{
+		_float fBlendTime;
+		_float fLifeTime;
+
+		_bool IsEqual;
+		_float fCurrentTime;
+
+		_vector vStartScale;
+		_vector vStartRotation;
+		_vector vStartPosition;
+
+		_vector vEndScale;
+		_vector vEndRotation;
+		_vector vEndPosition;
+	}DECAL_UPDATE_DATA;
+
+
+private:
+	typedef pair<DECAL_UPDATE_DATA, VTXINSTANCE_DECAL> DECAL_INSTANCE_DATA;
 	typedef pair<DECAL_DATA::TYPE, DECAL_INSTANCE_DATA> DECAL_INSTANCE;
 
 private:
@@ -24,7 +43,7 @@ public:
 	void						Render(CShader* pShader);
 	
 	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance);
-	HRESULT						Add_DecalData(DECAL_DATA& Decal);
+	HRESULT						Add_DecalData(const DECAL_DATA& Decal);
 	ID3D11ShaderResourceView*	Get_DecalSRV(TEXTURETYPE eTextureType);
 	
 private:

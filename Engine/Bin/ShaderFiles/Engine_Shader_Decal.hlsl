@@ -129,16 +129,15 @@ PS_OUT PS_MAIN(PS_IN In)
             discard;
     }
     
-    float fAlpha = saturate((In.vLifeTime.x / In.vLifeTime.y));
     float4 vColor = any(vDifffuse) ? vDifffuse : In.vColor;
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
-    Out.vDiffuse.a -= fAlpha;
+    Out.vDiffuse.a -= In.fAlpha;
     
     
     if(any(vEmissive.xyz))
     {
-        Out.vEmissive.a -= fAlpha;
+        Out.vEmissive.a -= In.fAlpha;
         Out.vEmissive.xyz *= Out.vEmissive.a;
     }
     

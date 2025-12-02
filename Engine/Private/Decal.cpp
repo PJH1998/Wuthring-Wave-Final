@@ -50,7 +50,7 @@ void CDecal::Update(_float fTimeDelta)
 	vector<VTXINSTANCE_DECAL> TempDatas;
 	TempDatas.reserve(m_iNumDecals);
 	for (auto& Data : m_DecalDatas)
-		TempDatas.push_back(Data.second);
+		TempDatas.push_back(Data.second.second);
 
 	if (m_iNumDecals > 0)
 		m_pVIBuffer_Decal->Update_Buffer(TempDatas);
@@ -92,7 +92,7 @@ HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE:
     return S_OK;
 }
 
-HRESULT CDecal::Add_DecalData(DECAL_DATA& Decal)
+HRESULT CDecal::Add_DecalData(const DECAL_DATA& Decal)
 {
 	if (m_iNumDecals >= g_iMaxDecal)
 		return E_FAIL;
@@ -109,15 +109,23 @@ HRESULT CDecal::Add_DecalData(DECAL_DATA& Decal)
 	Data.vColor = Decal.vColor;
 	Data.fEmissiveIntensity = Decal.fEmissiveIntensity == 0.f ? 1.f : Decal.fEmissiveIntensity;
 
-	XMMatrixDecompose(&Decal.vStartScale, &Decal.vStartRotation, &Decal.vStartPosition, Decal.WorldMatrix);
-	XMMatrixDecompose(&Decal.vEndScale, &Decal.vEndRotation, &Decal.vEndPosition, Decal.EndWorldMatrix);
+	DECAL_UPDATE_DATA UpdateData = {};
 
-	if (XMVector4Equal(Decal.vStartScale, Decal.vEndScale) && XMQuaternionEqual(Decal.vStartRotation, Decal.vEndRotation) && XMVector4Equal(Decal.vStartPosition, Decal.vEndPosition))
-		Decal.IsEqual = true;
+	UpdateData.fCurrentTime = 0.f;
+	UpdateData.fBlendTime = Decal.fBlendTime;
+	UpdateData.fLifeTime = Decal.fLifeTime;
+
+	XMMatrixDecompose(&UpdateData.vStartScale, &UpdateData.vStartRotation, &UpdateData.vStartPosition, Decal.WorldMatrix);
+	XMMatrixDecompose(&UpdateData.vEndScale, &UpdateData.vEndRotation, &UpdateData.vEndPosition, Decal.EndWorldMatrix);
+
+	if (XMVector4Equal(UpdateData.vStartScale, UpdateData.vEndScale)
+		&& XMQuaternionEqual(UpdateData.vStartRotation, UpdateData.vEndRotation) 
+		&& XMVector4Equal(UpdateData.vStartPosition, UpdateData.vEndPosition))
+		UpdateData.IsEqual = true;
 	else
-		Decal.IsEqual = false;
+		UpdateData.IsEqual = false;
 
-	DECAL_INSTANCE_DATA DataPair = make_pair(Decal, Data);
+	DECAL_INSTANCE_DATA DataPair = make_pair(UpdateData, Data);
 
 	DECAL_INSTANCE Pair = make_pair(Decal.eType, DataPair);
 
@@ -146,7 +154,7 @@ _bool CDecal::Update_InstanceData(DECAL_INSTANCE_DATA& Data, _float fTimeDelta)
 		_float fDenom = max(Data.first.fLifeTime - Data.first.fBlendTime, 1e-5);
 		_float fNum = Data.first.fCurrentTime - Data.first.fBlendTime;
 
-		Data.second.fAlpha = 1.f - Saturate(fNum / fDenom);
+		Data.second.fAlpha = Saturate(fNum / fDenom);
 	}
 
 	if (Data.first.IsEqual)

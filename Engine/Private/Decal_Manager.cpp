@@ -46,7 +46,7 @@ HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const _tchar* pFi
 	return S_OK;
 }
 
-HRESULT CDecal_Manager::Add_DecalData(const _wstring& strDecalTag, DECAL_DATA& Decal)
+HRESULT CDecal_Manager::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
 {
 	CDecal* pDecal = Find_Decal(strDecalTag);
 	ASSERT_CRASH(pDecal);

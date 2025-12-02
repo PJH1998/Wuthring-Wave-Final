@@ -21,7 +21,7 @@ public:
 	HRESULT								Initialize();
 	void								Update(_float fTimeDelta);
 	HRESULT								Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance);
-	HRESULT								Add_DecalData(const _wstring& strDecalTag, DECAL_DATA& Decal);
+	HRESULT								Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
 	HRESULT								Render();
 	void								Clear();
 

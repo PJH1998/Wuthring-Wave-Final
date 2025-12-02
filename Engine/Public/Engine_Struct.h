@@ -91,19 +91,6 @@ namespace Engine
 		_float fLifeTime;
 		_float4 vColor;
 		_float fEmissiveIntensity;
-		
-		
-		// Non Input Data
-		_bool IsEqual;
-		_float fCurrentTime;
-
-		_vector vStartScale;
-		_vector vStartRotation;
-		_vector vStartPosition;
-
-		_vector vEndScale;
-		_vector vEndRotation;
-		_vector vEndPosition;
 	}DECAL_DATA;
 
 	typedef struct tagNotify
