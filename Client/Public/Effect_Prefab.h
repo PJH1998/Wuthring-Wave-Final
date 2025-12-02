@@ -23,7 +23,7 @@ public:
 		vector<FRAME_DESC> FrameDesc;
 
 		_bool	IsLoop = false;
-		_float2	vLifeTime = { 0.f, 10.f };
+		_float2	vLifeTime = { 0.f, 15.f };
 		_string strBoneTag;
 		_uint	CurrentLevel;
 	}PREFAB_DESC;

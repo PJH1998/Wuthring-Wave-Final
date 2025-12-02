@@ -67,7 +67,6 @@ void CEffect_Rect::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-   m_vLifeTime.x += fTimeDelta;
    m_fSweep += fTimeDelta * m_fSweepSpeed;
 
    if (m_IsSprite)
