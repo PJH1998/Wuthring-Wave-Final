@@ -162,7 +162,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
-	m_pPhysicsManager->Late_Update();
+	//m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	

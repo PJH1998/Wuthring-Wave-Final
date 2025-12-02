@@ -157,6 +157,8 @@ HRESULT CShadowMap::DownSampleShadowMap()
 
 void CShadowMap::Clear()
 {
+	m_iNumSector = 0;
+
 	for (auto& pBounding : m_Boundings)
 		Safe_Delete(pBounding);
 	m_Boundings.clear();
