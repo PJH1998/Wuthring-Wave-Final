@@ -19,7 +19,7 @@ struct VS_IN
     float3 vPosition :  POSITION;
     row_major float4x4 World : WORLD;
     row_major float4x4 WorldInv : INVWORLD;
-    float2 vLifeTime :  TEXCOORD0;
+    float fAlpha : TEXCOORD0;
     float4 vColor :     COLOR;
     float fEmissiveIntenisity : TEXCOORD1;
 };
@@ -29,7 +29,7 @@ struct VS_OUT
     float4 vPosition :  SV_POSITION;
     row_major float4x4 WorldInv : INVWORLD;
     float4 vColor : COLOR;
-    float2 vLifeTime : TEXCOORD0;
+    float fAlpha : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
     float fEmissiveIntenisity : TEXCOORD2;
 };
@@ -44,7 +44,7 @@ VS_OUT VS_MAIN(VS_IN In)
     matWVP = mul(matWV, g_ProjMatrix);
     Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
     Out.WorldInv = In.WorldInv;
-    Out.vLifeTime = In.vLifeTime;
+    Out.fAlpha = In.fAlpha;
     Out.vColor = In.vColor;
     Out.vProjPos = Out.vPosition;
     Out.fEmissiveIntenisity = In.fEmissiveIntenisity;
@@ -57,7 +57,7 @@ struct PS_IN
     float4 vPosition :  SV_POSITION;
     row_major float4x4 WorldInv : INVWORLD;
     float4 vColor :     COLOR;
-    float2 vLifeTime : TEXCOORD0;
+    float fAlpha : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
     float fEmissiveIntenisity : TEXCOORD2;
 };
@@ -129,16 +129,15 @@ PS_OUT PS_MAIN(PS_IN In)
             discard;
     }
     
-    float fAlpha = saturate((In.vLifeTime.x / In.vLifeTime.y));
     float4 vColor = any(vDifffuse) ? vDifffuse : In.vColor;
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
-    Out.vDiffuse.a -= fAlpha;
+    Out.vDiffuse.a -= In.fAlpha;
     
     
     if(any(vEmissive.xyz))
     {
-        Out.vEmissive.a -= fAlpha;
+        Out.vEmissive.a -= In.fAlpha;
         Out.vEmissive.xyz *= Out.vEmissive.a;
     }
     

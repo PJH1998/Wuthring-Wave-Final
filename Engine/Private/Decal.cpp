@@ -104,7 +104,7 @@ HRESULT CDecal::Add_DecalData(const DECAL_DATA& Decal)
 	memcpy(&Data.vRight, &Decal.WorldMatrix, sizeof(_matrix));
 	memcpy(&Data.vRightInv, &WorldInv, sizeof(_matrix));
 
-	Data.fAlpha = 1.f;
+	Data.fAlpha = 0.f;
 
 	Data.vColor = Decal.vColor;
 	Data.fEmissiveIntensity = Decal.fEmissiveIntensity == 0.f ? 1.f : Decal.fEmissiveIntensity;
