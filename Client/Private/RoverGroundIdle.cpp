@@ -319,6 +319,28 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
         m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN)); // 상위, 하위 상태
         return;
     }
+
+	if (m_IsAnimationEnd)
+	{
+		switch (static_cast<ERoverIdleType>(m_iCurrentAnimIdx))
+		{
+		case ERoverIdleType::STANDCHANGE:
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case ERoverIdleType::STAND1_ACTION02:
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION03; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case ERoverIdleType::STAND1_ACTION03:
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		default:
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		}
+
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+		return;
+	}
 }
 
 

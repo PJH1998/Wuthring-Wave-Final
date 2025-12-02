@@ -148,6 +148,7 @@ namespace Client
 		, ENERGY_BLADE // 6
 		, AUGUSTA_HEADPROP // 7
 		, DISSOLVE_AUGUSTAWEAPON // 8
+		, DISSOLVE_ROVERWEAPON // 9
 		, END
 	};
 

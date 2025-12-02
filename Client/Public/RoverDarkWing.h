@@ -11,7 +11,7 @@ public:
 		VOLUME_END
 	};
 
-protected:
+private:
 	explicit CRoverDarkWing(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CRoverDarkWing(const CPartObject& Prototype);
 	virtual ~CRoverDarkWing() = default;
@@ -24,6 +24,9 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+
+public:
+	virtual void Activate(_bool IsActivate) override;
 
 private:
 	vector<_uint> m_ShaderPaths = {};
