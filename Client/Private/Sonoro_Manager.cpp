@@ -153,6 +153,21 @@ const _tchar* CSonoro_Manager::Get_SonoroText()
 		TEXT("소노라 진입하기");
 }
 
+void CSonoro_Manager::Clear_Resource()
+{
+	for (auto& pObject : m_SonoroObjects)
+		Safe_Release(pObject);
+	m_SonoroObjects.clear();
+
+	for (auto& pObject : m_NonSonoroObjects)
+		Safe_Release(pObject);
+	m_NonSonoroObjects.clear();
+
+	for (auto& pInstance : m_Instance)
+		Safe_Release(pInstance);
+	m_Instance.clear();
+}
+
 
 CSonoro_Manager* CSonoro_Manager::Create()
 {
