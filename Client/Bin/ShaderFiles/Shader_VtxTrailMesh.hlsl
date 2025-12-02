@@ -900,6 +900,72 @@ PS_OUT PS_DefaultMeshRender(PS_IN In)
     
     return Out;
 }
+
+PS_OUT PS_X_OUT(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    float2 UV = In.vTexcoord;
+
+    float MaskR = g_MaskTexture.Sample(ClampSampler, UV).r;
+
+    if (MaskR < 0.2f)
+        discard;
+
+    float fX = 1.f - g_MaskSweep;
+    float fVisibleX;
+
+    fVisibleX = 1.f - step(fX, UV.x);
+
+    float fVisibleY;
+
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
+
+    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+
+    fVisibleY = fTailFad * fHeadFad;
+
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    float fAlpha = fVisibleY * fVisibleX * MaskR;
+
+    if (fAlpha < 0.2f)
+        discard;
+
+    Out.vDiffuse = float4(vColor.rgb, fAlpha);
+
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+
+    Out.vDiffuse.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
+    
+    return Out;
+}
+
 // ==Test==
 technique11 DefaultTechnique
 {
