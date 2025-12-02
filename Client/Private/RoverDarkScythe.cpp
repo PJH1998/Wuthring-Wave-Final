@@ -43,9 +43,6 @@ void CRoverDarkScythe::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 	//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
-
-	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
-	m_fEmissiveIntensity = 30.f;
 	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 
@@ -254,8 +251,8 @@ void CRoverDarkScythe::Ready_Variables(const PROP_DESC* pDesc)
 
 	// Shader 변수
 	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
-	m_fEmissiveIntensity = 30.f;
+	m_vDissolveColor = { 0.693f, 0.481f, 1.f, 1.f };
+	m_fEmissiveIntensity = 1.5f;
 }
 
 void CRoverDarkScythe::Ready_Positions(const PROP_DESC* pDesc)

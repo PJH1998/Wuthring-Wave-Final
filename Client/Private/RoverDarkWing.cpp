@@ -45,6 +45,7 @@ void CRoverDarkWing::Priority_Update(_float fTimeDelta)
 		return;
 
 	
+	
     CProp::Priority_Update(fTimeDelta);
 
 	// 1. Attack Volume 갱신
@@ -219,8 +220,8 @@ void CRoverDarkWing::Ready_Variables(const PROP_DESC* pDesc)
 
 	// Shader 변수
 	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
-	m_fEmissiveIntensity = 30.f;
+	m_vDissolveColor = { 0.693f, 0.481f, 1.f, 1.f };
+	m_fEmissiveIntensity = 1.5f;
 }
 
 void CRoverDarkWing::Ready_Positions(const PROP_DESC* pDesc)

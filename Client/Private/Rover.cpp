@@ -79,9 +79,6 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	m_vDissolveColor = { 0.15f, 0.01f, 0.3f, 1.f };
-	m_fEmissiveIntensity = 30.f;
-
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -1063,8 +1060,8 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 	// Shader Vlaue 추가
 	m_fDissolveTimer = 0.f;
 	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 0.5f, 0.5f, 0.5f, 1.f };
-	m_fEmissiveIntensity = 3.f;
+	m_vDissolveColor = { 0.693f, 0.481f, 1.f, 1.f };
+	m_fEmissiveIntensity = 1.5f;
 }
 
 void CRover::Ready_Positions(const CHARACTER_DESC* pDesc)
