@@ -204,8 +204,6 @@ void CRover::Render()
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	if (IsDissolve)
 	{
-		
-
 		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
 		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
 			CRASH("Failed Bind Dissolve Rate");
@@ -224,6 +222,8 @@ void CRover::Render()
 			Render_Skin(i);
 		else if (IsEye(i))
 			Render_Eye(i);
+		else if (IsMask(i))
+			Render_Mask(i);
 		else
 			Render_Default(i);
 
@@ -955,11 +955,8 @@ void CRover::Render_Eye(_uint iMeshIndex)
 	if (IsCutScene)
 	{
 		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
-		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
 		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
 		_float fEmissiveIntensity = { 5.f };
-		//_float4 vEmissiveColor = { 0.693f, 0.481f, 1.f, 1.f };
-		//_float  fEmissiveIntensity = 10.f;
 		_float fGalbrenaEyeAlpha = 0.6f;
 		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
 		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));
@@ -968,6 +965,18 @@ void CRover::Render_Eye(_uint iMeshIndex)
 	else
 		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
 }
+
+void CRover::Render_Mask(_uint iMeshIndex)
+{
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+}
+
+
 
 _bool CRover::IsSkin(_uint iMeshIndex)
 {
@@ -983,6 +992,13 @@ _bool CRover::IsEye(_uint iMeshIndex)
 	if (iMeshIndex == MESH_EYE)
 		return true;
 
+	return false;
+}
+
+_bool CRover::IsMask(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESHTYPE::MESH_MASK)
+		return true;
 	return false;
 }
 
@@ -1057,13 +1073,15 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::ROVER);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
 
 	// Shader Vlaue 추가
 	m_fDissolveTimer = 0.f;
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.693f, 0.481f, 1.f, 1.f };
 	m_fEmissiveIntensity = 1.5f;
+
+	m_ShaderPaths[MESH_MASK] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVERMASK);
 }
 
 void CRover::Ready_Positions(const CHARACTER_DESC* pDesc)
