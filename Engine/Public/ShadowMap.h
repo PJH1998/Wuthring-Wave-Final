@@ -28,8 +28,12 @@ private:
 		_float2 vMin;
 		_float Padding2[2];
 
-		_float2 vShadowMapSize;
+		_float2 vMax;
 		_float Padding3[2];
+
+
+		_float2 vShadowMapSize;
+		_float Padding4[2];
 	}SHADOWMAP_DATA;
 
 private:

@@ -35,8 +35,8 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fPhaseFunctionG = 0.5f;
 	m_VF_Data.fDensityScale = 0.01f;
 
-	m_VF_Data.fFogMinHeight = 5.f;
-	m_VF_Data.fFogMaxHeight = 200.f;
+	m_VF_Data.fFogMinHeight = 100.f;
+	m_VF_Data.fFogMaxHeight = 230.f;
 
 	//m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
 	m_VF_Data.vFogColor = _float3(0.7f, 0.75f, 0.87f);
@@ -44,6 +44,16 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fGroundFallOff = 0.02f;
 	m_VF_Data.fDistanceFallOff = 0.02f;
 	m_VF_Data.fNoiseScale = 0.002f;
+
+	m_VF_Data.fRayPhaseFunctionG = 0.5f;
+	m_VF_Data.fRayIntensity = 3.f;
+
+	m_VF_Data.fScatterWeight = 0.5f;
+
+	m_VF_Data.fFogBaseIntensity = 0.2f;
+
+	m_VF_Data.fRayDensity = 0.7f;
+	m_VF_Data.fRayDensityScale = 0.4f;
 
 	m_IsFirst = true;
 
@@ -67,7 +77,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 HRESULT CVolumetricFog::SetUp_FogNF()
 {
 	m_vFogRange.x = m_pGameInstance->Get_CurrentCamera_Near();//m_pGameInstance->Get_CurrentCamera_Near(); 
-	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far();
+	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far() * 0.4f;
 
 	m_VF_Data.fNear = m_vFogRange.x;
 	m_VF_Data.fFar = m_vFogRange.y;
@@ -156,6 +166,15 @@ void CVolumetricFog::Setting_VF()
 	ImGui::DragFloat("HEIGHT_FALLOFF", &m_VF_Data.fHegihtFallOff, 0.01f, 0.01f, 1.f, "%.2f");
 	ImGui::DragFloat("GROUND_FALLOFF", &m_VF_Data.fGroundFallOff, 0.01f, 0.01f, 1.f, "%.2f");
 	ImGui::DragFloat("NOISE_SCALE", &m_VF_Data.fNoiseScale, 0.0001f, 0.00001f, 0.001f, "%.5f");
+
+	ImGui::DragFloat("RAY_PHASE_FUNCTION", &m_VF_Data.fRayPhaseFunctionG, 0.01f, 0.5f, 1.f, "%.2f");
+	ImGui::DragFloat("RAY_INTENSITY", &m_VF_Data.fRayIntensity, 0.1f, 2.f, 10.f, "%.5f");
+
+	ImGui::DragFloat("SCATTER_WEIGHT", &m_VF_Data.fScatterWeight, 0.01f, 0.1f, 1.f, "%.5f");
+
+	ImGui::DragFloat("RAY_DENSITY", &m_VF_Data.fRayDensity, 0.01f, 0.1f, 1.f, "%.5f");
+
+	ImGui::DragFloat("RAY_DENSITY_SCALE", &m_VF_Data.fRayDensityScale, 0.01f, 0.05f, 0.5f, "%.5f");
 
 	ImGui::End();
 }
