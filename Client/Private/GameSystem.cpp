@@ -69,7 +69,7 @@ void CGameSystem::Clear_Resource()
 {
 	m_pDirector->Clear_Action();
 	m_pMonsterTable->Clear_NPCData();
-
+	m_pSonoro_Manager->Clear_Resource();
 	Safe_Release(m_pPlayer);
 }
 #pragma region PARSER

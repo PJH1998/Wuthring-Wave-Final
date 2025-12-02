@@ -462,6 +462,10 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			m_pGameInstance->Add_Light(to_wstring(i), ReadDesc);
 		}
 	}
+	else if (pFilePath.find("Effect") != std::string::npos)
+	{
+
+	}
 	else
 	{
 		CMapObject::MAP_LOAD Desc{};
