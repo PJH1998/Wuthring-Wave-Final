@@ -418,6 +418,12 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Anchor">
       <UniqueIdentifier>{5db8e06d-ff67-4b7d-820b-cebd945a1f1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\PlayerInteraction">
+      <UniqueIdentifier>{9e7095ef-0622-4743-9d42-726f9ea37073}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Component\MotionTrail">
+      <UniqueIdentifier>{2c7787ac-02a8-4c6a-856a-7a129227d9f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1084,6 +1090,12 @@
     <ClInclude Include="..\Public\Levi_Anchor.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Scan.h">
+      <Filter>03. GameObject\PlayerInteraction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\MotionTrail.h">
+      <Filter>04. Component\MotionTrail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1715,6 +1727,12 @@
     <ClCompile Include="..\Private\Levi_Anchor.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Scan.cpp">
+      <Filter>03. GameObject\PlayerInteraction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MotionTrail.cpp">
+      <Filter>04. Component\MotionTrail</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1801,6 +1819,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Logo.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxScan.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

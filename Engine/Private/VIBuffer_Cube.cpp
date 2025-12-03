@@ -16,7 +16,7 @@ HRESULT CVIBuffer_Cube::Initialize_Prototype()
 
 #pragma region VERTEX
      m_iNumVertices = 8;
-    m_iVertexStride = sizeof(VTXPOSCOL);
+    m_iVertexStride = sizeof(VTXPOS);
     m_iNumVertexBuffers = 1;
 
     D3D11_BUFFER_DESC   VBDesc = {};
@@ -27,30 +27,22 @@ HRESULT CVIBuffer_Cube::Initialize_Prototype()
     VBDesc.MiscFlags = 0;
     VBDesc.StructureByteStride = m_iVertexStride;
 
-	VTXPOSCOL* pVertices = new VTXPOSCOL[m_iNumVertices];
+	VTXPOS* pVertices = new VTXPOS[m_iNumVertices];
 	pVertices[0].vPosition = _float3(-0.5f, 0.5f, -0.5f);
-	pVertices[0].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[1].vPosition = _float3(0.5f, 0.5f, -0.5f);
-	pVertices[1].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[2].vPosition = _float3(0.5f, -0.5f, -0.5f);
-	pVertices[2].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[3].vPosition = _float3(-0.5f, -0.5f, -0.5f);
-	pVertices[3].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[4].vPosition = _float3(-0.5f, 0.5f, 0.5f);
-	pVertices[4].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[5].vPosition = _float3(0.5f, 0.5f, 0.5f);
-	pVertices[5].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[6].vPosition = _float3(0.5f, -0.5f, 0.5f);
-	pVertices[6].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
 	pVertices[7].vPosition = _float3(-0.5f, -0.5f, 0.5f);
-	pVertices[7].vColor = _float4(1.f, 0.f, 0.f, 1.f);
 
     D3D11_SUBRESOURCE_DATA VBInitialData = {};
     VBInitialData.pSysMem = pVertices;

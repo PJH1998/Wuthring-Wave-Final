@@ -465,6 +465,10 @@ HRESULT CGameInstance::Clear_RT(const _wstring& strTargetTag)
 {
     return m_pTargetManager->Clear_RT(strTargetTag);
 }
+HRESULT CGameInstance::Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* pConstantName)
+{
+	return m_pTargetManager->Bind_OpenRT(eRT, pShader, pConstantName);
+}
 #ifdef _DEBUG
 HRESULT CGameInstance::Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
 {
@@ -1005,6 +1009,10 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #pragma endregion
 
 #pragma region DECAL_MANAGER
+HRESULT CGameInstance::Add_CustomDecal(CGameObject* pCustomDecalObject)
+{
+	return m_pDecal_Manager->Add_CustomDecal(pCustomDecalObject);
+}
 HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
 {
 	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath, vEmissiveLuminance);
@@ -1212,6 +1220,7 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 
 	if (m_pModel_Manager)
 		m_pModel_Manager->Clear_Resource(iLevelID);
+
 	return S_OK;
 }
 

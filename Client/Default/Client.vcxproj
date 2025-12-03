@@ -277,6 +277,7 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\Public\MapObject_Water.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
+    <ClInclude Include="..\public\MotionTrail.h" />
     <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\MouseController.h" />
     <ClInclude Include="..\Public\NPCCell.h" />
@@ -343,6 +344,7 @@
     <ClInclude Include="..\Public\RoverRopeHook.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
+    <ClInclude Include="..\public\Scan.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\public\SFX_Prefab.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
@@ -541,6 +543,7 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
+    <ClCompile Include="..\private\MotionTrail.cpp" />
     <ClCompile Include="..\Private\Mouse.cpp" />
     <ClCompile Include="..\Private\MouseController.cpp" />
     <ClCompile Include="..\Private\NPCCell.cpp" />
@@ -567,6 +570,7 @@
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\RoverRopeDrag.cpp" />
     <ClCompile Include="..\Private\RoverRopeHook.cpp" />
+    <ClCompile Include="..\private\Scan.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\private\SFX_Prefab.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />
@@ -703,6 +707,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxScan.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_MonsterProp.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>

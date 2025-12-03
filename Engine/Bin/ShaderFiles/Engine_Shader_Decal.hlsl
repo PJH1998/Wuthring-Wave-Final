@@ -134,7 +134,6 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
     Out.vDiffuse.a -= In.fAlpha;
     
-    
     if(any(vEmissive.xyz))
     {
         Out.vEmissive.a -= In.fAlpha;
