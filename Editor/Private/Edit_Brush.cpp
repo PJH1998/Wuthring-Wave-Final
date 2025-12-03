@@ -239,7 +239,7 @@ void CEdit_Brush::About_InstanceInfo()
 			ImGui::SameLine();
 			m_iShaderPassIndex = m_SaveInstanceObjects[m_iCurSaveIndex][0]->ShaderPassWindow();
 			m_eInstanceType = m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Type();
-			if (m_iShaderPassIndex == 2 && !XMVector4Equal(vDiffuseColor.Vec, XMLoadFloat4(m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color())))
+			if (!XMVector4Equal(vDiffuseColor.Vec, XMLoadFloat4(m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color())))
 				vDiffuseColor.float_4 = *m_SaveInstanceObjects[m_iCurSaveIndex][0]->Get_Color();
 
 			for (auto& pObject : m_SaveInstanceObjects[m_iCurSaveIndex])

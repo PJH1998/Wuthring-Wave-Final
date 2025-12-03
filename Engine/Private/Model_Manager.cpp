@@ -19,10 +19,10 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
 #ifndef _DEBUG
-	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 60, 20);
-	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 45, 10);
-	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 25, 6);
-	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 10, 3);
+	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 70, 20);
+	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 55, 10);
+	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 35, 6);
+	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 20, 3);
 #else
 	
 		m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));

@@ -77,6 +77,12 @@ namespace Client
 		_string strAnimTag;
 	}NPCINFO;
 
+	typedef struct tagScanInfo
+	{
+		_vector vCenterPos;
+		_float fRadius;
+	}SCAN_INFO;
+
 	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
 	typedef struct tagUISkillSlot {
 		_string strKeyInput;      // "LB", "E", "Q" 등

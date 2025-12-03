@@ -42,34 +42,14 @@ int2 Compute_Pixel(float4 vProjPos, float fWidth, float fHeight)
     return Pixel;
 }
 
-float4 Compute_WorldPos(float2 vTexcoord, Texture2D DepthTexture, int3 Location, matrix ProjMatrixInv, matrix ViewMatrixInv)
-{
-    float4 vWorldPos = 0.f;
-    
-    vector vDepthDesc = DepthTexture.Load(Location);
-    
-    vWorldPos.x = vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = vDepthDesc.x;
-    vWorldPos.w = 1.f;
-    
-    vWorldPos *= vDepthDesc.y;
-    
-    vWorldPos = mul(vWorldPos, ProjMatrixInv);
-    vWorldPos = mul(vWorldPos, ViewMatrixInv);
-    
-    return vWorldPos;
-}
-
 float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture, int3 Location, matrix ProjMatrixInv)
 {
     float4 vViewPos = 0.f;
     
     vector vDepthDesc = DepthTexture.Load(Location);
-    if(vDepthDesc.y == 0.f)
+    if (vDepthDesc.y == 0.f)
         return vViewPos;
-    
-    
+   
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
     vViewPos.z = vDepthDesc.x;
@@ -79,7 +59,20 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture, int3 Location, 
     
     vViewPos = mul(vViewPos, ProjMatrixInv);
     
-    return vViewPos;
+    return float4(vViewPos.xyz, 1.f);
+}
+float4 Compute_WorldPos(float2 vTexcoord, Texture2D DepthTexture, int3 Location, matrix ProjMatrixInv, matrix ViewMatrixInv)
+{
+    float4 vWorldPos = 0.f;
+    
+    float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture, Location, ProjMatrixInv);
+    
+    if(all(vViewPos) == 0.f)
+        return vWorldPos;
+    
+    vWorldPos = mul(vViewPos, ViewMatrixInv);
+    
+    return vWorldPos;
 }
 
 float4 Compute_ViewPosTexcoord(float2 vTexcoord, Texture2D DepthTexture, sampler Sampler, matrix ProjMatrixInv)
@@ -88,6 +81,9 @@ float4 Compute_ViewPosTexcoord(float2 vTexcoord, Texture2D DepthTexture, sampler
     
     float4 vDepthDesc = DepthTexture.SampleLevel(Sampler, vTexcoord, 0);
     
+    if(vDepthDesc.y == 0.f)
+        return vViewPos;
+        
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
     vViewPos.z = vDepthDesc.x;
