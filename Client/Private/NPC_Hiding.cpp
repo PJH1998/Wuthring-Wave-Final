@@ -70,7 +70,7 @@ void CNPC_Hiding::Render()
 		HRESULT hr = m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 		
 		m_pModelCom->Render(i);
 

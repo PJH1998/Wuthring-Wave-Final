@@ -32,6 +32,7 @@
 #pragma region NPC
 #include "NPCInstancing.h"
 #include "NPCCell.h"
+#include "Napal.h"
 #pragma endregion
 
 #pragma region UI
@@ -1016,6 +1017,17 @@ HRESULT CLoader_GamePlay::Load_NPC()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCCell"),
 		CNPCCell::Create(m_pDevice, m_pContext))))
+		CRASH("NPCCell Prototype Create Failed");
+
+	// Prototype_Component_Model_Napal
+	//_fmatrix PreNapalMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Napal"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/NPC/Napal/Napal.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Napal
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
+		CNapal::Create(m_pDevice, m_pContext))))
 		CRASH("NPCCell Prototype Create Failed");
 
 	return S_OK;

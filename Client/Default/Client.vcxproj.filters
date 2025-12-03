@@ -427,6 +427,12 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta">
       <UniqueIdentifier>{2e691801-6e07-44a7-9b57-0f663bda1dad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\HideNSeek">
+      <UniqueIdentifier>{4cb69a31-8168-4ad1-9554-4dbf47a1198d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\Napal">
+      <UniqueIdentifier>{ceb873a6-33b2-420c-b937-ec67568e748d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1114,6 +1120,12 @@
     <ClInclude Include="..\Public\WeaponDummy.h">
       <Filter>03. GameObject\Dummy</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\NPC_Hiding.h">
+      <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Napal.h">
+      <Filter>03. GameObject\Actor\NPC\Napal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1765,6 +1777,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\WeaponDummy.cpp">
       <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\NPC_Hiding.cpp">
+      <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Napal.cpp">
+      <Filter>03. GameObject\Actor\NPC\Napal</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

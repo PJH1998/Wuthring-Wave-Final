@@ -283,8 +283,10 @@
     <ClInclude Include="..\public\MonsterTable.h" />
     <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\MouseController.h" />
+    <ClInclude Include="..\Public\Napal.h" />
     <ClInclude Include="..\Public\NPCCell.h" />
     <ClInclude Include="..\Public\NPCInstancing.h" />
+    <ClInclude Include="..\public\NPC_Hiding.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PatternDummy.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
@@ -554,8 +556,10 @@
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Mouse.cpp" />
     <ClCompile Include="..\Private\MouseController.cpp" />
+    <ClCompile Include="..\Private\Napal.cpp" />
     <ClCompile Include="..\Private\NPCCell.cpp" />
     <ClCompile Include="..\Private\NPCInstancing.cpp" />
+    <ClCompile Include="..\private\NPC_Hiding.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PatternDummy.cpp" />

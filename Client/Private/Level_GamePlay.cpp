@@ -10,6 +10,7 @@
 #include "Projectile.h"
 #include "AoEDoT.h"
 #include "NPCInstancing.h"
+#include "Napal.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -558,6 +559,16 @@ void CLevel_GamePlay::Ready_NPC()
 	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
+
+	CNapal::NAPALDESC Napal{};
+	Napal.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Napal"));
+	Napal.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Napal.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	Napal.eCurLevel = m_eCurLevel;
+	Napal.vInitPos = _float3(3206.12f, 350.9f, 1680.1f);
+	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
 }
 
 #ifdef _DEBUG
