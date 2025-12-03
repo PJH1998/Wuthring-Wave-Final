@@ -161,12 +161,18 @@ HRESULT CModel_Streaming::Ready_Mesh(const _char* pFilePath)
 		if (entry.path().extension() != ".dat")
 			continue;
 
+		const _char* pTest = "Tab_Ten_04CM";
+
+		if (strstr(entry.path().string().c_str(), pTest) != nullptr)
+ 			int a = 10;
+
 		ifstream File(entry.path(), ios::binary);
 		if (!File.is_open())
 			CRASH("Failed");
 		File.read(reinterpret_cast<_char*>(&m_iNumMeshes[m_iMaxLOD]), sizeof(_uint));
 		File.close();
 		m_Meshes[m_iMaxLOD] = CMesh_Streaming::Create(m_pDevice, m_pContext, m_iNumMeshes[m_iMaxLOD]);
+
 
 		if (!m_Meshes[m_iMaxLOD++])
 			CRASH("Failed");
@@ -207,7 +213,7 @@ HRESULT CModel_Streaming::Ready_Material()
 
 		ifstream MaterialFile(szMaterialFilePath);
 		if (false == MaterialFile.is_open())
-		{
+		{ 
 			MSG_BOX("Failed Open : Material");
 			return E_FAIL;
 		}
