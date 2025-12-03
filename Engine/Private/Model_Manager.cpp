@@ -24,7 +24,6 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 35, 6);
 	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 20, 3);
 #else
-	
 		m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 128, sizeof(VTXMESH));
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
