@@ -23,6 +23,10 @@ public:
 		_float4 vBaseColor{ 1.f, 1.f, 1.f, 1.f };
 	}LEVIBAYONET_DESC;
 
+	typedef struct tagLeviBayynetReset
+	{
+		COLLISIONLAYER eLayer;
+	}LEVI_BY_RESET;
 private:
 	enum SHADERPATH{ BASE, KNIFE, FX, END };
 
@@ -42,7 +46,7 @@ public:
 
 	virtual		void Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 	void Attack_Active(_bool isActive);
-	//void Change_Visible(_bool isActive);
+	void Change_Layer(COLLISIONLAYER eLayer);
 
 private:
 	CShader* m_pShaderCom = { nullptr };

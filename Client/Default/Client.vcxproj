@@ -204,6 +204,7 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\SequencePlayerFactory.h" />
     <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
@@ -261,9 +262,12 @@
     <ClInclude Include="..\Public\Level_Heaven.h" />
     <ClInclude Include="..\public\Levi_Alter.h" />
     <ClInclude Include="..\Public\Levi_Anchor.h" />
+    <ClInclude Include="..\Public\Levi_Augusta.h" />
     <ClInclude Include="..\public\Levi_Bayonet.h" />
     <ClInclude Include="..\Public\Levi_Bow.h" />
+    <ClInclude Include="..\Public\Levi_Drop.h" />
     <ClInclude Include="..\public\Levi_Ray.h" />
+    <ClInclude Include="..\Public\Levi_Wave.h" />
     <ClInclude Include="..\Public\Loader_Heaven.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
@@ -278,6 +282,7 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\Public\MapObject_Water.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
+    <ClInclude Include="..\public\MotionTrail.h" />
     <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\MouseController.h" />
     <ClInclude Include="..\Public\NPCCell.h" />
@@ -344,7 +349,10 @@
     <ClInclude Include="..\Public\RoverRopeHook.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
+    <ClInclude Include="..\public\Scan.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
+    <ClInclude Include="..\Public\SequencePlayer.h" />
+    <ClInclude Include="..\Public\SequencePlayerDefine.h" />
     <ClInclude Include="..\public\SFX_Prefab.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\public\SonoraChange.h" />
@@ -396,7 +404,12 @@
     <ClInclude Include="..\public\UI_Text_Damage.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
+    <ClInclude Include="..\Public\WeaponDummy.h" />
     <ClInclude Include="..\Public\Wing.h" />
+    <ClInclude Include="..\Public\Yuno.h" />
+    <ClInclude Include="..\Public\YunoFactory.h" />
+    <ClInclude Include="..\Public\YunoMoon.h" />
+    <ClInclude Include="..\Public\YunoState_Enum.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -447,6 +460,7 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\private\SequencePlayerFactory.cpp" />
     <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
@@ -517,9 +531,12 @@
     </ClCompile>
     <ClCompile Include="..\private\Levi_Alter.cpp" />
     <ClCompile Include="..\Private\Levi_Anchor.cpp" />
+    <ClCompile Include="..\Private\Levi_Augusta.cpp" />
     <ClCompile Include="..\private\Levi_Bayonet.cpp" />
     <ClCompile Include="..\Private\Levi_Bow.cpp" />
+    <ClCompile Include="..\Private\Levi_Drop.cpp" />
     <ClCompile Include="..\private\Levi_Ray.cpp" />
+    <ClCompile Include="..\Private\Levi_Wave.cpp" />
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
     <ClCompile Include="..\Private\Loader_Heaven.cpp" />
@@ -545,6 +562,7 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
+    <ClCompile Include="..\private\MotionTrail.cpp" />
     <ClCompile Include="..\Private\Mouse.cpp" />
     <ClCompile Include="..\Private\MouseController.cpp" />
     <ClCompile Include="..\Private\NPCCell.cpp" />
@@ -571,7 +589,9 @@
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\RoverRopeDrag.cpp" />
     <ClCompile Include="..\Private\RoverRopeHook.cpp" />
+    <ClCompile Include="..\private\Scan.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
+    <ClCompile Include="..\Private\SequencePlayer.cpp" />
     <ClCompile Include="..\private\SFX_Prefab.cpp" />
     <ClCompile Include="..\private\SonoraChange.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
@@ -630,7 +650,11 @@
     <ClCompile Include="..\private\UI_Text_Damage.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Prop.cpp" />
+    <ClCompile Include="..\Private\WeaponDummy.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
+    <ClCompile Include="..\Private\Yuno.cpp" />
+    <ClCompile Include="..\Private\YunoFactory.cpp" />
+    <ClCompile Include="..\Private\YunoMoon.cpp" />
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -709,6 +733,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxScan.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_MonsterProp.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>

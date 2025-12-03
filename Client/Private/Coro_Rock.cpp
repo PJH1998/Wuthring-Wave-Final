@@ -35,7 +35,7 @@ HRESULT CCoro_Rock::Initialize_Clone(void* pArg)
 		XMVectorSetW(XMLoadFloat3(&pDesc->vOffsetTrans), 1.f));
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
-
+	m_isActivate = false;
     return S_OK;
 }
 
@@ -142,7 +142,7 @@ void CCoro_Rock::Ready_Component(CORO_ROCK_DESC* pDesc)
 	m_tCallback.fAttack = pDesc->fAttackDmg;
 	m_tCallback.eType = pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_tCallback);
-	//m_pRigidBodyCom->IsActivate(false);
+	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MonsterProp"),

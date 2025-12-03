@@ -28,7 +28,6 @@ namespace PlayerData
     {
         CCharacter::CHARACTER_DESC Desc;
         Desc.eCurLevel = eLevel;
-        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
@@ -36,11 +35,8 @@ namespace PlayerData
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
         Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
         Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
-        //Desc.abilityData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Ability"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
-        //Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
         Desc.strFolderPath = "../Bin/Resource/Model/Player/AugustaFacial/Notify/";
-        //Desc.strAbilityFolderPath = "../Bin/Resource/Model/Player/Augusta/Ability/"; // 스탯 정보 폴더.
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
