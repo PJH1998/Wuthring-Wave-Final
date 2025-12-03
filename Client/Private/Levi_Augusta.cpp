@@ -149,7 +149,7 @@ void CLevi_Augusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold
 void CLevi_Augusta::Ready_Components(const LEVIAUG_DESC* pDesc)
 {
     // 1. Components
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->eLevel)
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
         , TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         CRASH("Shader");
 
