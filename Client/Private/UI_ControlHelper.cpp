@@ -178,7 +178,7 @@ void CUI_ControlHelper::Show_InteractUI(_wstring strText)
 	textDesc.strText = strText;
 	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
 
-
+	
 	//auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
 	//textDesc.strText = strText;
 	//static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);

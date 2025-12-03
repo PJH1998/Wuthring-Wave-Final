@@ -80,6 +80,8 @@
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
 
+#include "UI_CurveTrace.h"
+
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
 
@@ -979,6 +981,11 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_Text_Instance"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_TextInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
 		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_TextInstance Load Failed. The Shader_TextInstance may have already been loaded.\n");
+	
+	// Shader_CurveTrace
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxCurveTrace.hlsl"), VTXUICURVE::Elements, VTXUICURVE::iNumElements))))
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_CurveTrace Load Failed. The Shader_CurveTrace may have already been loaded.\n");
 
 
 	// ==============================
@@ -1034,10 +1041,14 @@ HRESULT CLoader_Test::Load_UI()
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
 
 	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_CurveTrace",
+		CUI_CurveTrace::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_CurveTrace Load Failed. The UI_CurveTrace may have already been loaded.\n");
+
+	// Custom...
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
 		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
-
 
 
 
