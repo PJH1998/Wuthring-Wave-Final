@@ -104,6 +104,7 @@ void CLevi_Anchor::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->LookAt(XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
 	m_vTargetPos = pDesc->vTargetPos;
 	m_pRigidBodyCom->IsActivate(true);
+	m_isDisolve = false;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
 }
@@ -171,7 +172,7 @@ CLevi_Anchor* CLevi_Anchor::Create(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
-		MSG_BOX("Failed to Create : CLevi_Anchor");
+		MSG_BOX("Failed to Create : CLevi_Drop");
 		Safe_Release(pInstance);
 	}
 
@@ -184,7 +185,7 @@ CGameObject* CLevi_Anchor::Clone(void* pArg)
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
-		MSG_BOX("Failed to Create : CLevi_Anchor (Clone)");
+		MSG_BOX("Failed to Create : CLevi_Drop (Clone)");
 		Safe_Release(pClone);
 	}
 

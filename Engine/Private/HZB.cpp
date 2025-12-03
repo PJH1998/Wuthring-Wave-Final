@@ -21,6 +21,7 @@ HRESULT CHZB::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	Ready_DefaultSetting();
 	Ready_OcclusionCulling();
 
+	m_pBoxInfos = new BOXINFO[3000];
     return S_OK;
 }
 
@@ -57,7 +58,6 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	_uint iNumObjects = Objects.size();
 
 	// Create StructuredBuffer (BoxPoints)
-	BOXINFO* pBoxInfos = new BOXINFO[3000];
 
 	//D3D11_MAPPED_SUBRESOURCE BoxPointsSub = {};
 	//m_pContext->Map(m_pBoxPointsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &BoxPointsSub);
@@ -78,12 +78,12 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 		XMStoreFloat3(&BoxInfo.vCenter, XMVector3TransformCoord(XMLoadFloat3(&Objects[i]->Get_BoundingBox()->Center), ViewMatrix));
 		BoxInfo.fRadius = max(Objects[i]->Get_BoundingBox()->Extents.x, max(Objects[i]->Get_BoundingBox()->Extents.y, Objects[i]->Get_BoundingBox()->Extents.z));
 		//BoxInfo.fRadius = Objects[i]->Get_BoundingBox()->Extents.z;
-		pBoxInfos[i] = BoxInfo;
+		m_pBoxInfos[i] = BoxInfo;
 	}
 	//m_pContext->Unmap(m_pBoxPointsBuffer, 0);
-	m_pContext->UpdateSubresource(m_pBoxPointsBuffer, 0, nullptr, pBoxInfos, 0, 0);
+	m_pContext->UpdateSubresource(m_pBoxPointsBuffer, 0, nullptr, m_pBoxInfos, 0, 0);
 
-	Safe_Delete_Array(pBoxInfos);
+	ZeroMemory(m_pBoxInfos, sizeof(BOXINFO) * 3000);
 
 	// Dispatch
 	OC_DESC OCDesc = {};
@@ -395,4 +395,5 @@ void CHZB::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pGameInstance);
+	Safe_Delete_Array(m_pBoxInfos);
 }

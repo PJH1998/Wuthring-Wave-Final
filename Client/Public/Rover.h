@@ -220,8 +220,10 @@ private:
 	void Render_Default(_uint iMeshIndex);
 	void Render_Skin(_uint iMeshIndex);
 	void Render_Eye(_uint iMeshIndex);
+	void Render_Mask(_uint iMeshIndex);
 	_bool IsSkin(_uint iMeshIndex);
 	_bool IsEye(_uint iMeshIndex);
+	_bool IsMask(_uint iMeshIndex);
 
 private:
 	void Bind_Resources();

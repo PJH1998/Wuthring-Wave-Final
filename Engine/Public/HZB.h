@@ -88,7 +88,7 @@ private:
 
 	// Temporal Filter (Pre Visible Store)
 	map<size_t, VISIBLE_COUNT>					m_PreVisible;
-
+	BOXINFO*									m_pBoxInfos = { nullptr };
 private:
 	void						Ready_DefaultSetting();
 	void						Ready_OcclusionCulling();

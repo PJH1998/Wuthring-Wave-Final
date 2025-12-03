@@ -41,7 +41,7 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	m_vBaseColor = _float4(0.1f, 0.1f, 0.1f, 1.f);
-
+	m_pModelCom->Play_Animation_CPU("Stand2_Ex", 0.f, nullptr, false, false, false, false);
 	return S_OK;
 }
 
@@ -68,8 +68,6 @@ void CLevi_Bow::Update(_float fTimeDelta)
 	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
 	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
-
-	m_pModelCom->Play_Animation_CPU("Stand2_Ex", fTimeDelta, nullptr, false, false, false, false);
 }
 
 void CLevi_Bow::Late_Update(_float fTimeDelta)
