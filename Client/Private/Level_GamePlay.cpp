@@ -429,7 +429,7 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CoroDesc.fSpeedPerSec = 10.f;
 	CoroDesc.vInitPosition = _float3(3479.2f, 268.6f, 2098.8f);
 	CoroDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
-	CoroDesc.pAnimationTag = "Idle1";
+	CoroDesc.pAnimationTag = "burst01_5";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Monster/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
 	CoroDesc.fAttackDmg = pInfo->fAttack;
