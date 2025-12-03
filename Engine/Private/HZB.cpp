@@ -21,7 +21,7 @@ HRESULT CHZB::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	Ready_DefaultSetting();
 	Ready_OcclusionCulling();
 
-	m_pBoxInfos = new BOXINFO[3000];
+	m_pBoxInfos = new BOXINFO[MAX_OBJECT];
     return S_OK;
 }
 
@@ -231,7 +231,7 @@ void CHZB::Ready_DefaultSetting()
 
 void CHZB::Ready_OcclusionCulling()
 {
-	_uint iMaxObject = 2000;
+	_uint iMaxObject = MAX_OBJECT;
 
 	// Create Constant Buffer
 	D3D11_BUFFER_DESC OCDescBufferDesc = {};

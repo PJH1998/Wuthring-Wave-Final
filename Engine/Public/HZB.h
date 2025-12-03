@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Base.h"
 
+#define MAX_OBJECT 3000
+
 NS_BEGIN(Engine)
 
 class CHZB final : public CBase
