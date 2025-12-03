@@ -1111,6 +1111,9 @@
     <ClInclude Include="..\Public\Levi_Augusta.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\WeaponDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1759,6 +1762,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Levi_Augusta.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\WeaponDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

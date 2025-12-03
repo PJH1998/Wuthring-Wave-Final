@@ -42,7 +42,7 @@ HRESULT CLevi_Augusta::Initialize_Clone(void* pArg)
 		XMVectorSetW(XMLoadFloat3(&pDesc->vOffsetPos), 1.f));
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
-	m_vBaseColor = _float4(0.1f, 0.1f, 0.1f, 1.f);
+	m_vBaseColor = _float4(0.15f, 0.1f, 0.15f, 1.f);
 	m_pModelCom->Play_Animation_CPU("Burst01", 0.f, nullptr, false, false, false, false);
     return S_OK;
 }

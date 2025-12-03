@@ -1,14 +1,15 @@
 ﻿#include "ClientPch.h"
 #include "PatternDummy.h"
+#include "WeaponDummy.h"
 
 
 CPatternDummy::CPatternDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CGameObject { pDevice, pContext }
+	: CContainerObject { pDevice, pContext }
 {
 }
 
 CPatternDummy::CPatternDummy(const CPatternDummy& Prototype)
-	: CGameObject { Prototype }
+	: CContainerObject{ Prototype }
 {
 }
 
@@ -30,18 +31,28 @@ HRESULT CPatternDummy::Initialize_Clone(void* pArg)
 	m_strAnimTag = m_strInitAnimTag;
 
 	Register_AllNotifies(pDesc->strFolderPath);
+	m_eType = pDesc->eType;
+	if (m_eType == MODEL_TYPES::WEAPON)
+		Ready_PartObjects(pDesc);
 	return S_OK;
 }
 
 void CPatternDummy::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
+
+	for (auto& Pair : m_PartObjects)
+	{
+		if (Pair.second->IsActivate())
+			Pair.second->Priority_Update(fTimeDelta);
+	}
 }
 
 void CPatternDummy::Update(_float fTimeDelta)
 {
 	_bool isFinished{};
-	isFinished = m_pModelCom->Play_Animation_CPU(m_strAnimTag, fTimeDelta * 1.f, &m_fTrackPosition, false, m_isRootMotion, m_isRootRotate, m_isRootTranslate, 1.f);
+	isFinished = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strAnimTag, fTimeDelta * 1.f, &m_fTrackPosition, m_isRootMotion, m_isRootRotate, m_isRootTranslate, 1.f);
+	
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	XMStoreFloat3(&m_vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 	if (isFinished)
@@ -51,6 +62,12 @@ void CPatternDummy::Update(_float fTimeDelta)
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
 	//_vector vVelocity = m_pTransformCom->Get_Velocity();
 	//m_pColliderCom->Update(vVelocity / fTimeDelta);
+
+	for (auto& Pair : m_PartObjects)
+	{
+		if (Pair.second->IsActivate())
+			Pair.second->Update(fTimeDelta);
+	}
 }
 
 void CPatternDummy::Late_Update(_float fTimeDelta)
@@ -93,6 +110,12 @@ void CPatternDummy::Late_Update(_float fTimeDelta)
 
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
+
+	for (auto& Pair : m_PartObjects)
+	{
+		if (Pair.second->IsActivate())
+			Pair.second->Late_Update(fTimeDelta);
+	}
 }
 
 void CPatternDummy::Render()
@@ -127,9 +150,18 @@ void CPatternDummy::Render_Shadow()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pShaderCom->Begin(5);
+
+		_bool HasNormal = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		
 
 		m_pModelCom->Render(i);
+
+		m_pShaderCom->UndBind_All_VS_SRV();
 	}
 }
 
@@ -151,8 +183,13 @@ void CPatternDummy::OnCollide_Remove(_uint iLayer, void* pDesc, const ContactMan
 void CPatternDummy::Ready_Component(PAT_DUMMYDESC* pDesc)
 {
 	// Com_Shader
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"), 
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
+
+	// Com_ComputeShader
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
+		, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"), TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+		CRASH("Leviatan/Com_ComputeShader");
 
 	// Com_Model
 	Add_Component(ENUM_CLASS(pDesc->eLevel), pDesc->strModelTag,
@@ -162,51 +199,17 @@ void CPatternDummy::Ready_Component(PAT_DUMMYDESC* pDesc)
 	m_strAnimationTags = m_pModelCom->Get_AnimationNames();
 #endif // _DEBUG
 
+}
 
-	// Com_Rigidbody
-	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eShape = SHAPE::MESH;
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//RigidbodyDesc.eType = EMotionType::Static;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	//RigidbodyDesc.pModel = m_pModelCom;
-	//CRigidbody::CAPSULEBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eShape = SHAPE::CAPSULE;
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//RigidbodyDesc.eType = EMotionType::Kinematic;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	//RigidbodyDesc.fHeight = 10.f;
-	//RigidbodyDesc.fRadius = m_pGameInstance->Rand(5.f, 20.f);
-	//RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::VIRTUAL;
-	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
-
-	// Com_Collider
-	//CCollider::COLLIDER_DESC ColliderDesc = {};
-	//XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	////ColliderDesc.vPos = _float3(0.f, 0.f, 0.f);
-	//ColliderDesc.eType = EMotionType::Kinematic;
-	//ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
-	//ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-	//ColliderDesc.fHeight = 1.8f;
-	//ColliderDesc.fRadius = 7.f; //m_pGameInstance->Rand(5.f, 20.f);
-	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
-	//	TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
-	//
-	//// Collide Callback Func Setting
-	//m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& inManifold) {
-	//		OnCollide_Enter(iLayer, pDesc, inManifold);
-	//	});
-	//// Collide Callback Func Setting
-	//m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& inManifold) {
-	//	OnCollide_During(iLayer, pDesc, inManifold);
-	//	});
-	//// Collide Callback Func Setting
-	//m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& inManifold) {
-	//	OnCollide_Remove(iLayer, pDesc, inManifold);
-	//	});
-	//m_pColliderCom->Set_Gravity(false);
-
+void CPatternDummy::Ready_PartObjects(PAT_DUMMYDESC* pDesc)
+{
+	CWeaponDummy::WD_DESC WD{};
+	WD.vOffsetPos = pDesc->vOffsetPos;
+	WD.vOffsetRadian = pDesc->vOffsetRot;
+	WD.wstrModelTag = pDesc->strPartTag;
+	WD.pParentTransform = m_pTransformCom;
+	WD.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(pDesc->strBoneName.c_str());
+	CContainerObject::Add_PartObject(TEXT("Part_Weapon"), ENUM_CLASS(pDesc->eLevel),TEXT("Prototype_GameObject_WeaponDummy"), &WD);
 }
 
 void CPatternDummy::Register_AllNotifies(const _string& strFolderPath)
@@ -273,6 +276,8 @@ void CPatternDummy::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pComputeShaderCom);
+	//Safe_Release(m_pFacialShaderCom);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
 	//Safe_Release(m_pRigidbodyCom);

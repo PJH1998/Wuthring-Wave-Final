@@ -71,11 +71,11 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-	//Ready_Dummy();
+	Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();mm
 	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
+	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
 	//Ready_Leviatan();
@@ -180,13 +180,19 @@ void CLevel_Test::Ready_Dummy()
 	
 	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
 	DummyDesc.eLevel = m_eCurLevel;
+	DummyDesc.eType = CPatternDummy::MODEL_TYPES::DEFAULT;
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");				//신왕
 	//DummyDesc.strInitAnimTag = "Stand1";
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	
-	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로
-	DummyDesc.strInitAnimTag = "Stand";
-	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/CorroSaurus/Notify";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로
+	//DummyDesc.strInitAnimTag = "Stand";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/CorroSaurus/Notify";
+	//DummyDesc.eType = CPatternDummy::MODEL_TYPES::WEAPON;
+	//DummyDesc.strPartTag = TEXT("Prototype_Component_Model_CoroRock");
+	//DummyDesc.strBoneName = "Bone_WeaponProp001";
+	//DummyDesc.vOffsetPos = _float3(2.5f, 0.f, 0.f);
+	//DummyDesc.vOffsetRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(-90.f));
 	 
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Ggobul");						//꼬불이
 	//DummyDesc.strInitAnimTag = "SAttack01_1";
@@ -196,9 +202,15 @@ void CLevel_Test::Ready_Dummy()
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
 
-	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Leviatan_Alter");					//레비아탄(분신)
-	//DummyDesc.strInitAnimTag = "Stand2";
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Levi_Alter");					// 레비아탄(분신 모델, 본체와 애니메이션 동일)
+	DummyDesc.strInitAnimTag = "Stand2";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";			// 레비아탄(분신 Notify)
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";				// 레비아탄(본체 Notify)
+	DummyDesc.eType = CPatternDummy::MODEL_TYPES::WEAPON;
+	DummyDesc.strPartTag = TEXT("Prototype_Component_Model_Leviatan_Bayonet");
+	DummyDesc.strBoneName = "WeaponProp02";
+	DummyDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	DummyDesc.vOffsetRot = _float3(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
