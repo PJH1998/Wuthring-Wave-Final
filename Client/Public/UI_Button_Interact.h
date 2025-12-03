@@ -21,6 +21,7 @@ public: // 생성/복제
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 public:
 	void			Req_OffInteract()	{ m_IsGoinDisabled = true; }
+	
 
 private:
 	void			PreAssign_ChildUIs();

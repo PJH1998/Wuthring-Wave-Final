@@ -38,7 +38,12 @@ public:
 	void					Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
 	void					Toggle_BossStatusUI(_bool isOn) { m_isOn_BossStatus = isOn; }
 
-
+	/*
+	
+	isIn_Galbrena_BurstMode
+	isIn_Augusta_AdvUlt
+	
+	*/
 private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_ChildExtraComponents();

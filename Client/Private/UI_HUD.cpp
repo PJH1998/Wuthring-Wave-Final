@@ -510,19 +510,23 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		_uint iTargetNumInstance = static_cast<_uint>(targetUI->Get_UIDesc().vecInstanceDescs.size());
 		vecVariantMat.resize(iTargetNumInstance);
 
+		_float fLeftColorMul		= 0.4f;
+		_float fPassedColorMul		= 0.8f;
+		_float fFilledColorMul		= 0.95f;
+
         vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
-        vecVariantMat[0].m[0][1] = 0.5f;
-        vecVariantMat[0].m[0][2] = 0.95f;
+        vecVariantMat[0].m[0][1] = fLeftColorMul;
+		vecVariantMat[0].m[0][2] = (fBasicSkillCD[i][SK_E] != 0.f)? fPassedColorMul : fFilledColorMul;
 
         vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
-        vecVariantMat[1].m[0][1] = 0.5f;
-        vecVariantMat[1].m[0][2] = 0.95f;
+        vecVariantMat[1].m[0][1] = fLeftColorMul;
+		vecVariantMat[1].m[0][2] = (fBasicSkillCD[i][SK_R] != 0.f) ? fPassedColorMul : fFilledColorMul;;
 
 		if (vecVariantMat.size() >= 3)
 		{
 			vecVariantMat[2].m[0][0] = 0.0f;	// for LB Btn
-			vecVariantMat[2].m[0][1] = 0.5f;
-			vecVariantMat[2].m[0][2] = 0.95f;
+			vecVariantMat[2].m[0][1] = fLeftColorMul;
+			vecVariantMat[2].m[0][2] = fPassedColorMul;
 		}
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -587,7 +591,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
 	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
-	_bool isIn_Galbrena_BurstMode = false; /* 나중에 버스트 모드 조건 삽입 */
+	_bool isIn_Galbrena_BurstMode = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
+		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
@@ -629,14 +634,31 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	for (auto& instDesc : readyInstDesc)
 		instDesc.vClipTexcoordX = { 0.f, 0.f };
 	
+	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
 
-	// - E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
+	// - LB/E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
 	 
 	//if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
 	//	readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 1 };
 	//else
 	//	readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
 
+	if (isReady_Augusta_StrongATK)		readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 1 };
+	else								readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
+	if (isIn_Augusta_AdvUlt)			readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 1 };
+	else								readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
+
+
+	switch (m_iSelectedCHIndex)
+	{
+	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Augusta_AdvUlt) ?		_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	case CH_GALBRENA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Galbrena_BurstMode) ?	_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	default:			readyInstDesc[iIndex_LBBtn].vClipTexcoordX = _float2{ 0.f, 0.f };														break;
+	}
+	
+	
+
+	;
 
 	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
@@ -677,15 +699,29 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	case CH_GALBRENA:	is_RBtn_Active				= true;		break;
 	}
 
-
-	
 	readyInstDesc[iIndex_RBtn].vClipTexcoordX = (is_RBtn_Active) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };
 
-	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
 
+	// 이걸 이게 스킬별로 대응?
+	
+	for (_uint i = 0; i < vecVariantMat.size(); i++)
+	{	// 기본값 설정
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._11) = 0.f;
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._12) = 0.f;								// ColorMul1
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 1.f;								// ColorMul2
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._14) = static_cast<_float>(true);		// Is Use CustomColor?
+		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vecCustomColor[m_iSelectedCHIndex];	// CustomColor
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 0.f;							// CD Start Degree
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._33) = m_fElapsedTime;							// Elapsed Time
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._34) = 0.2f;							// UV Scroll Speed
+		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = vecAdvCustomColor[m_iSelectedCHIndex];	// Mask Color
+	}
+
+	// R에 대한 예외 적용
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._11) = (1.f - fUltGuage / 1.f);		// CD or Resource Rate
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._12) = 0.f;							// ColorMul1
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._13) = (fUltGuage >= 1.f) ? 1.f : 0.85f ;							// ColorMul2
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._13) = (fUltGuage >= 1.f) ? 1.f : 0.85f ;	// ColorMul2
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._14) = static_cast<_float>(true);	// Is Use CustomColor?
 	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21)= vecCustomColor[m_iSelectedCHIndex];	// CustomColor
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._31) = 0.f;							// CD Start Degree
@@ -693,7 +729,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._33) = m_fElapsedTime;							// Elapsed Time
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._34) = 0.2f;							// UV Scroll Speed
-	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._41)= vecAdvCustomColor[m_iSelectedCHIndex];						// Mask Color
+	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._41)= vecAdvCustomColor[m_iSelectedCHIndex];	// Mask Color
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
@@ -804,7 +840,7 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 
 	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
 	_bool isIn_Galbrena_BurstMode = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
-		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false; /* ksta : 나중에 버스트 모드 조건 삽입 */
+		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
@@ -1596,9 +1632,9 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 
 	if (fDistortStrength > fLateDistortStrength)	fLateDistortStrength += fFollowStrength * 2.f;
 	if (fDistortStrength < fLateDistortStrength)	fLateDistortStrength -= fFollowStrength;
-	fLateDistortStrength = clamp(fLateDistortStrength, fDistortMin, fDistortMax);
+	fLateDistortStrength = 0.5f;// clamp(fLateDistortStrength, fDistortMin, fDistortMax);
 
-	_float fUVRotateSpeed = -10.f / 60.f;
+	_float fUVRotateSpeed = -60.f / 60.f;
 
 	for (auto& variantMat : vecVariantMat)		// Outline
 	{
