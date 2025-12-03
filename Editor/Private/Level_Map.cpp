@@ -122,7 +122,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
-
+	m_pEffectCollector->Set_ImGuiOption();
     switch (m_eMenu)
     {
     case Editor::CLevel_Map::MENU_OBJECT:
@@ -529,6 +529,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Collaps"), event);
 				else if (Pair.first.find("Light") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Light"), event);
+				else if (Pair.first.find("Effect") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Effect"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -827,6 +829,15 @@ void CLevel_Map::Menu_Save_Load()
 								Desc.CopyDesc = &ReadDesc;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
 									, m_iLevel, TEXT("Layer_Light"), &Desc);
+							}
+						}
+						else if (strFilePath.find("Effect") != std::string::npos)
+						{
+							CEdit_MapEffectCollector::ETERNAL_EFFECT Desc{};
+							while (File.read(reinterpret_cast<char*>(&Desc.EffectTag), sizeof(_uint)))
+							{
+								File.read(reinterpret_cast<char*>(&Desc.vPos), sizeof(_float4));
+								m_pEffectCollector->Map_Load(Desc);
 							}
 						}
                         else
@@ -1857,6 +1868,7 @@ void CLevel_Map::Free()
 	Safe_Release(m_pBrush);
 	Safe_Release(m_pPickedSpawnor);
 	Safe_Release(m_pLightManager);
+	Safe_Release(m_pEffectCollector);
 	
     for (auto& Pair : m_SaveObjects)
     {

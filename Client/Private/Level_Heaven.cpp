@@ -102,6 +102,7 @@ HRESULT CLevel_Heaven::Initialize()
 
 	m_pGameInstance->Begin_VF();
 
+	m_pGameSystem->Create_MapEffects();
 	return S_OK;
 }
 
