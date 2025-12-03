@@ -31,6 +31,15 @@ CMesh::CMesh(const CMesh& Prototype)
 	
 }
 
+void CMesh::Copy_BoneMatrices(_float4x4* pOutMatrices, _uint iNumBones)
+{
+	if (m_iNumBones != iNumBones ||
+		nullptr == pOutMatrices)
+		return;
+
+	memcpy(pOutMatrices, m_BoneMatrices, sizeof(_float4x4) * iNumBones);
+}
+
 
 
 HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)

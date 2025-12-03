@@ -22,6 +22,8 @@ private:
 	virtual ~CMesh() = default;
 
 public:
+	_uint					Get_NumBones() { return m_iNumBones; }
+	void					Copy_BoneMatrices(_float4x4* pOutMatrices, _uint iNumBones);
 	_uint					Get_MaterialIndex() { return m_iMaterialIndex; }
 	const vector<_float3>&	Get_VerticesPos() { return m_VertexPositions; }
 	const vector<_uint>&	Get_Indices() { return m_Indices; }

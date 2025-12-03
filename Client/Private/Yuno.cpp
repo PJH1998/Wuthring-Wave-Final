@@ -278,8 +278,8 @@ void CYuno::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _flo
 {
     switch (iPartType)
     {
-	
-	
+	case PART_MOON:
+		break;
     default:
         break;
     }
