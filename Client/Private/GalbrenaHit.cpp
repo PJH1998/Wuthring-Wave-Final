@@ -199,7 +199,7 @@ void CGalbrenaHit::Check_StateTransition(_float fTimeDelta)
 				}
 				else
 				{
-					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2; // Idle 전용 일어나는 모션.
+					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // Idle 전용 일어나는 모션.
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 					return;
 				}

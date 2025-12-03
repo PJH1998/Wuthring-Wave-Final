@@ -29,6 +29,8 @@ HRESULT CEffect_Decal::Initialize_Clone(void* pArg)
     m_vColor = m_tDesc.vColor;
     m_LifeTime = m_tDesc.LifeTime;
 	m_wstrMyTag = m_tDesc.wstrDecalTag;
+	m_fBlendTime = m_tDesc.fBlendTime;
+	m_fEmissiveIntensity = m_tDesc.fEmissiveIntensity;
 
     m_isActivate = false;
 
@@ -41,14 +43,17 @@ void CEffect_Decal::Priority_Update(_float fTimeDelta)
 
 void CEffect_Decal::Update(_float fTimeDelta)
 {
-    if (!m_isActivate)
-        return;
+	if (!m_isActivate)
+		return;
 
 	DECAL_DATA Desc{};
 	Desc.eType = DECAL_DATA::NONSTATIC;
 	Desc.fLifeTime = m_LifeTime;
 	Desc.vColor = m_vColor;
 	Desc.WorldMatrix = m_ComBindMatrix; /*m_pTransformCom->Get_WorldMatrix();*/
+	Desc.EndWorldMatrix = m_ComBindMatrix;
+	Desc.fBlendTime = m_fBlendTime;
+	Desc.fEmissiveIntensity = m_fEmissiveIntensity;
 
 	m_pGameInstance->Add_DecalData(m_wstrMyTag, Desc);
 

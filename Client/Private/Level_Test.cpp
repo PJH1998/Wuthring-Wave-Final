@@ -424,6 +424,7 @@ void CLevel_Test::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 15);
 	//m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel, 10);
 }
 
 void CLevel_Test::Ready_Skybox()
@@ -584,13 +585,14 @@ void CLevel_Test::Ready_UI()
 	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
 	const _wstring strPrototypeTag_UI[] = {
-		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+		 L"Prototype_GameObject_Custom_UI_Container_HUD",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		//if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-		//	CRASH("Failed to Add RootUI to UI_Manager.");
+		
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
@@ -1038,14 +1040,14 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma region  [NUMPAD 0] KSTA_UITEST_QTE
 	static _bool isQTETrigger = false;
 
-	if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE);
+		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::Q);
 		isQTETrigger = !isQTETrigger;
 	}
-	else if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	else if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER, UI_QTE_BTN::F);
+		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
 		isQTETrigger = !isQTETrigger;
 	}
 #pragma endregion

@@ -39,6 +39,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
 	m_fHP = pDesc->fHP;
+	//m_fHP = 200.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -56,7 +57,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
 	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 120.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 10.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 80.f;
@@ -101,15 +102,15 @@ void CLeviatan::Update(_float fTimeDelta)
 {
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	//if(m_pBehaviorTreeCom[m_iPhase])
-	//{
-	//	if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
-	//	{
-	//		//1페 사망 애니메이션 진행 중
-	//	}
-	//	else
-	//		m_pBehaviorTreeCom[m_iPhase]->tick(this);
-	//}
+	if(m_pBehaviorTreeCom[m_iPhase])
+	{
+		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
+		{
+			//1페 사망 애니메이션 진행 중
+		}
+		else
+			m_pBehaviorTreeCom[m_iPhase]->tick(this);
+	}
 	After_Condition(fTimeDelta);
 	if (m_isAreaAttack)
 		AreaAttack(fTimeDelta);
@@ -270,9 +271,13 @@ void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
 	m_fHP = Info.fMaxHp;
+	//m_fHP = 200.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
+	m_pColliderCom->IsActivate(true);
+	m_pRigidBodyCom->IsActivate(true);
+	m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
 	m_isRender = true;
 }
 
@@ -665,7 +670,7 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 	pBlackBoard2->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard2->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
 	pBlackBoard2->Add_Condition("ATKArrange", [this]() ->_bool { return Attack_Arrange(); });
-	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 5.f); });
+	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 10.f); });
 	pBlackBoard2->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 5.f); });
 	pBlackBoard2->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 4.f); });
 	pBlackBoard2->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 6.f); });
@@ -723,7 +728,7 @@ void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 	AugDesc.pParentTransform = m_pTransformCom;
 	AugDesc.pSocketMatrix = m_pSwordSocket;
 	AugDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
-	AugDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	AugDesc.vOffsetRadian = _float3(XMConvertToRadians(-90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
 	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Augusta"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Augusta"), &AugDesc)))
 		CRASH("Failed to Add Part : Augusta");
@@ -800,13 +805,15 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 	{
 		if (m_iPhase == 0)
 		{
-			m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
+			m_iState = (ENUM_CLASS(TEST_STATE::SPLINT) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
 			m_fHP = 1.f;
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
 		else
+		{
 			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		}
 		return;
 	}
 	if (m_isAnimationFinished)
@@ -814,6 +821,17 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 		_uint iRemainState{};
 		if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 			iRemainState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
+		{
+			m_iAnimCheck++;
+			if(m_iAnimCheck < 3)
+				iRemainState |= ENUM_CLASS(TEST_STATE::SPLINT);
+			else
+			{
+				m_iPhase = PHASE::TWO;
+				Reset(XMMatrixIdentity(), nullptr);
+			}
+		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
 
 		m_iState |= iRemainState;
@@ -902,6 +920,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		//m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		//m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
 		m_isAggro = true;
 	}
 }
@@ -918,6 +937,8 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		vPosition.y += 1.f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_fHP -= pDesc->fAttack;
+		if(m_fStamina > 0.f)
+			m_fStamina -= 1.f;
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};
 
@@ -1070,8 +1091,8 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK5)
-		return false;
+	//if (iIndex != ATK_PATTERN::ATTACK22)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{

@@ -41,26 +41,29 @@ void CRoverGroundSpecial::OnEnter(void* pArg)
 	case ERoverSpecialType::EX_ATTACK01:
 		m_iPartType = CRover::PARTTYPE::PART_SWORD;
 		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pRover->Rotate_Target();
 		break;
 	case ERoverSpecialType::EX_ATTACK02:
 		m_iPartType = CRover::PARTTYPE::PART_SWORD;
 		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+		m_pRover->Rotate_Target();
 		break;
 	case ERoverSpecialType::EX_ATTACK03:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
 		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
+		m_pRover->Rotate_Target();
 		break;
 	case ERoverSpecialType::EX_ATTACK04:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
 		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
+		m_pRover->Rotate_Target();
 		break;
 	case ERoverSpecialType::EX_ATTACK05:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
 		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
+		m_pRover->Rotate_Target();
 		break;
 	}
-    
-
 
     m_pRover->PartActivate(m_iPartType, true);
     
@@ -108,7 +111,7 @@ void CRoverGroundSpecial::OnExit()
 	}
 	
     m_pRover->Set_Gravity(true); 
-
+	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 
@@ -211,6 +214,7 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
 			return;
 		}
+		
 	}
 
 	if (m_IsAnimationEnd)

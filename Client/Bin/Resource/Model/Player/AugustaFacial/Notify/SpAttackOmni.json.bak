@@ -1,0 +1,17 @@
+{
+    "AnimName": "SpAttackOmni",
+    "Notifies": [
+    {
+          "ColliderTag": "SkillWeapon|SWORD_ULTI|SKILL",
+          "IsActive": true,
+          "NotifyType": "Collider",
+          "TrackPosition": 43.0
+    },
+    {
+          "ColliderTag": "SkillWeapon|SWORD_ULTI|SKILL",
+          "IsActive": false,
+          "NotifyType": "Collider",
+          "TrackPosition": 51.0
+    }
+    ]
+}

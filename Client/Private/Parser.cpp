@@ -462,6 +462,10 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			m_pGameInstance->Add_Light(to_wstring(i), ReadDesc);
 		}
 	}
+	else if (pFilePath.find("Effect") != std::string::npos)
+	{
+
+	}
 	else
 	{
 		CMapObject::MAP_LOAD Desc{};
@@ -1288,6 +1292,12 @@ void CParser::Load_FXDecal_FromJson(const _string& strFilePath, const _string& D
 
 	if (DecalJson.contains("LifeTime"))
 		Desc.LifeTime = DecalJson["LifeTime"].get<_float>();
+
+	if (DecalJson.contains("BlendTime"))
+		Desc.fBlendTime = DecalJson["BlendTime"].get<_float>();
+
+	if (DecalJson.contains("EmissiveIntensity"))
+		Desc.fEmissiveIntensity = DecalJson["EmissiveIntensity"].get<_float>();
 
 	if (DecalJson.contains("Color") && DecalJson["Color"].is_array())
 	{

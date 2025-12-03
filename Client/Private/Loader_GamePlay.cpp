@@ -1,6 +1,6 @@
 ﻿#include "ClientPch.h"
-#include "Loader_GamePlay.h"
 #include"GameSystem.h"
+#include "Loader_GamePlay.h"
 
 #pragma region MAP
 #include"MapObject.h"
@@ -41,12 +41,16 @@
 #include "UI_Text.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
+#include "UI_HUD_Sector_FuncIcons.h"
+#include "UI_HUD_Sector_Minimap.h"
 #include "UI_Text_Damage.h"
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
+#include "UI_GrafflePoint.h"
+#include "UI_QTE.h"
 
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
@@ -63,6 +67,7 @@
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
 #include "AugustaHeadProp.h"
+#include "AugustaBurstWeapon.h"
 #include "Augusta.h"
 
 // Rover
@@ -138,10 +143,10 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1201_third/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1202_second2/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1201_second/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1202_third/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -376,6 +381,19 @@ HRESULT CLoader_GamePlay::Load_Augusta()
 		, wStrHeadPropTag
 		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_BurstWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/BurstWeapon/AugustaBurstWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrBurstWeaponTag = TEXT("Prototype_GameObject_Augusta_BurstWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrBurstWeaponTag
+		, CAugustaBurstWeapon::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
 
 
@@ -572,6 +590,14 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
 
+	_string strFilePath_UI_HUD_Sector_Minimap = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_Minimap.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_Minimap));
+
+	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
+
+
+
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
@@ -590,6 +616,11 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_OverflowingPalette = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Palette.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_OverflowingPalette));
 
+	_string strFilePath_UI_GrafflePoint = "../../Client/Bin/Resource/UI/FJson/UITree/Root_GrafflePoint.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_GrafflePoint));
+
+	_string strFilePath_UI_QTE = "../../Client/Bin/Resource/UI/FJson/UITree/Root_QTE1.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_QTE));
 
 
 
@@ -689,6 +720,12 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_TabUtility",
 		CUI_TabUtility::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_TabUtility Load Failed. The UI_TabUtility may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_GrafflePoint",
+		CUI_GrafflePoint::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_GrafflePoint Load Failed. The UI_GrafflePoint may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_QTE",
+		CUI_QTE::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
 
 	// Custom UI (MiniGames)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
@@ -704,6 +741,12 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_GamePlay::Load_UI] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		CUI_HUD_Sector_Minimap::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_Minimap Load Failed. The UI_HUD_Sector_Minimap may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
 
 	return S_OK;
 }

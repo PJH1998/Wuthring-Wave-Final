@@ -1,4 +1,11 @@
-﻿#include "EditorPch.h"
+﻿#include "Galbrena.h"
+#include "Galbrena.h"
+#include "Galbrena.h"
+#include "Galbrena.h"
+#include "Galbrena.h"
+#include "Galbrena.h"
+#include "Galbrena.h"
+#include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
 
@@ -778,12 +785,6 @@ void CAnimationActor::Render_Facial()
 
 	// 매프레임 Compute Shader에서 사용해야 하므로 바인딩 해제.
 
-	
-	
-
-
-
-
 }
 
 
@@ -813,6 +814,8 @@ void CAnimationActor::Render_Default()
 			CRASH("Ready Render Failed");
 	}
 }
+
+
 
 #ifdef _DEBUG
 

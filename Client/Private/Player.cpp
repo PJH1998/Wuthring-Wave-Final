@@ -98,6 +98,9 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 			m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 	}
 
+	// 9. 타이머 지정.
+	m_fChangeCoolTime = 3.f;
+	
 
     return S_OK;
 }
@@ -122,10 +125,14 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	if (m_iCurrentCharacterIdx != NONE)
 		m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
 
+	
 	// 5. Harmony
 	if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
 		m_Characters[m_iHarmonyCharacterIdx]->Priority_Update(fTimeDelta);
+	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
+		m_Characters[m_iPrevCharacterIdx]->Priority_Update(fTimeDelta);
+
 
 
 	// 6. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
@@ -133,7 +140,12 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 		m_pPlayerStatus->Update(fTimeDelta);
 
 
-	// 7. Interaction Type 갱신.
+	// 7. Cool Time 갱신
+	for (_int i = 0; i < CHARACTERTYPE::TYPE_END; ++i)
+	{
+		if (m_ChangeTimers[i] > 0.f)
+			m_ChangeTimers[i] -= fTimeDelta;
+	}
 	
 }
 
@@ -148,10 +160,14 @@ void CPlayer::Update(_float fTimeDelta)
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
 
+	
+
     // 2. Harmony 
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
+	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
+		m_Characters[m_iPrevCharacterIdx]->Update(fTimeDelta);
 
 
 	// 3. Rigidbody Update => Camera 
@@ -179,9 +195,13 @@ void CPlayer::Late_Update(_float fTimeDelta)
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
+	
+
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Late_Update(fTimeDelta);
+	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
+		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
 	
 
@@ -255,6 +275,7 @@ void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 
 	// 이전 캐릭터한테 QTE 정보 알림. => 별개의 Transform으로 움직여야함.
 	// Collider도 제어되면안됨.
+	m_Characters[m_iHarmonyCharacterIdx]->Activate(true);
 	m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(true);
 	m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(false);
 
@@ -286,32 +307,35 @@ void CPlayer::Player_KeyInput()
 	{
 		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 		{
-			if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER && m_ChangeTimers[CHARACTERTYPE::ROVER] <= 0.f)
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::ROVER;
 				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
+				m_ChangeTimers[CHARACTERTYPE::ROVER] = m_fChangeCoolTime;
 				return;
 			}
 
 		}
 		else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
 		{
-			if (m_iCurrentCharacterIdx != CHARACTERTYPE::AUGUSTA)
+			if (m_iCurrentCharacterIdx != CHARACTERTYPE::AUGUSTA && m_ChangeTimers[CHARACTERTYPE::AUGUSTA] <= 0.f)
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
 				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
+				m_ChangeTimers[CHARACTERTYPE::AUGUSTA] = m_fChangeCoolTime;
 				return;
 			}
 		}
 		else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
 		{
-			if (m_iCurrentCharacterIdx != CHARACTERTYPE::GALBRENA)
+			if (m_iCurrentCharacterIdx != CHARACTERTYPE::GALBRENA && m_ChangeTimers[CHARACTERTYPE::GALBRENA] <= 0.f)
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::GALBRENA;
 				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
+				m_ChangeTimers[CHARACTERTYPE::GALBRENA] = m_fChangeCoolTime;
 				return;
 			}
 		}
@@ -389,7 +413,7 @@ void CPlayer::Notify_HarmonyEnd()
 {
     if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
     {
-        m_Characters[m_iHarmonyCharacterIdx]->SetActivate(false);
+        m_Characters[m_iHarmonyCharacterIdx]->Activate(false);
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
     }
 }
@@ -400,7 +424,7 @@ void CPlayer::On_HarmonyEnd(CHARACTERTYPE eCharacter)
 {
     if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
     {
-        m_Characters[m_iHarmonyCharacterIdx]->SetActivate(false);
+        m_Characters[m_iHarmonyCharacterIdx]->Activate(false);
         m_Characters[m_iHarmonyCharacterIdx]->Clear_HarmonyEndCallback();
 		m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(false); // 시점이 잘못됌. => PriorityUpdate에서 처리해주던가? => 적어도 OnExit에서는 처리하면 안됌
 
@@ -422,7 +446,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	if (m_iCurrentCharacterIdx != NONE)
 	{
 		// 이전 캐릭터 비활성화
-		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
+		m_Characters[m_iCurrentCharacterIdx]->Activate(false);
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)); // 혹시 모르니.
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 		//m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
@@ -431,15 +455,13 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 
 	// 2. 새 캐릭터 활성화
 	m_iCurrentCharacterIdx = eNextCharacter;
-	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
+	m_Characters[m_iCurrentCharacterIdx]->Activate(true);
 	
 	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT)); // 선택된걸 확인하기.
 	
 	// Change Time 부여를 위한 Condition 추가
 	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
 	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
-	
-	
 
 
 	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화
@@ -453,10 +475,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	m_Characters[m_iCurrentCharacterIdx]->Set_Gravity(true);  // 중력 활성화 (필요 시)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
-
 	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
-
-	
 
 	// 6. 협주 확인. Ensemble
 	// 이전 캐릭터의 협주게이지 확인 => Get_HarmonyGauge
@@ -476,6 +495,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	else
 	{
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
+
 	}
 
 	/*m_pPlayerStatus->;*/

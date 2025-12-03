@@ -38,10 +38,6 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 	m_strPrevInfo = context.m_strPrevInfo;
 
 	// 6. 만약 궁이라면? => Cut Scene 실행.
-	if (m_strPrevInfo == "ULTI")
-	{
-
-	}
 
 	// 7. 흑 날개.
 	_string strBoneName = "WingCase";
@@ -49,9 +45,19 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 	m_pRover->PartActivate(m_iPartType, true);
 	m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pRover->Rotate_Target(); // 진입 시 한번만
-	//m_iPartType = CLogoMaleRover::TYPE_END;
 
 	m_pRover->Set_Gravity(true);
+
+	if (m_strPrevInfo == "ULTI")
+	{
+		m_pRover->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
+		m_pRover->Play_Action(TEXT("Action_Rover_Burst01"));
+		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+	}
+	
+	
 }
 
 void CRoverGroundBurst::OnUpdate(_float fTimeDelta)
@@ -73,8 +79,6 @@ void CRoverGroundBurst::OnUpdate(_float fTimeDelta)
     // 5. 상태 리셋.
     State_Reset();
     
-	
-
 }
 
 void CRoverGroundBurst::OnExit()
@@ -94,6 +98,15 @@ void CRoverGroundBurst::OnExit()
 
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
+
+	if (m_strPrevInfo == "ULTI")
+	{
+		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+	}
+	
+
 	
 }
 
@@ -109,6 +122,12 @@ void CRoverGroundBurst::Handle_Input()
 void CRoverGroundBurst::Update_SkillAnimations(_float fTimeDelta)
 {
     CCharacterState::Play_Animation(m_pRover, fTimeDelta);
+
+	m_pRover->Play_PartAnimation(
+		m_iPartType,
+		"B_Burst01",
+		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
+	);
 }
 
 void CRoverGroundBurst::Check_Physcis(_float fTimeDelta)
@@ -152,7 +171,7 @@ void CRoverGroundBurst::Check_StateTransition(_float fTimeDelta)
     
     if (m_IsAnimationEnd)
     {
-		m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+		m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDCHANGE;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 		return;
     }

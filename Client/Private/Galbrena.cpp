@@ -64,10 +64,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	XMStoreFloat4(&m_vQTEPos, vPos);
 	m_pQTEColliderCom->Set_Position(vPos);
 
-	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
 
-	m_fCameraOriginOffset = 1.2f;
-	m_fCameraOffset = 1.2f;
 
 	m_pMainAttackVolume->TriggerActivate(false);
     return S_OK;
@@ -77,6 +74,7 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+	m_fMaxDissolveTime = 0.35f;
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -93,13 +91,27 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 	// 3. 몬스터와 타겟간의 거리 계산하기.
 	Update_TargetDistance();
 
-	// 4. AttackVolume 바인딩.
+	// 4. AttackVolume 몬스터에 바인딩.
 	Bind_TargetToVolumes();
 
 	// 5. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
   
+	// Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+	// 6. Dissovle 체크
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		}
+	}
 }
 
 void CGalbrena::Update(_float fTimeDelta)
@@ -108,54 +120,39 @@ void CGalbrena::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+	// 3. 상태 머신 갱신
+	if (!IsDissolve)
+	{
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+
+		// 4. Physcics, Camera 업데이트
+		Update_Physics(fTimeDelta);
+		Update_Camera(fTimeDelta);
+	}
+
 	// 2. 파츠 갱신.?
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
+	
 
-	// 3. 상태 머신 갱신
-	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
-
-	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
-	Update_Physics(fTimeDelta);
-	Update_Camera(fTimeDelta);
-
-	//_vector vVelocity = m_pTransformCom->Get_Velocity();
-	//
-	//if (!m_IsQTE)
-	//{
-	//	// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-	//	m_pColliderCom->Update(vVelocity / fTimeDelta);
-	//
-	//	// 6. Camera 갱신 => 위치 따라오게
-	//	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fCameraOffset);
-	//}
-	//else
-	//{
-	//	m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
-	//}
-	//
-	//// 7. Land Check
-	//m_IsLand = Is_LandCollider();
-
-	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	//Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
-
-	// 9. MainAttackVolume 설정
+	// 5. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Update(fTimeDelta);
 
 }
 void CGalbrena::Late_Update(_float fTimeDelta)
 {
-    // 1. 파츠 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Late_Update(fTimeDelta);
-    }
+	if (!m_isActivate)
+		return;
+
+   
 
 	// 2. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -199,6 +196,13 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 			return;
 	}
 
+
+	//  파츠 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
+	}
     
 }
 
@@ -207,24 +211,34 @@ void CGalbrena::Render()
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if(FAILED(m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &m_fEmissiveIntensity, sizeof(_float))))
+			CRASH("Ready EmissiveIntensity")
+	}
+
+
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-			continue;
-
-		_bool HasNormal = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-			HasNormal = true;
-
-		_bool HasMask = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
-			HasMask = true;
-
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
-
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
-			CRASH("Ready g_HasSkinMask Failed");
+		if (IsBack(i))
+			Render_Back(i);
+		else if (IsEye(i))
+			Render_Eye(i);
+		else if (IsSkin(i))
+			Render_Skin(i);
+		else
+			Render_Default(i);
+		
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -572,7 +586,7 @@ void CGalbrena::Reset_QTECamera()
 void CGalbrena::Bind_QTECamera()
 {
 	m_fCameraOriginOffset = m_fCameraOffset;
-	m_fCameraOffset = 2.f; // 늘립니다.
+	m_fCameraOffset = 5.f; // 늘립니다.
 }
 
 
@@ -840,6 +854,44 @@ void CGalbrena::Bind_ChangeEffect()
 
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), matWorld, &effecInfo);
 }
+void CGalbrena::Bind_DissolveTimer()
+{
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	m_fDissolveTimer = 0.f;	
+}
+void CGalbrena::Bind_DefaultShaderPath()
+{
+	// 기본 Shader Path
+	for (_uint i = 0; i < MESHTYPE::MESH_END; ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+
+	// 등짝에 문신
+	m_ShaderPaths[MESHTYPE::MESH_EYE_OL] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENABACK);
+}
+void CGalbrena::Bind_DissolveShaderPath()
+{
+	for (_uint i = 0; i < MESHTYPE::MESH_END; ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::DISSOLVE_CHARACTER);
+}
+
+void CGalbrena::Activate(_bool IsActivate)
+{
+	if (false == IsActivate)
+	{
+		Bind_DissolveTimer();
+		Bind_DissolveShaderPath();
+		m_IsOutLineVisible = false;
+		XMStoreFloat4x4(&m_DissolveWorldMatrix, m_pTransformCom->Get_WorldMatrix());
+	}
+
+	if (true == IsActivate)
+	{
+		m_isActivate = true;
+		m_IsOutLineVisible = true;
+		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		Bind_DefaultShaderPath();
+	}
+}
 #pragma endregion
 
 
@@ -922,10 +974,133 @@ void CGalbrena::Update_Camera(_float fTimeDelta)
 	}
 }
 
+void CGalbrena::Render_Default(_uint iMeshIndex)
+{
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+
+}
+
+void CGalbrena::Render_Skin(_uint iMeshIndex)
+{
+
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	_bool HasSkinMask = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK))) // MaskTexture 배열을 바인딩.
+		HasSkinMask = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasSkinMask, sizeof(_bool))))
+		CRASH("Ready g_HasSkinMask Failed");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+}
+
+void CGalbrena::Render_Back(_uint iMeshIndex)
+{
+	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
+
+	_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f};
+	_float fEmissiveIntensity = { 0.5f };
+
+	// 1. MaskTexture 배열 바인딩.
+	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK); // MaskTexture 배열을 바인딩.
+
+	// 2. MaskIndex 바인딩.
+	m_pShaderCom->Bind_Value("g_iGalbrenaMaskIndex", &m_iGalbrenaMaskIndex, sizeof(_uint));
+
+	// 3. Emissive 바인딩.
+	m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &fEmissiveIntensity, sizeof(_float));
+
+}
+
+void CGalbrena::Render_Eye(_uint iMeshIndex)
+{
+	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+
+	if (IsCutScene)
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
+		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
+		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
+		_float fEmissiveIntensity = { 5.f };
+		_float fGalbrenaEyeAlpha = 0.6f;
+		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
+		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
+	}
+	else
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+}
+
+
+_bool CGalbrena::IsSkin(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_FACE ||
+		iMeshIndex == MESH_UP ||
+		iMeshIndex == MESH_DOWN)
+		return true;
+		
+
+	return false;
+}
+
+_bool CGalbrena::IsBack(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_EYE_OL)
+		return true;
+
+	return false;
+}
+
+_bool CGalbrena::IsEye(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_EYE)
+		return true;
+
+	return false;
+}
+
 void CGalbrena::Bind_Resources()
 {
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        CRASH("Failed Bind Matrix");
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		const _float4x4* pWorldMatrix = &m_DissolveWorldMatrix;
+		if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", pWorldMatrix))) // Dissolve는 해당 위치에 멈춰서 재생되어야함.
+			CRASH("Failed Bind Matrix");
+	}
+	else
+	{
+		if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+			CRASH("Failed Bind Matrix");
+	}
+    
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         CRASH("Failed Bind Matrix");
@@ -982,12 +1157,25 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 
 void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
-    m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
-    //for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-    //    m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::GALBRENA);
+	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+	m_fCameraOriginOffset = 1.2f;
+	m_fCameraOffset = 1.2f;
+
+    m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+
+	m_ShaderPaths[MESH_EYE_OL] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENABACK);
+	
+	// Shader Value 추가.
+	m_vEmissiveColor = {};
+	m_vMaskEmssiveColor = {};
+
+	m_fDissolveTimer = 0.f;
+	m_fMaxDissolveTime = 0.35f;
+	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
+	m_fEmissiveIntensity = 3.f;
 }
 
 void CGalbrena::Ready_Positions(const CHARACTER_DESC* pDesc)

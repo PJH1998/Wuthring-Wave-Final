@@ -67,7 +67,7 @@ void CLevi_Augusta::Update(_float fTimeDelta)
 		XMLoadFloat4x4(m_pSocketMatrix) *
 		m_pParentTransform->Get_WorldMatrix());
 
-	//m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_CombinedMatrix));
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_CombinedMatrix));
 
 	if (nullptr != m_pAttackVolume)
 		m_pAttackVolume->Update(fTimeDelta);
@@ -184,7 +184,6 @@ void CLevi_Augusta::Ready_AttackVolumes(const LEVIAUG_DESC* pDesc)
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
-	// Burst 궁 켰을때 평타.
 	m_pAttackVolume = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

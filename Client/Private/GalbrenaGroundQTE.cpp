@@ -44,6 +44,7 @@ void CGalbrenaGroundQTE::OnEnter(void* pArg)
 	_bool IsSelect = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 	if (IsSelect) // 선택된 캐릭터일때만?
 		m_pGalbrena->Bind_QTECamera();
+		
 }
 
 void CGalbrenaGroundQTE::OnUpdate(_float fTimeDelta)
@@ -140,7 +141,7 @@ void CGalbrenaGroundQTE::Check_StateTransition(_float fTimeDelta)
 		{
 			if (m_States[LAND])
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
+				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE02;
 				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 				return;
 			}

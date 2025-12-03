@@ -36,13 +36,14 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fDensityScale = 0.01f;
 
 	m_VF_Data.fFogMinHeight = 100.f;
-	m_VF_Data.fFogMaxHeight = 230.f;
+	m_VF_Data.fFogMaxHeight = 300.f;
 
 	//m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
 	m_VF_Data.vFogColor = _float3(0.7f, 0.75f, 0.87f);
 	m_VF_Data.fHegihtFallOff = 0.01f;
 	m_VF_Data.fGroundFallOff = 0.02f;
-	m_VF_Data.fDistanceFallOff = 0.02f;
+	//m_VF_Data.fDistanceFallOff = 0.02f;
+	m_VF_Data.fDistanceFallOff = 0.001f;
 	m_VF_Data.fNoiseScale = 0.002f;
 
 	m_VF_Data.fRayPhaseFunctionG = 0.5f;
@@ -53,7 +54,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fFogBaseIntensity = 0.2f;
 
 	m_VF_Data.fRayDensity = 0.7f;
-	m_VF_Data.fRayDensityScale = 0.4f;
+	m_VF_Data.fRayDensityScale = 0.f;
 
 	m_IsFirst = true;
 

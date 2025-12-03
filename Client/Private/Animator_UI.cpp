@@ -23,6 +23,11 @@ HRESULT CAnimator_UI::Initialize_Clone(void* pArg)
     ANIMATOR_UI_DESC* pDesc = static_cast<ANIMATOR_UI_DESC*>(pArg);
     m_pOwner = pDesc->pOwner;
 
+	if (m_pOwner)
+	{
+		m_pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
+		m_pOwnerShaderCom = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+	}
 
 
     return S_OK;
@@ -240,17 +245,12 @@ void CAnimator_UI::Update_Animation_Calculate()
 {
     // if target doesnt have selected animation, binds default value to shader.
     // if not, it will be affected by pre-played animations.
-#ifdef _DEBUG
-	if (m_pOwner->Get_UIDesc().strUIName == L"SectorA_Parry")
-		int i = 10;
-#endif // _DEBUG
 
-
-    if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))		// rootUI doesnt need animator.
+    if (!(m_pOwner && m_pOwnerShaderCom))		// rootUI doesnt need animator.
         return;
 
 	UI_ANIM_KEYFRAME_DESC tDesc = {};
-    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+    CShader* pTargetShader = m_pOwnerShaderCom;
 
     if (m_pCurAnimDesc == nullptr)
     {
@@ -362,7 +362,7 @@ void CAnimator_UI::Update_Animation_Calculate()
     // ==============================
 
 
-    CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
+    CTransform* pOwnerTransformCom = m_pOwnerTransformCom;
 
 
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
@@ -435,10 +435,10 @@ void CAnimator_UI::Update_Animation_Calculate()
 
 void CAnimator_UI::Update_Animation_BindShader()
 {
-	if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))		// rootUI doesnt need animator.
+	if (!(m_pOwner && m_pOwnerShaderCom))		// rootUI doesnt need animator.
 		return;
 
-	CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+	CShader* pTargetShader = m_pOwnerShaderCom;
 	if (!pTargetShader)
 		return;
 

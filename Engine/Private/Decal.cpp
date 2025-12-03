@@ -1,7 +1,7 @@
 ﻿#include "EnginePch.h"
 #include "Decal.h"
 #include "Texture.h"
-#include "VIBuffer_Decal.h"
+#include "VIBuffer_Decal_Cube.h"
 #include "Shader.h"
 #include "GameInstance.h"
 
@@ -17,7 +17,7 @@ CDecal::CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CDecal::Initialize()
 {
-	m_pVIBuffer_Decal = CVIBuffer_Decal::Create(m_pDevice, m_pContext);
+	m_pVIBuffer_Decal = CVIBuffer_Decal_Cube::Create(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pVIBuffer_Decal);
 
 	return S_OK;
@@ -27,21 +27,19 @@ void CDecal::Update(_float fTimeDelta)
 {
 	for (auto iter = m_DecalDatas.begin(); iter != m_DecalDatas.end();)
 	{
-		if (iter->first == DECAL_DATA::STATIC)
+		if (iter->first == DECAL_DATA::STATIC)                                
 		{
 			iter++;
 		}
 		else
 		{
-			iter->second.vLifeTime.x += fTimeDelta;
-
-			if (iter->second.vLifeTime.x >= iter->second.vLifeTime.y)
+			if (Update_InstanceData(iter->second, fTimeDelta))
 			{
-				iter = m_DecalDatas.erase(iter);
+				++iter;
 			}
 			else
 			{
-				++iter;
+				iter = m_DecalDatas.erase(iter);
 			}
 		}
 		
@@ -52,7 +50,7 @@ void CDecal::Update(_float fTimeDelta)
 	vector<VTXINSTANCE_DECAL> TempDatas;
 	TempDatas.reserve(m_iNumDecals);
 	for (auto& Data : m_DecalDatas)
-		TempDatas.push_back(Data.second);
+		TempDatas.push_back(Data.second.second);
 
 	if (m_iNumDecals > 0)
 		m_pVIBuffer_Decal->Update_Buffer(TempDatas);
@@ -99,18 +97,37 @@ HRESULT CDecal::Add_DecalData(const DECAL_DATA& Decal)
 	if (m_iNumDecals >= g_iMaxDecal)
 		return E_FAIL;
 
-	_matrix WorldInv = XMMatrixInverse(nullptr, Decal.WorldMatrix);
-
 	VTXINSTANCE_DECAL Data = {};
+
+	_matrix WorldInv = XMMatrixInverse(nullptr, Decal.WorldMatrix);
 
 	memcpy(&Data.vRight, &Decal.WorldMatrix, sizeof(_matrix));
 	memcpy(&Data.vRightInv, &WorldInv, sizeof(_matrix));
 
-	Data.vLifeTime = _float2(0.f, Decal.fLifeTime);
+	Data.fAlpha = 0.f;
+
 	Data.vColor = Decal.vColor;
 	Data.fEmissiveIntensity = Decal.fEmissiveIntensity == 0.f ? 1.f : Decal.fEmissiveIntensity;
 
-	DECAL_INSTANCE Pair = make_pair(Decal.eType, Data);
+	DECAL_UPDATE_DATA UpdateData = {};
+
+	UpdateData.fCurrentTime = 0.f;
+	UpdateData.fBlendTime = Decal.fBlendTime;
+	UpdateData.fLifeTime = Decal.fLifeTime;
+
+	XMMatrixDecompose(&UpdateData.vStartScale, &UpdateData.vStartRotation, &UpdateData.vStartPosition, Decal.WorldMatrix);
+	XMMatrixDecompose(&UpdateData.vEndScale, &UpdateData.vEndRotation, &UpdateData.vEndPosition, Decal.EndWorldMatrix);
+
+	if (XMVector4Equal(UpdateData.vStartScale, UpdateData.vEndScale)
+		&& XMQuaternionEqual(UpdateData.vStartRotation, UpdateData.vEndRotation) 
+		&& XMVector4Equal(UpdateData.vStartPosition, UpdateData.vEndPosition))
+		UpdateData.IsEqual = true;
+	else
+		UpdateData.IsEqual = false;
+
+	DECAL_INSTANCE_DATA DataPair = make_pair(UpdateData, Data);
+
+	DECAL_INSTANCE Pair = make_pair(Decal.eType, DataPair);
 
 	m_DecalDatas.push_back(Pair);
 
@@ -123,6 +140,42 @@ ID3D11ShaderResourceView* CDecal::Get_DecalSRV(TEXTURETYPE eTextureType)
 		return nullptr;
 
 	return m_pDecalTexture[ENUM_CLASS(eTextureType)]->Get_SRV(0);
+}
+
+_bool CDecal::Update_InstanceData(DECAL_INSTANCE_DATA& Data, _float fTimeDelta)
+{
+	Data.first.fCurrentTime += fTimeDelta;
+
+	if (Data.first.fCurrentTime >= Data.first.fLifeTime)
+		return false;
+
+	if (Data.first.fCurrentTime >= Data.first.fBlendTime)
+	{
+		_float fDenom = max(Data.first.fLifeTime - Data.first.fBlendTime, 1e-5);
+		_float fNum = Data.first.fCurrentTime - Data.first.fBlendTime;
+
+		Data.second.fAlpha = Saturate(fNum / fDenom);
+	}
+
+	if (Data.first.IsEqual)
+		return true;
+
+	_matrix CurrentWorld= {};
+
+	_vector vScale, vRotation, vPosition;
+
+	vScale = XMVectorLerp(Data.first.vStartScale, Data.first.vEndScale, Data.second.fAlpha);
+	vRotation = XMQuaternionSlerp(Data.first.vStartRotation, Data.first.vEndRotation, Data.second.fAlpha);
+	vPosition = XMVectorLerp(Data.first.vStartPosition, Data.first.vEndPosition, Data.second.fAlpha);
+
+	CurrentWorld = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, vPosition);
+
+	_matrix CurrentWorldInv= XMMatrixInverse(nullptr, CurrentWorld);
+
+	memcpy(&Data.second.vRight, &CurrentWorld, sizeof(_matrix));
+	memcpy(&Data.second.vRightInv, &CurrentWorldInv, sizeof(_matrix));
+
+	return true;
 }
 
 HRESULT CDecal::Bind_Resources(CShader* pShader)

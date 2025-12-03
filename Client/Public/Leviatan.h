@@ -101,6 +101,7 @@ private:
 	_bool					m_isRender{};
 	_bool					m_isAreaAttack{};
 	_uint					m_iPhase{};
+	_uint					m_iAnimCheck{};
 #pragma endregion
 
 #pragma region STATUS

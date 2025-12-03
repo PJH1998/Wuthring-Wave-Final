@@ -40,7 +40,7 @@ HRESULT CAugustaEnergyBlade::Initialize_Clone(void* pArg)
 	m_vScrollSpeed = { 1.f, 0.f };
 	m_vEmissiveColor = { 0.3f, 0.1f, 0.05f, 1.0f };
 	m_fEmissiveIntensity = 3.f;
-	m_vDissolveColor = { 1.f, 0.15f, 0.03f, 1.f };
+	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
 
 	m_fMaxDissolveTime = 0.35f;
 
@@ -59,8 +59,6 @@ void CAugustaEnergyBlade::Priority_Update(_float fTimeDelta)
 	m_fTime += fTimeDelta;
 
 	// Dissolve 체크.
-	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
-
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 
 	if (IsDissolve)

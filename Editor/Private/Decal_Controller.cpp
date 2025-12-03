@@ -261,7 +261,6 @@ void CDecal_Controller::Decal_Tab()
     {
         if (ImGui::Begin("Decal Info"))
         {
-           
                 if (ImGui::CollapsingHeader("Decal", ImGuiTreeNodeFlags_DefaultOpen))
                 {
 					vector<const char*> vDecalItems;
@@ -287,6 +286,16 @@ void CDecal_Controller::Decal_Tab()
                     ImGui::PushItemWidth(60);
                     ImGui::InputFloat("##DecalLifeTime", &(m_pSelectedDecalDesc->LifeTime));
                     ImGui::PopItemWidth();
+
+					ImGui::Text("BlendTime");
+					ImGui::PushItemWidth(60);
+					ImGui::InputFloat("##DecalBlendTime", &(m_pSelectedDecalDesc->fBlendTime));
+					ImGui::PopItemWidth();
+
+					ImGui::Text("EmissiveIntensity");
+					ImGui::PushItemWidth(60);
+					ImGui::InputFloat("##DecalEmissiveIntensity", &(m_pSelectedDecalDesc->fEmissiveIntensity));
+					ImGui::PopItemWidth();
 
                     if (ImGui::ColorEdit4("Color", m_fColor, 
 						ImGuiColorEditFlags_NoOptions          // 설정 메뉴 비활성화 (HSV 등 변환 방지)
