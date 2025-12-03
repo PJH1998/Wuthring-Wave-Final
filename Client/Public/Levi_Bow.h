@@ -19,6 +19,11 @@ public:
 		_float fAttackDmg;
 	}LEVIBOW_DESC;
 
+	typedef struct tagLeviBowReset
+	{
+		COLLISIONLAYER eLayer;
+	}LEVI_BOW_RESET;
+
 private:
 	enum SHADERPATH{ BASE, BAOSHI, SUISHI, LINE, END };
 
