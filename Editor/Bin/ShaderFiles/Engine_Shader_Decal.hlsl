@@ -87,7 +87,7 @@ PS_OUT PS_MAIN(PS_IN In)
     if (any(vLocalVolume > 0.5f))
         discard;
     
-    float2 vDecalUV = clamp((vLocalPos.xz) + 0.5f, 0.f, 1.f); // Decal ï¿½ï¿½ï¿½ï¿½ -0.5~0.5;
+    float2 vDecalUV = clamp((vLocalPos.xz) + 0.5f, 0.f, 1.f); // Decal ¹üÀ§ -0.5~0.5;
     
     float4 vDifffuse = 0.f;
     float4 vNormal = 0.f;
