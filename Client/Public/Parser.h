@@ -20,6 +20,10 @@ public:
 		_char szMonsterName3[MAX_PATH] = {};
 	}SPAWN_DESC;
 
+	typedef struct tagEffectTag {
+		_uint iEffectTag;
+		_float4 vEffectPos;
+	}MAPEFFECT;
 private:
 	explicit CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CParser() = default;
@@ -29,6 +33,7 @@ public:
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
+	void							Create_MapEffect();
 #pragma endregion
 
 #pragma region SPAWNER
@@ -94,6 +99,7 @@ private:
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 
 	vector<vector<_string>> m_Data;
+	vector<MAPEFFECT> m_MapEffects;
 	unordered_map<LEVEL, vector<const _char*>> m_LoadingMap;
 	vector<CMapObject_Instance::MAP_LOAD> m_MapInstanceData;
 	//unordered_map<const _char*, vector<SPAWN_DESC>> m_MonsterDesc;

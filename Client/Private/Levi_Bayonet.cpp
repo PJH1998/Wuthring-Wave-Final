@@ -122,12 +122,19 @@ void CLevi_Bayonet::Render()
 
 void CLevi_Bayonet::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	//LEVI_BY_RESET* pDesc = static_cast<LEVI_BY_RESET*>(pArg);
 	m_pAttackVolume->TriggerActivate(false);
+	//m_pAttackVolume->Change_Layer(pDesc->eLayer);
 }
 
 void CLevi_Bayonet::Attack_Active(_bool isActive)
 {
 	m_pAttackVolume->TriggerActivate(isActive);
+}
+
+void CLevi_Bayonet::Change_Layer(COLLISIONLAYER eLayer)
+{
+	m_pAttackVolume->Change_Layer(eLayer);
 }
 
 HRESULT CLevi_Bayonet::Bind_Resources()
@@ -183,6 +190,12 @@ void CLevi_Bayonet::Ready_Volumes(LEVIBAYONET_DESC* pDesc)
 
 void CLevi_Bayonet::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+#ifdef _DEBUG
+		cout << "On Hit! (Levi Bayonet)" << endl;
+#endif // _DEBUG
+	}
 }
 
 CLevi_Bayonet* CLevi_Bayonet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

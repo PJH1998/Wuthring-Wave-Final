@@ -36,7 +36,7 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	m_Tracks.emplace(make_pair("Attack_20|3", make_pair(120.f, 138.f)));
 	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12, 50)));
 	m_isActivate = false;
-	m_vBaseColor = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	m_vBaseColor = _float4(0.25f, 0.2f, 0.25f, 1.f);
 	return S_OK;
 }
 
