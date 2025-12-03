@@ -181,17 +181,7 @@ void CPlayer::Update(_float fTimeDelta)
 	
 	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
-	
 
-	//TEST
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-	{
-		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-
-		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
-	}
 
 #ifdef _DEBUG
 	GUI_Teleport();

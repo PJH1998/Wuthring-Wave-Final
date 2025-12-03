@@ -97,13 +97,17 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	m_pGameInstance->Set_FogDistanceFallOff(0.02f);
 	m_pGameInstance->Set_FogMaxHeight(230.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
 
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
 
 	m_pGameSystem->Create_MapEffects();
+
+	//TEST
+
+
 	return S_OK;
 }
 
@@ -535,10 +539,6 @@ void CLevel_GamePlay::Ready_SFX()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
 		CRASH("Failed Add Pool SONORA_CHANGE");
-
-	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"), ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_Scan"),
-		TEXT("Pooling_Scan"), 1)))
-		CRASH("Failed Add Pool Scan");
 
 	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
 	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
