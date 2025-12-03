@@ -8,6 +8,7 @@
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
+#include "AugustaBurstWeapon.h"
 #include "AugustaGriffon.h"
 #include "AugustaFxObject.h"
 #include "AugustaHeadProp.h"
@@ -61,6 +62,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_pWing->SetActivate(false);
 	m_pFxObject->SetActivate(false);
 	m_pHeadProp->SetActivate(false);
+	m_pBurstWeapon->SetActivate(false);
 	
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
@@ -69,7 +71,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	XMStoreFloat4(&m_vQTEPos, vPos);
 	m_pQTEColliderCom->Set_Position(vPos);
 
-	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+	
 
 	
 	
@@ -97,8 +99,23 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	// 4. 몬스터가 있다면?
 	Update_TargetDistance();
 	
+	
+	// Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+	// 5. Dissovle 체크
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		}
+	}
 	// 5. Change Timer 계산. => Dissolve에 사용
-	Calc_ChangeTimer(fTimeDelta);
+	//Calc_ChangeTimer(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -116,8 +133,18 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
     // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	if (!IsDissolve)
+	{
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		// 3. Physcis 업데이트
+		Update_Physics(fTimeDelta);
+		// 4. 카메라 업데이트
+		Update_Camera(fTimeDelta);
+	}
+    
 
 	// 파츠 갱신.
 	for (auto& pPart : m_PartObjects)
@@ -125,11 +152,6 @@ void CAugusta::Update(_float fTimeDelta)
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
-	
-	// 3. Physcis 업데이트
-	Update_Physics(fTimeDelta);
-	// 4. 카메라 업데이트
-	Update_Camera(fTimeDelta);
 	
 	// 4. 어택 볼륨 갱신.
 	for (auto& pAttackVolume : m_AttackVolumes)
@@ -152,7 +174,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		else
 			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
 	}
-
 	
 
 	// 3. 
@@ -163,12 +184,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		m_IsQTEend = false;
 	}
 
-	// 1. 파츠 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Late_Update(fTimeDelta);
-	}
+	
 
 	if (m_IsVisible)
 	{
@@ -180,10 +196,16 @@ void CAugusta::Late_Update(_float fTimeDelta)
 			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
 				return;
 		}
-			
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+	}
+
+	//  파츠 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
 	}
 	
     
@@ -191,46 +213,48 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
 void CAugusta::Render()
 {
+#ifdef _DEBUG
+	Debug_BurstWeapon();
+#endif // _DEBUG
+
+	
 
     Bind_Resources();
 
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)))
+	// 1. Dissolve 체크.
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsDissolve)
 	{
-		// Shader에 값 바인딩.. => 나중에 Shader Path 생성 필요,
+		_float fDissolveRate = (m_fDissolveTimer / m_fMaxDissolveTime);
+		if (FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &fDissolveRate, sizeof(_float))))
+			CRASH("Failed Bind Dissolve Rate");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_vDissolveColor", &m_vDissolveColor, sizeof(_float4))))
+			CRASH("Ready EnergyColor");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fEmissiveIntensity", &m_fEmissiveIntensity, sizeof(_float))))
+			CRASH("Ready EmissiveIntensity")
 	}
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-            CRASH("Ready Diffuse Texture Failed");
+		if (IsSkin(i))
+			Render_Skin(i);
+		else if (IsEye(i))
+			Render_Eye(i);
+		else
+			Render_Default(i);
 
-		_bool HasNormal = { false };
-
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-			HasNormal = true;
-
-		_bool HasMask = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
-			HasMask = true;
-
-		if(FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
-
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
-			CRASH("Ready g_HasSkinMask Failed");
-
+       
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
 		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
 			CRASH("Bind Morph Result Failed");
 
-
 		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
 			CRASH("Ready Shader Begin Failed");
-        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
-        //    CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
@@ -239,17 +263,11 @@ void CAugusta::Render()
     }
 
 #ifdef _DEBUG
-	/*if (!m_IsQTE)
-		m_pColliderCom->Render();
-	else
-		m_pQTEColliderCom->Render();*/
 	m_pColliderCom->Render();
-	//m_pQTEColliderCom->Render();
-    
 	Print_LookRay();
 	
-	if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();
+	//if (m_pMainAttackVolume->IsActivate())
+	//	m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
@@ -358,6 +376,9 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     case PART_HEADPROP:
 		m_pHeadProp->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
     case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
@@ -383,6 +404,9 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     case PART_HEADPROP:
         m_pHeadProp->Activate(IsActive);
         break;
+    case PART_BURSTWEAPON:
+        m_pBurstWeapon->Activate(IsActive);
+        break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
 		break;
@@ -402,6 +426,9 @@ void CAugusta::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	case PART_GRIFFON:
 		m_pGriffon->Change_Volume(iVolumeIdx);
 		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Change_Volume(iVolumeIdx);
+		break;
 	case PART_WING:
 		m_pWing->Change_Volume(iVolumeIdx);
 		break;
@@ -420,6 +447,9 @@ void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_GRIFFON:
 		m_pGriffon->Volume_Activate(IsActive); // MainVolume 켜기
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Volume_Activate(IsActive);
 		break;
 	case PART_WING:
 		break;
@@ -444,6 +474,9 @@ void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 		break;
     case PART_HEADPROP:
         m_pHeadProp->Clear_Animation(strAnimName);
+        break;
+    case PART_BURSTWEAPON:
+		m_pBurstWeapon->Clear_Animation(strAnimName);
         break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
@@ -473,6 +506,9 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     case PART_FXOBJECT:
         m_pFxObject->Set_SocketMatrix(pSocketMatrix);
         break;
+    case PART_BURSTWEAPON:
+        m_pBurstWeapon->Set_SocketMatrix(pSocketMatrix);
+        break;
     }
 }
 
@@ -494,6 +530,9 @@ void CAugusta::Set_AnimationToParts(_uint iPartType, const _string& strAnimName)
 		break;
 	case PART_HEADPROP:
 		m_pHeadProp->Set_AnimationName(strAnimName);
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Set_AnimationName(strAnimName);
 		break;
 	case PART_WING:
 		m_pWing->Set_AnimationName(strAnimName);
@@ -519,6 +558,9 @@ void CAugusta::Part_ShaderPathChange(_uint iPartType, _uint iShaderPath)
 		break;
 	case PART_HEADPROP:
 		m_pHeadProp->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Change_ShaderPath(iShaderPath);
 		break;
 	case PART_WING:
 		m_pWing->Change_ShaderPath(iShaderPath);
@@ -705,7 +747,6 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	// Main Attack Volume의 TriggerActivate
 	if (var1 == TEXT("Bayonet"))
 	{
-		
 		if (var2 == TEXT("ATK"))
 			iVolumeIdx = CAugustaBayonet::VOLUME::VOLUME_ATTACK;
 		if (var2 == TEXT("STRATK"))
@@ -754,6 +795,22 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pGriffon->Volume_Activate(IsActive);
 	}
+	else if (var1 == TEXT("BurstWeapon"))
+	{
+		if (var2 == TEXT("SWORD_ATTACK"))
+			iVolumeIdx = CAugustaBurstWeapon::VOLUME::VOLUME_SWORD_ATTACK;
+		else if (var2 == TEXT("SWORD_ULTI"))
+			iVolumeIdx = CAugustaBurstWeapon::VOLUME::VOLUME_SWORD_ULTI;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pBurstWeapon->Volume_Activate(IsActive);
+	}
 	else if (var1 == TEXT("Augusta"))
 	{
 		if (var2 == TEXT("RISE_ZERO"))
@@ -776,6 +833,7 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
+
 
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
@@ -925,17 +983,66 @@ void CAugusta::Render_Damage(const HIT_DESC* pDesc)
 }
 void CAugusta::Bind_DissolveTimer()
 {
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	m_fDissolveTimer = 0.f;
 }
 void CAugusta::Bind_DefaultShaderPath()
 {
+	// 기본 Shader Path
+	for (_uint i = 0; i < MESHTYPE::MESH_END; ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::AUGUSTA);
+
 }
 void CAugusta::Bind_DissolveShaderPath()
 {
+	for (_uint i = 0; i < MESHTYPE::MESH_END; ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::DISSOLVE_CHARACTER);
 }
 void CAugusta::Activate(_bool IsActivate)
 {
-	m_isActivate = IsActivate; // 임시.
+	//m_isActivate = IsActivate; // 임시.
+	if (false == IsActivate)
+	{
+		Bind_DissolveTimer();
+		Bind_DissolveShaderPath();
+		m_IsOutLineVisible = false;
+		XMStoreFloat4x4(&m_DissolveWorldMatrix, m_pTransformCom->Get_WorldMatrix());
+	}
+
+	if (true == IsActivate)
+	{
+		m_isActivate = true;
+		m_IsOutLineVisible = true;
+		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		Bind_DefaultShaderPath();
+	}
+
+	
 }
+
+#ifdef _DEBUG
+void CAugusta::Debug_BurstWeapon()
+{
+	static float vEmissive[3] = {};
+	static float fIntensity = { 0.1f };
+	ImGui::Begin("BurstWeapon ImGui");
+
+	ImGui::SliderFloat3("Emissive Color", vEmissive, 0.0f, 1.0f);
+	ImGui::SliderFloat("Emissive Intensity", &fIntensity, 0.f, 30.f);
+
+	if (ImGui::Button("Apply BurstWeapon"))
+	{
+		_float4 vEmissiveColor = { vEmissive[0], vEmissive[1], vEmissive[2], 1.0f };
+		_float fEmissiveIntensity = fIntensity;
+		m_pBurstWeapon->Debug_Emissive(vEmissiveColor, fEmissiveIntensity);
+	}
+	ImGui::End();
+
+}
+#endif // _DEBUG
+
+
+
 #pragma endregion
 
 
@@ -1095,6 +1202,89 @@ void CAugusta::Process_FxObject(const _wstring& wStrObjectTag)
 		
 }
 
+void CAugusta::Render_Default(_uint iMeshIndex)
+{
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+}
+
+void CAugusta::Render_Skin(_uint iMeshIndex)
+{
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	_bool HasSkinMask = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK))) // MaskTexture 배열을 바인딩.
+		HasSkinMask = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasSkinMask, sizeof(_bool))))
+		CRASH("Ready g_HasSkinMask Failed");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+}
+
+
+void CAugusta::Render_Eye(_uint iMeshIndex)
+{
+	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+
+	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
+		return;
+
+	_bool HasNormal = { false };
+	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
+		HasNormal = true;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		CRASH("Ready g_HasNormal Failed");
+
+	if (IsCutScene)
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
+		//_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
+		//_float fEmissiveIntensity = { 5.f };
+		//_float4 vEmissiveColor = { 0.9f, 0.7f, 0.1f, 1.0f };
+		_float4 vEmissiveColor = { 0.5f, 0.3f, 0.1f, 1.0f };
+		_float fEmissiveIntensity = { 3.f };
+		_float fGalbrenaEyeAlpha = 0.5f;
+		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
+		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
+	}
+	else
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::AUGUSTA);
+}
+
+_bool CAugusta::IsSkin(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_FACE ||
+		iMeshIndex == MESH_UP ||
+		iMeshIndex == MESH_DOWN)
+		return true;
+
+	return false;
+}
+
+_bool CAugusta::IsEye(_uint iMeshIndex)
+{
+	if (iMeshIndex == MESH_EYE)
+		return true;
+
+	return false;
+}
+
 void CAugusta::Update_TargetDistance()
 {
 	const _float4x4* pTargetMatrix = nullptr;
@@ -1167,8 +1357,18 @@ void CAugusta::Update_Camera(_float fTimeDelta)
 
 void CAugusta::Bind_Resources()
 {
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        CRASH("Failed Bind Matrix");
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		const _float4x4* pWorldMatrix = &m_DissolveWorldMatrix;
+		if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", pWorldMatrix))) // Dissolve는 해당 위치에 멈춰서 재생되어야함.
+			CRASH("Failed Bind Matrix");
+	}
+	else
+	{
+		if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+			CRASH("Failed Bind Matrix");
+	}
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         CRASH("Failed Bind Matrix");
@@ -1219,10 +1419,18 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
+	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
+
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA);
+
+	// Shader Vlaue 추가
+	m_fDissolveTimer = 0.f;
+	m_fMaxDissolveTime = 0.35f;
+	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
+	m_fEmissiveIntensity = 3.f;
 }
 
 void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
@@ -1341,6 +1549,23 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 			m_pHeadProp = dynamic_cast<CAugustaHeadProp*>(Find_PartObject(strPartName));
 			ASSERT_CRASH(m_pHeadProp);
 			Safe_AddRef(m_pHeadProp);
+			break;
+		case PARTTYPE::PART_BURSTWEAPON:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetAugustaBurstWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pBurstWeapon = dynamic_cast<CAugustaBurstWeapon*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pBurstWeapon);
+			Safe_AddRef(m_pBurstWeapon);
 			break;
 
 		case PARTTYPE::PART_WING:
@@ -1471,5 +1696,6 @@ void CAugusta::Free()
     Safe_Release(m_pGriffon);
     Safe_Release(m_pFxObject);
     Safe_Release(m_pHeadProp);
+    Safe_Release(m_pBurstWeapon);
 	Safe_Release(m_pWing);
 }

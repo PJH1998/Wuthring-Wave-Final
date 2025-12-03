@@ -63,6 +63,8 @@ void CRoverGroundSkill::OnEnter(void* pArg)
 
 	m_pRover->Set_Gravity(true);
 	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
+
+	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CRoverGroundSkill::OnUpdate(_float fTimeDelta)
@@ -100,6 +102,8 @@ void CRoverGroundSkill::OnExit()
 
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
+
+	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CRoverGroundSkill::Handle_Input()
@@ -155,6 +159,9 @@ void CRoverGroundSkill::Check_StateTransition(_float fTimeDelta)
 				return;
 			}
 		}
+
+		/*if (eSkillType == ERoverSkillType::SKILL02)
+			m_pRover->PartActivate(m_iPartType, false);*/
     }
 
 
@@ -163,7 +170,7 @@ void CRoverGroundSkill::Check_StateTransition(_float fTimeDelta)
     {
         if (m_States[LAND])
         {
-            m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+            m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDCHANGE;
             m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
             return;
         }
@@ -187,11 +194,6 @@ void CRoverGroundSkill::SetUp_Animations()
 
     m_PartsAnimations.emplace("Ex_Skill02", "Scythe_Ex_Attack03");
     m_PartsAnimations.emplace("Skill02", "G_Skill02");
-    //SA1Shouwangjiu_AirAttack_End
-    //SA1Shouwangjiu_AirAttack_Loop
-    //SA1Shouwangjiu_AirAttack_Start
-    //SA1Shouwangjiu_Fly_Loop
-    //SA1Shouwangjiu_Skill_Strike
 
 }
 

@@ -199,7 +199,7 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 				}
 				else
 				{
-					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1; // Idle 전용 일어나는 모션.
+					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // Idle 전용 일어나는 모션.
 					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 					return;
 				}

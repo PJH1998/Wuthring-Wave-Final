@@ -25,6 +25,19 @@ public:
 		VOLUME_HACKDOWN = 2,
 		VOLUME_END
 	};
+
+	enum MESHTYPE
+	{
+		MESH_BANGS = 0,
+		MESH_HAIR,
+		MESH_FACE,
+		MESH_UP,
+		MESH_DOWN,
+		MESH_CLOTH,
+		MESH_ALPHA,
+		MESH_EYE,
+		MESH_END
+	};
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -137,7 +150,8 @@ public:
 		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
 		PART_FXOBJECT = 3,
 		PART_HEADPROP = 4,
-		PART_WING = 5,
+		PART_BURSTWEAPON = 5,
+		PART_WING = 6,
 		TYPE_END
 	};
 
@@ -208,6 +222,12 @@ public:
 	virtual void Bind_DefaultShaderPath() override;
 	virtual void Bind_DissolveShaderPath() override;
 	virtual void Activate(_bool IsActivate) override;
+
+
+#ifdef _DEBUG
+	void Debug_BurstWeapon();
+#endif // _DEBUG
+
 #pragma endregion
 
 
@@ -218,6 +238,7 @@ private:
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CAugustaFxObject* m_pFxObject = { nullptr };
 	class CAugustaHeadProp* m_pHeadProp = { nullptr };
+	class CAugustaBurstWeapon* m_pBurstWeapon = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
 	_string m_strPreAnimation = {};
@@ -238,6 +259,11 @@ private:
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
 	void Process_FxObject(const _wstring& wStrObjectTag);
 	
+	void Render_Default(_uint iMeshIndex);
+	void Render_Skin(_uint iMeshIndex);
+	void Render_Eye(_uint iMeshIndex);
+	_bool IsSkin(_uint iMeshIndex);
+	_bool IsEye(_uint iMeshIndex);
 #pragma endregion
 
 

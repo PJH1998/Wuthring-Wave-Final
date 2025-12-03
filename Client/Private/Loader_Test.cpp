@@ -46,6 +46,7 @@
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
 #include "AugustaHeadProp.h"
+#include "AugustaBurstWeapon.h"
 #include "Augusta.h"
 
 // Galbrena
@@ -98,7 +99,7 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
-
+	m_iNumLoadingThread = 15;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -657,6 +658,19 @@ HRESULT CLoader_Test::Load_Augusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrHeadPropTag
 		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_BurstWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/BurstWeapon/AugustaBurstWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrBurstWeaponTag = TEXT("Prototype_GameObject_Augusta_BurstWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrBurstWeaponTag
+		, CAugustaBurstWeapon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 	

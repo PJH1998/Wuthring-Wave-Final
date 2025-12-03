@@ -24,7 +24,7 @@ cbuffer GlobalConstants
 {
     int g_iNumBlendWeightsToUse = 2; 
     float g_fTime;
-    float g_fEmissiveIntensity;
+    float g_fEmissiveIntensity = 1.f;
     float4 g_vDissolveColor = float4(0.407f, 0.619f, 1.f, 1.f);
     float4 g_vEmissiveColor; 
     float2 g_vScrollSpeed;
@@ -451,6 +451,190 @@ PS_OUT PS_DISSOLVE_AUGUSTAWEAPON(PS_IN In) // Dissolve 추가.
     return Out;
 }
 
+PS_OUT PS_DISSOLVE_ROVERWEAPON(PS_IN In) // Dissolve 추가.
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    // 1. 디졸브 텍스처(g_MaskTexture[0])에서 마스크 값을 샘플링.
+    float fDissolveMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (fDissolveMask.r - g_fDissolveRate < 0.f) // 0.f 면 Discard;
+        discard;
+    
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    
+    
+    float3 vColor = g_vDissolveColor.rgb;
+    float fIntensity = g_fEmissiveIntensity;
+    if (fDissolveMask.r - g_fDissolveRate < 0.3f) // 0.3f 보다 작은 (사라지기 직전)
+        Out.vDiffuse.rgb = vColor * fIntensity; // 이러면 쨍하게 들어간다. 
+    
+    // Emissive 0.3f 초과인 얘들은 Emissive가 기본으로 들어가고, 0.3f 이하인 얘들은 Emmisive가 지정한 색상에 더 크게 적용된다.
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    return Out;
+}
+
+PS_OUT PS_AUGUSTA_BURSTWEAPON_EFFECT(PS_IN In) // Dissolve 추가.
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    // 1. 메인 텍스쳐 샘플링.
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = vDiffuse;
+    
+    // 2. 투명도 처리.
+    clip(vDiffuse.a - 0.1f);
+    
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        Out.vPBR.x = vNormalDesc.b;
+        Out.vPBR.y = vNormalDesc.a;
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic;
+        Out.vPBR.y = g_fGlobalDynamicRoughness;
+    }
+    
+    // Emissive (발광) 색상 처리
+    
+    float3 vBaseTextureColor = vDiffuse.rgb;
+    float3 vColor = g_vEmissiveColor.rgb;
+    float fIntensity = g_fEmissiveIntensity; // 블룸먹도록 증폭.
+    
+    float3 vFinalEmissive = vBaseTextureColor * vColor * fIntensity;
+    
+    Out.vEmissive = float4(vFinalEmissive, 1.0f);
+    
+    
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    Out.vNormal = vNormal;
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    Out.vPBR.z = 1.f;
+    
+    return Out;
+}
+
+PS_OUT PS_AUGUSTA_BURSTWEAPON(PS_IN In) // Dissolve 추가.
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float4 vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    float3 vBaseColor = Out.vDiffuse.rgb;
+    float fGlowMask = vMask.r;
+    float fBaseRatio = 0.3f;
+    float fFinalFactor = lerp(fBaseRatio, 1.0f, fGlowMask);
+    
+    float3 vFinalEmissive = vBaseColor * fFinalFactor * g_fEmissiveIntensity;
+    Out.vEmissive = float4(vFinalEmissive, 1.0f);
+    
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    return Out;
+}
+
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
 struct VS_OUT_SHADOW
@@ -480,6 +664,7 @@ VS_OUT_SHADOW VS_SHADOW(VS_IN In)
 
     return Out;
 }
+
 
 struct GS_IN
 {
@@ -705,6 +890,39 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_DISSOLVE_AUGUSTAWEAPON();
+    }
+
+    pass DissolveRoverWeapon // 9
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_DISSOLVE_ROVERWEAPON();
+    }
+
+    pass AugustaBurstWeaponEffect // 10
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_AUGUSTA_BURSTWEAPON_EFFECT();
+    }
+
+    pass AugustaBurstWeapon // 11
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_AUGUSTA_BURSTWEAPON();
     }
 
 }
