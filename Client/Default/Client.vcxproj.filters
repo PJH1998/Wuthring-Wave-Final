@@ -418,6 +418,15 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Anchor">
       <UniqueIdentifier>{5db8e06d-ff67-4b7d-820b-cebd945a1f1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Drop">
+      <UniqueIdentifier>{c46f1815-4eb2-4d0c-a16d-2ac0aefd0cc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Wave">
+      <UniqueIdentifier>{e87e0e11-afc2-4cbb-a309-783ced11e777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta">
+      <UniqueIdentifier>{2e691801-6e07-44a7-9b57-0f663bda1dad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1093,6 +1102,18 @@
     <ClInclude Include="..\Public\AugustaBurstWeapon.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Levi_Drop.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Drop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Levi_Wave.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Wave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Levi_Augusta.h">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\WeaponDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1732,6 +1753,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaBurstWeapon.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Drop.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Drop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Wave.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Wave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Levi_Augusta.cpp">
+      <Filter>03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\WeaponDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

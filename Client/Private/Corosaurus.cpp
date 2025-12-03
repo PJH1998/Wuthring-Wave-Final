@@ -40,8 +40,8 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 5.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 5.f;
+	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 65.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 45.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -741,7 +741,7 @@ _bool CCorosaurus::isKnockDown()
 	if (m_isParalysis)
 		return true;
 
-	return m_iState & (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::BLOCK) | ENUM_CLASS(TEST_STATE::BEHIT));
+	return m_iState & (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::BLOCK));
 }
 
 _bool CCorosaurus::isAttackEnable()
@@ -804,7 +804,7 @@ _bool CCorosaurus::AttackArrange()
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::BURST)
+	if (iIndex != ATK_PATTERN::ATTACK8)
 		return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
@@ -838,10 +838,13 @@ _bool CCorosaurus::isChase()
 	if (m_isDetecting)
 	{
 		bResult = true;
-		if (m_fDistance > 20.f)
+		if (m_fDistance > 14.f)
 			m_iState |= ENUM_CLASS(TEST_STATE::LAND);
 		else if (m_fDistance < 3.f)
+		{
+			if(m_fRightDot)
 			return false;
+		}
 	}
 	else
 	{

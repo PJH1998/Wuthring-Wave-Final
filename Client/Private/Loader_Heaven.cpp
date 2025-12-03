@@ -31,6 +31,9 @@
 #include "Levi_Bow.h"
 #include "Levi_Ray.h"
 #include "Levi_Anchor.h"
+#include "Levi_Drop.h"
+#include "Levi_Wave.h"
+#include "Levi_Augusta.h"
 #pragma endregion
 
 #pragma region UI
@@ -788,7 +791,7 @@ HRESULT CLoader_Heaven::Load_Effect()
 	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
-	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
 
 
 	return S_OK;
@@ -1090,6 +1093,21 @@ HRESULT CLoader_Heaven::Load_Leviatan()
 	// Prototype_GameObject_Levi_Anchor
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
 		CLevi_Anchor::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Drop
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
+		CLevi_Drop::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Wave
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		CLevi_Wave::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Augusta
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Augusta"),
+		CLevi_Augusta::Create(m_pDevice, m_pContext))))
 		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;
