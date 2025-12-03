@@ -17,6 +17,7 @@
 
 #include "MouseController.h"
 #include "Player.h"
+#include "SequencePlayer.h"
 
 
 
@@ -468,6 +469,11 @@ void CGameSystem::Unbind_Grab() // => 몬스터 잡기애니메이션이 거의 
 #pragma endregion
 
 #pragma region PLAYER
+void CGameSystem::Register_SequencePlayer(CSequencePlayer* pSequencePlayer)
+{
+	m_pSequencePlayer = pSequencePlayer;
+	Safe_AddRef(m_pSequencePlayer);
+}
 void CGameSystem::Register_Player(CPlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -501,6 +507,7 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pMonsterTable);
 	Safe_Release(m_pMouseController);
 	Safe_Release(m_pPlayer);
+	Safe_Release(m_pSequencePlayer);
 
 	Release();
 }

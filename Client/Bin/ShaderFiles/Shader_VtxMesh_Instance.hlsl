@@ -368,20 +368,6 @@ PS_OUT_LIGHT PS_MAIN_COLOR(PS_IN In)
             float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
                 vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
-
-            //vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
-        
-            //float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
-            //if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
-            //    vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
-
-            //if (vMask.r == 0.f && vMask.g == 0.f)
-            //    vNormal = vNormal1;
-            //else
-            //{
-            //vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
-            //vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
-            //}
             
             vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
         }
@@ -396,13 +382,6 @@ PS_OUT_LIGHT PS_MAIN_COLOR(PS_IN In)
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
                 vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
         }
-        //vector vNormalDesc = vDefaultNormal * (1.f - vMask.r) + vMaskNormal * vMask.g;
-        
-        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
-        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
-
-        //vNormal = vNormal1;  
 
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -430,6 +409,95 @@ PS_OUT_LIGHT PS_MAIN_COLOR(PS_IN In)
     
     return Out;
 }
+
+PS_OUT_LIGHT PS_MAIN_COLOROVERLAP(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+
+    if (g_HasMask)
+    {
+        Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
+        Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+
+    }
+    else
+    {
+        Out.vDiffuse = vDiffuse;
+    }
+    if (Out.vDiffuse.a < 0.1f)
+        discard;
+    
+    Out.vDiffuse.xyz = g_vDiffuseColor.xyz;
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+    
+    if (g_IsDynamicObject)
+    {
+        Out.vDepth.z = 1.f;
+        Out.vPBR.z = 1.f;
+    }
+
+    float4 vNormal;
+    
+    if (g_HasNormal)
+    {
+        if (g_HasMask)
+        {
+            vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        
+            float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
+            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+                vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+            
+            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+        }
+        else
+        {
+            vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+			
+            Out.vPBR.x = vDefaultNormal.b;
+            Out.vPBR.y = vDefaultNormal.a;
+	        
+            vNormal = normalize(vDefaultNormal * 2.f - 1.f);
+            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+                vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+        }
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        vNormal = vNormal * 0.5f + 0.5f;
+    }
+    Out.vNormal = float4(vNormal.xyz, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    
+    return Out;
+}
+
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -462,7 +530,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_COLOR();
     }
-    pass NonShake // 2
+    pass NonShake // 3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -471,5 +539,26 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_NONSHAKE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_COLOR();
+    }
+    pass ColorOverlapNonShake // 4
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_NONSHAKE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_COLOROVERLAP();
+    }
+
+    pass ColorOverlapShake // 5
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_COLOROVERLAP();
     }
 }

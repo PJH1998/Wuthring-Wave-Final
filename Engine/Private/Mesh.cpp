@@ -28,25 +28,19 @@ CMesh::CMesh(const CMesh& Prototype)
 	, m_Buffers { Prototype.m_Buffers }
 	, m_SRVs { Prototype.m_SRVs }
 {
-	//for (auto& pKey : m_ShapeKeys)
-	//	Safe_AddRef(pKey);
-
-	////  Prototype 생성 Buffer와 Instance 생성 Buffer 시점이 다르기 때문에 nullptr 체크를 해줍니다.
-	//for (auto& pBuffer : m_Buffers)
-	//{
-	//	if (nullptr != pBuffer)
-	//		Safe_AddRef(pBuffer);
-	//}
-
-	//for (auto& pSRV : m_SRVs)
-	//{
-	//	if (nullptr != pSRV)
-	//		Safe_AddRef(pSRV);
-	//}
-
-	//// size만 재설정.
-	//m_UAVs.resize(Prototype.m_UAVs.size()); 
+	
 }
+
+void CMesh::Copy_BoneMatrices(_float4x4* pOutMatrices, _uint iNumBones)
+{
+	if (m_iNumBones != iNumBones ||
+		nullptr == pOutMatrices)
+		return;
+
+	memcpy(pOutMatrices, m_BoneMatrices, sizeof(_float4x4) * iNumBones);
+}
+
+
 
 HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {

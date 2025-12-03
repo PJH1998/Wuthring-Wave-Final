@@ -83,6 +83,21 @@ CModel::CModel(const CModel& Prototype)
 
 }
 
+void CModel::Copy_BoneMatrices(_float4x4** ppOutMatrices, _uint iNumMeshes)
+{
+	
+	if (nullptr == ppOutMatrices ||
+		m_iNumMeshes < iNumMeshes)
+		return;
+
+	for (_uint i = 0; i < iNumMeshes; ++i)
+	{
+		_uint iNumBones = m_Meshes[i]->Get_NumBones();
+		m_Meshes[i]->Copy_BoneMatrices(ppOutMatrices[i], iNumBones);
+	}
+		
+}
+
 void CModel::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavigation, _float fTimeDelta)
 {
 	_vector vPrePosition = pOwnerTransform->Get_State(STATE::POSITION);

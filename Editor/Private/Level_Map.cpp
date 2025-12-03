@@ -993,10 +993,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
@@ -1666,11 +1666,11 @@ void CLevel_Map::Ready_Event()
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 				{
-					m_pPickedObject->Set_ShaderPass(3);
+					//m_pPickedObject->Set_ShaderPass(3);
 
 					if (m_pPickedDestructObject)
 					{
-						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject->Set_ShaderPass(0);
 						m_pPickedDestructObject = nullptr;
 					}
 
@@ -1683,23 +1683,23 @@ void CLevel_Map::Ready_Event()
 				else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
 				{
 
-					m_pPickedDestructObject->Set_ShaderPass(3);
+					//m_pPickedDestructObject->Set_ShaderPass(3);
 					if (m_pPickedDestructObject)
 					{
-						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject->Set_ShaderPass(0);
 					}
 				}
 				else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
 				{
-					m_pPickedMeteo->Set_ShaderPass(3);
+					//m_pPickedMeteo->Set_ShaderPass(3);
 				}
 				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
 				{
-					m_pPickedWater->Set_ShaderPass(3);
+					//m_pPickedWater->Set_ShaderPass(3);
 				}
 				else if (m_pPickedCollaps = dynamic_cast<CEdit_MapObject_Collaps*>(pObject))
 				{
-					m_pPickedCollaps->Set_ShaderPass(3);
+					//m_pPickedCollaps->Set_ShaderPass(3);
 				}
 			}
 		}
