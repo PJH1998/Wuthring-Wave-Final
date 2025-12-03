@@ -230,6 +230,11 @@ void CGameSystem::Hide_InteractUI(_bool isPressedAs)
 	m_pUI_ControlHelper->Hide_InteractUI(isPressedAs);
 }
 
+void CGameSystem::Req_Render_InteractUI(_wstring strText, _bool	isPressedAs)
+{
+	m_pUI_ControlHelper->Req_Render_InteractUI(strText, isPressedAs);
+}
+
 _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
 {
 	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
