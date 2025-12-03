@@ -74,6 +74,7 @@ private:
 	_bool					m_isPushed{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isDeadTrigger{};
+	_float					m_fDesolveRate{};
 #pragma endregion
 
 #pragma region STATUS

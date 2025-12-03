@@ -162,6 +162,13 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 			return;
 		}
 	}
+	if (m_isDeadTrigger)
+	{
+		if (m_fDesolveRate < 1.f)
+			m_fDesolveRate += fTimeDelta;
+		else
+			m_fDesolveRate = 1.f;
+	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
@@ -235,6 +242,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_pColliderCom->IsActivate(true);
 	m_isDeadTrigger = false;
+	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
 }
