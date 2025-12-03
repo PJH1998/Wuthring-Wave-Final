@@ -562,11 +562,10 @@ void CRenderer::Render_LOD_Weight()
 void CRenderer::Clear_Resource()
 {
 	m_ShadowMapObjects.clear();
-	//m_StaticObjects[0].clear();
-	//m_StaticObjects[1].clear();
-	for (auto& Test : m_StaticObjects)
-		for (auto& TT : Test)
-			TT.clear();
+
+	for (auto& Pair : m_StaticObjects)
+		for (auto& pStaticObjects : Pair)
+			pStaticObjects.clear();
 }
 
 void CRenderer::Render_Priority()

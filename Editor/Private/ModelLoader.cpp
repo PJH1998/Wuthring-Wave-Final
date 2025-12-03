@@ -985,8 +985,8 @@ void CModelLoader::Load_File()
 							}
 							//_string SaveFilePath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/";
 							//_string SaveFilePath = "../../Client/Bin/Resource/Map/Test/Decal/";
-							_string SaveFilePath = "../../Client/Bin/Resource/Map/Test/Heaven/";
-							//_string SaveFilePath = "../../Client/Bin/Resource/Dat/";
+							//_string SaveFilePath = "../../Client/Bin/Resource/Map/Test/Heaven/";
+							_string SaveFilePath = "../../Client/Bin/Resource/Dat/";
 
 							_string FileName = entry.path().filename().string();
 							_string FolderPath;

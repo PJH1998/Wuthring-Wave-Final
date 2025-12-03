@@ -70,6 +70,7 @@ void CGameSystem::Clear_Resource()
 	m_pDirector->Clear_Action();
 	m_pMonsterTable->Clear_NPCData();
 	m_pSonoro_Manager->Clear_Resource();
+	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
 }
 #pragma region PARSER
@@ -95,6 +96,10 @@ void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 void CGameSystem::Clone_Spawners(LEVEL eLevel)
 {
 	m_pParser->Clone_Spawners(eLevel);
+}
+void CGameSystem::Create_MapEffects()
+{
+	m_pParser->Create_MapEffect();
 }
 #pragma endregion
 
