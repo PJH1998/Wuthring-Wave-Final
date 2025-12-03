@@ -109,6 +109,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	vector<CStaticObject*> CullObjects;
 
 	_uint* pFlags = new _uint[iNumObjects];
+	ZeroMemory(pFlags, sizeof(_uint) * iNumObjects);
 
 	D3D11_MAPPED_SUBRESOURCE SubResource = {};
 	m_pContext->Map(m_pOcclusionStageBuffer[m_iReadIndex], 0, D3D11_MAP_READ, 0, &SubResource);
