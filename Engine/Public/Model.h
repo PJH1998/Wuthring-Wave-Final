@@ -49,6 +49,7 @@ private:
 	virtual ~CModel() = default;
 
 public:
+	const vector<class CBone*>			Get_Bones() { return m_Bones; }
 	_uint								Get_NumMesh() { return m_iNumMeshes; }
 	void								Sync_RootNode(class CTransform* pOwnerTransform, class CNavigation* pOwnerNavigation, _float fTimeDelta);
 	void								Sync_RootNode(class CTransform* pOwnerTransform, _float fTimeDelta);

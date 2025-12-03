@@ -188,9 +188,12 @@ public:
 #pragma endregion
 
 #pragma region PLAYER
+	void						Register_SequencePlayer(class CSequencePlayer* pSequencePlayer);
 	void						Register_Player(class CPlayer* pPlayer);
 	_vector						Get_PlayerLookVector();
 	_vector						Get_PlayerPosition();
+
+	
 #pragma endregion
 
 
@@ -205,6 +208,7 @@ private:
 	class	CDirector*			m_pDirector 					= { nullptr };
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
 	class	CPlayer*			m_pPlayer						= { nullptr };
+	class   CSequencePlayer*	m_pSequencePlayer				= { nullptr };
 	
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 

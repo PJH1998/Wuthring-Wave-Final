@@ -43,6 +43,8 @@ public:
 	_bool							Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
 #endif
 
+
+
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShaderCom, const _char* pConstantName, const vector<class CBone*>& Bones);
 	HRESULT						Bind_MorphedResult(class CShader* pShaderCom, const _char* pConstantName);

@@ -100,7 +100,12 @@ void CEdit_LightObject::Ready_Component(void* pArg)
 		LightDesc.fRange = 5.f;
 	}
 	m_pGameInstance->Add_Light(to_wstring(g_iLightIndex), LightDesc);
+
+#ifdef _DEBUG
 	m_LightDesc = m_pGameInstance->Get_LightDesc_For_Map(to_wstring(g_iLightIndex));
+#endif // _DEBUG
+
+	
 }
 
 void CEdit_LightObject::Set_ImGuiOption()
