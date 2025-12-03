@@ -21,7 +21,7 @@ HRESULT CHZB::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	Ready_DefaultSetting();
 	Ready_OcclusionCulling();
 
-	m_pBoxInfos = new BOXINFO[3000];
+	m_pBoxInfos = new BOXINFO[MAX_OBJECT];
     return S_OK;
 }
 
@@ -109,6 +109,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	vector<CStaticObject*> CullObjects;
 
 	_uint* pFlags = new _uint[iNumObjects];
+	ZeroMemory(pFlags, sizeof(_uint) * iNumObjects);
 
 	D3D11_MAPPED_SUBRESOURCE SubResource = {};
 	m_pContext->Map(m_pOcclusionStageBuffer[m_iReadIndex], 0, D3D11_MAP_READ, 0, &SubResource);
@@ -230,7 +231,7 @@ void CHZB::Ready_DefaultSetting()
 
 void CHZB::Ready_OcclusionCulling()
 {
-	_uint iMaxObject = 2000;
+	_uint iMaxObject = MAX_OBJECT;
 
 	// Create Constant Buffer
 	D3D11_BUFFER_DESC OCDescBufferDesc = {};
