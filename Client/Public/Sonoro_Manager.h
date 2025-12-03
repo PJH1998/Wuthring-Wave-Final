@@ -21,6 +21,8 @@ public:
 	_bool  Change_Sonoro(_bool IsSonoro);
 	_bool IsSonoro() { return m_SonoroRender; }
 	const _tchar* Get_SonoroText();
+	void  Clear_Resource();
+
 private:
 	vector<class CMapObject_Sonoro*> m_SonoroObjects;
 	vector<class CMapObject_NonSonoro*> m_NonSonoroObjects;

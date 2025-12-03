@@ -37,8 +37,7 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
 
-	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 1.f, 0.2f, 0.1f, 1.f };
+	
 
     return S_OK;
 }
@@ -90,14 +89,8 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
-	
-
     CProp::Late_Update(fTimeDelta);
 
-	/*if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);*/
-	
-		
 
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -266,6 +259,10 @@ void CAugustaBayonet::Ready_Variables(const PROP_DESC* pDesc)
 		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 
 	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
+
+	// Shader 변수
+	m_fMaxDissolveTime = 0.35f;
+	m_vDissolveColor = { 1.f, 0.2f, 0.1f, 1.f };
 }
 
 void CAugustaBayonet::Ready_Positions(const PROP_DESC* pDesc)

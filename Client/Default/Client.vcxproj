@@ -173,6 +173,7 @@
     <ClInclude Include="..\Public\AugustaAirJump.h" />
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
+    <ClInclude Include="..\Public\AugustaBurstWeapon.h" />
     <ClInclude Include="..\Public\AugustaCapture.h" />
     <ClInclude Include="..\Public\AugustaEnergyBlade.h" />
     <ClInclude Include="..\Public\AugustaFxObject.h" />
@@ -365,6 +366,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\public\UI_HUD_Sector_Minimap.h" />
+    <ClInclude Include="..\public\UI_HUD_Sector_FuncIcons.h" />
     <ClInclude Include="..\public\UI_Image.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -415,6 +418,7 @@
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
     <ClCompile Include="..\Private\AugustaAirSkill.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
+    <ClCompile Include="..\Private\AugustaBurstWeapon.cpp" />
     <ClCompile Include="..\Private\AugustaCapture.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
@@ -597,6 +601,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\private\UI_HUD_Sector_Minimap.cpp" />
+    <ClCompile Include="..\private\UI_HUD_Sector_FuncIcons.cpp" />
     <ClCompile Include="..\private\UI_Image.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

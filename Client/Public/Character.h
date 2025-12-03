@@ -338,6 +338,12 @@ public:
 
 	virtual void Reset_QTECamera() {};
 	virtual void Bind_QTECamera() {};
+
+	virtual void Bind_DissolveTimer() {};
+	virtual void Bind_DefaultShaderPath() {};
+	virtual void Bind_DissolveShaderPath() {};
+
+	virtual void Activate(_bool IsActivate) {};
 #pragma endregion
 
 
@@ -376,11 +382,15 @@ protected:
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
+	// Shader 변수.
+	_float m_fMaxDissolveTime = { 0.5f };
+	_float m_fDissolveTimer = {};
+	_float4 m_vDissolveColor = { };
+	_float4 m_vEmissiveColor = {};
+	_float  m_fEmissiveIntensity = {};
 
-
+	_float4x4 m_DissolveWorldMatrix = {};
 protected:
-	//queue<EVENT_DESC> m_EventQueue; // 특정한 이벤트가 발생해서 StateMachine 외부에서 상태가 변경되야 하는 경우 ex) Hit 등등
-
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
@@ -417,9 +427,9 @@ protected:
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
-
 	_float4x4 m_GrabComibinedMatrix = {};
 
+	
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

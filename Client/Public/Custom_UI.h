@@ -143,7 +143,7 @@ public:
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 	void					Add_Child(CCustom_UI* pChildUI)		{ m_vecChildObjects.push_back(pChildUI); }
-	HRESULT					Add_ExtraTexture(_wstring strFilePath);
+	HRESULT					Add_ExtraTexture(_wstring strFileName);		// 반드시! 로드용 더미 UI json 에 추가하여, 프로토타입 생성 유도 후 사용해야 함. 안 그러면 FAIL.
 
 protected:
 	//HRESULT				Ready_Prototypes(void* pArg);

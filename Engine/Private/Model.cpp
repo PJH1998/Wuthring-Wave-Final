@@ -1514,39 +1514,7 @@ HRESULT CModel::Ready_ShapeKeyMesh(ifstream& InputFile)
 		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
 		ASSERT_CRASH(pMesh);
 		m_Meshes.push_back(pMesh);
-
-		//// ShapeKey에 대한 가중치 배열 정보 저장.
-		//const vector<CShapeKey*>& MeshKeys = pMesh->Get_ShapeKeys();
-		//for (auto& pKey : MeshKeys)
-		//{
-		//	_string strName = pKey->Get_Name();
-
-		//	// 1. 처음 보는 이름이라면
-		//	if (m_ShapeKeyIndices.find(strName) == m_ShapeKeyIndices.end())
-		//	{
-		//		m_ShapeKeyIndices.emplace(strName, m_ShapeKeyNames.size()); // 인덱스 부여
-		//		m_ShapeKeyNames.push_back(strName);							// 이름 목록 추가
-		//		m_ShapeKeyWeights.push_back(0.f);							// 가중치 0으로 초기화
-		//	}
-
-		//	// 2. 관리 맵에 등록 (어떤 메쉬의 키인지)
-		//	SHAPEKEYINFO Info;
-		//	Info.pShapeKey = pKey;
-		//	Info.iMeshIndex = i;
-
-		//	// 3. Info에 "전역 가중치 배열의 몇 번째를 참조해야 하는지" 알려줌 (중요!)
-		//	Info.pShapeKey->Set_GlobalWeightIndex(m_ShapeKeyIndices.at(strName));
-
-		//	auto iter = m_ShapeKeys.find(strName);
-		//	if (iter == m_ShapeKeys.end())
-		//		m_ShapeKeys.emplace(strName, vector<SHAPEKEYINFO>());
-		//	m_ShapeKeys.at(strName).push_back(Info);
-		//}
-
 	}
-
-	//if (FAILED(Organize_ShapeKeyIndices()))
-	//	return E_FAIL;
 
 	return S_OK;
 }

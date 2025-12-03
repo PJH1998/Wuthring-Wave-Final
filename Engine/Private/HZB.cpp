@@ -57,7 +57,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	_uint iNumObjects = Objects.size();
 
 	// Create StructuredBuffer (BoxPoints)
-	BOXINFO* pBoxInfos = new BOXINFO[2000];
+	BOXINFO* pBoxInfos = new BOXINFO[3000];
 
 	//D3D11_MAPPED_SUBRESOURCE BoxPointsSub = {};
 	//m_pContext->Map(m_pBoxPointsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &BoxPointsSub);

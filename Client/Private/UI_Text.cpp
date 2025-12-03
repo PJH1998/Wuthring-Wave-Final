@@ -376,6 +376,27 @@ void CUI_Text::Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType)
 	Update_Alignment(eAlignmentType);
 }
 
+HRESULT CUI_Text::Attach_AsChildToUI(CCustom_UI* pAttachTargetUI)
+{
+	CCustom_UI* pAttacher = pAttachTargetUI;
+	auto& fontDesc = this->Get_UIDesc();
+	auto& attacherDesc = pAttacher->Get_UIDesc();
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+
+	pAttacher->Add_Child(this);
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	this->Update_Description(0.f);
+
+
+	return S_OK;
+}
+
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CUI_Text* pInstance = new CUI_Text(pDevice, pContext);

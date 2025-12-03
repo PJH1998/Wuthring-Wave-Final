@@ -323,7 +323,7 @@ public:
 #pragma region DECAL_MANAGER
 public:
 	HRESULT						Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance = _float3(0.f, 0.f, 0.f));
-	HRESULT						Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
+	HRESULT						Add_DecalData(const _wstring& strDecalTag, const  DECAL_DATA& Decal);
 	HRESULT						Render_Decal();
 #pragma endregion
 
@@ -334,6 +334,10 @@ public:
 #pragma region VOLUMETRIC_FOG
 public:
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
+	void						Set_FogMaxHeight(_float fFogMaxHeight);
+	void						Set_FogDistanceFallOff(_float fDistanceFallOf);
+	void						Set_FogRayDensityScale(_float fFogRayDensityScale);
+
 	void						Begin_VF();
 #pragma endregion
 

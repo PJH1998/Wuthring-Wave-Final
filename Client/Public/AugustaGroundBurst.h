@@ -32,6 +32,7 @@ public:
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[BURSTSTATE::END] = {};
+	map<_string, _string> m_PartsAnimations = {};
 
 private:
     virtual void Handle_Input() override;

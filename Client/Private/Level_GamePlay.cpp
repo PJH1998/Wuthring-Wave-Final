@@ -15,6 +15,7 @@
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
 #include "UI_Parry.h"
+#include "UI_QTE.h"
 
 #include "Event_Level.h"
 
@@ -93,6 +94,10 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Effect();
 	Ready_Skybox();
 	Ready_SFX();
+
+	m_pGameInstance->Set_FogDistanceFallOff(0.02f);
+	m_pGameInstance->Set_FogMaxHeight(230.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.f);
 
 	m_pGameInstance->Begin_VF();
 
@@ -474,13 +479,14 @@ void CLevel_GamePlay::Ready_UI()
 	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
 	const _wstring strPrototypeTag_UI[] = {
-		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+		 L"Prototype_GameObject_Custom_UI_Container_HUD",
+		L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-	//	if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
-	//		CRASH("Failed to Add RootUI to UI_Manager.");
+	
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
@@ -509,6 +515,17 @@ void CLevel_GamePlay::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_TabUtility"),
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
+		CRASH("Failed Ready GrafflePoint");
+
+	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
+		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
+		CRASH("Failed Ready QTE");
+
+
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
 		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))

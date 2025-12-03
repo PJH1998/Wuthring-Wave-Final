@@ -335,7 +335,7 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	//공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
 	if (m_IsAnimationEnd)
 	{
-		m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
+		m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 		m_IsNextAttackInput = false;
 		return;

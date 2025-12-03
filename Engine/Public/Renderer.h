@@ -94,7 +94,7 @@ private:
 
 #ifdef _DEBUG
 	list<class CComponent*>					m_DebugComponents;
-	_bool									m_isRenderDebug = { true };
+	_bool									m_isRenderDebug = { false };
 	_bool									m_IsSSAO = { true };
 	_bool									m_IsSSAO_Blur = { true };	 
 	_bool									m_IsStylized = { true };

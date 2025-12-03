@@ -1066,6 +1066,12 @@
     <ClInclude Include="..\Public\RoverCapture.h">
       <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_HUD_Sector_Minimap.h">
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_HUD_Sector_FuncIcons.h">
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\Levi_Alter.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
     </ClInclude>
@@ -1083,6 +1089,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\Levi_Anchor.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaBurstWeapon.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1697,6 +1706,12 @@
     <ClCompile Include="..\Private\RoverCapture.cpp">
       <Filter>03. GameObject\Actor\Player\State\Capture\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_HUD_Sector_Minimap.cpp">
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_HUD_Sector_FuncIcons.cpp">
+      <Filter>03. GameObject\UI\Containers_Child\HUD</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\Levi_Alter.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Alter</Filter>
     </ClCompile>
@@ -1714,6 +1729,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Levi_Anchor.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaBurstWeapon.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

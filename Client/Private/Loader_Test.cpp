@@ -46,6 +46,7 @@
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
 #include "AugustaHeadProp.h"
+#include "AugustaBurstWeapon.h"
 #include "Augusta.h"
 
 // Galbrena
@@ -70,6 +71,8 @@
 #include "UI_Text_Damage.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
+#include "UI_HUD_Sector_FuncIcons.h"
+#include "UI_HUD_Sector_Minimap.h"
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
@@ -96,7 +99,7 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
-
+	m_iNumLoadingThread = 15;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -486,6 +489,7 @@ HRESULT CLoader_Test::Load_Effect()
 
 	//m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
 
     return S_OK;
 }
@@ -654,6 +658,19 @@ HRESULT CLoader_Test::Load_Augusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrHeadPropTag
 		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_BurstWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/BurstWeapon/AugustaBurstWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrBurstWeaponTag = TEXT("Prototype_GameObject_Augusta_BurstWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrBurstWeaponTag
+		, CAugustaBurstWeapon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 	
@@ -879,6 +896,14 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
 
+	_string strFilePath_UI_HUD_Sector_Minimap = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_Minimap.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_Minimap));
+
+	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
+
+
+
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
@@ -1036,7 +1061,13 @@ HRESULT CLoader_Test::Load_UI()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		CUI_HUD_Sector_Minimap::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_Minimap Load Failed. The UI_HUD_Sector_Minimap may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
 
 	
 	return S_OK;
