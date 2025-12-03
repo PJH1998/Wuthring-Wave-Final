@@ -39,6 +39,24 @@ ID3D11ShaderResourceView* CTarget_Manager::Get_Debug_RT_Resource(const _wstring&
 	return pRenderTarget->Get_SRV();
 }
 #endif
+
+HRESULT CTarget_Manager::Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* pConstantName)
+{
+	_wstring strRTTag = {};
+
+	switch(eRT)
+	{
+		case OPEN_RT::DEPTH:
+			strRTTag = TEXT("RT_Depth");
+			break;
+
+		default:
+			return E_FAIL;
+			break;
+	}
+
+	return pShader->Bind_SRV(pConstantName, Get_RT_SRV(strRTTag));
+}
 HRESULT CTarget_Manager::Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor)
 {
 	if (nullptr != Find_RenderTarget(strTargetTag))

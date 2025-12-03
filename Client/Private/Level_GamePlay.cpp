@@ -536,6 +536,10 @@ void CLevel_GamePlay::Ready_SFX()
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
 		CRASH("Failed Add Pool SONORA_CHANGE");
 
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"), ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_Scan"),
+		TEXT("Pooling_Scan"), 1)))
+		CRASH("Failed Add Pool Scan");
+
 	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
 	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
 	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
@@ -563,16 +567,16 @@ void CLevel_GamePlay::Ready_NPC()
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_pGameInstance->End_SFX();
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	//	m_pGameInstance->End_SFX();
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
@@ -588,13 +592,6 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	{
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_IsSSS = !m_IsSSS;
-		m_pGameInstance->SettingSSS(m_IsSSS);
-	}
-
 
 	ImGui::Begin("SHADER");
 	if (ImGui::CollapsingHeader("SSR"))
