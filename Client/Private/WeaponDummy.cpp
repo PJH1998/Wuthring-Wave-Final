@@ -1,28 +1,28 @@
 ﻿#include "ClientPch.h"
-#include "Levi_Bow.h"
+#include "WeaponDummy.h"
 #include "AttackVolume.h"
 
-CLevi_Bow::CLevi_Bow(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CWeaponDummy::CWeaponDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CPartObject { pDevice, pContext }
 {
 }
 
-CLevi_Bow::CLevi_Bow(const CLevi_Bow& Prototype)
+CWeaponDummy::CWeaponDummy(const CWeaponDummy& Prototype)
 	: CPartObject { Prototype }
 {
 }
 
-HRESULT CLevi_Bow::Initialize_Prototype()
+HRESULT CWeaponDummy::Initialize_Prototype()
 {
 	return S_OK;
 }
 
-HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
+HRESULT CWeaponDummy::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	LEVIBOW_DESC* pDesc = static_cast<LEVIBOW_DESC*>(pArg);
+	WD_DESC* pDesc = static_cast<WD_DESC*>(pArg);
 	m_pParentTransform = pDesc->pParentTransform;
 	m_pSocketMatrix = pDesc->pSocketMatrix;
 
@@ -38,20 +38,16 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 
-	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
-
-	m_vBaseColor = _float4(0.15f, 0.1f, 0.15f, 1.f);
-	m_pModelCom->Play_Animation_CPU("Stand2_Ex", 0.f, nullptr, false, false, false, false);
 	return S_OK;
 }
 
-void CLevi_Bow::Priority_Update(_float fTimeDelta)
+void CWeaponDummy::Priority_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
 }
 
-void CLevi_Bow::Update(_float fTimeDelta)
+void CWeaponDummy::Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
 	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
@@ -70,13 +66,13 @@ void CLevi_Bow::Update(_float fTimeDelta)
 	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
 }
 
-void CLevi_Bow::Late_Update(_float fTimeDelta)
+void CWeaponDummy::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
 
-void CLevi_Bow::Render()
+void CWeaponDummy::Render()
 {
 	if (FAILED(Bind_Resources()))
 		CRASH("Failed to Bind Resources (Levi_Bayonet)");
@@ -102,7 +98,7 @@ void CLevi_Bow::Render()
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 
-		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+		if (FAILED(m_pShaderCom->Begin(0)))
 			CRASH("Ready Shader Begin Failed");
 
 		if (FAILED(m_pModelCom->Render(i)))
@@ -117,21 +113,7 @@ void CLevi_Bow::Render()
 
 }
 
-void CLevi_Bow::Change_Offset(LEVIBOW_DESC& Desc)
-{
-#ifdef _DEBUG
-	m_vOffsetPos = Desc.vOffsetPos;
-	m_vOffsetRot = Desc.vOffsetRadian;
-#else
-	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
-		XMQuaternionRotationRollPitchYaw(Desc.vOffsetRadian.x, Desc.vOffsetRadian.y, Desc.vOffsetRadian.z),
-		XMVectorSetW(XMLoadFloat3(&Desc.vOffsetPos), 1.f));
-	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
-#endif // _DEBUG
-
-}
-
-HRESULT CLevi_Bow::Bind_Resources()
+HRESULT CWeaponDummy::Bind_Resources()
 {
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
 		CRASH("Failed Bind Matrix");
@@ -142,53 +124,48 @@ HRESULT CLevi_Bow::Bind_Resources()
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Failed Proj Matrix");
 
-	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
 	return S_OK;
 }
 
-void CLevi_Bow::Ready_Component(LEVIBOW_DESC* pDesc)
+void CWeaponDummy::Ready_Component(WD_DESC* pDesc)
 {
 	// 1. Components
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
-		, TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		, TEXT("Prototype_Component_Shader_MonsterProp"), TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("Shader");
 
 	if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel()
-		, TEXT("Prototype_Component_Model_Leviatan_Bow"), TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		, pDesc->wstrModelTag, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
 }
 
-void CLevi_Bow::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+CWeaponDummy* CWeaponDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-}
-
-CLevi_Bow* CLevi_Bow::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-{
-	CLevi_Bow* pInstance = new CLevi_Bow(pDevice, pContext);
+	CWeaponDummy* pInstance = new CWeaponDummy(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
-		MSG_BOX("Failed to Create : CLevi_Bow");
+		MSG_BOX("Failed to Create : CWeaponDummy");
 		Safe_Release(pInstance);
 	}
 
 	return pInstance;
 }
 
-CGameObject* CLevi_Bow::Clone(void* pArg)
+CGameObject* CWeaponDummy::Clone(void* pArg)
 {
-	CLevi_Bow* pClone = new CLevi_Bow(*this);
+	CWeaponDummy* pClone = new CWeaponDummy(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
-		MSG_BOX("Failed to Create : CLevi_Bow (Clone)");
+		MSG_BOX("Failed to Create : CWeaponDummy (Clone)");
 		Safe_Release(pClone);
 	}
 
 	return pClone;
 }
 
-void CLevi_Bow::Free()
+void CWeaponDummy::Free()
 {
 	__super::Free();
 	Safe_Release(m_pShaderCom);
