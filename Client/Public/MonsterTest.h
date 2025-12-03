@@ -20,6 +20,9 @@ public:
 		_float3 vInitPosition;
 		_float3 vInitRotate;
 		const _char* pAnimationTag;
+		_float		fHP;
+		_float fAttackDmg;
+		_float fMaxStamina;
 		_float3 vDetectRange;
 	}MONSTERTEST_DESC;
 
