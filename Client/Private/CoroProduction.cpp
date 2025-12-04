@@ -30,7 +30,7 @@ HRESULT CCoroProduction::Initialize_Clone(void* pArg)
         CRASH("Failed Ready_Components");
         return E_FAIL;
     }
-
+	Register_AllNotifies(pDesc->strFolderPath);
     m_IsPlayAnimation = false;
 	m_Tracks.emplace("Attack4", make_pair(43.f, 73.f));
 	m_Tracks.emplace("Attack12", make_pair(5.f, 80.f));
@@ -42,7 +42,7 @@ HRESULT CCoroProduction::Initialize_Clone(void* pArg)
 	m_pGameSystem->TriggerRegister(34, [this](void* pArg) {
 		Action3();
 		});
-	m_pGameSystem->TriggerRegister(40, [this](void* pArg) {
+	m_pGameSystem->TriggerRegister(30, [this](void* pArg) {
 		Action1();
 		});
     return S_OK;
@@ -145,6 +145,14 @@ void CCoroProduction::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CCoroProduction::Object_Func(const _wstring& wStrObjectTag)
 {
+	if (wStrObjectTag == TEXT("Meteo"))
+	{
+
+	}
+	else if (wStrObjectTag == TEXT("Action40"))
+	{
+		m_pGameSystem->OnTriggerActivate(40);
+	}
 }
 
 void CCoroProduction::Bind_Resources()
