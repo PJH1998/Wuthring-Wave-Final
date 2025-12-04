@@ -16,6 +16,7 @@ public:
 
 private:
 	void 						Ready_Layer_Player();
+	void 						Ready_Layer_SequnecePlayer();
 	void						Ready_Dummy();
 	void						Ready_MonsterTest();
 	void						Ready_HavocWarrior();

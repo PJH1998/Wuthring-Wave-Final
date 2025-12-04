@@ -16,6 +16,8 @@
 #include"Levi_Anchor.h"
 
 #include "Player.h"
+#include "SequencePlayer.h"
+
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
 #include "UI_QTE.h"
@@ -82,6 +84,7 @@ HRESULT CLevel_Heaven::Initialize()
 	
 	Ready_UI();
 	Ready_Layer_Player();
+	Ready_Layer_SequnecePlayer();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
@@ -160,6 +163,39 @@ void CLevel_Heaven::Ready_Layer_Player()
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
 		CRASH("Failed Ready Player");
+}
+
+void CLevel_Heaven::Ready_Layer_SequnecePlayer()
+{
+	_float3 vScale{}, vRotation{}, vPosition{};
+	vScale = { 1.f, 1.f, 1.f };
+	vRotation = { 0.f, 0.f, 0.f };
+	vPosition = { 0.f, -10.f, 50.f };
+
+	CSequencePlayer::SEQUENCEPLAYER_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.vScale = vScale;
+	Desc.vRotation = vRotation;
+	Desc.vPosition = vPosition;
+	Desc.iPlayerCount = CSequencePlayer::SEQUENCECHARACTER::SEQUENCE_END;
+
+	// 0. vector 크기 정의
+	Desc.PlayerSpecs.resize(CSequencePlayer::SEQUENCECHARACTER::SEQUENCE_END);
+
+	// 1. Yuno(주인공) 캐릭터 정의
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::YUNO].CharacterDesc = SeqPlayerData::GetYunoCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::YUNO].strActorTag = TEXT("Prototype_GameObject_Actor_Yuno");
+
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].CharacterDesc = SeqPlayerData::GetSequenceAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceAugusta");
+
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::LUPA].CharacterDesc = SeqPlayerData::GetSequenceLupaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::LUPA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceLupa");
+
+	// 2. Sequence Player(Character 모음) 생성.
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_SequencePlayer"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_SequencePlayers"), &Desc)))
+		CRASH("Failed Ready Sequence Player");
 }
 
 void CLevel_Heaven::Ready_Dummy()

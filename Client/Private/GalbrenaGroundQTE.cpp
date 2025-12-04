@@ -107,8 +107,12 @@ void CGalbrenaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 	if (m_fAnimationScale > 1.f)
 		m_fAnimationScale = 1.f;
 
+	_bool IsSelect = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	_bool IsFaical = true;
+	// 1. 애니메이션 실행부터
+	if (!IsSelect) IsFaical = false;
     // 1. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
+    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale, IsFaical);
 }
 
 void CGalbrenaGroundQTE::Check_StateTransition(_float fTimeDelta)
@@ -164,7 +168,7 @@ void CGalbrenaGroundQTE::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundQTE::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaQTEType::SKILL_QTE), "Attack07", 1.5f, 100.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaQTEType::SKILL_QTE), "Attack07", 1.5f, 60.f);
 }
 
 void CGalbrenaGroundQTE::State_Reset()

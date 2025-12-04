@@ -69,6 +69,9 @@
 // SequenceAugusta
 #include "SequenceAugusta.h"
 
+#include "SequenceLupa.h"
+#include "LupaSpear.h"
+
 #include "SequencePlayer.h"
 #pragma endregion
 
@@ -129,6 +132,7 @@ HRESULT CLoader_Test::Initialize()
 	// Sequence Player
 	m_pGameInstance->Add_Work([this]() {Load_Yuno(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_SequenceAugusta(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequenceLupa(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
 	
 	
@@ -983,6 +987,53 @@ HRESULT CLoader_Test::Load_SequenceAugusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrActorTag
 		, CSequenceAugusta::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_SequenceLupa()
+{
+	_wstring wStrModelTag = L"Prototype_Component_Model_SequenceLupa";
+	_string strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/Lupa/Lupa.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. Model 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_SequenceLupa";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_SequenceLupa");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CSequenceLupa::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Lupa_Spear";
+	strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/Lupa/Weapon/Spear/LupaSpear.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrSpearTag = TEXT("Prototype_GameObject_Lupa_Spear");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrSpearTag
+		, CLupaSpear::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 	return S_OK;

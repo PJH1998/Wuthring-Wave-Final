@@ -372,13 +372,14 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		if (nullptr != m_pTransformCom) // 우선 내위치에 켜기?ㅡ
-			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
+		
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
+
+		
 	}
 
 
@@ -386,11 +387,15 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+
+		if (nullptr != m_pTransformCom) // 우선 내위치에 켜기?ㅡ
+			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)

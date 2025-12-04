@@ -599,7 +599,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	return false;
 }
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, _bool isFacial)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 	ASSERT_CRASH(pTrackPosition);
@@ -628,7 +628,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShad
 
 
 	// 4. Facial Animation Weight 계산
-	if (m_eType == MODELTYPE::CHARACTER)
+	if (m_eType == MODELTYPE::CHARACTER && isFacial)
 	{
 		// 1. Facial Animation Weight 계산
 		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
@@ -650,7 +650,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShad
 			// Model이 만든 Weight SRV를 Mesh에게 빌려줌
 			pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
 		}
-		
 	}
 
 	// 4. Root Motion 조정.

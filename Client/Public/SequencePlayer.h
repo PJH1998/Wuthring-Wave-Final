@@ -11,9 +11,6 @@ public:
 		YUNO = 0,
 		AUGUSTA = 1,
 		LUPA = 2,
-		ZANI = 3,
-		SHACON = 4,
-		CARLOTA = 5,
 		SEQUENCE_END
 	};
 
