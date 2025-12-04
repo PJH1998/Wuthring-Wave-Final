@@ -23,6 +23,7 @@
 #include "Mouse.h"
 
 #include "Scan.h"
+#include "MotionTrail.h"
 
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
@@ -358,6 +359,12 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxScan.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements))))
 		CRASH("Failed to Add Prototype Shader Scan");
 
+	// Shader_MotionTrail
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MotionTrail"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh_MotionTrail.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+		CRASH("Failed to Add Prototype Shader MotionTrail");
+
+
 #pragma endregion
 
 #pragma region COMPUTE_SHADER
@@ -516,6 +523,14 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"),
 		CScan::Create(m_pDevice, m_pContext))))
 		CRASH("Failed to Add Prototype GameObject Scan");
+
+#pragma endregion
+
+#pragma region MOTION_TRAIL
+
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"),
+		CMotionTrail::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype GameObject MotionTrail");
 
 #pragma endregion
 }
