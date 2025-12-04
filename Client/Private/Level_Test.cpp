@@ -21,6 +21,7 @@
 
 #include "Player.h"
 #include "SequencePlayer.h"
+#include "SequenceLupa.h"
 
 #include "ShadowMap.h"
 #include "SkyBox.h"
@@ -209,6 +210,9 @@ void CLevel_Test::Ready_Layer_SequnecePlayer()
 
 	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].CharacterDesc = SeqPlayerData::GetSequenceAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
 	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceAugusta");
+
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::LUPA].CharacterDesc = SeqPlayerData::GetSequenceLupaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::LUPA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceLupa");
 
 	// 2. Sequence Player(Character 모음) 생성.
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_SequencePlayer"),
