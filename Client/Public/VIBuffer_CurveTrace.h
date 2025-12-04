@@ -21,12 +21,16 @@ public:
 	HRESULT UpdateVertices(const VTXUICURVE* pVertices, _uint iVertexCount);
 	_uint Get_VertexCount(void) const { return m_iVertexCount; }
 
+#ifdef _DEBUG
+	ID3D11Buffer* Get_VB() { return m_pVB; };
+#endif // _DEBUG
+
 
 private:
 	_uint m_iMaxSegmentCount = 0;	// 최대 세그먼트(선분) 수
 	_uint m_iSegmentUsing = 0;
 	_uint m_iVertexCount = 0;		// 실제 사용 중인 버텍스 수
-	D3D11_PRIMITIVE_TOPOLOGY m_ePrimitiveType = {};
+	//D3D11_PRIMITIVE_TOPOLOGY m_ePrimitiveType = {};
 
 private:
 	virtual void Free(void) override;

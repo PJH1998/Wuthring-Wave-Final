@@ -33,11 +33,11 @@ HRESULT CVIBuffer_CurveTrace::Initialize_Prototype(_uint iMaxSegmentCount)
 
 	//VB
 	m_iMaxSegmentCount = iMaxSegmentCount;
-	m_iVertexCount = m_iMaxSegmentCount + 1;		// 세그먼트(직선) n개. 즉, vertex(점)은 n+1개
+	m_iVertexCount = iMaxVertexCount; // m_iMaxSegmentCount + 1;	// 세그먼트(직선) n개. 즉, vertex(점)은 n+1개
 
 	m_iVertexStride = sizeof(VTXUICURVE);
 	m_iNumVertices = m_iVertexCount;
-	m_iNumIndices = iMaxIndexCount;								// 인덱스 안 씀, Draw()만
+	m_iNumIndices = iMaxIndexCount;	
 
 	m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	m_eIndexFormat = DXGI_FORMAT_R32_UINT;
@@ -78,9 +78,9 @@ HRESULT CVIBuffer_CurveTrace::Initialize_Prototype(_uint iMaxSegmentCount)
 
 	D3D11_BUFFER_DESC tIBDesc = {};
 	tIBDesc.ByteWidth = sizeof(_uint) * iMaxIndexCount;
-	tIBDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	tIBDesc.Usage = D3D11_USAGE_DYNAMIC;
 	tIBDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	tIBDesc.CPUAccessFlags = 0;
+	tIBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	D3D11_SUBRESOURCE_DATA tIBData = {};
 	tIBData.pSysMem = vecIndices.data();
@@ -132,14 +132,18 @@ HRESULT CVIBuffer_CurveTrace::UpdateVertices(const VTXUICURVE* pVertices, _uint 
 
 	return S_OK;
 }
-HRESULT CVIBuffer_CurveTrace::Render(void)
+
+HRESULT CVIBuffer_CurveTrace::Render()
 {
-	if (nullptr == m_pVB)
-		return E_FAIL;
+    if (nullptr == m_pVB || nullptr == m_pIB)
+        return E_FAIL;
 
-	m_pContext->Draw(m_iNumVertices, 0);
+    if (m_iNumIndices == 0)
+        return S_OK;
 
-	return S_OK;
+    m_pContext->DrawIndexed(m_iNumIndices, 0, 0);
+
+    return S_OK;
 }
 
 CVIBuffer_CurveTrace* CVIBuffer_CurveTrace::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iMaxSegmentCount)

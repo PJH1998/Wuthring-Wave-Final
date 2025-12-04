@@ -962,6 +962,13 @@ HRESULT CLoader_Test::Load_UI()
 		CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
 		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
+	// VIBuffer_CurveTrace
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
+		CVIBuffer_CurveTrace::Create(m_pDevice, m_pContext, 64))))
+		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_CurveTrace Load Failed. The VIBuffer_CurveTrace  may have already been loaded.\n");
+
+	//
+
 
 	// ==============================
 	cout << "[Loader_Test] Shader" << endl;

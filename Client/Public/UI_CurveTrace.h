@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "GameObject.h"
+#include "VIBuffer_CurveTrace.h"
 
 NS_BEGIN(Client)
+class CVIBuffer_CurveTrace;
 class CUI_CurveTrace final : public CGameObject
 {
 public:
@@ -48,7 +50,7 @@ private:
 	UI_CURVETRACE_DESC	m_tDesc = {};
 
 	CShader*		m_pShaderCom = { nullptr };			// Shader_UI_VtxCurveTrace.hlsl
-	CVIBuffer*		m_pVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp
+	CVIBuffer_CurveTrace*	m_pVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp
 	_bool			m_isCloned = false;
 
 	_bool			m_isModified = false;

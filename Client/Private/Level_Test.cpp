@@ -1064,17 +1064,17 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 	{
 		CUI_CurveTrace::UI_CURVETRACE_DESC tDesc = {};
-		tDesc.vStartPos		= _float3(-40.f, -2.f, 100.f);	
-		tDesc.vStartVel		= _float3(3.f, 3.f, 3.f);
-		tDesc.vGravity		= _float3(0.f, -9.8f, 0.f);
-		tDesc.fMaxTime		= 9.8f;
+		tDesc.vStartPos		= _float3(0.f, 0.f,  0.f);	
+		tDesc.vStartVel		= _float3(0.3f, 10.f, 0.3f);
+		tDesc.vGravity		= _float3(0.f, -0.98f, 0.f);
+		tDesc.fMaxTime		= 20.f;
 		tDesc.iSegmentCount	= 15;
-		tDesc.fWidth		= 10.f;
-		tDesc.vBaseColor	= _float4(0.f, 0.f, 0.f, 1.f);
+		tDesc.fWidth		= 20.f;
+		tDesc.vBaseColor	= _float4(1.f, 1.f, 1.f, 1.f);
 		tDesc.vHeadColor	= _float4(1.f, 0.f, 1.f, 1.f);
 		tDesc.vTailColor	= _float4(0.f, 1.f, 1.f, 1.f);
 
-		_vector vPos = XMVectorSet(-40.f, -2.f, 100.f, 1.f);
+		_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 		_vector vSca = XMVectorSet(50.f, 50.f, 50.f, 1.f);
 		_matrix matPos = XMMatrixScalingFromVector(vSca) * XMMatrixTranslationFromVector(vPos);
 		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_CurveTrace", matPos, &tDesc);

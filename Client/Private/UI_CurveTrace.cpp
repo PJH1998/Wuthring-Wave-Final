@@ -39,15 +39,15 @@ void CUI_CurveTrace::Priority_Update(_float fTimeDelta)
 		return;
 
 }
-
+/*
 void CUI_CurveTrace::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
 
 	// 파라미터가 변경되었을 때에만 리본 버텍스를 다시 생성
-	if (m_isModified)
-	{
+	//if (m_isModified)
+	//{
 		// 1) 기준 포인트(포물선) 샘플링
 		const _uint iSeg = m_tDesc.iSegmentCount;
 		if (iSeg == 0)
@@ -80,15 +80,37 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 
 		const _float fHalfWidth = m_tDesc.fWidth * 0.5f;
 
-		// [3-3] 리본용 좌/우 정점 생성
+
+		_float3 prevSide = {};
+		bool    hasPrevSide = false;
+
 		for (_uint i = 0; i < iPointCount; ++i)
 		{
 			_float3 vPos = vecPoints[i];
 			_float3 vTan = CalcTangent(vecPoints.data(), iPointCount, i);
-			_float3 vSide = CalcSide(vTan, vPos);
+			_float3 vSide = CalcSide(vTan, vPos); // 원래대로 계산
 
-			_float3 vLeft;
-			_float3 vRight;
+			// [연속성 보정]
+			if (hasPrevSide)
+			{
+				_vector s = XMLoadFloat3(&vSide);
+				_vector ps = XMLoadFloat3(&prevSide);
+				float dot = XMVectorGetX(XMVector3Dot(s, ps));
+
+				// dot이 0보다 작으면 (90도 넘게 꺾이면) 방향 뒤집기
+				if (dot < 0.0f)
+				{
+					vSide.x *= -1.f;
+					vSide.y *= -1.f;
+					vSide.z *= -1.f;
+				}
+			}
+
+			prevSide = vSide;
+			hasPrevSide = true;
+
+			// 이하 기존 좌/우 계산
+			_float3 vLeft, vRight;
 
 			vLeft.x = vPos.x - vSide.x * fHalfWidth;
 			vLeft.y = vPos.y - vSide.y * fHalfWidth;
@@ -98,16 +120,13 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 			vRight.y = vPos.y + vSide.y * fHalfWidth;
 			vRight.z = vPos.z + vSide.z * fHalfWidth;
 
-			const _float fCurveU = (_float)i / (_float)iSeg; // 진행도 0~1
+			const _float fCurveU = (_float)i / (_float)iSeg;
+			const _uint  idx = i * 2;
 
-			const _uint idx = i * 2;
-
-			// left
 			vecVerts[idx + 0].vPosition = vLeft;
 			vecVerts[idx + 0].fCurve = fCurveU;
 			vecVerts[idx + 0].fWidth = 0;
 
-			// right
 			vecVerts[idx + 1].vPosition = vRight;
 			vecVerts[idx + 1].fCurve = fCurveU;
 			vecVerts[idx + 1].fWidth = 1;
@@ -117,16 +136,48 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 		//  → CVIBuffer_CurveRibbon::UpdateVertices(const VTX_CURVERIBBON*, _uint iSegCount)
 		static_cast<CVIBuffer_CurveTrace*>(m_pVIBufferCom)->UpdateVertices(vecVerts.data(), iSeg);
 
-		m_isModified = false;
-	}
+		m_isModified = true;// false;
+	//}
 }
+*/
+
+
+void CUI_CurveTrace::Update(_float fTimeDelta)
+{
+	// [UI_CurveTrace.cpp Update 함수]
+
+	vector<VTXUICURVE> vecVerts(4);
+
+	// Triangle Strip 순서: 0(좌하) -> 1(좌상) -> 2(우하) -> 3(우상) 
+	// (순서는 취향이지만, 이렇게 하면 'N'자가 되어 사각형이 나옵니다)
+
+	// 0: 좌하 (Bottom-Left)
+	vecVerts[0].vPosition = _float3(0.f, 0.f, 0.f);
+	vecVerts[0].fWidth = 0.f; vecVerts[0].fCurve = 0.f;
+
+	// 1: 좌상 (Top-Left) <-- 순서 변경! (기존엔 여기가 2번이었음)
+	vecVerts[1].vPosition = _float3(0.f, 0.f, 0.f);
+	vecVerts[1].fWidth = 0.f; vecVerts[1].fCurve = 1.f;
+
+	// 2: 우하 (Bottom-Right) <-- 순서 변경! (기존엔 여기가 1번이었음)
+	vecVerts[2].vPosition = _float3(0.f, 0.f, 0.f);
+	vecVerts[2].fWidth = 1.f; vecVerts[2].fCurve = 0.f;
+
+	// 3: 우상 (Top-Right)
+	vecVerts[3].vPosition = _float3(0.f, 0.f, 0.f);
+	vecVerts[3].fWidth = 1.f; vecVerts[3].fCurve = 1.f;	
+
+	// UpdateVertices 호출 (기존 동일)
+	static_cast<CVIBuffer_CurveTrace*>(m_pVIBufferCom)->UpdateVertices(vecVerts.data(), 1);
+}
+
 
 void CUI_CurveTrace::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
 
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::BLEND, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this);
 }
 
 void CUI_CurveTrace::Render()
@@ -134,7 +185,11 @@ void CUI_CurveTrace::Render()
 	if (!m_isActivate)
 		return;
 
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", m_pTransformCom->Get_WorldMatrixPtr())))
+
+	_float4x4 IdentityMatrix;
+	XMStoreFloat4x4(&IdentityMatrix, XMMatrixIdentity());
+	
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &IdentityMatrix)))
 		CRASH("Binding_Matrix_Failed");
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Binding_Matrix_Failed");
@@ -148,6 +203,9 @@ void CUI_CurveTrace::Render()
 	if (FAILED(m_pShaderCom->Bind_Value("g_TailColor", &m_tDesc.vTailColor, sizeof(m_tDesc.vTailColor))))
 		CRASH("Binding_Value_Failed");
 
+	m_pShaderCom->Begin(0);
+	m_pVIBufferCom->Bind_Resources();
+	m_pVIBufferCom->Render();
 }
 
 void CUI_CurveTrace::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -173,7 +231,7 @@ HRESULT CUI_CurveTrace::Ready_Components(void* pArg)
 	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
-	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
+	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
 		return E_FAIL;
 }
@@ -230,7 +288,24 @@ _float3 CUI_CurveTrace::CalcSide(_float3& vTan, _float3& vPos)
 	_vector vT = XMVector3Normalize(XMLoadFloat3(&vTan));
 	_vector vC = XMVector3Normalize(XMLoadFloat3(&vCamDir));
 
-	_vector vSide = XMVector3Normalize(XMVector3Cross(vC, vT));
+
+	// 1. 1차 외적 시도
+	_vector vSideVec = XMVector3Cross(vC, vT);
+	_vector vLengthSq = XMVector3LengthSq(vSideVec);
+
+	// 2. [안전장치] 평행해서 길이가 너무 짧다면(0.001 미만), 월드 Up 벡터를 대신 사용
+	if (XMVectorGetX(vLengthSq) < 0.001f)
+	{
+		// 진행 방향이 위(0,1,0)인 경우까지 대비해 Right(1,0,0)도 예비로 둠
+		_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+		if (abs(XMVectorGetY(vT)) > 0.99f) // 진행방향이 수직이면
+			vWorldUp = XMVectorSet(1.f, 0.f, 0.f, 0.f); // X축 사용
+
+		vSideVec = XMVector3Cross(vWorldUp, vT);
+	}
+
+	_vector vSide = XMVector3Normalize(vSideVec);
+
 
 	_float3 out;
 	XMStoreFloat3(&out, vSide);

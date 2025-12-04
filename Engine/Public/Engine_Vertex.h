@@ -341,20 +341,37 @@ typedef struct tagVertexInstanceAnimMesh
 		};
 	}VTXUITEXT;
 
+	//typedef struct tagVertexCurveTrace
+	//{
+	//	_float3		vPosition;
+	//	_float		fWidth;;
+	//	_float		fCurve;
+	//
+	//	static const _uint iNumElements = { 3 };
+	//	static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] =
+	//	{
+	//		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,		0, 0,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//		{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT,				0, 12,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//		{ "TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT,				0, 16,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//	};
+	//}VTXUICURVE;
+
 	typedef struct tagVertexCurveTrace
 	{
-		_float3		vPosition;
-		_float		fWidth;;
-		_float		fCurve;
+		_float3 vPosition;
+		_float  fWidth;   
+		_float  fCurve;   
+		_float3 vPadding; // padding
 
-		static const _uint iNumElements = { 3 };
+		static const _uint iNumElements = 3;
 		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] =
 		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,		0, 0,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT,				0, 12,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT,				0, 16,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT,       0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT,       0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-	}VTXUICURVE;
+	} VTXUICURVE;
+
 
 	// ==============================
 
