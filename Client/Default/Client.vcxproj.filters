@@ -1929,6 +1929,9 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_MotionTrail.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance_FireFly.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">

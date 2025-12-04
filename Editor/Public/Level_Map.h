@@ -60,6 +60,7 @@ private:
 	class CEdit_MapObject_Collaps* m_pPickedCollaps = { nullptr };
 	class CEdit_LightManager* m_pLightManager = { nullptr };
 	class CEdit_MapEffectCollector* m_pEffectCollector = { nullptr };
+	class CEdit_FireFly_Manager* m_pFlyManager = { nullptr };
 	unordered_set< _string> m_szPrototypeName;
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };

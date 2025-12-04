@@ -1,18 +1,19 @@
 ﻿#include"EnginePch.h"
-#include "Mesh_Instance.h"
+#include "Mesh_Instance_FireFly.h"
+#include "GameInstance.h"
 
-CMesh_Instance::CMesh_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    :CVIBuffer_Instance(pDevice,pContext)
+CMesh_Instance_FireFly::CMesh_Instance_FireFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	:CVIBuffer_Instance(pDevice, pContext)
 {
 }
 
-CMesh_Instance::CMesh_Instance(const CMesh_Instance& Prototype)
-    :CVIBuffer_Instance(Prototype),
-	m_IsEdit{Prototype.m_IsEdit}
+CMesh_Instance_FireFly::CMesh_Instance_FireFly(const CMesh_Instance_FireFly& Prototype)
+	:CVIBuffer_Instance(Prototype),
+	m_IsEdit{ Prototype.m_IsEdit }
 {
 }
 
-HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool IsEdit, void* pArg, ifstream& InputFile, _float* MinPos, _float* MaxPos)
+HRESULT CMesh_Instance_FireFly::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool IsEdit, void* pArg, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
 	VTXMESH* pVertices = { nullptr };
 	_uint* pIndices = { nullptr };
@@ -96,14 +97,14 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool 
 
 	if (!m_IsEdit)
 	{
-		CMesh_Instance::MESH_INST_DESC* pDesc = static_cast<CMesh_Instance::MESH_INST_DESC*>(pArg);
+		CMesh_Instance_FireFly::MESH_INST_DESC* pDesc = static_cast<CMesh_Instance_FireFly::MESH_INST_DESC*>(pArg);
 		//MESH_INST_DESC* pDesc = static_cast<MESH_INST_DESC*>(pArg);
 		if (!pDesc)
 			CRASH("Failed");
 
 		m_iNumInstance = pDesc->iNumInstance;
 		//m_TransformMatrices = pDesc->pTransformMatrix;
-		m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH);
+		m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH_FIREFLY);
 		m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
 		m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
 		m_VBInstanceDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -111,22 +112,25 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool 
 		m_VBInstanceDesc.MiscFlags = 0;
 		m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
-		m_pVBInstanceVertices = new VTXINSTANCE_MESH[m_iNumInstance];
-		VTXINSTANCE_MESH* pVBInstanceVertices = static_cast<VTXINSTANCE_MESH*>(m_pVBInstanceVertices);
-		//for (_uint i = 0; i < m_iNumInstance; ++i)
-		//{
-		//	memcpy(&pVBInstanceVertices[i].vRight, &pDesc->pTransformMatrix[i].m[0], sizeof(_float4));
-		//	memcpy(&pVBInstanceVertices[i].vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
-		//	memcpy(&pVBInstanceVertices[i].vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
-		//	memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
-		//}
+		m_pVBInstanceVertices = new VTXINSTANCE_MESH_FIREFLY[m_iNumInstance];
+		VTXINSTANCE_MESH_FIREFLY* pVBInstanceVertices = static_cast<VTXINSTANCE_MESH_FIREFLY*>(m_pVBInstanceVertices);
+		for (_uint i = 0; i < m_iNumInstance; ++i)
+		{
+			memcpy(&pVBInstanceVertices[i].vRight, &pDesc->pTransformMatrix[i].m[0], sizeof(_float4));
+			memcpy(&pVBInstanceVertices[i].vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
+			memcpy(&pVBInstanceVertices[i].vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
+			memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
 
-		memcpy(pVBInstanceVertices, pDesc->pTransformMatrix, sizeof(_float4x4) * m_iNumInstance);
+			pVBInstanceVertices[i].vPerMove.x = m_pGameInstance->Rand(pDesc->vPerMoveCos.x, pDesc->vPerMoveCos.y);
+			pVBInstanceVertices[i].vPerMove.y = m_pGameInstance->Rand(pDesc->vPerMoveSin.x, pDesc->vPerMoveSin.y);
+			pVBInstanceVertices[i].vPerMove.z = m_pGameInstance->Rand(pDesc->vPerMoveSin2.x, pDesc->vPerMoveSin2.y);
+			pVBInstanceVertices[i].vRange = m_pGameInstance->Rand(pDesc->vRange.x, pDesc->vRange.y);
+		}
 	}
 	return S_OK;
 }
 
-HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
+HRESULT CMesh_Instance_FireFly::Initialize_Clone(void* pArg)
 {
 	if (m_IsEdit)
 	{
@@ -137,7 +141,7 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 
 		m_iNumInstance = pDesc->iNumInstance;
 		//m_TransformMatrices = pDesc->pTransformMatrix;
-		m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH);
+		m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH_FIREFLY);
 		m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
 		m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
 		m_VBInstanceDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -145,8 +149,8 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 		m_VBInstanceDesc.MiscFlags = 0;
 		m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
-		m_pVBInstanceVertices = new VTXINSTANCE_MESH[m_iNumInstance];
-		VTXINSTANCE_MESH* pVBInstanceVertices = static_cast<VTXINSTANCE_MESH*>(m_pVBInstanceVertices);
+		m_pVBInstanceVertices = new VTXINSTANCE_MESH_FIREFLY[m_iNumInstance];
+		VTXINSTANCE_MESH_FIREFLY* pVBInstanceVertices = static_cast<VTXINSTANCE_MESH_FIREFLY*>(m_pVBInstanceVertices);
 
 		for (_uint i = 0; i < m_iNumInstance; ++i)
 		{
@@ -154,61 +158,46 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 			memcpy(&pVBInstanceVertices[i].vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
 			memcpy(&pVBInstanceVertices[i].vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
 			memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
+
+			pVBInstanceVertices[i].vPerMove.x = m_pGameInstance->Rand(pDesc->vPerMoveCos.x, pDesc->vPerMoveCos.y);
+			pVBInstanceVertices[i].vPerMove.y = m_pGameInstance->Rand(pDesc->vPerMoveSin.x, pDesc->vPerMoveSin.y);
+			pVBInstanceVertices[i].vPerMove.z = m_pGameInstance->Rand(pDesc->vPerMoveSin2.x, pDesc->vPerMoveSin2.y);
+			pVBInstanceVertices[i].vRange = m_pGameInstance->Rand(pDesc->vRange.x, pDesc->vRange.y);
 		}
 	}
 
-    if (FAILED(__super::Initialize_Clone(pArg)))
-        return E_FAIL;
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
 
-    return S_OK;
+	return S_OK;
 }
 
 #ifdef _DEBUG
-_bool CMesh_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
+void CMesh_Instance_FireFly::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
 {
-    //?몄뒪?댁떛????紐뉖쾲 吏몄씤吏 ?뚯븘?쇳븿.
+	D3D11_MAPPED_SUBRESOURCE SubResource{};
 
-    _float fMin = FLT_MAX;
-    for (size_t i = 0; i < m_Indices.size() - 2; i += 3)
-    {
-        _float3 vPos[3] = {
-            m_VertexPositions[m_Indices[i]],
-            m_VertexPositions[m_Indices[i + 1]],
-            m_VertexPositions[m_Indices[i + 2]],
-        };
-        _float fDistance = {};
-        if (true == TriangleTests::Intersects(vRayPos, vRayDir,
-            XMVectorSetW(XMLoadFloat3(&vPos[0]), 1.f),
-            XMVectorSetW(XMLoadFloat3(&vPos[1]), 1.f),
-            XMVectorSetW(XMLoadFloat3(&vPos[2]), 1.f), fDistance))
-        {
-            if (fMin > fDistance)
-                fMin = fDistance;
-        }
-    }
-    if (fMin < FLT_MAX)
-    {
-        *pDistance = fMin;
-        return true;
-    }
-
-    return false;
+	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+	VTXINSTANCE_MESH_FIREFLY* pVertices = static_cast<VTXINSTANCE_MESH_FIREFLY*>(SubResource.pData);
+	memcpy(&pVertices[iNumInstance], &fMatrix, sizeof(_float4x4));
+	m_pContext->Unmap(m_pVBInstance, 0);
 }
 
-void CMesh_Instance::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
+void CMesh_Instance_FireFly::FireFly_Move(_fvector vPos)
 {
-    D3D11_MAPPED_SUBRESOURCE SubResource{};
-        
-    m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-    VTXINSTANCE_MESH* pVertices = static_cast<VTXINSTANCE_MESH*>(SubResource.pData);
-    memcpy(&pVertices[iNumInstance], &fMatrix, sizeof(_float4x4));
-    m_pContext->Unmap(m_pVBInstance, 0);
+	D3D11_MAPPED_SUBRESOURCE SubResource{};
+
+	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+	VTXINSTANCE_MESH_FIREFLY* pVertices = static_cast<VTXINSTANCE_MESH_FIREFLY*>(SubResource.pData);
+	for (_uint i = 0; i < m_iNumInstance; ++i)
+		XMStoreFloat4(&pVertices[i].vTranslation, vPos);
+	m_pContext->Unmap(m_pVBInstance, 0);
 }
 #endif
 
-CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, _bool IsEdit, void* pArg, ifstream& InputFile, _float* MinPos, _float* MaxPos)
+CMesh_Instance_FireFly* CMesh_Instance_FireFly::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, _bool IsEdit, void* pArg, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
-	CMesh_Instance* pInstance = new CMesh_Instance(pDevice, pContext);
+	CMesh_Instance_FireFly* pInstance = new CMesh_Instance_FireFly(pDevice, pContext);
 
 	//혹시 메쉬 인스턴스 생성할 때 pArg 받으면 랜덤성 말고 정해진 대로 하게 할것.
 
@@ -221,11 +210,11 @@ CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 	return pInstance;
 }
 
-CMesh_Instance* CMesh_Instance::Clone(void* pArg)
+CMesh_Instance_FireFly* CMesh_Instance_FireFly::Clone(void* pArg)
 {
-    return new CMesh_Instance(*this);
+	return new CMesh_Instance_FireFly(*this);
 }
-void CMesh_Instance::Free()
+void CMesh_Instance_FireFly::Free()
 {
     __super::Free();
 	if (m_IsEdit)

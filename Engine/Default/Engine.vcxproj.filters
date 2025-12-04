@@ -817,6 +817,10 @@
     <ClInclude Include="..\public\VIBuffer_Decal_Cube.h">
       <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Model_Instance_FireFly.h" />
+    <ClInclude Include="..\Public\Mesh_Instance_FireFly.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1205,6 +1209,10 @@
     </ClCompile>
     <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Model_Instance_FireFly.cpp" />
+    <ClCompile Include="..\Private\Mesh_Instance_FireFly.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

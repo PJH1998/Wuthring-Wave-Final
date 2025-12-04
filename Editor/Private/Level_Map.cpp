@@ -20,6 +20,7 @@
 #include"Edit_MapObject_Collaps.h"
 #include"Edit_LightManager.h"
 #include"Edit_MapEffectCollector.h"
+#include"Edit_FireFly_Manager.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -41,11 +42,10 @@ CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
-
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4000, 4000,4000));
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
-
+	m_pFlyManager = CEdit_FireFly_Manager::Create(m_pDevice, m_pContext);
 
 	//ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
@@ -123,6 +123,8 @@ void CLevel_Map::Update(_float fTimeDelta)
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 	m_pEffectCollector->Set_ImGuiOption();
+	m_pFlyManager->Set_ImGuiOption();
+
     switch (m_eMenu)
     {
     case Editor::CLevel_Map::MENU_OBJECT:
@@ -1070,6 +1072,8 @@ void CLevel_Map::Load_Objects()
 				_wstring namePart = baseName.substr(0, pos + 1);
 
 				_wstring numberPart = baseName.substr(pos + 1);
+				if (numberPart.empty())
+					continue;
 				version = stoi(numberPart);
 
 				_wstring key = L"Prototype_Component_Model_" + namePart;
@@ -1301,7 +1305,7 @@ _bool CLevel_Map::NameCheck(const _string& ModelName, const _string& Name)
 
 void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 {
-
+	return;
 
 #pragma region MyRegion
 
@@ -1869,6 +1873,7 @@ void CLevel_Map::Free()
 	Safe_Release(m_pPickedSpawnor);
 	Safe_Release(m_pLightManager);
 	Safe_Release(m_pEffectCollector);
+	Safe_Release(m_pFlyManager);
 	
     for (auto& Pair : m_SaveObjects)
     {

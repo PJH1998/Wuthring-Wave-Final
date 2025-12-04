@@ -493,6 +493,8 @@
     </ClInclude>
     <ClInclude Include="..\Public\Edit_LightManager.h" />
     <ClInclude Include="..\Public\Edit_MapEffectCollector.h" />
+    <ClInclude Include="..\Public\Edit_FireFly.h" />
+    <ClInclude Include="..\Public\Edit_FireFly_Manager.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -736,6 +738,8 @@
     </ClCompile>
     <ClCompile Include="..\Private\Edit_LightManager.cpp" />
     <ClCompile Include="..\Private\Edit_MapEffectCollector.cpp" />
+    <ClCompile Include="..\Private\Edit_FireFly.cpp" />
+    <ClCompile Include="..\Private\Edit_FireFly_Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

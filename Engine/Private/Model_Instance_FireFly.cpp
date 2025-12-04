@@ -1,22 +1,20 @@
 ﻿#include"EnginePch.h"
-#include"Model_Instance.h"
+#include "Model_Instance_FireFly.h"
+#include"Mesh_Instance_FireFly.h"
 #include"Material.h"
-#include"Mesh_Instance.h"
 
-CModel_Instance::CModel_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    :CComponent(pDevice,pContext)
+CModel_Instance_FireFly::CModel_Instance_FireFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	:CComponent(pDevice,pContext)
 {
 }
 
-CModel_Instance::CModel_Instance(const CModel_Instance& Prototype)
-    :CComponent(Prototype),
-	m_eType{ Prototype.m_eType },
+CModel_Instance_FireFly::CModel_Instance_FireFly(const CModel_Instance_FireFly& Prototype)
+	:CComponent(Prototype),
 	m_iNumMeshes{ Prototype.m_iNumMeshes },
 	m_iNumMaterials{ Prototype.m_iNumMaterials },
 	m_Materials{ Prototype.m_Materials },
 	m_PreTransformMatrix{ Prototype.m_PreTransformMatrix }
 {
-	//메쉬는 깊은복사하되, m_pVB, m_pIB와같이 메쉬의 정보는 얕은복사.
 	for (auto& pMesh : Prototype.m_Meshes)
 		m_Meshes.push_back(pMesh->Clone(nullptr));
 
@@ -24,20 +22,9 @@ CModel_Instance::CModel_Instance(const CModel_Instance& Prototype)
 		Safe_AddRef(pMaterial);
 }
 
-void CModel_Instance::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavigation, _float fTimeDelta)
+HRESULT CModel_Instance_FireFly::Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath, _bool IsEdit, void* pArg)
 {
-}
-
-void CModel_Instance::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
-{
-}
-
-HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath, _bool IsEdit, void* pArg)
-{
-    m_eType = eType;
-	
 	XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
-
 	ifstream InputFile(pFilePath, ios::binary);
 	if (false == InputFile.is_open())
 	{
@@ -53,28 +40,28 @@ HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTrans
 
 	InputFile.close();
 
-    return S_OK;
+	return S_OK;
 }
 
-HRESULT CModel_Instance::Initialize_Clone(void* pArg)
+HRESULT CModel_Instance_FireFly::Initialize_Clone(void* pArg)
 {
-	//?꾩떆
 	for (auto& pMesh : m_Meshes)
 		pMesh->Initialize_Clone(pArg);
 
-    return S_OK;
+	//
+	return S_OK;
 }
 
-HRESULT CModel_Instance::Render(_uint iMeshIndex)
+HRESULT CModel_Instance_FireFly::Render(_uint iMeshIndex)
 {
 	if (FAILED(m_Meshes[iMeshIndex]->Bind_Resources()))
 		return E_FAIL;
-	
+
 	m_Meshes[iMeshIndex]->Render();
 	return S_OK;
 }
 
-HRESULT CModel_Instance::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
+HRESULT CModel_Instance_FireFly::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
 	if (FAILED(m_Meshes[iMeshIndex]->Bind_Resources(pDC)))
 		return E_FAIL;
@@ -82,34 +69,7 @@ HRESULT CModel_Instance::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
 
 	return S_OK;
 }
-
-#ifdef _DEBUG
-_bool CModel_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
-{
-	_float fMin = FLT_MAX;
-	for (_uint i = 0; i < m_iNumMeshes; ++i)
-	{
-		_float fDistance = {};
-		if (true == m_Meshes[i]->Is_Picked(vRayPos, vRayDir, &fDistance) && fMin > fDistance)
-			fMin = fDistance;
-	}
-
-	if (fMin < FLT_MAX)
-	{
-		*pDistance = fMin;
-		return true;
-	}
-
-	return false;
-}
-void CModel_Instance::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
-{
-	for (auto& pMesh : m_Meshes)
-		pMesh->Change_InstanceInfo(iNumInstance, fMatrix);
-}
-#endif
-
-HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex)
+HRESULT CModel_Instance_FireFly::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex)
 {
 	if (iMeshIndex >= m_Meshes.size())
 		return E_FAIL;
@@ -117,7 +77,7 @@ HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstant
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex);
 }
 
-HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType)
+HRESULT CModel_Instance_FireFly::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType)
 {
 	if (iMeshIndex >= m_Meshes.size())
 		return S_OK;
@@ -125,7 +85,7 @@ HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstant
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType);
 }
 
-HRESULT CModel_Instance::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
+HRESULT CModel_Instance_FireFly::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
 {
 	if (iMeshIndex >= m_Meshes.size())
 		return E_FAIL;
@@ -133,20 +93,27 @@ HRESULT CModel_Instance::Bind_Materials(CDeferredShader* pShader, const _char* p
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
 }
 
-HRESULT CModel_Instance::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+HRESULT CModel_Instance_FireFly::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
 {
 	if (iMeshIndex >= m_Meshes.size())
 		return S_OK;
 
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
 }
-HRESULT CModel_Instance::Ready_Mesh(ifstream& InputFile, _bool IsEdit, void* pArg)
+#ifdef _DEBUG
+void CModel_Instance_FireFly::Change_Pos(_fvector vPos)
+{
+	for (size_t i = 0; i < m_iNumMeshes; ++i)
+		m_Meshes[i]->FireFly_Move(vPos);
+}
+#endif
+HRESULT CModel_Instance_FireFly::Ready_Mesh(ifstream& InputFile, _bool IsEdit, void* pArg)
 {
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
 
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
-		CMesh_Instance* pMesh = CMesh_Instance::Create(m_pDevice, m_pContext, XMLoadFloat4x4(&m_PreTransformMatrix), IsEdit, pArg, InputFile, m_MinPos, m_MaxPos);
+		CMesh_Instance_FireFly* pMesh = CMesh_Instance_FireFly::Create(m_pDevice, m_pContext, XMLoadFloat4x4(&m_PreTransformMatrix), IsEdit, pArg, InputFile, m_MinPos, m_MaxPos);
 
 		if (nullptr == pMesh)
 			return E_FAIL;
@@ -157,7 +124,7 @@ HRESULT CModel_Instance::Ready_Mesh(ifstream& InputFile, _bool IsEdit, void* pAr
 	return S_OK;
 }
 
-HRESULT CModel_Instance::Ready_Material(const _char* pFilePath)
+HRESULT CModel_Instance_FireFly::Ready_Material(const _char* pFilePath)
 {
 	_char szMaterialFilePath[MAX_PATH] = {};
 	_char szMaterialDrivePath[MAX_PATH] = {};
@@ -196,13 +163,11 @@ HRESULT CModel_Instance::Ready_Material(const _char* pFilePath)
 	return S_OK;
 }
 
-CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, const _char* pFilePath, _bool IsEdit, void* pArg)
+CModel_Instance_FireFly* CModel_Instance_FireFly::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, const _char* pFilePath, _bool IsEdit, void* pArg)
 {
-	CModel_Instance* pInstance = new CModel_Instance(pDevice, pContext);
+	CModel_Instance_FireFly* pInstance = new CModel_Instance_FireFly(pDevice, pContext);
 
-	MODELTYPE eType = MODELTYPE::MAP;
-
-	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath, IsEdit, pArg)))
+	if (FAILED(pInstance->Initialize_Prototype(PreTransformMatrix, pFilePath, IsEdit, pArg)))
 	{
 		MSG_BOX("Failed to Create : Model_Instance");
 		Safe_Release(pInstance);
@@ -211,9 +176,9 @@ CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 	return pInstance;
 }
 
-CComponent* CModel_Instance::Clone(void* pArg)
+CComponent* CModel_Instance_FireFly::Clone(void* pArg)
 {
-	CModel_Instance* pClone = new CModel_Instance(*this);
+	CModel_Instance_FireFly* pClone = new CModel_Instance_FireFly(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
@@ -224,7 +189,7 @@ CComponent* CModel_Instance::Clone(void* pArg)
 	return pClone;
 }
 
-void CModel_Instance::Free()
+void CModel_Instance_FireFly::Free()
 {
 	__super::Free();
 
