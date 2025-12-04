@@ -192,18 +192,33 @@ void CCoroProduction::Action1()
 {
 	m_strCurrentAnimation = "PatrolToFight";
 	m_isActivate = true;
+	_vector vPos = XMVectorSet(3463.f, 321.1f, 1963.7f, 1.f);
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Rotation_Quaternion(vQuat);
+	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 }
 
 void CCoroProduction::Action2()
 {
 	m_strCurrentAnimation = "Attack4";
 	m_isActivate = true;
+	_vector vPos = XMVectorSet(3393.292f, 299.548f, 1952.436f, 1.f);
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Rotation_Quaternion(vQuat);
+	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 }
 
 void CCoroProduction::Action3()
 {
 	m_strCurrentAnimation = "Attack12";
 	m_isActivate = true;
+	_vector vPos = XMVectorSet(3388.3f, 313.3f, 2019.1f, 1.f);
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Rotation_Quaternion(vQuat);
+	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 }
 
 CGameObject* CCoroProduction::Clone(void* pArg)

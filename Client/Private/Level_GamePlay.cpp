@@ -11,6 +11,7 @@
 #include "AoEDoT.h"
 #include "NPCInstancing.h"
 #include "Napal.h"
+#include "CoroProduction.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -87,6 +88,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_ElectroPredator();
 	Ready_CoroSaurus();
 	Ready_NPC();
+	Ready_Production();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -569,6 +571,19 @@ void CLevel_GamePlay::Ready_NPC()
 	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
+}
+
+void CLevel_GamePlay::Ready_Production()
+{
+	CCoroProduction::COROPROD_DESC Production{};
+	Production.shaderData = { LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh") };
+	Production.computeShaderData = { LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib") };
+	Production.modelData = { m_eCurLevel, TEXT("Prototype_Component_Model_CoroProduction") };
+	Production.strFolderPath = "../Bin/Resource/Model/NPC/CoroProduction/Notify";
+	Production.fSpeedPerSec = 10.f;
+	Production.fRotationPerSec = XMConvertToRadians(90.f);
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroProduction"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Production);
 }
 
 #ifdef _DEBUG
