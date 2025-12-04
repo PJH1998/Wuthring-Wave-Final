@@ -204,6 +204,7 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\CoroProduction.h" />
     <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
@@ -453,6 +454,7 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\CoroProduction.cpp" />
     <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />

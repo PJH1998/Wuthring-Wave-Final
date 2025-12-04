@@ -433,6 +433,9 @@
     <Filter Include="03. GameObject\Actor\NPC\Napal">
       <UniqueIdentifier>{ceb873a6-33b2-420c-b937-ec67568e748d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\EventActor">
+      <UniqueIdentifier>{3517b6ce-78d5-4714-a57c-35efc851fd20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1126,6 +1129,9 @@
     <ClInclude Include="..\Public\Napal.h">
       <Filter>03. GameObject\Actor\NPC\Napal</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\CoroProduction.h">
+      <Filter>03. GameObject\EventActor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1783,6 +1789,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Napal.cpp">
       <Filter>03. GameObject\Actor\NPC\Napal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CoroProduction.cpp">
+      <Filter>03. GameObject\EventActor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
