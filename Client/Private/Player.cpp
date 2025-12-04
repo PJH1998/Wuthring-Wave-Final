@@ -181,7 +181,7 @@ void CPlayer::Update(_float fTimeDelta)
 	
 	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
-	
+
 
 #ifdef _DEBUG
 	GUI_Teleport();

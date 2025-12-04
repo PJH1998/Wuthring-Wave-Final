@@ -45,7 +45,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 				});
 
 	}
-	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 24)
+	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 25)
 	{
 		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
@@ -185,6 +185,10 @@ void CTrigger_Box::Register_Trigger()
 			m_IsTriggered = true;
 			break;
 		case 24:
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_IsTriggered = true;
+			break;
+		case 25:
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
 			m_IsTriggered = true;
 			break;

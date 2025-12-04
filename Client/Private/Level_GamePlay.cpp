@@ -100,13 +100,17 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	m_pGameInstance->Set_FogDistanceFallOff(0.02f);
 	m_pGameInstance->Set_FogMaxHeight(230.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
 
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
 
 	m_pGameSystem->Create_MapEffects();
+
+	//TEST
+
+
 	return S_OK;
 }
 
@@ -589,16 +593,16 @@ void CLevel_GamePlay::Ready_Production()
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_pGameInstance->End_SFX();
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	//	m_pGameInstance->End_SFX();
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
@@ -614,13 +618,6 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	{
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_IsSSS = !m_IsSSS;
-		m_pGameInstance->SettingSSS(m_IsSSS);
-	}
-
 
 	ImGui::Begin("SHADER");
 	if (ImGui::CollapsingHeader("SSR"))

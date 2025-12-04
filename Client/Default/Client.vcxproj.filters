@@ -418,6 +418,24 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Anchor">
       <UniqueIdentifier>{5db8e06d-ff67-4b7d-820b-cebd945a1f1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer">
+      <UniqueIdentifier>{359acbfd-96ca-4db0-b9c7-f11321c0c0b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\Define">
+      <UniqueIdentifier>{899ae55b-3efc-4133-8232-fa55dcdde1e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\Common">
+      <UniqueIdentifier>{986eefb8-3b89-4ad5-a88c-bd984058c6a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\Yuno">
+      <UniqueIdentifier>{30e86cec-9203-41ec-bf48-43577703a6dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon\Sequence">
+      <UniqueIdentifier>{64edc258-231a-40a9-bced-0b7149ffdab4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\PlayerInteraction">
+      <UniqueIdentifier>{9e7095ef-0622-4743-9d42-726f9ea37073}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Drop">
       <UniqueIdentifier>{c46f1815-4eb2-4d0c-a16d-2ac0aefd0cc1}</UniqueIdentifier>
     </Filter>
@@ -426,6 +444,9 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta">
       <UniqueIdentifier>{2e691801-6e07-44a7-9b57-0f663bda1dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MotionTrail">
+      <UniqueIdentifier>{2c7787ac-02a8-4c6a-856a-7a129227d9f9}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\NPC\HideNSeek">
       <UniqueIdentifier>{4cb69a31-8168-4ad1-9554-4dbf47a1198d}</UniqueIdentifier>
@@ -738,7 +759,6 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Corosaurus.h" />
-    <ClInclude Include="..\Public\PlayerStatus.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <Filter>03. GameObject\UI\Text</Filter>
     </ClInclude>
@@ -804,9 +824,6 @@
     </ClInclude>
     <ClInclude Include="..\public\MonsterTable.h">
       <Filter>01. GameSystem\MonsterTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerStatus.h">
-      <Filter>01. GameSystem\PlayerStatus</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\LogoMaleRover.h">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
@@ -1108,6 +1125,12 @@
     <ClInclude Include="..\Public\Levi_Anchor.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Scan.h">
+      <Filter>03. GameObject\PlayerInteraction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\MotionTrail.h">
+      <Filter>03. GameObject\MotionTrail</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\AugustaBurstWeapon.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
@@ -1123,6 +1146,31 @@
     <ClInclude Include="..\Public\WeaponDummy.h">
       <Filter>03. GameObject\Dummy</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Yuno.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Yuno</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\YunoFactory.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Yuno</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\YunoMoon.h">
+      <Filter>03. GameObject\Weapon\Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\YunoState_Enum.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequencePlayerDefine.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequencePlayer.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequencePlayerFactory.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h" />
     <ClInclude Include="..\public\NPC_Hiding.h">
       <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
     </ClInclude>
@@ -1388,12 +1436,8 @@
     <ClCompile Include="..\Private\Ability.cpp">
       <Filter>04. Component\03. Ability</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\Private\FS_Scythe.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerStatus.cpp">
-      <Filter>01. GameSystem\PlayerStatus</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp">
       <Filter>03. GameObject\MapObject</Filter>
@@ -1772,6 +1816,24 @@
     <ClCompile Include="..\Private\AugustaBurstWeapon.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Yuno.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Yuno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\YunoFactory.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Yuno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\YunoMoon.cpp">
+      <Filter>03. GameObject\Weapon\Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequencePlayer.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SequencePlayerFactory.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Levi_Drop.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Drop</Filter>
     </ClCompile>
@@ -1784,6 +1846,13 @@
     <ClCompile Include="..\Private\WeaponDummy.cpp">
       <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Scan.cpp">
+      <Filter>03. GameObject\PlayerInteraction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MotionTrail.cpp">
+      <Filter>03. GameObject\MotionTrail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\private\NPC_Hiding.cpp">
       <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
     </ClCompile>
@@ -1879,6 +1948,12 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Logo.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxScan.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_MotionTrail.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

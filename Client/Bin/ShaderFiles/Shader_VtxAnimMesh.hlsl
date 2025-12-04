@@ -78,7 +78,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vTangent = normalize(mul(vTangent, g_WorldMatrix));
     Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
     Out.vTexcoord = In.vTexcoord;
-    Out.vProjPos = mul(vPosition, matWVP);
+    Out.vProjPos = mul(vPosition, matWVP);  
 
     return Out;
 }

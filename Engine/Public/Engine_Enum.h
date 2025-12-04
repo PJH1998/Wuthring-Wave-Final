@@ -14,6 +14,8 @@ namespace Engine
 	enum class KEY_INPTEROLATION : unsigned int { LINEAR = 0, CONSTANT, CUBIC, END };
 	enum class KEY_TARGENT_MODE : unsigned int { AUTO = 0, USER, BREAK, END };
 
+	enum class OPEN_RT { DEPTH };
+
 	// Input
 	enum class KEYSTATE { DOWN, PRESS, UP, END };
 	enum class MOUSEKEYSTATE { LB, RB, WB, END };

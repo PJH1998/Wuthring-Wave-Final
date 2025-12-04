@@ -22,6 +22,9 @@
 
 #include "Mouse.h"
 
+#include "Scan.h"
+#include "MotionTrail.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -194,8 +197,8 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::SKILL), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::PLAYER));
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::GRAPPLE));
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::INTERACTION));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::GRAPPLE));          
+	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::INTERACTION));
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::MAP));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK));
@@ -203,8 +206,8 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::GRAB));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::GRAPPLE));
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::INTERACTION));
-	
+	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::INTERACTION));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::NPC), ENUM_CLASS(COLLISIONLAYER::INTERACTION));
 	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::PLAYER)); //몬스터 인식 볼륨
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::NPC), ENUM_CLASS(COLLISIONLAYER::MAP));
@@ -241,10 +244,11 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::GRAB), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PARRY), ENUM_CLASS(BPLAYER::SENSOR));
 
-	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::INTERACTION), ENUM_CLASS(BPLAYER::SENSOR)); // 어떤 범위랑 할것인지? => SENSOR
+	//m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::INTERACTION), ENUM_CLASS(BPLAYER::SENSOR)); // 어떤 범위랑 할것인지? => SENSOR
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::INTERACTION), ENUM_CLASS(BPLAYER::MOVE));
+
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::GRAPPLE), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::GRAPPLE), ENUM_CLASS(BPLAYER::SENSOR)); 
-
 }
 
 void CMainApp::Ready_Event()
@@ -350,6 +354,17 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_Mouse");
 
+	// Shader_Scan
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_Scan"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxScan.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements))))
+		CRASH("Failed to Add Prototype Shader Scan");
+
+	// Shader_MotionTrail
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MotionTrail"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh_MotionTrail.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+		CRASH("Failed to Add Prototype Shader MotionTrail");
+
+
 #pragma endregion
 
 #pragma region COMPUTE_SHADER
@@ -385,6 +400,7 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxInstance_AnimMesh.hlsl")
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute Instance_AnimMesh Shader");
+
 	string strEntryParticle = "main";
 	SHADER_MACRO eShaderMacroParticle = {
 	{"THREAD_X", "64" }
@@ -433,14 +449,23 @@ void CMainApp::Ready_Prototype_ForStatic()
 #pragma endregion
 
 #pragma region VIBUFFER
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
-		CVIBuffer_Point::Create(m_pDevice, m_pContext));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
+		CVIBuffer_Point::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype VIBuffer FXRect");
 
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
-		CVIBuffer_Rect::Create(m_pDevice, m_pContext));
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype VIBuffer Rect");
 
-	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect_Instance"),
-		CVIBuffer_Rect_Instance::Create(m_pDevice, m_pContext, 10));
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect_Instance"),
+		CVIBuffer_Rect_Instance::Create(m_pDevice, m_pContext, 10))))
+		CRASH("Failed to Add Prototype VIBuffer Rect Instance");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Cube"),
+		CVIBuffer_Cube::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype VIBuffer Cube");
+
+	
 #pragma endregion
 
 
@@ -487,6 +512,26 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Mouse"),
 		CMouse::Create(m_pDevice, m_pContext))))
 		CRASH("Mouse");
+#pragma endregion
+
+#pragma region SCAN
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Texture_Scan"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Effect/Scan/T_Mask_18023.png"), 1))))
+		CRASH("Failed to Add Prototype Texture Scan");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"),
+		CScan::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype GameObject Scan");
+
+#pragma endregion
+
+#pragma region MOTION_TRAIL
+
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"),
+		CMotionTrail::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype GameObject MotionTrail");
+
 #pragma endregion
 }
 
