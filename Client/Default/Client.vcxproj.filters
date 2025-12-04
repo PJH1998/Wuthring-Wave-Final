@@ -475,6 +475,9 @@
     <Filter Include="03. GameObject\Actor\SequencePlayer\Augusta">
       <UniqueIdentifier>{7866a971-f767-4c42-994a-bfc112050574}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Augusta">
+      <UniqueIdentifier>{6f4ff5b5-9847-405b-aa05-d552970970f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1203,7 +1206,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\SequenceAugustaFactory.h">
       <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
-    </ClInclude>      
+    </ClInclude>
     <ClInclude Include="..\public\NPC_Hiding.h">
       <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
     </ClInclude>
@@ -1212,6 +1215,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\CoroProduction.h">
       <Filter>03. GameObject\EventActor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugustaGroundSkill.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1907,6 +1913,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\SequenceAugustaFactory.cpp">
       <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceAugustaGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -38,7 +38,7 @@ void CYunoAirAttack::OnEnter(void* pArg)
     State_Reset();
 
     // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
-    m_iPartType = CYuno::PARTTYPE::TYPE_END; // 추후 애니메이션에 따른. 분기문 필요.
+    m_iPartType = CYuno::PARTTYPE::PART_MOON; // 추후 애니메이션에 따른. 분기문 필요.
 
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "";
@@ -94,9 +94,16 @@ void CYunoAirAttack::Update_AttackAnimations(_float fTimeDelta)
 	// 1. 애니메이션 실행.
     CCharacterState::Play_Animation(m_pYuno, fTimeDelta, m_fAnimationScale);
 
+	m_pYuno->Play_PartAnimation(
+		m_iPartType,
+		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+		fTimeDelta, nullptr
+	);
 
 	EYunoAirAttackType eAirAttackType = static_cast<EYunoAirAttackType>(m_iCurrentAnimIdx);
     _vector vLook = m_pYuno->Get_LookVector();
+
+	
 
     if (eAirAttackType == EYunoAirAttackType::AIRATTACK_LOOP)
         m_pYuno->Move_Fall(fTimeDelta, m_fSpeed);
