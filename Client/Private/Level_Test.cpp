@@ -207,6 +207,9 @@ void CLevel_Test::Ready_Layer_SequnecePlayer()
 	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::YUNO].CharacterDesc = SeqPlayerData::GetYunoCloneData(vScale, vRotation, vPosition, m_eCurLevel);
 	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::YUNO].strActorTag = TEXT("Prototype_GameObject_Actor_Yuno");
 
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].CharacterDesc = SeqPlayerData::GetSequenceAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceAugusta");
+
 	// 2. Sequence Player(Character 모음) 생성.
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_SequencePlayer"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_SequencePlayers"), &Desc)))

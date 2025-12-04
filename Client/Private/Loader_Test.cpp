@@ -62,9 +62,12 @@
 #include "Player.h"
 
 
-// SequencePlayer
+// Yuno
 #include "Yuno.h"
 #include "YunoMoon.h"
+
+// SequenceAugusta
+#include "SequenceAugusta.h"
 
 #include "SequencePlayer.h"
 #pragma endregion
@@ -110,7 +113,7 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
-	m_iNumLoadingThread = 17;
+	m_iNumLoadingThread = 18;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -125,6 +128,7 @@ HRESULT CLoader_Test::Initialize()
 
 	// Sequence Player
 	m_pGameInstance->Add_Work([this]() {Load_Yuno(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequenceAugusta(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
 	
 	
@@ -948,6 +952,37 @@ HRESULT CLoader_Test::Load_Yuno()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wstrSwordTag
 		, CYunoMoon::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_SequenceAugusta()
+{
+
+	_wstring wStrModelTag = L"Prototype_Component_Model_SequenceAugusta";
+	_string strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/Augusta/Augusta.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. Model 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_SequenceAugusta";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_SequenceAugusta");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CSequenceAugusta::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 	return S_OK;

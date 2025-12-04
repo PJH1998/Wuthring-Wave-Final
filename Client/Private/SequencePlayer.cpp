@@ -237,10 +237,10 @@ HRESULT CSequencePlayer::Ready_Players(const SEQUENCEPLAYER_DESC* pDesc)
 			break;
 
 		case SEQUENCECHARACTER::AUGUSTA:
-			CharacterDesc = pDesc->PlayerSpecs[SEQUENCECHARACTER::YUNO].CharacterDesc;
+			CharacterDesc = pDesc->PlayerSpecs[SEQUENCECHARACTER::AUGUSTA].CharacterDesc;
 			pCharacter = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
 				ENUM_CLASS(m_eCurLevel),
-				pDesc->PlayerSpecs[SEQUENCECHARACTER::YUNO].strActorTag,
+				pDesc->PlayerSpecs[SEQUENCECHARACTER::AUGUSTA].strActorTag,
 				PROTOTYPE::GAMEOBJECT,
 				&CharacterDesc));
 

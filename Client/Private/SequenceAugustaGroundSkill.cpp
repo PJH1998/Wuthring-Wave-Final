@@ -39,11 +39,11 @@ void CSequenceAugustaGroundSkill::OnEnter(void* pArg)
 
     // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
     m_iPartType = CSequenceAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+	m_pSequenceAugusta->PartActivate(CSequenceAugusta::PARTTYPE::PART_BAYONET, true);
 
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "";
   
-	m_fSpeed = 2.f;
 	m_pSequenceAugusta->Set_Gravity(true);
 	m_pSequenceAugusta->Rotate_TargetPosition(); // 처음 공격한 곳을 타겟으로 공격.
 }
@@ -88,12 +88,17 @@ void CSequenceAugustaGroundSkill::Handle_Input()
 void CSequenceAugustaGroundSkill::Update_AttackAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선) // 거리 계산에 따른 Animation Scale 조절.
-	m_fRootMotionScale = m_pSequenceAugusta->Calculate_RootMotionScale();
+	m_fRootMotionScale = 0.3f;
 	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
 
 	// 1. 애니메이션 실행.
-    CCharacterState::Play_Animation(m_pSequenceAugusta, fTimeDelta, m_fAnimationScale);
+    CCharacterState::Play_Animation_NonFacial(m_pSequenceAugusta, fTimeDelta, m_fAnimationScale);
 
+	m_pSequenceAugusta->Play_PartAnimation(
+		m_iPartType,
+		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+		fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
+	);
 
 	ESequenceAugustaSkillType eSkillType = static_cast<ESequenceAugustaSkillType>(m_iCurrentAnimIdx);
     _vector vLook = m_pSequenceAugusta->Get_LookVector();
@@ -110,10 +115,6 @@ void CSequenceAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
     ESequenceAugustaSkillType eSkillType = static_cast<ESequenceAugustaSkillType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     _float fOffsetY = 0.1f;
-    //_float fDistanceToGround = m_pSequenceAugusta->Get_DistanceFromGround(fOffsetY);
-
-
-   
 
 	// 애니메이션이 끝나면?
     if (IsEscapePossible)
@@ -146,9 +147,9 @@ void CSequenceAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 
 void CSequenceAugustaGroundSkill::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ESequenceAugustaSkillType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.3f, 30.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(ESequenceAugustaSkillType::ATTACK_PULL) ,"Attack_Pull", 1.3f, 30.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(ESequenceAugustaSkillType::ATTACK_SPSKILL),"Attack_SpSkill", 1.3f, 60.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(ESequenceAugustaSkillType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.f, 30.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(ESequenceAugustaSkillType::ATTACK_PULL) ,"Attack_Pull", 1.f, 30.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(ESequenceAugustaSkillType::ATTACK_SPSKILL),"Attack_SpSkill", 1.f, 60.f, 1.f);
 }
 
 void CSequenceAugustaGroundSkill::State_Reset()

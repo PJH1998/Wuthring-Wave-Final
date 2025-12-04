@@ -70,11 +70,11 @@ namespace SeqPlayerData
 	{
 		CCharacter::CHARACTER_DESC Desc;
 		Desc.eCurLevel = eLevel;
-		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
 		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta"));
-		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_SequenceAugusta"));
+		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_SequenceAugusta"));
 		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
 		Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
 		Desc.fRotationPerSec = XMConvertToRadians(90.f);
@@ -85,7 +85,7 @@ namespace SeqPlayerData
 		Desc.vPosition = vPosition;
 
 		Desc.PartPrototypes = {
-		   make_pair(L"Bayonet", L"Prototype_GameObject_SequenceAugusta_Bayonet")
+		   make_pair(L"Bayonet", L"Prototype_GameObject_Augusta_Bayonet")
 		};
 
 		return Desc;

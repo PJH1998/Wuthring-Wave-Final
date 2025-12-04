@@ -190,8 +190,8 @@ void CSequenceAugusta::Render()
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
-		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
-			CRASH("Bind Morph Result Failed");
+		//if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
+		//	CRASH("Bind Morph Result Failed");
 
 		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
 			CRASH("Ready Shader Begin Failed");
@@ -430,20 +430,19 @@ void CSequenceAugusta::Bind_DefaultShaderPath()
 	// 기본 Shader Path
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMesh; ++i)
-		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA);
 }
 void CSequenceAugusta::Bind_DissolveShaderPath()
 {
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMesh; ++i)
-		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::DISSOLVE_CHARACTER);
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::DISSOLVE_NORMAL);
 }
 void CSequenceAugusta::Activate(_bool IsActivate)
 {
 	//m_isActivate = IsActivate;
 	if (false == IsActivate)
 	{
-
 		Bind_DissolveTimer();
 		Bind_DissolveShaderPath();
 		XMStoreFloat4x4(&m_DissolveWorldMatrix, m_pTransformCom->Get_WorldMatrix());
