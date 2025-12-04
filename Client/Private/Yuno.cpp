@@ -439,7 +439,7 @@ void CYuno::Activate(_bool IsActivate)
 	//m_isActivate = IsActivate;
 	if (false == IsActivate)
 	{
-
+		m_pColliderCom->Set_Position(XMVectorSet(0.f, -3000.f, 0.f, 1.f));
 		Bind_DissolveTimer();
 		Bind_DissolveShaderPath();
 		XMStoreFloat4x4(&m_DissolveWorldMatrix, m_pTransformCom->Get_WorldMatrix());
