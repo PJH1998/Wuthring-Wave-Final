@@ -457,7 +457,7 @@ void CSequenceAugusta::Activate(_bool IsActivate)
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 
 		// State까지 결정
-		m_StateContext.m_eSkillType = ESequenceAugustaSkillType::ATTACK_SPEEDDRIVE;
+		m_StateContext.m_eSkillType = ESequenceAugustaSkillType::ATTACK_SPSKILL;
 		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ESequenceAugustaGroundState::SKILL));
 	}
 }

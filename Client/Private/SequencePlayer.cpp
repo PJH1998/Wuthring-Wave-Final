@@ -208,7 +208,7 @@ void CSequencePlayer::Summon_Squad_Near_Boss(CTransform* pTarget)
 		if (i == AUGUSTA)
 			vSpawnPos += (vBossRight * 1.f * fDist * 2.f);
 		if (i == LUPA)
-			vSpawnPos += (vBossRight * -1.f * fDist * 2.f);
+			vSpawnPos += (vBossRight * -1.f * fDist * 3.f);
 
 		vSpawnPos = XMVectorSetY(vSpawnPos, XMVectorGetY(vBossPos) + 1.0f); // Y축 보정
 
