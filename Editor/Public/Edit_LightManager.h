@@ -16,6 +16,7 @@ public:
 	HRESULT Initialize();
 	void Set_ImGuiOption();
 	void Create_Light();
+	void Map_Load(LIGHT_DESC& Desc);
 private:
 	map<_uint, class CEdit_LightObject*> m_Lights;
 	class CEdit_LightObject* m_pPickedLight = { nullptr };

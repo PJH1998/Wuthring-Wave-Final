@@ -824,7 +824,7 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&ReadDesc.vPosition), sizeof(_float4));
 								File.read(reinterpret_cast<char*>(&ReadDesc.vSpecular), sizeof(_float4));
 
-								CEdit_LightObject::MAP_LOAD Desc{};
+								CEdit_LightObject::MAP_LOAD Desc{};	
 								Desc.vWorldPos = ReadDesc.vPosition;
 								Desc.CopyDesc = &ReadDesc;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
@@ -993,10 +993,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";

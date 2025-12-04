@@ -52,7 +52,6 @@ public:
 
 private:
     class CRover* m_pRover = { nullptr };
-    vector<ANIM_DATA> m_IdleStates = {};
 
     _bool m_States[IDLESTATE::END] = {};
 	_float m_fFallTime = {};

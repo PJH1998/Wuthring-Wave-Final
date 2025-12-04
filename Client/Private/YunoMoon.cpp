@@ -41,8 +41,6 @@ void CYunoMoon::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
-
-
 	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 
@@ -100,8 +98,6 @@ void CYunoMoon::Render()
 {
     Bind_Resources();
 
-    _uint iNumMeshes = m_pModelCom->Get_NumMesh();
-
 	// 1. Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
 	if (IsDissolve)
@@ -117,10 +113,12 @@ void CYunoMoon::Render()
 			CRASH("Ready EnergyColor");
 	}
 
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-            CRASH("Ready Diffuse Texture Failed");
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			continue;
 
 		_bool HasNormal = { false };
 
@@ -129,9 +127,6 @@ void CYunoMoon::Render()
 
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
-
-		// 3. Mask Texture
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0);
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -215,8 +210,7 @@ void CYunoMoon::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-    for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+	m_iShaderPath = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 
 	// Shader 변수
 	m_fMaxDissolveTime = 0.35f;

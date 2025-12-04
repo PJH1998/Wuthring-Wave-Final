@@ -814,6 +814,8 @@ void CRover::Bind_DefaultShaderPath()
 	// 기본 Shader Path
 	for (_uint i = 0; i < MESHTYPE::MESH_END; ++i)
 		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+
+	m_ShaderPaths[MESH_MASK] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVERMASK);
 }
 void CRover::Bind_DissolveShaderPath()
 {

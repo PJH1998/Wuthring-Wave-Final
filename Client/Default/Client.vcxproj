@@ -204,7 +204,12 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\SequenceAugusta.h" />
+    <ClInclude Include="..\Public\SequenceAugustaFactory.h" />
+    <ClInclude Include="..\Public\SequenceAugustaGroundSkill.h" />
+    <ClInclude Include="..\Public\SequenceAugustaState_Enum.h" />
     <ClInclude Include="..\Public\SequencePlayerFactory.h" />
+    <ClInclude Include="..\Public\CoroProduction.h" />
     <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
     <ClInclude Include="..\Public\GalbrenaGroundSpecialDash.h" />
@@ -285,8 +290,10 @@
     <ClInclude Include="..\public\MotionTrail.h" />
     <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\MouseController.h" />
+    <ClInclude Include="..\Public\Napal.h" />
     <ClInclude Include="..\Public\NPCCell.h" />
     <ClInclude Include="..\Public\NPCInstancing.h" />
+    <ClInclude Include="..\public\NPC_Hiding.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PatternDummy.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
@@ -407,7 +414,9 @@
     <ClInclude Include="..\Public\WeaponDummy.h" />
     <ClInclude Include="..\Public\Wing.h" />
     <ClInclude Include="..\Public\Yuno.h" />
+    <ClInclude Include="..\Public\YunoAirAttack.h" />
     <ClInclude Include="..\Public\YunoFactory.h" />
+    <ClInclude Include="..\Public\YunoGroundIdle.h" />
     <ClInclude Include="..\Public\YunoMoon.h" />
     <ClInclude Include="..\Public\YunoState_Enum.h" />
     <ClInclude Include="Client.h" />
@@ -460,7 +469,11 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\SequenceAugusta.cpp" />
+    <ClCompile Include="..\Private\SequenceAugustaFactory.cpp" />
+    <ClCompile Include="..\Private\SequenceAugustaGroundSkill.cpp" />
     <ClCompile Include="..\private\SequencePlayerFactory.cpp" />
+    <ClCompile Include="..\Private\CoroProduction.cpp" />
     <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundSpecialDash.cpp" />
@@ -565,8 +578,10 @@
     <ClCompile Include="..\private\MotionTrail.cpp" />
     <ClCompile Include="..\Private\Mouse.cpp" />
     <ClCompile Include="..\Private\MouseController.cpp" />
+    <ClCompile Include="..\Private\Napal.cpp" />
     <ClCompile Include="..\Private\NPCCell.cpp" />
     <ClCompile Include="..\Private\NPCInstancing.cpp" />
+    <ClCompile Include="..\private\NPC_Hiding.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PatternDummy.cpp" />
@@ -653,7 +668,9 @@
     <ClCompile Include="..\Private\WeaponDummy.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
     <ClCompile Include="..\Private\Yuno.cpp" />
+    <ClCompile Include="..\Private\YunoAirAttack.cpp" />
     <ClCompile Include="..\Private\YunoFactory.cpp" />
+    <ClCompile Include="..\Private\YunoGroundIdle.cpp" />
     <ClCompile Include="..\Private\YunoMoon.cpp" />
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp" />
     <ClCompile Include="Client.cpp">

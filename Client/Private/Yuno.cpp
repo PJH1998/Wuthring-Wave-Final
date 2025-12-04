@@ -9,6 +9,8 @@
 #include "AttackVolume.h"
 #include "GameSystem.h"
 
+#include "YunoMoon.h"
+
 CYuno::CYuno(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
 {
@@ -43,14 +45,11 @@ HRESULT CYuno::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
 	Ready_AttackVolumes();
     Register_AllNotifies(pDesc->strFolderPath);
-	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
 	CYunoFactory::Register_States(m_pStateMachineCom, this);
 	
 	// 비활성화. 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
-
 
     return S_OK;
 }
@@ -104,8 +103,6 @@ void CYuno::Update(_float fTimeDelta)
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
-		// 4. 카메라 업데이트
-		Update_Camera(fTimeDelta);
 	}
 
 	// 5. 파츠 갱신.?
@@ -123,6 +120,9 @@ void CYuno::Update(_float fTimeDelta)
 }
 void CYuno::Late_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
     // 1. 파츠 갱신
     for (auto& pPart : m_PartObjects)
     {
@@ -135,38 +135,19 @@ void CYuno::Late_Update(_float fTimeDelta)
 		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
 	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
-	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else
-	{
-		// 2. QTE인 경우 Collider 갱신하지 않음.
-		if (!m_IsQTE)
-			m_pColliderCom->Sync_Position(m_pTransformCom);
-		else
-			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
-	}
-
-	if (m_IsQTEend)
-	{
-		Notify_HarmonyEnd();
-		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
-		m_IsQTEend = false;
-	}
-
+	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_IsVisible)
 	{
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 			return;
 
-		if (m_IsOutLineVisible)
+		if (!m_IsOutLineVisible)
 		{
 			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
 				return;
 		}
+
 		
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
@@ -279,6 +260,7 @@ void CYuno::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _flo
     switch (iPartType)
     {
 	case PART_MOON:
+		m_pYunoMoon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
 		break;
     default:
         break;
@@ -290,6 +272,7 @@ void CYuno::PartActivate(_uint iPartType, _bool IsActive)
     switch (iPartType)
     {
     case PART_MOON:
+		m_pYunoMoon->Activate(IsActive);
         break;
     default:
         break;
@@ -301,6 +284,7 @@ void CYuno::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	switch (iPartType)
 	{
 	case PART_MOON:
+		m_pYunoMoon->Change_Volume(iVolumeIdx);
 		break;
 	}
 }
@@ -310,6 +294,7 @@ void CYuno::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 	switch (iPartType)
 	{
 	case PART_MOON:
+		m_pYunoMoon->Volume_Activate(IsActive);
 		break;
 	}
 }
@@ -319,6 +304,7 @@ void CYuno::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
     switch (iPartType)
     {
     case PART_MOON:
+		m_pYunoMoon->Clear_Animation(strAnimName);
         break;
     default:
         break;
@@ -351,10 +337,6 @@ void CYuno::Sync_Position()
 #pragma region NOTIFY
 void CYuno::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-  /*  if (wStrColliderTag == TEXT("Body"))
-    {
-		m_pColliderCom->IsActivate(IsActive);
-    }*/
 
 	_wstring var1, var2, var3;
 	wstringstream wss(wStrColliderTag);
@@ -367,19 +349,19 @@ void CYuno::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		m_pMainAttackVolume->TriggerActivate(IsActive);
 
 
-    if (var1 == TEXT("Sword"))
+    if (var1 == TEXT("Moon"))
     {
-		/*if (var2 == TEXT("ATK"))
-			iVolumeIdx = CYunoSword::VOLUME::VOLUME_ATTACK;
+		if (var2 == TEXT("ATK"))
+			iVolumeIdx = CYunoMoon::VOLUME::VOLUME_ATTACK;
 
 		if (var3 == TEXT("ATTACK"))
-			m_pYunoSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+			m_pYunoMoon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
 		else if (var3 == TEXT("KNOCKBACK"))
-			m_pYunoSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+			m_pYunoMoon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
 		else if (var3 == TEXT("SKILL"))
-			m_pYunoSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+			m_pYunoMoon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
 
-		m_pYunoSword->Volume_Activate(IsActive);*/
+		m_pYunoMoon->Volume_Activate(IsActive);
     }
 }
 
@@ -457,18 +439,24 @@ void CYuno::Activate(_bool IsActivate)
 	//m_isActivate = IsActivate;
 	if (false == IsActivate)
 	{
+		m_pColliderCom->Set_Position(XMVectorSet(0.f, -3000.f, 0.f, 1.f));
 		Bind_DissolveTimer();
 		Bind_DissolveShaderPath();
-		m_IsOutLineVisible = false;
 		XMStoreFloat4x4(&m_DissolveWorldMatrix, m_pTransformCom->Get_WorldMatrix());
 	}
 
 	if (true == IsActivate)
 	{
 		m_isActivate = true;
+		m_IsVisible = true;
 		m_IsOutLineVisible = true;
 		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+
+		// State까지 결정
+		m_StateContext.m_eAirAttackType = EYunoAirAttackType::AIRATTACK_START;
+		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EYunoAirState::AIR_ATTACK));
 	}
 }
 #pragma endregion
@@ -477,46 +465,12 @@ void CYuno::Activate(_bool IsActivate)
 
 void CYuno::Update_Physics(_float fTimeDelta)
 {
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
-	{
-		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
-			nullptr != m_PendingCaptureDesc.pTransform)
-		{
-			_matrix matFinalWorld = XMLoadFloat4x4(m_PendingCaptureDesc.pSocketMatrix); // 1. 본행렬
-
-			_vector vScale{}, vRotQuat{}, vTrans{};
-			_vector vPlayerScale = XMVectorSet(1.f, 1.f, 1.f, 0.f);
-			XMMatrixDecompose(&vScale, &vRotQuat, &vTrans, matFinalWorld);
-			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
-		}
-	}
-	else
-	{
-		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
-		_vector vVelocity = m_pTransformCom->Get_Velocity();
-		if (!m_IsQTE)
-			m_pColliderCom->Update(vVelocity / fTimeDelta);
-		else
-			m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
-		// 6. Land Check
-		m_IsLand = Is_LandCollider();
-	}
+	// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	m_pColliderCom->Update(vVelocity / fTimeDelta);
+	m_IsLand = Is_LandCollider();
 }
 
-void CYuno::Update_Camera(_float fTimeDelta)
-{
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
-	{
-		_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 
-		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		vPos += vCameraLook * -3.f;
-		m_pSpringCamera->Update_Target(vPos, 1.2f); // 카메라는 고정.
-	}
-	else if (!m_IsQTE)
-	{
-		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-	}
-}
 
 void CYuno::Update_TargetDistance(_float fTimeDelta)
 {
@@ -524,11 +478,7 @@ void CYuno::Update_TargetDistance(_float fTimeDelta)
 
 	_vector vTargetPos = {};
 
-	// LockOn Target 우선
-	if (nullptr != m_pLockOnTargetTransform)
-		vTargetPos = m_pLockOnTargetTransform->Get_State(STATE::POSITION);
-	// 없으면 Target Transform.
-	else if (nullptr != m_pTargetTransform)
+	if (nullptr != m_pTargetTransform)
 		vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION);
 
 	// 거리 계산. Y제외.
@@ -592,11 +542,11 @@ void CYuno::Ready_Components(const CHARACTER_DESC* pDesc)
 	ColliderDesc.vPos = pDesc->vPosition;
 	ColliderDesc.vOffset = { 0.f, 0.67f, 0.f };
 	ColliderDesc.eType = EMotionType::Kinematic;
-	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::QTE);
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::QTE); // 땅만 타게.?
 	ColliderDesc.fHeight = 0.4f;
 	ColliderDesc.fRadius = 0.5f;
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
-		, TEXT("Prototype_Component_Collider"), TEXT("Com_QTECollider"), reinterpret_cast<CComponent**>(&m_pQTEColliderCom), &ColliderDesc)))
+		, TEXT("Prototype_Component_Collider"), TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
 		CRASH("Collider");
 
 }
@@ -629,7 +579,6 @@ void CYuno::Ready_Positions(const CHARACTER_DESC* pDesc)
 
 void CYuno::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
-
     _float3 vScale = {};
     _float3 vRotation = {};
     _float3 vPosition = {};
@@ -643,6 +592,21 @@ void CYuno::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         switch (i)
         {
 		case PARTTYPE::PART_MOON:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = SeqPlayerData::GetYunoMoonCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pYunoMoon = dynamic_cast<CYunoMoon*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pYunoMoon);
+			Safe_AddRef(m_pYunoMoon);
 			break;
 		}
     }
@@ -729,4 +693,6 @@ void CYuno::Free()
 	}
 
 	m_AttackVolumes.clear();
+
+	Safe_Release(m_pYunoMoon);
 }
