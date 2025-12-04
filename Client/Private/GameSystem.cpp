@@ -492,7 +492,8 @@ _vector CGameSystem::Get_PlayerPosition()
 // 보스 근처에 소환.
 void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
 {
-	if (nullptr == m_pSequencePlayer)
+	if (nullptr == m_pSequencePlayer || 
+		nullptr == pTransform)
 		return;
 
 	// 

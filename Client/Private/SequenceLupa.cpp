@@ -563,8 +563,8 @@ void CSequenceLupa::Ready_Variables(const CHARACTER_DESC* pDesc)
 	// Shader Vlaue 추가
 	m_fDissolveTimer = 0.f;
 	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 0.693f, 0.481f, 1.f, 1.f };
-	m_fEmissiveIntensity = 1.5f;
+	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
+	m_fEmissiveIntensity = 3.f;
 
 }
 
