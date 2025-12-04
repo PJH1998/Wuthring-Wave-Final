@@ -27,11 +27,13 @@
 #include "Projectile.h"
 #include "Corosaurus.h"
 #include "Coro_Rock.h"
+#include "CoroProduction.h"
 #pragma endregion
 
 #pragma region NPC
 #include "NPCInstancing.h"
 #include "NPCCell.h"
+#include "Napal.h"
 #pragma endregion
 
 #pragma region UI
@@ -119,6 +121,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Production(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -997,6 +1000,20 @@ HRESULT CLoader_GamePlay::Load_Monster()
 #pragma endregion
 	return S_OK;
 }
+HRESULT CLoader_GamePlay::Load_Production()
+{
+	// Prototype_Component_Model_CoroProduction
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroProduction"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/NPC/CoroProduction/CoroProduction.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroProduction
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroProduction"),
+		CCoroProduction::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+	return S_OK;
+}
 HRESULT CLoader_GamePlay::Load_NPC()
 {
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
@@ -1016,6 +1033,17 @@ HRESULT CLoader_GamePlay::Load_NPC()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCCell"),
 		CNPCCell::Create(m_pDevice, m_pContext))))
+		CRASH("NPCCell Prototype Create Failed");
+
+	// Prototype_Component_Model_Napal
+	//_fmatrix PreNapalMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Napal"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/NPC/Napal/Napal.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Napal
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
+		CNapal::Create(m_pDevice, m_pContext))))
 		CRASH("NPCCell Prototype Create Failed");
 
 	return S_OK;
