@@ -178,7 +178,6 @@ void CPlayer::Update(_float fTimeDelta)
 	
 	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
-	
 
 	// Scan => TEST
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)

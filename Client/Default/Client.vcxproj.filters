@@ -436,9 +436,6 @@
     <Filter Include="03. GameObject\PlayerInteraction">
       <UniqueIdentifier>{9e7095ef-0622-4743-9d42-726f9ea37073}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04. Component\MotionTrail">
-      <UniqueIdentifier>{2c7787ac-02a8-4c6a-856a-7a129227d9f9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Drop">
       <UniqueIdentifier>{c46f1815-4eb2-4d0c-a16d-2ac0aefd0cc1}</UniqueIdentifier>
     </Filter>
@@ -447,6 +444,18 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta">
       <UniqueIdentifier>{2e691801-6e07-44a7-9b57-0f663bda1dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MotionTrail">
+      <UniqueIdentifier>{2c7787ac-02a8-4c6a-856a-7a129227d9f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\HideNSeek">
+      <UniqueIdentifier>{4cb69a31-8168-4ad1-9554-4dbf47a1198d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\Napal">
+      <UniqueIdentifier>{ceb873a6-33b2-420c-b937-ec67568e748d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\EventActor">
+      <UniqueIdentifier>{3517b6ce-78d5-4714-a57c-35efc851fd20}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\SequencePlayer\State">
       <UniqueIdentifier>{158a166b-c4ee-4394-a877-401ebd00136f}</UniqueIdentifier>
@@ -1138,7 +1147,7 @@
       <Filter>03. GameObject\PlayerInteraction</Filter>
     </ClInclude>
     <ClInclude Include="..\public\MotionTrail.h">
-      <Filter>04. Component\MotionTrail</Filter>
+      <Filter>03. GameObject\MotionTrail</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaBurstWeapon.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
@@ -1194,6 +1203,15 @@
     </ClInclude>
     <ClInclude Include="..\Public\SequenceAugustaFactory.h">
       <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClInclude>      
+    <ClInclude Include="..\public\NPC_Hiding.h">
+      <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Napal.h">
+      <Filter>03. GameObject\Actor\NPC\Napal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CoroProduction.h">
+      <Filter>03. GameObject\EventActor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1865,7 +1883,17 @@
       <Filter>03. GameObject\PlayerInteraction</Filter>
     </ClCompile>
     <ClCompile Include="..\private\MotionTrail.cpp">
-      <Filter>04. Component\MotionTrail</Filter>
+      <Filter>03. GameObject\MotionTrail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\private\NPC_Hiding.cpp">
+      <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Napal.cpp">
+      <Filter>03. GameObject\Actor\NPC\Napal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CoroProduction.cpp">
+      <Filter>03. GameObject\EventActor</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\Private\YunoGroundIdle.cpp">
@@ -1969,6 +1997,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxScan.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_MotionTrail.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

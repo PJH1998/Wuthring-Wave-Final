@@ -824,7 +824,7 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&ReadDesc.vPosition), sizeof(_float4));
 								File.read(reinterpret_cast<char*>(&ReadDesc.vSpecular), sizeof(_float4));
 
-								CEdit_LightObject::MAP_LOAD Desc{};
+								CEdit_LightObject::MAP_LOAD Desc{};	
 								Desc.vWorldPos = ReadDesc.vPosition;
 								Desc.CopyDesc = &ReadDesc;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
@@ -1666,11 +1666,11 @@ void CLevel_Map::Ready_Event()
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 				{
-					m_pPickedObject->Set_ShaderPass(3);
+					//m_pPickedObject->Set_ShaderPass(3);
 
 					if (m_pPickedDestructObject)
 					{
-						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject->Set_ShaderPass(0);
 						m_pPickedDestructObject = nullptr;
 					}
 
@@ -1683,23 +1683,23 @@ void CLevel_Map::Ready_Event()
 				else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
 				{
 
-					m_pPickedDestructObject->Set_ShaderPass(3);
+					//m_pPickedDestructObject->Set_ShaderPass(3);
 					if (m_pPickedDestructObject)
 					{
-						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject->Set_ShaderPass(0);
 					}
 				}
 				else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
 				{
-					m_pPickedMeteo->Set_ShaderPass(3);
+					//m_pPickedMeteo->Set_ShaderPass(3);
 				}
 				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
 				{
-					m_pPickedWater->Set_ShaderPass(3);
+					//m_pPickedWater->Set_ShaderPass(3);
 				}
 				else if (m_pPickedCollaps = dynamic_cast<CEdit_MapObject_Collaps*>(pObject))
 				{
-					m_pPickedCollaps->Set_ShaderPass(3);
+					//m_pPickedCollaps->Set_ShaderPass(3);
 				}
 			}
 		}

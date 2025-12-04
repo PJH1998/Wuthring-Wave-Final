@@ -59,7 +59,8 @@ void CMapObject_Instance::Late_Update(_float fTimeDelta)
 	if (!(m_eInstanceType == INSTANCETYPE::DEFAULT))
 		if (m_TypeMode != *m_bSonoroMode)
 			IsRender = false;
-	if (IsRender)
+	
+	if (IsRender && m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
