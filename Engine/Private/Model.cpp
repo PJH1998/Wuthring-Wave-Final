@@ -385,8 +385,6 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 		// 1. Instance 전용 버퍼 생성.
 		if (FAILED(Ready_Instance_Buffers()))
 			return E_FAIL;
-
-		
 	}
 
 
@@ -576,32 +574,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
 	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
-
-	// 4. Facial Animation Weight 계산
-	//if (m_eType == MODELTYPE::CHARACTER)
-	//{
-	//	// Facial Animation Weight 계산
-	//	iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights); 
-
-	//	for (auto& pMesh : m_Meshes)
-	//		pMesh->FetchMorphWeights_FromCompute(pComputeShaderCom, m_ShapeKeyWeights);
-	//}
-	//if (m_eType == MODELTYPE::CHARACTER)
-	//{
-	//	// Facial Animation Weight 계산
-	//	iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
-
-	//	// 모든 메쉬에게 "지금 설정된 가중치(m_ShapeKeyWeights)대로 얼굴 바꿔!" 라고 명령
-	//	for (auto& pMesh : m_Meshes)
-	//	{
-	//		// 위에서 만든 CPU 연산 함수 호출
-	//		pMesh->Update_Morph_CPU(m_ShapeKeyWeights);
-	//	}
-	//}
-	//if (m_eType == MODELTYPE::CHARACTER)
-	//{
-	//	
-	//}
 
 	// 4. Root Motion 조정.
 	if (true == isRootMotion)

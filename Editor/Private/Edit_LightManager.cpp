@@ -101,6 +101,11 @@ void CEdit_LightManager::Create_Light()
 	}
 }
 
+void CEdit_LightManager::Map_Load(LIGHT_DESC& Desc)
+{
+
+}
+
 CEdit_LightManager* CEdit_LightManager::Create()
 {
 	CEdit_LightManager* pInstance = new CEdit_LightManager();

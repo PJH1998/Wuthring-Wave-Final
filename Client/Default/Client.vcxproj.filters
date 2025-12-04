@@ -448,6 +448,36 @@
     <Filter Include="03. GameObject\MotionTrail">
       <UniqueIdentifier>{2c7787ac-02a8-4c6a-856a-7a129227d9f9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\HideNSeek">
+      <UniqueIdentifier>{4cb69a31-8168-4ad1-9554-4dbf47a1198d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\Napal">
+      <UniqueIdentifier>{ceb873a6-33b2-420c-b937-ec67568e748d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\EventActor">
+      <UniqueIdentifier>{3517b6ce-78d5-4714-a57c-35efc851fd20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State">
+      <UniqueIdentifier>{158a166b-c4ee-4394-a877-401ebd00136f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground">
+      <UniqueIdentifier>{1e1deba4-5132-443d-8d78-c180fd9ee4fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Air">
+      <UniqueIdentifier>{ed93eaa7-016c-422c-b36f-021169e3de96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Yuno">
+      <UniqueIdentifier>{f36f56dc-bbc2-4888-9071-a369adbe0443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Air\Yuno">
+      <UniqueIdentifier>{7fe5caf6-6cfe-431c-ac54-ad5bcea39d1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\Augusta">
+      <UniqueIdentifier>{7866a971-f767-4c42-994a-bfc112050574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Augusta">
+      <UniqueIdentifier>{6f4ff5b5-9847-405b-aa05-d552970970f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1162,6 +1192,33 @@
       <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\Public\YunoGroundIdle.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\YunoAirAttack.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Air\Yuno</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugusta.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugustaState_Enum.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugustaFactory.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\NPC_Hiding.h">
+      <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Napal.h">
+      <Filter>03. GameObject\Actor\NPC\Napal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CoroProduction.h">
+      <Filter>03. GameObject\EventActor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugustaGroundSkill.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1835,6 +1892,31 @@
       <Filter>03. GameObject\MotionTrail</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\private\NPC_Hiding.cpp">
+      <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Napal.cpp">
+      <Filter>03. GameObject\Actor\NPC\Napal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CoroProduction.cpp">
+      <Filter>03. GameObject\EventActor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\YunoGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\YunoAirAttack.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Air\Yuno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceAugusta.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceAugustaFactory.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceAugustaGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Augusta</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

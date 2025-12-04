@@ -10,6 +10,8 @@
 #include "Projectile.h"
 #include "AoEDoT.h"
 #include "NPCInstancing.h"
+#include "Napal.h"
+#include "CoroProduction.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -86,6 +88,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_ElectroPredator();
 	Ready_CoroSaurus();
 	Ready_NPC();
+	Ready_Production();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -433,7 +436,7 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CoroDesc.fSpeedPerSec = 10.f;
 	CoroDesc.vInitPosition = _float3(3479.2f, 268.6f, 2098.8f);
 	CoroDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
-	CoroDesc.pAnimationTag = "Idle1";
+	CoroDesc.pAnimationTag = "burst01_5";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Monster/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
 	CoroDesc.fAttackDmg = pInfo->fAttack;
@@ -562,6 +565,29 @@ void CLevel_GamePlay::Ready_NPC()
 	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
+
+	CNapal::NAPALDESC Napal{};
+	Napal.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Napal"));
+	Napal.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Napal.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	Napal.eCurLevel = m_eCurLevel;
+	Napal.vInitPos = _float3(3206.12f, 350.9f, 1680.1f);
+	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
+}
+
+void CLevel_GamePlay::Ready_Production()
+{
+	CCoroProduction::COROPROD_DESC Production{};
+	Production.shaderData = { LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh") };
+	Production.computeShaderData = { LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib") };
+	Production.modelData = { m_eCurLevel, TEXT("Prototype_Component_Model_CoroProduction") };
+	Production.strFolderPath = "../Bin/Resource/Model/NPC/CoroProduction/Notify";
+	Production.fSpeedPerSec = 10.f;
+	Production.fRotationPerSec = XMConvertToRadians(90.f);
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroProduction"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Production);
 }
 
 #ifdef _DEBUG
