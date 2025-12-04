@@ -5,6 +5,19 @@ NS_BEGIN(Client)
 class CSequencePlayer final : public CGameObject
 {
 public:
+	enum SEQUENCECHARACTER
+	{
+		NONE = -1,
+		YUNO = 0,
+		AUGUSTA = 1,
+		LUPA = 2,
+		ZANI = 3,
+		SHACON = 4,
+		CARLOTA = 5,
+		SEQUENCE_END
+	};
+
+public:
 	typedef struct tagSequencePlayerDesc
 	{
 		LEVEL eCurLevel = { LEVEL::END };
@@ -12,7 +25,7 @@ public:
 		_float3 vScale = {};
 		_float3 vRotation = {};
 		_uint iPlayerCount = {};
-		vector<SEQUENCEPLAYER_SPEC> SeqPlayerSpecs = {};
+		vector<SEQUENCEPLAYER_SPEC> PlayerSpecs = {};
 	}SEQUENCEPLAYER_DESC;
 
 private:
@@ -38,13 +51,16 @@ public:
 
 
 public:
-	_bool Is_TargetValid(class CTransform* pTarget); // 타겟이 유효한가?
+	_bool Is_TargetValid(class CTransform* pTarget);
 
-
-#pragma region GAMESYSTEM과의 연계함수.
+#pragma region GAMESYSTEM 연계
 public:
-
+	void Summon_Squad_Near_Boss(class CTransform* pTarget);
+	void Binding_Trigger();
 #pragma endregion
+
+
+
 
 
 
@@ -53,6 +69,8 @@ private:
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	LEVEL m_eCurLevel = { LEVEL::END };
 	
+	// 현재 실행 중인 SequenceCharacter
+	vector<class CCharacter*> m_SequenceCharacters;
 
 
 private:
@@ -70,14 +88,18 @@ private:
 	_float m_fTargetDistance = {}; // 몬스터와의 거리
 	_uint m_iCondition = {};
 
-
+	_uint m_iNextSpawnIndex = 0;
+	_uint m_iSequenceMax = { 3 };
 private:
 	void Sorting_Target();
 	void Toggle_LockOn();
+	void Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc);
 
 private:
 	HRESULT Ready_Players(const SEQUENCEPLAYER_DESC* pDesc);
 	HRESULT Ready_Components(const SEQUENCEPLAYER_DESC* pDesc);
+	HRESULT Ready_Sequence(const SEQUENCEPLAYER_DESC* pDesc);
+	
 
 
 public:

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Player_Define.h"
+#include "SequencePlayerDefine.h"
 #include "YunoState_Enum.h"
 
 NS_BEGIN(Client)
@@ -18,9 +18,12 @@ private:
 	struct StateTransitionContext
 	{
 		// Prev Info
+		EYunoIdleType m_eIdleType = EYunoIdleType::END;
+		EYunoAirAttackType m_eAirAttackType = EYunoAirAttackType::END;
 		_string m_strPrevInfo = {};
 		void Clear()
 		{
+			m_eIdleType = EYunoIdleType::END;
 			m_strPrevInfo.clear();
 		};
 	};
@@ -104,12 +107,14 @@ private:
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
-	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State���� Ȱ��ȭ?
+	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; 
 
 	
 	// Attack Volume
 	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
+
+	class CYunoMoon* m_pYunoMoon = { nullptr };
 
 private:
 	void Update_Physics(_float fTimeDelta);

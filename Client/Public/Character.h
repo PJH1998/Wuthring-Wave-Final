@@ -132,13 +132,15 @@ public:
 	void Set_Gravity(_bool IsGravity);
 
 	// Collider
+	
 	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
-
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
 
+	
 	// WorldMatrix
 	_matrix Get_WorldMatrix();
+	void Set_Position(_fvector vPos);
 
 #ifdef _DEBUG
 	void Print_LookRay();
@@ -233,6 +235,8 @@ public:
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
 	
+	// TargetPosition
+	void Bind_TargetPosition(_fvector vPos);
 	// Hit
 	_bool Is_Hit() { return m_IsHit; }
 	void Set_Hit(_bool IsHit) { m_IsHit = IsHit; }
@@ -252,6 +256,9 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
 	virtual void Clear_Animation(const _string& strAnimName, _float fTrackPosition = 0.f);
 	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
+		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+
+	virtual _bool Play_Animation_NonFacical(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
 		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 
 	virtual _bool Play_AnimationFly(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
@@ -280,6 +287,7 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+	void Rotate_TargetPosition();
 	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);
 
@@ -424,6 +432,8 @@ protected:
 	_float m_fStateTimeRate = { 1.f }; //
 	_float m_fOriginTimeRate = { 1.f };
 	_float m_fStateDelayTimer = {}; // StateDelayTimer;
+
+	_float4 m_vTargetPosition = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

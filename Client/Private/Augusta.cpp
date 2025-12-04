@@ -17,6 +17,9 @@
 #include "GameSystem.h"
 
 
+//TEst
+#include "MotionTrail.h"
+
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
 {

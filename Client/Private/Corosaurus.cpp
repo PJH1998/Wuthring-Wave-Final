@@ -49,11 +49,18 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fParalysisAcc = 5.f;
 
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+
+	//조우 애니메이션 고정하기
+	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 51.f);
+	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, nullptr);
+	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;
 }
 
 void CCorosaurus::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isAggro)
+		return;
 	m_pTransformCom->Save_PreviousPosition();
 
 	XMStoreFloat4x4(&m_GrabCombinedMat, XMLoadFloat4x4(m_pGrabSocket) * m_pTransformCom->Get_WorldMatrix());
@@ -67,6 +74,8 @@ void CCorosaurus::Priority_Update(_float fTimeDelta)
 
 void CCorosaurus::Update(_float fTimeDelta)
 {
+	if (!m_isAggro)
+		return;
 	Reset_Condition(fTimeDelta);
 	m_pBehaviorTreeCom->tick(this);
 
@@ -99,6 +108,9 @@ void CCorosaurus::Update(_float fTimeDelta)
 
 void CCorosaurus::Late_Update(_float fTimeDelta)
 {
+	if (!m_isAggro)
+		return;
+
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
@@ -804,8 +816,8 @@ _bool CCorosaurus::AttackArrange()
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK8)
-		return false;
+	//if (iIndex != ATK_PATTERN::ATTACK8)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{

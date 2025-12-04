@@ -67,11 +67,14 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 	m_isRender = false;
+	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;
 }
 
 void CMonsterTest::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isAggro)
+		return;
 	m_pTransformCom->Save_PreviousPosition();
 	if(m_isTrigger == true)
 		m_isDetecting = true;
