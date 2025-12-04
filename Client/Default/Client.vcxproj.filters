@@ -448,6 +448,24 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon\Augusta">
       <UniqueIdentifier>{2e691801-6e07-44a7-9b57-0f663bda1dad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State">
+      <UniqueIdentifier>{158a166b-c4ee-4394-a877-401ebd00136f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground">
+      <UniqueIdentifier>{1e1deba4-5132-443d-8d78-c180fd9ee4fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Air">
+      <UniqueIdentifier>{ed93eaa7-016c-422c-b36f-021169e3de96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Yuno">
+      <UniqueIdentifier>{f36f56dc-bbc2-4888-9071-a369adbe0443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Air\Yuno">
+      <UniqueIdentifier>{7fe5caf6-6cfe-431c-ac54-ad5bcea39d1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\Augusta">
+      <UniqueIdentifier>{7866a971-f767-4c42-994a-bfc112050574}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -816,9 +834,6 @@
     <ClInclude Include="..\public\MonsterTable.h">
       <Filter>01. GameSystem\MonsterTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerStatus.h">
-      <Filter>01. GameSystem\PlayerStatus</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\LogoMaleRover.h">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClInclude>
@@ -1164,6 +1179,22 @@
     <ClInclude Include="..\Public\SequencePlayerFactory.h">
       <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\Public\YunoGroundIdle.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\YunoAirAttack.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Air\Yuno</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugusta.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugustaState_Enum.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceAugustaFactory.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1422,9 +1453,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\FS_Scythe.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerStatus.cpp">
-      <Filter>01. GameSystem\PlayerStatus</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp">
       <Filter>03. GameObject\MapObject</Filter>
@@ -1838,6 +1866,19 @@
     </ClCompile>
     <ClCompile Include="..\private\MotionTrail.cpp">
       <Filter>04. Component\MotionTrail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\YunoGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\YunoAirAttack.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Air\Yuno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceAugusta.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceAugustaFactory.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

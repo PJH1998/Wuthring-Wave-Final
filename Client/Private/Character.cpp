@@ -277,6 +277,12 @@ _matrix CCharacter::Get_WorldMatrix()
 	return m_pTransformCom->Get_WorldMatrix();
 }
 
+void CCharacter::Set_Position(_fvector vPos)
+{
+	ASSERT_CRASH(m_pTransformCom);
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+}
+
 #pragma endregion
 
 #ifdef _DEBUG
@@ -688,6 +694,11 @@ _bool CCharacter::Is_LockOn()
     return m_IsLockOn;
 }
 
+void CCharacter::Bind_TargetPosition(_fvector vPos)
+{
+	XMStoreFloat4(&m_vTargetPosition, vPos); // 타겟 지점.
+}
+
 
 void CCharacter::ActiveCaptureState()
 {
@@ -940,6 +951,16 @@ void CCharacter::Rotate_Target()
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
+}
+
+void CCharacter::Rotate_TargetPosition()
+{
+	_vector vTarget = XMLoadFloat4(&m_vTargetPosition);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 }
 
 void CCharacter::Rotate_Target_Lerp(_float fTimeDelta)

@@ -204,6 +204,9 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\SequenceAugusta.h" />
+    <ClInclude Include="..\Public\SequenceAugustaFactory.h" />
+    <ClInclude Include="..\Public\SequenceAugustaState_Enum.h" />
     <ClInclude Include="..\Public\SequencePlayerFactory.h" />
     <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
@@ -407,7 +410,9 @@
     <ClInclude Include="..\Public\WeaponDummy.h" />
     <ClInclude Include="..\Public\Wing.h" />
     <ClInclude Include="..\Public\Yuno.h" />
+    <ClInclude Include="..\Public\YunoAirAttack.h" />
     <ClInclude Include="..\Public\YunoFactory.h" />
+    <ClInclude Include="..\Public\YunoGroundIdle.h" />
     <ClInclude Include="..\Public\YunoMoon.h" />
     <ClInclude Include="..\Public\YunoState_Enum.h" />
     <ClInclude Include="Client.h" />
@@ -460,6 +465,8 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\SequenceAugusta.cpp" />
+    <ClCompile Include="..\Private\SequenceAugustaFactory.cpp" />
     <ClCompile Include="..\private\SequencePlayerFactory.cpp" />
     <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />
@@ -653,7 +660,9 @@
     <ClCompile Include="..\Private\WeaponDummy.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
     <ClCompile Include="..\Private\Yuno.cpp" />
+    <ClCompile Include="..\Private\YunoAirAttack.cpp" />
     <ClCompile Include="..\Private\YunoFactory.cpp" />
+    <ClCompile Include="..\Private\YunoGroundIdle.cpp" />
     <ClCompile Include="..\Private\YunoMoon.cpp" />
     <ClCompile Include="..\public\UI_Ovfl_Palette.cpp" />
     <ClCompile Include="Client.cpp">

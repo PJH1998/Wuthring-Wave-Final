@@ -375,8 +375,6 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 		// 1. Instance 전용 버퍼 생성.
 		if (FAILED(Ready_Instance_Buffers()))
 			return E_FAIL;
-
-		
 	}
 
 

@@ -29,6 +29,10 @@ private:
 	HRESULT				Load_Galbrena();
 	HRESULT				Load_Action();
 
+	HRESULT				Load_SequencePlayer();
+	HRESULT				Load_Yuno();
+
+
 	HRESULT				Load_NPC();
 
 	HRESULT				Load_UI();
