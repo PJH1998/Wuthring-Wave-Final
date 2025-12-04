@@ -64,9 +64,9 @@ void CEdit_LightObject::Ready_Component(void* pArg)
 	LIGHT_DESC LightDesc{};
 	if (CopyDesc)
 	{
-		LightDesc.vAmbient = CopyDesc->vAmbient;
-		LightDesc.vDiffuse = CopyDesc->vDiffuse;
-		LightDesc.vSpecular = CopyDesc->vSpecular;
+		m_vLightAmbient.float_4 = LightDesc.vAmbient = CopyDesc->vAmbient;
+		m_vLightDiffuse.float_4 = LightDesc.vDiffuse = CopyDesc->vDiffuse;
+		m_vLightSpec.float_4 = LightDesc.vSpecular = CopyDesc->vSpecular;
 		LightDesc.eType = CopyDesc->eType;
 
 		if (LightDesc.eType == LIGHT_DESC::DIRECTION)
@@ -92,7 +92,7 @@ void CEdit_LightObject::Ready_Component(void* pArg)
 	}
 	else
 	{
-		LightDesc.vAmbient = _float4(1.f,1.f,1.f,1.f);
+		LightDesc.vAmbient = _float4(1.f, 1.f, 1.f, 1.f);
 		LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 		LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 		LightDesc.eType = LIGHT_DESC::POINT;
@@ -105,7 +105,7 @@ void CEdit_LightObject::Ready_Component(void* pArg)
 	m_LightDesc = m_pGameInstance->Get_LightDesc_For_Map(to_wstring(g_iLightIndex));
 #endif // _DEBUG
 
-	
+
 }
 
 void CEdit_LightObject::Set_ImGuiOption()

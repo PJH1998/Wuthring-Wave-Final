@@ -367,7 +367,8 @@ PS_OUT_LIGHT PS_MAIN_EMISSIVE_LIGHT(PS_IN In)
     }
 
     if (Out.vDiffuse.a > 0.f)
-        Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.7f, 1.f);
+        //Out.vEmissive = float4((Out.vDiffuse.xyz) * 0.7f, 1.f);
+        Out.vEmissive = float4(1.0f, 0.9f, 0.6f, 1.f);
     
     Out.vDiffuse.w = 1.f;
     
