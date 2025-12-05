@@ -214,6 +214,8 @@ void CNPC_Hiding::OnCollide_During(_uint iLayer, void* pDesc, const ContactManif
 		if (fDistance <= pScan->fRadius)
 		{
 			//스캔 성공
+			m_isScaned = true;
+			m_fScanAcc = 0.f;
 		}
 	}
 }
