@@ -192,6 +192,7 @@ public:
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
+	void					IsChangeLevel_ForPhysicX(_bool isChangeLevel);
 	void					SetUp_PhysicsSystem();
 	void					SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
 	void					SetUp_ObjectFilter(_uint iSrc, _uint iDst);

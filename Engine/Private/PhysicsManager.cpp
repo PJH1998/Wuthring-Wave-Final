@@ -15,6 +15,11 @@ CPhysicsManager::CPhysicsManager(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 	Safe_AddRef(m_pGameInstance);
 }
 
+void CPhysicsManager::IsChangeLevel(_bool isChangeLevel)
+{
+	m_pContactListener->IsChangeLevel(isChangeLevel);
+}
+
 Body* CPhysicsManager::Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut)
 {
 	Body* body = m_pPhysicsSystem->GetBodyInterface().CreateBody(BodySetting);

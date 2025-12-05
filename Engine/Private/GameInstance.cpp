@@ -162,7 +162,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
-	//m_pPhysicsManager->Late_Update();
+	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	
@@ -673,6 +673,10 @@ HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
+void CGameInstance::IsChangeLevel_ForPhysicX(_bool isChangeLevel)
+{
+	m_pPhysicsManager->IsChangeLevel(isChangeLevel);
+}
 void CGameInstance::SetUp_PhysicsSystem()
 {
 	m_pPhysicsManager->SetUp_PhysicsSystem();
