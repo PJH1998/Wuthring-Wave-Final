@@ -111,7 +111,7 @@ public:
 ;
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f);
+										, _float fRootMotionRate = 0.1f, _bool isFacial = true);
 
 	_bool								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true

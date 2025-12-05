@@ -156,11 +156,8 @@ void CPlayer::Update(_float fTimeDelta)
 	{
 		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
 		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 컨디션 동기화
-		//Sync_InteractionType_ToCharacter(m_Characters[m_iCurrentCharacterIdx]); // Interaction 선택 동기화
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
-
-	
 
     // 2. Harmony 
     if (m_iHarmonyCharacterIdx != NONE &&
@@ -182,6 +179,15 @@ void CPlayer::Update(_float fTimeDelta)
 	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
 
+	// Scan => TEST
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	{
+		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+
+		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
+	}
 
 #ifdef _DEBUG
 	GUI_Teleport();
@@ -361,17 +367,19 @@ void CPlayer::Player_KeyInput()
 
 	}
 
-	
-
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
+
+		
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
+
+		
 	}
 
 
@@ -379,11 +387,15 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+
+		if (nullptr != m_pTransformCom) // 우선 내위치에 켜기?ㅡ
+			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -569,7 +581,6 @@ void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactM
 }
 
 
-
 void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 공격과 스킬이 아니라면 호출하지 않습니다.
@@ -623,6 +634,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	}
 }
 
+
 _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 {
 	if (nullptr == pTarget)
@@ -644,6 +656,10 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 	return true;
 }
+
+
+
+
 
 #pragma region GameSystem 연계함수.
 void CPlayer::Notify_GrabVisible(_bool IsVisible)
@@ -675,9 +691,11 @@ void CPlayer::Sorting_Target()
     if (0 < m_TargetTransforms.size())
     {
         m_pTargetTransform = m_TargetTransforms[0];
+
+		
+		
     }
 
-    //m_TargetTransforms.clear();
 }
 
 void CPlayer::Toggle_LockOn()
@@ -749,27 +767,6 @@ void CPlayer::Toggle_LockOn()
 
 	// 7. LockOn 초기화?
 	m_pTargetTransform = nullptr;
-	/* if (nullptr == m_pTargetTransform)
-	 {
-		 if (m_IsLockOn)
-		 {
-			 m_IsLockOn = false;
-			 m_pSpringCamera->Lock_On(nullptr, false);
-			 if (m_iCurrentCharacterIdx !=NONE)
-				 m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
-
-		 }
-		 return;
-	 }
-
-	 if (nullptr != m_Characters[m_iCurrentCharacterIdx])
-	 {
-		 m_Characters[m_iCurrentCharacterIdx]->Set_AutoLockOn(m_pTargetTransform, m_IsLockOn);
-	 }
-	 m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
-	 */
-
-    //m_pTargetTransform = nullptr;
 }
 
 
@@ -968,10 +965,6 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
 		});
 
-	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollider_Enter(iLayer, pDesc, Manifold);
-	//	});
-
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
 	m_fColliderRadius = 0.4f;
@@ -1036,8 +1029,8 @@ void CPlayer::Free()
     CGameObject::Free();
     Safe_Release(m_pGameSystem);
 
-    for (auto& pPlayer : m_Characters)
-        Safe_Release(pPlayer);
+    for (auto& pCharacter : m_Characters)
+        Safe_Release(pCharacter);
 
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pInputControllerCom);
