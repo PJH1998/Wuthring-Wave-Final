@@ -68,7 +68,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	_float temp{};
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
-	m_iPhase = PHASE::TWO;
+	//m_iPhase = PHASE::TWO;
 	
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -918,8 +918,8 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		if (m_isAggro)
 			return;
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
-		//m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
-		//m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
 		m_isAggro = true;
 	}

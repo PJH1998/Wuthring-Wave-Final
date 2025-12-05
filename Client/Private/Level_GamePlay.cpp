@@ -557,12 +557,18 @@ void CLevel_GamePlay::Ready_SFX()
 void CLevel_GamePlay::Ready_NPC()
 {
 	CNPCInstancing::NPC_DESC NPCDesc{};
+	NPCDesc.iNPCType = 0;
 	NPCDesc.eCurLevel = m_eCurLevel;
 	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"));
 	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
 	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleM"));
 	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_NPCCell");
 	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
+
+	NPCDesc.iNPCType = 1;
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_MaleM"));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
 
