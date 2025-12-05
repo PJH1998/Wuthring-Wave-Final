@@ -1162,6 +1162,9 @@
       <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\Public\MapObject_FireFly.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1835,6 +1838,9 @@
       <Filter>03. GameObject\MotionTrail</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\MapObject_FireFly.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

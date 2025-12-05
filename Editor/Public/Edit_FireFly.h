@@ -52,6 +52,7 @@ public:
 	_uint ShaderPassWindow();
 	void Set_Color(_float4 vColor) { m_vDiffuseColor = vColor; }
 	_float4* Get_Color() { return &m_vDiffuseColor; }
+	void SaveData(ofstream& File);
 	//INSTANCETYPE Get_Type() { return m_eInstanceType; }
 	//void Set_Type(INSTANCETYPE eType) { m_eInstanceType = eType; }
 private:
@@ -79,6 +80,8 @@ private:
 	_uint m_iSaveIndex = {};
 	_float4 m_vDiffuseColor = {};
 	_float m_fTotalTime = {};
+
+	MAP_LOAD m_Desc = {};
 public:
 	static CEdit_FireFly* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

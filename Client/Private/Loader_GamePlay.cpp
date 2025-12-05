@@ -13,6 +13,7 @@
 #include"MapObject_Meteo.h"
 #include"MapObject_Water.h"
 #include"MapObject_Collaps.h"
+#include"MapObject_FireFly.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -143,7 +144,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1204_second/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1205_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
@@ -214,6 +215,12 @@ HRESULT CLoader_GamePlay::Load_Object()
 	
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
 		CSpawner::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_MapObejct_FireFly"),
+		CMapObject_FireFly::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_FireFly"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance_FireFly.hlsl"), VTXMESHINSTANCE_FIREFLY::Elements, VTXMESHINSTANCE_FIREFLY::iNumElements));
 #pragma endregion
 	return S_OK;
 }

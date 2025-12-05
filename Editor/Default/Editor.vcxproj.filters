@@ -491,10 +491,18 @@
     <ClInclude Include="..\Public\Edit_MapObject_Water.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_LightManager.h" />
-    <ClInclude Include="..\Public\Edit_MapEffectCollector.h" />
-    <ClInclude Include="..\Public\Edit_FireFly.h" />
-    <ClInclude Include="..\Public\Edit_FireFly_Manager.h" />
+    <ClInclude Include="..\Public\Edit_MapEffectCollector.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_FireFly.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_FireFly_Manager.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_LightManager.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -736,10 +744,18 @@
     <ClCompile Include="..\Private\Edit_Meteo.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_LightManager.cpp" />
-    <ClCompile Include="..\Private\Edit_MapEffectCollector.cpp" />
-    <ClCompile Include="..\Private\Edit_FireFly.cpp" />
-    <ClCompile Include="..\Private\Edit_FireFly_Manager.cpp" />
+    <ClCompile Include="..\Private\Edit_FireFly.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_FireFly_Manager.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_LightManager.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapEffectCollector.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

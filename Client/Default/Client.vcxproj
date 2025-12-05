@@ -204,6 +204,7 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\SequencePlayerFactory.h" />
     <ClInclude Include="..\Public\GalbrenaCapture.h" />
     <ClInclude Include="..\Public\GalbrenaGroundHeavyAttack.h" />
@@ -460,6 +461,7 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\private\SequencePlayerFactory.cpp" />
     <ClCompile Include="..\Private\GalbrenaCapture.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundHeavyAttack.cpp" />

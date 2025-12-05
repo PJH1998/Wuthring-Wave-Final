@@ -46,6 +46,7 @@ HRESULT CLevel_Map::Initialize()
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
 	m_pFlyManager = CEdit_FireFly_Manager::Create(m_pDevice, m_pContext);
+	m_SaveObjects["Map_FireFly"].push_back(nullptr);
 
 	//ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
@@ -117,13 +118,21 @@ HRESULT CLevel_Map::Initialize()
 
 void CLevel_Map::Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_PGUP) == KEYSTATE::DOWN)
+		m_FireFly = !m_FireFly;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_INSERT) == KEYSTATE::DOWN)
+		m_Effect = !m_Effect;
+
     m_fNearDistance = FLT_MAX;
     m_fNearDistance_Instance = FLT_MAX;
 
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
-	m_pEffectCollector->Set_ImGuiOption();
-	m_pFlyManager->Set_ImGuiOption();
+	if (m_Effect)
+		m_pEffectCollector->Set_ImGuiOption();
+	if (m_FireFly)
+		m_pFlyManager->Set_ImGuiOption();
 
     switch (m_eMenu)
     {
@@ -533,6 +542,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Light"), event);
 				else if (Pair.first.find("Effect") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Effect"), event);
+				else if (Pair.first.find("FireFly") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_FireFly"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -840,6 +851,21 @@ void CLevel_Map::Menu_Save_Load()
 							{
 								File.read(reinterpret_cast<char*>(&Desc.vPos), sizeof(_float4));
 								m_pEffectCollector->Map_Load(Desc);
+							}
+						}
+						else if (strFilePath.find("FireFly") != std::string::npos)
+						{
+							CEdit_FireFly::MAP_LOAD Desc{};
+							while (File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint)))
+							{
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
+								File.read(reinterpret_cast<char*>(&Desc.vRange), sizeof(_float2));
+								File.read(reinterpret_cast<char*>(&Desc.vPerSin), sizeof(_float2));
+								File.read(reinterpret_cast<char*>(&Desc.vPerCos), sizeof(_float2));
+								File.read(reinterpret_cast<char*>(&Desc.vPerSin2), sizeof(_float2));
+								m_pFlyManager->Map_Load(Desc);
 							}
 						}
                         else
@@ -1193,7 +1219,8 @@ void CLevel_Map::Ready_Map_Load_Prototype()
 			continue;
 		if (entry.path().string().find("Bone") != string::npos)
 			continue;
-
+		if (entry.path().string().find("FireFly") != string::npos)
+			continue;
 		_char FileDrive[MAX_PATH] = {};
 		_char FileDir[MAX_PATH] = {};
 

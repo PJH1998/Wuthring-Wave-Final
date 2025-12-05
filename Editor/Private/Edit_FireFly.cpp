@@ -3,6 +3,7 @@
 #include"Model_Instance_FireFly.h"
 #include"Mesh_Instance_FireFly.h"
 #include"Event_Level.h"
+#include"Map_Interface.h"
 
 CEdit_FireFly::CEdit_FireFly(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
@@ -28,6 +29,7 @@ HRESULT CEdit_FireFly::Initialize_Clone(void* pArg)
 		return E_FAIL;
 	FLY event(this);
 	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("FLY"), event);
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
     return S_OK;
 }
 
@@ -37,6 +39,8 @@ void CEdit_FireFly::Priority_Update(_float fTimeDelta)
 
 void CEdit_FireFly::Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
 	//남은거-
 	
 	//셰이더 만들기
@@ -52,6 +56,9 @@ void CEdit_FireFly::Update(_float fTimeDelta)
 
 void CEdit_FireFly::Late_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
@@ -107,12 +114,19 @@ void CEdit_FireFly::Render_Shadow()
 
 void CEdit_FireFly::Set_ImGuiOption()
 {
-	//m_pGameInstance->Use_Gizmo()
+	ImGui::Begin("FireFly Pos");
+	m_pMapInterface->Set_Transform(m_pTransformCom);
+
+	if (ImGui::Button("Change Pos") || m_pGameInstance->Get_DIKeyState(DIK_RETURN) == KEYSTATE::PRESS)
+		m_pModelCom->Change_Pos(m_pTransformCom->Get_State(STATE::POSITION));
+	ImGui::End();
 }
 
 HRESULT CEdit_FireFly::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	m_Desc = *pDesc;
+
 	CMesh_Instance_FireFly::MESH_INST_DESC Desc{};
 	m_iSaveIndex = pDesc->iSaveIndex;
 
@@ -132,43 +146,7 @@ HRESULT CEdit_FireFly::Ready_Component(void* pArg)
 	Desc.vRange = pDesc->vRange;
 	_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
 
-	if (pDesc->IsLoaded)
-	{
 
-
-		_string NameTemp = pDesc->ModelName;
-		_uint NumStartsPos = NameTemp.find_last_not_of("0123456789");
-		NumStartsPos == string::npos ? NumStartsPos = 0 : NumStartsPos += 1;
-
-		//이게 뒤에 다 뺀 LOD3까지 있는 이름.
-		_string ModelName = NameTemp.substr(0, NumStartsPos + 1);
-
-		strcpy_s(m_ModelName, ModelName.c_str());
-
-		m_pRotation = new _float4[m_iNumInstance];
-
-		_uint V = ModelName[ModelName.length() - 1] - '0' + 1;
-		m_pModelComArray.resize(V);
-
-
-		ProtoName += StringToWString(ModelName);
-
-		//얘는 뒷숫자 말고 앞 숫자를 바꿔야함.
-		for (_uint i = 0; i < V; ++i)
-		{
-			_wstring ModelCom = ProtoName;
-			ModelCom.pop_back();
-			ModelCom += to_wstring(i);
-			ModelCom += to_wstring(m_iSaveIndex);
-			_char ModelName[MAX_PATH] = {};
-			sprintf_s(ModelName, "Com_Model%d", i);
-
-			if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
-				StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), &Desc)))
-				return E_FAIL;
-		}
-	}
-	else
 	{
 		ProtoName += StringToWString(pDesc->ModelName);
 		strcpy_s(m_ModelName, pDesc->ModelName);
@@ -176,7 +154,7 @@ HRESULT CEdit_FireFly::Ready_Component(void* pArg)
 		_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
 		m_pModelComArray.resize(V);
 		if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
-			TEXT("Test"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
+			TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
 			return E_FAIL;
 		//얘는 뒷숫자
 		//for (_uint i = 0; i < V; ++i)
@@ -198,7 +176,7 @@ HRESULT CEdit_FireFly::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
 	XMStoreFloat4x4(&pDesc->WorldMatrix, XMMatrixIdentity());
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->InstanceWorldMatrix));
 	return S_OK;
 }
 void CEdit_FireFly::Move(_fvector vPos)
@@ -217,6 +195,20 @@ void CEdit_FireFly::Bind_Resources()
 _uint CEdit_FireFly::ShaderPassWindow()
 {
     return 0;
+}
+
+void CEdit_FireFly::SaveData(ofstream& File)
+{
+	File.write(reinterpret_cast<const char*>(&m_Desc.iNumInstance), sizeof(_uint));
+	File.write(reinterpret_cast<const char*>(&m_Desc.iShaderPassIndex), sizeof(_uint));
+	_float4x4 TransformMat;
+	XMStoreFloat4x4(&TransformMat, m_pTransformCom->Get_WorldMatrix());
+	File.write(reinterpret_cast<const char*>(&TransformMat), sizeof(_float4x4));
+
+	File.write(reinterpret_cast<const char*>(&m_Desc.vRange), sizeof(_float2));
+	File.write(reinterpret_cast<const char*>(&m_Desc.vPerSin), sizeof(_float2));
+	File.write(reinterpret_cast<const char*>(&m_Desc.vPerCos), sizeof(_float2));
+	File.write(reinterpret_cast<const char*>(&m_Desc.vPerSin2), sizeof(_float2));
 }
 
 void CEdit_FireFly::Ready_Events()
@@ -251,4 +243,5 @@ void CEdit_FireFly::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
 	Safe_Delete_Array(m_pInstanceMatrix);
+	Safe_Release(m_pMapInterface);
 }
