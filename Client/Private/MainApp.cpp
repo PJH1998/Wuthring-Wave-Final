@@ -10,6 +10,7 @@
 #include "Level_GamePlay.h"
 #include "Level_Heaven.h"
 #include "Level_Test.h"
+
 #include "Level_Test_UI.h"
 
 #include "SpringCamera.h"
@@ -438,6 +439,9 @@ void CMainApp::Ready_Prototype_ForStatic()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
 		CVIBuffer_Rect::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_VIBuffer_Sphere"),
+		CVIBuffer_Sphere::Create(m_pDevice, m_pContext));
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect_Instance"),
 		CVIBuffer_Rect_Instance::Create(m_pDevice, m_pContext, 10));

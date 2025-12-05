@@ -67,31 +67,8 @@ void CUI_CurveTrace::Render()
 	if (!m_isActivate)
 		return;
 
-	_float4x4 IdentityMatrix;
-	XMStoreFloat4x4(&IdentityMatrix, XMMatrixIdentity());
-	
-	_float4x4 thisTransformMatrix = *m_pTransformCom->Get_WorldMatrixPtr();
-
-	_float4x4 playerTransformMatrix = *m_pGameSystem->Get_PlayerMatrixPtr();
-
-
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &playerTransformMatrix)))
-		CRASH("Binding_Matrix_Failed");
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
-		CRASH("Binding_Matrix_Failed");
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
-		CRASH("Binding_Matrix_Failed");
-
-	if (FAILED(m_pShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
-		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
-		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
-		CRASH("Binding_Value_Failed");
-
-	m_pShaderCom->Begin(0);
-	m_pVIBufferCom->Bind_Resources();
-	m_pVIBufferCom->Render();
+	Render_Curve();
+	Render_Sphere();
 }
 
 void CUI_CurveTrace::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -120,15 +97,28 @@ HRESULT CUI_CurveTrace::Ready_Components(void* pArg)
 	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
 		return E_FAIL;
+
+
+
+	m_pTargetTransformCom = CTransform::Create(m_pDevice, m_pContext);
+	if (FAILED(m_pTargetTransformCom->Initialize_Clone(pArg)))
+		return E_FAIL;
+	m_Components.emplace(TEXT("Com_TargetTransform"), m_pTargetTransformCom);
+	Safe_AddRef(m_pTargetTransformCom);
+	m_pTargetTransformCom->Scale(_float3(5.f, 5.f, 5.f));
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_VIBuffer_Sphere"),
+		TEXT("Com_TargetVIBuffer"), reinterpret_cast<CComponent**>(&m_pTargetVIBufferCom), nullptr)))
+		return E_FAIL;
 }
 
 void CUI_CurveTrace::PreAssign_Presets()
 {
 	enum CHAR_INDEX { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
 
-	m_arrColorPreset[CH_ROVER]		= _float4(0.808f, 0.322f, 0.612f, 1.0f);
-	m_arrColorPreset[CH_AUGUSTA]	= _float4(0.969f, 0.451f, 1.000f, 1.0f);
-	m_arrColorPreset[CH_GALBRENA]	= _float4(1.000f, 0.416f, 0.416f, 1.0f);
+	m_arrColorPreset[CH_ROVER]			= _float4(0.808f, 0.322f, 0.612f, 1.0f);
+	m_arrColorPreset[CH_AUGUSTA]		= _float4(0.969f, 0.451f, 1.000f, 1.0f);
+	m_arrColorPreset[CH_GALBRENA]		= _float4(1.000f, 0.416f, 0.416f, 1.0f);
 
 	m_arrAdvColorPreset[CH_ROVER]		= _float4(0.485f, 0.193f, 0.367f, 1.0f);
 	m_arrAdvColorPreset[CH_AUGUSTA]		= _float4(0.581f, 0.271f, 0.600f, 1.0f);
@@ -138,6 +128,7 @@ void CUI_CurveTrace::PreAssign_Presets()
 _float3 CUI_CurveTrace::EvalProjectilePos(const _float3& vPosition, const _float3& vVelocity, const _float3& vAcceleration, _float fTime)		// Start Position, Start Velocity, Gravity
 {
 	// iSeg + 1개의 기준점 계산
+	// 나중에 계산식 다르면 이거 수정하면 됨
 	_float3 out;
 
 	out.x = vPosition.x + vVelocity.x * fTime + 0.5f * vAcceleration.x * pow(fTime, 2);
@@ -166,43 +157,6 @@ _float3 CUI_CurveTrace::CalcTangent(_float3* pPts, _uint count, _uint idx)
 
 _float3 CUI_CurveTrace::CalcSide(_float3& vTan, _float3& vPos)
 {
-	//_float3 vCamPos = {
-	//	m_pGameInstance->Get_CamPos()->x,
-	//	m_pGameInstance->Get_CamPos()->y,
-	//	m_pGameInstance->Get_CamPos()->z
-	//};
-	//
-	//_float3 vCamDir;
-	//vCamDir.x = vPos.x - vCamPos.x;
-	//vCamDir.y = vPos.y - vCamPos.y;
-	//vCamDir.z = vPos.z - vCamPos.z;
-	//
-	//_vector vT = XMVector3Normalize(XMLoadFloat3(&vTan));
-	//_vector vC = XMVector3Normalize(XMLoadFloat3(&vCamDir));
-	//
-	//
-	//// 1. 1차 외적 시도
-	//_vector vSideVec = XMVector3Cross(vC, vT);
-	//_vector vLengthSq = XMVector3LengthSq(vSideVec);
-	//
-	//// 2. [안전장치] 평행해서 길이가 너무 짧다면(0.001 미만), 월드 Up 벡터를 대신 사용
-	//if (XMVectorGetX(vLengthSq) < 0.001f)
-	//{
-	//	// 진행 방향이 위(0,1,0)인 경우까지 대비해 Right(1,0,0)도 예비로 둠
-	//	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-	//	if (abs(XMVectorGetY(vT)) > 0.99f) // 진행방향이 수직이면
-	//		vWorldUp = XMVectorSet(1.f, 0.f, 0.f, 0.f); // X축 사용
-	//
-	//	vSideVec = XMVector3Cross(vWorldUp, vT);
-	//}
-	//
-	//_vector vSide = XMVector3Normalize(vSideVec);
-	//
-	//
-	//_float3 out;
-	//XMStoreFloat3(&out, vSide);
-	//return out;
-
 	_vector vTangent = XMVector3Normalize(XMLoadFloat3(&vTan));	// 정규화
 	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
 
@@ -222,100 +176,113 @@ _float3 CUI_CurveTrace::CalcSide(_float3& vTan, _float3& vPos)
 
 void CUI_CurveTrace::Update_CurveVB()
 {
-		// 파라미터가 변경되었을 때에만 리본 버텍스를 다시 생성
-	//if (m_isModified)
-	// 
-		// 1) 기준 포인트(포물선) 샘플링
-		const _uint iSeg = m_tDesc.iSegmentCount;
-		if (iSeg == 0)
-			return;
+	// [1] 파라미터 준비
+	const _uint iSegmentIndex = m_tDesc.iSegmentCount;
+	if (iSegmentIndex == 0) return;
 
-		const _uint iPointCount = iSeg + 1;
-		const _uint iVertexCount = iPointCount * 2;
+	// 유효한 점들을 담을 컨테이너 (시작점 포함)
+	vector<_float3> vecValidPoints;
+	vecValidPoints.reserve(iSegmentIndex + 1);
+	vecValidPoints.push_back(m_tDesc.vStartPos);
 
-		vector<_float3>			vecPoints(iPointCount);
-		vector<VTXUICURVE>		vecVerts(iVertexCount);
+	// 타겟 표시 초기화
+	m_isShowTarget = false;
 
-		// 포물선 위치 계산 함수 (로컬 람다로 처리)
-		
+	// [2] 시뮬레이션 루프. 각 선분 단위로, 가까운 선 부터,레이 검사하며 확인
+	for (_uint i = 0; i < iSegmentIndex; ++i)
+	{
+		_float3 vCurrentPos = vecValidPoints.back();		// 현재 점
 
-		// [3-1] 포물선 기준점 샘플링
-		for (_uint i = 0; i <= iSeg; ++i)
+		_float fNextRatio = (_float)(i + 1) / (_float)iSegmentIndex;	// 다음 점 계산
+		_float fNextTime = fNextRatio * m_tDesc.fMaxTime;
+
+		_float3 vNextPos = EvalProjectilePos(m_tDesc.vStartPos, m_tDesc.vStartVel, m_tDesc.vGravity, fNextTime);	// 다음 점
+
+		// 레이캐스트 진행
+		_float4 vHitPos4;
+		_bool isRayDetected = m_pGameInstance->Ray_Cast(XMLoadFloat3(&vCurrentPos), XMLoadFloat3(&vNextPos), &vHitPos4);
+
+		if (isRayDetected)	// 충돌O
 		{
-			_float fRatio = (_float)i / (_float)iSeg;       // 0~1
-			_float fT = fRatio * m_tDesc.fMaxTime;      // 0~MaxTime
-
-			vecPoints[i] = EvalProjectilePos(
-				m_tDesc.vStartPos,
-				m_tDesc.vStartVel,
-				m_tDesc.vGravity,
-				fT);
+			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점
+			vecValidPoints.push_back(vHitPos);											// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)
+			m_pTargetTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
+			m_isShowTarget = true;														// 구 활성화
+			break;
 		}
-
-		// [3-2] 카메라 방향 얻기 (뷰/역행렬 이용)
-		// -> GameInstace 통하여 진행
-
-		const _float fHalfWidth = m_tDesc.fWidth * 0.5f;
-
-
-		_float3 prevSide = {};
-		bool    hasPrevSide = false;
-
-		for (_uint i = 0; i < iPointCount; ++i)
+		else				// 충돌X
 		{
-			_float3 vPos = vecPoints[i];
-			_float3 vTan = CalcTangent(vecPoints.data(), iPointCount, i);
-			_float3 vSide = CalcSide(vTan, vPos); // 원래대로 계산
-
-			// [연속성 보정]
-			if (hasPrevSide)
+			vecValidPoints.push_back(vNextPos);											// 궤적 리스트에 점 추가.
+			if (i == iSegmentIndex - 1)													// 만약 끝까지 날아갔다면, 마지막 지점에 타겟 표시
 			{
-				_vector s = XMLoadFloat3(&vSide);
-				_vector ps = XMLoadFloat3(&prevSide);
-				float dot = XMVectorGetX(XMVector3Dot(s, ps));
-
-				// dot이 0보다 작으면 (90도 넘게 꺾이면) 방향 뒤집기
-				if (dot < 0.0f)
-				{
-					vSide.x *= -1.f;
-					vSide.y *= -1.f;
-					vSide.z *= -1.f;
-				}
+				m_pTargetTransformCom->Set_State(STATE::POSITION, XMLoadFloat3(&vNextPos));
+				m_isShowTarget = true;
 			}
-
-			prevSide = vSide;
-			hasPrevSide = true;
-
-			// 이하 기존 좌/우 계산
-			_float3 vLeft, vRight;
-
-			vLeft.x = vPos.x - vSide.x * fHalfWidth;
-			vLeft.y = vPos.y - vSide.y * fHalfWidth;
-			vLeft.z = vPos.z - vSide.z * fHalfWidth;
-
-			vRight.x = vPos.x + vSide.x * fHalfWidth;
-			vRight.y = vPos.y + vSide.y * fHalfWidth;
-			vRight.z = vPos.z + vSide.z * fHalfWidth;
-
-			const _float fCurveU = (_float)i / (_float)iSeg;
-			const _uint  idx = i * 2;
-
-			vecVerts[idx + 0].vPosition = vLeft;
-			vecVerts[idx + 0].fCurve = fCurveU;
-			vecVerts[idx + 0].fWidth = 0;
-
-			vecVerts[idx + 1].vPosition = vRight;
-			vecVerts[idx + 1].fCurve = fCurveU;
-			vecVerts[idx + 1].fWidth = 1;
 		}
+	}
 
-		// [3-4] VIBuffer 에 업로드
-		//  → CVIBuffer_CurveRibbon::UpdateVertices(const VTX_CURVERIBBON*, _uint iSegCount)
-		static_cast<CVIBuffer_CurveTrace*>(m_pVIBufferCom)->UpdateVertices(vecVerts.data(), iSeg);
 
-		m_isModified = true;// false;
-	//}
+	// [3] 리본 메쉬(VIBuffer) 갱신
+	const _uint iValidCount = (_uint)vecValidPoints.size();
+	if (iValidCount < 2) return; // 점이 최소 2개는 있어야 선을 그리므로..
+
+	// 정점 배열 (점 개수 * 2) -> 좌측점, 우측점
+	vector<VTXUICURVE> vecVerts(iValidCount * 2);
+	const _float fHalfWidth = m_tDesc.fWidth * 0.5f;
+
+	_float3 prevSide = {};
+	bool    hasPrevSide = false;
+
+	for (_uint i = 0; i < iValidCount; ++i)
+	{
+		_float3 vPos = vecValidPoints[i];
+
+		// 탄젠트(진행방향) 및 사이드(우측방향) 계산
+		_float3 vTan = CalcTangent(vecValidPoints.data(), iValidCount, i);
+		_float3 vSide = CalcSide(vTan, vPos);
+
+		// 연속성 보정 (갑자기 방향 튐 방지)
+		if (hasPrevSide)
+		{
+			_vector s = XMLoadFloat3(&vSide);
+			_vector ps = XMLoadFloat3(&prevSide);
+			if (XMVectorGetX(XMVector3Dot(s, ps)) < 0.0f) // 90도 이상 꺾이면 뒤집기
+			{
+				vSide.x *= -1.f; vSide.y *= -1.f; vSide.z *= -1.f;
+			}
+		}
+		prevSide = vSide;
+		hasPrevSide = true;
+
+		// 좌/우 정점 생성
+		_float3 vLeft, vRight;
+		vLeft.x = vPos.x - vSide.x * fHalfWidth;
+		vLeft.y = vPos.y - vSide.y * fHalfWidth;
+		vLeft.z = vPos.z - vSide.z * fHalfWidth;
+
+		vRight.x = vPos.x + vSide.x * fHalfWidth;
+		vRight.y = vPos.y + vSide.y * fHalfWidth;
+		vRight.z = vPos.z + vSide.z * fHalfWidth;
+
+		// UV 좌표 계산 (0~1)
+		const _float fCurveU = (_float)i / (_float)(m_tDesc.iSegmentCount); // 전체 대비, 현재 인덱스의 진행 비율
+		const _uint  idx = i * 2;
+
+		vecVerts[idx + 0].vPosition = vLeft;
+		vecVerts[idx + 0].fCurve = fCurveU;
+		vecVerts[idx + 0].fWidth = 0; // Shader에서 Edge 처리용
+
+		vecVerts[idx + 1].vPosition = vRight;
+		vecVerts[idx + 1].fCurve = fCurveU;
+		vecVerts[idx + 1].fWidth = 1;
+	}
+
+	// 버퍼에 데이터 삽입. UpdateVertices 함수는 선분(segment) 개수를 인자로 받으므로, 점의 개수인 iValidCount에서 1을 뺍니다.
+	static_cast<CVIBuffer_CurveTrace*>(m_pVIBufferCom)->UpdateVertices(vecVerts.data(), iValidCount - 1);
+
+	m_isModified = true;
 }
+
 void CUI_CurveTrace::Update_CurrentColor()
 {
 	if (m_tDesc.isUseCustomColor)
@@ -333,8 +300,74 @@ void CUI_CurveTrace::Update_CurrentColor()
 		m_arrSelectedColor[2] = m_arrAdvColorPreset[iSelectedChar];
 	}
 }
-;
+void CUI_CurveTrace::Render_Curve()
+{
+	_float4x4 IdentityMatrix;
+	XMStoreFloat4x4(&IdentityMatrix, XMMatrixIdentity());
 
+	_float4x4 thisTransformMatrix = *m_pTransformCom->Get_WorldMatrixPtr();
+
+	// ksta : 임시로 플레이어 좌표 가져옴. 나중에 시작 좌표는 픽업한 오브젝트,
+	//		 방향은 카메라가 바라보는 방향으로 픽스 필요
+	_float4x4 playerTransformMatrix = *m_pGameSystem->Get_PlayerMatrixPtr();
+
+
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &playerTransformMatrix)))
+		CRASH("Binding_Matrix_Failed");
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+		CRASH("Binding_Matrix_Failed");
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+		CRASH("Binding_Matrix_Failed");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
+		CRASH("Binding_Value_Failed");
+
+	m_pShaderCom->Begin(0);
+	m_pVIBufferCom->Bind_Resources();
+	m_pVIBufferCom->Render();
+}
+
+void CUI_CurveTrace::Render_Sphere()
+{
+	if (!m_isShowTarget)
+		return;
+
+	_float4x4 TargetWorld;
+	XMStoreFloat4x4(&TargetWorld, m_pTargetTransformCom->Get_WorldMatrix());
+	OutPutDebugMatrix(L"Sphere Matrix", TargetWorld);
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &TargetWorld)))
+		CRASH("Binding_Matrix_Failed");
+	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
+	if (FAILED(m_pShaderCom->Bind_Value("g_CamPosition", &vCamPos, sizeof(vCamPos))))
+		CRASH("Binding_Value_Failed");
+
+	//if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+	//	CRASH("Binding_Matrix_Failed");
+	//if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+	//	CRASH("Binding_Matrix_Failed");
+
+
+	// 어차피 Curve랑 동일한 색 쓸건데  굳이 재할당 필요 없을듯?
+
+	//_float4 vTargetColor	= m_arrSelectedColor[0];
+	//_float4 vHeadColor		= m_arrSelectedColor[1];
+	//_float4 vTailColor		= m_arrSelectedColor[2];
+	//if (FAILED(m_pShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
+	//	CRASH("Binding_Value_Failed");
+	//if (FAILED(m_pShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
+	//	CRASH("Binding_Value_Failed");
+	//if (FAILED(m_pShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
+	//	CRASH("Binding_Value_Failed");
+
+	m_pShaderCom->Begin(1);			// Sphere 용 패스 제작
+	m_pTargetVIBufferCom->Bind_Resources();
+	m_pTargetVIBufferCom->Render();
+}
+;
 CUI_CurveTrace* CUI_CurveTrace::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CUI_CurveTrace* pInstance = new CUI_CurveTrace(pDevice, pContext);
@@ -361,6 +394,9 @@ void CUI_CurveTrace::Free()
 {
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pVIBufferCom);
+
+	Safe_Release(m_pTargetTransformCom);
+	Safe_Release(m_pTargetVIBufferCom);
 
 	__super::Free();
 }

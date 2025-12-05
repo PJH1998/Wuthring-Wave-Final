@@ -16,10 +16,10 @@ public:
 		_uint   iSegmentCount;   // 세그먼트 개수 (기준점 = seg+1)
 		_float  fWidth;          // 리본 두께 (월드 단위)
 
-		_bool	isUseCustomColor = false;
+		_bool	isUseCustomColor = false;	// 색 임의로 쓸거임? (기본색은 캐릭터별 속성색 프리셋으로 지정)
 		_float4 vBaseColor;      // 기본 색
-		_float4 vHeadColor;      // 시작 쪽 색
-		_float4 vTailColor;      // 끝 쪽 색
+		_float4 vHeadColor;      // 시작 색
+		_float4 vTailColor;      // 끝   색
 	}UI_CURVETRACE_DESC;
 
 public:
@@ -52,6 +52,9 @@ private:
 	void			Update_CurveVB();
 	void			Update_CurrentColor();
 
+	void			Render_Curve();
+	void			Render_Sphere();
+
 private:
 	UI_CURVETRACE_DESC	m_tDesc = {};
 
@@ -61,8 +64,16 @@ private:
 private:
 	class CGameSystem*	m_pGameSystem = { nullptr };
 	
-	CShader*		m_pShaderCom = { nullptr };			// Shader_UI_VtxCurveTrace.hlsl
-	CVIBuffer_CurveTrace*	m_pVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp
+	/// 나중에 CustomUI로 편입시킬 시 수정 필요. 그쪽에 있는 컴포넌트를 사용 해야 함
+	CShader*				m_pShaderCom = { nullptr };			// Shader_UI_VtxCurveTrace.hlsl		
+	CVIBuffer_CurveTrace*	m_pVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp		
+
+	// 충돌 인디케이터 구(Sphere) 전용 2차 Transform 컴포넌트 및 VIBuffer
+	CTransform*				m_pTargetTransformCom = { nullptr };
+	CVIBuffer_Sphere*		m_pTargetVIBufferCom = { nullptr };	// VIBuffer_Sphere.cpp		
+	_bool					m_isShowTarget = false;				// 구체 켤 거임? 
+
+
 
 	array<_float4, 3>	m_arrColorPreset = {};
 	array<_float4, 3>	m_arrAdvColorPreset = {};
