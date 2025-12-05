@@ -120,7 +120,7 @@ private:
 	void						test(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
-
+	void						Reset_NotifyInteraction();
 #pragma region BT_CONDITIONS
 	_bool						isAnimationRunning() const { return !m_isAnimationFinished; }
 	_bool						isKnockDown();

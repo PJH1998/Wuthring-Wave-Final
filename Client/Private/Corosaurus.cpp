@@ -51,8 +51,8 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 
 	//조우 애니메이션 고정하기
-	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 51.f);
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, nullptr);
+	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 51.f);
 	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;
 }
@@ -271,6 +271,10 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 #ifdef _DEBUG
 		cout << "플레이어 잡기 해제 호출!" << endl;
 #endif // _DEBUG
+	}
+	else if (wstrTypeTag == TEXT("Reset"))
+	{
+		Reset_NotifyInteraction();
 	}
 //	else if (wstrTypeTag == TEXT("CallVisible"))
 //	{
@@ -581,6 +585,8 @@ void CCorosaurus::OnCollide_During(_uint iLayer, void* pOther, const ContactMani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 		m_isTrigger = true;
+		if (false == m_isAggro)
+			m_isAggro = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
@@ -713,6 +719,24 @@ void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& 
 	cout << "Parry! (Corro)" << endl;
 	cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
+}
+
+void CCorosaurus::Reset_NotifyInteraction()
+{
+	m_isTurnLerp = false;
+	m_isDist_Interp_Enable = false;
+	m_pColliderCom->Set_Gravity(true);
+
+	for (_uint i = 0; i < ATK_SOCKET::END; i++)
+	{
+		if (nullptr != m_pAtkVolumes[i])
+		{
+			m_pAtkVolumes[i]->SetActivate(false);
+			m_pAtkVolumes[i]->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
+		}
+	}
+	if (nullptr != m_pParryVolume)
+		m_pParryVolume->SetActivate(false);
 }
 
 _bool CCorosaurus::isKnockDown()
