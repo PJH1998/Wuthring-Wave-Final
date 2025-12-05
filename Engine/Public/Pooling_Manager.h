@@ -17,7 +17,10 @@ public:
 
 	// Object Pooling
 	HRESULT								Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg);
+	HRESULT								Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg);
+
 	HRESULT								Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg);
+	HRESULT								Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg);
 	HRESULT								Clear_Resource();
 	void									Update_Pooling();
 
@@ -34,10 +37,14 @@ public:
 
 private:
 	class CGameInstance*				m_pGameInstance = { nullptr };
-	// Pooling ?湲?
+	// Pooling Object
 	map<const _wstring, queue<class CGameObject*>>			m_PoolingObjects;
-	// ?쒖꽦?붾맂 Object
+	// Active Object
 	map<const _wstring, list<class CGameObject*>>				m_ActiveObjects;
+	// Pooling Object (Static)
+	map<const _wstring, queue<class CGameObject*>>			m_PoolingStaticObjects;
+	// Active Object (Static)
+	map<const _wstring, list<class CGameObject*>>				m_ActiveStaticObjects;
 
 	// Thread
 	vector<thread>					m_Threads;

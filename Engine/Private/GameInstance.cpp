@@ -393,10 +393,18 @@ HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
 }
+HRESULT CGameInstance::Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
+{
+	return m_pPooling_Manager->Add_PoolingObject_ForStatic(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
+}
  HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
+ HRESULT CGameInstance::Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+ {
+	 return m_pPooling_Manager->Spawn_PoolingObject_ForStatic(strPoolingTag, WorldMatrix, pArg);
+ }
 void CGameInstance::Add_Work(function<void()> Work)
 {
 	m_pPooling_Manager->Add_Work(Work);
