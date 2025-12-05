@@ -27,6 +27,7 @@ private:
 	void						Ready_UI();
 	void						Ready_SFX();
 	void						Ready_NPC();
+	void						Ready_Production();
 
 #ifdef _DEBUG
 private:

@@ -156,11 +156,8 @@ void CPlayer::Update(_float fTimeDelta)
 	{
 		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
 		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 컨디션 동기화
-		//Sync_InteractionType_ToCharacter(m_Characters[m_iCurrentCharacterIdx]); // Interaction 선택 동기화
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
-
-	
 
     // 2. Harmony 
     if (m_iHarmonyCharacterIdx != NONE &&
@@ -182,6 +179,7 @@ void CPlayer::Update(_float fTimeDelta)
 	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
 
+	
 
 #ifdef _DEBUG
 	GUI_Teleport();
@@ -303,6 +301,17 @@ _vector CPlayer::Get_Position()
 
 void CPlayer::Player_KeyInput()
 {
+	// Scan 키 설정. => T키로 변경 예정.
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::T), KEYSTATE::UP) &&
+		UI_TAB_UTILITY::SENSOR == m_eUtilityType) //
+	{
+		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+
+		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
+	}
+
 	if (!m_IsQTE) // QTE 도중이면 플레이어 변경 불가능.
 	{
 		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
@@ -356,22 +365,23 @@ void CPlayer::Player_KeyInput()
 						m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 				}
 			}
-
 		}
 
 	}
-
-	
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
+
+		
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
+
+		
 	}
 
 
@@ -379,21 +389,33 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+
+		if (nullptr != m_pTransformCom) // 우선 내위치에 켜기?ㅡ
+			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
+
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
+		// 임시
+		m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
+
+		// 임시
+		
+		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
@@ -406,6 +428,8 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 
+
+	
 	
 }
 
@@ -569,7 +593,6 @@ void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactM
 }
 
 
-
 void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 공격과 스킬이 아니라면 호출하지 않습니다.
@@ -577,15 +600,13 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer && 
 		ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK) != iLayer && 
 		ENUM_CLASS(COLLISIONLAYER::GRAB) != iLayer &&
-		ENUM_CLASS(COLLISIONLAYER::PARRY))
+		ENUM_CLASS(COLLISIONLAYER::PARRY) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::SLIDE) != iLayer)
 		return;
 
 	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
 		return;
 
-#ifdef _DEBUG
-	cout << "Player Crash" << endl;
-#endif // _DEBUG
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
 
@@ -594,7 +615,16 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	
 	// 추후 다른 어택 판정이 들어오면 그거에 맞는 판정을생성합니다.
 
-	if (COLLISIONLAYER::GRAB == eLayer)
+	// 충돌하면? => Condition 추가 및 데이터 전달 받기.
+	if (COLLISIONLAYER::SLIDE == eLayer)
+	{
+		// 1. Condition 추가.
+		m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+
+		// 2. Data 전달.
+		m_Characters[m_iCurrentCharacterIdx]->Reserve_LandSlide(pClientDesc.eSlideData);
+	}
+	else if (COLLISIONLAYER::GRAB == eLayer)
 	{
 		CCharacter::CAPTURE_DESC GrabDesc{};
 		GrabDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
@@ -623,6 +653,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	}
 }
 
+
 _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 {
 	if (nullptr == pTarget)
@@ -644,6 +675,10 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 	return true;
 }
+
+
+
+
 
 #pragma region GameSystem 연계함수.
 void CPlayer::Notify_GrabVisible(_bool IsVisible)
@@ -675,9 +710,11 @@ void CPlayer::Sorting_Target()
     if (0 < m_TargetTransforms.size())
     {
         m_pTargetTransform = m_TargetTransforms[0];
+
+		
+		
     }
 
-    //m_TargetTransforms.clear();
 }
 
 void CPlayer::Toggle_LockOn()
@@ -749,27 +786,6 @@ void CPlayer::Toggle_LockOn()
 
 	// 7. LockOn 초기화?
 	m_pTargetTransform = nullptr;
-	/* if (nullptr == m_pTargetTransform)
-	 {
-		 if (m_IsLockOn)
-		 {
-			 m_IsLockOn = false;
-			 m_pSpringCamera->Lock_On(nullptr, false);
-			 if (m_iCurrentCharacterIdx !=NONE)
-				 m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
-
-		 }
-		 return;
-	 }
-
-	 if (nullptr != m_Characters[m_iCurrentCharacterIdx])
-	 {
-		 m_Characters[m_iCurrentCharacterIdx]->Set_AutoLockOn(m_pTargetTransform, m_IsLockOn);
-	 }
-	 m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
-	 */
-
-    //m_pTargetTransform = nullptr;
 }
 
 
@@ -968,10 +984,6 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
 		});
 
-	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollider_Enter(iLayer, pDesc, Manifold);
-	//	});
-
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
 	m_fColliderRadius = 0.4f;
@@ -1036,8 +1048,8 @@ void CPlayer::Free()
     CGameObject::Free();
     Safe_Release(m_pGameSystem);
 
-    for (auto& pPlayer : m_Characters)
-        Safe_Release(pPlayer);
+    for (auto& pCharacter : m_Characters)
+        Safe_Release(pCharacter);
 
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pInputControllerCom);

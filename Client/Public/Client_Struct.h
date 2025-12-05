@@ -10,16 +10,17 @@ namespace Engine
 namespace Client
 {
 	
+#pragma region CHARACTER
+	typedef struct SLIDE_DATA
+	{
+		vector<_float3> WayPoints;
+		_float fSpeed = 5.f;
 
-	typedef struct tagSFX_RadialData {
-		_float fMinDistance;
-		_float fMaxDistance;
-		_float fLengthScale;
-		_float fPadding0;
-		_float2 vPivot;
-		_float2 fPadding1;
-	}SFX_RADIAL_DATA;
-
+		void Reset()
+		{
+			WayPoints.clear();
+		}
+	}SLIDE_DATA;
 
 	typedef struct tagSkillInfo
 	{
@@ -36,7 +37,6 @@ namespace Client
 		_float  fDamage;			// 스킬 데미지
 		_string strDescription; // 설명
 	}SKILL_INFO;
-	
 
 	typedef struct tagChracterInfo
 	{
@@ -51,6 +51,55 @@ namespace Client
 		_float fHarmonyGauge;       // 협주 게이지
 		_float fMaxHarmonyGauge;    // 협주 게이지 최대값.
 	}CHARACTER_INFO;
+
+	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
+	typedef struct tagUISkillSlot {
+		_string strKeyInput;      // "LB", "E", "Q" 등
+		_uint iCharacterType;	  // 캐릭터 타입. => Rover, Augusta, Galbrena => UI_CHARACTERTYPE
+		_uint iStateType;		  // 캐릭터에 따른 State => Character Type을 확인하고 그에 맞게 캐스팅해서 사용. 
+		// => iStateType은 UI_AUGUSTA_STATE 또는 ROVER_STATE GABRENA_STATE
+		 // ex) AUGUSTA면 UI_AUGUSTA_STATE eState = static_cast<UI_AUGUSTA_STATE>(iStateType);
+
+		_float  fCurrentCoolTime; // 현재 쿨타임.
+		_float  fMaxCoolTime;     // Max 쿨타임
+		_string  strSkillName; // Skill Name 디버그 용도.
+	} UISKILL_SLOT;
+
+	typedef struct tagDelayedAction {
+		enum class TYPE { HIT, PARRY, DODGE, GRAB }; // 이벤트 타입.
+		TYPE type;
+		void* pData;  // HIT_DESC 등 데이터 (nullptr 가능)
+		tagDelayedAction(TYPE t, void* data = nullptr) : type(t), pData(data) {}
+	}DELAYED_ACTION;
+
+	typedef struct tagGrappleInfo {
+		CTransform* pTransform = { nullptr };
+		OBJECTTYPE eObjectType;
+		uint* pTriggerIndex = { nullptr };
+
+		void Reset()
+		{
+			pTransform = nullptr;
+			eObjectType = OBJECTTYPE::END;
+			pTriggerIndex = { nullptr };
+		}
+	}GRAPPLE_INFO;
+
+
+
+#pragma endregion
+
+	typedef struct tagSFX_RadialData {
+		_float fMinDistance;
+		_float fMaxDistance;
+		_float fLengthScale;
+		_float fPadding0;
+		_float2 vPivot;
+		_float2 fPadding1;
+	}SFX_RADIAL_DATA;
+	
+
+	
 
 
 	typedef struct tagMonsterInfo
@@ -82,19 +131,6 @@ namespace Client
 		_vector vCenterPos;
 		_float fRadius;
 	}SCAN_INFO;
-
-	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
-	typedef struct tagUISkillSlot {
-		_string strKeyInput;      // "LB", "E", "Q" 등
-		_uint iCharacterType;	  // 캐릭터 타입. => Rover, Augusta, Galbrena => UI_CHARACTERTYPE
-		_uint iStateType;		  // 캐릭터에 따른 State => Character Type을 확인하고 그에 맞게 캐스팅해서 사용. 
-		// => iStateType은 UI_AUGUSTA_STATE 또는 ROVER_STATE GABRENA_STATE
-		 // ex) AUGUSTA면 UI_AUGUSTA_STATE eState = static_cast<UI_AUGUSTA_STATE>(iStateType);
-
-		_float  fCurrentCoolTime; // 현재 쿨타임.
-		_float  fMaxCoolTime;     // Max 쿨타임
-		_string  strSkillName; // Skill Name 디버그 용도.
-	} UISKILL_SLOT;
 	
 	typedef struct tagCallBackClientDesc
 	{
@@ -107,28 +143,12 @@ namespace Client
 		OBJECTTYPE eObjectType { OBJECTTYPE::END }; // 어떤 오브젝트인지 넣어서 판단하게. ANCHOR(고정), PULL(당긴다)
 		// Shaking이나, HitStop? 이런 거.
 		const _float4x4* pSocketMatrix = { nullptr }; // Grap 시 플레이어가 붙을 Matrix Pointer?
+
+		SLIDE_DATA eSlideData;
 	}CALLBACK_CLIENT;
 
 
-	typedef struct tagDelayedAction {
-		enum class TYPE { HIT, PARRY, DODGE, GRAB }; // 이벤트 타입.
-		TYPE type;
-		void* pData;  // HIT_DESC 등 데이터 (nullptr 가능)
-		tagDelayedAction(TYPE t, void* data = nullptr) : type(t), pData(data) {}
-	}DELAYED_ACTION;
-
-	typedef struct tagGrappleInfo {
-		CTransform* pTransform = { nullptr };
-		OBJECTTYPE eObjectType;
-		uint* pTriggerIndex = { nullptr };
-
-		void Reset()
-		{
-			pTransform = nullptr;
-			eObjectType = OBJECTTYPE::END;
-			pTriggerIndex = { nullptr };
-		}
-	}GRAPPLE_INFO;
+	
 
 #pragma region SEQUENCE
 	typedef struct tagAnimData {

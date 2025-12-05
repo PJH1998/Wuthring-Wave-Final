@@ -194,6 +194,8 @@ public:
 	_vector						Get_PlayerLookVector();
 	_vector						Get_PlayerPosition();
 
+	void						Summon_SequenceCharacter(class CTransform* pTransform);
+
 	
 #pragma endregion
 

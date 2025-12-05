@@ -489,6 +489,17 @@ _vector CGameSystem::Get_PlayerPosition()
 	return m_pPlayer->Get_Position();
 }
 
+// 보스 근처에 소환.
+void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
+{
+	if (nullptr == m_pSequencePlayer || 
+		nullptr == pTransform)
+		return;
+
+	// 
+	m_pSequencePlayer->Summon_Squad_Near_Boss(pTransform);
+}
+
 
 #pragma endregion
 

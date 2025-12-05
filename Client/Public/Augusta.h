@@ -48,6 +48,7 @@ private:
 		EAugustaRunType m_eRunType = EAugustaRunType::END;
 		EAugustaSprintType m_eSprintType = EAugustaSprintType::END;
 		EAugustaLandType m_eLandType = EAugustaLandType::END;
+		EAugustaLandSlideType m_eLandSlideType = EAugustaLandSlideType::END;
 
 		EAugustaAttackType m_eAttackType = EAugustaAttackType::END;
 		EAugustaSkillType m_eSkillType = EAugustaSkillType::END;
@@ -56,6 +57,8 @@ private:
 		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
 		EAugustaQTEType   m_eQTEType = EAugustaQTEType::END;
 		EAugustaDodgeType m_eDodgeType = EAugustaDodgeType::END;
+
+		
 
 		// Air
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
@@ -90,7 +93,10 @@ private:
 			m_eSprintType = EAugustaSprintType::END;
 			m_eDashType = EAugustaDashType::END;
 			m_eLandType = EAugustaLandType::END;
+			m_eLandSlideType = EAugustaLandSlideType::END;
 			m_eDodgeType = EAugustaDodgeType::END;
+
+			
 
 
 			// Attack
@@ -222,6 +228,8 @@ public:
 	virtual void Bind_DefaultShaderPath() override;
 	virtual void Bind_DissolveShaderPath() override;
 	virtual void Activate(_bool IsActivate) override;
+	
+	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) override;
 
 
 #ifdef _DEBUG
