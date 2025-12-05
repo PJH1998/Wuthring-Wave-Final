@@ -29,6 +29,14 @@ private:
 	HRESULT				Load_Galbrena();
 
 
+	HRESULT				Load_SequencePlayer();
+	HRESULT				Load_Yuno();
+	HRESULT				Load_SequenceAugusta();
+	HRESULT				Load_SequenceLupa();
+
+
+
+
 	HRESULT				Load_UI();
 	HRESULT				Load_Font();
 	HRESULT				Load_Effect();

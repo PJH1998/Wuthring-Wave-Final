@@ -178,6 +178,7 @@ public:
 
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 
+	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
 #pragma endregion
 
 
@@ -256,7 +257,7 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
 	virtual void Clear_Animation(const _string& strAnimName, _float fTrackPosition = 0.f);
 	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
-		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsFacial = true);
 
 	virtual _bool Play_Animation_NonFacical(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
 		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
@@ -327,6 +328,8 @@ public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
 	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
 	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
+
+
 #pragma endregion
 
 	

@@ -6,6 +6,7 @@
 #include "Collider.h"
 #include "Ability.h"
 #include "AttackVolume.h"
+#include "MotionTrail.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -384,6 +385,19 @@ void CCharacter::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, 
 	m_pGameInstance->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
 }
 
+void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
+{
+	CMotionTrail::MOTION_TRAIL_DESC Desc = {};
+	Desc.pModel = m_pModelCom;
+	Desc.pTransform = m_pTransformCom;
+	Desc.vColor = vColor;
+	Desc.fMotionLifeTime = fMotionLifeTime;
+	Desc.fInterval = fInterval;
+	Desc.fDuration = fDuration;
+	Desc.iShaderPassIndex = 0; 
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_MotionTrail"), XMMatrixIdentity(), &Desc);
+}
+
 
 
 // 내 Velocity 고정.
@@ -754,11 +768,11 @@ _bool CCharacter::Play_Animation_NonFacical(const _string& strAnimName, _float f
 	return IsPlayAnimationEnd;
 }
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsFacial)
 {
 	ASSERT_CRASH(m_pModelCom);
 	//_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-	_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+	_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, IsFacial);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 
 	return IsPlayAnimationEnd;

@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "CoroProduction.h"
+#include "MapObject_Meteo.h"
 #include "GameSystem.h"
 
 CCoroProduction::CCoroProduction(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -147,12 +148,13 @@ void CCoroProduction::Object_Func(const _wstring& wStrObjectTag)
 {
 	if (wStrObjectTag == TEXT("Meteo"))
 	{
-
+		m_pGameSystem->OnTriggerActivate(50);
+		
 	}
-	else if (wStrObjectTag == TEXT("Action40"))
-	{
-		m_pGameSystem->OnTriggerActivate(40);
-	}
+	//else if (wStrObjectTag == TEXT("Action40"))
+	//{
+	//	m_pGameSystem->OnTriggerActivate(40);
+	//}
 }
 
 void CCoroProduction::Bind_Resources()
@@ -192,6 +194,25 @@ HRESULT CCoroProduction::Ready_Components(const COROPROD_DESC* pDesc)
         return E_FAIL;
     }
 	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+
+	// Meteo
+	_vector vSrc = XMVectorSet(3449.22f, 323.1f, 1964.74f, 1.f);
+	_vector vDst = XMVectorSet(3440.1f, 321.5f, 1966.f, 1.f);
+	_uint iCurLevel = m_pGameInstance->Get_CurrentLevel();
+	CMapObject_Meteo::MAP_LOAD Meteo{};
+	Meteo.fArchY = 0.5f;
+	Meteo.iLevel = iCurLevel;
+	Meteo.fDuration = 1.f;
+	XMStoreFloat4(&Meteo.vSourPos, vSrc);
+	XMStoreFloat4(&Meteo.vDestPos, vDst);
+	Meteo.iShaderPassIndex = 0;
+	Meteo.TriggerIndex = 50;
+	Meteo.TriggerActiveIndex = 40;
+	strcpy_s(Meteo.ModelName, "SM_Com2_Roc_APD_39AX_LOD0");
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iCurLevel, TEXT("Prototype_GameObject_MapObject_Meteo"), iCurLevel, TEXT("Layer_Meteo"), &Meteo)))
+		return E_FAIL;
+
 
     return S_OK;
 }

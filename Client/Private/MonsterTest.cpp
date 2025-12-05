@@ -273,6 +273,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 	{
 		m_isDist_Interp_Enable = Isactive;
 	}
+	else if (wstrTypeTag == TEXT("Render"))
+	{
+		m_isRender = Isactive;
+	}
 }
 
 void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)

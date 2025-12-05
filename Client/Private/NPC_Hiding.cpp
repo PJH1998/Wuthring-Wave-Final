@@ -209,7 +209,14 @@ void CNPC_Hiding::OnCollide_During(_uint iLayer, void* pDesc, const ContactManif
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::INTERACTION))
 	{
-		
+		SCAN_INFO* pScan = static_cast<SCAN_INFO*>(pDesc);
+		_float fDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION) - pScan->vCenterPos));
+		if (fDistance <= pScan->fRadius)
+		{
+			//스캔 성공
+			m_isScaned = true;
+			m_fScanAcc = 0.f;
+		}
 	}
 }
 

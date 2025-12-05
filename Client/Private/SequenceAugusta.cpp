@@ -190,8 +190,6 @@ void CSequenceAugusta::Render()
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
-		//if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
-		//	CRASH("Bind Morph Result Failed");
 
 		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
 			CRASH("Ready Shader Begin Failed");
@@ -459,7 +457,7 @@ void CSequenceAugusta::Activate(_bool IsActivate)
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 
 		// State까지 결정
-		m_StateContext.m_eSkillType = ESequenceAugustaSkillType::ATTACK_SPEEDDRIVE;
+		m_StateContext.m_eSkillType = ESequenceAugustaSkillType::ATTACK_SPSKILL;
 		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ESequenceAugustaGroundState::SKILL));
 	}
 }
@@ -567,8 +565,8 @@ void CSequenceAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 	// Shader Vlaue 추가
 	m_fDissolveTimer = 0.f;
 	m_fMaxDissolveTime = 0.35f;
-	m_vDissolveColor = { 0.693f, 0.481f, 1.f, 1.f };
-	m_fEmissiveIntensity = 1.5f;
+	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
+	m_fEmissiveIntensity = 3.f;
 
 }
 
