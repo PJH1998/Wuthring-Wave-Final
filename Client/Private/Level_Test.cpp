@@ -904,40 +904,54 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 	
-	static _uint iInteractIndex = 0;
-	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
+	//static _uint iInteractIndex = 0;
+	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
+	//
+	//
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
+	//{
+	//	switch (iInteractIndex)
+	//	{
+	//	case TEST_INTERACT0:
+	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	case TEST_INTERACT1:
+	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	}
+	//}
+	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	//{
+	//	m_pGameSystem->Hide_InteractUI(true);
+	//}
+	//
+	//
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endlㅡ
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
+	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
+	static _bool isInteractActivate = false;
+	
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN)
+		isInteractActivate = !isInteractActivate;
+	
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-		(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
-	{
-		switch (iInteractIndex)
-		{
-		case TEST_INTERACT0:
-			m_pGameSystem->Show_InteractUI(L"테스트하나");
-			iInteractIndex++;
-			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-			break;
-		case TEST_INTERACT1:
-			m_pGameSystem->Show_InteractUI(L"테스트둘");
-			iInteractIndex++;
-			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-			break;
-		}
-	}
-	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-		(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
-	{
-		m_pGameSystem->Hide_InteractUI(true);
-	}
+	_bool isInteracted = false;
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADMINUS) == KEYSTATE::DOWN)
+		isInteracted = true;
+	if (isInteractActivate)
+		m_pGameSystem->Req_Render_InteractUI(L"테스트입니다.", isInteracted);
 
-
-	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
-		cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
-	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
-		cout << "[Level_Test::Testing_UI] 마우스올라감" << endl;
-	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
-		cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+	
 
 #pragma endregion
 
@@ -1094,7 +1108,8 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		isInitialized_GrafflePoint = true;
 	}
 
-#pragma endregion
+#pragma endregion	
+
 
 #pragma region  [NUMPAD 0] KSTA_UITEST_QTE
 	static _bool isQTETrigger = false;
