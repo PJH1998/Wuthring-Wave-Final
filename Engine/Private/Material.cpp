@@ -95,7 +95,10 @@ CMaterial* CMaterial::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 	CMaterial* pInstance = new CMaterial(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize(MaterialData)))
+	{
+		int a = 0;
 		CRASH("Material");
+	}
 
 	return pInstance;
 }

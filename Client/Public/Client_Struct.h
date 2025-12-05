@@ -11,6 +11,17 @@ namespace Client
 {
 	
 #pragma region CHARACTER
+	typedef struct SLIDE_DATA
+	{
+		vector<_float3> WayPoints;
+		_float fSpeed = 5.f;
+
+		void Reset()
+		{
+			WayPoints.clear();
+		}
+	}SLIDE_DATA;
+
 	typedef struct tagSkillInfo
 	{
 		_string strSkillName;   // 스킬 이름 (Key)
@@ -74,11 +85,8 @@ namespace Client
 		}
 	}GRAPPLE_INFO;
 
-	typedef struct tagSequenceEvent {
-		_uint iCharacterID = {}; // Character ID
-		_float fDistance = {}; // 타겟으로부터 떨어질 거리.
-		_float fDuration = {};
-	}SEQUENCE_EVENT;
+
+
 #pragma endregion
 
 	typedef struct tagSFX_RadialData {
@@ -135,6 +143,8 @@ namespace Client
 		OBJECTTYPE eObjectType { OBJECTTYPE::END }; // 어떤 오브젝트인지 넣어서 판단하게. ANCHOR(고정), PULL(당긴다)
 		// Shaking이나, HitStop? 이런 거.
 		const _float4x4* pSocketMatrix = { nullptr }; // Grap 시 플레이어가 붙을 Matrix Pointer?
+
+		SLIDE_DATA eSlideData;
 	}CALLBACK_CLIENT;
 
 
