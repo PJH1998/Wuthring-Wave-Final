@@ -230,7 +230,7 @@ void CRoverSword::Ready_Variables(const PROP_DESC* pDesc)
     m_pParentTransform = pDesc->pParentTransform;
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 
 	// Shader 변수
 	m_fMaxDissolveTime = 0.35f;

@@ -14,6 +14,7 @@
 #include "AugustaGroundRun.h"
 #include "AugustaGroundSprint.h"
 #include "AugustaGroundLand.h"
+#include "AugustaGroundLandSlide.h"
 #include "AugustaGroundDash.h"
 #include "AugustaGroundAttack.h"
 #include "AugustaGroundSkill.h"
@@ -56,6 +57,7 @@ void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta*
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN), CAugustaGroundRun::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT), CAugustaGroundSprint::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND), CAugustaGroundLand::Create(pCharacter));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE), CAugustaGroundLandSlide::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH), CAugustaGroundDash::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK), CAugustaGroundAttack::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL), CAugustaGroundSkill::Create(pCharacter));

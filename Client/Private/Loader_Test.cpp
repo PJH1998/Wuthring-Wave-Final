@@ -21,12 +21,16 @@
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
+#include "WeaponDummy.h"
 #include "Leviatan.h"
 #include "Levi_Alter.h"
 #include "Levi_Bayonet.h"
 #include "Levi_Bow.h"
 #include "Levi_Ray.h"
 #include "Levi_Anchor.h"
+#include "Levi_Drop.h"
+#include "Levi_Wave.h"
+#include "Levi_Augusta.h"
 #pragma endregion
 
 
@@ -46,6 +50,7 @@
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
 #include "AugustaHeadProp.h"
+#include "AugustaBurstWeapon.h"
 #include "Augusta.h"
 
 // Galbrena
@@ -55,6 +60,19 @@
 
 // Player
 #include "Player.h"
+
+
+// Yuno
+#include "Yuno.h"
+#include "YunoMoon.h"
+
+// SequenceAugusta
+#include "SequenceAugusta.h"
+
+#include "SequenceLupa.h"
+#include "LupaSpear.h"
+
+#include "SequencePlayer.h"
 #pragma endregion
 
 #pragma region NPC
@@ -98,7 +116,7 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
-	m_iNumLoadingThread = 15;
+	m_iNumLoadingThread = 18;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -110,6 +128,12 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
 	
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
+
+	// Sequence Player
+	m_pGameInstance->Add_Work([this]() {Load_Yuno(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequenceAugusta(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequenceLupa(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
 	
 	
 	
@@ -198,6 +222,10 @@ HRESULT CLoader_Test::Load_Object()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"),
 		CDummy::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_WeaponDummy"),
+		CWeaponDummy::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 	//if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"), CMonsterTest::Create(m_pDevice, m_pContext))))
 	//	return E_FAIL;
@@ -476,6 +504,21 @@ HRESULT CLoader_Test::Load_Leviatan()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
 		CLevi_Anchor::Create(m_pDevice, m_pContext))))
 		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Drop
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
+		CLevi_Drop::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Wave
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		CLevi_Wave::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
+
+	// Prototype_GameObject_Levi_Augusta
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Augusta"),
+		CLevi_Augusta::Create(m_pDevice, m_pContext))))
+		CRASH("Leviatan Prototype Create Failed");
 #pragma endregion
 	return S_OK;
 }
@@ -657,6 +700,19 @@ HRESULT CLoader_Test::Load_Augusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrHeadPropTag
 		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_BurstWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/BurstWeapon/AugustaBurstWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrBurstWeaponTag = TEXT("Prototype_GameObject_Augusta_BurstWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrBurstWeaponTag
+		, CAugustaBurstWeapon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
 	
@@ -843,6 +899,143 @@ HRESULT CLoader_Test::Load_Galbrena()
 HRESULT CLoader_Test::Load_Action()
 {
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_SequencePlayer()
+{
+	_wstring wStrPlayerTag = TEXT("Prototype_GameObject_SequencePlayer");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrPlayerTag
+		, CSequencePlayer::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Yuno()
+{
+	_wstring wStrModelTag = L"Prototype_Component_Model_Yuno";
+	_string strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/YunoFacial/Yuno.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. Model 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Yuno";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Yuno");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CYuno::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+	wStrModelTag = L"Prototype_Component_Model_Yuno_Moon";
+	strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/YunoFacial/Weapon/Moon/Moon.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrSwordTag = TEXT("Prototype_GameObject_Yuno_Moon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrSwordTag
+		, CYunoMoon::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_SequenceAugusta()
+{
+
+	_wstring wStrModelTag = L"Prototype_Component_Model_SequenceAugusta";
+	_string strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/Augusta/Augusta.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. Model 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_SequenceAugusta";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_SequenceAugusta");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CSequenceAugusta::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	return S_OK;
+}
+
+HRESULT CLoader_Test::Load_SequenceLupa()
+{
+	_wstring wStrModelTag = L"Prototype_Component_Model_SequenceLupa";
+	_string strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/Lupa/Lupa.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. Model 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_SequenceLupa";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_SequenceLupa");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CSequenceLupa::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Lupa_Spear";
+	strFilePath = "../../Client/Bin/Resource/Model/SequencePlayer/Lupa/Weapon/Spear/LupaSpear.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrSpearTag = TEXT("Prototype_GameObject_Lupa_Spear");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrSpearTag
+		, CLupaSpear::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 	return S_OK;
 }
 

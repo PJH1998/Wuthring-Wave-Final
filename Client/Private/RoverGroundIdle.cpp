@@ -83,7 +83,8 @@ void CRoverGroundIdle::Handle_Input()
 	if (m_States[HIT] || m_States[DODGE])
 		return;
 
-	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT); // 최우선 순위
 	m_States[ROPE_HOOK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pRover->Is_GrappleHook());

@@ -35,6 +35,9 @@ void CGalbrenaGroundIdle::OnEnter(void* pArg)
     // 2. 복사본에서 필요한 값 읽기
     EGalbrenaIdleType eIdleType = context.m_eIdleType;
 
+	if (eIdleType == EGalbrenaIdleType::END)
+		CRASH("Failed IdleType");
+
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 
     // 3. Idle 상태 초기화
@@ -337,6 +340,9 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
 		case EGalbrenaIdleType::STAND2:
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
+		case EGalbrenaIdleType::STANDUP:
 			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
 		default:

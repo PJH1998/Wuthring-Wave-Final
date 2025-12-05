@@ -274,6 +274,29 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 }
 
+void CParser::Create_MapEffect()
+{
+	_matrix EffectMat = {};
+	PREFAB_INFO Info{};
+	for(auto& Effect : m_MapEffects)
+	{
+		EffectMat = XMMatrixTranslationFromVector(XMLoadFloat4(&Effect.vEffectPos));
+		switch (Effect.iEffectTag)
+		{
+		case 0:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			break;
+		case 1:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			break;
+		case 2:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			break;
+		}
+	}
+	m_MapEffects.clear();
+}
+
 #pragma region SPAWNER
 void CParser::Clone_Spawners(LEVEL eLevel)
 {
@@ -464,7 +487,13 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Effect") != std::string::npos)
 	{
+		MAPEFFECT Effect{};
 
+		while (File.read(reinterpret_cast<char*>(&Effect.iEffectTag), sizeof(_uint)))
+		{
+			File.read(reinterpret_cast<char*>(&Effect.vEffectPos), sizeof(_float4));
+			m_MapEffects.push_back(Effect);
+		}
 	}
 	else
 	{

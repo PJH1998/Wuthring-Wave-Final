@@ -48,6 +48,7 @@ private:
 		EAugustaRunType m_eRunType = EAugustaRunType::END;
 		EAugustaSprintType m_eSprintType = EAugustaSprintType::END;
 		EAugustaLandType m_eLandType = EAugustaLandType::END;
+		EAugustaLandSlideType m_eLandSlideType = EAugustaLandSlideType::END;
 
 		EAugustaAttackType m_eAttackType = EAugustaAttackType::END;
 		EAugustaSkillType m_eSkillType = EAugustaSkillType::END;
@@ -56,6 +57,8 @@ private:
 		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
 		EAugustaQTEType   m_eQTEType = EAugustaQTEType::END;
 		EAugustaDodgeType m_eDodgeType = EAugustaDodgeType::END;
+
+		
 
 		// Air
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
@@ -90,7 +93,10 @@ private:
 			m_eSprintType = EAugustaSprintType::END;
 			m_eDashType = EAugustaDashType::END;
 			m_eLandType = EAugustaLandType::END;
+			m_eLandSlideType = EAugustaLandSlideType::END;
 			m_eDodgeType = EAugustaDodgeType::END;
+
+			
 
 
 			// Attack
@@ -150,7 +156,8 @@ public:
 		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
 		PART_FXOBJECT = 3,
 		PART_HEADPROP = 4,
-		PART_WING = 5,
+		PART_BURSTWEAPON = 5,
+		PART_WING = 6,
 		TYPE_END
 	};
 
@@ -221,6 +228,14 @@ public:
 	virtual void Bind_DefaultShaderPath() override;
 	virtual void Bind_DissolveShaderPath() override;
 	virtual void Activate(_bool IsActivate) override;
+	
+	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) override;
+
+
+#ifdef _DEBUG
+	void Debug_BurstWeapon();
+#endif // _DEBUG
+
 #pragma endregion
 
 
@@ -231,6 +246,7 @@ private:
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CAugustaFxObject* m_pFxObject = { nullptr };
 	class CAugustaHeadProp* m_pHeadProp = { nullptr };
+	class CAugustaBurstWeapon* m_pBurstWeapon = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
 	_string m_strPreAnimation = {};

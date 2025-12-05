@@ -119,8 +119,12 @@ void CAugustaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 	if (m_fAnimationScale > 1.f)
 		m_fAnimationScale = 1.f;
 
+	_bool IsSelect = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	_bool IsFaical = true;
     // 1. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
+	if (!IsSelect) 
+		IsFaical = false;
+	CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale, IsFaical);
 
 
 	// 2. 파츠 애니메이션 실행.

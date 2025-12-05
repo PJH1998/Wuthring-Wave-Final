@@ -10,6 +10,8 @@
 #include "Projectile.h"
 #include "AoEDoT.h"
 #include "NPCInstancing.h"
+#include "Napal.h"
+#include "CoroProduction.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -86,6 +88,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_ElectroPredator();
 	Ready_CoroSaurus();
 	Ready_NPC();
+	Ready_Production();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -97,20 +100,15 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	m_pGameInstance->Set_FogDistanceFallOff(0.02f);
 	m_pGameInstance->Set_FogMaxHeight(230.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
 
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
-	
-	PREFAB_INFO Info{};
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 377.2f, 1587.7f, 1.f)), &Info);
-	m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 318.1f, 1624.f, 1.f)), &Info);
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 316.6f, 1647.9f, 1.f)), &Info);
 
-	//m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3358.9f, 381.2f, 1587.7f, 1.f)), &Info);
-	//m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), XMMatrixTranslationFromVector(XMVectorSet(3223.5f, 322.1f, 1624.f, 1.f)), &Info);
-	//m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), XMMatrixTranslationFromVector(XMVectorSet(3197.2f, 320.6f, 1647.9f, 1.f)), &Info);
+	m_pGameSystem->Create_MapEffects();
+
+	//TEST
 
 
 	return S_OK;
@@ -438,7 +436,7 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CoroDesc.fSpeedPerSec = 10.f;
 	CoroDesc.vInitPosition = _float3(3479.2f, 268.6f, 2098.8f);
 	CoroDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
-	CoroDesc.pAnimationTag = "Idle1";
+	CoroDesc.pAnimationTag = "burst01_5";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Monster/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
 	CoroDesc.fAttackDmg = pInfo->fAttack;
@@ -567,21 +565,44 @@ void CLevel_GamePlay::Ready_NPC()
 	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
+
+	CNapal::NAPALDESC Napal{};
+	Napal.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Napal"));
+	Napal.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Napal.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	Napal.eCurLevel = m_eCurLevel;
+	Napal.vInitPos = _float3(3206.12f, 350.9f, 1680.1f);
+	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
+}
+
+void CLevel_GamePlay::Ready_Production()
+{
+	CCoroProduction::COROPROD_DESC Production{};
+	Production.shaderData = { LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh") };
+	Production.computeShaderData = { LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib") };
+	Production.modelData = { m_eCurLevel, TEXT("Prototype_Component_Model_CoroProduction") };
+	Production.strFolderPath = "../Bin/Resource/Model/NPC/CoroProduction/Notify";
+	Production.fSpeedPerSec = 10.f;
+	Production.fRotationPerSec = XMConvertToRadians(90.f);
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroProduction"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Production);
 }
 
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_pGameInstance->End_SFX();
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	//	m_pGameInstance->End_SFX();
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
@@ -597,13 +618,6 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 	{
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
 	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_IsSSS = !m_IsSSS;
-		m_pGameInstance->SettingSSS(m_IsSSS);
-	}
-
 
 	ImGui::Begin("SHADER");
 	if (ImGui::CollapsingHeader("SSR"))

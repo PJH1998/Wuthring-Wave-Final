@@ -19,6 +19,7 @@
 #include"Edit_MapObject_Water.h"
 #include"Edit_MapObject_Collaps.h"
 #include"Edit_LightManager.h"
+#include"Edit_MapEffectCollector.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -51,7 +52,8 @@ HRESULT CLevel_Map::Initialize()
 
 	LEVEL m_eCurLevel = LEVEL::MAP;
 	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
-
+	m_pEffectCollector = CEdit_MapEffectCollector::Create();
+	m_SaveObjects["Map_Effect"].push_back(nullptr);
 	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
 	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
@@ -120,7 +122,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
-
+	m_pEffectCollector->Set_ImGuiOption();
     switch (m_eMenu)
     {
     case Editor::CLevel_Map::MENU_OBJECT:
@@ -527,6 +529,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Collaps"), event);
 				else if (Pair.first.find("Light") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Light"), event);
+				else if (Pair.first.find("Effect") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Effect"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -820,11 +824,20 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&ReadDesc.vPosition), sizeof(_float4));
 								File.read(reinterpret_cast<char*>(&ReadDesc.vSpecular), sizeof(_float4));
 
-								CEdit_LightObject::MAP_LOAD Desc{};
+								CEdit_LightObject::MAP_LOAD Desc{};	
 								Desc.vWorldPos = ReadDesc.vPosition;
 								Desc.CopyDesc = &ReadDesc;
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
 									, m_iLevel, TEXT("Layer_Light"), &Desc);
+							}
+						}
+						else if (strFilePath.find("Effect") != std::string::npos)
+						{
+							CEdit_MapEffectCollector::ETERNAL_EFFECT Desc{};
+							while (File.read(reinterpret_cast<char*>(&Desc.EffectTag), sizeof(_uint)))
+							{
+								File.read(reinterpret_cast<char*>(&Desc.vPos), sizeof(_float4));
+								m_pEffectCollector->Map_Load(Desc);
 							}
 						}
                         else
@@ -1653,11 +1666,11 @@ void CLevel_Map::Ready_Event()
 				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
 				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 				{
-					m_pPickedObject->Set_ShaderPass(3);
+					//m_pPickedObject->Set_ShaderPass(3);
 
 					if (m_pPickedDestructObject)
 					{
-						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject->Set_ShaderPass(0);
 						m_pPickedDestructObject = nullptr;
 					}
 
@@ -1670,23 +1683,23 @@ void CLevel_Map::Ready_Event()
 				else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
 				{
 
-					m_pPickedDestructObject->Set_ShaderPass(3);
+					//m_pPickedDestructObject->Set_ShaderPass(3);
 					if (m_pPickedDestructObject)
 					{
-						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject->Set_ShaderPass(0);
 					}
 				}
 				else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
 				{
-					m_pPickedMeteo->Set_ShaderPass(3);
+					//m_pPickedMeteo->Set_ShaderPass(3);
 				}
 				else if (m_pPickedWater = dynamic_cast<CEdit_MapObject_Water*>(pObject))
 				{
-					m_pPickedWater->Set_ShaderPass(3);
+					//m_pPickedWater->Set_ShaderPass(3);
 				}
 				else if (m_pPickedCollaps = dynamic_cast<CEdit_MapObject_Collaps*>(pObject))
 				{
-					m_pPickedCollaps->Set_ShaderPass(3);
+					//m_pPickedCollaps->Set_ShaderPass(3);
 				}
 			}
 		}
@@ -1855,6 +1868,7 @@ void CLevel_Map::Free()
 	Safe_Release(m_pBrush);
 	Safe_Release(m_pPickedSpawnor);
 	Safe_Release(m_pLightManager);
+	Safe_Release(m_pEffectCollector);
 	
     for (auto& Pair : m_SaveObjects)
     {

@@ -66,11 +66,15 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_ShaderIndices[SHINWANG_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_isRender = false;
+	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;
 }
 
 void CMonsterTest::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isAggro)
+		return;
 	m_pTransformCom->Save_PreviousPosition();
 	if(m_isTrigger == true)
 		m_isDetecting = true;
@@ -126,10 +130,20 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	//if(KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE))
 	//	m_isParalysis = true;
 #endif // _DEBUG
+	if (!m_isAggro)
+		return;
 	if(m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
 		m_isParalysis = true;
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
+
+	if (m_isDesolve)
+	{
+		if (m_fDesolveRate < 1.f)
+			m_fDesolveRate += fTimeDelta;
+		else
+			m_fDesolveRate = 1.f;
+	}
 
 	if (m_isRender)
 	{
@@ -258,6 +272,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 	else if (wstrTypeTag == TEXT("Distance"))
 	{
 		m_isDist_Interp_Enable = Isactive;
+	}
+	else if (wstrTypeTag == TEXT("Render"))
+	{
+		m_isRender = Isactive;
 	}
 }
 

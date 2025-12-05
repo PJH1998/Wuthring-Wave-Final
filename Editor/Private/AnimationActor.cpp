@@ -1,11 +1,4 @@
-﻿#include "Galbrena.h"
-#include "Galbrena.h"
-#include "Galbrena.h"
-#include "Galbrena.h"
-#include "Galbrena.h"
-#include "Galbrena.h"
-#include "Galbrena.h"
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
 
@@ -796,9 +789,7 @@ void CAnimationActor::Render_Default()
 		// 1. 재질 기존 유지.
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
 			return;
-
 		//CRASH("Ready Diffuse Texture Failed");
-
 		//if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
 		//    return E_FAIL;
 

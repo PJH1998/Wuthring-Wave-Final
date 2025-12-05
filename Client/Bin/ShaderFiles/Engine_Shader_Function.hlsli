@@ -160,6 +160,9 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
     
     vector vDepthDesc = DepthTexture.Sample(PointSampler, vTexcoord);
     
+    if(vDepthDesc.y == 0.f)
+        return vViewPos;
+        
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
     vViewPos.z = vDepthDesc.x;
@@ -178,6 +181,9 @@ float4 Compute_WorldPos(float2 vTexcoord, Texture2D DepthTexture)
     float4 vWorldPos = 0.f;
     
     float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
+    
+    if (all(vViewPos) == 0.f)
+        return vWorldPos;
     
     vWorldPos = mul(float4(vViewPos.xyz, 1.f), g_ViewMatrixInv);
     
