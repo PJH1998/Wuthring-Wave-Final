@@ -179,15 +179,7 @@ void CPlayer::Update(_float fTimeDelta)
 	m_GrappleCandidates.clear();
 	m_TargetTransforms.clear();
 
-	// Scan => TEST
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-	{
-		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-
-		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
-	}
+	
 
 #ifdef _DEBUG
 	GUI_Teleport();
@@ -309,6 +301,17 @@ _vector CPlayer::Get_Position()
 
 void CPlayer::Player_KeyInput()
 {
+	// Scan 키 설정. => T키로 변경 예정.
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::T), KEYSTATE::UP) &&
+		UI_TAB_UTILITY::SENSOR == m_eUtilityType) //
+	{
+		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+
+		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
+	}
+
 	if (!m_IsQTE) // QTE 도중이면 플레이어 변경 불가능.
 	{
 		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
@@ -362,7 +365,6 @@ void CPlayer::Player_KeyInput()
 						m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 				}
 			}
-
 		}
 
 	}
@@ -400,12 +402,20 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
+
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
+		// 임시
+		m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
+
+		// 임시
+		
+		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
@@ -418,6 +428,8 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 
+
+	
 	
 }
 
@@ -588,15 +600,13 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer && 
 		ENUM_CLASS(COLLISIONLAYER::ENEMY_HARDATTACK) != iLayer && 
 		ENUM_CLASS(COLLISIONLAYER::GRAB) != iLayer &&
-		ENUM_CLASS(COLLISIONLAYER::PARRY))
+		ENUM_CLASS(COLLISIONLAYER::PARRY) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::SLIDE) != iLayer)
 		return;
 
 	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
 		return;
 
-#ifdef _DEBUG
-	cout << "Player Crash" << endl;
-#endif // _DEBUG
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
 
@@ -605,7 +615,16 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	
 	// 추후 다른 어택 판정이 들어오면 그거에 맞는 판정을생성합니다.
 
-	if (COLLISIONLAYER::GRAB == eLayer)
+	// 충돌하면? => Condition 추가 및 데이터 전달 받기.
+	if (COLLISIONLAYER::SLIDE == eLayer)
+	{
+		// 1. Condition 추가.
+		m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+
+		// 2. Data 전달.
+		m_Characters[m_iCurrentCharacterIdx]->Reserve_LandSlide(pClientDesc.eSlideData);
+	}
+	else if (COLLISIONLAYER::GRAB == eLayer)
 	{
 		CCharacter::CAPTURE_DESC GrabDesc{};
 		GrabDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);

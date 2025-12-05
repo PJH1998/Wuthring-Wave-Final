@@ -171,6 +171,8 @@
     <ClInclude Include="..\Public\AnimationActor.h" />
     <ClInclude Include="..\Public\AnimationTool.h" />
     <ClInclude Include="..\Public\AnimNotifyTool.h" />
+    <ClInclude Include="..\Public\Edit_FireFly.h" />
+    <ClInclude Include="..\Public\Edit_FireFly_Manager.h" />
     <ClInclude Include="..\Public\Edit_LightManager.h" />
     <ClInclude Include="..\Public\Edit_MapEffectCollector.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Collaps.h" />
@@ -262,6 +264,8 @@
     <ClCompile Include="..\Private\AnimationActor.cpp" />
     <ClCompile Include="..\Private\AnimationTool.cpp" />
     <ClCompile Include="..\Private\AnimNotifyTool.cpp" />
+    <ClCompile Include="..\Private\Edit_FireFly.cpp" />
+    <ClCompile Include="..\Private\Edit_FireFly_Manager.cpp" />
     <ClCompile Include="..\Private\Edit_LightManager.cpp" />
     <ClCompile Include="..\Private\Edit_MapEffectCollector.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Collaps.cpp" />
