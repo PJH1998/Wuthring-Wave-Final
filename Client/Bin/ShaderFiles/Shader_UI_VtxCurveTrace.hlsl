@@ -31,11 +31,12 @@ struct VS_IN
 struct VS_OUT
 {
     float4 vPosition        : SV_POSITION;
-    float fCurveWidth       : TEXCOORD0;
-    float fCurveProgress    : TEXCOORD1;
+    float3 vWorldPos        : TEXCOORD0;
+    float fCurveWidth       : TEXCOORD1;
+    float fCurveProgress    : TEXCOORD2;
 };
 
-VS_OUT VS_MAIN_OLD(VS_IN In)
+VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out;
 
@@ -43,13 +44,14 @@ VS_OUT VS_MAIN_OLD(VS_IN In)
     float4 vView        = mul(vWorld, g_ViewMatrix);                     
     Out.vPosition       = mul(vView, g_ProjMatrix);                      
 
+    Out.vWorldPos       = vWorld.xyz;
     Out.fCurveWidth     = In.fCurveWidth;
     Out.fCurveProgress  = In.fCurveProgress;
 
     return Out;
 }
 
-VS_OUT VS_MAIN(VS_IN In)
+VS_OUT VS_MAIN_OLD(VS_IN In)
 {
     VS_OUT Out;
 
@@ -75,8 +77,9 @@ VS_OUT VS_MAIN(VS_IN In)
 struct PS_IN
 {
     float4 vPosition        : SV_POSITION;
-    float fCurveWidth       : TEXCOORD0;
-    float fCurveProgress    : TEXCOORD1;
+    float3 vWorldPos        : TEXCOORD0;
+    float fCurveWidth       : TEXCOORD1;
+    float fCurveProgress    : TEXCOORD2;
 };
 
 struct PS_OUT
@@ -94,12 +97,36 @@ PS_OUT PS_MAIN(PS_IN In) : SV_Target
     float4 col = g_BaseColor * gradColor;
 
     // 좌우 가장자리 알파 페이드 (중앙 밝게, 끝은 어둡게)
-    float alphaEdge = 1.0 - abs(In.fCurveWidth - 0.5) * 2.0; // u=0.5 -> 1, u=0/1 -> 0
+    float fMaxAlpha = 0.5f;
+    float alphaEdge = 1.0f - abs(In.fCurveWidth - 0.5f) * 2.0f * fMaxAlpha; // u=0.5 -> 1, u=0/1 -> 0
+    if (abs(In.fCurveWidth - 0.5f) > 0.45f)
+        alphaEdge = 1.f;
     alphaEdge = saturate(alphaEdge);
 
     col.a *= alphaEdge * g_AlphaScale;
-    Out.vColor = col;
     
+    
+    // 출발 타겟과 가까울 시에 투명화
+    float3 vStartTargetPos = g_WorldMatrix._41_42_43;
+    float3 vFocusedPixelPos = In.vWorldPos;
+    
+    const float fMinLength = 2.f;   // 이보다 작으면 알파.
+    const float fMaxLength = 4.f;  // 이보다 크면 그대로.
+    
+    
+    float lengthToTarget = length(vStartTargetPos - vFocusedPixelPos);
+
+    if (lengthToTarget < fMinLength)                                        // 너무 가까우면 투명화
+        col.a = 0.f;
+    else if (fMinLength <= lengthToTarget && lengthToTarget < fMaxLength)   // 적당히 가까우면 거리따라 알파 다르게.
+    {
+        float normalizedLength = smoothstep(fMinLength, fMaxLength, lengthToTarget);
+        col.a = col.a * normalizedLength;
+    }
+        
+    
+    
+    Out.vColor = col;
     return Out;
 }
 
@@ -108,7 +135,7 @@ technique11 DefaultTechnique
     pass DefaultPass
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_NoneCompare, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;

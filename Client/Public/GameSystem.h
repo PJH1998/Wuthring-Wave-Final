@@ -196,6 +196,7 @@ public:
 	void						Register_Player(class CPlayer* pPlayer);
 	_vector						Get_PlayerLookVector();
 	_vector						Get_PlayerPosition();
+	const _float4x4*			Get_PlayerMatrixPtr();
 #pragma endregion
 
 

@@ -27,9 +27,9 @@ HRESULT CVIBuffer_CurveTrace::Initialize_Prototype(_uint iMaxSegmentCount)
 
 
 	const _uint iMaxVertexCount = (m_iMaxSegmentCount + 1) * 2; // 좌/우
-	const _uint iMaxIndexCount = m_iMaxSegmentCount * 6;		// 삼각형 2개 * 3
+	const _uint iMaxIndexCount = m_iMaxSegmentCount * 6;		// 삼각형 2개 * 3 
 
-
+	m_iNumVertexBuffers = 1;
 
 	//VB
 	m_iMaxSegmentCount = iMaxSegmentCount;

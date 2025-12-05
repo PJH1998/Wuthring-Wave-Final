@@ -478,9 +478,15 @@ _vector CGameSystem::Get_PlayerLookVector()
 {
 	return m_pPlayer->Get_LookVector();
 }
+
 _vector CGameSystem::Get_PlayerPosition()
 {
 	return m_pPlayer->Get_Position();
+}
+
+const _float4x4* CGameSystem::Get_PlayerMatrixPtr()
+{
+	return m_pPlayer->Get_PlayerMatrixPtr();
 }
 
 

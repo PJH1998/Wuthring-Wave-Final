@@ -299,6 +299,18 @@ _vector CPlayer::Get_Position()
 	return m_pTransformCom->Get_State(STATE::POSITION);
 }
 
+const _float4x4* CPlayer::Get_PlayerMatrixPtr()
+{
+	if (nullptr == m_pTransformCom)
+		return nullptr;
+	//{
+	//	_float4x4 identityMatrix = {}; XMStoreFloat4x4(&identityMatrix, (XMMatrixIdentity()));
+	//	return identityMatrix;
+	//}
+
+	return m_pTransformCom->Get_WorldMatrixPtr();
+}
+
 #pragma endregion
 
 void CPlayer::Player_KeyInput()
