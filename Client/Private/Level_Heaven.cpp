@@ -85,10 +85,7 @@ HRESULT CLevel_Heaven::Initialize()
 	Ready_UI();
 	Ready_Layer_Player();
 	Ready_Layer_SequnecePlayer();
-	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
-	//Ready_CoroSaurus();
+
 	Ready_Leviatan();
 
 	//m_pGameSystem->Clone_Spawners(m_eCurLevel);
@@ -134,7 +131,7 @@ void CLevel_Heaven::Ready_Layer_Player()
 	vRotation = { 0.f, 0.f, 0.f };
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
-	vPosition = { 0.f, 0.f, 0.f };
+	vPosition = { 0.f, 2.f, -120.f };
 	
 	CPlayer::PLAYER_DESC Desc{};
 	Desc.eCurLevel = m_eCurLevel;
