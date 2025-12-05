@@ -1,0 +1,167 @@
+﻿#include "ClientPch.h"
+#include "AugustaGroundLandSlide.h"
+#include "Augusta.h"
+#include "StateMachine.h"
+#include "AugustaState_Enum.h"
+
+HRESULT CAugustaGroundLandSlide::Initialize(CCharacter* pCharacter)
+{
+    if (FAILED(CGroundState::Initialize(pCharacter)))
+        return E_FAIL;
+
+    m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
+    ASSERT_CRASH(m_pAugusta);
+
+    Setup_Animations();
+    return S_OK;
+}
+
+
+
+void CAugustaGroundLandSlide::OnEnter(void* pArg)
+{
+    CGroundState::OnEnter(pArg);
+
+	// 0. Sliding 정보 가져오기.
+	m_SlideData = *static_cast<SLIDE_DATA*>(pArg);
+
+    // 1. 복사본 context 받아오기.
+    const auto context = m_pAugusta->TakeStateContext();
+
+    // 2. 복사본에서 필요한 값 읽기
+    EAugustaLandSlideType eLandSlideType = context.m_eLandSlideType;
+
+    // 3. 값에 따른 상태 변경.
+    m_iCurrentAnimIdx = static_cast<_uint>(eLandSlideType);
+
+    // 4. 상태 초기화
+    State_Reset();
+
+	// 5. 중력 끕니다. => 정해진 경로로 이동할 것이므로.
+	m_pAugusta->Set_Gravity(false);
+
+}
+
+void CAugustaGroundLandSlide::OnUpdate(_float fTimeDelta)
+{
+    
+    CGroundState::OnUpdate(fTimeDelta);
+
+    // 0. 키입력 제어
+    Handle_Input();
+
+    // 1. 애니메이션 제어.
+    Update_LandAnimation(fTimeDelta);
+
+    // 2. 상태 제어.
+    Check_StateTransition(fTimeDelta);
+   
+    // 3. 상태 초기화
+    State_Reset();
+}
+
+void CAugustaGroundLandSlide::OnExit()
+{
+    CGroundState::OnExit();
+	m_pAugusta->Set_Gravity(true);
+	m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
+
+	m_SlideData.Reset();
+}
+
+
+
+void CAugustaGroundLandSlide::Handle_Input()
+{
+	m_States[EXIT] = !m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+
+	m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+}
+
+void CAugustaGroundLandSlide::Update_LandAnimation(_float fTimeDelta)
+{
+    // 0. 애니메이션 실행부터
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+}
+
+void CAugustaGroundLandSlide::Check_StateTransition(_float fTimeDelta)
+{
+    _bool IsEscapePossible = CState::Is_EscapePossible();
+	EAugustaLandSlideType eLandSlideType = static_cast<EAugustaLandSlideType>(m_iCurrentAnimIdx);
+
+	if (m_States[EXIT])
+	{
+		if (m_States[MOVE])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+			return;
+		}
+
+		if (m_States[LAND])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eSprintType = EAugustaSprintType::STOP_SPRINT_L;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT));
+			return;
+		}
+	}
+
+
+	if (m_IsAnimationEnd) // 애니메이션 끝나면.
+	{
+		if (EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP == eLandSlideType)
+		{
+			m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
+			return;
+		}
+
+		if (EAugustaLandSlideType::LANDSLIDE_SPRINT_START == eLandSlideType) // Loop로 이동.
+		{
+			m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
+			return;
+		}
+	}
+
+	
+	
+ 
+}
+
+
+void CAugustaGroundLandSlide::Setup_Animations()
+{
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_START), "Landslide_Sprint_Start", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP), "Landslide_Sprint_Loop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_POSE_F), "Landslide_Sprint_Pose_F", 1.f, 0.f);
+}
+
+void CAugustaGroundLandSlide::State_Reset()
+{
+    for (_uint i = 0; i < LANDSTATE::END; ++i)
+        m_States[i] = false;
+}
+
+
+
+CAugustaGroundLandSlide* CAugustaGroundLandSlide::Create(CCharacter* pOwner)
+{
+    CAugustaGroundLandSlide* pInstance = new CAugustaGroundLandSlide();
+
+    if (FAILED(pInstance->Initialize(pOwner)))
+    {
+        Safe_Release(pInstance);
+        MSG_BOX("Failed to Create : CAugustaGroundLandSlide");
+        return nullptr;
+    }
+
+    return pInstance;
+}
+
+void CAugustaGroundLandSlide::Free()
+{
+    CGroundState::Free();
+}

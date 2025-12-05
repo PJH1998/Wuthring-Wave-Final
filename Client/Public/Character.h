@@ -170,6 +170,9 @@ public:
 	virtual void End_SFX();
 
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
+	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
+
+	void Reserve_LandSlide(const SLIDE_DATA& eData);
 
 	void Bind_GrabEscapePossible();
 	void Bind_GrabEscapeExecute();
@@ -177,8 +180,8 @@ public:
 	void ResetPose();
 
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
-
 	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
+	
 #pragma endregion
 
 
@@ -417,6 +420,7 @@ protected:
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
 	CAPTURE_DESC m_PendingCaptureDesc = {};
+	SLIDE_DATA  m_PendingSlideData = {};
 
 
 	_float m_fDodgeableDuration = 0.2f;

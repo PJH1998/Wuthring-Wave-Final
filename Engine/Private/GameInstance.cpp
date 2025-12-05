@@ -184,7 +184,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pVF->Update_VF(fTimeDelta);
 
-	m_pModel_Manager->Update(fTimeDelta);
+	//m_pModel_Manager->Update(fTimeDelta);
 
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
 }

@@ -325,6 +325,15 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 }
 
 
+void CCharacter::Reserve_LandSlide(const SLIDE_DATA& eData)
+{
+	// 1. 데이터 복사.
+	m_PendingSlideData = eData;
+
+	// 2. 예약 플래그 설정.
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+}
+
 void CCharacter::Bind_GrabEscapePossible()
 {
 	// 컨디션이 Grab이 아니라면? 호출 정지.

@@ -20,6 +20,7 @@
 #include"Edit_MapObject_Collaps.h"
 #include"Edit_LightManager.h"
 #include"Edit_MapEffectCollector.h"
+#include"Edit_FireFly_Manager.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -41,11 +42,11 @@ CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
-
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4000, 4000,4000));
 	if (FAILED(Ready_Static_Component()))
 		return E_FAIL;
-
+	m_pFlyManager = CEdit_FireFly_Manager::Create(m_pDevice, m_pContext);
+	m_SaveObjects["Map_FireFly"].push_back(nullptr);
 
 	//ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
@@ -117,12 +118,22 @@ HRESULT CLevel_Map::Initialize()
 
 void CLevel_Map::Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_PGUP) == KEYSTATE::DOWN)
+		m_FireFly = !m_FireFly;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_INSERT) == KEYSTATE::DOWN)
+		m_Effect = !m_Effect;
+
     m_fNearDistance = FLT_MAX;
     m_fNearDistance_Instance = FLT_MAX;
 
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
-	m_pEffectCollector->Set_ImGuiOption();
+	if (m_Effect)
+		m_pEffectCollector->Set_ImGuiOption();
+	if (m_FireFly)
+		m_pFlyManager->Set_ImGuiOption();
+
     switch (m_eMenu)
     {
     case Editor::CLevel_Map::MENU_OBJECT:
@@ -531,6 +542,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Light"), event);
 				else if (Pair.first.find("Effect") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Effect"), event);
+				else if (Pair.first.find("FireFly") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_FireFly"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -840,6 +853,21 @@ void CLevel_Map::Menu_Save_Load()
 								m_pEffectCollector->Map_Load(Desc);
 							}
 						}
+						else if (strFilePath.find("FireFly") != std::string::npos)
+						{
+							CEdit_FireFly::MAP_LOAD Desc{};
+							while (File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint)))
+							{
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
+								File.read(reinterpret_cast<char*>(&Desc.vRange), sizeof(_float2));
+								File.read(reinterpret_cast<char*>(&Desc.vPerSin), sizeof(_float2));
+								File.read(reinterpret_cast<char*>(&Desc.vPerCos), sizeof(_float2));
+								File.read(reinterpret_cast<char*>(&Desc.vPerSin2), sizeof(_float2));
+								m_pFlyManager->Map_Load(Desc);
+							}
+						}
                         else
                         {
                             CEdit_MapObject::MAP_LOAD Desc{};
@@ -1070,6 +1098,8 @@ void CLevel_Map::Load_Objects()
 				_wstring namePart = baseName.substr(0, pos + 1);
 
 				_wstring numberPart = baseName.substr(pos + 1);
+				if (numberPart.empty())
+					continue;
 				version = stoi(numberPart);
 
 				_wstring key = L"Prototype_Component_Model_" + namePart;
@@ -1189,7 +1219,8 @@ void CLevel_Map::Ready_Map_Load_Prototype()
 			continue;
 		if (entry.path().string().find("Bone") != string::npos)
 			continue;
-
+		if (entry.path().string().find("FireFly") != string::npos)
+			continue;
 		_char FileDrive[MAX_PATH] = {};
 		_char FileDir[MAX_PATH] = {};
 
@@ -1301,7 +1332,7 @@ _bool CLevel_Map::NameCheck(const _string& ModelName, const _string& Name)
 
 void CLevel_Map::ShaderChange(const _string& ModelName, _uint* pShaderIndex)
 {
-
+	return;
 
 #pragma region MyRegion
 
@@ -1869,6 +1900,7 @@ void CLevel_Map::Free()
 	Safe_Release(m_pPickedSpawnor);
 	Safe_Release(m_pLightManager);
 	Safe_Release(m_pEffectCollector);
+	Safe_Release(m_pFlyManager);
 	
     for (auto& Pair : m_SaveObjects)
     {

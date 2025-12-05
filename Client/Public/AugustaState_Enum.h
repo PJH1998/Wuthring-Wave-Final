@@ -22,6 +22,7 @@ enum class EAugustaGroundState : _uint
 	LAND,			// 착지 (Land)
 	QTE,			// 협주 스킬(Augusta의 경우 변주)
 	DODGE,			// 회피 스킬.
+	LANDSLIDE,		// 땅바닥 슬라이딩 모션. => 정해진 길만 이동?
 	GROUND_END
 };
 
@@ -123,12 +124,14 @@ enum class EAugustaSprintType : _uint
 
 enum class EAugustaLandType : _uint
 {
-	LAND_LIGHT = 0,     // 약한 착지
-	LAND_HEAVY, // 강한 착지
-	LAND_ROLL,      // 착지후 구르기.
-	LANDSLIDE_F, // 매달린 애니메이션.
-	LAND_ROLL_ATTACK01_2,
-	LANDSLIDE_B,
+	LAND_LIGHT = 0, // 약한 착지
+	LAND_HEAVY,		// 강한 착지
+	LAND_ROLL,		// 착지후 구르기.
+	END
+};
+
+enum class EAugustaLandSlideType : _uint
+{
 	LANDSLIDE_SPRINT_LOOP,
 	LANDSLIDE_SPRINT_POSE_F,
 	LANDSLIDE_SPRINT_START,

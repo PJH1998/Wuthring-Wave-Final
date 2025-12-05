@@ -174,10 +174,14 @@ void CUI_ControlHelper::Show_InteractUI(_wstring strText)
 	auto attacher = m_pUI_Interact_Multiplier;
 
 	CCustom_UI* pFont = m_pTextUI_Interact;
-
 	auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
 	textDesc.strText = strText;
 	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
+
+
+	//auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
+	//textDesc.strText = strText;
+	//static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
 }
 
 void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
@@ -199,6 +203,37 @@ void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
 
 		pInteractBtn->Req_OffInteract();
 	}
+}
+
+void CUI_ControlHelper::Req_Render_InteractUI(_wstring strText, _bool isPressedAs)
+{
+	CUI_Button_Interact* pRootUI = dynamic_cast<CUI_Button_Interact*>(m_pRootUI_Interact);
+
+	if (pRootUI == nullptr || pRootUI->IsActivate() == false)
+	{
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_Interact", _fmatrix());
+		return;
+	}
+
+	CCustom_UI* pFont = m_pTextUI_Interact;
+	auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
+	textDesc.strText = strText;
+	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
+
+	if (isPressedAs)
+	{
+		m_pUI_Interact_Pressed->SetActivate(true);
+		static_cast<CAnimator_UI*>(m_pUI_Interact_Pressed->Get_Component(L"Com_Animator_UI"))
+			->Change_Animation(L"Interact_Pressed_Trigger", true);
+
+		m_pUI_Interact_Focused->SetActivate(true);
+		static_cast<CAnimator_UI*>(m_pUI_Interact_Focused->Get_Component(L"Com_Animator_UI"))
+			->Change_Animation(L"Interact_Focused_On", true);
+
+		pRootUI->Req_OffInteract();
+	}
+
+	static_cast<CUI_Button_Interact*>(pRootUI)->Req_Render();
 }
 
 _bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
