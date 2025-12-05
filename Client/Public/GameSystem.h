@@ -63,6 +63,7 @@ public:
 
 #pragma region [UI] CONTROL_HELPER
 	// UI 꺼내쓰기용. 혹 수정 필요시 말해주세요.
+
 	void		PreAssign_TargetUIs();	// Initialize for UI caching. call after ui load.
 
 	// 기존 GameInstance 에서는 번거롭게 캐스팅 필요하던 걸, 편하게 가져오도록 캐스팅 내장시켜서 재정의.
@@ -85,6 +86,10 @@ public:
 	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 때처럼, 피드백 애니메이션 재생 후 사라질 것인지 여부
 	// (해당 함수 호출 없이 마우스 클릭으로도 끌 수 있습니다,)
 	void		Hide_InteractUI(_bool isPressedAs = false);
+
+	// 상호작용 UI를 매 프레임 렌더 요청을 보냅니다.
+	// 도중 isPressedAs가 true가 되거나, 렌더 호출이 1프레임 끊길 시 자동으로 Hide됩니다.
+	void		Req_Render_InteractUI(_wstring strText, _bool isPressedAs = false);
 	// 상호작용 UI가 "마우스"를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
@@ -133,9 +138,9 @@ public:
 
 
 	// [WIP] 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
-	void				Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);			// 몬스터 등과 같이 실시간 갱신이 필요한 경우. Update_MobStatus 에 내장됨.
-	void				Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우
-	void				Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
+	void		Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);			// 몬스터 등과 같이 실시간 갱신이 필요한 경우. Update_MobStatus 에 내장됨.
+	void		Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우
+	void		Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
 
 
 #pragma endregion

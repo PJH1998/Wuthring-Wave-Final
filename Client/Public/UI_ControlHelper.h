@@ -28,11 +28,12 @@ public:
 	void				HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
 	void				HUD_Toggle_BossStatusUI(_bool isOn, _bool isForceChange);
 
-
+	 
 	//void				Toggle_InteractUI(_bool isOn, _wstring strText);
 
 	void				Show_InteractUI(_wstring strText);
 	void				Hide_InteractUI(_bool isPressedAs = false);
+	void				Req_Render_InteractUI(_wstring xstrText, _bool isPressedAs);
 
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
