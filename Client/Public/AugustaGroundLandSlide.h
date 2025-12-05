@@ -4,20 +4,21 @@
 NS_BEGIN(Client)
 
 // Run State - Run 관련 모든 애니메이션 관리
-class CAugustaGroundLand final : public CGroundState
+class CAugustaGroundLandSlide final : public CGroundState
 {
 private:
     enum LANDSTATE
     {
-        RUN = 0,
-		LANDSLIDE,
+        MOVE = 0,
 		HIT,
+		EXIT,
+		LAND,
         END
     };
 
 private:
-    explicit CAugustaGroundLand() = default;
-    virtual ~CAugustaGroundLand() = default;
+    explicit CAugustaGroundLandSlide() = default;
+    virtual ~CAugustaGroundLandSlide() = default;
 
 public:
     virtual HRESULT Initialize(class CCharacter* pCharacter) override;
@@ -32,6 +33,8 @@ private:
     _float3 m_vMoveDirection = {};
     _bool m_States[LANDSTATE::END] = {};
 
+	SLIDE_DATA m_SlideData = {};
+
 private:
     virtual void Handle_Input() override;
     void Update_LandAnimation(_float fTimeDelta);
@@ -40,7 +43,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundLand* Create(class CCharacter* pOwner);
+    static CAugustaGroundLandSlide* Create(class CCharacter* pOwner);
     virtual void Free() override;
 };
 

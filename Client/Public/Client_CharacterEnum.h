@@ -2,7 +2,7 @@
 namespace Client
 {
 	enum class CHARACTER_EVENT : unsigned int {
-		EVENT = 0,
+		LANDSLIDE, // 경사면 슬라이딩.
 		END
 	};
 
@@ -45,6 +45,8 @@ namespace Client
 		STATE_DELAY = 1 << 12,  // Player의 State 속도가 저하된 상태.
 		GRABRELEASE = 1 << 13,  // Player의 Grab이 해제된 상태.
 		DISSOLVE = 1 << 14,
+		LANDSLIDE_READY = 1 << 15, // Player에서 LandSlide 이벤트.
+		LANDSLIDE = 1 << 16, // Player에서 LandSlide 이벤트.
 		END
 	};
 

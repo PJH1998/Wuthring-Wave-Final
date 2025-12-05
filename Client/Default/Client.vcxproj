@@ -177,6 +177,7 @@
     <ClInclude Include="..\Public\AugustaCapture.h" />
     <ClInclude Include="..\Public\AugustaEnergyBlade.h" />
     <ClInclude Include="..\Public\AugustaFxObject.h" />
+    <ClInclude Include="..\Public\AugustaGroundLandSlide.h" />
     <ClInclude Include="..\Public\AugustaHeadProp.h" />
     <ClInclude Include="..\Public\AugustaRopeDrag.h" />
     <ClInclude Include="..\Public\AugustaRopeHook.h" />
@@ -458,6 +459,7 @@
     <ClCompile Include="..\Private\AugustaGroundDodge.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundLandSlide.cpp" />
     <ClCompile Include="..\Private\AugustaGroundQTE.cpp" />
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />

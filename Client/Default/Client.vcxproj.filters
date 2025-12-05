@@ -1240,6 +1240,9 @@
     <ClInclude Include="..\Public\SequenceLupaGroundSkill.h">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Lupa</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundLandSlide.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1949,6 +1952,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\SequenceLupaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Lupa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundLandSlide.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
