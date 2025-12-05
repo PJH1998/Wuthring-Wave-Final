@@ -236,6 +236,11 @@ void CGameSystem::Hide_InteractUI(_bool isPressedAs)
 	m_pUI_ControlHelper->Hide_InteractUI(isPressedAs);
 }
 
+void CGameSystem::Req_Render_InteractUI(_wstring strText, _bool	isPressedAs)
+{
+	m_pUI_ControlHelper->Req_Render_InteractUI(strText, isPressedAs);
+}
+
 _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
 {
 	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
@@ -492,7 +497,8 @@ _vector CGameSystem::Get_PlayerPosition()
 // 보스 근처에 소환.
 void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
 {
-	if (nullptr == m_pSequencePlayer)
+	if (nullptr == m_pSequencePlayer || 
+		nullptr == pTransform)
 		return;
 
 	// 

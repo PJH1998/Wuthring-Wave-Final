@@ -200,7 +200,6 @@ CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 {
 	CModel_Instance* pInstance = new CModel_Instance(pDevice, pContext);
 
-	//?꾩떆. ?섏쨷???좊떂 紐⑤뜽??硫붿돩 ?몄뒪?댁떛???꾩슂??寃쎌슦 ?鍮??놁븷吏??딆쓬.
 	MODELTYPE eType = MODELTYPE::MAP;
 
 	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath, IsEdit, pArg)))

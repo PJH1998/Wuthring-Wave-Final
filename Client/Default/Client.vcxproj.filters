@@ -478,6 +478,12 @@
     <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Augusta">
       <UniqueIdentifier>{6f4ff5b5-9847-405b-aa05-d552970970f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\Lupa">
+      <UniqueIdentifier>{456993a4-e058-4de7-bf5b-d0605298f313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Lupa">
+      <UniqueIdentifier>{37295868-08db-46f3-88ad-9604095f57f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1192,6 +1198,9 @@
       <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\Public\MapObject_FireFly.h">
+      <Filter>03. GameObject\MapObject</Filter>
+	</ClInclude>
     <ClInclude Include="..\Public\YunoGroundIdle.h">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
     </ClInclude>
@@ -1218,6 +1227,24 @@
     </ClInclude>
     <ClInclude Include="..\Public\SequenceAugustaGroundSkill.h">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceLupa.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Lupa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceLupaState_Enum.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceLupaFactory.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\Lupa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LupaSpear.h">
+      <Filter>03. GameObject\Weapon\Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SequenceLupaGroundSkill.h">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Lupa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundLandSlide.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1892,6 +1919,9 @@
       <Filter>03. GameObject\MotionTrail</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\MapObject_FireFly.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+	</ClCompile>
     <ClCompile Include="..\private\NPC_Hiding.cpp">
       <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
     </ClCompile>
@@ -1916,6 +1946,21 @@
     </ClCompile>
     <ClCompile Include="..\Private\SequenceAugustaGroundSkill.cpp">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceLupa.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Lupa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceLupaFactory.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\Lupa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LupaSpear.cpp">
+      <Filter>03. GameObject\Weapon\Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SequenceLupaGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Lupa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundLandSlide.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2009,6 +2054,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_MotionTrail.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance_FireFly.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

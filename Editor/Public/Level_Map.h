@@ -60,6 +60,7 @@ private:
 	class CEdit_MapObject_Collaps* m_pPickedCollaps = { nullptr };
 	class CEdit_LightManager* m_pLightManager = { nullptr };
 	class CEdit_MapEffectCollector* m_pEffectCollector = { nullptr };
+	class CEdit_FireFly_Manager* m_pFlyManager = { nullptr };
 	unordered_set< _string> m_szPrototypeName;
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
@@ -86,6 +87,9 @@ private:
 	mutex m_Mutex;
 	_float m_TriggerBoxExtends[3] = { 10.f,10.f,10.f };
 	string m_FolderPath;
+
+	_bool m_Effect = { false };
+	_bool m_FireFly = { false };
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

@@ -112,5 +112,52 @@ namespace SeqPlayerData
 	}
 #pragma endregion
 
+#pragma region LUPA
+	static CCharacter::CHARACTER_DESC GetSequenceLupaCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CCharacter::CHARACTER_DESC Desc;
+		Desc.eCurLevel = eLevel;
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
+		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_SequenceLupa"));
+		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_SequenceLupa"));
+		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
+		Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.strFolderPath = "../Bin/Resource/Model/SequencePlayer/Lupa/Notify/";
+		Desc.fSpeedPerSec = 10.f;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+
+		Desc.PartPrototypes = {
+		   make_pair(L"Spear", L"Prototype_GameObject_Lupa_Spear")
+		};
+
+		return Desc;
+	}
+
+	static CProp::PROP_DESC GetLupaSpearCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CProp::PROP_DESC Desc{};
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.fSpeedPerSec = 10.f;
+		Desc.pSocketMatrix = { nullptr }; // Augusta
+		Desc.pParentTransform = { nullptr }; // Augusta
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Lupa_Spear"));
+		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+		Desc.strFolderPath = "../Bin/Resource/Model/SequencePlayer/Lupa/Weapon/Spear/Notify/";
+		Desc.strBoneName = "WeaponProp01";
+		Desc.eWeaponType = WEAPONTYPE::ANIM;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+		return Desc;
+	}
+#pragma endregion
+
 
 }

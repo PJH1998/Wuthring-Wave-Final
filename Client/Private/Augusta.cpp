@@ -102,7 +102,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	// 4. 몬스터가 있다면?
 	Update_TargetDistance();
 	
-	
 	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
@@ -117,8 +116,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
-	// 5. Change Timer 계산. => Dissolve에 사용
-	//Calc_ChangeTimer(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -147,7 +144,6 @@ void CAugusta::Update(_float fTimeDelta)
 		// 4. 카메라 업데이트
 		Update_Camera(fTimeDelta);
 	}
-    
 
 	// 파츠 갱신.
 	for (auto& pPart : m_PartObjects)
@@ -179,15 +175,12 @@ void CAugusta::Late_Update(_float fTimeDelta)
 	}
 	
 
-	// 3. 
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
-
-	
 
 	if (m_IsVisible)
 	{
@@ -920,7 +913,6 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
 			m_fStateDelayTimer = 0.f;
 		}
-
 	}
 	
 	// Dodge가 아닐때만 추가되므로.
@@ -1021,6 +1013,22 @@ void CAugusta::Activate(_bool IsActivate)
 	}
 
 	
+}
+
+// Event 발생하면 작업할 동작. 바로 => 동작 진행.
+void CAugusta::OnEvent(CHARACTER_EVENT eEvent, void* pArg)
+{
+	switch (eEvent)
+	{
+	case CHARACTER_EVENT::LANDSLIDE:
+		m_StateContext.m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_START;
+		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE), pArg);
+		break;
+	case CHARACTER_EVENT::END:
+		break;
+	default:
+		break;
+	}
 }
 
 #ifdef _DEBUG
@@ -1309,6 +1317,21 @@ void CAugusta::Update_TargetDistance()
 
 void CAugusta::Update_Physics(_float fTimeDelta)
 {
+	// Land 상태이고, LandSlide 이벤트를 받았으면? => 바로 스테이트를 변환한다.
+	if (Is_LandCollider() && Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY)))
+	{
+		// 1. 예약 플래그 해제.
+		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+
+		// 2. 현재 상태 플래그 설정.
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+
+		// 3. 저장한 데이터 인자로 전달.
+		OnEvent(CHARACTER_EVENT::LANDSLIDE, &m_PendingSlideData);
+	}
+		
+
+
 	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 	{
 		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&

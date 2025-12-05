@@ -121,7 +121,8 @@ void CAugustaGroundIdle::Handle_Input()
 
 	if (m_States[HIT] || m_States[DODGE])
 		return;
-	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)) 
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT); // 최우선 순위
 	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pAugusta->Is_GrappleHook());

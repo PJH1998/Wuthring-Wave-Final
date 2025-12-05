@@ -32,6 +32,7 @@ private:
 	HRESULT				Load_SequencePlayer();
 	HRESULT				Load_Yuno();
 	HRESULT				Load_SequenceAugusta();
+	HRESULT				Load_SequenceLupa();
 
 
 	HRESULT				Load_NPC();

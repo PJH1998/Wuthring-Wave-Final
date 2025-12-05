@@ -27,6 +27,9 @@
 #include "VIBuffer_Spectrum.h"
 #include "Model_Streaming.h"
 #include "ModelAnim_Instance.h"
+#include"Mesh_Instance_FireFly.h"
+#include"Model_Instance_FireFly.h"
+
 // ==================
 
 NS_BEGIN(Engine)

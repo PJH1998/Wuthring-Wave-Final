@@ -103,8 +103,12 @@ void CRoverGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 	if (m_fAnimationScale > 1.f)
 		m_fAnimationScale = 1.f;
 
-    // 1. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pRover, fTimeDelta, m_fAnimationScale);
+
+	_bool IsSelect = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	_bool IsFaical = true;
+	// 1. 애니메이션 실행부터
+	if (!IsSelect) IsFaical = false;
+    CCharacterState::Play_Animation(m_pRover, fTimeDelta, m_fAnimationScale, IsFaical);
     
 
 

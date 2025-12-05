@@ -43,6 +43,8 @@ private:
 
 	_bool					m_isRender{};
 	_bool					m_isDesolve{};
+	_bool					m_isScaned{};
+	_float					m_fScanAcc{};
 	_float					m_fDesolveRate{};
 	_float4					m_vBaseColor{};
 
