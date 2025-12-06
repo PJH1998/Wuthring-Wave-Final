@@ -20,6 +20,7 @@
 #include "UI_QTE.h"
 
 #include "Event_Level.h"
+#include"NPC_Griffin.h"
 
 //SFX
 #ifdef _DEBUG
@@ -557,12 +558,18 @@ void CLevel_GamePlay::Ready_SFX()
 void CLevel_GamePlay::Ready_NPC()
 {
 	CNPCInstancing::NPC_DESC NPCDesc{};
+	NPCDesc.iNPCType = 0;
 	NPCDesc.eCurLevel = m_eCurLevel;
 	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh_Instance"));
 	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxInstance_AnimMesh"));
 	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleM"));
 	NPCDesc.wstrObjectPrototypeTag = TEXT("Prototype_GameObject_NPCCell");
 	NPCDesc.wstrCombiningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
+
+	NPCDesc.iNPCType = 1;
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_MaleM"));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_NPCInstance"), &NPCDesc);
 
@@ -575,6 +582,35 @@ void CLevel_GamePlay::Ready_NPC()
 	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
+
+	CNPC_Griffin::GRIFFIN_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
+	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
+	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+
+	_float3 vRotDegree = _float3(-180.0f, 88.149f, -180.f);
+	_vector vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
+	_vector vTrans = XMVectorSet(3214.813f, 324.34f, 1727.473f, 1.f);
+	
+	XMStoreFloat4x4(&Desc.pTransformMatrix, XMMatrixRotationRollPitchYawFromVector(vRot) * XMMatrixTranslationFromVector(vTrans));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+
+	vRotDegree = _float3(-180.f, -4.127f, -180.f);
+	vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
+	vTrans = XMVectorSet(3273.907f, 339.604f, 1650.809f, 1.f);
+	XMStoreFloat4x4(&Desc.pTransformMatrix, XMMatrixRotationRollPitchYawFromVector(vRot) * XMMatrixTranslationFromVector(vTrans));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+	
+	vRotDegree = _float3(-180.f, -17.102f, 180.f);
+	vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
+	vTrans = XMVectorSet(3405.010f, 379.317f, 1623.268f, 1.f);
+	XMStoreFloat4x4(&Desc.pTransformMatrix, XMMatrixRotationRollPitchYawFromVector(vRot) * XMMatrixTranslationFromVector(vTrans));
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
 }
 
 void CLevel_GamePlay::Ready_Production()

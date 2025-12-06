@@ -503,6 +503,7 @@
     <ClInclude Include="..\Public\Edit_LightManager.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_SlideZone.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -756,6 +757,7 @@
     <ClCompile Include="..\Private\Edit_MapEffectCollector.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_SlideZone.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

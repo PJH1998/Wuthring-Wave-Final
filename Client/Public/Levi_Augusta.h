@@ -3,6 +3,7 @@
 
 NS_BEGIN(Engine)
 class CShader;
+class CComputeShader;
 class CModel;
 NS_END
 
@@ -51,6 +52,7 @@ public:
 
 private:
 	CShader* m_pShaderCom = { nullptr };
+	CComputeShader* m_pComputeShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
 	CAttackVolume* m_pAttackVolume = { nullptr };
 

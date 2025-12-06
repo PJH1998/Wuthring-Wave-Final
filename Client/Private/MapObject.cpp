@@ -53,6 +53,7 @@ void CMapObject::Update(_float fTimeDelta)
 
 void CMapObject::Late_Update(_float fTimeDelta)
 {
+	
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
@@ -60,6 +61,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
 	if (!m_IsRender)
 		return;
+	               
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
