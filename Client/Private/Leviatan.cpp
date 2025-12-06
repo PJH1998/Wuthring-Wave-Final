@@ -68,7 +68,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	_float temp{};
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
-	//m_iPhase = PHASE::TWO;
+	m_iPhase = PHASE::TWO;
 	
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -76,8 +76,13 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_PreTransform, XMMatrixIdentity());
 	m_isRender = true;
 
+	_float fTemp{};
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", 0.f, &fTemp, true);
 	//m_BowOffsets.push_back(_float3(0.f, 0.f, 0.f)); // attack20
 	//m_BowOffsets.push_back(_float3(XMConvertToRadians(15.f), XMConvertToRadians(0.f), XMConvertToRadians(90.f))); // attack13
+	m_iActionChecker[ACTION::ENCOUNTER] = 2;
+	m_iActionChecker[ACTION::PHASE1_DOWN] = 3;
+	m_iActionChecker[ACTION::PHASE2_DEAD] = 4;
 
 	return S_OK;
 }
@@ -106,7 +111,7 @@ void CLeviatan::Update(_float fTimeDelta)
 	{
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
-			//1페 사망 애니메이션 진행 중
+			//1페 사망 애니메이션 진행 중 + 연출 컷신 진행
 		}
 		else
 			m_pBehaviorTreeCom[m_iPhase]->tick(this);
@@ -116,7 +121,12 @@ void CLeviatan::Update(_float fTimeDelta)
 		AreaAttack(fTimeDelta);
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	if(m_pAnimMachineCom[m_iPhase])
-		m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	{
+		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+		else											// 전투 애니메이션 갱신, facial X
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	}
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	else
 	{
@@ -483,10 +493,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		_vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
 		//_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		XMStoreFloat3(&m_vSpawnPos[0], vPos - vRight * 4.f);
-		XMStoreFloat3(&m_vSpawnPos[1], vPos - vRight * 2.f);
-		XMStoreFloat3(&m_vSpawnPos[2], vPos + vRight * 2.f);
-		XMStoreFloat3(&m_vSpawnPos[3], vPos + vRight * 4.f);
+		XMStoreFloat3(&m_vSpawnPos[0], vPos - vRight * 6.f);
+		XMStoreFloat3(&m_vSpawnPos[1], vPos - vRight * 3.f);
+		XMStoreFloat3(&m_vSpawnPos[2], vPos + vRight * 3.f);
+		XMStoreFloat3(&m_vSpawnPos[3], vPos + vRight * 6.f);
 	}
 	else if (wstrTypeTag == TEXT("Ray"))
 	{
@@ -824,12 +834,17 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
 			m_iAnimCheck++;
-			if(m_iAnimCheck < 3)
+			if(m_iAnimCheck < m_iActionChecker[m_iActionIndex])
 				iRemainState |= ENUM_CLASS(TEST_STATE::SPLINT);
 			else
 			{
-				m_iPhase = PHASE::TWO;
-				Reset(XMMatrixIdentity(), nullptr);
+				if(m_iActionIndex == ACTION::PHASE1_DOWN)
+				{
+					m_iPhase = PHASE::TWO;
+					Reset(XMMatrixIdentity(), nullptr);
+				}
+				m_iActionIndex++;
+				m_iAnimCheck = 0;
 			}
 		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -920,6 +935,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		//조우 연출 시작
 		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
 		m_isAggro = true;
 	}
