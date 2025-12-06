@@ -1841,8 +1841,8 @@ HRESULT CModel::Ready_Shared_Buffers()
 
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "CHARACTER GPU_KEYFRAME BYTE : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "CHARACTER GPU_KEYFRAME BYTE : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 
@@ -1856,8 +1856,8 @@ HRESULT CModel::Ready_Shared_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character ANIMINFO BYTE : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character ANIMINFO BYTE : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 	// 2-3. 뼈(채널)별 정보 버퍼 (g_ChannelInfos)
@@ -1870,8 +1870,8 @@ HRESULT CModel::Ready_Shared_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character GPU_CHANNELINFO BYTE : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character GPU_CHANNELINFO BYTE : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 	return S_OK;
@@ -1896,8 +1896,8 @@ HRESULT CModel::Ready_Instance_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character Bone Buffer BYTE : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character Bone Buffer BYTE : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 
@@ -1911,8 +1911,8 @@ HRESULT CModel::Ready_Instance_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character ANIMATION_CBINFO BYTE : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character ANIMATION_CBINFO BYTE : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 	// 2-5. 매 프레임 업데이트할 상수 버퍼 (ANIMATIONFLY_CBINFO)
@@ -1925,8 +1925,8 @@ HRESULT CModel::Ready_Instance_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character ANIMATIONFLY_CBINFO Byte : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character ANIMATIONFLY_CBINFO Byte : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 	// 2-6. GPU -> CPU 복사를 위한 Staging 버퍼
@@ -1938,8 +1938,8 @@ HRESULT CModel::Ready_Instance_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character Staging Buffer Byte : " << bufferDesc.ByteWidth << endl;
+	//if (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character Staging Buffer Byte : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 	if (MODELTYPE::CHARACTER == m_eType)
@@ -1967,8 +1967,8 @@ HRESULT CModel::Ready_MorphInstance_Buffers()
 	BufferDesc.StructureByteStride = sizeof(_float);
 
 #ifdef _DEBUG
-	if (m_eType == MODELTYPE::CHARACTER)
-		cout << "Character ShapeKeyWeight Byte : " << BufferDesc.ByteWidth << endl;
+	//f (m_eType == MODELTYPE::CHARACTER)
+	//	cout << "Character ShapeKeyWeight Byte : " << BufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
 	// m_Buffers에 공간이 없다면 enum 추가 필요 (BUFFER_MORPH_WEIGHT 등)

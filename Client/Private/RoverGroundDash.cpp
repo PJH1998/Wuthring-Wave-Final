@@ -103,6 +103,16 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
+		const CCharacter::HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
+		if (nullptr == pDesc)
+			return;
+
+		if (pDesc->IsBack)
+			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+		else
+			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_B;
+
+
 		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
 		return;

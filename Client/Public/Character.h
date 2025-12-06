@@ -17,6 +17,7 @@ public:
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
+		_bool IsBack = { false };
 	}HIT_DESC;
 
 	typedef struct tagParryDesc {
