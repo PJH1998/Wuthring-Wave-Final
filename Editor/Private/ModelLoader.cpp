@@ -21,7 +21,7 @@ void CModelLoader::Update()
 	if (0 == m_iAnim) m_eType = MODELTYPE::NONANIM;
 	else if (1 == m_iAnim) m_eType = MODELTYPE::ANIM;
 	else if (2 == m_iAnim) m_eType = MODELTYPE::CHARACTER;
-	else if (3 == m_iAnim) m_eType = MODELTYPE::VAT;
+	else if (3 == m_iAnim) m_eType = MODELTYPE::VA;
 
 	if (ImGui::Button("Load FBX"))
 		m_isShowLoadFile = !m_isShowLoadFile;
@@ -858,7 +858,7 @@ if (nullptr == m_pAIScene)
 		file.write(reinterpret_cast<const _char*>(&pMesh->mNumFaces), sizeof(_uint));
 		file.write(reinterpret_cast<const _char*>(&pMesh->mMaterialIndex), sizeof(_uint));
 
-		VTX_VATMESH* Vertices = new VTX_VATMESH[pMesh->mNumVertices];
+		VTX_VAMESH* Vertices = new VTX_VAMESH[pMesh->mNumVertices];
 	
 		for (size_t j = 0; j < pMesh->mNumVertices; ++j)
 		{
@@ -870,7 +870,7 @@ if (nullptr == m_pAIScene)
 			memcpy(&Vertices[j].vVATcoord, &pMesh->mTextureCoords[1][j], sizeof(_float2));
 		}
 		
-		file.write(reinterpret_cast<const _char*>(Vertices), sizeof(VTX_VATMESH) * pMesh->mNumVertices);
+		file.write(reinterpret_cast<const _char*>(Vertices), sizeof(VTX_VAMESH) * pMesh->mNumVertices);
 		Safe_Delete_Array(Vertices);
 
 		_uint* Indices = new _uint[pMesh->mNumFaces * 3];
@@ -1116,6 +1116,9 @@ void CModelLoader::Save_File()
 				Save_Dat_Character(strFilePath.c_str()); // 캐릭터 전용 포맷(쉐이프키 포함) 저장
 				Save_Animation_Character(strFilePath.c_str()); // 애니메이션 데이터도 필요하다면 저장 
 			}
+			else if (MODELTYPE::VA == m_eType)
+				Save_Dat_VatMesh(strFilePath.c_str());
+			
 			Save_Material(strFilePath.c_str());
 		}
 		ImGuiFileDialog::Instance()->Close();
