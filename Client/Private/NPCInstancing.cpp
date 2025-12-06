@@ -74,11 +74,11 @@ void CNPCInstancing::Render()
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::FACE));
 		else
 		{
-			//if (FAILED(hr))
-			//	m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
-			//else
-			//	m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::NORMAL_TEX));
-			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
+			if (FAILED(hr))
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::NORMAL_TEX));
+			//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::DEFAULT_NORMAL));
 		}
 
 		m_pModelInstanceCom->Render(i);
@@ -142,12 +142,19 @@ void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
 	{
 		vector<_uint> MeshType(m_MeshTypePadding.size());
 		//memcpy(MeshType.data(), NpcData[i].MeshtypeIndices, sizeof(NpcData[i].MeshtypeIndices));
-		for (_uint j = 0; j < MeshType.size() - 1; ++j)
+		if(NpcData[i].MeshtypeIndices[0] < 0)
 		{
-			MeshType[j] = static_cast<_uint>(m_pGameInstance->Rand(m_MeshTypePadding[j], m_MeshTypePadding[j + 1] - eps)) - m_MeshTypePadding[j];
+			for (_uint j = 0; j < MeshType.size() - 1; ++j)
+			{
+				MeshType[j] = static_cast<_uint>(m_pGameInstance->Rand(m_MeshTypePadding[j], m_MeshTypePadding[j + 1] - eps)) - m_MeshTypePadding[j];
+			}
+			auto iter = MeshType.end() - 1;
+			(*iter) = static_cast<_uint>(m_pGameInstance->Rand(m_MeshTypePadding.back(), m_pModelInstanceCom->Get_NumMesh())) - m_MeshTypePadding.back();
 		}
-		auto iter = MeshType.end() - 1;
-		(*iter) = static_cast<_uint>(m_pGameInstance->Rand(m_MeshTypePadding.back(), m_pModelInstanceCom->Get_NumMesh())) - m_MeshTypePadding.back();
+		else
+		{
+			memcpy(MeshType.data(), NpcData[i].MeshtypeIndices, sizeof(NpcData[i].MeshtypeIndices));
+		}
 
 		CNPCCell::DUMMYCELL_DESC CellDesc = {};
 		CellDesc.pUpdateRootFunc = [this](const _string& strAnimationName, CTransform* pTransform, _float fTimeDelta, _float* pTrackPos, 

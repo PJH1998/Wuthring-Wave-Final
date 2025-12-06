@@ -121,7 +121,7 @@ namespace Client
 	{
 		_float3 vPosition;
 		_float3 vRotation;
-		_uint MeshtypeIndices[3];	//몸통, 얼굴, 머리 인덱스
+		_int MeshtypeIndices[3];	//몸통, 얼굴, 머리 인덱스
 		_bool isCollide;
 		_string strAnimTag;
 	}NPCINFO;

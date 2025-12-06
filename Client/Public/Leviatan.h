@@ -2,8 +2,6 @@
 #include "Actor.h"
 
 NS_BEGIN(Engine)
-class CShader;
-class CModel;
 class CAnimMachine;
 class CBehavior_Tree;
 class CComputeShader;
@@ -34,6 +32,7 @@ private:
 	enum ATK_PATTERN { ATTACK3, ATTACK5, ATTACK12, ATTACK13, BURST, ATTACK18, ATTACK1, ATTACK20, ATTACK22, ATK_END };
 	enum LEVIATAN_SHADER { BANG, HAIR, FACE, UP, DOWN, CLOTH, ALPHA, FX };
 	enum PHASE { ONE, TWO, P_END };
+	enum ACTION {ENCOUNTER, PHASE1_DOWN, PHASE2_DEAD, ACTEND };
 private:
 	explicit CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CLeviatan(const CLeviatan& Prototype);
@@ -101,7 +100,13 @@ private:
 	_bool					m_isRender{};
 	_bool					m_isAreaAttack{};
 	_uint					m_iPhase{};
+#pragma endregion
+
+#pragma region ACTION_PRODUCT
 	_uint					m_iAnimCheck{};
+	_uint					m_iActionIndex{};
+	_uint					m_iActionChecker[ACTION::ACTEND] = {};
+	vector<_string>			m_strAnimTag[ACTION::ACTEND];
 #pragma endregion
 
 #pragma region STATUS
