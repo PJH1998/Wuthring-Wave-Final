@@ -5,7 +5,7 @@
 NS_BEGIN(Engine)
 class CShader;
 class CTexture;
-class CHdrTexture;
+class CVAMesh;
 NS_END
 
 NS_BEGIN(Client)
@@ -17,7 +17,6 @@ public:
 	{
 		_wstring		strTextureTag;
 		_wstring		strColorTextureTag;
-		_wstring		strHdrTextureTag;
 
 		_wstring		strMeshTag;
 
