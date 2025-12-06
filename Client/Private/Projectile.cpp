@@ -27,7 +27,7 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	m_wstrEffectTag = pDesc->wstrEffectTag;
 	m_isCollisionDestroy = pDesc->isCollisionDestroy;
 	m_fMaxLifeTime = pDesc->fLifeTime;
-	m_fDelay = 0.2f;
+	m_fMaxDelay = pDesc->fMaxDelay;
 	m_isActivate = false;
     return S_OK;
 }
@@ -51,7 +51,7 @@ void CProjectile::Update(_float fTimeDelta)
 		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 		EffectDesc.pModelPtr = nullptr;
 		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
-		m_fDelay = 1.f;
+		m_fDelay = m_fMaxDelay;
 	}
 	else
 		m_fDelay -= fTimeDelta;
@@ -113,7 +113,7 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
-	m_fDelay = 0.2f;
+	m_fDelay = 0.f;
 }
 
 HRESULT CProjectile::Bind_Resources()
