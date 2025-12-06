@@ -1030,7 +1030,7 @@ HRESULT CLoader_GamePlay::Load_Production()
 HRESULT CLoader_GamePlay::Load_NPC()
 {
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
-	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
 	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
 
 	vector<_string> TypeName = { "Body", "Hair", "Face" };
@@ -1038,6 +1038,11 @@ HRESULT CLoader_GamePlay::Load_NPC()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleM"),
 		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, m_pGameSystem->Get_NumNPCInstance(0),
 			"../../Client/Bin/Resource/Model/NPC/FemaleM", &TypeName))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_MaleM"),
+		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, m_pGameSystem->Get_NumNPCInstance(1),
+			"../../Client/Bin/Resource/Model/NPC/MaleM", &TypeName))))
 		CRASH("Prototype Create Failed");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
