@@ -85,7 +85,7 @@ namespace Engine
 		};
 	}VTXMESH;
 
-	typedef struct tagVATMesh
+	typedef struct tagVAMesh
 	{
 		_float3 vPosition;
 		_float3 vNormal;
@@ -103,7 +103,7 @@ namespace Engine
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
 			{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0}
 		};
-	}VTX_VATMESH;
+	}VTX_VAMESH;
 
 
 	typedef struct tagVertexAnimMesh

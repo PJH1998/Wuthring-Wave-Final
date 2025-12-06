@@ -244,9 +244,6 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\04. Component\VIBuffer\VBMesh">
-      <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine">
       <UniqueIdentifier>{a54d431a-e7ed-4546-9ff3-5fdefe162fda}</UniqueIdentifier>
     </Filter>
@@ -409,6 +406,12 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\20.Model_Streaming">
       <UniqueIdentifier>{b6e24aa3-a926-43dd-9b4e-d07c9eaa0539}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Texture\Hdr">
+      <UniqueIdentifier>{0afa1376-7b38-4c9f-98fb-74a9799ac323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\VAMesh">
+      <UniqueIdentifier>{c5b7554b-e188-40ac-8ea3-675d46b5f23b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -839,6 +842,12 @@
     <ClInclude Include="..\Public\FreeList.h">
       <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\HdrTexture.h">
+      <Filter>01. Utility\04. Component\Texture\Hdr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VAMesh.h">
+      <Filter>01. Utility\04. Component\VIBuffer\VAMesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1243,6 +1252,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\FreeList.cpp">
       <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\HdrTexture.cpp">
+      <Filter>01. Utility\04. Component\Texture\Hdr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VAMesh.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\VAMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

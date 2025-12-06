@@ -80,6 +80,7 @@
     <ClInclude Include="..\Public\GameObject.h" />
     <ClInclude Include="..\Public\Graphic_Device.h" />
     <ClInclude Include="..\Public\GUIManager.h" />
+    <ClInclude Include="..\public\HdrTexture.h" />
     <ClInclude Include="..\Public\HZB.h" />
     <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\Input_Device.h" />
@@ -111,6 +112,7 @@
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
+    <ClInclude Include="..\Public\VAMesh.h" />
     <ClInclude Include="..\public\VIBuffer_Decal_Cube.h" />
     <ClInclude Include="..\public\Water.h" />
     <ClInclude Include="..\Public\Sequence.h" />
@@ -218,6 +220,7 @@
     <ClCompile Include="..\Private\GameObject.cpp" />
     <ClCompile Include="..\Private\Graphic_Device.cpp" />
     <ClCompile Include="..\Private\GUIManager.cpp" />
+    <ClCompile Include="..\private\HdrTexture.cpp" />
     <ClCompile Include="..\Private\HZB.cpp" />
     <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\Input_Device.cpp" />
@@ -249,6 +252,7 @@
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
+    <ClCompile Include="..\Private\VAMesh.cpp" />
     <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp" />
     <ClCompile Include="..\private\Water.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />

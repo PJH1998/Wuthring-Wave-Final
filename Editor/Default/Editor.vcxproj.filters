@@ -223,6 +223,9 @@
     <Filter Include="03. GameObject\SFX\Galbrena\Blur">
       <UniqueIdentifier>{7c036509-854b-4b08-8d10-aec1747c6dbd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Test">
+      <UniqueIdentifier>{b2dd2452-a82b-41dc-8da3-5dc497c14423}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -504,6 +507,10 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_SlideZone.h" />
+    <ClInclude Include="..\Public\Edit_Portal.h" />
+    <ClInclude Include="..\public\TestVA.h">
+      <Filter>03. GameObject\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -758,6 +765,10 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Edit_SlideZone.cpp" />
+    <ClCompile Include="..\Private\Edit_Portal.cpp" />
+    <ClCompile Include="..\private\TestVA.cpp">
+      <Filter>03. GameObject\Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
