@@ -16,6 +16,7 @@ public:
 	HRESULT		Initialize();
 	void			Update();
 
+	HRESULT		Save_Dat_VatMesh(const _char* pFileName);
 	HRESULT		Save_Dat_NonAnim(const _char* pFileName);
 	HRESULT		Save_Dat_Anim(const _char* pFileName);
 	HRESULT		Save_Dat_Character(const _char* pFileName);	

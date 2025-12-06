@@ -80,6 +80,7 @@
     <ClInclude Include="..\Public\GameObject.h" />
     <ClInclude Include="..\Public\Graphic_Device.h" />
     <ClInclude Include="..\Public\GUIManager.h" />
+    <ClInclude Include="..\public\HdrTexture.h" />
     <ClInclude Include="..\Public\HZB.h" />
     <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\Input_Device.h" />
@@ -93,9 +94,11 @@
     <ClInclude Include="..\Public\MeshAnim_Instance.h" />
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
+    <ClInclude Include="..\Public\Mesh_Instance_FireFly.h" />
     <ClInclude Include="..\Public\Mesh_Streaming.h" />
     <ClInclude Include="..\Public\ModelAnim_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\Public\Model_Instance_FireFly.h" />
     <ClInclude Include="..\Public\Model_Manager.h" />
     <ClInclude Include="..\Public\Model_Streaming.h" />
     <ClInclude Include="..\Public\MorphChannel.h" />
@@ -109,6 +112,7 @@
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Resource_Manager.h" />
     <ClInclude Include="..\public\ScreenBlur.h" />
+    <ClInclude Include="..\Public\VAMesh.h" />
     <ClInclude Include="..\public\VIBuffer_Decal_Cube.h" />
     <ClInclude Include="..\public\VIBuffer_Sphere.h" />
     <ClInclude Include="..\public\Water.h" />
@@ -217,6 +221,7 @@
     <ClCompile Include="..\Private\GameObject.cpp" />
     <ClCompile Include="..\Private\Graphic_Device.cpp" />
     <ClCompile Include="..\Private\GUIManager.cpp" />
+    <ClCompile Include="..\private\HdrTexture.cpp" />
     <ClCompile Include="..\Private\HZB.cpp" />
     <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\Input_Device.cpp" />
@@ -230,9 +235,11 @@
     <ClCompile Include="..\Private\MeshAnim_Instance.cpp" />
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
+    <ClCompile Include="..\Private\Mesh_Instance_FireFly.cpp" />
     <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\Private\ModelAnim_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\Private\Model_Instance_FireFly.cpp" />
     <ClCompile Include="..\Private\Model_Manager.cpp" />
     <ClCompile Include="..\Private\Model_Streaming.cpp" />
     <ClCompile Include="..\Private\MorphChannel.cpp" />
@@ -246,6 +253,7 @@
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Resource_Manager.cpp" />
     <ClCompile Include="..\private\ScreenBlur.cpp" />
+    <ClCompile Include="..\Private\VAMesh.cpp" />
     <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp" />
     <ClCompile Include="..\private\VIBuffer_Sphere.cpp" />
     <ClCompile Include="..\private\Water.cpp" />

@@ -13,6 +13,8 @@
 #include"MapObject_Meteo.h"
 #include"MapObject_Water.h"
 #include"MapObject_Collaps.h"
+#include"MapObject_FireFly.h"
+#include"Slide_Navigation.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -27,11 +29,14 @@
 #include "Projectile.h"
 #include "Corosaurus.h"
 #include "Coro_Rock.h"
+#include "CoroProduction.h"
 #pragma endregion
 
 #pragma region NPC
 #include "NPCInstancing.h"
 #include "NPCCell.h"
+#include "Napal.h"
+#include"NPC_Griffin.h"
 #pragma endregion
 
 #pragma region UI
@@ -67,6 +72,7 @@
 #include "AugustaFxObject.h"
 #include "AugustaEnergyBlade.h"
 #include "AugustaHeadProp.h"
+#include "AugustaBurstWeapon.h"
 #include "Augusta.h"
 
 // Rover
@@ -118,6 +124,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Production(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -142,10 +149,10 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1202_second2/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1206_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1202_third/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -213,6 +220,16 @@ HRESULT CLoader_GamePlay::Load_Object()
 	
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
 		CSpawner::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_MapObejct_FireFly"),
+		CMapObject_FireFly::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_FireFly"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance_FireFly.hlsl"), VTXMESHINSTANCE_FIREFLY::Elements, VTXMESHINSTANCE_FIREFLY::iNumElements));
+	
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
+		CSlide_Navigation::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 	return S_OK;
 }
@@ -379,6 +396,19 @@ HRESULT CLoader_GamePlay::Load_Augusta()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
 		, wStrHeadPropTag
 		, CAugustaHeadProp::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_BurstWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/AugustaFacial/Weapon/BurstWeapon/AugustaBurstWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrBurstWeaponTag = TEXT("Prototype_GameObject_Augusta_BurstWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrBurstWeaponTag
+		, CAugustaBurstWeapon::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 #pragma endregion
 
@@ -983,10 +1013,24 @@ HRESULT CLoader_GamePlay::Load_Monster()
 #pragma endregion
 	return S_OK;
 }
+HRESULT CLoader_GamePlay::Load_Production()
+{
+	// Prototype_Component_Model_CoroProduction
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroProduction"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/NPC/CoroProduction/CoroProduction.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroProduction
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroProduction"),
+		CCoroProduction::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+	return S_OK;
+}
 HRESULT CLoader_GamePlay::Load_NPC()
 {
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
-	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
 	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
 
 	vector<_string> TypeName = { "Body", "Hair", "Face" };
@@ -994,6 +1038,11 @@ HRESULT CLoader_GamePlay::Load_NPC()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleM"),
 		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, m_pGameSystem->Get_NumNPCInstance(0),
 			"../../Client/Bin/Resource/Model/NPC/FemaleM", &TypeName))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_MaleM"),
+		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, m_pGameSystem->Get_NumNPCInstance(1),
+			"../../Client/Bin/Resource/Model/NPC/MaleM", &TypeName))))
 		CRASH("Prototype Create Failed");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPCInstancing"),
@@ -1004,6 +1053,30 @@ HRESULT CLoader_GamePlay::Load_NPC()
 		CNPCCell::Create(m_pDevice, m_pContext))))
 		CRASH("NPCCell Prototype Create Failed");
 
+	// Prototype_Component_Model_Napal
+	//_fmatrix PreNapalMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Napal"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/NPC/Napal/Napal.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_Napal
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
+		CNapal::Create(m_pDevice, m_pContext))))
+		CRASH("NPCCell Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_FalseSovereign
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		CNPC_Griffin::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_NPCGriffin"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
+		CRASH("Prototype Create Failed");
 	return S_OK;
 }
 #pragma endregion

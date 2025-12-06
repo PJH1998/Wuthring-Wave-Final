@@ -1,0 +1,23 @@
+{
+    "AnimName": "SpAttack02",
+    "Notifies": [
+    {
+          "ColliderTag": "SkillWeapon|SWORD_ATTACK|ATTACK",
+          "IsActive": true,
+          "NotifyType": "Collider",
+          "TrackPosition": 5.0
+    },
+    {
+          "ColliderTag": "SkillWeapon|SWORD_ATTACK|ATTACK",
+          "IsActive": false,
+          "NotifyType": "Collider",
+          "TrackPosition": 10.0
+    },
+      {
+            "NotifyType": "Object",
+            "ObjectTag": "CAMERA|0.1|12.0|1.0|0.1|0.0|UDLR",
+            "TrackPosition": 5.5
+      }
+
+    ]
+}

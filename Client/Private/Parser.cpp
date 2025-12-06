@@ -7,6 +7,8 @@
 #include "MapObject_Instance.h"
 #include "MapObject_Meteo.h"
 #include"MapObject_Collaps.h"
+#include"MapObject_FireFly.h"
+#include"Slide_Navigation.h"
 
 #include "Spawner.h"
 
@@ -20,7 +22,6 @@
 
 #include "Sequence.h"
 #include "Effect_Radial.h"
-
 #include "SFX_Prefab.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -59,22 +60,23 @@ void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, cons
 	_wstring PrototypeName = L"Prototype_Component_Model_";
 	_wstring InstancePrototypeName = L"Prototype_Component_Model_Instance_";
 
-
+	_string FilePath;
 	for (const auto& entry : filesystem::directory_iterator(pDataFilePath)) {
 		if (!entry.is_regular_file())
 			continue;
-		if (entry.path().string().find("Prototype") == std::string::npos && entry.path().string().find("Instance") == std::string::npos
-			 && entry.path().string().find("MonsterSpawnor") == std::string::npos)
+		FilePath = entry.path().string();
+		if (FilePath.find("Prototype") == std::string::npos && FilePath.find("Instance") == std::string::npos
+			&& FilePath.find("MonsterSpawnor") == std::string::npos && FilePath.find("FireFly") == std::string::npos)
 			continue;
 
-		_string strFilePath = entry.path().string();
+		_string strFilePath = FilePath;
 		ifstream File(strFilePath, ios::binary);
 
 		_uint NameLength = {};
 
 		_char Name[MAX_PATH] = {};
 
-		if (entry.path().string().find("Instance") != std::string::npos)
+		if (FilePath.find("Instance") != std::string::npos)
 		{
 			CMapObject_Instance::MAP_LOAD Desc{};
 			unordered_set<_wstring> m_Names;
@@ -141,7 +143,7 @@ void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, cons
 				Safe_Delete_Array(MeshDesc.pTransformMatrix);
 			}
 		}
-		else if (entry.path().string().find("MonsterSpawnor") != std::string::npos)
+		else if (FilePath.find("MonsterSpawnor") != std::string::npos)
 		{
 			SPAWN_DESC Desc;
 			while (File.read(reinterpret_cast<char*>(&Desc.vMonsterSpawnorPos), sizeof(_float4)))
@@ -166,7 +168,40 @@ void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, cons
 				m_MonsterDesc[eLevel].push_back(Desc);
 			}
 		}
-		else if(entry.path().string().find("Prototype") != std::string::npos)
+		else if (FilePath.find("FireFly") != std::string::npos)
+		{
+			CMesh_Instance_FireFly::MESH_INST_DESC MeshDesc{};
+			CMapObject_FireFly::MAP_LOAD MapDesc{};
+			_float FlySize = 0.00005f;
+			_string FireFlyFilePath = "../Bin/Resource/Map/Asphodel_Barrens/FireFly/FireFly.dat";
+			_matrix FireFlyPreTransformMatrix = XMMatrixScaling(FlySize, FlySize, FlySize);
+			_uint i = 0;
+
+			while (File.read(reinterpret_cast<char*>(&MeshDesc.iNumInstance), sizeof(_uint)))
+			{
+				File.read(reinterpret_cast<char*>(&MapDesc.iShaderPassIndex), sizeof(_uint));
+				File.read(reinterpret_cast<char*>(&MapDesc.WorldMatrix), sizeof(_float4x4));
+
+				_float4x4* pInstanceTransform = new _float4x4[MeshDesc.iNumInstance];
+				for (_uint i = 0; i < MeshDesc.iNumInstance; ++i)
+					pInstanceTransform[i] = MapDesc.WorldMatrix;
+				MeshDesc.pTransformMatrix = pInstanceTransform;
+				File.read(reinterpret_cast<char*>(&MeshDesc.vRange), sizeof(_float2));
+				File.read(reinterpret_cast<char*>(&MeshDesc.vPerMoveSin), sizeof(_float2));
+				File.read(reinterpret_cast<char*>(&MeshDesc.vPerMoveCos), sizeof(_float2));
+				File.read(reinterpret_cast<char*>(&MeshDesc.vPerMoveSin2), sizeof(_float2));
+				strcpy_s(MapDesc.ModelName, "Fly");
+				strcat_s(MapDesc.ModelName, to_string(i++).c_str());
+				MapDesc.iLevel = ENUM_CLASS(eLevel);
+				m_FireFlyData.push_back(MapDesc);
+				if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), StringToWString(MapDesc.ModelName),
+					CModel_Instance_FireFly::Create(m_pDevice, m_pContext, FireFlyPreTransformMatrix, FireFlyFilePath.c_str(), false, &MeshDesc))))
+					CRASH("Prototype Create Failed");
+
+				Safe_Delete_Array(pInstanceTransform);
+			}
+		}
+		else if (FilePath.find("Prototype") != std::string::npos)
 		{
 			while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
 			{
@@ -218,16 +253,16 @@ void CParser::Read_Map_Prototype(const _string pDataFilePath, LEVEL eLevel, cons
 					{
 						//m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry2.path().parent_path().stem().string()), ModelPath = entry2.path().parent_path().string().c_str()]() {
 
-							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
-								CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
-								CRASH("Prototype Create Failed");
-							//});
+						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(entry2.path().parent_path().stem().string()),
+							CModel_Streaming::Create(m_pDevice, m_pContext, entry2.path().parent_path().string().c_str()))))
+							CRASH("Prototype Create Failed");
+						//});
 
-	/*					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
-							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
-								CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
-								CRASH("Prototype Create Failed");
-							});*/
+/*					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
+							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
+							CRASH("Prototype Create Failed");
+						});*/
 						break;
 					}
 					//프로토타입 생성
@@ -274,6 +309,29 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 }
 
+void CParser::Create_MapEffect()
+{
+	_matrix EffectMat = {};
+	PREFAB_INFO Info{};
+	for(auto& Effect : m_MapEffects)
+	{
+		EffectMat = XMMatrixTranslationFromVector(XMLoadFloat4(&Effect.vEffectPos));
+		switch (Effect.iEffectTag)
+		{
+		case 0:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			break;
+		case 1:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			break;
+		case 2:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			break;
+		}
+	}
+	m_MapEffects.clear();
+}
+
 #pragma region SPAWNER
 void CParser::Clone_Spawners(LEVEL eLevel)
 {
@@ -297,7 +355,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 {
 	if (pFilePath.find("Spawn") != _string::npos)
 		return;
-	
+
 	ifstream File(pFilePath, ios::binary);
 
 	if (!File.is_open())
@@ -318,6 +376,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
 				, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
 		}
+		m_MapInstanceData.clear();
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
 	{
@@ -379,10 +438,10 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			//	});
 		}
 	}
-	else if (pFilePath.find("Meteo") != std::string::npos) 
+	else if (pFilePath.find("Meteo") != std::string::npos)
 	{
 		CMapObject_Meteo::MAP_LOAD Desc{};
-		
+
 		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
 		{
 			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
@@ -464,7 +523,41 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Effect") != std::string::npos)
 	{
+		MAPEFFECT Effect{};
 
+		while (File.read(reinterpret_cast<char*>(&Effect.iEffectTag), sizeof(_uint)))
+		{
+			File.read(reinterpret_cast<char*>(&Effect.vEffectPos), sizeof(_float4));
+			m_MapEffects.push_back(Effect);
+		}
+	}
+	else if (pFilePath.find("FireFly") != std::string::npos)
+	{
+		for (auto& pData : m_FireFlyData)
+		{
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_MapObejct_FireFly"),
+				ENUM_CLASS(eLevel), TEXT("Layer_Fly"), &pData);
+		}
+		m_FireFlyData.clear();
+	}
+	else if (pFilePath.find("Slide") != std::string::npos)
+	{
+		CSlide_Navigation::SLIDE_NAVIGATION_DESC Desc{};
+		
+		while (File.read(reinterpret_cast<char*>(&Desc.IsStart), sizeof(_bool)))
+		{
+			File.read(reinterpret_cast<char*>(&Desc.vExtends), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.WorldMat), sizeof(_float4x4));
+			File.read(reinterpret_cast<char*>(&Desc.iPathSize), sizeof(_uint));
+			_float4* pPath = new _float4[Desc.iPathSize];
+			for (_uint i = 0; i < Desc.iPathSize; ++i)
+				File.read(reinterpret_cast<char*>(&pPath[i]), sizeof(_float4));
+			Desc.pPath = pPath;
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_Slide_Navigation")
+				, ENUM_CLASS(eLevel), TEXT("Layer_Collaps"), &Desc);
+
+			Safe_Delete_Array(pPath);
+		}
 	}
 	else
 	{

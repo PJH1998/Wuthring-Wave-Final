@@ -131,7 +131,11 @@ void CCollider::Update(const _fvector& vVelocity)
 	if (false == m_isLand && true == m_isGravity)
 		Velocity += XMVectorSet(0.f, -9.81f, 0.f, 0.f) * 0.7f;
 	else
+	{
 		Slide(Velocity);
+		//if (Velocity.GetY() < 0.f)
+		//	Velocity.SetY(0.f);
+	}
 
 	// Ground Check Error
 	CharacterVirtual::EGroundState GS = m_pCharacterVirtual->GetGroundState();
@@ -161,7 +165,7 @@ Vec3 CCollider::Slide(const Vec3& Velocity)
 	_vector vGroundNormal = XMVector3Normalize(StoreVector3(m_pCharacterVirtual->GetGroundNormal()));
 
 	_float fDot = XMVectorGetX(XMVector3Dot(XMVectorSet(0.f, 1.f, 0.f, 0.f), vGroundNormal));
-	if (fDot < XMConvertToRadians(70.f))
+	if (fDot < cosf(XMConvertToRadians(70.f)))
 		return Velocity;
 
 	_vector vVelocity = StoreVector3(Velocity);

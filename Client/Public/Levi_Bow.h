@@ -3,6 +3,7 @@
 
 NS_BEGIN(Engine)
 class CShader;
+class CComputeShader;
 class CModel;
 NS_END
 
@@ -18,6 +19,11 @@ public:
 		_float3 vOffsetRadian;
 		_float fAttackDmg;
 	}LEVIBOW_DESC;
+
+	typedef struct tagLeviBowReset
+	{
+		COLLISIONLAYER eLayer;
+	}LEVI_BOW_RESET;
 
 private:
 	enum SHADERPATH{ BASE, BAOSHI, SUISHI, LINE, END };
@@ -41,6 +47,7 @@ public:
 	void			Change_Offset(LEVIBOW_DESC& Desc);
 private:
 	CShader* m_pShaderCom = { nullptr };
+	CComputeShader* m_pComputeShaderCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
 
 	const _float4x4* m_pSocketMatrix = { nullptr };

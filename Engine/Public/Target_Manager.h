@@ -17,6 +17,9 @@ public:
 #endif
 
 public:
+	HRESULT		Bind_OpenRT(OPEN_RT eRT, class CShader* pShader, const _char* pConstantName);
+
+public:
 	HRESULT		Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_Shader_Resource(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);

@@ -162,7 +162,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
-	//m_pPhysicsManager->Late_Update();
+	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	
@@ -184,7 +184,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pVF->Update_VF(fTimeDelta);
 
-	m_pModel_Manager->Update(fTimeDelta);
+	//m_pModel_Manager->Update(fTimeDelta);
 
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
 }
@@ -393,10 +393,18 @@ HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
 }
+HRESULT CGameInstance::Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
+{
+	return m_pPooling_Manager->Add_PoolingObject_ForStatic(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
+}
  HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
+ HRESULT CGameInstance::Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+ {
+	 return m_pPooling_Manager->Spawn_PoolingObject_ForStatic(strPoolingTag, WorldMatrix, pArg);
+ }
 void CGameInstance::Add_Work(function<void()> Work)
 {
 	m_pPooling_Manager->Add_Work(Work);
@@ -464,6 +472,10 @@ void CGameInstance::End_MRT()
 HRESULT CGameInstance::Clear_RT(const _wstring& strTargetTag)
 {
     return m_pTargetManager->Clear_RT(strTargetTag);
+}
+HRESULT CGameInstance::Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* pConstantName)
+{
+	return m_pTargetManager->Bind_OpenRT(eRT, pShader, pConstantName);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
@@ -669,6 +681,10 @@ HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
+void CGameInstance::IsChangeLevel_ForPhysicX(_bool isChangeLevel)
+{
+	m_pPhysicsManager->IsChangeLevel(isChangeLevel);
+}
 void CGameInstance::SetUp_PhysicsSystem()
 {
 	m_pPhysicsManager->SetUp_PhysicsSystem();
@@ -1005,6 +1021,10 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #pragma endregion
 
 #pragma region DECAL_MANAGER
+HRESULT CGameInstance::Add_CustomDecal(CGameObject* pCustomDecalObject)
+{
+	return m_pDecal_Manager->Add_CustomDecal(pCustomDecalObject);
+}
 HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
 {
 	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath, vEmissiveLuminance);
@@ -1212,6 +1232,7 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 
 	if (m_pModel_Manager)
 		m_pModel_Manager->Clear_Resource(iLevelID);
+
 	return S_OK;
 }
 
@@ -1229,6 +1250,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pShadowMap->Clear();
 	m_pEnvMap->Clear();
 	m_pVF->Clear();
+	
 	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))

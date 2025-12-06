@@ -15,8 +15,14 @@
 #include "Levi_Alter.h"
 #include "Levi_Ray.h"
 #include "Levi_Anchor.h"
+#include "Levi_Drop.h"
+#include "Levi_Wave.h"
 #pragma endregion
+
 #include "Player.h"
+#include "SequencePlayer.h"
+#include "SequenceLupa.h"
+
 #include "ShadowMap.h"
 #include "SkyBox.h"
 #include "Projectile.h"
@@ -31,6 +37,7 @@
 #include "UI_QTE.h"
 #include "UI_CurveTrace.h"
 
+#include "NPC_Griffin.h"
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
@@ -70,6 +77,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
+    Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();mm
@@ -113,6 +121,14 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Skybox();
 	Ready_UI();
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Scan"),
+		TEXT("Pooling_Scan"), 1)))
+		CRASH("Failed Add Pool Scan");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_MotionTrail"),
+		TEXT("Pooling_MotionTrail"), 1)))
+		CRASH("Failed Add Pool MotionTrail");
+
     return S_OK;
 }
 
@@ -148,9 +164,8 @@ void CLevel_Test::Ready_Layer_Player()
     Desc.vScale = vScale;
     Desc.vRotation = vRotation;
     Desc.vPosition = vPosition;
-    Desc.iPlayerCount = CPlayer::CHARACTERTYPE::TYPE_END;
-    Desc.wStrInputControllerTag = TEXT("Prototype_Component_PlayerController");
-
+	Desc.iPlayerCount = CPlayer::CHARACTERTYPE::TYPE_END;
+	Desc.wStrInputControllerTag = TEXT("Prototype_Component_PlayerController");
     // 0. vector 크기 정의
     Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
 
@@ -172,6 +187,39 @@ void CLevel_Test::Ready_Layer_Player()
         CRASH("Failed Ready Player");
 }
 
+void CLevel_Test::Ready_Layer_SequnecePlayer()
+{
+	_float3 vScale{}, vRotation{}, vPosition{};
+	vScale = { 1.f, 1.f, 1.f };
+	vRotation = { 0.f, 0.f, 0.f };
+	vPosition = { 0.f, -10.f, 50.f };
+
+	CSequencePlayer::SEQUENCEPLAYER_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.vScale = vScale;
+	Desc.vRotation = vRotation;
+	Desc.vPosition = vPosition;
+	Desc.iPlayerCount = CSequencePlayer::SEQUENCECHARACTER::SEQUENCE_END;
+
+	// 0. vector 크기 정의
+	Desc.PlayerSpecs.resize(CSequencePlayer::SEQUENCECHARACTER::SEQUENCE_END);
+
+	// 1. Yuno(주인공) 캐릭터 정의
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::YUNO].CharacterDesc = SeqPlayerData::GetYunoCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::YUNO].strActorTag = TEXT("Prototype_GameObject_Actor_Yuno");
+
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].CharacterDesc = SeqPlayerData::GetSequenceAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceAugusta");
+
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::LUPA].CharacterDesc = SeqPlayerData::GetSequenceLupaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CSequencePlayer::SEQUENCECHARACTER::LUPA].strActorTag = TEXT("Prototype_GameObject_Actor_SequenceLupa");
+
+	// 2. Sequence Player(Character 모음) 생성.
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_SequencePlayer"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_SequencePlayers"), &Desc)))
+		CRASH("Failed Ready Sequence Player");
+}
+
 void CLevel_Test::Ready_Dummy()
 {
 
@@ -179,13 +227,19 @@ void CLevel_Test::Ready_Dummy()
 	
 	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
 	DummyDesc.eLevel = m_eCurLevel;
+	DummyDesc.eType = CPatternDummy::MODEL_TYPES::DEFAULT;
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");				//신왕
 	//DummyDesc.strInitAnimTag = "Stand1";
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	
-	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로
-	DummyDesc.strInitAnimTag = "Stand";
-	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/CorroSaurus/Notify";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로
+	//DummyDesc.strInitAnimTag = "Stand";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/CorroSaurus/Notify";
+	//DummyDesc.eType = CPatternDummy::MODEL_TYPES::WEAPON;
+	//DummyDesc.strPartTag = TEXT("Prototype_Component_Model_CoroRock");
+	//DummyDesc.strBoneName = "Bone_WeaponProp001";
+	//DummyDesc.vOffsetPos = _float3(2.5f, 0.f, 0.f);
+	//DummyDesc.vOffsetRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(-90.f));
 	 
 	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Ggobul");						//꼬불이
 	//DummyDesc.strInitAnimTag = "SAttack01_1";
@@ -195,9 +249,15 @@ void CLevel_Test::Ready_Dummy()
 	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/FS_Scythe/Notify";
 	//DummyDesc.strInitAnimTag = "Stand1";
 
-	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Leviatan_Alter");					//레비아탄(분신)
-	//DummyDesc.strInitAnimTag = "Stand2";
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Levi_Alter");					// 레비아탄(분신 모델, 본체와 애니메이션 동일)
+	DummyDesc.strInitAnimTag = "Stand2";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";			// 레비아탄(분신 Notify)
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";				// 레비아탄(본체 Notify)
+	DummyDesc.eType = CPatternDummy::MODEL_TYPES::WEAPON;
+	DummyDesc.strPartTag = TEXT("Prototype_Component_Model_Leviatan_Bayonet");
+	DummyDesc.strBoneName = "WeaponProp02";
+	DummyDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	DummyDesc.vOffsetRot = _float3(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
@@ -473,6 +533,18 @@ void CLevel_Test::Ready_AnimInstanceTest()
 	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);
+	
+
+	CNPC_Griffin::GRIFFIN_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
+	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
+	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+
 }
 
 void CLevel_Test::Ready_Leviatan()
@@ -506,7 +578,7 @@ void CLevel_Test::Ready_Leviatan()
 	AlterDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	AlterDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	AlterDesc.fSpeedPerSec = 10.f;
-	AlterDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
+	AlterDesc.strFolderPath = "../Bin/Resource/Model/Monster/Levi_Alter/Notify";
 	AlterDesc.fAttackDmg = pInfo->fAttack;
 	AlterDesc.vDetectRange = _float3(35.f, 20.f, 35.f);
 
@@ -542,13 +614,13 @@ void CLevel_Test::Ready_Leviatan()
 	Projectile.fSpeedPerSec = 15.f;
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_Projectile");
 	Projectile.eType = TEXT_COLOR_TYPE::DARK;
-	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	Projectile.wstrEffectTag = TEXT("Leviatan_Dg2");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviSword"), 4, &Projectile)))
 		CRASH("Failed Ready Projectile (Leviatan)");
 
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_SwordAura");
-	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	Projectile.wstrEffectTag = TEXT("Leviatan_Dg");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviAura"), 4, &Projectile)))
 		CRASH("Failed Ready Projectile (Leviatan)");
@@ -559,6 +631,22 @@ void CLevel_Test::Ready_Leviatan()
 	//Anchor.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviAnchor"), 4, &Anchor)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Drop::DROPDESC Drop{};
+	Drop.fAttackDamage = pInfo->fAttack * 0.5f;
+	Drop.fSpeedPerSec = 10.f;
+	//Drop.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviDrop"), 8, &Drop)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Wave::WAVEDESC Wave{};
+	Wave.fAttackDamage = pInfo->fAttack;
+	Wave.fSpeedPerSec = 15.f;
+	//Wave.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviWave"), 4, &Wave)))
 		CRASH("Failed Ready Projectile (Leviatan)");
 }
 

@@ -105,6 +105,12 @@ HRESULT CBufferPool::Bind_BufferPool(ID3D11DeviceContext* pDC)
 	return S_OK;
 }
 
+void CBufferPool::Clear_Resource()
+{
+	m_pVertexFreeList->Clear_Resource();
+	m_pIndexFreeList->Clear_Resource();
+}
+
 
 CBufferPool* CBufferPool::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iVertexSize, _uint iIndexSize)
 {

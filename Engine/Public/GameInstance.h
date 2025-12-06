@@ -90,7 +90,9 @@ public:
 #pragma region POOLING_MANAGER
 	_uint			Get_NumThread();
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
+	HRESULT		Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
+	HRESULT		Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
 	// Thread Work Assign
 	void			Add_Work(function<void()> Work);
 	// Render Work Assing
@@ -117,6 +119,7 @@ public:
 	HRESULT		SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag);
 	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
+	HRESULT		Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* pConstantName);
 #ifdef _DEBUG
 	HRESULT		Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render_RT(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
@@ -191,6 +194,7 @@ public:
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
+	void					IsChangeLevel_ForPhysicX(_bool isChangeLevel);
 	void					SetUp_PhysicsSystem();
 	void					SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
 	void					SetUp_ObjectFilter(_uint iSrc, _uint iDst);
@@ -322,6 +326,7 @@ public:
 
 #pragma region DECAL_MANAGER
 public:
+	HRESULT						Add_CustomDecal(class CGameObject* pCustomDecalObject);
 	HRESULT						Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance = _float3(0.f, 0.f, 0.f));
 	HRESULT						Add_DecalData(const _wstring& strDecalTag, const  DECAL_DATA& Decal);
 	HRESULT						Render_Decal();

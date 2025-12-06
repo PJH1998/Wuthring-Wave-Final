@@ -30,6 +30,17 @@ void CDecal_Manager::Update(_float fTimeDelta)
 		Pair.second->Update(fTimeDelta);
 }
 
+HRESULT CDecal_Manager::Add_CustomDecal(CGameObject* pCustomDecalObject)
+{
+	if (nullptr == pCustomDecalObject)
+		return E_FAIL;
+
+	m_CustomDecals.push_back(pCustomDecalObject);
+	Safe_AddRef(pCustomDecalObject);
+
+	return S_OK;
+}
+
 HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
 {
 	if (nullptr != Find_Decal(strDecalTag))
@@ -60,6 +71,14 @@ HRESULT CDecal_Manager::Render()
 {
 	for (auto& Pair : m_Decals)
 		Pair.second->Render(m_pShader);
+
+	for (auto& pCustomDecal : m_CustomDecals)
+	{
+		pCustomDecal->Render();
+		Safe_Release(pCustomDecal);
+	}
+
+	m_CustomDecals.clear();
 
 	return S_OK;
 }
@@ -112,4 +131,9 @@ void CDecal_Manager::Free()
 	m_Decals.clear();
 	
 	Safe_Release(m_pShader);
+
+	for (auto& pCustomDecal : m_CustomDecals)
+		Safe_Release(pCustomDecal);
+	
+	m_CustomDecals.clear();
 }

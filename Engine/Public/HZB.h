@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Base.h"
 
+#define MAX_OBJECT 3000
+
 NS_BEGIN(Engine)
 
 class CHZB final : public CBase
@@ -88,7 +90,7 @@ private:
 
 	// Temporal Filter (Pre Visible Store)
 	map<size_t, VISIBLE_COUNT>					m_PreVisible;
-
+	BOXINFO*									m_pBoxInfos = { nullptr };
 private:
 	void						Ready_DefaultSetting();
 	void						Ready_OcclusionCulling();

@@ -28,7 +28,6 @@ public:
 	void Menu_Object_Type();
 	void Load_Objects();
 
-	void Create_TriggerBox();
 
 	void Ready_Map_Load_Prototype();
 	void Ready_Debris_Prototype(const _char* pModelName);
@@ -39,6 +38,8 @@ private:
 	void Ready_Event();
 	void Make_MousePos();
 	void Container_Info();
+	void Create_TriggerBox();
+	void Create_SlideBox();
 
 	void Load_Foliage();
 public:
@@ -59,6 +60,9 @@ private:
 	class CEdit_MapObject_Water* m_pPickedWater = { nullptr };
 	class CEdit_MapObject_Collaps* m_pPickedCollaps = { nullptr };
 	class CEdit_LightManager* m_pLightManager = { nullptr };
+	class CEdit_MapEffectCollector* m_pEffectCollector = { nullptr };
+	class CEdit_FireFly_Manager* m_pFlyManager = { nullptr };
+	class CEdit_SlideZone* m_pPickedSlideBox = { nullptr };
 	unordered_set< _string> m_szPrototypeName;
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
@@ -85,6 +89,10 @@ private:
 	mutex m_Mutex;
 	_float m_TriggerBoxExtends[3] = { 10.f,10.f,10.f };
 	string m_FolderPath;
+
+	_bool m_Effect = { false };
+	_bool m_FireFly = { false };
+	_bool m_ManageTrigger = { true };
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

@@ -85,6 +85,27 @@ namespace Engine
 		};
 	}VTXMESH;
 
+	typedef struct tagVAMesh
+	{
+		_float3 vPosition;
+		_float3 vNormal;
+		_float3 vTangent;
+		_float3 vBinormal;
+		_float2 vTexcoord;
+		_float2 vVATcoord;
+
+		static const _uint iNumElements = { 6 };
+		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] = {
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		};
+	}VTX_VAMESH;
+
+
 	typedef struct tagVertexAnimMesh
 	{
 		_float3		vPosition;
@@ -114,6 +135,17 @@ namespace Engine
 		_float4		vLook;
 		_float4		vTranslation;
 	}VTXINSTANCE_MESH;
+
+	typedef struct tagVertexInstanceMeshFireFly
+	{
+		_float4		vRight;
+		_float4		vUp;
+		_float4		vLook;
+		_float4		vTranslation;
+
+		_float3     vPerMove;
+		_float		vRange;
+	}VTXINSTANCE_MESH_FIREFLY;
 
 	typedef struct tagVertexInstanceFXMesh
 	{
@@ -191,6 +223,25 @@ namespace Engine
 			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1},
 		};
 	}VTXMESHINSTANCE;
+
+	typedef struct tagVertexMeshInstance_FireFly
+	{
+		static const _uint iNumElements = { 11 };
+		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] = {
+			{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "BINORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+			{ "WORLD",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,  D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "WORLD",  1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "WORLD",  2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "WORLD",  3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{"TEXCOORD",1, DXGI_FORMAT_R32G32B32_FLOAT,    1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{"TEXCOORD",2, DXGI_FORMAT_R32_FLOAT,          1, 76, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+		};
+	}VTXMESHINSTANCE_FIREFLY;
 
 	typedef struct tagVertexInstanceDecal
 	{

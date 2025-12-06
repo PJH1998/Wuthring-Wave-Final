@@ -8,6 +8,7 @@
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
+#include "AugustaBurstWeapon.h"
 #include "AugustaGriffon.h"
 #include "AugustaFxObject.h"
 #include "AugustaHeadProp.h"
@@ -15,6 +16,9 @@
 #include "Wing.h"
 #include "GameSystem.h"
 
+
+//TEst
+#include "MotionTrail.h"
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -61,6 +65,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_pWing->SetActivate(false);
 	m_pFxObject->SetActivate(false);
 	m_pHeadProp->SetActivate(false);
+	m_pBurstWeapon->SetActivate(false);
 	
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
@@ -97,7 +102,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	// 4. 몬스터가 있다면?
 	Update_TargetDistance();
 	
-	
 	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
@@ -112,8 +116,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
-	// 5. Change Timer 계산. => Dissolve에 사용
-	//Calc_ChangeTimer(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -142,7 +144,6 @@ void CAugusta::Update(_float fTimeDelta)
 		// 4. 카메라 업데이트
 		Update_Camera(fTimeDelta);
 	}
-    
 
 	// 파츠 갱신.
 	for (auto& pPart : m_PartObjects)
@@ -174,15 +175,12 @@ void CAugusta::Late_Update(_float fTimeDelta)
 	}
 	
 
-	// 3. 
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
-
-	
 
 	if (m_IsVisible)
 	{
@@ -211,6 +209,11 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
 void CAugusta::Render()
 {
+#ifdef _DEBUG
+	Debug_BurstWeapon();
+#endif // _DEBUG
+
+	
 
     Bind_Resources();
 
@@ -369,6 +372,9 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     case PART_HEADPROP:
 		m_pHeadProp->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
     case PART_WING:
 		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
@@ -394,6 +400,9 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     case PART_HEADPROP:
         m_pHeadProp->Activate(IsActive);
         break;
+    case PART_BURSTWEAPON:
+        m_pBurstWeapon->Activate(IsActive);
+        break;
 	case PART_WING:
 		m_pWing->Activate(IsActive);
 		break;
@@ -413,6 +422,9 @@ void CAugusta::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 	case PART_GRIFFON:
 		m_pGriffon->Change_Volume(iVolumeIdx);
 		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Change_Volume(iVolumeIdx);
+		break;
 	case PART_WING:
 		m_pWing->Change_Volume(iVolumeIdx);
 		break;
@@ -431,6 +443,9 @@ void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_GRIFFON:
 		m_pGriffon->Volume_Activate(IsActive); // MainVolume 켜기
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Volume_Activate(IsActive);
 		break;
 	case PART_WING:
 		break;
@@ -455,6 +470,9 @@ void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 		break;
     case PART_HEADPROP:
         m_pHeadProp->Clear_Animation(strAnimName);
+        break;
+    case PART_BURSTWEAPON:
+		m_pBurstWeapon->Clear_Animation(strAnimName);
         break;
 	case PART_WING:
 		m_pWing->Clear_Animation(strAnimName);
@@ -484,6 +502,9 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     case PART_FXOBJECT:
         m_pFxObject->Set_SocketMatrix(pSocketMatrix);
         break;
+    case PART_BURSTWEAPON:
+        m_pBurstWeapon->Set_SocketMatrix(pSocketMatrix);
+        break;
     }
 }
 
@@ -505,6 +526,9 @@ void CAugusta::Set_AnimationToParts(_uint iPartType, const _string& strAnimName)
 		break;
 	case PART_HEADPROP:
 		m_pHeadProp->Set_AnimationName(strAnimName);
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Set_AnimationName(strAnimName);
 		break;
 	case PART_WING:
 		m_pWing->Set_AnimationName(strAnimName);
@@ -530,6 +554,9 @@ void CAugusta::Part_ShaderPathChange(_uint iPartType, _uint iShaderPath)
 		break;
 	case PART_HEADPROP:
 		m_pHeadProp->Change_ShaderPath(iShaderPath);
+		break;
+	case PART_BURSTWEAPON:
+		m_pBurstWeapon->Change_ShaderPath(iShaderPath);
 		break;
 	case PART_WING:
 		m_pWing->Change_ShaderPath(iShaderPath);
@@ -716,7 +743,6 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	// Main Attack Volume의 TriggerActivate
 	if (var1 == TEXT("Bayonet"))
 	{
-		
 		if (var2 == TEXT("ATK"))
 			iVolumeIdx = CAugustaBayonet::VOLUME::VOLUME_ATTACK;
 		if (var2 == TEXT("STRATK"))
@@ -765,6 +791,22 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pGriffon->Volume_Activate(IsActive);
 	}
+	else if (var1 == TEXT("BurstWeapon"))
+	{
+		if (var2 == TEXT("SWORD_ATTACK"))
+			iVolumeIdx = CAugustaBurstWeapon::VOLUME::VOLUME_SWORD_ATTACK;
+		else if (var2 == TEXT("SWORD_ULTI"))
+			iVolumeIdx = CAugustaBurstWeapon::VOLUME::VOLUME_SWORD_ULTI;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pBurstWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pBurstWeapon->Volume_Activate(IsActive);
+	}
 	else if (var1 == TEXT("Augusta"))
 	{
 		if (var2 == TEXT("RISE_ZERO"))
@@ -787,6 +829,7 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
+
 
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
@@ -870,7 +913,6 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
 			m_fStateDelayTimer = 0.f;
 		}
-
 	}
 	
 	// Dodge가 아닐때만 추가되므로.
@@ -972,6 +1014,46 @@ void CAugusta::Activate(_bool IsActivate)
 
 	
 }
+
+// Event 발생하면 작업할 동작. 바로 => 동작 진행.
+void CAugusta::OnEvent(CHARACTER_EVENT eEvent, void* pArg)
+{
+	switch (eEvent)
+	{
+	case CHARACTER_EVENT::LANDSLIDE:
+		m_StateContext.m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_START;
+		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE), pArg);
+		break;
+	case CHARACTER_EVENT::END:
+		break;
+	default:
+		break;
+	}
+}
+
+#ifdef _DEBUG
+void CAugusta::Debug_BurstWeapon()
+{
+	static float vEmissive[3] = {};
+	static float fIntensity = { 0.1f };
+	ImGui::Begin("BurstWeapon ImGui");
+
+	ImGui::SliderFloat3("Emissive Color", vEmissive, 0.0f, 1.0f);
+	ImGui::SliderFloat("Emissive Intensity", &fIntensity, 0.f, 30.f);
+
+	if (ImGui::Button("Apply BurstWeapon"))
+	{
+		_float4 vEmissiveColor = { vEmissive[0], vEmissive[1], vEmissive[2], 1.0f };
+		_float fEmissiveIntensity = fIntensity;
+		m_pBurstWeapon->Debug_Emissive(vEmissiveColor, fEmissiveIntensity);
+	}
+	ImGui::End();
+
+}
+#endif // _DEBUG
+
+
+
 #pragma endregion
 
 
@@ -1182,10 +1264,12 @@ void CAugusta::Render_Eye(_uint iMeshIndex)
 	if (IsCutScene)
 	{
 		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
-		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
-		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
-		_float fEmissiveIntensity = { 5.f };
-		_float fGalbrenaEyeAlpha = 0.6f;
+		//_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
+		//_float fEmissiveIntensity = { 5.f };
+		//_float4 vEmissiveColor = { 0.9f, 0.7f, 0.1f, 1.0f };
+		_float4 vEmissiveColor = { 0.5f, 0.3f, 0.1f, 1.0f };
+		_float fEmissiveIntensity = { 3.f };
+		_float fGalbrenaEyeAlpha = 0.5f;
 		m_pShaderCom->Bind_Value("g_vEmissiveColor", &vEmissiveColor, sizeof(_float4));
 		m_pShaderCom->Bind_Value("g_fEmissiveIntenmmsity", &fEmissiveIntensity, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
@@ -1233,6 +1317,21 @@ void CAugusta::Update_TargetDistance()
 
 void CAugusta::Update_Physics(_float fTimeDelta)
 {
+	// Land 상태이고, LandSlide 이벤트를 받았으면? => 바로 스테이트를 변환한다.
+	if (Is_LandCollider() && Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY)))
+	{
+		// 1. 예약 플래그 해제.
+		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+
+		// 2. 현재 상태 플래그 설정.
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+
+		// 3. 저장한 데이터 인자로 전달.
+		OnEvent(CHARACTER_EVENT::LANDSLIDE, &m_PendingSlideData);
+	}
+		
+
+
 	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 	{
 		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
@@ -1477,6 +1576,23 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 			ASSERT_CRASH(m_pHeadProp);
 			Safe_AddRef(m_pHeadProp);
 			break;
+		case PARTTYPE::PART_BURSTWEAPON:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetAugustaBurstWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pBurstWeapon = dynamic_cast<CAugustaBurstWeapon*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pBurstWeapon);
+			Safe_AddRef(m_pBurstWeapon);
+			break;
 
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
@@ -1606,5 +1722,6 @@ void CAugusta::Free()
     Safe_Release(m_pGriffon);
     Safe_Release(m_pFxObject);
     Safe_Release(m_pHeadProp);
+    Safe_Release(m_pBurstWeapon);
 	Safe_Release(m_pWing);
 }

@@ -14,6 +14,8 @@ namespace Engine
 	enum class KEY_INPTEROLATION : unsigned int { LINEAR = 0, CONSTANT, CUBIC, END };
 	enum class KEY_TARGENT_MODE : unsigned int { AUTO = 0, USER, BREAK, END };
 
+	enum class OPEN_RT { DEPTH };
+
 	// Input
 	enum class KEYSTATE { DOWN, PRESS, UP, END };
 	enum class MOUSEKEYSTATE { LB, RB, WB, END };
@@ -21,7 +23,7 @@ namespace Engine
 	 
 	// Render
 	enum class TEXTURETYPE { DIFFUSE, NORMAL, MASK, EMISSIVE, END };
-	enum class MODELTYPE { NONANIM, ANIM, MAP, ECO, CHARACTER };
+	enum class MODELTYPE { NONANIM, ANIM, MAP, ECO, CHARACTER, VA };
 	enum class PROTOTYPE { GAMEOBJECT, COMPONENT };
 	enum class RENDERGROUP { PRIORITY, SHADOW, OUTLINE, NONBLEND, STATIC, NONSTATIC, DYNAMIC, WATER, NONLIGHT, EMISSIVE, EFFECT, SFX, BLEND, DISTORTION, POST_SFX, UI, FADE,
 	#ifdef _DEBUG  

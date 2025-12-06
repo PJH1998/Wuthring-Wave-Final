@@ -19,7 +19,6 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
-	HRESULT				Load_MonsterTest();
 	HRESULT				Load_Monster();
 	HRESULT				Load_Leviatan();
 
@@ -27,6 +26,14 @@ private:
 	HRESULT				Load_Augusta();
 	HRESULT				Load_Rover();
 	HRESULT				Load_Galbrena();
+
+
+	HRESULT				Load_SequencePlayer();
+	HRESULT				Load_Yuno();
+	HRESULT				Load_SequenceAugusta();
+	HRESULT				Load_SequenceLupa();
+
+
 
 
 	HRESULT				Load_UI();

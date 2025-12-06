@@ -34,6 +34,8 @@ public:
 	
 	ID3D11Buffer* Get_VertexBuffer() { return m_pVertexBufferPool; }
 	ID3D11Buffer* Get_IndexBuffer() { return m_pIndexBufferPool; }
+
+	void		Clear_Resource();
 private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };

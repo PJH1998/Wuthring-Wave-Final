@@ -67,6 +67,8 @@ void CAugustaGroundLand::OnExit()
 
 void CAugustaGroundLand::Handle_Input()
 {
+	// 이벤트 상태 => 
+	m_States[LANDSLIDE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 	m_States[HIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
 	// Hit면 모든 상태 제거
 	if (m_States[HIT])
@@ -85,7 +87,16 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
-	// Hit는 무조건 전환
+	//// 0. LandSlide 이벤트 시. 
+	//if (m_States[LANDSLIDE])
+	//{
+	//	m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_START;
+	//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
+	//	return;
+	//}
+	
+
+	// 1. Hit는 무조건 전환
 	if (m_States[HIT])
 	{
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
@@ -100,7 +111,6 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
 			return;
 		}
-        
     }
 
     if (m_IsAnimationEnd)
@@ -117,7 +127,6 @@ void CAugustaGroundLand::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
 }
 
 void CAugustaGroundLand::State_Reset()

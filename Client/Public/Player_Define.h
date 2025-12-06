@@ -28,7 +28,6 @@ namespace PlayerData
     {
         CCharacter::CHARACTER_DESC Desc;
         Desc.eCurLevel = eLevel;
-        //Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter"));
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
@@ -36,11 +35,8 @@ namespace PlayerData
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
         Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
         Desc.facialComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph"));
-        //Desc.abilityData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Ability"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
-        //Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
         Desc.strFolderPath = "../Bin/Resource/Model/Player/AugustaFacial/Notify/";
-        //Desc.strAbilityFolderPath = "../Bin/Resource/Model/Player/Augusta/Ability/"; // 스탯 정보 폴더.
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
@@ -53,6 +49,7 @@ namespace PlayerData
             make_pair(L"Griffon", L"Prototype_GameObject_Augusta_Griffon"),
 			make_pair(L"FxObject", L"Prototype_GameObject_Augusta_FxObject"),
 			make_pair(L"HeadProp", L"Prototype_GameObject_Augusta_HeadProp"),
+			make_pair(L"BurstWeapon", L"Prototype_GameObject_Augusta_BurstWeapon"),
 			make_pair(L"Wing", L"Prototype_GameObject_Wing"),
 			
         };
@@ -175,6 +172,25 @@ namespace PlayerData
 		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_HeadProp"));
 		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
 		Desc.strBoneName = "Bone_Hair001_M";
+		Desc.eWeaponType = WEAPONTYPE::ANIM;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+		return Desc;
+	}
+
+	static CProp::PROP_DESC GetAugustaBurstWeaponCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CProp::PROP_DESC Desc{};
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.fSpeedPerSec = 10.f;
+		Desc.pSocketMatrix = { nullptr }; // Augusta
+		Desc.pParentTransform = { nullptr }; // Augusta
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxPropAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_BurstWeapon"));
+		Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+		Desc.strBoneName = "WeaponProp02";
 		Desc.eWeaponType = WEAPONTYPE::ANIM;
 		Desc.vScale = vScale;
 		Desc.vRotation = vRotation;

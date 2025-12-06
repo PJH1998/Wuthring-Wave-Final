@@ -19,12 +19,11 @@ HRESULT CModel_Manager::Initialize(_uint iMaxLevel)
 	_float fSize = 0.01f;
 	XMStoreFloat4x4(&m_PreTransformMatrix, XMMatrixScaling(fSize, fSize, fSize));
 #ifndef _DEBUG
-	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 60, 20);
-	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 45, 10);
-	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 25, 6);
-	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 10, 3);
+	m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 70, 20);
+	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 55, 10);
+	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 35, 6);
+	m_pBufferPool[3] = CBufferPool::Create(m_pDevice, m_pContext, 20, 3);
 #else
-	
 		m_pBufferPool[0] = CBufferPool::Create(m_pDevice, m_pContext, 256, sizeof(VTXMESH));
 	m_pBufferPool[1] = CBufferPool::Create(m_pDevice, m_pContext, 128, sizeof(VTXMESH));
 	m_pBufferPool[2] = CBufferPool::Create(m_pDevice, m_pContext, 64, sizeof(VTXMESH));
@@ -53,21 +52,21 @@ void CModel_Manager::Update(_float fTimeDelta)
 	//m_fTotalPlayTime = m_pGameInstance->Get_PlayTime();
 	m_fTotalPlayTime = 0.f;
 	m_iCurrentLoadCnt = 0;
-	//for (_uint i = 0; i < m_DeleteList.size(); ++i)
-	//{
-	//	auto& Data = m_DeleteList[i];
-	//	Data.iLifeCount--;
-	//	if (Data.iLifeCount <= 0)
-	//	{
-	//		m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
-	//		m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
-	//		if (i != m_DeleteList.size() - 1)
-	//			m_DeleteList[i] = m_DeleteList.back();
-	//		m_DeleteList.pop_back();
-	//	}
-	//	else
-	//		i++;
-	//}
+	for (_uint i = 0; i < m_DeleteList.size(); ++i)
+	{
+		auto& Data = m_DeleteList[i];
+		Data.iLifeCount--;
+		if (Data.iLifeCount <= 0)
+		{
+			m_pBufferPool[Data.iLODIndex]->FreeMemory_Vertex(Data.VertexOffset, Data.VertexSize);
+			m_pBufferPool[Data.iLODIndex]->FreeMemory_Index(Data.IndexOffset, Data.IndexSize);
+			if (i != m_DeleteList.size() - 1)
+				m_DeleteList[i] = m_DeleteList.back();
+			m_DeleteList.pop_back();
+		}
+		else
+			i++;
+	}
 
 	if (!m_DelayedNotice.empty())
 	{
@@ -162,36 +161,36 @@ void CModel_Manager::Update(_float fTimeDelta)
 	if (m_iSearchIndex == m_ModelPrototypes[m_iCurrentLevel].end())
 		m_iSearchIndex = m_ModelPrototypes[m_iCurrentLevel].begin();
 	_uint iCheckCount = { 0 };
-	//while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes[m_iCurrentLevel].end())
-	//{
-	//	CModel_Streaming* pModel = m_iSearchIndex->second;
-	//	for (_uint i = 0; i < 3; ++i)
-	//	{
-	//		if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
-	//		{
-	//			if (pModel->Get_MeshDesc(0)[i].empty())
-	//				continue;
-	//			vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
-	//			if (pMeshVector->empty())
-	//				continue;
-	//			for (auto& pDesc : *pMeshVector)
-	//			{
-	//				DELETE_DATA Data{};
-	//				Data.iLifeCount = 3;
-	//				Data.iLODIndex = i;
-	//				Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
-	//				Data.IndexSize = pDesc.IndexSize;
-	//				Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
-	//				Data.VertexSize = pDesc.VertexSize;
+	while (iCheckCount < m_iCheckPerFrame && m_iSearchIndex != m_ModelPrototypes[m_iCurrentLevel].end())
+	{
+		CModel_Streaming* pModel = m_iSearchIndex->second;
+		for (_uint i = 0; i < 3; ++i)
+		{
+			if (pModel->Is_RenderTimeOver(i) && pModel->Get_MeshState(i) == LOADSTATE::LOADED)
+			{
+				if (pModel->Get_MeshDesc(0)[i].empty())
+					continue;
+				vector<SHARED_DATA_DESC>* pMeshVector = pModel->Get_MeshDesc(i);
+				if (pMeshVector->empty())
+					continue;
+				for (auto& pDesc : *pMeshVector)
+				{
+					DELETE_DATA Data{};
+					Data.iLifeCount = 3;
+					Data.iLODIndex = i;
+					Data.IndexOffset = pDesc.IndexOffset * sizeof(_uint);
+					Data.IndexSize = pDesc.IndexSize;
+					Data.VertexOffset = pDesc.VertexOffset * sizeof(VTXMESH);
+					Data.VertexSize = pDesc.VertexSize;
 
-	//				m_DeleteList.push_back(Data);
-	//			}
-	//			pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
-	//		}
-	//	}
-	//	m_iSearchIndex++;
-	//	iCheckCount++;
-	//}
+					m_DeleteList.push_back(Data);
+				}
+				pModel->Get_MeshState(i).store(LOADSTATE::NOTLOADED);
+			}
+		}
+		m_iSearchIndex++;
+		iCheckCount++;
+	}
 
 }
 
@@ -400,6 +399,10 @@ void CModel_Manager::Clear_Resource(_uint iLevel)
 	for (auto& pPair : m_ModelPrototypes[iLevel])
 		Safe_Release(pPair.second);
 	m_ModelPrototypes[iLevel].clear();
+	m_pBufferPool[0]->Clear_Resource();
+	m_pBufferPool[1]->Clear_Resource();
+	m_pBufferPool[2]->Clear_Resource();
+	m_pBufferPool[3]->Clear_Resource();
 }
 
 void CModel_Manager::Change_Level(_uint iLevel)

@@ -15,7 +15,6 @@ CVIBuffer_Mesh::CVIBuffer_Mesh(const CVIBuffer_Mesh& Prototype)
 
 HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath)
 {
-
     ifstream EMeshFile(pFilePath, ios::binary);
     if (false == EMeshFile.is_open())
     {

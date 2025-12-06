@@ -7,6 +7,9 @@
 #include "Levi_Ray.h"
 #include "Projectile.h"
 #include "Levi_Anchor.h"
+#include "Levi_Drop.h"
+#include "Levi_Wave.h"
+#include "Levi_Augusta.h"
 #include "GameSystem.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -36,6 +39,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
 	m_fHP = pDesc->fHP;
+	//m_fHP = 200.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -52,8 +56,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
-	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 120.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 10.f;
+	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 10.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 80.f;
@@ -72,8 +76,13 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_PreTransform, XMMatrixIdentity());
 	m_isRender = true;
 
+	_float fTemp{};
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", 0.f, &fTemp, true);
 	//m_BowOffsets.push_back(_float3(0.f, 0.f, 0.f)); // attack20
 	//m_BowOffsets.push_back(_float3(XMConvertToRadians(15.f), XMConvertToRadians(0.f), XMConvertToRadians(90.f))); // attack13
+	m_iActionChecker[ACTION::ENCOUNTER] = 2;
+	m_iActionChecker[ACTION::PHASE1_DOWN] = 3;
+	m_iActionChecker[ACTION::PHASE2_DEAD] = 4;
 
 	return S_OK;
 }
@@ -102,7 +111,7 @@ void CLeviatan::Update(_float fTimeDelta)
 	{
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
-			//1페 사망 애니메이션 진행 중
+			//1페 사망 애니메이션 진행 중 + 연출 컷신 진행
 		}
 		else
 			m_pBehaviorTreeCom[m_iPhase]->tick(this);
@@ -112,7 +121,12 @@ void CLeviatan::Update(_float fTimeDelta)
 		AreaAttack(fTimeDelta);
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	if(m_pAnimMachineCom[m_iPhase])
-		m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	{
+		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+		else											// 전투 애니메이션 갱신, facial X
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	}
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	else
 	{
@@ -267,9 +281,13 @@ void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
 	m_fHP = Info.fMaxHp;
+	//m_fHP = 200.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
+	m_pColliderCom->IsActivate(true);
+	m_pRigidBodyCom->IsActivate(true);
+	m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
 	m_isRender = true;
 }
 
@@ -289,6 +307,11 @@ void CLeviatan::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		{
 			//m_pAtkVolumes[ATK_SOCKET::RAY1]->TriggerActivate(Isactive);
 			dynamic_cast<CLevi_Bayonet*>(m_PartObjects[TEXT("Part_Bayonet")])->Attack_Active(IsActive);
+		}
+		else if (wstrPartTag == TEXT("Aug"))
+		{
+			//m_pAtkVolumes[ATK_SOCKET::RAY1]->TriggerActivate(Isactive);
+			dynamic_cast<CLevi_Augusta*>(m_PartObjects[TEXT("Part_Augusta")])->Attack_Active(IsActive);
 		}
 		else if (wstrPartTag == TEXT("G"))
 		{
@@ -330,21 +353,12 @@ void CLeviatan::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		else if (wstrPartTag == TEXT("Bow"))
 		{
 			CLevi_Bow* pBow = dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")]);
-			//m_PartObjects[TEXT("Part_Bow")]->Reset(XMMatrixIdentity(), nullptr);
-			//if(IsActive)
-			//{
-			//	CLevi_Bow::LEVIBOW_DESC Desc{};
-			//	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_7))
-			//	{
-			//		Desc.vOffsetRadian = m_BowOffsets[1];
-			//	}
-			//	else
-			//	{
-			//		Desc.vOffsetRadian = m_BowOffsets[0];
-			//	}
-			//	pBow->Change_Offset(Desc);
-			//}
 			pBow->SetActivate(IsActive);
+		}
+		else if (wstrPartTag == TEXT("Aug"))
+		{
+			m_PartObjects[TEXT("Part_Augusta")]->Reset(XMMatrixIdentity(), nullptr);
+			m_PartObjects[TEXT("Part_Augusta")]->SetActivate(IsActive);
 		}
 		else
 		{
@@ -375,21 +389,26 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
 	if (wstrTypeTag == TEXT("Type"))
 	{
+		COLLISIONLAYER eLayer{ COLLISIONLAYER::END };
 		if (wstrAnimTag == TEXT("ATK"))
 		{
-			for (auto& pATKVolume : m_pAtkVolumes)
-				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
+			eLayer = COLLISIONLAYER::ENEMY_ATTACK;
 		}
 		else if (wstrAnimTag == TEXT("HARD"))
 		{
-			for (auto& pATKVolume : m_pAtkVolumes)
-				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_HARDATTACK);
+			eLayer = COLLISIONLAYER::ENEMY_HARDATTACK;
 		}
 		else if (wstrAnimTag == TEXT("SKILL"))
 		{
-			for (auto& pATKVolume : m_pAtkVolumes)
-				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_SKILL);
+			eLayer = COLLISIONLAYER::ENEMY_SKILL;
 		}
+		else
+			eLayer = COLLISIONLAYER::ENEMY_ATTACK;
+
+		for (auto& pATKVolume : m_pAtkVolumes)
+			pATKVolume->Change_Layer(eLayer);
+		dynamic_cast<CLevi_Bayonet*>(m_PartObjects[TEXT("Part_Bayonet")])->Change_Layer(eLayer);
+		dynamic_cast<CLevi_Augusta*>(m_PartObjects[TEXT("Part_Augusta")])->Change_Volume(eLayer);
 	}
 	else if (wstrTypeTag == TEXT("Look"))
 	{
@@ -463,6 +482,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviSword"), WorldMatrix, &Desc);
 		}
+		else if (wstrAnimTag == TEXT("Wave"))
+		{
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviWave"), m_pTransformCom->Get_WorldMatrix(), nullptr);
+		}
 	}
 	else if (wstrTypeTag == TEXT("SaveMatrix"))
 	{
@@ -470,10 +493,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		_vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
 		//_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		XMStoreFloat3(&m_vSpawnPos[0], vPos - vRight * 4.f);
-		XMStoreFloat3(&m_vSpawnPos[1], vPos - vRight * 2.f);
-		XMStoreFloat3(&m_vSpawnPos[2], vPos + vRight * 2.f);
-		XMStoreFloat3(&m_vSpawnPos[3], vPos + vRight * 4.f);
+		XMStoreFloat3(&m_vSpawnPos[0], vPos - vRight * 6.f);
+		XMStoreFloat3(&m_vSpawnPos[1], vPos - vRight * 3.f);
+		XMStoreFloat3(&m_vSpawnPos[2], vPos + vRight * 3.f);
+		XMStoreFloat3(&m_vSpawnPos[3], vPos + vRight * 6.f);
 	}
 	else if (wstrTypeTag == TEXT("Ray"))
 	{
@@ -518,7 +541,7 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Teleport"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.7f), 1.f);
+		vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
 		m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	}
@@ -657,7 +680,7 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 	pBlackBoard2->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard2->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown(); });
 	pBlackBoard2->Add_Condition("ATKArrange", [this]() ->_bool { return Attack_Arrange(); });
-	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 5.f); });
+	pBlackBoard2->Add_Condition("Attack01", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 10.f); });
 	pBlackBoard2->Add_Condition("Attack03", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 5.f); });
 	pBlackBoard2->Add_Condition("Attack05", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK5, 4.f); });
 	pBlackBoard2->Add_Condition("Attack12", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK12, 6.f); });
@@ -693,6 +716,7 @@ void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 
 	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Bayonet"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Bayonet"), &BayonetDesc)))
 		CRASH("Failed to Add Part : Bayonet");
+	m_PartObjects[TEXT("Part_Bayonet")]->SetActivate(true);
 
 	m_pBowSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	m_pSwordSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
@@ -707,6 +731,18 @@ void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 		CRASH("Failed to Add Part : Bow");
 
 	m_PartObjects[TEXT("Part_Bow")]->SetActivate(false);
+
+	CLevi_Augusta::LEVIAUG_DESC AugDesc{};
+	AugDesc.eLevel = pDesc->eCurLevel;
+	AugDesc.fAttackDmg = m_fAttackDmg;
+	AugDesc.pParentTransform = m_pTransformCom;
+	AugDesc.pSocketMatrix = m_pSwordSocket;
+	AugDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	AugDesc.vOffsetRadian = _float3(XMConvertToRadians(-90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+
+	if (FAILED(CContainerObject::Add_PartObject(TEXT("Part_Augusta"), ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Levi_Augusta"), &AugDesc)))
+		CRASH("Failed to Add Part : Augusta");
+	m_PartObjects[TEXT("Part_Augusta")]->SetActivate(false);
 }
 
 void CLeviatan::Ready_Volumes(LEVIATAN_DESC* pDesc)
@@ -779,13 +815,15 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 	{
 		if (m_iPhase == 0)
 		{
-			m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
+			m_iState = (ENUM_CLASS(TEST_STATE::SPLINT) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
 			m_fHP = 1.f;
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
 		else
+		{
 			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		}
 		return;
 	}
 	if (m_isAnimationFinished)
@@ -793,6 +831,22 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 		_uint iRemainState{};
 		if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 			iRemainState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
+		{
+			m_iAnimCheck++;
+			if(m_iAnimCheck < m_iActionChecker[m_iActionIndex])
+				iRemainState |= ENUM_CLASS(TEST_STATE::SPLINT);
+			else
+			{
+				if(m_iActionIndex == ACTION::PHASE1_DOWN)
+				{
+					m_iPhase = PHASE::TWO;
+					Reset(XMMatrixIdentity(), nullptr);
+				}
+				m_iActionIndex++;
+				m_iAnimCheck = 0;
+			}
+		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
 
 		m_iState |= iRemainState;
@@ -879,8 +933,10 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		if (m_isAggro)
 			return;
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
-		//m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
-		//m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		//조우 연출 시작
+		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
 		m_isAggro = true;
 	}
 }
@@ -897,6 +953,8 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		vPosition.y += 1.f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_fHP -= pDesc->fAttack;
+		if(m_fStamina > 0.f)
+			m_fStamina -= 1.f;
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};
 
@@ -945,6 +1003,17 @@ void CLeviatan::AreaAttack(_float fTimeDelta)
 	if (m_fDropAcc >= 0.5f)
 	{
 		m_fDropAcc = 0.f;
+		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
+		_float fRange = m_pGameInstance->Rand(0.5f, 5.f);
+		_float3 vSpawnPos = m_vTargetPosition;
+		vSpawnPos.x -= sin(fRadius) * fRange;
+		vSpawnPos.y = m_PreTransform.m[3][1];
+		vSpawnPos.z -= cos(fRadius) * fRange;
+
+		CLevi_Drop::DROPRESET Drop{};
+		Drop.vTargetPos = vSpawnPos;
+		Drop.vTargetPos.y = m_pTransformCom->Get_State(STATE::POSITION).m128_f32[1];
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviDrop"), XMMatrixTranslation(vSpawnPos.x, vSpawnPos.y, vSpawnPos.z), &Drop);
 	}
 	if (m_fFenceAcc >= 0.375f)
 	{
@@ -983,13 +1052,20 @@ void CLeviatan::Reset_NotifyInteraction()
 	m_isDist_Interp_Enable = false;
 	m_isRender = true;
 	m_pColliderCom->Set_Gravity(true);
+
 	for (_uint i = 0; i < ATK_SOCKET::ATKEND; i++)
 	{
 		if(nullptr != m_pAtkVolumes[i])
+		{
 			m_pAtkVolumes[i]->SetActivate(false);
+			m_pAtkVolumes[i]->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
+		}
 	}
 	if (nullptr != m_pParryVolume)
 		m_pParryVolume->SetActivate(false);
+
+	//for (auto& Pair : m_PartObjects)
+	//	Pair.second->Reset(XMMatrixIdentity(), nullptr);
 }
 
 _bool CLeviatan::isKnockDown()
@@ -1031,8 +1107,8 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex != ATK_PATTERN::ATTACK20)
-	//	return false;
+	if (iIndex != ATK_PATTERN::BURST)
+		return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{

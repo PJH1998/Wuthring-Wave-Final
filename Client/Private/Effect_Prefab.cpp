@@ -38,11 +38,9 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
        m_vFrames.push_back(pDesc->FrameDesc[i]);
     }
-    //m_vLifeTime = pDesc->vLifeTime;
-    //프리팹 라이프 타임 필요할까 ?
 
-    m_vLifeTime.y = 15.f;
-    m_vLifeTime.x = 0.f;
+    m_vLifeTime = pDesc->vLifeTime;
+
 	m_IsLoop = pDesc->IsLoop;
 	
     m_isActivate = false;

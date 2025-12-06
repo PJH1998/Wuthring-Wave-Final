@@ -17,6 +17,7 @@
 
 #include "MouseController.h"
 #include "Player.h"
+#include "SequencePlayer.h"
 
 
 
@@ -70,6 +71,7 @@ void CGameSystem::Clear_Resource()
 	m_pDirector->Clear_Action();
 	m_pMonsterTable->Clear_NPCData();
 	m_pSonoro_Manager->Clear_Resource();
+	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
 }
 #pragma region PARSER
@@ -95,6 +97,10 @@ void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 void CGameSystem::Clone_Spawners(LEVEL eLevel)
 {
 	m_pParser->Clone_Spawners(eLevel);
+}
+void CGameSystem::Create_MapEffects()
+{
+	m_pParser->Create_MapEffect();
 }
 #pragma endregion
 
@@ -491,6 +497,11 @@ void CGameSystem::Unbind_Grab() // => 몬스터 잡기애니메이션이 거의 
 #pragma endregion
 
 #pragma region PLAYER
+void CGameSystem::Register_SequencePlayer(CSequencePlayer* pSequencePlayer)
+{
+	m_pSequencePlayer = pSequencePlayer;
+	Safe_AddRef(m_pSequencePlayer);
+}
 void CGameSystem::Register_Player(CPlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -512,6 +523,17 @@ const _float4x4* CGameSystem::Get_PlayerMatrixPtr()
 	return m_pPlayer->Get_PlayerMatrixPtr();
 }
 
+// 보스 근처에 소환.
+void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
+{
+	if (nullptr == m_pSequencePlayer || 
+		nullptr == pTransform)
+		return;
+
+	// 
+	m_pSequencePlayer->Summon_Squad_Near_Boss(pTransform);
+}
+
 
 #pragma endregion
 
@@ -530,6 +552,7 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pMonsterTable);
 	Safe_Release(m_pMouseController);
 	Safe_Release(m_pPlayer);
+	Safe_Release(m_pSequencePlayer);
 
 	Release();
 }
