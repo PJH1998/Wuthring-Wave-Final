@@ -1070,10 +1070,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
@@ -1272,7 +1272,7 @@ void CLevel_Map::Create_SlideBox()
 		_float4x4 TT;
 		XMStoreFloat4x4(&TT, Mat);
 		SlideDesc.WorldMatrix = &TT;
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_SlideZone"), m_iLevel, TEXT("Layer_Slide"), &SlideDesc);
+		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_SlideBox"), m_iLevel, TEXT("Layer_Slide"), &SlideDesc);
 	}
 }
 

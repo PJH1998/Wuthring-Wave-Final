@@ -620,9 +620,12 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	{
 		// 1. Condition 추가.
 		m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
-
+		
 		// 2. Data 전달.
 		m_Characters[m_iCurrentCharacterIdx]->Reserve_LandSlide(pClientDesc.eSlideData);
+		
+		//IsStart가 True면 시작지점(SlideData 있음) false면 끝 지점(SlideData 없음)
+		pClientDesc.IsStart;
 	}
 	else if (COLLISIONLAYER::GRAB == eLayer)
 	{

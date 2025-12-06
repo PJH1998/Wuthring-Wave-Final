@@ -7,7 +7,7 @@
 #include "Trigger_Box.h"
 #include "MapObject_Collaps.h"
 #include "AnimationDummy.h"
-
+#include"Slide_Navigation.h"
 #pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
@@ -236,6 +236,8 @@ HRESULT CLoader_Test::Load_Object()
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
+		CSlide_Navigation::Create(m_pDevice, m_pContext));
 	cout << "Object" << endl;
 
     return S_OK;
