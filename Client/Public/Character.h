@@ -142,6 +142,8 @@ public:
 	_matrix Get_WorldMatrix();
 	void Set_Position(_fvector vPos);
 
+	void ColliderActive(_bool IsActive);
+
 #ifdef _DEBUG
 	void Print_LookRay();
 #endif // _DEBUG

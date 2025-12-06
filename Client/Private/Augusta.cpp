@@ -165,6 +165,10 @@ void CAugusta::Late_Update(_float fTimeDelta)
 	{
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
 	}
+	else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
+	{
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+	}
 	else
 	{
 		// 2. QTE인 경우 Collider 갱신하지 않음.
@@ -1329,7 +1333,6 @@ void CAugusta::Update_Physics(_float fTimeDelta)
 		// 3. 저장한 데이터 인자로 전달.
 		OnEvent(CHARACTER_EVENT::LANDSLIDE, &m_PendingSlideData);
 	}
-		
 
 
 	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
@@ -1345,6 +1348,14 @@ void CAugusta::Update_Physics(_float fTimeDelta)
 			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
 		}
 	}
+	else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
+	{
+		
+		// LandSlide 도중에는 SetPosition으로만 업데이트 합니다.
+		//_vector vVelocity = m_pTransformCom->Get_Velocity();
+		//m_pColliderCom->Update(vVelocity / fTimeDelta);
+		//m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	}
 	else
 	{
 		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
@@ -1353,9 +1364,10 @@ void CAugusta::Update_Physics(_float fTimeDelta)
 			m_pColliderCom->Update(vVelocity / fTimeDelta);
 		else
 			m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
-		// 6. Land Check
-		m_IsLand = Is_LandCollider();
 	}
+
+	// 6. Land Check
+	m_IsLand = Is_LandCollider();
 }
 
 

@@ -41,8 +41,16 @@ void CAugustaGroundLandSlide::OnEnter(void* pArg)
 	// 5. 중력 끕니다. => 정해진 경로로 이동할 것이므로.
 	m_pAugusta->Set_Gravity(false);
 
+	m_pAugusta->ColliderActive(false);
 	// 6. 현재 위치를 받아옵니다.
 	XMStoreFloat3(&m_vStart, m_pAugusta->Get_Position());
+
+	// 7. Rotate
+	_vector vCurrentPos = m_pAugusta->Get_Position();						// 현재 캐릭터 위치
+	_vector vTargetPos = XMLoadFloat3(&m_SlideData.WayPoints[m_iWayPoint]); // 목표 WayPoint
+
+	_vector vDir = XMVectorSetW(vTargetPos - vCurrentPos, 0.f);			// 목표 방향
+	m_pAugusta->Rotate_Direction(vDir);
 }
 
 void CAugustaGroundLandSlide::OnUpdate(_float fTimeDelta)
@@ -66,10 +74,12 @@ void CAugustaGroundLandSlide::OnUpdate(_float fTimeDelta)
 void CAugustaGroundLandSlide::OnExit()
 {
     CGroundState::OnExit();
+	m_pAugusta->ColliderActive(true);
 	m_pAugusta->Set_Gravity(true);
-	m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
-	m_iWayPoint = 0;
+	//m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 
+	m_iWayPoint = 0;
 	m_SlideData.Reset();
 }
 
@@ -97,20 +107,16 @@ void CAugustaGroundLandSlide::Update_LandAnimation(_float fTimeDelta)
 	}
 
 	// 1. 현재 위치와 목표 위치 계산
-	_vector vCurrentPos = m_pAugusta->Get_Position();						// 현재 캐릭터 위치
-	_vector vTargetPos = XMLoadFloat3(&m_SlideData.WayPoints[m_iWayPoint]); // 목표 WayPoint
+	_vector vCurrentPos = m_pAugusta->Get_Position();						
+	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_SlideData.WayPoints[m_iWayPoint]), 1.f);
 
 	// 2. 방향 벡터 및 거리 계산
 	_vector vDir = vTargetPos - vCurrentPos;			// 목표 방향
 	_float fDist = XMVectorGetX(XMVector3Length(vDir)); // 남은 거리
 
-	// 3. 이번 프레임 이동량 계산
-	_float fMoveStep = 2.f * fTimeDelta;
-
-	// 4. 이동 처리
-	if (fDist <= fMoveStep)
+	// 3. 이동 처리
+	if (fDist <= 0.3f)
 	{
-		// A. 이번 프레임에 목표 지점에 도달하거나 넘어가는 경우
 		m_pAugusta->Set_Position(vTargetPos);
 		m_iWayPoint++; // 다음 WayPoint로 인덱스 증가.
 
@@ -119,12 +125,17 @@ void CAugustaGroundLandSlide::Update_LandAnimation(_float fTimeDelta)
 	}
 	else
 	{
-		// B. 목표 지점까지 거리가 남은 경우
-		vDir = XMVector3Normalize(vDir); // 방향 정규화
+		// 목표 지점까지 거리가 남은 경우?
+		m_pAugusta->Set_Gravity(true);
+		//vDir = XMVectorSetW(XMVector3Normalize(XMVectorSetY(vDir, 0.f)), 0.f); // 방향 정규화
+		vDir = XMVectorSetW(XMVector3Normalize(vDir), 0.f);
+		m_pAugusta->Move_Direction(vDir, fTimeDelta, 1.2f);
 
-		m_pAugusta->Rotate_Direction(vDir);
+		vDir = XMVector3Normalize(XMVectorSetY(vDir, 0.f));
+		m_pAugusta->Rotate_DirectionNoPitchLerp(vDir, fTimeDelta, 3.f);
+		//m_pAugusta->Rotate_DirectionLerp(vDir, fTimeDelta, 0.1f);
 
-		m_pAugusta->Move_Direction(vDir, fTimeDelta, 2.f);
+		
 	}
 
 }
@@ -156,15 +167,18 @@ void CAugustaGroundLandSlide::Check_StateTransition(_float fTimeDelta)
 	{
 		if (EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP == eLandSlideType)
 		{
-			m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP);
+			m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
+			//m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
+			//m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
 			return;
 		}
 
 		if (EAugustaLandSlideType::LANDSLIDE_SPRINT_START == eLandSlideType) // Loop로 이동.
 		{
-			m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP);
+			//m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
+			//m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
 			return;
 		}
 	}

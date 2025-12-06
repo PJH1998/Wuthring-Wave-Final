@@ -284,6 +284,12 @@ void CCharacter::Set_Position(_fvector vPos)
 	m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
+void CCharacter::ColliderActive(_bool IsActive)
+{
+	ASSERT_CRASH(m_pColliderCom);
+	m_pColliderCom->IsActivate(IsActive);
+}
+
 #pragma endregion
 
 #ifdef _DEBUG
@@ -954,18 +960,38 @@ void CCharacter::Rotate_Direction(_fvector vDir)
 
 void CCharacter::Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
-    _vector vDirFlat = XMVectorSetY(vDir, 0.f);
+	_vector vDirFlat = XMVectorSetW(vDir, 0.f);
+    vDirFlat = XMVectorSetY(vDirFlat, 0.f);
     vDirFlat = XMVector3Normalize(vDirFlat);
 
     if (XMVector3Equal(vDirFlat, XMVectorZero()))
         return;
 
-    m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
+	_vector vCurrentLook = m_pTransformCom->Get_State(STATE::LOOK);
+	vCurrentLook = XMVectorSetW(vCurrentLook, 0.f);
+	vCurrentLook = XMVector3Normalize(vCurrentLook);
+
+	_vector vNewLook = XMVectorLerp(vCurrentLook, vDirFlat, fTimeDelta * fSpeed);
+	vNewLook = XMVectorSetW(vNewLook, 0.f); 
+	vNewLook = XMVector3Normalize(vNewLook);
+
+	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	_vector vRight = XMVector3Cross(vWorldUp, vNewLook);
+	vRight = XMVectorSetW(vRight, 0.f);
+	vRight = XMVector3Normalize(vRight);
+
+	_vector vUp = XMVector3Cross(vNewLook, vRight);
+	vUp = XMVectorSetW(vUp, 0.f);
+	vUp = XMVector3Normalize(vUp);
+
+	// 5. Transform에 값 강제 주입
+	m_pTransformCom->Set_State(STATE::RIGHT, vRight);
+	m_pTransformCom->Set_State(STATE::UP, vUp);
+	m_pTransformCom->Set_State(STATE::LOOK, vNewLook);
 }
 
 void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
-
 	_vector vDirFlat = XMVector3Normalize(vDir);
 	if (XMVector3Equal(vDirFlat, XMVectorZero()))
 		return;

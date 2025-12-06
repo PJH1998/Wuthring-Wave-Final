@@ -614,14 +614,19 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	// 충돌하면? => Condition 추가 및 데이터 전달 받기.
 	if (COLLISIONLAYER::SLIDE == eLayer)
 	{
-		// 1. Condition 추가.
-		m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
-		
-		// 2. Data 전달.
-		m_Characters[m_iCurrentCharacterIdx]->Reserve_LandSlide(pClientDesc.eSlideData);
+		if (pClientDesc.IsStart)
+		{
+			// 1. Condition 추가.
+			m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+
+			// 2. Data 전달.
+			m_Characters[m_iCurrentCharacterIdx]->Reserve_LandSlide(pClientDesc.eSlideData);
+		}
+		else
+			m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 		
 		//IsStart가 True면 시작지점(SlideData 있음) false면 끝 지점(SlideData 없음)
-		pClientDesc.IsStart;
+		
 	}
 	else if (COLLISIONLAYER::GRAB == eLayer)
 	{
