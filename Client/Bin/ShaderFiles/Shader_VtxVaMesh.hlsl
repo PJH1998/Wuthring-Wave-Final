@@ -34,7 +34,7 @@ VS_OUT VS_MAIN(VS_IN In)
     float fVatCoordY = In.vVATcoord.y + (g_fTexelSize * g_fFrameCount);
     float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
    
-    float4 vMovement = g_VatTexture.Sample(DefaultSampler, vVatCoord);
+    //float4 vMovement = g_VatTexture.Sample(DefaultSampler, vVatCoord);
     
     float3 vPosition = In.vPosition + vMovement.xyz;
     
