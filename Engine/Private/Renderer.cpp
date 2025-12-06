@@ -227,7 +227,7 @@ void CRenderer::Render()
 	Render_Bloom();		
 	Render_BloomCombined();
 	Render_DistortionObject();
-	Render_Blend(); 
+	Render_Blend();
 	Render_Fog();
 	Render_Distortion();
 	Render_ScreenEffect();
