@@ -4,28 +4,31 @@
 #include "GameSystem.h"
 #include "PlayerStatus.h"
 
+// 플레이어 0, 0, 0 기준 테스트 필요시, 아래 매크로 해제 
+//#define KSTA_UITEST_BASEDONPLAYER
+
 
 CUI_CurveTrace::CUI_CurveTrace(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CGameObject(pDevice, pContext)
+	: CCustom_UI(pDevice, pContext)
 {
 }
 
 CUI_CurveTrace::CUI_CurveTrace(const CUI_CurveTrace& Prototype)
-	: CGameObject(Prototype)
+	: CCustom_UI(Prototype)
 	, m_pGameSystem (CGameSystem::GetInstance())
 {
 }
 
 HRESULT CUI_CurveTrace::Initialize_Prototype()
 {
-	__super::Initialize_Prototype();
+	CGameObject::Initialize_Prototype();
 
 	return S_OK;
 }
 
 HRESULT CUI_CurveTrace::Initialize_Clone(void* pArg)
 {
-	__super::Initialize_Clone(pArg);
+	CGameObject::Initialize_Clone(pArg);
 
 	this->Ready_Components(pArg);
 	PreAssign_Presets();
@@ -33,6 +36,7 @@ HRESULT CUI_CurveTrace::Initialize_Clone(void* pArg)
 
 	m_isActivate = false;
 	m_isClone = true;
+	m_pGameInstance->Add_RootUI(L"UI_Custom_CurveTrace", this);
 
 	return S_OK;
 }
@@ -49,7 +53,7 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	Update_CurveVB();
+	//Update_CurveVB();
 	Update_CurrentColor();
 }
 
@@ -58,6 +62,8 @@ void CUI_CurveTrace::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_CheckReq();
 
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::BLEND, this);
 }
@@ -87,32 +93,44 @@ void CUI_CurveTrace::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isModified = true;
 }
 
+void CUI_CurveTrace::Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration)
+{
+	m_tDesc.vStartPos = vStartPos;
+	m_tDesc.vStartVel = vStartVelocity;
+	m_tDesc.vAcceleration = vAcceleration;
+
+	Update_CurveVB();
+	m_isReqedCurFrame = true;
+}
+
 HRESULT CUI_CurveTrace::Ready_Components(void* pArg)
 {
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
 
-	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace"),
-		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+	if (FAILED(CCustom_UI::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pCurveShaderCom), nullptr)))
 		return E_FAIL;
-	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
-		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
+	if (FAILED(CCustom_UI::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
+		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pCurveVIBufferCom), nullptr)))
 		return E_FAIL;
 
 
 
-	m_pTargetTransformCom = CTransform::Create(m_pDevice, m_pContext);
-	if (FAILED(m_pTargetTransformCom->Initialize_Clone(pArg)))
+	m_pSphereTransformCom = CTransform::Create(m_pDevice, m_pContext);
+	if (FAILED(m_pSphereTransformCom->Initialize_Clone(pArg)))
 		return E_FAIL;
-	m_Components.emplace(TEXT("Com_TargetTransform"), m_pTargetTransformCom);
-	Safe_AddRef(m_pTargetTransformCom);
-	m_pTargetTransformCom->Scale(_float3(5.f, 5.f, 5.f));
+	m_Components.emplace(TEXT("Com_TargetTransform"), m_pSphereTransformCom);
+	Safe_AddRef(m_pSphereTransformCom);
+	m_pSphereTransformCom->Scale(_float3(5.f, 5.f, 5.f));
 
-	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace_Sphere"),
-		TEXT("Com_TargetShader"), reinterpret_cast<CComponent**>(&m_pTargetShaderCom), nullptr)))
+	if (FAILED(CCustom_UI::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace_Sphere"),
+		TEXT("Com_TargetShader"), reinterpret_cast<CComponent**>(&m_pSphereShaderCom), nullptr)))
 		return E_FAIL;
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_VIBuffer_Sphere"),
-		TEXT("Com_TargetVIBuffer"), reinterpret_cast<CComponent**>(&m_pTargetVIBufferCom), nullptr)))
+	if (FAILED(CCustom_UI::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_VIBuffer_Sphere"),
+		TEXT("Com_TargetVIBuffer"), reinterpret_cast<CComponent**>(&m_pSphereVIBufferCom), nullptr)))
 		return E_FAIL;
+
+	return S_OK;
 }
 
 void CUI_CurveTrace::PreAssign_Presets()
@@ -134,9 +152,9 @@ _float3 CUI_CurveTrace::EvalProjectilePos(const _float3& vPosition, const _float
 	// 나중에 계산식 다르면 이거 수정하면 됨
 	_float3 out;
 
-	out.x = vPosition.x + vVelocity.x * fTime + 0.5f * vAcceleration.x * pow(fTime, 2);
-	out.y = vPosition.y + vVelocity.y * fTime + 0.5f * vAcceleration.y * pow(fTime, 2);
-	out.z = vPosition.z + vVelocity.z * fTime + 0.5f * vAcceleration.z * pow(fTime, 2);
+	out.x = vPosition.x + vVelocity.x * fTime + 0.5f * vAcceleration.x * powf(fTime, 2);
+	out.y = vPosition.y + vVelocity.y * fTime + 0.5f * vAcceleration.y * powf(fTime, 2);
+	out.z = vPosition.z + vVelocity.z * fTime + 0.5f * vAcceleration.z * powf(fTime, 2);
 
 	return out;
 };
@@ -177,6 +195,15 @@ _float3 CUI_CurveTrace::CalcSide(_float3& vTan, _float3& vPos)
 	return out;
 }
 
+void CUI_CurveTrace::Update_CheckReq()
+{
+	if (m_isReqedPreFrame && !m_isReqedCurFrame)
+		m_isActivate = false;
+
+	m_isReqedPreFrame = m_isReqedCurFrame;
+	m_isReqedCurFrame = false;
+}
+
 void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플레이어 위치를 고려않고, 플레이어 위치를 중점삼아 쏘는 중.
 {
 	// [1] 파라미터 준비
@@ -185,8 +212,12 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 
 	// ksta : 나중에 타겟 변경 시, 좌표 삽입. 바라보는 방향도 적용된 행렬이 필요함.
 	//		 이는 위치는 해당 오브젝트 위치 기준으로, 방향 등을 비롯한 정보는 카메라 방향을 바라보던가 하는 식으로 따로 하면 될 듯
+
 	//_float4 vRawTargetPos = {};	XMStoreFloat4(&vRawTargetPos, m_pGameSystem->Get_PlayerPosition());			.
+#ifdef KSTA_UITEST_BASEDONPLAYER
 	_matrix matTargetTransform = XMLoadFloat4x4(m_pGameSystem->Get_PlayerMatrixPtr());
+#endif // KSTA_UITEST_BASEDONPLAYER
+
 	//_float3	vTargetPos = *reinterpret_cast<_float3*>(&vRawTargetPos);
 
 	// 유효한 점들을 담을 컨테이너 (시작점 포함)
@@ -205,16 +236,24 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 		_float fNextRatio = (_float)(i + 1) / (_float)iSegmentIndex;	// 다음 점 계산
 		_float fNextTime = fNextRatio * m_tDesc.fMaxTime;
 
-		_float3 vNextPos = EvalProjectilePos(m_tDesc.vStartPos, m_tDesc.vStartVel, m_tDesc.vGravity, fNextTime);	// 다음 점
+		_float3 vNextPos = EvalProjectilePos(m_tDesc.vStartPos, m_tDesc.vStartVel, m_tDesc.vAcceleration, fNextTime);	// 다음 점
 
 		// 레이캐스트 진행
 		_float4 vHitPos4;
 		// 레이는 월드 좌표를 기준으로 비교하여야 함. 플레이어 위치 고려안하면 그냥 플레이어 위치를 중점삼아 이상하게 계산함.
 		// 또한 계산될 위치는 플레이어가 바라보는 방향으로 적용되어야 함.
+
+#ifdef KSTA_UITEST_BASEDONPLAYER
 		_vector vCalcedCurrentWorldPos	= XMVector3TransformCoord(XMLoadFloat3(&vCurrentPos), matTargetTransform);
 		_vector vCalcedNextWorldPos		= XMVector3TransformCoord(XMLoadFloat3(&vNextPos), matTargetTransform);
+#endif // KSTA_UITEST_BASEDONPLAYER
+#ifndef KSTA_UITEST_BASEDONPLAYER
+		_vector vCalcedCurrentWorldPos	= XMVectorSetW(XMLoadFloat3(&vCurrentPos), 1.f);
+		_vector vCalcedNextWorldPos		= XMVectorSetW(XMLoadFloat3(&vNextPos), 1.f);
+#endif // !KSTA_UITEST_BASEDONPLAYER
 
 		_float3 vCurrentWorldPos = {};	XMStoreFloat3(&vCurrentWorldPos, vCalcedCurrentWorldPos);
+
 		_float3 vNextWorldPos = {};		XMStoreFloat3(&vNextWorldPos, vCalcedNextWorldPos);
 
 		_bool isRayDetected = m_pGameInstance->Ray_Cast(XMLoadFloat3(&vCurrentWorldPos), XMLoadFloat3(&vNextWorldPos), &vHitPos4);
@@ -224,11 +263,16 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 		{
 			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점. world
 			// 이거는 다시 플레이어 기준 로컬 좌표로 변환하여 넣어야 함.
+#ifdef KSTA_UITEST_BASEDONPLAYER
 			_vector vCalcedLocalHitPos = XMVector3TransformCoord(XMLoadFloat3(&vHitPos), XMMatrixInverse(nullptr, matTargetTransform));
+#endif // KSTA_UITEST_BASEDONPLAYER
+#ifndef KSTA_UITEST_BASEDONPLAYER
+			_vector vCalcedLocalHitPos = XMVectorSetW(XMLoadFloat3(&vHitPos), 1.f);
+#endif // !KSTA_UITEST_BASEDONPLAYER
 			_float3 vLocalHitPos = {};	XMStoreFloat3(&vLocalHitPos, vCalcedLocalHitPos);
 
 			vecValidPoints.push_back(vLocalHitPos);										// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)		
-			m_pTargetTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
+			m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
 			m_isShowTarget = true;														// 구 활성화
 			break;
 		}
@@ -237,7 +281,7 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 			vecValidPoints.push_back(vNextPos);											// 궤적 리스트에 점 추가.
 			if (i == iSegmentIndex - 1)													// 만약 끝까지 날아갔다면, 마지막 지점에 타겟 표시
 			{
-				m_pTargetTransformCom->Set_State(STATE::POSITION, XMLoadFloat3(&vNextPos));
+				m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat3(&vNextPos));
 				m_isShowTarget = true;
 			}
 		}
@@ -300,7 +344,7 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 	}
 
 	// 버퍼에 데이터 삽입. UpdateVertices 함수는 선분(segment) 개수를 인자로 받으므로, 점의 개수인 iValidCount에서 1을 뺍니다.
-	static_cast<CVIBuffer_CurveTrace*>(m_pVIBufferCom)->UpdateVertices(vecVerts.data(), iValidCount - 1);
+	static_cast<CVIBuffer_CurveTrace*>(m_pCurveVIBufferCom)->UpdateVertices(vecVerts.data(), iValidCount - 1);
 
 	m_isModified = true;
 }
@@ -331,26 +375,35 @@ void CUI_CurveTrace::Render_Curve()
 
 	// ksta : 임시로 플레이어 좌표 가져옴. 나중에 시작 좌표는 픽업한 오브젝트,
 	//		 방향은 카메라가 바라보는 방향으로 픽스 필요
+#ifdef KSTA_UITEST_BASEDONPLAYER
 	_float4x4 playerTransformMatrix = *m_pGameSystem->Get_PlayerMatrixPtr();	// 나중에 
-
-
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &playerTransformMatrix)))
+	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_WorldMatrix", &playerTransformMatrix)))
 		CRASH("Binding_Matrix_Failed");
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+#endif // KSTA_UITEST_BASEDONPLAYER
+
+#ifndef KSTA_UITEST_BASEDONPLAYER
+	_float4x4 matCurveStart = {};
+	XMStoreFloat4x4(&matCurveStart, XMMatrixTranslationFromVector(XMLoadFloat3(&m_tDesc.vStartPos)));
+	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_WorldMatrix", &matCurveStart)))
 		CRASH("Binding_Matrix_Failed");
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+#endif // !KSTA_UITEST_BASEDONPLAYER
+
+
+	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+		CRASH("Binding_Matrix_Failed");
+	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Binding_Matrix_Failed");
 
-	if (FAILED(m_pShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
+	if (FAILED(m_pCurveShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
 		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
+	if (FAILED(m_pCurveShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
 		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
+	if (FAILED(m_pCurveShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
 		CRASH("Binding_Value_Failed");
 
-	m_pShaderCom->Begin(0);
-	m_pVIBufferCom->Bind_Resources();
-	m_pVIBufferCom->Render();
+	m_pCurveShaderCom->Begin(0);
+	m_pCurveVIBufferCom->Bind_Resources();
+	m_pCurveVIBufferCom->Render();
 }
 
 void CUI_CurveTrace::Render_Sphere()
@@ -359,16 +412,16 @@ void CUI_CurveTrace::Render_Sphere()
 		return;
 
 	_float4x4 TargetWorld;
-	XMStoreFloat4x4(&TargetWorld, m_pTargetTransformCom->Get_WorldMatrix());
-	if (FAILED(m_pTargetShaderCom->Bind_Matrix("g_WorldMatrix", &TargetWorld)))
+	XMStoreFloat4x4(&TargetWorld, m_pSphereTransformCom->Get_WorldMatrix());
+	if (FAILED(m_pSphereShaderCom->Bind_Matrix("g_WorldMatrix", &TargetWorld)))
 		CRASH("Binding_Matrix_Failed");
 	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
-	if (FAILED(m_pTargetShaderCom->Bind_Value("g_CamPosition", &vCamPos, sizeof(vCamPos))))
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_CamPosition", &vCamPos, sizeof(vCamPos))))
 		CRASH("Binding_Value_Failed");
 
-	if (FAILED(m_pTargetShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+	if (FAILED(m_pSphereShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Binding_Matrix_Failed");
-	if (FAILED(m_pTargetShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+	if (FAILED(m_pSphereShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Binding_Matrix_Failed");
 
 
@@ -377,16 +430,16 @@ void CUI_CurveTrace::Render_Sphere()
 	_float4 vTargetColor	= m_arrSelectedColor[0];
 	_float4 vHeadColor		= m_arrSelectedColor[1];
 	_float4 vTailColor		= m_arrSelectedColor[2];
-	if (FAILED(m_pTargetShaderCom->Bind_Value("g_BaseColor", &vTargetColor, sizeof(vTargetColor))))
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_BaseColor", &vTargetColor, sizeof(vTargetColor))))
 		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pTargetShaderCom->Bind_Value("g_HeadColor", &vHeadColor, sizeof(vHeadColor))))
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_HeadColor", &vHeadColor, sizeof(vHeadColor))))
 		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pTargetShaderCom->Bind_Value("g_TailColor", &vTailColor, sizeof(vTailColor))))
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_TailColor", &vTailColor, sizeof(vTailColor))))
 		CRASH("Binding_Value_Failed");
 
-	m_pTargetShaderCom->Begin(0);			// Sphere 용 패스 제작
-	m_pTargetVIBufferCom->Bind_Resources();
-	m_pTargetVIBufferCom->Render();
+	m_pSphereShaderCom->Begin(0);			// Sphere 용 패스 제작
+	m_pSphereVIBufferCom->Bind_Resources();
+	m_pSphereVIBufferCom->Render();
 }
 ;
 CUI_CurveTrace* CUI_CurveTrace::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -400,7 +453,7 @@ CUI_CurveTrace* CUI_CurveTrace::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 	return pInstance;
 }
 
-CGameObject* CUI_CurveTrace::Clone(void* pArg)
+CCustom_UI* CUI_CurveTrace::Clone(void* pArg)
 {
 	CUI_CurveTrace* pInstance = new CUI_CurveTrace(*this);
 	if (FAILED(pInstance->Initialize_Clone(pArg)))
@@ -413,11 +466,15 @@ CGameObject* CUI_CurveTrace::Clone(void* pArg)
 
 void CUI_CurveTrace::Free()
 {
-	Safe_Release(m_pShaderCom);
-	Safe_Release(m_pVIBufferCom);
-
-	Safe_Release(m_pTargetTransformCom);
-	Safe_Release(m_pTargetVIBufferCom);
-
 	__super::Free();
+
+	if (m_isClone)
+		m_pGameInstance->Remove_RootUI(L"UI_Custom_CurveTrace");
+
+	Safe_Release(m_pCurveShaderCom);
+	Safe_Release(m_pCurveVIBufferCom);
+
+	Safe_Release(m_pSphereTransformCom);
+	Safe_Release(m_pSphereShaderCom);
+	Safe_Release(m_pSphereVIBufferCom);
 }

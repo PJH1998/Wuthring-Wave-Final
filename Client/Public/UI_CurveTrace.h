@@ -1,17 +1,17 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "Custom_UI.h"
 #include "VIBuffer_CurveTrace.h"
 
 NS_BEGIN(Client)
 class CVIBuffer_CurveTrace;
-class CUI_CurveTrace final : public CGameObject
+class CUI_CurveTrace final : public CCustom_UI
 {
 public:
 	typedef struct tUICurveTraceDesc
 	{
 		_float3 vStartPos;       // 시작 위치
 		_float3 vStartVel;       // 초기 속도
-		_float3 vGravity;        // 중력 가속도
+		_float3 vAcceleration;        // 중력 가속도
 		_float  fMaxTime;        // 궤적을 그릴 최대 시간 (0~fMaxTime)
 		_uint   iSegmentCount;   // 세그먼트 개수 (기준점 = seg+1)
 		_float  fWidth;          // 리본 두께 (월드 단위)
@@ -38,7 +38,8 @@ public:
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override; 
 
 public:
-	void			Req_Disable() { m_isActivate = false; };
+//	void			Req_Disable() { m_isActivate = false; };
+	void			Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration);
 
 private:
 	HRESULT			Ready_Components(void* pArg);
@@ -49,6 +50,8 @@ private:
 	_float3			CalcSide(_float3& vTan, _float3& vPos);
 
 private:
+	void			Update_CheckReq();
+
 	void			Update_CurveVB();
 	void			Update_CurrentColor();
 
@@ -65,13 +68,13 @@ private:
 	class CGameSystem*	m_pGameSystem = { nullptr };
 	
 	/// 나중에 CustomUI로 편입시킬 시 수정 필요. 그쪽에 있는 컴포넌트를 사용 해야 함
-	CShader*				m_pShaderCom = { nullptr };			// Shader_UI_VtxCurveTrace.hlsl		
-	CVIBuffer_CurveTrace*	m_pVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp		
+	CShader*				m_pCurveShaderCom = { nullptr };			// Shader_UI_VtxCurveTrace.hlsl		
+	CVIBuffer_CurveTrace*	m_pCurveVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp		
 
 	// 충돌 인디케이터 구(Sphere) 전용 2차 Transform 컴포넌트 및 VIBuffer
-	CTransform*				m_pTargetTransformCom = { nullptr };// Shader_UI_VtxCurveTrace_Sphere.hlsl		
-	CVIBuffer_Sphere*		m_pTargetVIBufferCom = { nullptr };	// VIBuffer_Sphere.cpp	
-	CShader*				m_pTargetShaderCom = { nullptr };
+	CTransform*				m_pSphereTransformCom = { nullptr };// Shader_UI_VtxCurveTrace_Sphere.hlsl		
+	CVIBuffer_Sphere*		m_pSphereVIBufferCom = { nullptr };	// VIBuffer_Sphere.cpp	
+	CShader*				m_pSphereShaderCom = { nullptr };
 
 	_bool					m_isShowTarget = false;				// 구체 켤 거임? 
 
@@ -82,9 +85,13 @@ private:
 
 	array<_float4, 3>	m_arrSelectedColor = {};
 
+	_bool			m_isReqedCurFrame = false;
+	_bool			m_isReqedPreFrame = false;
+
+
 public:
 	static CUI_CurveTrace*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual CGameObject*	Clone(void* pArg) override;
+	virtual CCustom_UI*		Clone(void* pArg) override;
 	virtual void			Free() override;
 };
 NS_END

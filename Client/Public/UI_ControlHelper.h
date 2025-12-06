@@ -60,6 +60,8 @@ public:
 	void				Attach_ObjectPos_ToMinimap(const _float3& pPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);
 	void				Detach_ObjectPos_ToMinimap(void* pOwner);
 
+	void				Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration);
+
 
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
@@ -89,6 +91,8 @@ private:
 	//CCustom_UI*			m_pRootUI_QTE						= { nullptr };
 
 	CCustom_UI*			m_pRootUI_Ovfl_Palette				= { nullptr };
+
+	CCustom_UI*			m_pRootUI_CurveTrace				= { nullptr };
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };

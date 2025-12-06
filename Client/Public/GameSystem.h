@@ -142,6 +142,13 @@ public:
 	void		Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
 
 
+	// [WIP] 날아갈 궤적 및 충돌 예상 지점에의 구체를 표시합니다. 계산에 필요한 정보들의 매 프레임 갱신 필요.
+	// - vStartPos : 시작 위치. 즉 오브젝트의 위치 + 오프셋 등
+	// - vStartVelocity : 시작 속도. 즉, 던지는 방향과 그 세기(power)
+	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
+	void		Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration);
+
+
 #pragma endregion
 
 #pragma region PLAYER STATUS

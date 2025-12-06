@@ -310,6 +310,11 @@ void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
 	m_pUI_ControlHelper->Detach_ObjectPos_ToMinimap(pOwner);
 }
 
+void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration)
+{
+	m_pUI_ControlHelper->Req_Render_CurveTrace(vStartPos, vStartVelocity, vAcceleration);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);

@@ -1063,33 +1063,54 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
 		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 	{
-		CUI_CurveTrace::UI_CURVETRACE_DESC tDesc = {};
-		//tDesc.vStartPos		= _float3(0.f, 0.f,  0.f);	
-		tDesc.vStartPos		= _float3(0.f, 0.f,  0.f);	
-		tDesc.vStartVel		= _float3(0.f, 10.f, 10.f);
-		tDesc.vGravity		= _float3(0.f, -9.8f, 0.f);
-		tDesc.fMaxTime		= 4.f;
-		tDesc.iSegmentCount	= 50;
-		tDesc.fWidth		= 0.25f;
-		tDesc.isUseCustomColor = true;
-		tDesc.vBaseColor	= _float4(1.f, 1.f, 1.f, 1.f);
-		tDesc.vHeadColor	= _float4(1.f, 0.f, 0.f, 1.f);
-		tDesc.vTailColor	= _float4(.8f, 0.f, 0.f, 1.f);
-
-		_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-		_vector vSca = XMVectorSet(2.f, 2.f, 2.f, 1.f);
-		_matrix matPos = XMMatrixScalingFromVector(vSca) * XMMatrixTranslationFromVector(vPos);
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_CurveTrace", matPos, &tDesc);
-
-
-		isCurveTraceOn = false;
+		isCurveTraceOn = true;
+		std::cout << "[Level_Test::Testing_UI] CurveTrace On" << std::endl;
 	}
 	else if (isCurveTraceOn &&
 		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
 		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 	{
+		isCurveTraceOn = false;
+		std::cout << "[Level_Test::Testing_UI] CurveTrace Off" << std::endl;
+	}
 
 
+	if (isCurveTraceOn)
+	{
+		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
+
+		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
+		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
+
+		_float fDEBUG_Radius = 10.f;
+		_float fDEBUG_RotateX = sinf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
+		_float fDEBUG_RotateZ = cosf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
+
+		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
+		_float3 vStartVel		= _float3(fDEBUG_RotateX, fDEBUG_Radius, fDEBUG_RotateZ);
+		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
+		
+		
+		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
+
+
+
+		//CUI_CurveTrace::UI_CURVETRACE_DESC tDesc = {};
+		//tDesc.vStartPos		= _float3(0.f, 0.f,  0.f);	
+		//tDesc.vStartVel		= _float3(0.f, 10.f, 10.f);
+		//tDesc.vAcceleration	= _float3(0.f, -9.8f, 0.f);
+		//tDesc.fMaxTime		= 4.f;
+		//tDesc.iSegmentCount	= 50;
+		//tDesc.fWidth		= 0.25f;
+		//tDesc.isUseCustomColor = true;
+		//tDesc.vBaseColor	= _float4(1.f, 1.f, 1.f, 1.f);
+		//tDesc.vHeadColor	= _float4(1.f, 0.f, 0.f, 1.f);
+		//tDesc.vTailColor	= _float4(.8f, 0.f, 0.f, 1.f);
+		//
+		//_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+		//_vector vSca = XMVectorSet(2.f, 2.f, 2.f, 1.f);
+		//_matrix matPos = XMMatrixScalingFromVector(vSca) * XMMatrixTranslationFromVector(vPos);
+		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_CurveTrace", matPos, &tDesc);
 	}
 
 #pragma endregion

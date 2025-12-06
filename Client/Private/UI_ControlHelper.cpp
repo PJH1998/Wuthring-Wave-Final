@@ -20,6 +20,7 @@
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_CurveTrace.h"
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -70,6 +71,8 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 
 	// MiniGames
 	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
+
+	m_pRootUI_CurveTrace			= Find_RootUI (L"UI_Custom_CurveTrace");
 }
 
 CCustom_UI* CUI_ControlHelper::Find_RootUI(_wstring strName)
@@ -413,6 +416,39 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 		return;
 
 	pRootUI->Detach_ObjectPos(pOwner);
+}
+
+void CUI_ControlHelper::Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration)
+{
+	CUI_CurveTrace* pRootUI = dynamic_cast<CUI_CurveTrace*>(m_pRootUI_CurveTrace);
+
+	if (pRootUI == nullptr)
+		return;
+	if (pRootUI->IsActivate() == false)
+	{
+		CUI_CurveTrace::UI_CURVETRACE_DESC tDesc = {};
+		tDesc.vStartPos = vStartPos;// _float3(0.f, 0.f, 0.f);
+		tDesc.vStartVel = vStartVelocity;// _float3(0.f, 10.f, 10.f);
+		tDesc.vAcceleration = vAcceleration;// _float3(0.f, -9.8f, 0.f);
+		tDesc.fMaxTime = 4.f;
+		tDesc.iSegmentCount = 50;
+		tDesc.fWidth = 0.25f;
+		tDesc.isUseCustomColor = true;
+		tDesc.vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+		tDesc.vHeadColor = _float4(1.f, 0.f, 0.f, 1.f);
+		tDesc.vTailColor = _float4(.8f, 0.f, 0.f, 1.f);
+
+		_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+		_vector vSca = XMVectorSet(2.f, 2.f, 2.f, 1.f);
+		_matrix matPos = XMMatrixScalingFromVector(vSca) * XMMatrixTranslationFromVector(vPos);
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_CurveTrace", matPos, &tDesc);
+
+		return;
+	}
+	else
+	{
+		pRootUI->Req_Render_CurveTrace(vStartPos, vStartVelocity, vAcceleration);
+	}
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
