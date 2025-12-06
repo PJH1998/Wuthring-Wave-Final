@@ -484,6 +484,9 @@
     <Filter Include="03. GameObject\Actor\SequencePlayer\State\Ground\Lupa">
       <UniqueIdentifier>{37295868-08db-46f3-88ad-9604095f57f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\FXVA">
+      <UniqueIdentifier>{a0858081-8918-47d3-874e-57bd9194d4a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1249,6 +1252,9 @@
     <ClInclude Include="..\Public\NPC_Griffin.h" />
     <ClInclude Include="..\Public\MapObject_SlideZone.h" />
     <ClInclude Include="..\Public\Slide_Navigation.h" />
+    <ClInclude Include="..\Public\Effect_VA.h">
+      <Filter>03. GameObject\Effect\Prefab\FXVA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1968,6 +1974,9 @@
     <ClCompile Include="..\Private\NPC_Griffin.cpp" />
     <ClCompile Include="..\Private\MapObject_SlideZone.cpp" />
     <ClCompile Include="..\Private\Slide_Navigation.cpp" />
+    <ClCompile Include="..\Private\Effect_VA.cpp">
+      <Filter>03. GameObject\Effect\Prefab\FXVA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -2063,6 +2072,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance_FireFly.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxVaMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
