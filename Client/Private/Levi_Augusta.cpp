@@ -43,7 +43,8 @@ HRESULT CLevi_Augusta::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 	m_vBaseColor = _float4(0.15f, 0.1f, 0.15f, 1.f);
-	m_pModelCom->Play_Animation_CPU("Burst01", 0.f, nullptr, false, false, false, false);
+	_float temp{};
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,"Burst01", 0.f, &temp, false, false, false, false);
     return S_OK;
 }
 
@@ -153,6 +154,11 @@ void CLevi_Augusta::Ready_Components(const LEVIAUG_DESC* pDesc)
         , TEXT("Prototype_Component_Shader_VtxAnimMesh"), TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         CRASH("Shader");
 
+	// Com_ComputeShader
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
+		, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"), TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+		CRASH("Leviatan/Com_ComputeShader");
+
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->eLevel)
         , TEXT("Prototype_Component_Model_Augusta_SkillWeapon"), TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
@@ -235,4 +241,5 @@ void CLevi_Augusta::Free()
 	Safe_Release(m_pAttackVolume);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
+	Safe_Release(m_pComputeShaderCom);
 }
