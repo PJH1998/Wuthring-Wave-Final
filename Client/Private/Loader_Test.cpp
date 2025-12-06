@@ -138,8 +138,8 @@ HRESULT CLoader_Test::Initialize()
 	
 	
 	
-    //m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_Leviatan(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Leviatan(); Complete_Load(); });
 	
     m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 	
@@ -476,13 +476,13 @@ HRESULT CLoader_Test::Load_Leviatan()
 		CRASH("Prototype Create Failed");
 
 	// Prototype_Component_Model_Leviatan_Projectile
-	PreWeaponMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(90.f));
+	PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationX(XMConvertToRadians(90.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Projectile"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Projectile/SwordProjectile.dat"))))
 		CRASH("Prototype Create Failed");
 
 	// Prototype_Component_Model_Leviatan_SwordAura
-	PreWeaponMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_SwordAura"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/SwordAura/SwordAura.dat"))))
 		CRASH("Prototype Create Failed");
