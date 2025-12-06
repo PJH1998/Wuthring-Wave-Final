@@ -44,7 +44,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
 	// 시작 프레임 하나 실행.
 	m_strCurrentAnimation = "AppearanceIdle";
 	m_strPreAnimation = m_strCurrentAnimation;
-	m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
+	//m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
     return S_OK;
 }
 
@@ -65,7 +65,8 @@ void CLogoMaleRover::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+	//m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+	m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
 
 	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
 }

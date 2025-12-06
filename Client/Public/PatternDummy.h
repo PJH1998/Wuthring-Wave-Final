@@ -73,7 +73,7 @@ private:
 	void						Register_AllNotifies(const _string& strFolderPath);
 	void						Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
 	void						Effect_Active(const _wstring& wStrEffectTag);
-	void						Object_Func(const _wstring& wStrObjectTag) {};
+	void						Object_Func(const _wstring& wStrObjectTag);
 
 public:
 	static		CPatternDummy*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -31,6 +31,7 @@
 #include"Mesh_Instance_FireFly.h"
 #include"Model_Instance_FireFly.h"
 #include "HdrTexture.h"
+#include "VAMesh.h"
 // ==================
 
 NS_BEGIN(Engine)

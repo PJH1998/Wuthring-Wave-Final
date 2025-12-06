@@ -293,7 +293,7 @@ void CRover::Render_Shadow()
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::SHADOW));
 
 		m_pModelCom->Render(i);
 	}
@@ -1045,6 +1045,10 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->facialComputeShaderData.first)
 		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
+
+#ifdef _DEBUG
+	cout << "Rover Model Clone : " << endl;
+#endif // _DEBUG
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
