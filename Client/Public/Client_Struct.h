@@ -140,11 +140,12 @@ namespace Client
 		_wstring strEffectTag = {};		// 호출할 이펙트 태그
 		TEXT_COLOR_TYPE eType{};		// 공격자 속성
 		ATTACKVOULME_DIR eDir{};
-		OBJECTTYPE eObjectType { OBJECTTYPE::END }; // 어떤 오브젝트인지 넣어서 판단하게. ANCHOR(고정), PULL(당긴다)
+		OBJECTTYPE eObjectType{ OBJECTTYPE::END }; // 어떤 오브젝트인지 넣어서 판단하게. ANCHOR(고정), PULL(당긴다)
 		// Shaking이나, HitStop? 이런 거.
 		const _float4x4* pSocketMatrix = { nullptr }; // Grap 시 플레이어가 붙을 Matrix Pointer?
 
 		SLIDE_DATA eSlideData;
+		_bool		IsStart = { false };
 	}CALLBACK_CLIENT;
 
 

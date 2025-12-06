@@ -90,7 +90,9 @@ public:
 #pragma region POOLING_MANAGER
 	_uint			Get_NumThread();
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
+	HRESULT		Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
+	HRESULT		Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
 	// Thread Work Assign
 	void			Add_Work(function<void()> Work);
 	// Render Work Assing
@@ -192,6 +194,7 @@ public:
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
+	void					IsChangeLevel_ForPhysicX(_bool isChangeLevel);
 	void					SetUp_PhysicsSystem();
 	void					SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
 	void					SetUp_ObjectFilter(_uint iSrc, _uint iDst);

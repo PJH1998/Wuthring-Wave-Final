@@ -9,11 +9,12 @@ texture2D g_DistortionTexture;
 
 //색상
 float g_Sweep;
+float g_SweepSpeed;
 float g_SweepWitdh;
 float g_Soft = 0.3f; //툴에서 받아올 수 있게 해주자.
 
 //공용
-int g_Dir; //안쓰는중
+int g_Dir; 
 float g_Time;
 float g_Alpha;
 float2 g_LifeTime;
@@ -966,6 +967,282 @@ PS_OUT PS_X_OUT(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_SkyTrail(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    float2 UV = In.vTexcoord;
+
+    float2 MaskUV = UV;
+    MaskUV.x = frac(MaskUV.x + g_MaskSpeed * g_Time);
+    
+    float MaskR = g_MaskTexture.Sample(ClampSampler, MaskUV).r;
+
+    if (MaskR < 0.3f)
+        discard;
+
+    float fVisibleY;
+
+    fVisibleY = 1.f - step(g_Sweep, UV.y);
+
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
+    
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    float fAlpha = fVisibleY * MaskR;
+
+    if (fAlpha < 0.2f)
+        discard;
+
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
+    
+    if(1.f - fRatio <= 0.4f)
+        fAlpha *= 1.f - fRatio;
+    
+    Out.vDiffuse = float4(vColor.rgb, fAlpha);
+
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+
+    Out.vDiffuse.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
+    return Out;
+}
+
+PS_OUT PS_SkyTrailColor(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    float2 UV = In.vTexcoord;
+
+    //float2 MaskUV = UV;
+    //MaskUV.x = frac(MaskUV.x + g_MaskSpeed * g_Time);
+    
+    float Center = 0.5f;
+    float Dx = UV.y - Center;
+    float Dist = abs(Dx); // 중심에서 거리
+
+    float Radial = frac(Dist + g_MaskSpeed * g_Time);
+
+    float2 FlowUV;
+    FlowUV.x = UV.x;
+    FlowUV.y = Radial;
+    
+    float fVisibleY;
+
+    fVisibleY = step(1.f - g_Sweep, UV.y);
+
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(FlowUV.x, saturate(FlowUV.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(FlowUV.y, saturate(FlowUV.x)));
+    
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    vColor.a = fVisibleY;
+
+    if (vColor.a < 0.2f)
+        discard;
+
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
+    
+    if (1.f - fRatio <= 0.4f)
+        vColor.a *= 1.f - fRatio;
+    
+    Out.vDiffuse = vColor;
+
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+
+    Out.vDiffuse.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
+    return Out;
+}
+
+PS_OUT PS_SkyTrailMask_X(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    float2 UV = In.vTexcoord;
+    float Radial = frac(UV.x + g_MaskSpeed * g_Time);
+
+    float2 FlowUV;
+    FlowUV.x = Radial;
+    FlowUV.y = UV.y;
+    
+    float MaskR = g_MaskTexture.Sample(ClampSampler, FlowUV).r;
+    
+    if(MaskR < 0.3f)
+        discard;
+    
+    float fVisibleY;
+
+    fVisibleY = step(1.f - g_Sweep, UV.y);
+
+    float fVisibleX;
+
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.x);
+
+    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, 1.f - FlowUV.x);
+
+    fVisibleX = fTailFad * fHeadFad;
+
+    float4 vColor;
+
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
+    
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    float fAlpha = saturate(fVisibleY * fVisibleX * MaskR);
+
+    if (fAlpha < 0.2f)
+        discard;
+
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
+    
+    if (1.f - fRatio <= 0.4f)
+        fAlpha *= 1.f - fRatio;
+    
+    Out.vDiffuse = float4(vColor.rgb, fAlpha);
+
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+
+    Out.vDiffuse.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
+    return Out;
+}
+
+PS_OUT PS_SkyTrailMask_Y(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    float2 UV = In.vTexcoord;
+    float Radial = frac(UV.y + g_MaskSpeed * g_Time);
+
+    float2 FlowUV;
+    FlowUV.x = UV.x;
+    FlowUV.y = Radial;
+    
+    float MaskR = g_MaskTexture.Sample(ClampSampler, FlowUV).r;
+    
+    if (MaskR < 0.3f)
+        discard;
+    
+    float fVisible;
+
+    fVisible = step(1.f - g_Sweep, UV.y);
+
+    float fVisibleY;
+
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.y);
+
+    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, 1.f - FlowUV.y);
+
+    fVisibleY = fTailFad * fHeadFad;
+
+    float4 vColor;
+
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
+    
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    float fAlpha = saturate(fVisibleY * fVisible * MaskR);
+
+    if (fAlpha < 0.2f)
+        discard;
+
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
+    
+    if (1.f - fRatio <= 0.4f)
+        fAlpha *= 1.f - fRatio;
+    
+    Out.vDiffuse = float4(vColor.rgb, fAlpha);
+
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+
+    Out.vDiffuse.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
+    
+    return Out;
+}
+
+
+
+
 // ==Test==
 technique11 DefaultTechnique
 {
@@ -1121,5 +1398,49 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_DefaultMeshRender();
+    }
+
+    pass TrailSky // 14
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SkyTrail();
+    }
+
+    pass TrailSkyColor // 15
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SkyTrailColor();
+    }
+
+    pass SkyTrailMaskX // 16
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SkyTrailMask_X();
+    }
+
+    pass SkyTrailMaskY // 17
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SkyTrailMask_Y();
     }
 }

@@ -70,6 +70,9 @@ void CContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& i
 
 void CContactListenerImpl::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
 {
+	if (true == m_isChangeLevel)
+		return;
+
 	pair<BodyID, BodyID> PairID;
 	PairID.first = inSubShapePair.GetBody1ID();
 	PairID.second = inSubShapePair.GetBody2ID();

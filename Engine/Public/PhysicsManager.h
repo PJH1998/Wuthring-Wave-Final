@@ -19,6 +19,9 @@ private:
 	virtual ~CPhysicsManager() = default;
 
 public:
+	void				IsChangeLevel(_bool isChangeLevel);
+
+public:
 #pragma region Init
 	// Physics System 세팅
 	void				SetUp_PhysicsSystem();

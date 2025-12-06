@@ -2,7 +2,9 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-float4 g_GrassColor = float4(0.7019f, 0.24705f, 0.24705f, 1.f);
+//float4 g_GrassColor = float4(0.7019f, 0.24705f, 0.24705f, 1.f);
+float4 g_GrassColor = float4(0.7844f, 0.4567f, 0.1137f, 1.f);
+float g_fGrassColorIntensity = 0.53f;
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
@@ -672,7 +674,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_MA(PS_IN In)
     
     float4 vMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    //float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    float4 vDiffuse = lerp(vRockDiffuse, lerp(vGrassDiffuse, g_GrassColor, g_fGrassColorIntensity), vMask.r);
   
     float3 vNormalDesc = lerp(vMainNormal.xyz, vGrasNormal.xyz, vMask.r);
   //  float3 vNormalDesc = lerp(lerp(vMainNormal.xyz, vDetailNormal.xyz, vMask.b), vGrasNormal.xyz, vMask.r);
@@ -726,7 +729,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_GREEN(PS_IN In)
     
     float4 vMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    //float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    float4 vDiffuse = lerp(vRockDiffuse, lerp(vGrassDiffuse, g_GrassColor, g_fGrassColorIntensity), vMask.r);
     
     float3 vNormalDesc = lerp(lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.g), vGrasNormal.xyz, vMask.r);
 
@@ -778,7 +782,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_BLUE(PS_IN In)
     
     float4 vMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    //float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    float4 vDiffuse = lerp(vRockDiffuse, lerp(vGrassDiffuse, g_GrassColor, g_fGrassColorIntensity), vMask.r);
     
     float3 vNormalDesc = lerp(lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.b), vGrasNormal.xyz, vMask.r);
     
@@ -881,7 +886,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_NONDETAIL(PS_IN In)
     
     float4 vMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
     
-    float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    //float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
+    float4 vDiffuse = lerp(vRockDiffuse, lerp(vGrassDiffuse, g_GrassColor, g_fGrassColorIntensity), vMask.r);
     
     float3 vNormalDesc = lerp(vMainNormal.xyz, vGrasNormal.xyz, vMask.r);
     

@@ -14,6 +14,7 @@
 #include"MapObject_Water.h"
 #include"MapObject_Collaps.h"
 #include"MapObject_FireFly.h"
+#include"Slide_Navigation.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -35,6 +36,7 @@
 #include "NPCInstancing.h"
 #include "NPCCell.h"
 #include "Napal.h"
+#include"NPC_Griffin.h"
 #pragma endregion
 
 #pragma region UI
@@ -147,7 +149,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 {
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1205_second/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1206_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
@@ -224,6 +226,10 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_FireFly"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance_FireFly.hlsl"), VTXMESHINSTANCE_FIREFLY::Elements, VTXMESHINSTANCE_FIREFLY::iNumElements));
+	
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
+		CSlide_Navigation::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 	return S_OK;
 }
@@ -1058,6 +1064,19 @@ HRESULT CLoader_GamePlay::Load_NPC()
 		CNapal::Create(m_pDevice, m_pContext))))
 		CRASH("NPCCell Prototype Create Failed");
 
+	// Prototype_Component_AnimMachine_FalseSovereign
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		CNPC_Griffin::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_NPCGriffin"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
+		CRASH("Prototype Create Failed");
 	return S_OK;
 }
 #pragma endregion

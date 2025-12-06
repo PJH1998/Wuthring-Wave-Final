@@ -207,6 +207,9 @@
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
+    <ClInclude Include="..\Public\MapObject_SlideZone.h" />
+    <ClInclude Include="..\Public\Slide_Navigation.h" />
+    <ClInclude Include="..\Public\NPC_Griffin.h" />
     <ClInclude Include="..\Public\SequenceAugusta.h" />
     <ClInclude Include="..\Public\SequenceAugustaFactory.h" />
     <ClInclude Include="..\Public\SequenceAugustaGroundSkill.h" />
@@ -479,6 +482,9 @@
     <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
+    <ClCompile Include="..\Private\MapObject_SlideZone.cpp" />
+    <ClCompile Include="..\Private\Slide_Navigation.cpp" />
+    <ClCompile Include="..\Private\NPC_Griffin.cpp" />
     <ClCompile Include="..\Private\SequenceAugusta.cpp" />
     <ClCompile Include="..\Private\SequenceAugustaFactory.cpp" />
     <ClCompile Include="..\Private\SequenceAugustaGroundSkill.cpp" />
