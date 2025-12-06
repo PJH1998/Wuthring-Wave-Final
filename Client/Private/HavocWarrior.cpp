@@ -48,6 +48,8 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	return S_OK;
 }
 
