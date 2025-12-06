@@ -106,9 +106,8 @@ public:
 	void		Enable_Parried();
 
 	// 몬스터 HP바 표시를 위한 정보를 할당합니다. / &tDesc : 필요 정보 구조체
-	// 살아 있는 동안 매 프레임 호출이 필요하며, 요구 구조체 내의 iMonsterPtrKey 는 몹 주소를 reinterpret_cast 를 통해 할당해주시면 됩니다.
+	// 살아 있는 동안 매 프레임 호출이 필요하며, 요구 구조체 내의 몬스터 키는 몹 주소를 할당해주시면 됩니다.
 	void		Update_MobStatus(const UI_MOBINFO_DESC& tDesc);
-	// 몬스터, 객체 등을 미니맵에 띄우기 위한 정보를 할당합니다.
 
 
 	// 탭 유틸리티 UI를 켭니다. /  iCurSelectedUtilityIndex : 현재 선택중인 유틸리티 인덱스 (UI_TAB_UTILITY Enum을 따름)
@@ -146,7 +145,7 @@ public:
 
 	// [WIP] 날아갈 궤적 및 충돌 예상 지점에의 구체를 표시합니다. 계산에 필요한 정보들의 매 프레임 갱신 필요.
 	// - vStartPos : 시작 위치. 즉 오브젝트의 위치 + 오프셋 등
-	// - vStartVelocity : 시작 속도. 즉, 던지는 방향과 그 세기(power)
+	// - vStartVelocity : 시작 속도. 즉, 던지려는 방향과 그 세기(power)
 	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
 	// ===== 이하는 필요 시 수정 ===== 
 	// - fMaxTime : 해당 값 기준 몇초까지 날아갈 거리만큼 리본메쉬를 그릴 것인지

@@ -392,7 +392,7 @@ void CUI_ControlHelper::Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPositi
 {
 	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
 
-	if (pRootUI)
+	if (!pRootUI)
 		return;
 
 	pRootUI->Bind_ObjectPos_PerFrame(vPosition, eType);
@@ -402,7 +402,7 @@ void CUI_ControlHelper::Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_
 {
 	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
 
-	if (pRootUI)
+	if (!pRootUI)
 		return;
 
 	pRootUI->Attach_ObjectPos(vPosition, eType, pOwner);
@@ -412,7 +412,7 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 {
 	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
 
-	if (pRootUI)
+	if (!pRootUI)
 		return;
 
 	pRootUI->Detach_ObjectPos(pOwner);

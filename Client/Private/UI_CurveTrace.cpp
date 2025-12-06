@@ -55,6 +55,9 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 
 	//Update_CurveVB();
 	Update_CurrentColor();
+	
+
+	m_fTimeElapsed += fTimeDelta;
 }
 
 
@@ -113,6 +116,7 @@ HRESULT CUI_CurveTrace::Ready_Components(void* pArg)
 	if (FAILED(CCustom_UI::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pCurveVIBufferCom), nullptr)))
 		return E_FAIL;
+	
 
 
 
@@ -401,6 +405,10 @@ void CUI_CurveTrace::Render_Curve()
 	if (FAILED(m_pCurveShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
 		CRASH("Binding_Value_Failed");
 
+	if (FAILED(m_pCurveShaderCom->Bind_Value("g_TimeElapsed", &m_fTimeElapsed, sizeof(m_fTimeElapsed))))
+		CRASH("Binding_Value_Failed");
+
+
 	m_pCurveShaderCom->Begin(0);
 	m_pCurveVIBufferCom->Bind_Resources();
 	m_pCurveVIBufferCom->Render();
@@ -424,18 +432,16 @@ void CUI_CurveTrace::Render_Sphere()
 	if (FAILED(m_pSphereShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Binding_Matrix_Failed");
 
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pSphereShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
+		CRASH("Binding_Value_Failed");
 
-	// 어차피 Curve랑 동일한 색 쓸건데  굳이 재할당 필요 없을듯?
+	if (FAILED(m_pCurveShaderCom->Bind_Value("g_TimeElapsed", &m_fTimeElapsed, sizeof(m_fTimeElapsed))))
+		CRASH("Binding_Value_Failed");
 
-	_float4 vTargetColor	= m_arrSelectedColor[0];
-	_float4 vHeadColor		= m_arrSelectedColor[1];
-	_float4 vTailColor		= m_arrSelectedColor[2];
-	if (FAILED(m_pSphereShaderCom->Bind_Value("g_BaseColor", &vTargetColor, sizeof(vTargetColor))))
-		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pSphereShaderCom->Bind_Value("g_HeadColor", &vHeadColor, sizeof(vHeadColor))))
-		CRASH("Binding_Value_Failed");
-	if (FAILED(m_pSphereShaderCom->Bind_Value("g_TailColor", &vTailColor, sizeof(vTailColor))))
-		CRASH("Binding_Value_Failed");
 
 	m_pSphereShaderCom->Begin(0);			// Sphere 용 패스 제작
 	m_pSphereVIBufferCom->Bind_Resources();

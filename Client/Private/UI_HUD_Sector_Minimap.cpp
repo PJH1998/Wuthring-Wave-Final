@@ -137,7 +137,7 @@ void CUI_HUD_Sector_Minimap::PreAssign_ChildUIs()
 	m_pUI_InstObjectIndicator	= Find_ChildObject(L"InstObjectIndicator");
 
 	//m_pUI_LT_Minimap_StaticBG	= Find_ChildObject(L"LT_Minimap_StaticBG");
-	//m_pUI_LT_Minimap_TurnPoint	= Find_ChildObject(L"LT_Minimap_TurnPoint");
+	//m_pUI_LT_Minimap_TurnPoint= Find_ChildObject(L"LT_Minimap_TurnPoint");
 }
 
 void CUI_HUD_Sector_Minimap::PreAssign_Presets()

@@ -216,20 +216,8 @@ void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey,
 	m_strMonsterKey		= pMonsterKey;
 
 	// 텍스트 객체에, 출력될 텍스트를 변경
-
 	CUI_Text* pTargetText = static_cast<CUI_Text*>(m_pTextUI_BossName);
 	pTargetText->Change_Text(strUIBosssName, TEXT_ALIGN_TYPE::CENTER);
-
-
-	//CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
-	//if (nullptr != pTargetText)
-	//{
-	//	auto& bossNameDesc = pTargetText->Get_TextUIDesc();
-	//
-	//	bossNameDesc.strText = strUIBosssName;
-	//	//pTargetText->Set_TextUIDesc(bossNameDesc);
-	//	pTargetText->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
-	//}
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)
@@ -244,7 +232,7 @@ HRESULT CUI_HUD::Ready_ChildExtraComponents()
 	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_DistortionMap0_DM");	// Extra 0
 	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_Caustic_Noise");		// Extra 1
 
-
+	m_pUI_BossHPBar->Add_ExtraTexture(L"T_DistortionMap0_DM");
 
 
 	return S_OK;
@@ -1365,6 +1353,12 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)      = vHPBackColor1;
     *reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)     = fBossHPRatio;
     *reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)       = fBossHPBackRatio;
+
+	//*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32) = static_cast<_float>(true);	// isUseNoise
+	//*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33) = m_fElapsedTime;							// Elapsed Time
+	//*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34) = 0.2f;							// UV Scroll Speed
+	//*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.581f, 0.271f, 0.600f, 1.0f);	// Mask Color
+
 
     vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
     *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11)  = (isSABreak) ? vSABreakColor : vSAColor;

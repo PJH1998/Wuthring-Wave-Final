@@ -2,6 +2,8 @@
 #include "Custom_UI.h"
 #include "VIBuffer_CurveTrace.h"
 
+// 얜 게임오브젝트에 가깝지만.. UI매니저를 통한 외부접근을 가능케 하기 위해 Custom UI 로 둠.
+
 NS_BEGIN(Client)
 class CVIBuffer_CurveTrace;
 class CUI_CurveTrace final : public CCustom_UI
@@ -63,6 +65,8 @@ private:
 
 	_bool			m_isClone = false;
 	_bool			m_isModified = false;
+
+	_float			m_fTimeElapsed = 0.f;
 
 private:
 	class CGameSystem*	m_pGameSystem = { nullptr };
