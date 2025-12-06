@@ -1,7 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "PatternDummy.h"
 #include "WeaponDummy.h"
-
+#include "Projectile.h"
 
 CPatternDummy::CPatternDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CContainerObject { pDevice, pContext }
@@ -244,6 +244,38 @@ void CPatternDummy::Effect_Active(const _wstring& wStrEffectTag)
 
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &Info);
+}
+
+void CPatternDummy::Object_Func(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
+
+	// 레비아탄 투사체
+	if(wstrTypeTag == TEXT("Sword"))
+	{
+		CProjectile::PROJECTILERESET Desc{};
+		XMStoreFloat3(&Desc.vTargetPos, XMVectorSetW(m_pTransformCom->Get_State(STATE::POSITION) + m_pTransformCom->Get_State(STATE::LOOK), 1.f));
+		Desc.vTargetPos.y += 0.5f; //offset
+		_matrix WorldMatrix = XMMatrixIdentity();
+		_vector vScale{}, vQuat{}, vTrans{};
+		if(wstrAnimTag == TEXT("Aura"))
+		{
+			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviAura"), m_pTransformCom->Get_WorldMatrix(), &Desc);
+		}
+		else if(wstrAnimTag == TEXT("Proj"))
+		{
+			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviSword"), m_pTransformCom->Get_WorldMatrix(), &Desc);
+		}
+		else if(wstrAnimTag == TEXT("Wave"))
+		{
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviWave"), m_pTransformCom->Get_WorldMatrix(), nullptr);
+		}
+	}
+	// 레비아탄 투사체 end
 }
 
 CPatternDummy* CPatternDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
