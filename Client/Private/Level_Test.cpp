@@ -35,7 +35,7 @@
 #include "UI_MobHPBar.h"
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
-
+#include"NPC_Griffin.h"
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
@@ -76,7 +76,7 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_Player();
     Ready_Layer_SequnecePlayer();
-	//Ready_Dummy();
+	Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();mm
 	//Ready_ElectroPredator();
@@ -119,11 +119,9 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Skybox();
 	Ready_UI();
 
-
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Scan"),
 		TEXT("Pooling_Scan"), 1)))
 		CRASH("Failed Add Pool Scan");
-
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_MotionTrail"),
 		TEXT("Pooling_MotionTrail"), 1)))
@@ -533,6 +531,18 @@ void CLevel_Test::Ready_AnimInstanceTest()
 	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);
+	
+
+	CNPC_Griffin::GRIFFIN_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
+	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
+	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+
 }
 
 void CLevel_Test::Ready_Leviatan()
@@ -602,13 +612,13 @@ void CLevel_Test::Ready_Leviatan()
 	Projectile.fSpeedPerSec = 15.f;
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_Projectile");
 	Projectile.eType = TEXT_COLOR_TYPE::DARK;
-	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	Projectile.wstrEffectTag = TEXT("Leviatan_Dg2");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviSword"), 4, &Projectile)))
 		CRASH("Failed Ready Projectile (Leviatan)");
 
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_SwordAura");
-	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	Projectile.wstrEffectTag = TEXT("Leviatan_Dg");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviAura"), 4, &Projectile)))
 		CRASH("Failed Ready Projectile (Leviatan)");

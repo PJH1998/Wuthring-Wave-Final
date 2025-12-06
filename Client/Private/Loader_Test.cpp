@@ -7,7 +7,7 @@
 #include "Trigger_Box.h"
 #include "MapObject_Collaps.h"
 #include "AnimationDummy.h"
-
+#include"Slide_Navigation.h"
 #pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
@@ -78,6 +78,7 @@
 #pragma region NPC
 #include "DummyNPC.h"
 #include "DummyCell.h"
+#include"NPC_Griffin.h"
 #pragma endregion
 
 
@@ -235,6 +236,8 @@ HRESULT CLoader_Test::Load_Object()
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
+		CSlide_Navigation::Create(m_pDevice, m_pContext));
 	cout << "Object" << endl;
 
     return S_OK;
@@ -1055,6 +1058,20 @@ HRESULT CLoader_Test::Load_NPC()
 		CDummyCell::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
+
+	// Prototype_Component_AnimMachine_FalseSovereign
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		CNPC_Griffin::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_NPCGriffin"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
+		CRASH("Prototype Create Failed");
 	return S_OK;
 }
 

@@ -93,6 +93,11 @@ void CLevi_Drop::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fLifeTime = 0.f;
 
 	// 메테오 스폰
+	PREFAB_INFO Info = {};
+	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	Info.pModelPtr = nullptr;
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Drop"), m_pTransformCom->Get_WorldMatrix(), &Info);
 }
 
 HRESULT CLevi_Drop::Bind_Resources()

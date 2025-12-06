@@ -48,6 +48,11 @@ void CLevi_Anchor::Update(_float fTimeDelta)
 			m_pRigidBodyCom->IsActivate(false);
 
 			//터지는 이펙트 스폰
+			PREFAB_INFO Info = {};
+			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+			Info.pModelPtr = nullptr;
+
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		}
 	}
 	

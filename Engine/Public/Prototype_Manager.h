@@ -29,7 +29,7 @@
 #include "ModelAnim_Instance.h"
 #include"Mesh_Instance_FireFly.h"
 #include"Model_Instance_FireFly.h"
-
+#include "HdrTexture.h"
 // ==================
 
 NS_BEGIN(Engine)

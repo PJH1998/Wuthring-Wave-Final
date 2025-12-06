@@ -205,8 +205,12 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\Effect_VA.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
+    <ClInclude Include="..\Public\MapObject_SlideZone.h" />
+    <ClInclude Include="..\Public\Slide_Navigation.h" />
+    <ClInclude Include="..\Public\NPC_Griffin.h" />
     <ClInclude Include="..\Public\SequenceAugusta.h" />
     <ClInclude Include="..\Public\SequenceAugustaFactory.h" />
     <ClInclude Include="..\Public\SequenceAugustaGroundSkill.h" />
@@ -477,8 +481,12 @@
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
+    <ClCompile Include="..\Private\Effect_VA.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
+    <ClCompile Include="..\Private\MapObject_SlideZone.cpp" />
+    <ClCompile Include="..\Private\Slide_Navigation.cpp" />
+    <ClCompile Include="..\Private\NPC_Griffin.cpp" />
     <ClCompile Include="..\Private\SequenceAugusta.cpp" />
     <ClCompile Include="..\Private\SequenceAugustaFactory.cpp" />
     <ClCompile Include="..\Private\SequenceAugustaGroundSkill.cpp" />
@@ -773,6 +781,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxVaMesh.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">

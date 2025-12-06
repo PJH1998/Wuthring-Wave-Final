@@ -260,7 +260,6 @@ void CModel::Print_ShapeKeyWeights()
 	OutputDebugString(outString.c_str());
 }
 
-
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
