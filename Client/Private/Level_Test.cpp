@@ -620,7 +620,7 @@ void CLevel_Test::Ready_Leviatan()
 		CRASH("Failed Ready Projectile (Leviatan)");
 
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_SwordAura");
-	//Projectile.wstrEffectTag = TEXT("Projectile_Effect");
+	Projectile.wstrEffectTag = TEXT("Leviatan_Dg");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviAura"), 4, &Projectile)))
 		CRASH("Failed Ready Projectile (Leviatan)");
