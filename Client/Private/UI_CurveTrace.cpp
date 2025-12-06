@@ -174,11 +174,17 @@ _float3 CUI_CurveTrace::CalcSide(_float3& vTan, _float3& vPos)
 	return out;
 }
 
-void CUI_CurveTrace::Update_CurveVB()
+void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플레이어 위치를 고려않고, 플레이어 위치를 중점삼아 쏘는 중.
 {
 	// [1] 파라미터 준비
 	const _uint iSegmentIndex = m_tDesc.iSegmentCount;
 	if (iSegmentIndex == 0) return;
+
+	// ksta : 나중에 타겟 변경 시, 좌표 삽입. 바라보는 방향도 적용된 행렬이 필요함.
+	//		 이는 위치는 해당 오브젝트 위치 기준으로, 방향 등을 비롯한 정보는 카메라 방향을 바라보던가 하는 식으로 따로 하면 될 듯
+	//_float4 vRawTargetPos = {};	XMStoreFloat4(&vRawTargetPos, m_pGameSystem->Get_PlayerPosition());			.
+	_matrix matTargetTransform = XMLoadFloat4x4(m_pGameSystem->Get_PlayerMatrixPtr());
+	//_float3	vTargetPos = *reinterpret_cast<_float3*>(&vRawTargetPos);
 
 	// 유효한 점들을 담을 컨테이너 (시작점 포함)
 	vector<_float3> vecValidPoints;
@@ -200,12 +206,24 @@ void CUI_CurveTrace::Update_CurveVB()
 
 		// 레이캐스트 진행
 		_float4 vHitPos4;
-		_bool isRayDetected = m_pGameInstance->Ray_Cast(XMLoadFloat3(&vCurrentPos), XMLoadFloat3(&vNextPos), &vHitPos4);
+		// 레이는 월드 좌표를 기준으로 비교하여야 함. 플레이어 위치 고려안하면 그냥 플레이어 위치를 중점삼아 이상하게 계산함.
+		// 또한 계산될 위치는 플레이어가 바라보는 방향으로 적용되어야 함.
+		_vector vCalcedCurrentWorldPos	= XMVector3TransformCoord(XMLoadFloat3(&vCurrentPos), matTargetTransform);
+		_vector vCalcedNextWorldPos		= XMVector3TransformCoord(XMLoadFloat3(&vNextPos), matTargetTransform);
+
+		_float3 vCurrentWorldPos = {};	XMStoreFloat3(&vCurrentWorldPos, vCalcedCurrentWorldPos);
+		_float3 vNextWorldPos = {};		XMStoreFloat3(&vNextWorldPos, vCalcedNextWorldPos);
+
+		_bool isRayDetected = m_pGameInstance->Ray_Cast(XMLoadFloat3(&vCurrentWorldPos), XMLoadFloat3(&vNextWorldPos), &vHitPos4);
 
 		if (isRayDetected)	// 충돌O
 		{
 			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점
-			vecValidPoints.push_back(vHitPos);											// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)
+			// 이거는 다시 플레이어 기준 로컬 좌표로 변환하여 넣어야 함.
+			_vector vCalcedLocalHitPos = XMVector3TransformCoord(XMLoadFloat3(&vHitPos), XMMatrixInverse(nullptr, matTargetTransform));
+			_float3 vLocalHitPos = {};	XMStoreFloat3(&vLocalHitPos, vCalcedLocalHitPos);
+
+			vecValidPoints.push_back(vLocalHitPos);										// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)		
 			m_pTargetTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
 			m_isShowTarget = true;														// 구 활성화
 			break;
@@ -231,7 +249,7 @@ void CUI_CurveTrace::Update_CurveVB()
 	const _float fHalfWidth = m_tDesc.fWidth * 0.5f;
 
 	_float3 prevSide = {};
-	bool    hasPrevSide = false;
+	_bool   hasPrevSide = false;
 
 	for (_uint i = 0; i < iValidCount; ++i)
 	{

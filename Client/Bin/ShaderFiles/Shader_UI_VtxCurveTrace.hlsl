@@ -173,6 +173,12 @@ PS_OUT PS_MAIN_CURVE(PS_IN_CURVE In) : SV_Target
 PS_OUT PS_MAIN_SPHERE(PS_IN_SPHERE In) : SV_Target
 {
     PS_OUT Out;
+
+    
+    Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+    return Out;
+    
+    
     
     // 1. 픽셀 -> 카메라로 가는 방향을 구함
     float3 vViewDir = normalize(g_CamPosition.xyz - In.vWorldPos);

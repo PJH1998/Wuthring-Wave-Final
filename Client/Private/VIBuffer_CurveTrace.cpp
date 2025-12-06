@@ -90,8 +90,8 @@ HRESULT CVIBuffer_CurveTrace::Initialize_Prototype(_uint iMaxSegmentCount)
 
 	// 초기값
 	m_iSegmentUsing = 0;
-	m_iVertexCount = 0;
-	m_iNumIndices = 0; // 초기에는 그릴 것 X
+	m_iVertexCount	= 0;
+	m_iNumIndices	= 0; // 초기에는 그릴 것 X
 
 	return S_OK;
 }
