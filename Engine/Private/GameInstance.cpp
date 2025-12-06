@@ -162,7 +162,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
-	//m_pPhysicsManager->Late_Update();
+	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 	
@@ -393,10 +393,18 @@ HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
 }
+HRESULT CGameInstance::Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
+{
+	return m_pPooling_Manager->Add_PoolingObject_ForStatic(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
+}
  HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
+ HRESULT CGameInstance::Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+ {
+	 return m_pPooling_Manager->Spawn_PoolingObject_ForStatic(strPoolingTag, WorldMatrix, pArg);
+ }
 void CGameInstance::Add_Work(function<void()> Work)
 {
 	m_pPooling_Manager->Add_Work(Work);
@@ -673,6 +681,10 @@ HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
+void CGameInstance::IsChangeLevel_ForPhysicX(_bool isChangeLevel)
+{
+	m_pPhysicsManager->IsChangeLevel(isChangeLevel);
+}
 void CGameInstance::SetUp_PhysicsSystem()
 {
 	m_pPhysicsManager->SetUp_PhysicsSystem();

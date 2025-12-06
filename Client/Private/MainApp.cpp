@@ -82,6 +82,9 @@ void CMainApp::Post_Update()
 
 		if (true == m_isLoad)
 		{
+			// PhysicX Update시 Remove ID 수집 중지
+			m_pGameInstance->IsChangeLevel_ForPhysicX(true);
+
 			// Memory Clear (Sound, Camera, Light, ETC)
 			if (FAILED(m_pGameInstance->Clear_Memory()))
 				CRASH("Clear");
@@ -122,6 +125,8 @@ void CMainApp::Post_Update()
 			ASSERT_CRASH(pLevel);
 
 			m_pGameInstance->Open_Level(ENUM_CLASS(m_eNextLevel), pLevel);
+
+			m_pGameInstance->IsChangeLevel_ForPhysicX(false);
 		}
 	}
 }

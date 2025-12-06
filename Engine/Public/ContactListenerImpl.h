@@ -11,6 +11,9 @@ public:
 	virtual ~CContactListenerImpl();
 
 public:
+	void		IsChangeLevel(_bool isChangeLevel) { m_isChangeLevel = isChangeLevel; }
+
+public:
 	void		Remove_Update();
 	void		Clear_Resource();
 
@@ -23,7 +26,8 @@ public:
 private:
 	BodyInterface*				m_pBodyInterface = { nullptr };
 
-	vector<pair<BodyID, BodyID>> m_RemoveIDs;
+	_bool										m_isChangeLevel = { false };
+	vector<pair<BodyID, BodyID>>	m_RemoveIDs;
 };
 
 NS_END
