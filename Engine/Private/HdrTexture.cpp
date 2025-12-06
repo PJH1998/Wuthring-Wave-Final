@@ -7,16 +7,6 @@ CHdrTexture::CHdrTexture(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 }
 
-CHdrTexture::CHdrTexture(const CHdrTexture& Prototype)
-	: CComponent { Prototype }
-	, m_iNumTextures { Prototype.m_iNumTextures }
-	, m_HdrSRVs { Prototype.m_HdrSRVs }
-	, m_MaxFrames { Prototype.m_MaxFrames }
-{
-	for (auto& pSRV : m_HdrSRVs)
-		Safe_AddRef(pSRV);
-}
-
 HRESULT CHdrTexture::Initialize_Prototype(const _tchar* pFilePath, _uint iNumTextures)
 {
 	m_iNumTextures = iNumTextures;
@@ -124,17 +114,6 @@ CHdrTexture* CHdrTexture::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 		Safe_Release(pInstance);
 	}
     return pInstance;
-}
-
-CComponent* CHdrTexture::Clone(void* pArg)
-{
-	CHdrTexture* pInstance = new CHdrTexture(*this);
-	if (FAILED(pInstance->Initialize_Clone(pArg)))
-	{
-		MSG_BOX("Failed to Clone : CHdrTexture");
-		Safe_Release(pInstance);
-	}
-	return pInstance;
 }
 
 void CHdrTexture::Free()

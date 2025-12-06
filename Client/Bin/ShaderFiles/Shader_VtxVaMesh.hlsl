@@ -2,6 +2,11 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
+Texture2D g_VatTexture;
+
+float g_fTexelSize;
+float g_fFrameCount;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -26,16 +31,23 @@ VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
     
+    float fVatCoordY = In.vVATcoord.y + (g_fTexelSize * g_fFrameCount);
+    float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
+   
+    float4 vMovement = g_VatTexture.Sample(DefaultSampler, vVatCoord);
+    
+    float3 vPosition = In.vPosition + vMovement.xyz;
+    
     matrix matWV, matWVP;
     
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
-    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vPosition = mul(float4(vPosition, 1.f), matWVP);
     Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
     Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
     Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), g_WorldMatrix));
     Out.vTexcoord = In.vTexcoord;
-    Out.vProjPos = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vProjPos = mul(float4(vPosition, 1.f), matWVP);
 
     return Out;
 }
@@ -59,6 +71,8 @@ struct PS_OUT
 PS_OUT PS_VA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vDiffuse = 1.f;
     
     return Out;
 }
