@@ -1204,6 +1204,7 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	Safe_Release(m_pFpsStateMachineCom);
 	Safe_Release(m_pQTEColliderCom);
 	Safe_Release(m_pFlyComputeShaderCom);
 	Safe_Release(m_pFacialComputeShaderCom);

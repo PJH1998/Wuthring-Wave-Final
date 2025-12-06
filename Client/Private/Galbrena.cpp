@@ -46,7 +46,8 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	Ready_AttackVolumes();
     Register_AllNotifies(pDesc->strFolderPath);
 
-	CGalbrenaFactory::Register_States(m_pStateMachineCom, this);
+	CGalbrenaFactory::Register_States(m_pStateMachineCom, this);    // 기본 StateMachineCom
+	CGalbrenaFactory::Register_States(m_pFpsStateMachineCom, this); // FPS StateMachineCom
 	
 	// 비활성화. 
 	//PartActivate(PART_FIRSTGUN, false);
@@ -1046,7 +1047,6 @@ void CGalbrena::Render_Eye(_uint iMeshIndex)
 	if (IsCutScene)
 	{
 		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENAEYE);
-		//_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f };
 		_float4 vEmissiveColor = { 1.f, 0.1f, 1.0f, 1.f };
 		_float fEmissiveIntensity = { 5.f };
 		_float fGalbrenaEyeAlpha = 0.6f;
@@ -1133,6 +1133,10 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
 		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
+#ifdef _DEBUG
+	cout << "Galbrena Model Clone : " << endl;
+#endif // _DEBUG
+
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
@@ -1140,6 +1144,10 @@ void CGalbrena::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
+		, pDesc->stateMachineData.second, TEXT("Com_FpsStateMachine"), reinterpret_cast<CComponent**>(&m_pFpsStateMachineCom), nullptr)))
+		CRASH("StateMachine");
 
 	
 	CCollider::COLLIDER_DESC ColliderDesc{};

@@ -1422,6 +1422,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
+#ifdef _DEBUG
+	cout << "Augusta Model Clone : " << endl;
+#endif // _DEBUG
+
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");

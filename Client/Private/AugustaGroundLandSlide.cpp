@@ -23,7 +23,8 @@ void CAugustaGroundLandSlide::OnEnter(void* pArg)
     CGroundState::OnEnter(pArg);
 
 	// 0. Sliding 정보 가져오기.
-	m_SlideData = *static_cast<SLIDE_DATA*>(pArg);
+	// if (nullptr == pArg) return;
+	//m_SlideData = *static_cast<SLIDE_DATA*>(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();

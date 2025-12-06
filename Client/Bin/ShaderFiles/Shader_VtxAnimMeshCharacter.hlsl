@@ -77,8 +77,6 @@ VS_OUT VS_MAIN(VS_IN In)
     // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing
     float3 vMorphedPos = MorphedVert.vPosition;
     float3 vMorphedNormal = MorphedVert.vNormal;
-    
-    
 
     // 2. [Skinning] 변형된 얼굴(vMorphedPos)을 기준으로 뼈대를 움직입니다.
     matrix matBone = (matrix) 0;
@@ -90,6 +88,36 @@ VS_OUT VS_MAIN(VS_IN In)
     // 애니메이션 행렬 적용 (vMorphedPos 사용!)
     vector vPosition = mul(float4(vMorphedPos, 1.f), matBone);
     vector vNormal = mul(float4(vMorphedNormal, 0.f), matBone);
+    vector vTangent = mul(float4(In.vTangent, 0.f), matBone); // Tangent는 Morph 안 했으므로 In.vTangent 사용 (약식)
+    vector vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
+
+    // 3. [WVP Transformation] 화면 좌표로 변환
+    matrix matWVP = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWVP, g_ProjMatrix);
+    
+    Out.vPosition = mul(vPosition, matWVP);
+    Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
+    Out.vTangent = normalize(mul(vTangent, g_WorldMatrix));
+    Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
+    Out.vTexcoord = In.vTexcoord;
+    Out.vProjPos = mul(vPosition, matWVP);
+
+    return Out;
+}
+
+VS_OUT VS_NONMORPH_MAIN(VS_IN In)
+{
+    VS_OUT Out = (VS_OUT) 0;
+
+    matrix matBone = (matrix) 0;
+    matBone += g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x;
+    matBone += g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y;
+    matBone += g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z;
+    matBone += g_BoneMatrices[In.vBlendIndex.w] * In.vBlendWeight.w;
+
+    // 애니메이션 행렬 적용 (vMorphedPos 사용!)
+    vector vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    vector vNormal = mul(float4(In.vNormal, 0.f), matBone);
     vector vTangent = mul(float4(In.vTangent, 0.f), matBone); // Tangent는 Morph 안 했으므로 In.vTangent 사용 (약식)
     vector vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
 
@@ -925,6 +953,17 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_ROVERMASK();
+    }
+
+    pass NonMorphCharacter // 13
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_NONMORPH_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_GALBRENA();
     }
   
 }

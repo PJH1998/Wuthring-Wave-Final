@@ -519,11 +519,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	else
 	{
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
-
 	}
-
-	/*m_pPlayerStatus->;*/
-
 	
 
 }
