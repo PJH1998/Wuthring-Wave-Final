@@ -21,7 +21,7 @@ void CModelLoader::Update()
 	if (0 == m_iAnim) m_eType = MODELTYPE::NONANIM;
 	else if (1 == m_iAnim) m_eType = MODELTYPE::ANIM;
 	else if (2 == m_iAnim) m_eType = MODELTYPE::CHARACTER;
-	else if (3 == m_iAnim) m_eType = MODELTYPE::VAT;
+	//else if (3 == m_iAnim) m_eType = MODELTYPE::VAT;
 
 	if (ImGui::Button("Load FBX"))
 		m_isShowLoadFile = !m_isShowLoadFile;
