@@ -137,8 +137,9 @@ public:
 
 
 	// [WIP] 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
+	//      임의로 색상/타입 추가 시, [UI_MINIMAP_OBJTYPE] 및 [UI_HUD_Sector_Minimap::PreAssign_Presets] 에서 추가 후 사용하시면 됩니다.
 	void		Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);			// 몬스터 등과 같이 실시간 갱신이 필요한 경우. Update_MobStatus 에 내장됨.
-	void		Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우
+	void		Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우. 실시간 갱신 X
 	void		Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
 
 

@@ -5,7 +5,7 @@
 #include "PlayerStatus.h"
 
 // 플레이어 0, 0, 0 기준 테스트 필요시, 아래 매크로 해제 
-#define KSTA_UITEST_BASEDONPLAYER
+//#define KSTA_UITEST_BASEDONPLAYER
 
 
 CUI_CurveTrace::CUI_CurveTrace(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -39,7 +39,7 @@ namespace Client
 	};
 
 	enum class UI_EVENT_TYPE {
-		NONE, CLICK_ENTER, CLICKING, CLICK_EXIT, HOVER_ENTER, HOVERING, HOVER_EXIT, SCROLL, END
+		NONE, CLICK_ENTER, CLICKING, CLICK_EXIT, HOVER_ENTER, HOVERING, HOVER_EXIT, END
 	};
 
 	enum class UI_VARIANT_FLAG {			// * UI용 짬통셰이더 플래그 지정용. 필요할때마다 만들고 여기에 추가한다.

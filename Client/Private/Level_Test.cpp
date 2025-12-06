@@ -1078,7 +1078,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 	if (isCurveTraceOn)
 	{
-#define KSTA_UITEST_BASEDONPLAYER	// 디버그용 매크로
+//#define KSTA_UITEST_BASEDONPLAYER	// 디버그용 매크로
 
 
 #ifndef KSTA_UITEST_BASEDONPLAYER
