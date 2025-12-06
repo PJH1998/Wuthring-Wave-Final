@@ -8,6 +8,7 @@
 #include "MapObject_Meteo.h"
 #include"MapObject_Collaps.h"
 #include"MapObject_FireFly.h"
+#include"Slide_Navigation.h"
 
 #include "Spawner.h"
 
@@ -538,6 +539,25 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 				ENUM_CLASS(eLevel), TEXT("Layer_Fly"), &pData);
 		}
 		m_FireFlyData.clear();
+	}
+	else if (pFilePath.find("Slide") != std::string::npos)
+	{
+		CSlide_Navigation::SLIDE_NAVIGATION_DESC Desc{};
+		
+		while (File.read(reinterpret_cast<char*>(&Desc.IsStart), sizeof(_bool)))
+		{
+			File.read(reinterpret_cast<char*>(&Desc.vExtends), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.WorldMat), sizeof(_float4x4));
+			File.read(reinterpret_cast<char*>(&Desc.iPathSize), sizeof(_uint));
+			_float4* pPath = new _float4[Desc.iPathSize];
+			for (_uint i = 0; i < Desc.iPathSize; ++i)
+				File.read(reinterpret_cast<char*>(&pPath[i]), sizeof(_float4));
+			Desc.pPath = pPath;
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_Slide_Navigation")
+				, ENUM_CLASS(eLevel), TEXT("Layer_Collaps"), &Desc);
+
+			Safe_Delete_Array(pPath);
+		}
 	}
 	else
 	{

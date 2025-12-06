@@ -178,6 +178,7 @@
     <ClInclude Include="..\Public\Edit_MapObject_Collaps.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Water.h" />
     <ClInclude Include="..\Public\Edit_ScreenEffect.h" />
+    <ClInclude Include="..\Public\Edit_SlideZone.h" />
     <ClInclude Include="..\Public\Effect_Decal.h" />
     <ClInclude Include="..\Public\Decal_Controller.h" />
     <ClInclude Include="..\public\EditDummy.h" />
@@ -271,6 +272,7 @@
     <ClCompile Include="..\Private\Edit_MapObject_Collaps.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Water.cpp" />
     <ClCompile Include="..\Private\Edit_ScreenEffect.cpp" />
+    <ClCompile Include="..\Private\Edit_SlideZone.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp" />
     <ClCompile Include="..\Private\Decal_Controller.cpp" />
     <ClCompile Include="..\private\EditDummy.cpp" />

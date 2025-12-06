@@ -21,6 +21,7 @@
 #include"Edit_LightManager.h"
 #include"Edit_MapEffectCollector.h"
 #include"Edit_FireFly_Manager.h"
+#include"Edit_SlideZone.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -228,25 +229,49 @@ void CLevel_Map::Menu_Object()
 	switch (m_eObjectType)
 	{
 	case static_cast<_uint>(OBJECTTYPE::TRIGGERBOX):
-
 	{
-		ImGui::Text("Current Triggers");
+		ImGui::Checkbox("Trigger | Slide", &m_ManageTrigger);
 
-		ImGuiID ShaderId = ImGui::GetID("TriggerBox");
-		ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
-
-		for (_uint i = 0; i < m_SaveObjects["Map_Object_TriggerBox"].size(); ++i)
+		if(m_ManageTrigger)
 		{
-			if (ImGui::Button(to_string(i).c_str())) {
-				m_pPickedTriggerBox = dynamic_cast<CEdit_TriggerBox*>(m_SaveObjects["Map_Object_TriggerBox"][i]);
+			ImGui::Text("Current Triggers");
+
+			ImGuiID ShaderId = ImGui::GetID("TriggerBox");
+			ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+
+			for (_uint i = 0; i < m_SaveObjects["Map_Object_TriggerBox"].size(); ++i)
+			{
+				if (ImGui::Button(to_string(i).c_str())) {
+					m_pPickedTriggerBox = dynamic_cast<CEdit_TriggerBox*>(m_SaveObjects["Map_Object_TriggerBox"][i]);
+				}
 			}
+			ImGui::EndChildFrame();
+
+			if (m_pPickedTriggerBox)
+				m_pPickedTriggerBox->Set_ImGuiOption();
+
+			Create_TriggerBox();
 		}
-		ImGui::EndChildFrame();
+		else
+		{
+			ImGui::Text("Current Slide");
 
-		if (m_pPickedTriggerBox)
-			m_pPickedTriggerBox->Set_ImGuiOption();
+			ImGuiID ShaderId = ImGui::GetID("Slide");
+			ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
 
-		Create_TriggerBox();
+			for (_uint i = 0; i < m_SaveObjects["Map_Object_SlideBox"].size(); ++i)
+			{
+				if (ImGui::Button(to_string(i).c_str())) {
+					m_pPickedSlideBox = dynamic_cast<CEdit_SlideZone*>(m_SaveObjects["Map_Object_SlideBox"][i]);
+				}
+			}
+			ImGui::EndChildFrame();
+
+			if (m_pPickedSlideBox)
+				m_pPickedSlideBox->Set_ImGuiOption();
+
+			Create_SlideBox();
+		}
 	}
 		break;
 	case static_cast<_uint>(OBJECTTYPE::SPAWNOR):
@@ -544,6 +569,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Effect"), event);
 				else if (Pair.first.find("FireFly") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_FireFly"), event);
+				else if (Pair.first.find("Slide") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Slide"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -866,6 +893,28 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&Desc.vPerCos), sizeof(_float2));
 								File.read(reinterpret_cast<char*>(&Desc.vPerSin2), sizeof(_float2));
 								m_pFlyManager->Map_Load(Desc);
+							}
+						}
+						else if (strFilePath.find("Slide") != std::string::npos)
+						{
+							CEdit_SlideZone::SLIDE_DESC Desc{};
+							while (File.read(reinterpret_cast<char*>(&Desc.IsStart), sizeof(_bool)))
+							{
+								File.read(reinterpret_cast<char*>(&Desc.vExtends), sizeof(_float3));
+								_float4x4 WorldMat;
+								File.read(reinterpret_cast<char*>(&WorldMat), sizeof(_float4x4));
+								Desc.WorldMatrix = &WorldMat;
+								
+								File.read(reinterpret_cast<char*>(&Desc.iPathSize), sizeof(_uint));
+								_float4* pPath = new _float4[Desc.iPathSize];
+								for(_uint i=0; i< Desc.iPathSize;++i)
+									File.read(reinterpret_cast<char*>(&pPath[i]), sizeof(_float4));
+								Desc.IsLoad = true;
+								Desc.pPath = pPath;
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_SlideBox")
+									, m_iLevel, TEXT("Layer_Slide"), &Desc);
+
+								Safe_Delete_Array(pPath);
 							}
 						}
                         else
@@ -1197,7 +1246,7 @@ void CLevel_Map::Create_TriggerBox()
 	ImGui::InputFloat3("TriggerBox Extends", m_TriggerBoxExtends);
 	if (ImGui::Button("Create"))
 	{
-	CEdit_TriggerBox::TRIGGER Tri;
+		CEdit_TriggerBox::TRIGGER Tri;
 		Tri.iLevel = m_iLevel;
 		Tri.vExtends = _float3(m_TriggerBoxExtends[0], m_TriggerBoxExtends[1], m_TriggerBoxExtends[2]);
 		_matrix Mat = XMMatrixTranslationFromVector(XMVectorSet(m_vPickedPos.x, m_vPickedPos.y, m_vPickedPos.z, 1.f));
@@ -1205,6 +1254,25 @@ void CLevel_Map::Create_TriggerBox()
 		XMStoreFloat4x4(&TT, Mat);
 		Tri.WorldMatrix = &TT;
 		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
+	}
+}
+
+void CLevel_Map::Create_SlideBox()
+{
+	ImGui::Text("Slide Info");
+	ImGui::InputFloat3("SlidePos", reinterpret_cast<_float*>(&m_vPickedPos), "%.1f");
+
+	ImGui::InputFloat3("Slide Extends", m_TriggerBoxExtends);
+	if (ImGui::Button("Create"))
+	{
+		CEdit_SlideZone::SLIDE_DESC SlideDesc;
+		SlideDesc.iLevel = m_iLevel;
+		SlideDesc.vExtends = _float3(m_TriggerBoxExtends[0], m_TriggerBoxExtends[1], m_TriggerBoxExtends[2]);
+		_matrix Mat = XMMatrixTranslationFromVector(XMVectorSet(m_vPickedPos.x, m_vPickedPos.y, m_vPickedPos.z, 1.f));
+		_float4x4 TT;
+		XMStoreFloat4x4(&TT, Mat);
+		SlideDesc.WorldMatrix = &TT;
+		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_SlideZone"), m_iLevel, TEXT("Layer_Slide"), &SlideDesc);
 	}
 }
 
@@ -1662,6 +1730,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Collaps"),
 		CEdit_MapObject_Collaps::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_SlideBox"),
+		CEdit_SlideZone::Create(m_pDevice, m_pContext));
+
     Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
 
@@ -1789,6 +1860,11 @@ void CLevel_Map::Ready_Event()
 			{
 				m_SaveObjects["Map_Object_Collaps"].push_back(m_pPickedCollaps);
 				Safe_AddRef(m_pPickedCollaps);
+			}
+			else if (m_pPickedSlideBox= dynamic_cast<CEdit_SlideZone*>(pObject))
+			{
+				m_SaveObjects["Map_Object_SlideBox"].push_back(m_pPickedSlideBox);
+				Safe_AddRef(m_pPickedSlideBox);
 			}
 		}
 

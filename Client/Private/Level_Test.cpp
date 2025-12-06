@@ -35,7 +35,7 @@
 #include "UI_MobHPBar.h"
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
-
+#include"NPC_Griffin.h"
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
@@ -533,6 +533,18 @@ void CLevel_Test::Ready_AnimInstanceTest()
 	NPCDesc.wstrSkinningPrototypeTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh_Skinning");
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_DummyNPC"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &NPCDesc);
+	
+
+	CNPC_Griffin::GRIFFIN_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
+	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
+	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+
 }
 
 void CLevel_Test::Ready_Leviatan()
