@@ -228,6 +228,7 @@ public:
 	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) {};
 
 	// Look Vector
+	_vector Get_Position();
 	_vector Get_LookVector();
 	_vector Get_CameraLookVector();
 	_vector Get_LookVector_NoPitch();

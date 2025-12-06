@@ -293,7 +293,7 @@ void CRover::Render_Shadow()
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::SHADOW));
 
 		m_pModelCom->Render(i);
 	}

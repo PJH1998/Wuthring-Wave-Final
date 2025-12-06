@@ -53,7 +53,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	//m_pTransformCom->Rotation(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
 	/////////////////////
 	_float temp{};
-	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
 

@@ -75,7 +75,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-    //Ready_Layer_SequnecePlayer();
+    Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();mm

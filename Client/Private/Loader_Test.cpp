@@ -131,10 +131,10 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 
 	//// Sequence Player
-	//m_pGameInstance->Add_Work([this]() {Load_Yuno(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_SequenceAugusta(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_SequenceLupa(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Yuno(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequenceAugusta(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequenceLupa(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
 	
 	
 	

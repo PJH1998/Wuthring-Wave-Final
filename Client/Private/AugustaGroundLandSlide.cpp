@@ -23,8 +23,8 @@ void CAugustaGroundLandSlide::OnEnter(void* pArg)
     CGroundState::OnEnter(pArg);
 
 	// 0. Sliding 정보 가져오기.
-	// if (nullptr == pArg) return;
-	//m_SlideData = *static_cast<SLIDE_DATA*>(pArg);
+	if (nullptr == pArg) return;
+	m_SlideData = *static_cast<SLIDE_DATA*>(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -41,6 +41,8 @@ void CAugustaGroundLandSlide::OnEnter(void* pArg)
 	// 5. 중력 끕니다. => 정해진 경로로 이동할 것이므로.
 	m_pAugusta->Set_Gravity(false);
 
+	// 6. 현재 위치를 받아옵니다.
+	XMStoreFloat3(&m_vStart, m_pAugusta->Get_Position());
 }
 
 void CAugustaGroundLandSlide::OnUpdate(_float fTimeDelta)
@@ -66,6 +68,7 @@ void CAugustaGroundLandSlide::OnExit()
     CGroundState::OnExit();
 	m_pAugusta->Set_Gravity(true);
 	m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
+	m_iWayPoint = 0;
 
 	m_SlideData.Reset();
 }
@@ -85,6 +88,45 @@ void CAugustaGroundLandSlide::Update_LandAnimation(_float fTimeDelta)
 {
     // 0. 애니메이션 실행부터
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	
+	// 인덱스가 범위를 벗어났다면 이동 종료.
+	if (m_iWayPoint >= m_SlideData.WayPoints.size())
+	{
+		m_States[EXIT] = true;
+		return;
+	}
+
+	// 1. 현재 위치와 목표 위치 계산
+	_vector vCurrentPos = m_pAugusta->Get_Position();						// 현재 캐릭터 위치
+	_vector vTargetPos = XMLoadFloat3(&m_SlideData.WayPoints[m_iWayPoint]); // 목표 WayPoint
+
+	// 2. 방향 벡터 및 거리 계산
+	_vector vDir = vTargetPos - vCurrentPos;			// 목표 방향
+	_float fDist = XMVectorGetX(XMVector3Length(vDir)); // 남은 거리
+
+	// 3. 이번 프레임 이동량 계산
+	_float fMoveStep = 2.f * fTimeDelta;
+
+	// 4. 이동 처리
+	if (fDist <= fMoveStep)
+	{
+		// A. 이번 프레임에 목표 지점에 도달하거나 넘어가는 경우
+		m_pAugusta->Set_Position(vTargetPos);
+		m_iWayPoint++; // 다음 WayPoint로 인덱스 증가.
+
+		if (m_iWayPoint >= m_SlideData.WayPoints.size())
+			m_States[EXIT] = true;
+	}
+	else
+	{
+		// B. 목표 지점까지 거리가 남은 경우
+		vDir = XMVector3Normalize(vDir); // 방향 정규화
+
+		m_pAugusta->Rotate_Direction(vDir);
+
+		m_pAugusta->Move_Direction(vDir, fTimeDelta, 2.f);
+	}
+
 }
 
 void CAugustaGroundLandSlide::Check_StateTransition(_float fTimeDelta)

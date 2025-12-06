@@ -588,6 +588,14 @@ void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iCondition
 	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
 }
 
+_vector CCharacter::Get_Position()
+{
+	if (nullptr == m_pTransformCom)
+		return XMVectorZero();
+
+	return m_pTransformCom->Get_State(STATE::POSITION);
+}
+
 _vector CCharacter::Get_LookVector()
 {
     _vector vLook = XMVectorZero();

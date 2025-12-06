@@ -67,7 +67,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_Volumes(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	_float temp{};
-	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	m_iPhase = PHASE::TWO;
 	
 	m_fParalysisAcc = 5.f;
