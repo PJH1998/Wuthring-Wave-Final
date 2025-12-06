@@ -83,7 +83,7 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();
