@@ -201,7 +201,7 @@ public:
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 	void					Register_Virtual(CharacterVirtual* pVirtual);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
-	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
+	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);	// pOut->w = 0 반환함에 주의.
 #ifdef _DEBUG
 	void					DrawShape(const Shape* pShape, RMat44 Matrix);
 	void					DrawRay(const _fvector& vStartPos, const _fvector& vEndPos);

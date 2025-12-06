@@ -69,8 +69,10 @@ private:
 	CVIBuffer_CurveTrace*	m_pVIBufferCom = { nullptr };		// VIBuffer_CurveTrace.cpp		
 
 	// 충돌 인디케이터 구(Sphere) 전용 2차 Transform 컴포넌트 및 VIBuffer
-	CTransform*				m_pTargetTransformCom = { nullptr };
-	CVIBuffer_Sphere*		m_pTargetVIBufferCom = { nullptr };	// VIBuffer_Sphere.cpp		
+	CTransform*				m_pTargetTransformCom = { nullptr };// Shader_UI_VtxCurveTrace_Sphere.hlsl		
+	CVIBuffer_Sphere*		m_pTargetVIBufferCom = { nullptr };	// VIBuffer_Sphere.cpp	
+	CShader*				m_pTargetShaderCom = { nullptr };
+
 	_bool					m_isShowTarget = false;				// 구체 켤 거임? 
 
 

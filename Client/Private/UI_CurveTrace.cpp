@@ -107,6 +107,9 @@ HRESULT CUI_CurveTrace::Ready_Components(void* pArg)
 	Safe_AddRef(m_pTargetTransformCom);
 	m_pTargetTransformCom->Scale(_float3(5.f, 5.f, 5.f));
 
+	if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace_Sphere"),
+		TEXT("Com_TargetShader"), reinterpret_cast<CComponent**>(&m_pTargetShaderCom), nullptr)))
+		return E_FAIL;
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_VIBuffer_Sphere"),
 		TEXT("Com_TargetVIBuffer"), reinterpret_cast<CComponent**>(&m_pTargetVIBufferCom), nullptr)))
 		return E_FAIL;
@@ -125,7 +128,7 @@ void CUI_CurveTrace::PreAssign_Presets()
 	m_arrAdvColorPreset[CH_GALBRENA]	= _float4(0.600f, 0.250f, 0.250f, 1.0f);
 }
 
-_float3 CUI_CurveTrace::EvalProjectilePos(const _float3& vPosition, const _float3& vVelocity, const _float3& vAcceleration, _float fTime)		// Start Position, Start Velocity, Gravity
+_float3 CUI_CurveTrace::EvalProjectilePos(const _float3& vPosition, const _float3& vVelocity, const _float3& vAcceleration, _float fTime)		// Start Position, Start Velocity, Acceleration
 {
 	// iSeg + 1개의 기준점 계산
 	// 나중에 계산식 다르면 이거 수정하면 됨
@@ -215,10 +218,11 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 		_float3 vNextWorldPos = {};		XMStoreFloat3(&vNextWorldPos, vCalcedNextWorldPos);
 
 		_bool isRayDetected = m_pGameInstance->Ray_Cast(XMLoadFloat3(&vCurrentWorldPos), XMLoadFloat3(&vNextWorldPos), &vHitPos4);
+		vHitPos4.w = 1.f;
 
 		if (isRayDetected)	// 충돌O
 		{
-			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점
+			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점. world
 			// 이거는 다시 플레이어 기준 로컬 좌표로 변환하여 넣어야 함.
 			_vector vCalcedLocalHitPos = XMVector3TransformCoord(XMLoadFloat3(&vHitPos), XMMatrixInverse(nullptr, matTargetTransform));
 			_float3 vLocalHitPos = {};	XMStoreFloat3(&vLocalHitPos, vCalcedLocalHitPos);
@@ -327,7 +331,7 @@ void CUI_CurveTrace::Render_Curve()
 
 	// ksta : 임시로 플레이어 좌표 가져옴. 나중에 시작 좌표는 픽업한 오브젝트,
 	//		 방향은 카메라가 바라보는 방향으로 픽스 필요
-	_float4x4 playerTransformMatrix = *m_pGameSystem->Get_PlayerMatrixPtr();
+	_float4x4 playerTransformMatrix = *m_pGameSystem->Get_PlayerMatrixPtr();	// 나중에 
 
 
 	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &playerTransformMatrix)))
@@ -356,32 +360,31 @@ void CUI_CurveTrace::Render_Sphere()
 
 	_float4x4 TargetWorld;
 	XMStoreFloat4x4(&TargetWorld, m_pTargetTransformCom->Get_WorldMatrix());
-	OutPutDebugMatrix(L"Sphere Matrix", TargetWorld);
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &TargetWorld)))
+	if (FAILED(m_pTargetShaderCom->Bind_Matrix("g_WorldMatrix", &TargetWorld)))
 		CRASH("Binding_Matrix_Failed");
 	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
-	if (FAILED(m_pShaderCom->Bind_Value("g_CamPosition", &vCamPos, sizeof(vCamPos))))
+	if (FAILED(m_pTargetShaderCom->Bind_Value("g_CamPosition", &vCamPos, sizeof(vCamPos))))
 		CRASH("Binding_Value_Failed");
 
-	//if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
-	//	CRASH("Binding_Matrix_Failed");
-	//if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
-	//	CRASH("Binding_Matrix_Failed");
+	if (FAILED(m_pTargetShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+		CRASH("Binding_Matrix_Failed");
+	if (FAILED(m_pTargetShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+		CRASH("Binding_Matrix_Failed");
 
 
 	// 어차피 Curve랑 동일한 색 쓸건데  굳이 재할당 필요 없을듯?
 
-	//_float4 vTargetColor	= m_arrSelectedColor[0];
-	//_float4 vHeadColor		= m_arrSelectedColor[1];
-	//_float4 vTailColor		= m_arrSelectedColor[2];
-	//if (FAILED(m_pShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
-	//	CRASH("Binding_Value_Failed");
-	//if (FAILED(m_pShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
-	//	CRASH("Binding_Value_Failed");
-	//if (FAILED(m_pShaderCom->Bind_Value("g_TailColor", &m_arrSelectedColor[2], sizeof(m_arrSelectedColor[2]))))
-	//	CRASH("Binding_Value_Failed");
+	_float4 vTargetColor	= m_arrSelectedColor[0];
+	_float4 vHeadColor		= m_arrSelectedColor[1];
+	_float4 vTailColor		= m_arrSelectedColor[2];
+	if (FAILED(m_pTargetShaderCom->Bind_Value("g_BaseColor", &vTargetColor, sizeof(vTargetColor))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pTargetShaderCom->Bind_Value("g_HeadColor", &vHeadColor, sizeof(vHeadColor))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pTargetShaderCom->Bind_Value("g_TailColor", &vTailColor, sizeof(vTailColor))))
+		CRASH("Binding_Value_Failed");
 
-	m_pShaderCom->Begin(1);			// Sphere 용 패스 제작
+	m_pTargetShaderCom->Begin(0);			// Sphere 용 패스 제작
 	m_pTargetVIBufferCom->Bind_Resources();
 	m_pTargetVIBufferCom->Render();
 }

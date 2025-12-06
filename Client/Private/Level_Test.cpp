@@ -77,7 +77,7 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	Ready_Leviatan();
+	//Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -789,6 +789,43 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 
+	// Interact
+
+	//static _uint iInteractIndex = 0;
+	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
+	//
+	//
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
+	//{
+	//	switch (iInteractIndex)
+	//	{
+	//	case TEST_INTERACT0:
+	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	case TEST_INTERACT1:
+	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	}
+	//}
+	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	//{
+	//	m_pGameSystem->Hide_InteractUI(true);
+	//}
+	//
+	//
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endlㅡ
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
+	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+
 
 
 #endif // KSTA_UITEST_OLD
@@ -830,43 +867,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 	if (!isEnableUITest) return;
 
-
-
-	
-	//static _uint iInteractIndex = 0;
-	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
-	//
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
-	//{
-	//	switch (iInteractIndex)
-	//	{
-	//	case TEST_INTERACT0:
-	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	case TEST_INTERACT1:
-	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	}
-	//}
-	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
-	//{
-	//	m_pGameSystem->Hide_InteractUI(true);
-	//}
-	//
-	//
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endlㅡ
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
-	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
 	static _bool isInteractActivate = false;
 	
@@ -1064,16 +1064,17 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 	{
 		CUI_CurveTrace::UI_CURVETRACE_DESC tDesc = {};
+		//tDesc.vStartPos		= _float3(0.f, 0.f,  0.f);	
 		tDesc.vStartPos		= _float3(0.f, 0.f,  0.f);	
-		tDesc.vStartVel		= _float3(0.f, 5.f, 5.f);
-		tDesc.vGravity		= _float3(0.f, -0.98f, 0.f);
-		tDesc.fMaxTime		= 20.f;
-		tDesc.iSegmentCount	= 15;
-		tDesc.fWidth		= 1.f;
-		tDesc.isUseCustomColor = false;
-		//tDesc.vBaseColor	= _float4(1.f, 1.f, 1.f, 1.f);
-		//tDesc.vHeadColor	= _float4(1.f, 0.f, 1.f, 1.f);  // head : magenta
-		//tDesc.vTailColor	= _float4(0.f, 1.f, 1.f, 1.f);	// tail : cyan
+		tDesc.vStartVel		= _float3(0.f, 10.f, 10.f);
+		tDesc.vGravity		= _float3(0.f, -9.8f, 0.f);
+		tDesc.fMaxTime		= 4.f;
+		tDesc.iSegmentCount	= 50;
+		tDesc.fWidth		= 0.25f;
+		tDesc.isUseCustomColor = true;
+		tDesc.vBaseColor	= _float4(1.f, 1.f, 1.f, 1.f);
+		tDesc.vHeadColor	= _float4(1.f, 0.f, 0.f, 1.f);
+		tDesc.vTailColor	= _float4(.8f, 0.f, 0.f, 1.f);
 
 		_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 		_vector vSca = XMVectorSet(2.f, 2.f, 2.f, 1.f);

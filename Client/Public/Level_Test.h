@@ -52,6 +52,7 @@ private:
 	_float m_fBlurDistanceScale = { 1.5f };
 #endif
 
+
 public:
 	static		CLevel_Test* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

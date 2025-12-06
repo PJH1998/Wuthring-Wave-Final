@@ -994,6 +994,11 @@ HRESULT CLoader_Test::Load_UI()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxCurveTrace.hlsl"), VTXUICURVE::Elements, VTXUICURVE::iNumElements))))
 		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_CurveTrace Load Failed. The Shader_CurveTrace may have already been loaded.\n");
 
+	// Shader_CurveTrace_Sphere
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace_Sphere"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxCurveTrace_Sphere.hlsl"), VTXUICURVE::Elements, VTXUICURVE::iNumElements))))
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_CurveTrace_Sphere Load Failed. The Shader_CurveTrace_Sphere may have already been loaded.\n");
+
 
 	// ==============================
 	cout << "[Loader_Test] Object" << endl;
