@@ -78,6 +78,7 @@
 #pragma region NPC
 #include "DummyNPC.h"
 #include "DummyCell.h"
+#include"NPC_Griffin.h"
 #pragma endregion
 
 
@@ -1068,6 +1069,20 @@ HRESULT CLoader_Test::Load_NPC()
 		CDummyCell::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
+
+	// Prototype_Component_AnimMachine_FalseSovereign
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
+		CNPC_Griffin::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_NPCGriffin"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
+		CRASH("Prototype Create Failed");
 	return S_OK;
 }
 

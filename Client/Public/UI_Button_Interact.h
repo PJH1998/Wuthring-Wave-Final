@@ -21,20 +21,27 @@ public: // 생성/복제
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 public:
 	void			Req_OffInteract()	{ m_IsGoinDisabled = true; }
+	
+	void			Req_Render()		{ m_isReqedCurFrame = true; };
 
 private:
 	void			PreAssign_ChildUIs();
 
+	void			Update_CheckReq();
+	
 	void			Update_MouseFeedback(_float fTimeDelta);
 	void			Create_ChildText();
 
+
+
 private:
-	CCustom_UI*		m_pRUI_Interact_Multiplier = nullptr;
-	CCustom_UI*		m_pUI_Interact_Focused = nullptr;
-	CCustom_UI*		m_pUI_Interact_Pressed = nullptr;
-	CCustom_UI*		m_pUI_Interact_Normal = nullptr;
+	CCustom_UI*		m_pRUI_Interact_Multiplier	= nullptr;
+	CCustom_UI*		m_pUI_Interact_Focused		= nullptr;
+	CCustom_UI*		m_pUI_Interact_Pressed		= nullptr;
+	CCustom_UI*		m_pUI_Interact_Normal		= nullptr;
 
-
+	_bool			m_isReqedCurFrame = false;
+	_bool			m_isReqedPreFrame = false;
 	_bool			m_IsGoinDisabled = false;
 	_float			m_fDisableTimer = 0.f;
 

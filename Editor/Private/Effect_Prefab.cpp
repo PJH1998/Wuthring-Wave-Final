@@ -31,10 +31,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
     m_strMyTag = pDesc->strPrefabTag;
 
-    //m_vLifeTime = pDesc->vLifeTime;
-    //일단 프리팹 라이프타임 15초로
-	m_vLifeTime.y = 15.f;
-    m_vLifeTime.x = 0.f;
+    m_vLifeTime = pDesc->vLifeTime;
 	m_IsLoop = pDesc->IsLoop;
 
     m_isActivate = false;

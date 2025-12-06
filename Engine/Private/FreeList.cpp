@@ -8,8 +8,9 @@ CFreeList::CFreeList()
 
 HRESULT CFreeList::Initialize(_uint iMemorySize)
 {
+	m_iMemorySize = iMemorySize;
 	m_FreeBlocks.clear();
-	m_FreeBlocks.emplace(0, iMemorySize * 1024 * 1024);
+	m_FreeBlocks.emplace(0, m_iMemorySize * 1024 * 1024);
 	return S_OK;
 }
 
@@ -78,6 +79,12 @@ void CFreeList::Free(_uint iMemoryOffset, _uint iMemorySize)
 	}
 
 	m_FreeBlocks.emplace(iMemoryOffset, iMemorySize);
+}
+
+void CFreeList::Clear_Resource()
+{
+	m_FreeBlocks.clear();
+	m_FreeBlocks.emplace(0, m_iMemorySize * 1024 * 1024);
 }
 
 CFreeList* CFreeList::Create(_uint iMemorySize)

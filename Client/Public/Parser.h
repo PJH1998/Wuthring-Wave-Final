@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Base.h"
 #include"MapObject_Instance.h"
-
+#include"MapObject_FireFly.h"
 NS_BEGIN(Client)
 
 class CParser final : public CBase
@@ -101,7 +101,8 @@ private:
 	vector<vector<_string>> m_Data;
 	vector<MAPEFFECT> m_MapEffects;
 	unordered_map<LEVEL, vector<const _char*>> m_LoadingMap;
-	vector<CMapObject_Instance::MAP_LOAD> m_MapInstanceData;
+	vector<CMapObject_Instance::MAP_LOAD>	   m_MapInstanceData;
+	vector<CMapObject_FireFly::MAP_LOAD>	   m_FireFlyData;
 	//unordered_map<const _char*, vector<SPAWN_DESC>> m_MonsterDesc;
 	unordered_map<LEVEL, vector<SPAWN_DESC>> m_MonsterDesc;
 public:

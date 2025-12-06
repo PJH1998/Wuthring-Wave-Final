@@ -93,6 +93,8 @@ void CUI_Button_Interact::Late_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+	Update_CheckReq();
+
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
 
@@ -141,6 +143,8 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iAnimOrder = 0;
 
 	m_isActivate = true;
+	m_isReqedPreFrame = false;
+	m_isReqedCurFrame = false;
 
 	//if ( FAILED (static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Focused_Default")))
 	//	CRASH("");
@@ -154,6 +158,15 @@ void CUI_Button_Interact::PreAssign_ChildUIs()
 	m_pUI_Interact_Focused		= Find_ChildObject(L"Interact_Focused");
 	m_pUI_Interact_Pressed		= Find_ChildObject(L"Interact_Pressed");
 	m_pUI_Interact_Normal		= Find_ChildObject(L"Interact_Normal");
+}
+
+void CUI_Button_Interact::Update_CheckReq()
+{
+	if (m_isReqedPreFrame && !m_isReqedCurFrame)
+		m_IsGoinDisabled = true;
+
+	m_isReqedPreFrame = m_isReqedCurFrame;
+	m_isReqedCurFrame = false;
 }
 
 void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
@@ -173,7 +186,7 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 	if (isClickEnter && !m_IsGoinDisabled)
 	{
 		pPressedUI->SetActivate(true);
-		static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Pressed_Trigger");
+		static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Pressed_Trigger", true);
 		m_IsGoinDisabled = true;
 		cout << "[UI_Button_Interact::Update_MouseFeedback] || Click Enter" << endl;
 	}

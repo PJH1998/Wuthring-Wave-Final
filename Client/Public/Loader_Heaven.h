@@ -19,7 +19,6 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
-	HRESULT				Load_MonsterTest();
 	HRESULT				Load_Monster();
 	HRESULT				Load_Leviatan();
 

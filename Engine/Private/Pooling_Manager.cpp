@@ -44,22 +44,24 @@ HRESULT CPooling_Manager::Add_PoolingObject(_uint iPrototypeLevelID, const _wstr
     return S_OK;
 }
 
-//HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
-//{
-//    auto iter = m_PoolingObjects.find(strPoolingTag);
-//    if (iter == m_PoolingObjects.end())
-//        return E_FAIL;
-//
-//	if (0 == m_PoolingObjects[strPoolingTag].size())
-//		return S_OK;
-//
-//    CGameObject* pObject = m_PoolingObjects[strPoolingTag].front();
-//	m_PoolingObjects[strPoolingTag].pop();
-//    pObject->Reset(WorldMatrix, pArg);
-//	m_ActiveObjects[strPoolingTag].push_back(pObject);
-//
-//    return S_OK;
-//}
+HRESULT CPooling_Manager::Add_PoolingObject_ForStatic(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
+{
+	auto iter = m_PoolingStaticObjects.find(strPoolingTag);
+	if (iter != m_PoolingStaticObjects.end())
+		return E_FAIL;
+
+	for (_uint i = 0; i < iNumObjects; ++i)
+	{
+		CGameObject* pObject = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iPrototypeLevelID, strPrototypeTag, PROTOTYPE::GAMEOBJECT, pArg));
+		if (nullptr == pObject)
+			return E_FAIL;
+		m_PoolingStaticObjects[strPoolingTag].push(pObject);
+		m_pGameInstance->Add_GameObject_ToLayer(iLayerLevelID, strLayerTag, pObject);
+		Safe_AddRef(pObject);
+	}
+
+	return S_OK;
+}
 
 HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
 {
@@ -78,6 +80,23 @@ HRESULT CPooling_Manager::Spawn_PoolingObject(const _wstring& strPoolingTag, con
 	return S_OK;
 }
 
+HRESULT CPooling_Manager::Spawn_PoolingObject_ForStatic(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg)
+{
+	auto iter = m_PoolingStaticObjects.find(strPoolingTag);
+	if (iter == m_PoolingStaticObjects.end())
+		return E_FAIL;
+
+	if (0 == m_PoolingStaticObjects[strPoolingTag].size())
+		return S_OK;
+
+	CGameObject* pObject = m_PoolingStaticObjects[strPoolingTag].front();
+	m_PoolingStaticObjects[strPoolingTag].pop();
+	pObject->Reset(WorldMatrix, pArg);
+	m_ActiveStaticObjects[strPoolingTag].push_back(pObject);
+
+	return S_OK;
+}
+
 HRESULT CPooling_Manager::Clear_Resource()
 {
     for (auto& Pair : m_PoolingObjects)
@@ -89,6 +108,22 @@ HRESULT CPooling_Manager::Clear_Resource()
         }
     }
     m_PoolingObjects.clear();
+
+	for (auto& Pair : m_ActiveObjects)
+	{
+		for (auto& Object : Pair.second)
+			Safe_Release(Object);
+		Pair.second.clear();
+	}
+	m_ActiveObjects.clear();
+
+	for (auto& Pair : m_ActiveStaticObjects)
+	{
+		for (auto& Object : Pair.second)
+			m_PoolingStaticObjects[Pair.first].push(Object);
+		Pair.second.clear();
+	}
+	m_ActiveStaticObjects.clear();
 
     return S_OK;
 }
@@ -102,6 +137,20 @@ void CPooling_Manager::Update_Pooling()
 			if (false == (*iter)->IsActivate())
 			{
 				m_PoolingObjects[Pair.first].push(*iter);
+				iter = Pair.second.erase(iter);
+			}
+			else
+				++iter;
+		}
+	}
+
+	for (auto& Pair : m_ActiveStaticObjects)
+	{
+		for (auto iter = Pair.second.begin(); iter != Pair.second.end();)
+		{
+			if (false == (*iter)->IsActivate())
+			{
+				m_PoolingStaticObjects[Pair.first].push(*iter);
 				iter = Pair.second.erase(iter);
 			}
 			else
@@ -209,6 +258,24 @@ void CPooling_Manager::Free()
 		Pair.second.clear();
 	}
 	m_ActiveObjects.clear();
+
+	for (auto& Pair : m_PoolingStaticObjects)
+	{
+		while (false == Pair.second.empty())
+		{
+			Safe_Release(Pair.second.front());
+			Pair.second.pop();
+		}
+	}
+	m_PoolingStaticObjects.clear();
+
+	for (auto& Pair : m_ActiveStaticObjects)
+	{
+		for (auto& pObject : Pair.second)
+			Safe_Release(pObject);
+		Pair.second.clear();
+	}
+	m_ActiveStaticObjects.clear();
 
 	m_isAllStop = true;
 	m_CV.notify_all();

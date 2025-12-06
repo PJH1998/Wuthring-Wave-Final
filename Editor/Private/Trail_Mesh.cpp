@@ -94,14 +94,14 @@ void CTrail_Mesh::Update(_float fTimeDelta)
 		m_fMaskSweep = 0.f;
     }
 
-    if (m_fSweep >= 1.f + m_fSweepWitdh)
+ /*   if (m_fSweep >= 1.f + m_fSweepWitdh)
     {
         m_fSweep = 0.f;
         m_isActivate = false;
         m_fColorSweep = 0.f;
 		m_fMaskSweep = 0.f;
 		m_vLifeTime.x = 0.f;
-    }
+    }*/
 }
 
 void CTrail_Mesh::Late_Update(_float fTimeDelta)
@@ -293,6 +293,9 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
     //셰이더에 바인딩 해주자.
     if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
         return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_SweepSpeed", &m_fSweepSpeed, sizeof(_float))))
+		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_Soft", &m_fSoft, sizeof(_float))))
 		return E_FAIL;

@@ -156,8 +156,6 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 			memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
 		}
 	}
-	else
-		int a = 0;
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;

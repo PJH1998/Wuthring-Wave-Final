@@ -1198,6 +1198,9 @@
       <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\Public\MapObject_FireFly.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\YunoGroundIdle.h">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
     </ClInclude>
@@ -1243,6 +1246,9 @@
     <ClInclude Include="..\Public\AugustaGroundLandSlide.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\NPC_Griffin.h" />
+    <ClInclude Include="..\Public\MapObject_SlideZone.h" />
+    <ClInclude Include="..\Public\Slide_Navigation.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1916,6 +1922,9 @@
       <Filter>03. GameObject\MotionTrail</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\MapObject_FireFly.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\NPC_Hiding.cpp">
       <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
     </ClCompile>
@@ -1956,6 +1965,9 @@
     <ClCompile Include="..\Private\AugustaGroundLandSlide.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\NPC_Griffin.cpp" />
+    <ClCompile Include="..\Private\MapObject_SlideZone.cpp" />
+    <ClCompile Include="..\Private\Slide_Navigation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -2048,6 +2060,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh_MotionTrail.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance_FireFly.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

@@ -404,6 +404,12 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Decal\Cube">
       <UniqueIdentifier>{aeca2a29-2bc2-452c-ba24-3ac0a2cca864}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance\FireFly">
+      <UniqueIdentifier>{88af8b60-72fe-4c43-931f-273f2bf6f234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\20.Model_Streaming">
+      <UniqueIdentifier>{b6e24aa3-a926-43dd-9b4e-d07c9eaa0539}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -770,11 +776,6 @@
     <ClInclude Include="..\public\ScreenBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\BufferPool.h" />
-    <ClInclude Include="..\Public\Model_Manager.h" />
-    <ClInclude Include="..\Public\FreeList.h" />
-    <ClInclude Include="..\Public\Model_Streaming.h" />
-    <ClInclude Include="..\Public\Mesh_Streaming.h" />
     <ClInclude Include="..\public\RadialBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClInclude>
@@ -816,6 +817,27 @@
     </ClInclude>
     <ClInclude Include="..\public\VIBuffer_Decal_Cube.h">
       <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance_FireFly.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\FireFly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Model_Instance_FireFly.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\FireFly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Model_Streaming.h">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Streaming.h">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Model_Manager.h">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BufferPool.h">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\FreeList.h">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1159,11 +1181,6 @@
     <ClCompile Include="..\private\ScreenBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\BufferPool.cpp" />
-    <ClCompile Include="..\Private\Model_Manager.cpp" />
-    <ClCompile Include="..\Private\FreeList.cpp" />
-    <ClCompile Include="..\Private\Model_Streaming.cpp" />
-    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\private\RadialBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
     </ClCompile>
@@ -1205,6 +1222,27 @@
     </ClCompile>
     <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Instance_FireFly.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\FireFly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Model_Instance_FireFly.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\FireFly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Model_Manager.cpp">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Model_Streaming.cpp">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BufferPool.cpp">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\FreeList.cpp">
+      <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

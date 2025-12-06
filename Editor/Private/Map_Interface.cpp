@@ -662,6 +662,9 @@ void CMap_Interface::Ready_Map_Prototype(const _char* pFilePath)
 
 			if (entry.path().string().find("Anim") != std::string::npos)
 				continue;
+			
+			if (entry.path().string().find("FireFly") != std::string::npos)
+				continue;
 
 			if (entry.path().extension() == ".dat") {
 
