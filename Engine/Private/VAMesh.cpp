@@ -15,6 +15,11 @@ CVAMesh::CVAMesh(const CVAMesh& Prototype)
 	Safe_AddRef(m_pHdrTexture);
 }
 
+_float CVAMesh::Get_MaxFrame(_uint iTextureIndex)
+{
+	return m_pHdrTexture->Get_MaxFrame(iTextureIndex);
+}
+
 HRESULT CVAMesh::Initialize_Prototype(const _tchar* pFilePath, _fmatrix PreTransformMatrix, _uint iNumAnimation)
 {
 	ifstream EMeshFile(WStringToString(pFilePath), ios::binary);

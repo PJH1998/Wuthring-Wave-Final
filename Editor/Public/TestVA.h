@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -8,25 +7,23 @@ class CTexture;
 class CVAMesh;
 NS_END
 
-NS_BEGIN(Client)
+NS_BEGIN(Editor)
 
-class CEffect_VA : public CGameObject
+class CTestVA : public CGameObject
 {
 public:
 	typedef struct tagVADesc : Engine::EFFECT_DESC
 	{
 		_wstring		strTextureTag;
 		_wstring		strColorTextureTag;
-		_wstring		strHdrTextureTag;
-
 		_wstring		strMeshTag;
 
 	}VA_DESC;
 
 private:
-	CEffect_VA(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CEffect_VA(const CEffect_VA& Prototype);
-	virtual ~CEffect_VA() = default;
+	CTestVA(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CTestVA(const CTestVA& Prototype);
+	virtual ~CTestVA() = default;
 
 public:
 	virtual		HRESULT			Initialize_Prototype(const VA_DESC* pDesc);
@@ -49,15 +46,19 @@ private:
 
 	//_float							m_fTimeAcc = {};					// Anim 진행 시간 누적
 
-	_uint							m_iTrackPosition = {};			// Anim 진행 Pos
-	_uint							m_iAnimationDuration = {};		// 총 Animation 진행 시간 (HDR에서 Y Max 필요)
+	_uint						m_iTest = {3};
+	_uint						m_iTest2 = {};
+
+	_uint						m_iTrackPosition = {};			// Anim 진행 Pos
+	_uint						m_iAnimationDuration = {};		// 총 Animation 진행 시간 (HDR에서 Y Max 필요)
 
 private:
-	void							Bind_Resource();
+	void						Bind_Resource();
+	HRESULT						Ready_Components();
 
 public:
-	static		CEffect_VA*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc);
-	virtual		CGameObject*		Clone(void* pArg) override;
+	static		CTestVA* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc);
+	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void				Free() override;
 };
 
