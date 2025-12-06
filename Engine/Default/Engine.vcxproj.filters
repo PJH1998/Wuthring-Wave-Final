@@ -410,6 +410,9 @@
     <Filter Include="01. Utility\04. Component\20.Model_Streaming">
       <UniqueIdentifier>{b6e24aa3-a926-43dd-9b4e-d07c9eaa0539}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\Texture\Hdr">
+      <UniqueIdentifier>{0afa1376-7b38-4c9f-98fb-74a9799ac323}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -839,6 +842,9 @@
     <ClInclude Include="..\Public\FreeList.h">
       <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\HdrTexture.h">
+      <Filter>01. Utility\04. Component\Texture\Hdr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1243,6 +1249,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\FreeList.cpp">
       <Filter>01. Utility\04. Component\20.Model_Streaming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\HdrTexture.cpp">
+      <Filter>01. Utility\04. Component\Texture\Hdr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

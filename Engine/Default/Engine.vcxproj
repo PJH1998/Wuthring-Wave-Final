@@ -80,6 +80,7 @@
     <ClInclude Include="..\Public\GameObject.h" />
     <ClInclude Include="..\Public\Graphic_Device.h" />
     <ClInclude Include="..\Public\GUIManager.h" />
+    <ClInclude Include="..\public\HdrTexture.h" />
     <ClInclude Include="..\Public\HZB.h" />
     <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\Input_Device.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="..\Private\GameObject.cpp" />
     <ClCompile Include="..\Private\Graphic_Device.cpp" />
     <ClCompile Include="..\Private\GUIManager.cpp" />
+    <ClCompile Include="..\private\HdrTexture.cpp" />
     <ClCompile Include="..\Private\HZB.cpp" />
     <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\Input_Device.cpp" />
