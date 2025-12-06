@@ -47,8 +47,7 @@ void CLevi_Drop::Update(_float fTimeDelta)
 			m_isDisolve = true;
 			m_pRigidBodyCom->IsActivate(false);
 
-			// 터지는 이펙트 호출
-			// to do...
+			//바닦에 떨어졌을때 이펙트 호출
 		}
 	}
 	
@@ -92,6 +91,8 @@ void CLevi_Drop::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDisolve = false;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
+
+	// 메테오 스폰
 }
 
 HRESULT CLevi_Drop::Bind_Resources()

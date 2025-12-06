@@ -92,6 +92,9 @@ void CLevi_Wave::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
 	m_fDesolveTime = 0.f;
+
+	//이펙트 스폰 위치
+
 }
 
 HRESULT CLevi_Wave::Bind_Resources()
