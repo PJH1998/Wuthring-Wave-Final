@@ -33,6 +33,7 @@ private:
 	CAnimMachine* m_pAnimMachine = { nullptr };
 
 	_uint m_iAnimState = {};
+	_bool m_IsRender = {};
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(GRIFFIN_DESC* pDesc);

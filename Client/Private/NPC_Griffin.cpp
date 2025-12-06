@@ -33,8 +33,12 @@ void CNPC_Griffin::Priority_Update(_float fTimeDelta)
 void CNPC_Griffin::Update(_float fTimeDelta)
 {
 	_bool m_IsTrash = { false };
-
-	m_pAnimMachine->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iAnimState, m_IsTrash, fTimeDelta);
+	m_IsRender = false;
+	if (XMVectorGetX(XMVector3Length(XMVectorSetY(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - m_pTransformCom->Get_State(STATE::POSITION), 0.f))) < 500.f)
+	{
+		m_pAnimMachine->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iAnimState, m_IsTrash, fTimeDelta);
+		m_IsRender = true;
+	}
 	
 	if (m_IsTrash)
 		m_iAnimState = m_pGameInstance->Rand(0.f, 3.f - XMVectorGetX(g_XMEpsilon));
@@ -42,7 +46,8 @@ void CNPC_Griffin::Update(_float fTimeDelta)
 
 void CNPC_Griffin::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	if (m_IsRender)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 }
 
 void CNPC_Griffin::Render()
