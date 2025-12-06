@@ -17,9 +17,11 @@ void CModelLoader::Update()
 	if (ImGui::RadioButton("NonAnim", m_iAnim == 0)) m_iAnim = 0;
 	if (ImGui::RadioButton("Anim", m_iAnim == 1)) m_iAnim = 1;
 	if (ImGui::RadioButton("Character", m_iAnim == 2)) m_iAnim = 2;
+	if (ImGui::RadioButton("VAT", m_iAnim == 3)) m_iAnim = 3;
 	if (0 == m_iAnim) m_eType = MODELTYPE::NONANIM;
-	else if(1 == m_iAnim) m_eType = MODELTYPE::ANIM;
-	else if(2 == m_iAnim) m_eType = MODELTYPE::CHARACTER;
+	else if (1 == m_iAnim) m_eType = MODELTYPE::ANIM;
+	else if (2 == m_iAnim) m_eType = MODELTYPE::CHARACTER;
+	else if (3 == m_iAnim) m_eType = MODELTYPE::VAT;
 
 	if (ImGui::Button("Load FBX"))
 		m_isShowLoadFile = !m_isShowLoadFile;
@@ -832,6 +834,61 @@ HRESULT CModelLoader::Save_Animation_Character(const _char* pFileName)
 //
 //	return S_OK;
 //}
+
+HRESULT CModelLoader::Save_Dat_VatMesh(const _char* pFileName)
+{
+if (nullptr == m_pAIScene)
+		return E_FAIL;
+
+	ofstream file(pFileName, ios::binary);
+
+	if (false == file.is_open())
+	{
+		MSG_BOX("Model Save Fail");
+		return E_FAIL;
+	}
+
+	file.write(reinterpret_cast<const _char*>(&m_pAIScene->mNumMeshes), sizeof(_uint));
+
+	for (size_t i = 0; i < m_pAIScene->mNumMeshes; ++i)
+	{
+		aiMesh* pMesh = m_pAIScene->mMeshes[i];
+
+		file.write(reinterpret_cast<const _char*>(&pMesh->mNumVertices), sizeof(_uint));
+		file.write(reinterpret_cast<const _char*>(&pMesh->mNumFaces), sizeof(_uint));
+		file.write(reinterpret_cast<const _char*>(&pMesh->mMaterialIndex), sizeof(_uint));
+
+		VTX_VATMESH* Vertices = new VTX_VATMESH[pMesh->mNumVertices];
+	
+		for (size_t j = 0; j < pMesh->mNumVertices; ++j)
+		{
+			memcpy(&Vertices[j].vPosition, &pMesh->mVertices[j], sizeof(_float3));
+			memcpy(&Vertices[j].vNormal, &pMesh->mNormals[j], sizeof(_float3));
+			memcpy(&Vertices[j].vTangent, &pMesh->mTangents[j], sizeof(_float3));
+			memcpy(&Vertices[j].vBinormal, &pMesh->mBitangents[j], sizeof(_float3));
+			memcpy(&Vertices[j].vTexcoord, &pMesh->mTextureCoords[0][j], sizeof(_float2));
+			memcpy(&Vertices[j].vVATcoord, &pMesh->mTextureCoords[1][j], sizeof(_float2));
+		}
+		
+		file.write(reinterpret_cast<const _char*>(Vertices), sizeof(VTX_VATMESH) * pMesh->mNumVertices);
+		Safe_Delete_Array(Vertices);
+
+		_uint* Indices = new _uint[pMesh->mNumFaces * 3];
+		_uint iIndex = {};
+		for (size_t j = 0; j < pMesh->mNumFaces; ++j)
+		{
+			Indices[iIndex++] = pMesh->mFaces[j].mIndices[0];
+			Indices[iIndex++] = pMesh->mFaces[j].mIndices[1];
+			Indices[iIndex++] = pMesh->mFaces[j].mIndices[2];
+		}
+		file.write(reinterpret_cast<const _char*>(Indices), sizeof(_uint) * pMesh->mNumFaces * 3);
+		Safe_Delete_Array(Indices);
+	}
+
+	file.close();
+
+	return S_OK;
+}
 
 HRESULT CModelLoader::Save_Dat_NonAnim(const _char* pFileName)
 {

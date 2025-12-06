@@ -119,11 +119,9 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Skybox();
 	Ready_UI();
 
-
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Scan"),
 		TEXT("Pooling_Scan"), 1)))
 		CRASH("Failed Add Pool Scan");
-
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_MotionTrail"),
 		TEXT("Pooling_MotionTrail"), 1)))
