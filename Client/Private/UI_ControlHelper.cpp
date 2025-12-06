@@ -418,7 +418,16 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 	pRootUI->Detach_ObjectPos(pOwner);
 }
 
-void CUI_ControlHelper::Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration)
+void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
+												_float3& vStartVelocity,
+												_float3& vAcceleration,
+												_float fMaxTime,
+												_uint iSegmentCount,
+												_float fRibbonWidth,
+												_bool isUseCustomColor,
+												_float4 vBaseColor,
+												_float4 vHeadColor,
+												_float4 vTailColor)
 {
 	CUI_CurveTrace* pRootUI = dynamic_cast<CUI_CurveTrace*>(m_pRootUI_CurveTrace);
 
@@ -430,13 +439,13 @@ void CUI_ControlHelper::Req_Render_CurveTrace(_float3& vStartPos, _float3& vStar
 		tDesc.vStartPos = vStartPos;// _float3(0.f, 0.f, 0.f);
 		tDesc.vStartVel = vStartVelocity;// _float3(0.f, 10.f, 10.f);
 		tDesc.vAcceleration = vAcceleration;// _float3(0.f, -9.8f, 0.f);
-		tDesc.fMaxTime = 4.f;
-		tDesc.iSegmentCount = 50;
-		tDesc.fWidth = 0.25f;
-		tDesc.isUseCustomColor = true;
-		tDesc.vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
-		tDesc.vHeadColor = _float4(1.f, 0.f, 0.f, 1.f);
-		tDesc.vTailColor = _float4(.8f, 0.f, 0.f, 1.f);
+		tDesc.fMaxTime = fMaxTime;
+		tDesc.iSegmentCount = iSegmentCount;
+		tDesc.fWidth = fRibbonWidth;
+		tDesc.isUseCustomColor = isUseCustomColor;
+		tDesc.vBaseColor = vBaseColor;
+		tDesc.vHeadColor = vHeadColor;
+		tDesc.vTailColor = vTailColor;
 
 		_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 		_vector vSca = XMVectorSet(2.f, 2.f, 2.f, 1.f);

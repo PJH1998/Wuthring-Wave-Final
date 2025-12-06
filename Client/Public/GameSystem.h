@@ -146,7 +146,24 @@ public:
 	// - vStartPos : 시작 위치. 즉 오브젝트의 위치 + 오프셋 등
 	// - vStartVelocity : 시작 속도. 즉, 던지는 방향과 그 세기(power)
 	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
-	void		Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration);
+	// ===== 이하는 필요 시 수정 ===== 
+	// - fMaxTime : 해당 값 기준 몇초까지 날아갈 거리만큼 리본메쉬를 그릴 것인지
+	// - iSegmentCount : 리본메쉬 정밀도 (낮으면 버텍스의 굴곡짐이 잘 보임)
+	// - fRibbonWidth : 리본메쉬 가로두께
+	// - isUseCustomColor : 색 커스텀 여부 (false로 둘 시 캐릭터 속성 색 사용. 기본값은 빨간색)
+	// - vBaseColor : 기본색, vHeadColor : 시작방향 색, vTailColor : 끝 방향 색
+	void		Req_Render_CurveTrace(
+		_float3& vStartPos,
+		_float3& vStartVelocity,
+		_float3& vAcceleration, 
+		_float fMaxTime = 4.f, 
+		_uint iSegmentCount = 50, 
+		_float fRibbonWidth = 0.25f, 
+		_bool isUseCustomColor = true,
+		_float4 vBaseColor = _float4(1.f, 1.f, 1.f, 1.f),
+		_float4 vHeadColor = _float4(1.f, 0.f, 0.f, 1.f),
+		_float4 vTailColor = _float4(.8f, 0.f, 0.f, 1.f)
+	);
 
 
 #pragma endregion
