@@ -1026,7 +1026,6 @@ PS_OUT PS_SkyTrail(PS_IN In)
     Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
-    
     return Out;
 }
 
@@ -1070,10 +1069,10 @@ PS_OUT PS_SkyTrailColor(PS_IN In)
     if (vColor.a < 0.2f)
         discard;
 
-    //float fRatio = g_LifeTime.x / g_LifeTime.y;
+    float fRatio = g_LifeTime.x / g_LifeTime.y;
     
-    //if (1.f - fRatio <= 0.4f)
-    //    vColor.a *= 1.f - fRatio;
+    if (1.f - fRatio <= 0.4f)
+        vColor.a *= 1.f - fRatio;
     
     Out.vDiffuse = vColor;
 
@@ -1085,6 +1084,14 @@ PS_OUT PS_SkyTrailColor(PS_IN In)
     Out.vDiffuse.a *= g_Alpha;
     
     Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    float z = In.vProjPos.z / In.vProjPos.w;
+    
+    float Weight = max(1e-5, exp(-z * g_WeightBlend));
+    
+    Out.vAccumColor = float4(Out.vDiffuse.rgb * Out.vDiffuse.a, 0.0f) * Weight;
+    Out.vAccumAlpha.r = Out.vDiffuse.a * Weight;
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 0.f);
     
     return Out;
 }
@@ -1404,11 +1411,11 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_SkyTrail();
     }
 
-    pass TrailSkyA // 15
+    pass TrailSkyColor // 15
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
