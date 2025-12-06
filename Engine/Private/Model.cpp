@@ -1814,6 +1814,16 @@ HRESULT CModel::Ready_Shared_Buffers()
 	}
 
 
+	for (const auto& Pair : m_Animations)
+	{
+		CAnimation* pAnimation = Pair.second;
+			
+		// GPU Buffer를 만든 객체들은 모든 키프레임 채널들을 제거한다?
+		pAnimation->Release_Channels();
+	}
+	
+
+
 	// --- 2. 수집된 데이터로 실제 GPU 버퍼 생성 ---
 
 	D3D11_BUFFER_DESC bufferDesc = {};
@@ -1829,6 +1839,13 @@ HRESULT CModel::Ready_Shared_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_KEY_FRAME], nullptr, &m_SRVs[SRV_KEY_FRAME]);
 	if (FAILED(hr)) return E_FAIL;
 
+
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "CHARACTER GPU_KEYFRAME BYTE : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
+
+
 	// 2-2. 애니메이션 정보 버퍼 (g_AllAnimInfos)
 	bufferDesc.ByteWidth = sizeof(ANIMINFO) * static_cast<_uint>(vAllAnimInfos.size());
 	bufferDesc.StructureByteStride = sizeof(ANIMINFO);
@@ -1838,6 +1855,11 @@ HRESULT CModel::Ready_Shared_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_ANIM_INFO], nullptr, &m_SRVs[SRV_ANIM_INFO]);
 	if (FAILED(hr)) return E_FAIL;
 
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character ANIMINFO BYTE : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
+
 	// 2-3. 뼈(채널)별 정보 버퍼 (g_ChannelInfos)
 	bufferDesc.ByteWidth = sizeof(GPU_CHANNELINFO) * static_cast<_uint>(vAllChannelBoneInfos.size());
 	bufferDesc.StructureByteStride = sizeof(GPU_CHANNELINFO);
@@ -1846,6 +1868,11 @@ HRESULT CModel::Ready_Shared_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_BONE_CHANNEL], nullptr, &m_SRVs[SRV_BONE_CHANNEL]);
 	if (FAILED(hr)) return E_FAIL;
+
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character GPU_CHANNELINFO BYTE : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
 
 	return S_OK;
 }
@@ -1868,6 +1895,12 @@ HRESULT CModel::Ready_Instance_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_SRVs[SRV_FINAL_BONEMATRIX]);
 	if (FAILED(hr)) return E_FAIL;
 
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character Bone Buffer BYTE : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
+
+
 	// 2-5. 매 프레임 업데이트할 상수 버퍼 (AnimationInfo)
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(ANIMATION_CBINFO);
@@ -1876,6 +1909,11 @@ HRESULT CModel::Ready_Instance_Buffers()
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOCB]);
 	if (FAILED(hr)) return E_FAIL;
+
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character ANIMATION_CBINFO BYTE : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
 
 	// 2-5. 매 프레임 업데이트할 상수 버퍼 (ANIMATIONFLY_CBINFO)
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -1886,6 +1924,11 @@ HRESULT CModel::Ready_Instance_Buffers()
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOFLYCB]);
 	if (FAILED(hr)) return E_FAIL;
 
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character ANIMATIONFLY_CBINFO Byte : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
+
 	// 2-6. GPU -> CPU 복사를 위한 Staging 버퍼
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
@@ -1893,6 +1936,11 @@ HRESULT CModel::Ready_Instance_Buffers()
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_STAGING]);
 	if (FAILED(hr)) return E_FAIL;
+
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character Staging Buffer Byte : " << bufferDesc.ByteWidth << endl;
+#endif // _DEBUG
 
 	if (MODELTYPE::CHARACTER == m_eType)
 	{
@@ -1918,8 +1966,12 @@ HRESULT CModel::Ready_MorphInstance_Buffers()
 	BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	BufferDesc.StructureByteStride = sizeof(_float);
 
+#ifdef _DEBUG
+	if (m_eType == MODELTYPE::CHARACTER)
+		cout << "Character ShapeKeyWeight Byte : " << BufferDesc.ByteWidth << endl;
+#endif // _DEBUG
+
 	// m_Buffers에 공간이 없다면 enum 추가 필요 (BUFFER_MORPH_WEIGHT 등)
-	// 임시로 멤버변수 추가 가정: m_pMorphWeightBuffer, m_pMorphWeightSRV
 	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_Buffers[BUFFER_MORPH_WEIGHT])))
 		return E_FAIL;
 

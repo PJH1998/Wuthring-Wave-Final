@@ -25,11 +25,11 @@ HRESULT CHdrTexture::Initialize_Prototype(const _tchar* pFilePath, _uint iNumTex
 
 		ScratchImage OutImage = {};
 
-		if (FAILED(LoadFromHDRFile(pFilePath, &Data, OutImage)))
+		if (FAILED(LoadFromHDRFile(szFileName, &Data, OutImage)))
 			CRASH("Failed to Load HDR File");
 
 		m_MaxFrames.push_back(static_cast<_float>(Data.height));
-
+		
 		ID3D11Texture2D* pTexture = {};
 		D3D11_TEXTURE2D_DESC TextureDesc = {};
 

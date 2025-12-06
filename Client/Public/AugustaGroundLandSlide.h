@@ -34,6 +34,9 @@ private:
     _bool m_States[LANDSTATE::END] = {};
 
 	SLIDE_DATA m_SlideData = {};
+	_uint m_iWayPoint = {};
+
+	_float3 m_vStart = {};
 
 private:
     virtual void Handle_Input() override;

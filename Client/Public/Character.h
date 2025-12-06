@@ -142,6 +142,8 @@ public:
 	_matrix Get_WorldMatrix();
 	void Set_Position(_fvector vPos);
 
+	void ColliderActive(_bool IsActive);
+
 #ifdef _DEBUG
 	void Print_LookRay();
 #endif // _DEBUG
@@ -228,6 +230,7 @@ public:
 	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) {};
 
 	// Look Vector
+	_vector Get_Position();
 	_vector Get_LookVector();
 	_vector Get_CameraLookVector();
 	_vector Get_LookVector_NoPitch();
@@ -365,6 +368,7 @@ protected:
 	class CGameSystem* m_pGameSystem = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
+	class CStateMachine* m_pFpsStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
