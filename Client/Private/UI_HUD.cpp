@@ -811,8 +811,11 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	// ksta : m_iUtilityIndex_Tmp 나중에 플레이어가 들고있는 현재 유틸스킬 반드시 연결할 것.
 
-	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][0];
-	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][1];
+	UI_TAB_UTILITY ePlayerUtility = m_pPlayerStatus->Get_UtilityType();
+
+
+	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][0];
+	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][1];
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)

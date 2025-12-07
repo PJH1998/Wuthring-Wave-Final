@@ -147,6 +147,7 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
+	Sync_UtilityType();
 }
 
 void CPlayer::Update(_float fTimeDelta)
