@@ -41,7 +41,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 65.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 5.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 35.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -88,7 +88,7 @@ void CCorosaurus::Update(_float fTimeDelta)
 
 	if(m_isDist_Interp_Enable)
 	{
-		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
+		_float temp = clamp(m_fDistanceNonY - 2.f, 0.f, 1.f);
 		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
 	}
 	else
@@ -345,13 +345,6 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		BeHit(iLayer, pDesc, Manifold);
 		});
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.fAttack = pDesc->fAttackDmg;
-	m_CallBack.pCondition = &m_iState;
-	//m_CallBack.strEffectTag = ;
-	m_CallBack.eType = TEXT_COLOR_TYPE::FUSI;
-	m_pColliderCom->Set_Desc(&m_CallBack);
-
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
@@ -368,6 +361,15 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Corrosaurus/Com_Model");
 	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("Bip001");
+
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = pDesc->fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::FUSI;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
@@ -412,9 +414,8 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.fAttackDmg = pDesc->fAttackDmg;
-	m_pForeHeadSocket = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
-	TriggerDesc.pSocketMatrix = m_pForeHeadSocket;
-	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
+	TriggerDesc.vExtent = _float3(2.2f, 0.5f, 0.5f);
 	TriggerDesc.vOffsetPos = _float3(-0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::FUSI;
@@ -534,7 +535,7 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 
 #pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
-	_matrix WorldForeHead = XMLoadFloat4x4(m_pForeHeadSocket) * m_pTransformCom->Get_WorldMatrix();
+	_matrix WorldForeHead = XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix();
 	XMStoreFloat3(&m_vUIPosition, WorldForeHead.r[3]);
 #pragma endregion
 

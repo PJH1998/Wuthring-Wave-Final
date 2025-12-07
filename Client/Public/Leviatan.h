@@ -71,7 +71,7 @@ private:
 	//vector<_float3>			m_BowOffsets;
 	const _float4x4*		m_pBowSocket = { nullptr };
 	const _float4x4*		m_pSwordSocket = { nullptr };
-	const _float4x4*		m_pSpineMatrix = { nullptr };
+	const _float4x4*		m_pCameraSocket = { nullptr };
 
 	_float3					m_vSpawnPos[4]{};
 	_uint					m_iSpawnIndex{};

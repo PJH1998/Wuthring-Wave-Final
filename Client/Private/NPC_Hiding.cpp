@@ -28,20 +28,35 @@ HRESULT CNPC_Hiding::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
-	m_isActivate = false;
+	m_iFaceIndex = 5;
+	m_isFind = false;
+	//m_isActivate = false;
     return S_OK;
 }
 
 void CNPC_Hiding::Priority_Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CNPC_Hiding::Update(_float fTimeDelta)
 {
+	_bool isAnimFinished{ false };
+	if (m_pAnimMachineCom)
+		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	m_pColliderCom->Update(vVelocity);
+	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CNPC_Hiding::Late_Update(_float fTimeDelta)
 {
+	if (m_isFind)
+	{
+		m_isFind = false;
+		m_pRigidBodyCom->IsActivate(false);
+	}
+
 	if (m_isRender)
 	{
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -116,6 +131,7 @@ void CNPC_Hiding::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pColliderCom->IsActivate(true);
 	m_pColliderCom->Set_Gravity(true);
 	m_pRigidBodyCom->IsActivate(true);
+	m_isFind = false;
 	m_isActivate = true;
 }
 
@@ -163,6 +179,9 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnDetect_Enter(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnDetect_Remove(iLayer, pDesc, Manifold);
+		});
 	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider
@@ -209,10 +228,29 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 
 void CNPC_Hiding::OnDetect_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+#ifdef _DEBUG
+	cout << "붙었어! (NPC_Hiding)" << endl;
+#endif // _DEBUG
+
 }
 
 void CNPC_Hiding::OnDetect_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		m_isFind = true;
+#ifdef _DEBUG
+
+#endif // _DEBUG
+	}
+
+}
+
+void CNPC_Hiding::OnDetect_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+#ifdef _DEBUG
+	cout << "떨어졌어! (NPC_Hiding)" << endl;
+#endif // _DEBUG
 }
 
 void CNPC_Hiding::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)

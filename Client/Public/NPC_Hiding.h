@@ -45,16 +45,19 @@ private:
 	_bool					m_isRender{};
 	_bool					m_isDesolve{};
 	_bool					m_isScaned{};
+	_bool					m_isFind{};
 	_float					m_fScanAcc{};
 	_float					m_fDesolveRate{};
 	_float4					m_vBaseColor{};
 	_uint					m_iFaceIndex{};
+	_uint					m_iState{};
 
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(HIDINGDESC* pDesc);
 	void		OnDetect_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void		OnDetect_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void		OnDetect_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 	void		OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
