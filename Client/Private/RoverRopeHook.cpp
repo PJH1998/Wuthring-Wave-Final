@@ -33,7 +33,7 @@ void CRoverRopeHook::OnEnter(void* pArg)
 		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_U);
 		break;
 	case ROPEDIR::F:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_F);
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_D);
 		break;
 	case ROPEDIR::D:
 		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_F);
@@ -139,11 +139,11 @@ void CRoverRopeHook::Check_StateTransition(_float fTimeDelta)
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			case ERoverRopeHookType::FIXHOOK_START01_D:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U);
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_D);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			case ERoverRopeHookType::FIXHOOK_START01_F:
-				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U);
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_F);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			default:

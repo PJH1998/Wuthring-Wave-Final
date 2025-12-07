@@ -232,8 +232,9 @@ HRESULT CUI_HUD::Ready_ChildExtraComponents()
 	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_DistortionMap0_DM");	// Extra 0
 	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_Caustic_Noise");		// Extra 1
 
-	m_pUI_BossHPBar->Add_ExtraTexture(L"T_DistortionMap0_DM");
+	m_pUI_BossHPBar->Add_ExtraTexture(L"T_DistortionMap0_DM");			// Extra 0
 
+	m_pUI_Icon_ElementGuage->Add_ExtraTexture(L"T_DistortionMap0_DM");	// Extra 1
 
 	return S_OK;
 }
@@ -811,8 +812,11 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	// ksta : m_iUtilityIndex_Tmp 나중에 플레이어가 들고있는 현재 유틸스킬 반드시 연결할 것.
 
-	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][0];
-	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[m_iUtilityIndex_Tmp][1];
+	UI_TAB_UTILITY ePlayerUtility = m_pPlayerStatus->Get_UtilityType();
+
+
+	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][0];
+	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][1];
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
@@ -1354,10 +1358,10 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     *reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)     = fBossHPRatio;
     *reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)       = fBossHPBackRatio;
 
-	//*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32) = static_cast<_float>(true);	// isUseNoise
-	//*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33) = m_fElapsedTime;							// Elapsed Time
-	//*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34) = 0.2f;							// UV Scroll Speed
-	//*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.581f, 0.271f, 0.600f, 1.0f);	// Mask Color
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32) = static_cast<_float>(true);	// isUseNoise
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33) = m_fElapsedTime;							// Elapsed Time
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34) = 0.2f;							// UV Scroll Speed
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.698f, 0.212f, 0.035f, 1.000f);	// Mask Color
 
 
     vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
@@ -1565,6 +1569,11 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_float>(true);
     *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
+
+	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._32) = static_cast<_float>(fElementAmounts[m_iSelectedCHIndex] == 100.f);	// isUseNoise
+	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._33) = m_fElapsedTime;							// Elapsed Time
+	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._34) = 0.2f;							// UV Scroll Speed
+	*reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
 
 
 

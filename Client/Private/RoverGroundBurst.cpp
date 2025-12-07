@@ -56,6 +56,10 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
 	}
+	else
+	{
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverBurstType::EX_SKILL01_01);
+	}
 	
 	
 }
@@ -180,7 +184,8 @@ void CRoverGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundBurst::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverBurstType::BURST01), "Burst01", 1.4f, 50.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverBurstType::BURST01), "Burst01", 1.f, 50.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverBurstType::EX_SKILL01_01), "Ex_Skill01_01", 1.5f, 30.f);
 }
 
 void CRoverGroundBurst::State_Reset()

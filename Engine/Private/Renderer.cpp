@@ -220,15 +220,15 @@ void CRenderer::Render()
 
 	Render_NonLight();
 	Render_LUT();
+	Render_Fog();
 	Render_Effect();
-	Render_EffectResolve(); //test
+	Render_EffectResolve();
 	Render_SFX();
 	Render_Emissive();	
 	Render_Bloom();		
 	Render_BloomCombined();
 	Render_DistortionObject();
-	Render_Blend();
-	Render_Fog();
+	Render_Blend(); 
 	Render_Distortion();
 	Render_ScreenEffect();
 	Render_UI();
@@ -910,6 +910,39 @@ void CRenderer::Render_LUT()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Lut"));
 }
 
+
+void CRenderer::Render_Fog()
+{
+	
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+		CRASH("Failed Begin MRT_BackBuffer");
+
+	
+	if (false == m_IsFog)
+	{
+		if(FAILED(m_pShader->Bind_Texture("g_Texture", m_pCurrentSceneSRV)))
+			CRASH("Failed Bind CurrentScene");
+		
+		m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DRAW));
+	}
+	else
+	{
+		if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
+			CRASH("Failed Bind CurrentScene");
+
+		m_pGameInstance->Bind_VF_Resource(m_pShader, "g_VoulmetricTexture", "g_vFogRange");
+
+		m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
+	}
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
+}
+
 void CRenderer::Render_Effect()
 {
 	m_pGameInstance->Clear_RT(TEXT("RT_AccumColor"));
@@ -925,7 +958,7 @@ void CRenderer::Render_Effect()
 
 void CRenderer::Render_EffectResolve()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Lut"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_AccumColor"), m_pShader, "g_AccumColorTexture")))
@@ -941,7 +974,7 @@ void CRenderer::Render_EffectResolve()
 
 	m_pGameInstance->End_MRT();
 
-	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Lut"));
+	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
 void CRenderer::Render_SFX()
@@ -975,7 +1008,7 @@ void CRenderer::Render_Bloom()
 
 void CRenderer::Render_BloomCombined()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Lut"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Emissive"), m_pShader, "g_BlurTexture")))
@@ -991,7 +1024,7 @@ void CRenderer::Render_BloomCombined()
 
 	m_pGameInstance->End_MRT();
 
-	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Lut"));
+	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
 void CRenderer::Render_DistortionObject()
@@ -1006,38 +1039,12 @@ void CRenderer::Render_DistortionObject()
 
 void CRenderer::Render_Blend()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Lut"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::BLEND));
 
 	m_pGameInstance->End_MRT();
-}
-
-void CRenderer::Render_Fog()
-{
-	if (false == m_IsFog)
-		return;
-
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
-		CRASH("Failed Begin MRT_BackBuffer");
-
-	if(FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
-		CRASH("Failed Bind CurrentScene");
-
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Lut"), m_pShader, "g_LutResultTexture")))
-	//	CRASH("Failed Bind RT_Lut");
-	
-	m_pGameInstance->Bind_VF_Resource(m_pShader, "g_VoulmetricTexture", "g_vFogRange");
-	           
-	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
-
-	m_pVIBuffer->Bind_Resources();
-	m_pVIBuffer->Render();
-
-	m_pGameInstance->End_MRT();
-
-	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
 void CRenderer::Render_Distortion()
@@ -1316,7 +1323,7 @@ HRESULT CRenderer::Ready_MRT()
 
 #pragma region MRT_EFFECT
 
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Lut"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_BackBuffer"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
@@ -1354,7 +1361,7 @@ HRESULT CRenderer::Ready_MRT()
 
 	// RENDERGROUP::EMISSIVE
 #pragma region MRT_EMISSIVE
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_Lut"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_BackBuffer"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);

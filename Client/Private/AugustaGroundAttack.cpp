@@ -55,6 +55,9 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 	// 6. Target이 존재한다면? => Auto Target
 	m_pAugusta->Rotate_Target();
 
+	// 7. Camera 변경.
+	//m_pAugusta->Bind_CameraDistance(2.f);
+
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
@@ -93,6 +96,8 @@ void CAugustaGroundAttack::OnExit()
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
+
+	//m_pAugusta->Reset_CameraDistance();
 }
 
 _bool CAugustaGroundAttack::Hit_Judge()

@@ -92,7 +92,29 @@ void CGalbrenaHit::Enter_Hit()
 	// 5. 애니메이션 선정.
 	if (!m_States[LAND])
 	{
-		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL);
+		//m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL);
+
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_START);
+
+		// 내 위치 - 공격자 위치 = 밀려날 방향
+		_vector vMyPos = m_pGalbrena->Get_Position();
+		_vector vAttackerPos = pDesc->pTransform->Get_State(STATE::POSITION);
+		_vector vHitDir = vMyPos - vAttackerPos;
+		vHitDir = XMVectorSetY(vHitDir, 0.f);
+		if (XMVectorGetX(XMVector3Length(vHitDir)) < 0.01f)
+		{
+			vHitDir = m_pGalbrena->Get_LookVector_NoPitch() * -1.f;
+		}
+		else
+		{
+			vHitDir = XMVector3Normalize(vHitDir);
+		}
+
+
+		_float fKnockbackPower = 2.0f;
+		_float fUpForce = 2.0f;
+		m_vKnockbackVelocity = vHitDir * fKnockbackPower; // 뒤로 밀리는 힘
+		m_vKnockbackVelocity = XMVectorSetY(m_vKnockbackVelocity, fUpForce); // 위로 솟구치는 힘
 	}
 	else
 	{
@@ -127,6 +149,25 @@ void CGalbrenaHit::Update_HitAnimation(_float fTimeDelta)
 	{
 		m_pGalbrena->Move_Fall(fTimeDelta, 0.1f); // 미세하게 떨어지게
 	}
+
+	if (eHitType == EGalbrenaHitType::BEHIT_FLY_START ||
+		eHitType == EGalbrenaHitType::BEHIT_FLY_LOOP)
+	{
+		_vector vDir = XMVector3Normalize(m_vKnockbackVelocity);
+		_float fSpeed = XMVectorGetX(XMVector3Length(m_vKnockbackVelocity));
+
+		m_pGalbrena->Move_Direction(vDir, fTimeDelta, fSpeed);
+
+		_float fGravity = 5.f;
+		_vector vVelocityY = XMVectorSet(0.f, XMVectorGetY(m_vKnockbackVelocity), 0.f, 0.f);
+		vVelocityY = XMVectorSetY(vVelocityY, XMVectorGetY(vVelocityY) - fGravity * fTimeDelta);
+
+		_float fDrag = 2.0f; // 마찰 계수
+		_vector vVelocityXZ = XMVectorSetY(m_vKnockbackVelocity, 0.f);
+		vVelocityXZ = vVelocityXZ * (1.0f - fDrag * fTimeDelta); // 점점 느려지게
+
+		m_vKnockbackVelocity = vVelocityXZ + vVelocityY;
+	}
 }
 
 void CGalbrenaHit::Check_Physics(_float fTimeDelta)
@@ -146,6 +187,13 @@ void CGalbrenaHit::Check_StateTransition(_float fTimeDelta)
 	{
 		if (m_States[LAND])
 		{
+			if (eHitType == EGalbrenaHitType::BEHIT_FLY_LOOP ||
+				eHitType == EGalbrenaHitType::BEHIT_FLY_START) // Loop 라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+
 			if (m_States[MOVE])
 			{
 				m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
@@ -189,20 +237,28 @@ void CGalbrenaHit::Check_StateTransition(_float fTimeDelta)
 				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
 				return;
 			}
+
+			if (eHitType == EGalbrenaHitType::BEHIT_FLY_LOOP) // Loop 라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+			else if (eHitType == EGalbrenaHitType::BEHIT_FLY_START)
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+			else if (eHitType == EGalbrenaHitType::BEHIT_FLY_FALL)
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDUP; // Idle 전용 일어나는 모션.
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+				return;
+			}
 			else
 			{
-				if (eHitType == EGalbrenaHitType::BEHIT_FLY_FALL)
-				{
-					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDUP; // Idle 전용 일어나는 모션.
-					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-					return;
-				}
-				else
-				{
-					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // Idle 전용 일어나는 모션.
-					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-					return;
-				}
+				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01; // Idle 전용 일어나는 모션.
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+				return;
 			}
 		}
 
@@ -212,6 +268,11 @@ void CGalbrenaHit::Check_StateTransition(_float fTimeDelta)
 			{
 				m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
 				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
+				return;
+			}
+			else if (EGalbrenaHitType::BEHIT_FLY_START == eHitType) // Fly Start라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_LOOP); // Fly Loop로 전환.
 				return;
 			}
 			else
@@ -231,9 +292,9 @@ void CGalbrenaHit::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_B_L), "Behit_B_L", 1.f, 40.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_B_R), "Behit_B_R", 1.f, 40.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 30.f, 2.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.5f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_HOVER), "Behit_Hover", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_PRESS), "Behit_Press", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaHitType::BEHIT_PUSH_FALL), "Behit_Push_Fall", 1.f, 30.f);

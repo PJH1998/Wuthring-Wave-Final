@@ -29,22 +29,22 @@ HRESULT CLevel_Shader::Initialize()
         CRASH("Failed TestObject");
 
 	CEditDummy_Augusta::DUMMY_AUGU_DESC AuguDesc = {};
-	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.0001f, 0.0001f, 0.0001f, 1.f));
+	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f));
 	
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_Test_VAMesh"),
-		CVAMesh::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/VA/Augusta_Burst01_Floor.dat"), PreTransformationMatrix, 1))))
-		return E_FAIL;
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_Test_VAMesh"),
+	//	CVAMesh::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/VA/Augusta_Light_20005.dat"), PreTransformationMatrix, 1))))
+	//	return E_FAIL;
 
-	CTestVA::VA_DESC Desc = {};
+	/*CTestVA::VA_DESC Desc = {};
 
 	Desc.strMeshTag = TEXT("Prototype_Test_VAMesh");
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), CTestVA::Create(m_pDevice, m_pContext, &Desc))))
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), CTestVA::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_TEST"),
 		TEXT("Poolling_Test"), 1)))
-		return E_FAIL;
+		return E_FAIL;*/
 
 	m_pGameInstance->SettingFog(0);
 
@@ -58,7 +58,20 @@ void CLevel_Shader::Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
+		m_pGameInstance->Set_Active(TEXT("Test"), false);
+		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Set_Active(TEXT("Test"), true);
+		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD7) == KEYSTATE::DOWN)
+	{
+		m_TestLight.fRange = max(m_TestLight.fRange - 1.f, 1.f);
+		m_pGameInstance->Update_LightDesc(TEXT("Test1"), m_TestLight);
+		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
 	}
 }
 
@@ -79,6 +92,15 @@ HRESULT CLevel_Shader::Ready_Light()
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_CameraNF();
+
+	m_TestLight.eType = LIGHT_DESC::POINT;
+	m_TestLight.fRange = 10.f;
+	m_TestLight.vPosition = _float4(0.f, 0.f, 0.f, 1.f);
+	m_TestLight.vDiffuse = _float4(1.f, 0.f, 0.f, 1.f);
+	m_TestLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	m_TestLight.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+
+	m_pGameInstance->Add_Light(TEXT("Test1"), m_TestLight);
 
 	//LIGHT_DESC PointLight = {};
 	//PointLight.eType = LIGHT_DESC::POINT;

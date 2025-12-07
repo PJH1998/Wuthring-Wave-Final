@@ -46,6 +46,13 @@ void CLevi_Anchor::Update(_float fTimeDelta)
 		{
 			m_isDisolve = true;
 			m_pRigidBodyCom->IsActivate(false);
+
+			//터지는 이펙트 스폰
+			PREFAB_INFO Info = {};
+			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+			Info.pModelPtr = nullptr;
+
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		}
 	}
 	
@@ -107,6 +114,8 @@ void CLevi_Anchor::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDisolve = false;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
+
+	//데칼 스폰 vTargetPos 기준으로 호출하면 될듯.
 }
 
 HRESULT CLevi_Anchor::Bind_Resources()

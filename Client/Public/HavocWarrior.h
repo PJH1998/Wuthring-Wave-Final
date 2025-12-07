@@ -51,6 +51,7 @@ private:
 
 	CGameSystem*			m_pGameSystem = { nullptr };
 
+	const _float4x4*		m_pCameraSocket = { nullptr };
 	queue<_float3>			m_PatrolPoints;
 	_float4					m_vBaseColor{};
 
@@ -93,6 +94,7 @@ private:
 	_float					m_fTimeDelta{};
 	_bool					m_isTurnLerp{};
 	_bool					m_isHover{};
+	_bool					m_isSpawn{};
 #pragma endregion
 private:
 	HRESULT						Bind_Resources();

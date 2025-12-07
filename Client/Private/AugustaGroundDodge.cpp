@@ -165,8 +165,8 @@ void CAugustaGroundDodge::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundDodge::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 30.f, 2.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 30.f, 2.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 20.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 20.f, 2.f);
 }
 
 void CAugustaGroundDodge::State_Reset()

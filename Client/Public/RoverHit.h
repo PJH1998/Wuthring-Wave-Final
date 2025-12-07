@@ -28,6 +28,7 @@ public:
 private:
     class CRover* m_pRover = { nullptr };
     _bool m_States[HITSTATE::END] = {};
+	_vector m_vKnockbackVelocity = {}; // 날아가는 속도와 방향.
 
 private:
 	// Enter 초기에 작업해야할 것들 정의하기.

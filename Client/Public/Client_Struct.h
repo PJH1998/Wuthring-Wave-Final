@@ -148,6 +148,19 @@ namespace Client
 		_bool		IsStart = { false };
 	}CALLBACK_CLIENT;
 
+	typedef struct tagTargetInfo
+	{
+		CTransform* pTransform = nullptr;
+		const _float4x4* pSocketMatrix = nullptr;
+
+		// 초기화
+		void Reset() { pTransform = nullptr; pSocketMatrix = nullptr; }
+
+		_bool operator== (const tagTargetInfo& target) const
+		{
+			return this->pTransform == target.pTransform && this->pSocketMatrix == target.pSocketMatrix;
+		}
+	}TARGET_INFO;
 
 	
 

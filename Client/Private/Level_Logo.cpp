@@ -72,12 +72,17 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
 	{
-		CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+
 	}
 
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+	{
 		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
+		m_pGameInstance->OnFade(FADE::FADE_OUT, 3.f, [&]() {
+				CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
+				m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+			});
+	}
 }
 
 void CLevel_Logo::Render()

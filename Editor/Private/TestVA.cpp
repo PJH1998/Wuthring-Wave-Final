@@ -1,5 +1,5 @@
 ﻿#include "EditorPch.h"
-#include "TestVa.h"
+#include "TestVA.h"
 
 CTestVA::CTestVA(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject{ pDevice, pContext }
@@ -12,15 +12,17 @@ CTestVA::CTestVA(const CTestVA& Prototype)
 {
 }
 
-HRESULT CTestVA::Initialize_Prototype(const VA_DESC* pDesc)
+HRESULT CTestVA::Initialize_Prototype()
 {
-	m_tDesc = *pDesc;
-
 	return S_OK;
 }
 
 HRESULT CTestVA::Initialize_Clone(void* pArg)
 {
+	VA_DESC* pDesc = static_cast<VA_DESC*>(pArg);
+
+	m_tDesc = *pDesc;
+
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		CRASH("Transform");
 
@@ -29,7 +31,7 @@ HRESULT CTestVA::Initialize_Clone(void* pArg)
 
 	m_isActivate = false;
 
-	m_iAnimationDuration = static_cast<_uint>(m_pVAMesh->Get_MaxFrame(0));
+	m_fAnimationDuration = m_pVAMesh->Get_MaxFrame(0);
 
 	return S_OK;
 }
@@ -40,10 +42,10 @@ void CTestVA::Priority_Update(_float fTimeDelta)
 
 void CTestVA::Update(_float fTimeDelta)
 {
-	if (m_iTrackPosition > m_iAnimationDuration)
+	if (m_fTrackPosition > m_fAnimationDuration)
 		m_isActivate = false;
 
-	m_iTrackPosition += 1;
+	m_fTrackPosition += (fTimeDelta * m_tDesc.fAnimSpeed);
 }
 
 void CTestVA::Late_Update(_float fTimeDelta)
@@ -66,7 +68,9 @@ void CTestVA::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	m_isActivate = true;
 
-	m_iTrackPosition = 0;
+	m_fTrackPosition = 0.f;
+
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 }
 
 void CTestVA::Bind_Resource()
@@ -82,20 +86,24 @@ void CTestVA::Bind_Resource()
 
 	if(FAILED(m_pVAMesh->Bind_VAT(m_pShaderCom, "g_VatTexture", 0)))
 		CRASH("Failed to Bind VatTexture");
-
-	_float fTrackPosition = (static_cast<_float>(m_iTrackPosition) / m_pVAMesh->Get_MaxFrame(0));
-	if (FAILED(m_pShaderCom->Bind_Value("g_fTrackPosition", &fTrackPosition, sizeof(_float))))
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_fTrackPosition", &m_fTrackPosition, sizeof(_float))))
 		CRASH("Failed to Bind TrackPosition");
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_fAnimationDuration", &m_fAnimationDuration, sizeof(_float))))
+		CRASH("Failed to Bind AnimationDuration");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fMovementScale", &m_tDesc.fMovementScale, sizeof(_float))))
+		CRASH("Failed to Bind AnimationDuration");
 }
 
 HRESULT CTestVA::Ready_Components()
 {
-	//if(FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strTextureTag, TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
-	//	ASSERT_CRASH(m_pTextureCom);
+	if(FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strTextureTag, TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
+		ASSERT_CRASH(m_pTextureCom);
 
-	//if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strColorTextureTag, TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
-	//	ASSERT_CRASH(m_pColorTextureCom);
+	if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strColorTextureTag, TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
+		ASSERT_CRASH(m_pColorTextureCom);
 
 	if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strMeshTag, TEXT("Com_Mesh"), reinterpret_cast<CComponent**>(&m_pVAMesh), nullptr)))
 		ASSERT_CRASH(m_pVAMesh);
@@ -106,11 +114,11 @@ HRESULT CTestVA::Ready_Components()
 	return S_OK;
 }
 
-CTestVA* CTestVA::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc)
+CTestVA* CTestVA::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CTestVA* pInstance = new CTestVA(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize_Prototype(pDesc)))
+	if (FAILED(pInstance->Initialize_Prototype()))
 		CRASH("EFfect_VA");
 
 	return pInstance;

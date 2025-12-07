@@ -189,7 +189,7 @@ void CAugustaGroundQTE::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundQTE::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaQTEType::SKILLQTE), "SkillQTE", 1.5f, 60.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaQTEType::SKILLQTE), "SkillQTE", 1.5f, 50.f);
 }
 
 void CAugustaGroundQTE::State_Reset()

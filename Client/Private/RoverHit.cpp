@@ -32,8 +32,10 @@ void CRoverHit::OnEnter(void* pArg)
 	// 4. 상태 리셋.
     State_Reset();
 
+	m_strPrevInfo = context.m_strPrevInfo;
+
 	// 5. Hit Description을 이용하여 시작 초기 작업을 정의합니다.
-	if (m_strPrevInfo.empty())
+	if (context.m_strPrevInfo.empty())
 		Enter_Hit();
 	
 	// 6. 중력 적용
@@ -92,7 +94,28 @@ void CRoverHit::Enter_Hit()
 	// 5. 애니메이션 선정.
 	if (!m_States[LAND])
 	{
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL);
+		/*m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL);*/
+		m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_START);
+
+		// 내 위치 - 공격자 위치 = 밀려날 방향
+		_vector vMyPos = m_pRover->Get_Position();
+		_vector vAttackerPos = pDesc->pTransform->Get_State(STATE::POSITION);
+		_vector vHitDir = vMyPos - vAttackerPos;
+		vHitDir = XMVectorSetY(vHitDir, 0.f);
+		if (XMVectorGetX(XMVector3Length(vHitDir)) < 0.01f)
+		{
+			vHitDir = m_pRover->Get_LookVector_NoPitch() * -1.f;
+		}
+		else
+		{
+			vHitDir = XMVector3Normalize(vHitDir);
+		}
+
+
+		_float fKnockbackPower = 2.0f;
+		_float fUpForce = 2.0f;
+		m_vKnockbackVelocity = vHitDir * fKnockbackPower; // 뒤로 밀리는 힘
+		m_vKnockbackVelocity = XMVectorSetY(m_vKnockbackVelocity, fUpForce); // 위로 솟구치는 힘
 	}
 	else
 	{
@@ -127,6 +150,25 @@ void CRoverHit::Update_HitAnimation(_float fTimeDelta)
 	{
 		m_pRover->Move_Fall(fTimeDelta, 0.1f); // 미세하게 떨어지게
 	}
+
+	if (eHitType == ERoverHitType::BEHIT_FLY_START ||
+		eHitType == ERoverHitType::BEHIT_FLY_LOOP)
+	{
+		_vector vDir = XMVector3Normalize(m_vKnockbackVelocity);
+		_float fSpeed = XMVectorGetX(XMVector3Length(m_vKnockbackVelocity));
+
+		m_pRover->Move_Direction(vDir, fTimeDelta, fSpeed);
+
+		_float fGravity = 5.f;
+		_vector vVelocityY = XMVectorSet(0.f, XMVectorGetY(m_vKnockbackVelocity), 0.f, 0.f);
+		vVelocityY = XMVectorSetY(vVelocityY, XMVectorGetY(vVelocityY) - fGravity * fTimeDelta);
+
+		_float fDrag = 2.0f; // 마찰 계수
+		_vector vVelocityXZ = XMVectorSetY(m_vKnockbackVelocity, 0.f);
+		vVelocityXZ = vVelocityXZ * (1.0f - fDrag * fTimeDelta); // 점점 느려지게
+
+		m_vKnockbackVelocity = vVelocityXZ + vVelocityY;
+	}
 }
 
 void CRoverHit::Check_Physics(_float fTimeDelta)
@@ -146,6 +188,13 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 	{
 		if (m_States[LAND])
 		{
+			if (eHitType == ERoverHitType::BEHIT_FLY_LOOP ||
+				eHitType == ERoverHitType::BEHIT_FLY_START) // Loop 라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+
 			if (m_States[MOVE])
 			{
 				m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::RUN_F;
@@ -189,21 +238,30 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
 				return;
 			}
+
+			if (eHitType == ERoverHitType::BEHIT_FLY_LOOP) // Loop 라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+			else if (eHitType == ERoverHitType::BEHIT_FLY_START)
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+			else if (eHitType == ERoverHitType::BEHIT_FLY_FALL)
+			{
+				m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDUP; // Idle 전용 일어나는 모션.
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+				return;
+			}
 			else
 			{
-				if (eHitType == ERoverHitType::BEHIT_FLY_FALL)
-				{
-					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDUP; // Idle 전용 일어나는 모션.
-					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
-					return;
-				}
-				else
-				{
-					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // Idle 전용 일어나는 모션.
-					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
-					return;
-				}
+				m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // Idle 전용 일어나는 모션.
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+				return;
 			}
+			
 		}
 
 		if (!m_States[LAND])
@@ -212,6 +270,11 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 			{
 				m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_SECOND_F;
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
+				return;
+			}
+			else if (ERoverHitType::BEHIT_FLY_START == eHitType) // Fly Start라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(ERoverHitType::BEHIT_FLY_LOOP); // Fly Loop로 전환.
 				return;
 			}
 			else
@@ -231,9 +294,9 @@ void CRoverHit::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_B_L), "Behit_B_L", 1.f, 40.f);
     CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_B_R), "Behit_B_R", 1.f, 40.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 30.f, 2.f);
     CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.5f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_HOVER), "Behit_Hover", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_PRESS), "Behit_Press", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverHitType::BEHIT_PUSH_FALL), "Behit_Push_Fall", 1.f, 30.f);

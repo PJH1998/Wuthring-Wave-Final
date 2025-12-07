@@ -7,7 +7,7 @@
 #include "Animator_UI.h"
 
 
-#define KSTA_UITEST_PARRY_TOZERO
+//#define KSTA_UITEST_PARRY_TOZERO
 
 CUI_Parry::CUI_Parry(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Image(pDevice, pContext)
@@ -64,11 +64,11 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 	pAnim_SectorAEff->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 	pAnim_SectorACircEff->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 
-	pAnim_SectorAMain->Change_Animation(L"ParryA_Main_Initialize");
-	pAnim_SectorAEff->Change_Animation(L"ParryA_Eff_Initialize");
-	pAnim_SectorACircEff->Change_Animation(L"Parry_Activated_Initialize");
+	pAnim_SectorAMain->Change_Animation(L"ParryA_Main_Initialize", true);
+	pAnim_SectorAEff->Change_Animation(L"ParryA_Eff_Initialize", true);
+	pAnim_SectorACircEff->Change_Animation(L"Parry_Activated_Initialize", true);
 
-	Reset(_fmatrix(), nullptr);
+	//Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
 	m_pTargetPos = nullptr;
 
@@ -185,16 +185,19 @@ void CUI_Parry::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	CAnimator_UI* pAnim_Circle_Appr = static_cast<CAnimator_UI*>(m_pCircle_Appr->Get_Component(L"Com_Animator_UI"));
 	CAnimator_UI* pAnim_pSectorAMain = static_cast<CAnimator_UI*>(m_pSectorA->Get_Component(L"Com_Animator_UI"));
 	CAnimator_UI* pAnim_pSectorAEff = static_cast<CAnimator_UI*>(m_pSectorAEff->Get_Component(L"Com_Animator_UI"));
-
-	// 패링용 애니메이션 진행
-	pAnim_pSectorAMain->Change_Animation(L"ParryA_Main_Play", true);
-	pAnim_Circle_Appr->Change_Animation(L"Parry_ApprCirc_Play", true);
-	pAnim_pSectorAEff->Change_Animation(L"ParryA_Eff_Initialize", true);
+	CAnimator_UI* pAnim_pSectorACircEff = static_cast<CAnimator_UI*>(m_pSectorACircEff->Get_Component(L"Com_Animator_UI"));
 
 	m_isActivate = true;
 	m_fElapsedTime = 0.f;
 	m_isParried = false;
 
+	// 패링용 애니메이션 진행
+	pAnim_pSectorAMain->Change_Animation(L"ParryA_Main_Play", true);
+	pAnim_Circle_Appr->Change_Animation(L"Parry_ApprCirc_Play", true);
+	pAnim_pSectorAEff->Change_Animation(L"ParryA_Eff_Initialize", true);
+	pAnim_pSectorACircEff->Change_Animation(L"Parry_Activated_Initialize", true);
+
+		
 #ifndef KSTA_UITEST_PARRY_TOZERO
 	m_pTargetPos = static_cast<UI_PARRY_DESC*>(pArg)->pTargetPos;
 #endif // KSTA_UITEST_PARRY_TOZERO

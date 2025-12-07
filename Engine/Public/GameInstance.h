@@ -161,6 +161,7 @@ public:
 	HRESULT						Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT						Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
 	HRESULT						Bind_LightDatas(class CShader* pShader);
+	HRESULT						Update_LightDesc(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	const vector<LIGHT_DATA>*	Get_LightDatas();
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
@@ -396,6 +397,10 @@ public:
 	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
 #pragma endregion
 
+#pragma region Fade
+	void						OnFade(FADE eFade, _float fDuration, function<void()> func);
+#pragma endregion
+
 
 public:
 	HRESULT					SetUp_CameraNF();
@@ -434,8 +439,9 @@ private:
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
-	class CEnvironmentMap*		m_pEnvMap = { nullptr };
+	class CEnvironmentMap*	m_pEnvMap = { nullptr };
 	class CResource_Manager*	m_pResource_Manager = { nullptr };
+	class CFade*					m_pFade = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

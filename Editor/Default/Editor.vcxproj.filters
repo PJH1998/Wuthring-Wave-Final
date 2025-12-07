@@ -226,6 +226,9 @@
     <Filter Include="03. GameObject\Test">
       <UniqueIdentifier>{b2dd2452-a82b-41dc-8da3-5dc497c14423}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\VA_Controller">
+      <UniqueIdentifier>{e59009cf-230b-4ab5-b7c4-508acbc36321}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -511,6 +514,9 @@
     <ClInclude Include="..\public\TestVA.h">
       <Filter>03. GameObject\Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VA_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -768,6 +774,9 @@
     <ClCompile Include="..\Private\Edit_Portal.cpp" />
     <ClCompile Include="..\private\TestVA.cpp">
       <Filter>03. GameObject\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VA_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

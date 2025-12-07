@@ -40,7 +40,6 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
     Ready_Components(pDesc);
-    Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
 	Ready_AttackVolumes();
@@ -49,21 +48,10 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	CGalbrenaFactory::Register_States(m_pStateMachineCom, this);    // 기본 StateMachineCom
 	CGalbrenaFactory::Register_States(m_pFpsStateMachineCom, this); // FPS StateMachineCom
 	
+	Ready_Variables(pDesc);
 	// 비활성화. 
 	//PartActivate(PART_FIRSTGUN, false);
-	PartActivate(PART_FIRSTGUN, false);
-	PartActivate(PART_SECONDGUN, false);
-	PartActivate(PART_DARKWING, false);
-	PartActivate(PART_LION, false);
-	PartActivate(PART_WING, false);
 	
-
-	m_IsQTE = false; // QTE
-    XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-
-	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
-	XMStoreFloat4(&m_vQTEPos, vPos);
-	m_pQTEColliderCom->Set_Position(vPos);
 
 
 
@@ -75,7 +63,6 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-	m_fMaxDissolveTime = 0.35f;
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -161,7 +148,8 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 
 	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
 
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) || 
+		Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
 	{
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
 	}
@@ -828,6 +816,7 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 			//m_IsHit = true;
 			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+			m_pAbillityCom->Add_Hp(-10.f);
 			break;
 		}
 		case DELAYED_ACTION::TYPE::GRAB:
@@ -947,7 +936,7 @@ void CGalbrena::Update_Physics(_float fTimeDelta)
 			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
 		}
 	}
-	else
+	else if(!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
 	{
 		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
 		_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -1015,8 +1004,8 @@ void CGalbrena::Render_Back(_uint iMeshIndex)
 	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
 
-	_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f};
-	_float fEmissiveIntensity = { 0.5f };
+	_float4 vEmissiveColor = { 0.5f, 0.2f, 0.3f, 1.f};
+	_float fEmissiveIntensity = { 0.25f };
 
 	// 1. MaskTexture 배열 바인딩.
 	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK); // MaskTexture 배열을 바인딩.
@@ -1184,6 +1173,19 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	PartActivate(PART_FIRSTGUN, false);
+	PartActivate(PART_SECONDGUN, false);
+	PartActivate(PART_DARKWING, false);
+	PartActivate(PART_LION, false);
+	PartActivate(PART_WING, false);
+
+	m_IsQTE = false; // QTE
+	XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
 }
 
 void CGalbrena::Ready_Positions(const CHARACTER_DESC* pDesc)

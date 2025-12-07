@@ -300,9 +300,9 @@ void CGameSystem::Close_Game_OverflowPalette()
 	m_pUI_ControlHelper->Close_Game_OverflowPalette();
 }
 
-void CGameSystem::Attach_GrafflePoint(_float3* pTargetPos)
+void CGameSystem::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
 {
-	m_pUI_ControlHelper->Attach_GrafflePoint(pTargetPos);
+	m_pUI_ControlHelper->Attach_GrapplePoint(pTargetPos, eType);
 }
 
 void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)
@@ -472,30 +472,6 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition)
 	{
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
 	}
-}
-void CGameSystem::Call_Animation() // => 땅에 부딪혔을 때 => 탈출 가능한 지점.
-{
-	if (nullptr == m_pPlayer)
-		return;
-
-	// 탈출 가능하다고 알림.
-	m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
-	//m_pPlayer->Notify_GrabVisible(true); // 다시 보이게
-}
-void CGameSystem::Call_PlayerVisible()
-{
-	if (nullptr == m_pPlayer)
-		return;
-
-	//m_pPlayer->Notify_GrabVisible(false);
-}
-void CGameSystem::Unbind_Grab() // => 몬스터 잡기애니메이션이 거의 끝났을 때?
-{
-	if (nullptr == m_pPlayer)
-		return;
-
-	// 탈출 가능하다고 알림.
-	m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
 }
 
 #pragma endregion

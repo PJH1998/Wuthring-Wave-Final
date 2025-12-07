@@ -49,6 +49,7 @@ private:
 	CGameSystem*			m_pGameSystem = { nullptr };
 	//const _float4x4*		m_pArrowMatrix = { nullptr };
 
+	const _float4x4*		m_pCameraSocket = { nullptr };
 	queue<_float3>			m_PatrolPoints;
 	_float4					m_vBaseColor{};
 

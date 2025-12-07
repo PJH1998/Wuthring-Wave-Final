@@ -59,6 +59,16 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_PartObjects(pDesc);
 	Ready_Volumes(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
+
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_tCallDesc.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+	m_pColliderCom->Set_Desc(&m_CallBack);
+	m_pColliderCom->Set_Gravity(true);
+
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	//m_iPhase = PHASE::TWO;
@@ -457,11 +467,16 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviAlter"), WorldMatrix, &Desc);
 		}
 	}
+	else if (wstrTypeTag == TEXT("Parry"))
+	{
+		m_pGameSystem->Attach_Parry(&m_vUIPosition);
+	}
 	else if (wstrTypeTag == TEXT("Sword"))
 	{
 		CProjectile::PROJECTILERESET Desc{};
 		Desc.vTargetPos = m_vTargetPosition;
 		Desc.vTargetPos.y += 0.5f; //offset
+		Desc.pOwnerTransform = m_pTransformCom;
 		_matrix WorldMatrix = XMMatrixIdentity();
 		_vector vScale{}, vQuat{}, vTrans{};
 		if (wstrAnimTag == TEXT("Aura"))
@@ -599,14 +614,6 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.fAttack = m_fAttackDmg;
-	m_CallBack.pCondition = &m_iState;
-	//m_tCallDesc.strEffectTag = ;
-	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
-	m_pColliderCom->Set_Desc(&m_CallBack);
-	m_pColliderCom->Set_Gravity(true);
-
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -700,11 +707,15 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 
 void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 {
+	m_pBowSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	m_pSwordSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+
 	CLevi_Bayonet::LEVIBAYONET_DESC BayonetDesc{};
 	BayonetDesc.eType = TEXT_COLOR_TYPE::DARK;
 	BayonetDesc.fAttackDmg = m_fAttackDmg;
 	BayonetDesc.pParentTransform = m_pTransformCom;
-	BayonetDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+	BayonetDesc.pSocketMatrix = m_pSwordSocket;
 	BayonetDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	BayonetDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
@@ -712,8 +723,6 @@ void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 		CRASH("Failed to Add Part : Bayonet");
 	m_PartObjects[TEXT("Part_Bayonet")]->SetActivate(true);
 
-	m_pBowSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
-	m_pSwordSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
 	CLevi_Bow::LEVIBOW_DESC BowDesc{};
 	BowDesc.fAttackDmg = m_fAttackDmg;
 	BowDesc.pParentTransform = m_pTransformCom;
@@ -873,6 +882,8 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 
 #pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+	_matrix WorldCamBind = XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix();
+	XMStoreFloat3(&m_vUIPosition, WorldCamBind.r[3]);
 #pragma endregion
 
 	if (m_isParalysis)
@@ -999,6 +1010,11 @@ void CLeviatan::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+
+#pragma region PARRY_UI
+	m_pGameSystem->Enable_Parried();
+#pragma endregion
+
 #ifdef _DEBUG
 	cout << "Parry! Leviatan)" << endl;
 #endif // _DEBUG
@@ -1075,6 +1091,18 @@ void CLeviatan::Reset_NotifyInteraction()
 
 	//for (auto& Pair : m_PartObjects)
 	//	Pair.second->Reset(XMMatrixIdentity(), nullptr);
+}
+
+void CLeviatan::Event1()
+{
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
+}
+
+void CLeviatan::Event2()
+{
+	//2페이즈 맵으로 이동하기
+	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 }
 
 _bool CLeviatan::isKnockDown()

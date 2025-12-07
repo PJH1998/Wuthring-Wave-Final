@@ -604,7 +604,7 @@ void CSequencer::SetUp_Scene_Point(SEQUENCE_ITEM& item)
 	if (ImGui::Button("Delete"))
 	{
 		item.mRampEdit.mPoints.erase(item.mRampEdit.mPoints.begin() + iSelectIndex);
-		item.mRampEdit.mTargetCameraFrames.erase(item.mRampEdit.mTargetCameraFrames.begin() + iSelectIndex);
+		item.mRampEdit.mSQCameraDatas.erase(item.mRampEdit.mSQCameraDatas.begin() + iSelectIndex);
 		if (item.mRampEdit.miSelectPoint >= item.mRampEdit.GetPointCount(0))
 			item.mRampEdit.miSelectPoint = -1;
 	}
