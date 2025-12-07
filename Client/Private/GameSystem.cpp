@@ -18,7 +18,7 @@
 #include "MouseController.h"
 #include "Player.h"
 #include "SequencePlayer.h"
-
+#include"Potal.h"
 
 
 IMPLEMENT_SINGLETON(CGameSystem)
@@ -506,6 +506,20 @@ void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
 }
 
 
+
+#pragma endregion
+
+#pragma region POTAL
+void CGameSystem::Potal_Register(CPotal* pPotal)
+{
+	m_pPotal = pPotal;
+	Safe_AddRef(m_pPotal);
+}
+
+void CGameSystem::Set_Potal_Active(_bool B)
+{
+	m_pPotal->SetActivate(B);
+}
 #pragma endregion
 
 
@@ -513,6 +527,7 @@ void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
+	Safe_Release(m_pPotal);
 
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);

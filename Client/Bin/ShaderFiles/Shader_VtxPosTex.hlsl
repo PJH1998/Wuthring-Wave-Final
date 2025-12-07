@@ -111,7 +111,7 @@ PS_OUT PS_POTAL(PS_IN In)
     
     // UV 중심 이동 (0.5, 0.5 -> 0, 0)
     float2 center = float2(0.5f, 0.5f);
-    float2 centeredUV = In.vTexcoord- center;
+    float2 centeredUV = In.vTexcoord - center;
 
     // 극좌표 변환
     float radius = length(centeredUV);
@@ -148,7 +148,7 @@ PS_OUT PS_POTAL(PS_IN In)
     // 디퓨즈 색상에 왜곡된 마스크의 값을 적용합니다.
     // 마스크의 Red 채널을 알파(투명도)로 쓴다고 가정:
     // (옵션) 마스크 텍스처 자체의 색상도 곱하고 싶다면:
-    // finalColor.rgb *= maskColor.rgb;
+    Out.vColor *= maskColor;
 
     
     return Out;
@@ -265,7 +265,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MOUSE();
     }
 
-    pass Potal // 1
+    pass Potal // 2
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -276,7 +276,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_POTAL();
     }
 
-    pass Potal2 // 1
+    pass Potal2 // 3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);

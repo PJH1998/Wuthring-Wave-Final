@@ -20,10 +20,10 @@ public:
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
 	void							Load_Sequence(const _char* pFolderPath);
-	
+
 	//============================Effect
 	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
-	void							Create_Effect(const string& strFolderPath, LEVEL eLevel); 
+	void							Create_Effect(const string& strFolderPath, LEVEL eLevel);
 	void							Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum);
 	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
@@ -56,9 +56,9 @@ public:
 	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
 	void			Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
 	// 텍스트를 생성합니다. (화면상에 스크린좌표로 글자를 띄우는 UI를 생성합니다. 알파 미적용.)
-	class CUI_Text*	Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
+	class CUI_Text* Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag = L"WW_Bold");
 	// 텍스트를 생성합니다. (화면상에 스크린좌표로 글자를 띄우는 UI를 생성합니다. Instance Desc 수정을 통한 알파 적용.)
-	class CUI_Text*	Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
+	class CUI_Text* Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag = L"WW_Bold");
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
@@ -67,9 +67,9 @@ public:
 	void		PreAssign_TargetUIs();	// Initialize for UI caching. call after ui load.
 
 	// 기존 GameInstance 에서는 번거롭게 캐스팅 필요하던 걸, 편하게 가져오도록 캐스팅 내장시켜서 재정의.
-	class CCustom_UI*	Find_RootUI(_wstring strName);
-	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
-	
+	class CCustom_UI* Find_RootUI(_wstring strName);
+	class CCustom_UI* Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
+
 	HRESULT		HUD_FadeOut(_bool isForceChange = false);	// 보스 체력바를 제외한 HUD를 FadeOut 합니다.
 	HRESULT		HUD_FadeIn(_bool isForceChange = false);	// 보스 체력바를 제외한 HUD를 FadeIn  합니다.
 
@@ -130,10 +130,10 @@ public:
 	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
 	// eQTEType : QTE 종류 (연타로 게이지채우기, 단발성 중 선택), eIconIndex : 사용 버튼 종류.
 	void		Play_QTE(
-		_float2 vSpawnPos		= _float2{0.f, 0.f}, 
-		UI_QTE_TYPE eQTEType	= UI_QTE_TYPE::FILLGUAGE,
-		UI_QTE_BTN eIconIndex	= UI_QTE_BTN::F,
-		_float2 vScale			= _float2{1.f, 1.f}
+		_float2 vSpawnPos = _float2{ 0.f, 0.f },
+		UI_QTE_TYPE eQTEType = UI_QTE_TYPE::FILLGUAGE,
+		UI_QTE_BTN eIconIndex = UI_QTE_BTN::F,
+		_float2 vScale = _float2{ 1.f, 1.f }
 	);		// 여기에 정보 받기용으로 out 포인터 인자라도 만들거나, status 같은 곳에 호출? 
 
 
@@ -201,9 +201,13 @@ public:
 
 	void						Summon_SequenceCharacter(class CTransform* pTransform);
 
-	
+
 #pragma endregion
 
+#pragma region POTAL
+	void						Potal_Register(class CPotal* pPotal);
+	void						Set_Potal_Active(_bool B);
+#pragma endregion
 
 private:
 	class	CParser*			m_pParser						= { nullptr };
@@ -223,6 +227,7 @@ private:
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
 	class	CMouseController*	m_pMouseController				= { nullptr };
 
+	class  CPotal*				m_pPotal						= { nullptr };
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
 public:

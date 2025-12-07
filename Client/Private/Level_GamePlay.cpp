@@ -21,6 +21,7 @@
 
 #include "Event_Level.h"
 #include"NPC_Griffin.h"
+#include"Potal.h"
 
 //SFX
 #ifdef _DEBUG
@@ -80,8 +81,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_CameraNF();
 
 	m_pGameInstance->SettingFog(true);
-	
 
+	Ready_Potal();
 	Ready_UI();
 	Ready_Layer_Player();
 	Ready_MonsterTest();
@@ -624,6 +625,17 @@ void CLevel_GamePlay::Ready_Production()
 	Production.fRotationPerSec = XMConvertToRadians(90.f);
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroProduction"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Production);
+}
+
+void CLevel_GamePlay::Ready_Potal()
+{
+	CPotal::POTAL_DESC PotalDesc{};
+	PotalDesc.iLevel = ENUM_CLASS(m_eCurLevel);
+	PotalDesc.vExtent;
+	PotalDesc.vPos = _float4(3497.f, 147.84f, 3267.5f, 1.f);
+
+	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Potal"), &PotalDesc);
 }
 
 #ifdef _DEBUG

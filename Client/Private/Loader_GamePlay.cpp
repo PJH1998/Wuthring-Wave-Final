@@ -15,6 +15,7 @@
 #include"MapObject_Collaps.h"
 #include"MapObject_FireFly.h"
 #include"Slide_Navigation.h"
+#include"Potal.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -142,11 +143,21 @@ HRESULT CLoader_GamePlay::Load_Texture()
 {
 	cout << "Texture" << endl;
 
-    return S_OK;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Mask"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Ring_011.png"), 1))))
+		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Diffuse"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Mask_18312.png"), 1))))
+		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+
+	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
+	cout << "Model Start" << endl;
+
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1206_first/", m_eCurLevel, "Asphodel_Barrens");
@@ -171,7 +182,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyCloud_Gameplay.dat"))))
 		CRASH("SkyCloud");
 
-	cout << "Model" << endl;
+	cout << "Model End" << endl;
 
     return S_OK;
 }
@@ -230,6 +241,9 @@ HRESULT CLoader_GamePlay::Load_Object()
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
 		CSlide_Navigation::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
+		CPotal::Create(m_pDevice, m_pContext));
+	
 #pragma endregion
 	return S_OK;
 }
