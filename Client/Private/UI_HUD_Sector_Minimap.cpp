@@ -69,10 +69,10 @@ void CUI_HUD_Sector_Minimap::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3(-10.f, -10.f, -10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3(-10.f, -10.f,  10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3( 10.f, -10.f,  10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::END, _float3( 10.f, -10.f, -10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f, -10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f,  10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f,  10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f, -10.f) });
 
 	__super::Update(fTimeDelta);
 }
@@ -137,17 +137,21 @@ void CUI_HUD_Sector_Minimap::PreAssign_ChildUIs()
 	m_pUI_InstObjectIndicator	= Find_ChildObject(L"InstObjectIndicator");
 
 	//m_pUI_LT_Minimap_StaticBG	= Find_ChildObject(L"LT_Minimap_StaticBG");
-	//m_pUI_LT_Minimap_TurnPoint	= Find_ChildObject(L"LT_Minimap_TurnPoint");
+	//m_pUI_LT_Minimap_TurnPoint= Find_ChildObject(L"LT_Minimap_TurnPoint");
 }
 
 void CUI_HUD_Sector_Minimap::PreAssign_Presets()
 {
 	m_vecTmpCacledRelativeObjects.reserve(16);
-	m_vecTmpRelativeObjects.reserve(16);
+
+	m_arrColorPreset[ENUM_CLASS(UI_MINIMAP_OBJTYPE::MONSTER)] = _float4(0.8f, 0.5f, 0.5f, 0.8f);
 }
 
 void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 {
+	// ksta : // ksta delete : 런타임중 색상 바꿔보고 싶으면 아래 주석해제
+	//PreAssign_Presets();
+
 	_float4x4 camViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
 
 	_float3 camViewLook = { camViewMatrix._13, camViewMatrix._23, camViewMatrix._33 };			
@@ -186,25 +190,18 @@ void CUI_HUD_Sector_Minimap::Update_RelativePos()
 	const _float fMinimapRadius = 120.f;				// UI 창 반지름보다 약간 좁게
 
 
-	for (auto& objectPos : m_vecTmpRelativeObjects)
-	{	// Test
-		_float2 relativePos = Calc_RelativePos(&objectPos, 1.f);
-		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(relativePos);
-	}
-
 	for (auto& objectDesc : m_vecObjectPos_PerFrame)
 	{	// This Frame Only.
 		_float2 relativePos = Calc_RelativePos(&objectDesc.vTargetPos, 1.f);
 		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(relativePos);
+			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.eType, relativePos });
 	}
 
 	for (auto& objectDesc : m_mapObjectPos_Attached)
 	{	// contained
 		_float2 relativePos = Calc_RelativePos(&objectDesc.second.vTargetPos, 1.f);
 		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(relativePos);
+			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.second.eType, relativePos });
 	}
 
 
@@ -254,13 +251,13 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 
 
 	auto& objectIndicatorDesc = m_pUI_InstObjectIndicator->Get_UIDesc();
-	auto& objIndIinstDesc = objectIndicatorDesc.vecInstanceDescs;
-	objIndIinstDesc.resize(m_vecTmpCacledRelativeObjects.size());
+	auto& objIndiInstDesc = objectIndicatorDesc.vecInstanceDescs;
+	objIndiInstDesc.resize(m_vecTmpCacledRelativeObjects.size());
 
 	for (_uint i = 0; i < m_vecTmpCacledRelativeObjects.size(); i++)
 	{
-		auto& objdesc = objIndIinstDesc[i];
-		auto& targetPos = m_vecTmpCacledRelativeObjects[i];
+		auto& objdesc = objIndiInstDesc[i];
+		auto& targetPos = m_vecTmpCacledRelativeObjects[i].vCalcedTargetPos;
 
 		_float vInstSca = 16.f;
 		objdesc.vSInstTrans = _float4(targetPos.x, targetPos.y, 0.f, 1.f);
@@ -269,8 +266,23 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 	}
 
 	// 색상은 나중에 variantDesc 사용해서 그걸로 적용..
-	
+	static vector<_float4x4> vecObjIndiVariantMat = {};
+	vecObjIndiVariantMat.resize(objIndiInstDesc.size());
 
+	for (_uint i = 0; i < m_vecTmpCacledRelativeObjects.size(); i++)
+	{
+		auto targetObjType = m_vecTmpCacledRelativeObjects[i].eType;
+		*reinterpret_cast<_float4*>(&vecObjIndiVariantMat[i]) = m_arrColorPreset[ENUM_CLASS(targetObjType)];
+	}
+
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecObjIndiVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLE_COLORIZE),
+        true
+    };
+
+	m_pUI_InstObjectIndicator->Set_VariantUIDesc(tVariantDesc);
+	
 	m_vecTmpCacledRelativeObjects.clear();
 }
 

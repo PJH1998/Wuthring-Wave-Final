@@ -63,6 +63,7 @@ public:
 
 	_vector Get_LookVector();
 	_vector Get_Position();
+	const _float4x4* Get_PlayerMatrixPtr();
 #pragma endregion
 	
 

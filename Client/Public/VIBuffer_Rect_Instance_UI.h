@@ -9,15 +9,14 @@ class CVIBuffer_Rect_Instance_UI final : public CVIBuffer_Instance
 public:
 	typedef struct tagRectSingleInstanceDesc
 	{
-		// ���� �ν��Ͻ����� �ο��� ����
-		_float4 vSInstRight		= { 1.f, 0.f, 0.f ,0.f };					// ���� ��ü�� Pivot �� ���� �����ǥ
+		_float4 vSInstRight		= { 1.f, 0.f, 0.f ,0.f };
 		_float4 vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
 		_float4 vSInstLook		= { 0.f, 0.f, 1.f ,0.f };
 		_float4 vSInstTrans		= { 0.f, 0.f, 0.f ,1.f };
-		_float2 vSInstCoordX	= { 0.f, 1.f} ;
-		_float2 vSInstCoordY	= { 0.f, 1.f} ;
-		_float2 vClipTexcoordX	= { 0.f, 1.f };						// based on local space, per single instance
-		_float2 vClipTexcoordY	= { 0.f, 1.f };						// based on local space, per single instance
+		_float2 vSInstCoordX	= { 0.f, 1.f };
+		_float2 vSInstCoordY	= { 0.f, 1.f };
+		_float2 vClipTexcoordX	= { 0.f, 1.f };
+		_float2 vClipTexcoordY	= { 0.f, 1.f };
 
 		_float4x4 matExtraData = {};
 	}SINGLE_INST_DESC;
@@ -45,8 +44,6 @@ public:
 
 private:
 	_float3					m_vPivot = {};
-	//_float*				m_pSpeeds = {};
-	//_bool					m_isLoop = {};
 
 	SINGLE_INST_DESC*		m_pInstanceDesc = {};
 	_uint					m_iNumAvailableInstance = 0;

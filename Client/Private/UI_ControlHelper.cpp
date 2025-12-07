@@ -20,6 +20,7 @@
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_CurveTrace.h"
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -70,6 +71,8 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 
 	// MiniGames
 	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
+
+	m_pRootUI_CurveTrace			= Find_RootUI (L"UI_Custom_CurveTrace");
 }
 
 CCustom_UI* CUI_ControlHelper::Find_RootUI(_wstring strName)
@@ -178,7 +181,7 @@ void CUI_ControlHelper::Show_InteractUI(_wstring strText)
 	textDesc.strText = strText;
 	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
 
-
+	
 	//auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
 	//textDesc.strText = strText;
 	//static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
@@ -389,7 +392,7 @@ void CUI_ControlHelper::Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPositi
 {
 	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
 
-	if (pRootUI)
+	if (!pRootUI)
 		return;
 
 	pRootUI->Bind_ObjectPos_PerFrame(vPosition, eType);
@@ -399,7 +402,7 @@ void CUI_ControlHelper::Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_
 {
 	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
 
-	if (pRootUI)
+	if (!pRootUI)
 		return;
 
 	pRootUI->Attach_ObjectPos(vPosition, eType, pOwner);
@@ -409,10 +412,52 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 {
 	CUI_HUD_Sector_Minimap* pRootUI = dynamic_cast<CUI_HUD_Sector_Minimap*>(m_pRootUI_HUD_Minimap);
 
-	if (pRootUI)
+	if (!pRootUI)
 		return;
 
 	pRootUI->Detach_ObjectPos(pOwner);
+}
+
+void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
+												_float3& vStartVelocity,
+												_float3& vAcceleration,
+												_float fMaxTime,
+												_uint iSegmentCount,
+												_float fRibbonWidth,
+												_bool isUseCustomColor,
+												_float4 vBaseColor,
+												_float4 vHeadColor,
+												_float4 vTailColor)
+{
+	CUI_CurveTrace* pRootUI = dynamic_cast<CUI_CurveTrace*>(m_pRootUI_CurveTrace);
+
+	if (pRootUI == nullptr)
+		return;
+	if (pRootUI->IsActivate() == false)
+	{
+		CUI_CurveTrace::UI_CURVETRACE_DESC tDesc = {};
+		tDesc.vStartPos = vStartPos;// _float3(0.f, 0.f, 0.f);
+		tDesc.vStartVel = vStartVelocity;// _float3(0.f, 10.f, 10.f);
+		tDesc.vAcceleration = vAcceleration;// _float3(0.f, -9.8f, 0.f);
+		tDesc.fMaxTime = fMaxTime;
+		tDesc.iSegmentCount = iSegmentCount;
+		tDesc.fWidth = fRibbonWidth;
+		tDesc.isUseCustomColor = isUseCustomColor;
+		tDesc.vBaseColor = vBaseColor;
+		tDesc.vHeadColor = vHeadColor;
+		tDesc.vTailColor = vTailColor;
+
+		_vector vPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+		_vector vSca = XMVectorSet(2.f, 2.f, 2.f, 1.f);
+		_matrix matPos = XMMatrixScalingFromVector(vSca) * XMMatrixTranslationFromVector(vPos);
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_CurveTrace", matPos, &tDesc);
+
+		return;
+	}
+	else
+	{
+		pRootUI->Req_Render_CurveTrace(vStartPos, vStartVelocity, vAcceleration);
+	}
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
