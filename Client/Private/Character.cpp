@@ -409,7 +409,8 @@ void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& s
 // TimeStop
 void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
 {
-	m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	//m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
 }
 
 void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)

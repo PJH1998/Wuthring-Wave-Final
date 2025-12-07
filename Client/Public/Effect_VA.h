@@ -17,7 +17,6 @@ public:
 	{
 		_wstring		strTextureTag;
 		_wstring		strColorTextureTag;
-		_wstring		strHdrTextureTag;
 
 		_wstring		strMeshTag;
 

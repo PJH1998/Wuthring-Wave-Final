@@ -196,18 +196,9 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{
-		if (m_States[RUN_D])
-		{
-			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-		else
-		{
-			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
+		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+		return;
 	}
 
 
