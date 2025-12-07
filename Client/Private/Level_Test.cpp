@@ -921,40 +921,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	// interact
 #pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
-	static _bool isPrinted_FirstInfoMsg = false;
-
-	if (!isPrinted_FirstInfoMsg)
-	{
-		std::cout << "[Level_Test::Testing_UI] If you want to enable UI Test, Press [Ctrl + I]." << std::endl;
-		std::cout << "[Level_Test::Testing_UI] Default is Disabled Mode." << std::endl;
-
-		isPrinted_FirstInfoMsg = true;
-	}
-
-
-
-	static _bool isEnableUITest = false;
-	
-	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
-		m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-	{
-		isEnableUITest = !isEnableUITest;
-
-		if (isEnableUITest)
-		{
-			std::cout << "[Level_Test::Testing_UI] UI Testing Enabled." << std::endl;
-			std::cout << "[Level_Test::Testing_UI] \t[NUMPAD4] MobHP, \t[NUMPAD1] MobHP -10, \t[NUMPAD2] MobHP +10: " << std::endl;
-			std::cout << "[Level_Test::Testing_UI] \t[NUMPAD+] Interact, \t[NUMPAD6] Parry, \t[NUMPAD.] LockOn" << std::endl;
-			std::cout << "[Level_Test::Testing_UI] \t[TAB] TabUI(Hold), \t[NUMPAD5] Overflowing Palette" << std::endl;
-		}
-
-		if (!isEnableUITest)	std::cout << "[Level_Test::Testing_UI] UI Testing Disabled." << std::endl;
-	}
-
-
-
-	if (!isEnableUITest) return;
-
 
 	static _bool isInteractActivate = false;
 	

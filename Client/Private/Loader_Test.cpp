@@ -1190,7 +1190,6 @@ HRESULT CLoader_Test::Load_UI()
 		CVIBuffer_CurveTrace::Create(m_pDevice, m_pContext, 64))))
 		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_CurveTrace Load Failed. The VIBuffer_CurveTrace  may have already been loaded.\n");
 
-	//
 
 
 	// ==============================
@@ -1275,12 +1274,12 @@ HRESULT CLoader_Test::Load_UI()
 		CUI_QTE::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
 
-	// Custom UI (MiniGames)
+
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_CurveTrace",
 		CUI_CurveTrace::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_CurveTrace Load Failed. The UI_CurveTrace may have already been loaded.\n");
 
-	// Custom...
+	// Custom UI (MiniGames)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
 		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
@@ -1301,7 +1300,6 @@ HRESULT CLoader_Test::Load_UI()
 		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
 
-	
 	return S_OK;
 }
 
