@@ -29,17 +29,17 @@ HRESULT CLevel_Shader::Initialize()
         CRASH("Failed TestObject");
 
 	CEditDummy_Augusta::DUMMY_AUGU_DESC AuguDesc = {};
-	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.0001f, 0.0001f, 0.0001f, 1.f));
+	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f));
 	
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_Test_VAMesh"),
-		CVAMesh::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/VA/Augusta_Burst01_Floor.dat"), PreTransformationMatrix, 1))))
+		CVAMesh::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/VA/Augusta_Light_20005.dat"), PreTransformationMatrix, 1))))
 		return E_FAIL;
 
 	CTestVA::VA_DESC Desc = {};
 
 	Desc.strMeshTag = TEXT("Prototype_Test_VAMesh");
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), CTestVA::Create(m_pDevice, m_pContext, &Desc))))
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), CTestVA::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_TEST"),

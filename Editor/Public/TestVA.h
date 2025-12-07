@@ -18,6 +18,10 @@ public:
 		_wstring		strColorTextureTag;
 		_wstring		strMeshTag;
 
+		_float			fAnimSpeed;
+		_float			fMovementScale;
+
+		_int			iShaderPass;
 	}VA_DESC;
 
 private:
@@ -26,7 +30,7 @@ private:
 	virtual ~CTestVA() = default;
 
 public:
-	virtual		HRESULT			Initialize_Prototype(const VA_DESC* pDesc);
+	virtual		HRESULT			Initialize_Prototype();
 	virtual		HRESULT			Initialize_Clone(void* pArg) override;
 	virtual		void				Priority_Update(_float fTimeDelta) override;
 	virtual		void				Update(_float fTimeDelta) override;
@@ -49,15 +53,15 @@ private:
 	_uint						m_iTest = {3};
 	_uint						m_iTest2 = {};
 
-	_uint						m_iTrackPosition = {};			// Anim 진행 Pos
-	_uint						m_iAnimationDuration = {};		// 총 Animation 진행 시간 (HDR에서 Y Max 필요)
+	_float						m_fTrackPosition = {};			// Anim 진행 Pos
+	_float						m_fAnimationDuration = {};		// 총 Animation 진행 시간 (HDR에서 Y Max 필요)
 
 private:
 	void						Bind_Resource();
 	HRESULT						Ready_Components();
 
 public:
-	static		CTestVA* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc);
+	static		CTestVA* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void				Free() override;
 };

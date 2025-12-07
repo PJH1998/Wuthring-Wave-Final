@@ -729,7 +729,11 @@ void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& 
 {
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	m_isBlocked = true;
+
+#pragma region PARRY_UI
 	m_pGameSystem->Enable_Parried();
+#pragma endregion
+
 #ifdef _DEBUG
 	cout << "Parry! (Corro)" << endl;
 	cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -752,6 +756,9 @@ void CCorosaurus::Reset_NotifyInteraction()
 	}
 	if (nullptr != m_pParryVolume)
 		m_pParryVolume->SetActivate(false);
+
+	m_pCoroRock->Change_CollisionActive(false);
+	m_pCoroRock->SetActivate(false);
 }
 
 _bool CCorosaurus::isKnockDown()

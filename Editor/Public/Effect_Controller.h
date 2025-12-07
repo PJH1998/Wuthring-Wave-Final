@@ -106,6 +106,7 @@ private:
 	class CRect_Controller*										m_pRect_Controller = { nullptr };
 	class CDecal_Controller*									m_pDecal_Controller = { nullptr };
 	class CRadial_Controller*									m_pRadial_Controller = { nullptr };
+	class CVA_Controller*										m_pVA_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -122,6 +123,8 @@ private:
 	CEffect_Prefab::PREFAB_DESC*								m_pSelectedPrefabDesc = { nullptr };
 	CEffect_Prefab::FRAME_DESC*									m_pSelectedPrefabFrame = { nullptr };
 
+
+	//이거 타입으로 해둘걸...
 	_int														m_iSelectedChildren = 0;
 	_wstring													m_strChildrenTag = {};
 	_bool														m_IsParticle = false;
@@ -130,6 +133,7 @@ private:
 	_bool														m_IsRectEffect = false;
 	_bool														m_IsDecalEffect = false;
 	_bool														m_IsRadialEffect = false;
+	_bool														m_IsVAEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
