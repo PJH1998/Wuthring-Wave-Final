@@ -413,6 +413,21 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 		m_iState |= ENUM_CLASS(TEST_STATE::LAND);
 		m_fIdleAcc = m_fIdleDuration;
 	}
+#pragma region MONSTER_HP
+	// 변수
+	_float3 vMobPos = {};
+	XMStoreFloat3(&vMobPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	// 체력바
+	UI_MOBINFO_DESC tDesc = {};
+	tDesc.fMobCurHP = m_fHP;
+	tDesc.fMobMaxHP = m_pGameSystem->Get_MonsterInfo("ElectroPredator")->fMaxHp;
+	tDesc.isAtkedCurFrame = m_beHit;
+	tDesc.pMonsterPtrKey = this;
+	tDesc.vMobPos = vMobPos;
+	tDesc.vMobPos.y += 1.25f;
+	m_pGameSystem->Update_MobStatus(tDesc);
+#pragma endregion
 }
 
 void CElectroPredator::After_Condition(_float fTimeDelta)

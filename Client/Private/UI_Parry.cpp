@@ -7,7 +7,7 @@
 #include "Animator_UI.h"
 
 
-#define KSTA_UITEST_PARRY_TOZERO
+//#define KSTA_UITEST_PARRY_TOZERO
 
 CUI_Parry::CUI_Parry(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Image(pDevice, pContext)
@@ -68,7 +68,7 @@ HRESULT CUI_Parry::Initialize_Clone(void* pArg)
 	pAnim_SectorAEff->Change_Animation(L"ParryA_Eff_Initialize");
 	pAnim_SectorACircEff->Change_Animation(L"Parry_Activated_Initialize");
 
-	Reset(_fmatrix(), nullptr);
+	//Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
 	m_pTargetPos = nullptr;
 
