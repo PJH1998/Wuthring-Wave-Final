@@ -92,6 +92,11 @@ void CMonsterTest::Update(_float fTimeDelta)
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
 
+	if (false == m_isActivate)
+	{
+		//소멸 트리거
+	}
+
 	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생

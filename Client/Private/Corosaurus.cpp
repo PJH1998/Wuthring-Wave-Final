@@ -41,7 +41,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = /*m_fAttackAcc[ATK_PATTERN::BURST] =*/ 65.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 45.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = /*m_fAttackAcc[ATK_PATTERN::ATTACK8] =*/ 5.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -52,7 +52,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 
 	//조우 애니메이션 고정하기
 
-	_float temp{};
+	_float temp{51.f};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 51.f);
 	m_pTransformCom->Save_PreviousPosition();
@@ -157,7 +157,7 @@ void CCorosaurus::Render()
 		if (nullptr != m_pAtkVolumes[i])
 			m_pAtkVolumes[i]->Render();
 	}
-	//m_pParryVolume->Render();
+	m_pParryVolume->Render();
 	_float4 temp{};
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif // DEBUG
@@ -273,6 +273,10 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 #ifdef _DEBUG
 		cout << "플레이어 잡기 해제 호출!" << endl;
 #endif // _DEBUG
+	}
+	else if (wstrTypeTag == TEXT("Parry"))
+	{
+		m_pGameSystem->Attach_Parry(&m_vUIPosition);
 	}
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
@@ -404,7 +408,8 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
-	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
+	m_pForeHeadSocket = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
+	TriggerDesc.pSocketMatrix = m_pForeHeadSocket;
 	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
 	TriggerDesc.vOffsetPos = _float3(-0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
@@ -423,8 +428,8 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
-	TriggerDesc.vExtent = _float3(3.f, 0.55f, 0.55f);
-	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(4.f, 0.55f, 0.55f);
+	TriggerDesc.vOffsetPos = _float3(-0.4f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.pGrabMatrix = &m_GrabCombinedMat;
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -502,6 +507,11 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
 		m_iState |= iRemainState;
 	}
+	if (m_isBlocked)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		m_isBlocked = false;
+	}
 	if (m_isTrigger == true)
 	{
 		m_isDetecting = true;
@@ -520,6 +530,8 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 
 #pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+	_matrix WorldForeHead = XMLoadFloat4x4(m_pForeHeadSocket) * m_pTransformCom->Get_WorldMatrix();
+	XMStoreFloat3(&m_vUIPosition, WorldForeHead.r[3]);
 #pragma endregion
 
 	if (m_isParalysis)
@@ -717,6 +729,7 @@ void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& 
 {
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	m_isBlocked = true;
+	m_pGameSystem->Enable_Parried();
 #ifdef _DEBUG
 	cout << "Parry! (Corro)" << endl;
 	cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
