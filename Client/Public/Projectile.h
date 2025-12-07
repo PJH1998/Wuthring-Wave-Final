@@ -29,6 +29,7 @@ public:
 	typedef struct tagProjectileReset
 	{
 		_float3				vTargetPos;
+		CTransform*			pOwnerTransform;
 	}PROJECTILERESET;
 private:
 	explicit CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -59,7 +60,7 @@ private:
 	_float				m_fMaxDelay{};
 	// Effect?
 	_wstring			m_wstrEffectTag;
-	CALLBACK_CLIENT m_CallBack{};
+	CALLBACK_CLIENT		m_CallBack{};
 
 private:
 	HRESULT		Bind_Resources();

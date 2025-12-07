@@ -10,6 +10,7 @@
 
 #include "Decal_Controller.h"
 #include "Radial_Controller.h"
+#include "VA_Controller.h"
 
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
@@ -67,6 +68,8 @@ public:
 
 	void Radial_To_Json(json& Radial, CEffect_Radial::RADIAL_DESC* pRadialDesc);
 
+	void VA_To_Json(json& VA, CTestVA::VA_DESC* pVADesc);
+
 public:
 	void Load_Prefab();
 
@@ -106,6 +109,7 @@ private:
 	class CRect_Controller*										m_pRect_Controller = { nullptr };
 	class CDecal_Controller*									m_pDecal_Controller = { nullptr };
 	class CRadial_Controller*									m_pRadial_Controller = { nullptr };
+	class CVA_Controller*										m_pVA_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -122,6 +126,8 @@ private:
 	CEffect_Prefab::PREFAB_DESC*								m_pSelectedPrefabDesc = { nullptr };
 	CEffect_Prefab::FRAME_DESC*									m_pSelectedPrefabFrame = { nullptr };
 
+
+	//이거 타입으로 해둘걸...
 	_int														m_iSelectedChildren = 0;
 	_wstring													m_strChildrenTag = {};
 	_bool														m_IsParticle = false;
@@ -130,6 +136,7 @@ private:
 	_bool														m_IsRectEffect = false;
 	_bool														m_IsDecalEffect = false;
 	_bool														m_IsRadialEffect = false;
+	_bool														m_IsVAEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};

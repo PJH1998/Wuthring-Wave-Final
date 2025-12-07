@@ -201,26 +201,44 @@ void CTrail_Mesh::Default_Transform(_fmatrix WorldMatrix)
 
 void CTrail_Mesh::Update_Transform()
 {
-	if (m_pBoneMatrixPtr == nullptr)
-		return;
+	if (m_pBoneMatrixPtr != nullptr)
+	{
+		_matrix OffsetMatrix = m_OffsetMatrix;
 
-	_matrix OffsetMatrix = m_OffsetMatrix;
-	
-	_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
-	_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
-	
-	_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
-	
-	_vector vScale = {};
-	_vector vPos = {};
-	_vector vRot = {};
-	XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
-	
-	_matrix OffsetSpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
-	
-	XMStoreFloat4x4(&m_ComBindMatrix,
-		m_pTransformCom->Get_WorldMatrix() *
-		OffsetMatrix * OffsetSpawnMatrix);
+		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+		_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
+
+		_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
+
+		_vector vScale = {};
+		_vector vPos = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+		_matrix OffsetSpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+		XMStoreFloat4x4(&m_ComBindMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			OffsetMatrix * OffsetSpawnMatrix);
+	}
+	else if (m_pObjectMatrixPtr != nullptr)
+	{
+		_matrix OffsetMatrix = m_OffsetMatrix;
+
+		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+		_matrix SpawnMatrix = XMLoadFloat4x4(&ObjectMatrix);
+
+		_vector vScale = {};
+		_vector vPos = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+		_matrix OffsetSpawnMatrix = XMMatrixTranslationFromVector(vPos);
+
+		XMStoreFloat4x4(&m_ComBindMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			OffsetMatrix * OffsetSpawnMatrix);
+	}
 }
 
 HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)

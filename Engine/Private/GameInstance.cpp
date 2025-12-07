@@ -34,6 +34,7 @@
 #include "Model_Manager.h"
 #include "SFX_Hub.h"
 #include "Resource_Manager.h"
+#include "Fade.h"
 
 
 IMPLEMENT_SINGLETON(CGameInstance)
@@ -142,6 +143,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pResource_Manager = CResource_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pResource_Manager);
 
+	m_pFade = CFade::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
+	ASSERT_CRASH(m_pFade);
+
 	return S_OK;
 }
 
@@ -187,6 +191,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	//m_pModel_Manager->Update(fTimeDelta);
 
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
+	m_pFade->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -221,6 +226,9 @@ HRESULT CGameInstance::Draw()
 
 	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
+
+	ASSERT_CRASH(m_pFade);
+	m_pFade->Render();
 
 #ifdef _DEBUG
 	ASSERT_CRASH(m_pPhysicsManager);
@@ -1213,6 +1221,13 @@ ID3D11ShaderResourceView* CGameInstance::Get_Resource(const _string& strResource
 }
 #pragma endregion
 
+#pragma region FADE
+void CGameInstance::OnFade(FADE eFade, _float fDuration, function<void()> func)
+{
+	m_pFade->OnFade(eFade, fDuration, func);
+}
+#pragma endregion
+
 HRESULT CGameInstance::SetUp_CameraNF()
 {
 	m_pVF->SetUp_FogNF();
@@ -1294,6 +1309,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pSFX_Hub);
 	Safe_Release(m_pEnvMap);
+	Safe_Release(m_pFade);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);

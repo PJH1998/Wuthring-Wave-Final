@@ -10,6 +10,9 @@ namespace Engine
 	enum class POINTS { A, B, C, END};
 	enum class LINE { AB, BC, CA, END };
 
+	// Fade
+	enum class FADE { FADE_OUT, FADE_IN };
+
 	// Morph Target
 	enum class KEY_INPTEROLATION : unsigned int { LINEAR = 0, CONSTANT, CUBIC, END };
 	enum class KEY_TARGENT_MODE : unsigned int { AUTO = 0, USER, BREAK, END };
@@ -48,7 +51,7 @@ namespace Engine
 	// Collide Timing
 	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
-	enum class EFFECT_TYPE { PARTICLE, MESH, TRAIL, RECT, DECAL, RADIAL, END };
+	enum class EFFECT_TYPE { PARTICLE, MESH, TRAIL, RECT, DECAL, RADIAL, VA, END };
 
 	// Sequence
 	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SFX, ACTOR, EFFECT, END };

@@ -72,6 +72,7 @@
     <ClInclude Include="..\public\EnvironmentMap.h" />
     <ClInclude Include="..\Public\Event.h" />
     <ClInclude Include="..\Public\EventBus.h" />
+    <ClInclude Include="..\Public\Fade.h" />
     <ClInclude Include="..\Public\Font_Manager.h" />
     <ClInclude Include="..\Public\FreeCamera.h" />
     <ClInclude Include="..\Public\FreeList.h" />
@@ -213,6 +214,7 @@
     <ClCompile Include="..\private\EnvironmentMap.cpp" />
     <ClCompile Include="..\Private\Event.cpp" />
     <ClCompile Include="..\Private\EventBus.cpp" />
+    <ClCompile Include="..\Private\Fade.cpp" />
     <ClCompile Include="..\Private\Font_Manager.cpp" />
     <ClCompile Include="..\Private\FreeCamera.cpp" />
     <ClCompile Include="..\Private\FreeList.cpp" />
@@ -332,6 +334,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Decal.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Deferred.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_EnvMapDeferred.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Fade.hlsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

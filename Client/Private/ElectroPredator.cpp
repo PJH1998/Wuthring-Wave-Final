@@ -244,6 +244,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		CProjectile::PROJECTILERESET ProiDesc{};
 		ProiDesc.vTargetPos = m_vTargetPosition;
 		ProiDesc.vTargetPos.y += 0.5f; // 대상 높이 offset
+		ProiDesc.pOwnerTransform = m_pTransformCom;
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_Electro"), WorldMat, &ProiDesc);
 	}
 	else if (wStrObjectTag == TEXT("AoE"))
