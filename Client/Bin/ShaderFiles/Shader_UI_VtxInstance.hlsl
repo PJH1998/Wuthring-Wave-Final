@@ -988,8 +988,16 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             {
                 float2 originUV = In.vTexcoord;
                 float2 offset = fElapsedTime * fUVScrollSpeed;
+                //float2 worldPosAppliedUV = originUV / In.vWorldPos.xy;
                 
-                float maskWeight = g_TextureExtra0.Sample(DefaultSampler, frac(originUV + offset)).x;
+                float2 textureRatio = float2(fwidth(originUV.x), fwidth(originUV.y));
+                float ratioX = textureRatio.y / (textureRatio.x + 0.00001f);
+                
+                float2 calcedUV = originUV;
+                calcedUV.x *= ratioX;
+
+                float noiseScale = 0.15f;
+                float maskWeight = g_TextureExtra0.Sample(DefaultSampler, frac(noiseScale * calcedUV + offset)).x;
                 
                 Out.vColor.rgb = (1.f - maskWeight) * Out.vColor.rgb + (maskWeight) * vMaskColor.rgb;
                 Out.vColor.a = (1.f - maskWeight) * Out.vColor.a + (maskWeight) * vMaskColor.a * Out.vColor.a;

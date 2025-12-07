@@ -99,8 +99,8 @@ public:
 	// 락온 UI를 해제합니다.
 	void		Detach_LockOnUI();
 
-	// 패리 UI를 생성합니다. / *pTargetPos : 락온 대상의 위치 포인터.
-	// (일단은 생성 후 약 0.35초 = 21프레임 를 원이 겹치는 시점으로 잡았습니다.)
+	// 패리 UI를 생성합니다. / *pTargetPos : 패리 대상의 위치 포인터.
+	// (일단은 생성 후 약 0.35초 = 21프레임 를 원이 겹치는 시점으로 잡았습니다. 총 재생 시간은 약 0.5초 = 30프레임)
 	void		Attach_Parry(_float3* pTargetPos);
 	// 패리 UI가 살아있는 도중, 패리에 성공했음을 보냅니다. (원 즉시제거, 이펙트 이미지 출력)
 	void		Enable_Parried();
@@ -111,7 +111,6 @@ public:
 
 
 	// 탭 유틸리티 UI를 켭니다. /  iCurSelectedUtilityIndex : 현재 선택중인 유틸리티 인덱스 (UI_TAB_UTILITY Enum을 따름)
-	// 마우스 커서 락 해제 필요.(wip)
 	void		Show_TabUtilityUI(_uint iCurSelectedUtilityIndex = ENUM_CLASS(UI_TAB_UTILITY::NOTHING));
 	// 탭 유틸리티 UI를 끄라는 요청을 보내며 (애니메이션 재생을 위함), 선택한 유틸리티를 반환합니다.
 	// 반환값은 Client_Enum 의 UI_TAB_UTILITY 를 따릅니다.

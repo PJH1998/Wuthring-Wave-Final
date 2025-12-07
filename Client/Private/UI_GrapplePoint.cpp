@@ -1,4 +1,4 @@
-﻿// Single LockOn 
+﻿// Single GrapplePoint
 
 #include "ClientPch.h"
 #include "UI_GrapplePoint.h"
