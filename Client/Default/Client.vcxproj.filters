@@ -490,6 +490,9 @@
     <Filter Include="03. GameObject\Effect\Prefab\FXVA">
       <UniqueIdentifier>{a0858081-8918-47d3-874e-57bd9194d4a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. GameSystem\TimeLack">
+      <UniqueIdentifier>{94a08454-8c6c-48b1-83a2-741536fb8eb5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1264,6 +1267,9 @@
     <ClInclude Include="..\Public\Effect_VA.h">
       <Filter>03. GameObject\Effect\Prefab\FXVA</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\TimeLack.h">
+      <Filter>01. GameSystem\TimeLack</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1991,6 +1997,9 @@
     <ClCompile Include="..\Private\Slide_Navigation.cpp" />
     <ClCompile Include="..\Private\Effect_VA.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXVA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\TimeLack.cpp">
+      <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

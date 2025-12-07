@@ -113,18 +113,19 @@ void CLeviatan::Update(_float fTimeDelta)
 	if (m_isAreaAttack)
 		AreaAttack(fTimeDelta);
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	if(m_pAnimMachineCom[m_iPhase])
 	{
 		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
-			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
 		else											// 전투 애니메이션 갱신, facial X
-			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
 	}
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	else
 	{
 		_float temp{};
-		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta, &temp);
+		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta * fTimeRatio, &temp);
 	}
 	
 

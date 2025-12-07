@@ -14,6 +14,7 @@ private:
 public:
 #pragma region GAMESYSTEM
 	void		Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	void		Update(_float fTimeDelta);
 	void		Clear_Resource();
 #pragma endregion
 
@@ -186,7 +187,6 @@ public:
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(INSTANCETYPE eType, class CMapObject_Instance* pObjects, _bool** SonoroMode);
-	void Update(_float fTimeDelta);
 	_bool  Change_Sonoro(_bool IsSonoro);
 	_bool IsSonoro();
 
@@ -220,13 +220,18 @@ public:
 #pragma region PLAYER
 	void						Register_SequencePlayer(class CSequencePlayer* pSequencePlayer);
 	void						Register_Player(class CPlayer* pPlayer);
-	_vector						Get_PlayerLookVector();
-	_vector						Get_PlayerPosition();
-	const _float4x4*			Get_PlayerMatrixPtr();
+	_vector					Get_PlayerLookVector();
+	_vector					Get_PlayerPosition();
+	const _float4x4*		Get_PlayerMatrixPtr();
 
 	void						Summon_SequenceCharacter(class CTransform* pTransform);
+#pragma endregion
 
-	
+#pragma region TIMELACK
+	void						Update_TimeLack(_float fTimeDelta);
+	void						Change_TimeRate(COLLISIONLAYER eLayer, _float fRate);
+	void						Change_TimeRate(COLLISIONLAYER eLayer, _float fRate, _float fDuration);
+	_float						TimeLack(COLLISIONLAYER eLayer);
 #pragma endregion
 
 
@@ -247,6 +252,8 @@ private:
 
 	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
 	class	CMouseController*	m_pMouseController				= { nullptr };
+
+	class	CTimeLack*				m_pTimeLack = { nullptr };
 
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
