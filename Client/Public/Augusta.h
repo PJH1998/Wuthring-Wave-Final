@@ -266,6 +266,7 @@ private:
 	void Process_CameraAction(const _wstring& wStrObjectTag);
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
 	void Process_FxObject(const _wstring& wStrObjectTag);
+	void Process_CameraSpring(const _wstring& wStrObjectTag);
 	
 	void Render_Default(_uint iMeshIndex);
 	void Render_Skin(_uint iMeshIndex);

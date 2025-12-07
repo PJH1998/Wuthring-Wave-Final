@@ -46,6 +46,8 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	// 2. 그랩 용도 Matrix
 	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
 
+	
+
     return S_OK;
 }
 
@@ -86,13 +88,17 @@ void CCharacter::Render_Shadow()
 #pragma region 객체 공유
 void CCharacter::Set_InputController(CInputController* pInputControllerCom)
 {
+	ASSERT_CRASH(pInputControllerCom);
     m_pInputControllerCom = pInputControllerCom;
     Safe_AddRef(m_pInputControllerCom);
 }
 
 void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
 {
+	ASSERT_CRASH(pSpringCamera);
     m_pSpringCamera = pSpringCamera;
+	m_fCameraOriginDistance = m_pSpringCamera->Get_Distance();
+	m_fCaemraDistance = m_fCameraOriginDistance;
     Safe_AddRef(pSpringCamera);
 }
 
@@ -397,20 +403,19 @@ void CCharacter::ResetPose()
 
 void CCharacter::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
 {
+	if (nullptr == m_pGameInstance)
+		return;
+
 	m_pGameInstance->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
 }
 
-// Duration
-void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration)
 {
-	m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, fDuration);
-}
+	if (nullptr == m_pGameSystem)
+		return;
 
-// TimeStop
-void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
-{
-	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
-	//m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
+	//m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio, fDuration);
 }
 
 void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
@@ -424,6 +429,16 @@ void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fM
 	Desc.fDuration = fDuration;
 	Desc.iShaderPassIndex = 0; 
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_MotionTrail"), XMMatrixIdentity(), &Desc);
+}
+
+
+
+void CCharacter::Use_Spring(_float fDestination, _float fDuration)
+{
+	if (nullptr == m_pSpringCamera)
+		return;
+
+	m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 
 

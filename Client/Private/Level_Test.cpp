@@ -80,12 +80,12 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	Ready_CoroSaurus();
+	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
-	//Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	Ready_AnimInstanceTest();
+	Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();

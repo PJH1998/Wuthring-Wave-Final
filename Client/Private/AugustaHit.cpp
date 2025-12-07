@@ -70,6 +70,7 @@ void CAugustaHit::OnExit()
 	// Hit 판정 끝났으므로 정보 초기화
 	m_pAugusta->ClearPendingHit();
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+
 	//m_pAugusta->Set_Hit(false);
 	
 }
@@ -93,10 +94,33 @@ void CAugustaHit::Enter_Hit()
 	// 4. 땅 판정.
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
+
+
 	// 5. 애니메이션 선정.
 	if (!m_States[LAND])
 	{
-		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+		//m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START);
+
+		// 내 위치 - 공격자 위치 = 밀려날 방향
+		_vector vMyPos = m_pAugusta->Get_Position();
+		_vector vAttackerPos = pDesc->pTransform->Get_State(STATE::POSITION);
+		_vector vHitDir = vMyPos - vAttackerPos;
+		vHitDir = XMVectorSetY(vHitDir, 0.f);
+		if (XMVectorGetX(XMVector3Length(vHitDir)) < 0.01f)
+		{
+			vHitDir = m_pAugusta->Get_LookVector_NoPitch() * -1.f;
+		}
+		else
+		{
+			vHitDir = XMVector3Normalize(vHitDir);
+		}
+		
+
+		_float fKnockbackPower = 2.0f;
+		_float fUpForce = 2.0f;
+		m_vKnockbackVelocity = vHitDir * fKnockbackPower; // 뒤로 밀리는 힘
+		m_vKnockbackVelocity = XMVectorSetY(m_vKnockbackVelocity, fUpForce); // 위로 솟구치는 힘
 	}
 	else
 	{
@@ -133,6 +157,27 @@ void CAugustaHit::Update_HitAnimation(_float fTimeDelta)
 	{
 		m_pAugusta->Move_Fall(fTimeDelta, 0.1f); // 미세하게 떨어지게
 	}
+
+	if (eHitType == EAugustaHitType::BEHIT_FLY_START || 
+		eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
+	{
+		_vector vDir = XMVector3Normalize(m_vKnockbackVelocity);
+		_float fSpeed = XMVectorGetX(XMVector3Length(m_vKnockbackVelocity));
+
+		m_pAugusta->Move_Direction(vDir, fTimeDelta, fSpeed);
+
+		_float fGravity = 5.f;
+		_vector vVelocityY = XMVectorSet(0.f, XMVectorGetY(m_vKnockbackVelocity), 0.f, 0.f);
+		vVelocityY = XMVectorSetY(vVelocityY, XMVectorGetY(vVelocityY) - fGravity * fTimeDelta);
+
+		_float fDrag = 2.0f; // 마찰 계수
+		_vector vVelocityXZ = XMVectorSetY(m_vKnockbackVelocity, 0.f);
+		vVelocityXZ = vVelocityXZ * (1.0f - fDrag * fTimeDelta); // 점점 느려지게
+
+		m_vKnockbackVelocity = vVelocityXZ + vVelocityY;
+		//m_pAugusta->Move_Direction(m_vDir, fTimeDelta, 0.5f); // 곡선을 그리며 자연스럽게 날라가게.
+	}
+
 }
 
 void CAugustaHit::Check_Physics(_float fTimeDelta)
@@ -152,6 +197,13 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 	{
 		if (m_States[LAND])
 		{
+			if (eHitType == EAugustaHitType::BEHIT_FLY_LOOP || 
+				eHitType == EAugustaHitType::BEHIT_FLY_START) // Loop 라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+
 			if (m_States[MOVE])
 			{
 				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
@@ -196,29 +248,41 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
 				return;
 			}
+			if (eHitType == EAugustaHitType::BEHIT_FLY_LOOP) // Loop 라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+			else if (eHitType == EAugustaHitType::BEHIT_FLY_START)
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL); // Fall로 변경.
+				return;
+			}
+			else if (eHitType == EAugustaHitType::BEHIT_FLY_FALL)  // Fall이라면?
+			{
+				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDUP; // Idle 전용 일어나는 모션.
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+				return;
+			}
 			else
 			{
-				if (eHitType == EAugustaHitType::BEHIT_FLY_FALL) 
-				{
-					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDUP; // Idle 전용 일어나는 모션.
-					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-					return;
-				}
-				else
-				{
-					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // Idle 전용 일어나는 모션.
-					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-					return;
-				}
+				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // Idle 전용 일어나는 모션.
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+				return;
 			}
 		}
 
-		if (!m_States[LAND])
+		if (!m_States[LAND]) // 땅이아니라면?
 		{
 			if (m_States[JUMP])
 			{
 				m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+				return;
+			}
+			else if (EAugustaHitType::BEHIT_FLY_START == eHitType) // Fly Start라면?
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP); // Fly Loop로 전환.
 				return;
 			}
 			else
@@ -238,9 +302,9 @@ void CAugustaHit::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_L), "Behit_B_L", 1.5f, 40.f, 1.2f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_R), "Behit_B_R", 1.5f, 40.f, 1.2f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.f, 30.f, 2.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 30.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.5f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.5f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_HOVER), "Behit_Hover", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_PRESS), "Behit_Press", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_FALL), "Behit_Push_Fall", 1.f, 30.f);
