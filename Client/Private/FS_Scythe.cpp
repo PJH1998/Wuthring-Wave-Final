@@ -45,7 +45,7 @@ void CFS_Scythe::Priority_Update(_float fTimeDelta)
 void CFS_Scythe::Update(_float fTimeDelta)
 {
 	_bool isAnimFinished{};
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
 	if(!m_iState && isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);

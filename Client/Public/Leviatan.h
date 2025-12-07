@@ -71,6 +71,7 @@ private:
 	//vector<_float3>			m_BowOffsets;
 	const _float4x4*		m_pBowSocket = { nullptr };
 	const _float4x4*		m_pSwordSocket = { nullptr };
+	const _float4x4*		m_pSpineMatrix = { nullptr };
 
 	_float3					m_vSpawnPos[4]{};
 	_uint					m_iSpawnIndex{};
@@ -130,6 +131,7 @@ private:
 #pragma region UI_BIND
 	_bool					m_isParalysis{};
 	_float					m_fParalysisRatio{}; //0.f ~ 1.f
+	_float3					m_vUIPosition{};
 #pragma endregion
 
 private:
@@ -151,6 +153,8 @@ private:
 	void						TurnLerp(_bool isActive);
 	void						DistanceInterpolate(_bool isActive);
 	void						Reset_NotifyInteraction();
+	void						Event1();				//1페이즈 종료, 원점 원위치
+	void						Event2();				//2페이즈 시작, 변경 맵으로 이동
 
 #pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
