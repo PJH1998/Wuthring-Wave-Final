@@ -224,13 +224,13 @@ void CLight_Controller::LightData_Base_Tab()
 		if (ImGui::InputText("LightData", m_LightDataTag, IM_ARRAYSIZE(m_LightDataTag), ImGuiInputTextFlags_EnterReturnsTrue))
 			m_bDataTagFlag = true;
 
-		if (ImGui::ColorEdit4("Base Color", m_vBaseColor,
+		ImGui::ColorEdit4("Base Color", m_vBaseColor,
 			ImGuiColorEditFlags_NoOptions          // 설정 메뉴 비활성화 (HSV 등 변환 방지)
 			| ImGuiColorEditFlags_NoInputs         // 텍스트 입력 비활성 (정확히 선택한 색 유지)
 			| ImGuiColorEditFlags_DisplayRGB       // 항상 RGB로 표시
 			| ImGuiColorEditFlags_InputRGB         // RGB 입력값으로 유지
 			| ImGuiColorEditFlags_AlphaBar         // 알파 바 표시
-			| ImGuiColorEditFlags_AlphaPreview))   // 알파 미리보기
+			| ImGuiColorEditFlags_AlphaPreview);   // 알파 미리보기
 
         if (m_bDataTagFlag)
         {

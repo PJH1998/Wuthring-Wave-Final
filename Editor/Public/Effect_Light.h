@@ -33,9 +33,14 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
+	void Update_LightDesc(_float fTimeDelta);
+
+private:
 	LIGHT_DESC					m_tDesc = {};
 
-	_wstring					m_wstrMyTag = {};
+	Engine::LIGHT_DESC			m_tLightDesc = {};
+
+	_wstring					m_wstrLightTag = {};
 	_float4						m_vColor = {};
 	_float2						m_vLifeTime = {};
 	_float						m_fSpeed = {};

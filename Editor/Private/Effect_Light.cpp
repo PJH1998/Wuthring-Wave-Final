@@ -23,9 +23,11 @@ HRESULT CEffect_Light::Initialize_Clone(void* pArg)
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
 
+	m_tDesc = *pDesc;
+
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
-	m_wstrMyTag = pDesc->wstrLightTag;
+	m_wstrLightTag = pDesc->wstrLightTag;
 	m_fSpeed = pDesc->fSpeed;
 	m_vRange = pDesc->vRange;
 
@@ -43,18 +45,23 @@ void CEffect_Light::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	//DECAL_DATA Desc{};
-	//Desc.eType = DECAL_DATA::NONSTATIC;
-	//Desc.fLifeTime = m_LifeTime;
-	//Desc.vColor = m_vColor;
-	//Desc.WorldMatrix = m_ComBindMatrix; /*m_pTransformCom->Get_WorldMatrix();*/
-	//Desc.EndWorldMatrix = m_ComBindMatrix;
-	//Desc.fBlendTime = m_fBlendTime;
-	//Desc.fEmissiveIntensity = m_fEmissiveIntensity;
+	if (m_vLifeTime.x >= m_vLifeTime.y)
+	{
+		m_isActivate = false;
+		m_pGameInstance->Set_Active(m_wstrLightTag, false);
 
-	//m_pGameInstance->Add_DecalData(m_wstrMyTag, Desc);
+		//초기화
+		m_vLifeTime.x = 0.f;
+		m_vRange.x = 0.f;
 
-	m_isActivate = false;
+		return;
+	}
+
+	m_vLifeTime.x += fTimeDelta;
+
+	Update_LightDesc(fTimeDelta);
+
+	m_pGameInstance->Update_LightDesc(m_wstrLightTag, m_tLightDesc);
 }
 
 void CEffect_Light::Late_Update(_float fTimeDelta)
@@ -68,9 +75,39 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
 
+	//초기화
+	m_vLifeTime.x = 0.f;
+	m_vRange.x = 0.f;
+
 	if (m_isActivate = pDesc->IsActive)
-		m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-   
+	{
+		_vector vScale = {};
+		_vector vTrans = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, WorldMatrix);
+
+		_float4 vPos = {};
+		XMStoreFloat4(&vPos, vTrans);
+
+		m_tLightDesc.eType = Engine::LIGHT_DESC::POINT;
+		m_tLightDesc.vDiffuse = m_tDesc.vColor;
+		m_tLightDesc.vPosition = vPos;
+		m_tLightDesc.fRange = m_vRange.x;
+
+		m_pGameInstance->Update_LightDesc(m_wstrLightTag, m_tLightDesc);
+		m_pGameInstance->Set_Active(m_wstrLightTag, true);
+	}
+}
+
+void CEffect_Light::Update_LightDesc(_float fTimeDelta)
+{
+	if (m_vRange.x < m_vRange.y)
+	{
+		//일단은 늘어나게만 나중에 늘거나 줄거나로 바꿔주자.
+		//빛 갑자기 팍 꺼지는거 조금 어색한듯
+		m_vRange.x += fTimeDelta * m_fSpeed;
+		m_tLightDesc.fRange = m_vRange.x;
+	}
 }
 
 CEffect_Light* CEffect_Light::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
