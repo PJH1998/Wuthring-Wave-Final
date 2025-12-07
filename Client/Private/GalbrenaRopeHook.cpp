@@ -36,7 +36,7 @@ void CGalbrenaRopeHook::OnEnter(void* pArg)
 		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START01_F);
 		break;
 	case ROPEDIR::D:
-		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START01_F);
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START01_D);
 		break;
 	}
 
@@ -143,11 +143,11 @@ void CGalbrenaRopeHook::Check_StateTransition(_float fTimeDelta)
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			case EGalbrenaRopeHookType::FIXHOOK_START01_D:
-				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_U);
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_D);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			case EGalbrenaRopeHookType::FIXHOOK_START01_F:
-				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_U);
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_F);
 				m_eRopeStep = ROPESTEP::STEP_START2;
 				break;
 			default:

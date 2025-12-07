@@ -147,6 +147,8 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
+
+	// 8. PlayerStatus에 Utility Type 바인딩.
 	Sync_UtilityType();
 }
 
@@ -178,7 +180,8 @@ void CPlayer::Update(_float fTimeDelta)
     Toggle_LockOn(); // 5. Lock On
 	
 	m_GrappleCandidates.clear();
-	m_TargetTransforms.clear();
+	m_TargetCandidates.clear();
+	//m_TargetTransforms.clear();
 
 	
 
@@ -441,9 +444,6 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 
-
-	
-	
 	
 }
 
@@ -680,8 +680,11 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 		return false;
 
 
-	auto iter = find(m_TargetTransforms.begin(), m_TargetTransforms.end(), pTarget);
-	if (iter == m_TargetTransforms.end())
+	auto iter = find_if(m_TargetCandidates.begin(), m_TargetCandidates.end(), [pTarget](const TARGET_INFO& info) {
+			return info.pTransform == pTarget;
+		});
+
+	if (iter == m_TargetCandidates.end())
 		return false;
 
 	const _float fMaxLockOnDistance = 30.f;
@@ -721,18 +724,22 @@ void CPlayer::Notify_EscapeGrabExecute()
 
 void CPlayer::Sorting_Target()
 {
-    sort(m_TargetTransforms.begin(), m_TargetTransforms.end(), [this](CTransform* pSrcTransform, CTransform* pDstTransform)->_bool {
-        _float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pSrcTransform->Get_State(STATE::POSITION)));
-        _float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pDstTransform->Get_State(STATE::POSITION)));
+    /*sort(m_TargetCandidates.begin(), m_TargetCandidates.end(), [this](const TARGET_INFO& pSrc, const TARGET_INFO& pDst)->_bool {
+        _float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pSrc.pTransform->Get_State(STATE::POSITION)));
+        _float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pDst.pTransform->Get_State(STATE::POSITION)));
         return fSrcDistance < fDstDistance;
-        });
+        });*/
 
-    if (0 < m_TargetTransforms.size())
+	sort(m_TargetCandidates.begin(), m_TargetCandidates.end(), [this](const TARGET_INFO& pSrc, const TARGET_INFO& pDst)->_bool {
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION) - pSrc.pTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION) - pDst.pTransform->Get_State(STATE::POSITION)));
+		return fSrcDistance < fDstDistance;
+		});
+
+    if (0 < m_TargetCandidates.size())
     {
-        m_pTargetTransform = m_TargetTransforms[0];
-
-		
-		
+        //m_pTargetTransform = m_TargetTransforms[0];
+		m_TargetInfo = m_TargetCandidates[0];
     }
 
 }
@@ -748,11 +755,13 @@ void CPlayer::Toggle_LockOn()
 		if (m_IsLockOn)
 		{
 			// 현재 타겟을 고정 락온 타겟으로 설정.
-			m_pLockOnTargetTransform = m_pTargetTransform;
+			//m_pLockOnTargetTransform = m_pTargetTransform;
+			m_LockOnTargetInfo = m_TargetInfo;
 		}
 		else
 		{
-			m_pLockOnTargetTransform = nullptr;
+			//m_pLockOnTargetTransform = nullptr;
+			m_LockOnTargetInfo.Reset();
 		}
 	}
 
@@ -760,10 +769,10 @@ void CPlayer::Toggle_LockOn()
 	if (m_IsLockOn)
 	{
 		// TargetTransform이 없거나.. LockOnTargetTransform이 현재 검색된 Transform 중에 없다면?
-		if (nullptr == m_pTargetTransform || !Is_TargetValid(m_pLockOnTargetTransform)) 
+		if (nullptr == m_TargetInfo.pTransform || !Is_TargetValid(m_LockOnTargetInfo.pTransform))
 		{
 			m_IsLockOn = false;
-			m_pLockOnTargetTransform = nullptr;
+			m_LockOnTargetInfo.pTransform = nullptr;
 		}
 	}
 
@@ -780,7 +789,7 @@ void CPlayer::Toggle_LockOn()
 		{
 			// 락온을 해제해라.
 			m_IsLockOn = false;
-			m_pLockOnTargetTransform = nullptr;
+			m_LockOnTargetInfo.pTransform = nullptr;
 		}
 	}
 
@@ -788,24 +797,39 @@ void CPlayer::Toggle_LockOn()
 	if (m_IsLockOn)
 	{
 		// 하드 락온
-		pFinalTarget = m_pLockOnTargetTransform;
+		pFinalTarget = m_LockOnTargetInfo.pTransform;
 		if (pCurrentCharacter)
 			pCurrentCharacter->Set_LockOn(pFinalTarget, m_IsLockOn);
+
+		// LockOn UI 설정.
+		Calc_LockOnPos();
+		_float3 vPos = {};
+		XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		cout << "LockOn Pos (x, y, z) : " << m_vLockOnPos.x << " - " << m_vLockOnPos.y << " - " << m_vLockOnPos.z << endl;
+		cout << "Player Pos (x, y, z) : " << vPos.x << " - " << vPos.y << " - " << vPos.z << endl;
+
+		m_pGameSystem->Attach_LockOnUI(&m_vLockOnPos);
+
+	
 	}
 	else
 	{
+		m_pGameSystem->Detach_LockOnUI();
 		// 소프트 락온.
-		pFinalTarget = m_pTargetTransform;
+		pFinalTarget = m_TargetInfo.pTransform;
 		if (pCurrentCharacter)
 			pCurrentCharacter->Set_AutoLockOn(pFinalTarget, m_IsLockOn); // Character의 Set_AutoLockOn 호출
+
 	}
 
 
 	// 6. 카메라 업데이트.
 	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
 
+	
+
 	// 7. LockOn 초기화?
-	m_pTargetTransform = nullptr;
+	m_TargetInfo.Reset();
 }
 
 
@@ -849,9 +873,13 @@ void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
 
 		lock_guard<mutex> lock(m_Mutex);
 		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		
 		// Vector 컨테이너에 넣어줄 거면 
-		m_TargetTransforms.push_back(pTargetTransform);
-		m_pTargetTransform = nullptr;
+		m_TargetCandidates.push_back({ pTargetTransform, pcallDesc->pSocketMatrix });
+		//m_TargetTransforms.push_back(pTargetTransform);
+
+		//m_pTargetTransform = nullptr;
+		m_TargetInfo.Reset();
 	}
 }
 
@@ -908,6 +936,21 @@ _bool CPlayer::IsHitBack(CTransform* pTransform)
 		return true;
 
 	return false;
+}
+
+void CPlayer::Calc_LockOnPos()
+{
+	if (nullptr == m_LockOnTargetInfo.pTransform ||
+		nullptr == m_LockOnTargetInfo.pSocketMatrix)
+		return;
+
+	_matrix matTarget = m_LockOnTargetInfo.pTransform->Get_WorldMatrix();
+	_matrix matSocket = XMLoadFloat4x4(m_LockOnTargetInfo.pSocketMatrix);
+	_matrix matCombined = matTarget * matSocket;
+
+	XMStoreFloat3(&m_vLockOnPos, matCombined.r[3]); // Position 저장.
+	
+	
 }
 
 #ifdef _DEBUG
