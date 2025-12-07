@@ -59,7 +59,7 @@ private:
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
 	CGameSystem*			m_pGameSystem = { nullptr };
 	const _float4x4*		m_pToeMatrix = { nullptr };
-	const _float4x4*		m_pSpineMatrix = { nullptr };
+	const _float4x4*		m_pCameraMatrix = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 	CAttackVolume*			m_pParryVolume = {nullptr,};

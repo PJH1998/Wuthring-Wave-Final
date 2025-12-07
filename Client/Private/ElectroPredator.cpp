@@ -37,16 +37,23 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
+
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+	m_pColliderCom->Set_Desc(&m_CallBack);
+
 	m_fHP = pDesc->fHp;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_vDistanceRange = _float2(7.f, 12.95f);
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
 	m_fImpluseRate = pDesc->fImpluseRate;
-	//m_pArrowMatrix = m_pModelCom->Get_BoneMatrixPtr((""));
-	//임시 patrol 위치 데이터
-	//m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
-	//m_PatrolPoints.push(pDesc->vInitPosition);
+
 	m_pRigidBodyCom->IsActivate(false);
 	m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
@@ -54,6 +61,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+
 	return S_OK;
 }
 
@@ -313,12 +321,6 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.fAttack = m_fAttackDmg;
-	m_CallBack.pCondition = &m_iState;
-	//m_CallBack.strEffectTag = ;
-	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
-	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
 
 	// Com_Shader

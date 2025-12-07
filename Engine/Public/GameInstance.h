@@ -161,6 +161,7 @@ public:
 	HRESULT						Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT						Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
 	HRESULT						Bind_LightDatas(class CShader* pShader);
+	HRESULT						Update_LightDesc(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	const vector<LIGHT_DATA>*	Get_LightDatas();
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
