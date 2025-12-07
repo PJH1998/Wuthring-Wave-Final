@@ -29,7 +29,7 @@ HRESULT CTestVA::Initialize_Clone(void* pArg)
 
 	m_isActivate = false;
 
-	m_iAnimationDuration = static_cast<_uint>(m_pVAMesh->Get_MaxFrame(0));
+	m_fAnimationDuration = m_pVAMesh->Get_MaxFrame(0);
 
 	return S_OK;
 }
@@ -40,10 +40,10 @@ void CTestVA::Priority_Update(_float fTimeDelta)
 
 void CTestVA::Update(_float fTimeDelta)
 {
-	if (m_iTrackPosition > m_iAnimationDuration)
+	if (m_fTrackPosition > m_fAnimationDuration)
 		m_isActivate = false;
 
-	m_iTrackPosition += 1;
+	m_fTrackPosition += (fTimeDelta * 10.f);
 }
 
 void CTestVA::Late_Update(_float fTimeDelta)
@@ -66,7 +66,7 @@ void CTestVA::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	m_isActivate = true;
 
-	m_iTrackPosition = 0;
+	m_fTrackPosition = 0.f;
 }
 
 void CTestVA::Bind_Resource()
@@ -82,10 +82,13 @@ void CTestVA::Bind_Resource()
 
 	if(FAILED(m_pVAMesh->Bind_VAT(m_pShaderCom, "g_VatTexture", 0)))
 		CRASH("Failed to Bind VatTexture");
-
-	_float fTrackPosition = (static_cast<_float>(m_iTrackPosition) / m_pVAMesh->Get_MaxFrame(0));
-	if (FAILED(m_pShaderCom->Bind_Value("g_fTrackPosition", &fTrackPosition, sizeof(_float))))
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_fTrackPosition", &m_fTrackPosition, sizeof(_float))))
 		CRASH("Failed to Bind TrackPosition");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fAnimationDuration", &m_fAnimationDuration, sizeof(_float))))
+		CRASH("Failed to Bind AnimationDuration");
+
 
 }
 

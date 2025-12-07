@@ -5,6 +5,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 Texture2D g_VatTexture;
 
 float g_fTrackPosition;
+float g_fAnimationDuration;
 
 struct VS_IN
 {
@@ -30,12 +31,39 @@ VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
     
-    float fVatCoordY = In.vVATcoord.y + (g_fTrackPosition);
-    float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
-   
-    float4 vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
+    float fTexelSize = 1.f / g_fAnimationDuration;
+    
+    float fVatCoorX = In.vVATcoord.x;
+    float fVatCoordY = (g_fTrackPosition / g_fAnimationDuration);
+    
+    float4 vMovement = 0.f;
+  
+    float2 vVatCoord = float2(fVatCoorX, fVatCoordY);
+//    float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
 
-    vMovement /= 1000.f;
+    vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
+
+    //int iCurentTexelCount = (int) (fVatCoordY / fTexelSize);
+    //if ((iCurentTexelCount + 1) >= (int) g_fAnimationDuration)
+    //{
+    //    float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
+        
+    //    vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
+    //}
+    //else
+    //{
+    //    int iNextTexelCount = iCurentTexelCount + 1;
+    //    float fStartY = fTexelSize * iCurentTexelCount;
+    //    float fEndY = fTexelSize * iNextTexelCount;
+        
+    //    float4 vStartMovement = g_VatTexture.SampleLevel(DefaultSampler, float2(In.vVATcoord.x, fStartY), 0);
+    //    float4 vNextMovement = g_VatTexture.SampleLevel(DefaultSampler, float2(In.vVATcoord.x, fEndY), 0);
+        
+    //    float fRatio = 1.f - ((fEndY - fVatCoordY) / fTexelSize);
+    //    vMovement = lerp(vStartMovement, vNextMovement, fRatio);
+    //}
+    
+    vMovement *= 0.1f;
     
     float3 vPosition = In.vPosition /*+ vMovement.xyz*/;
     
@@ -78,7 +106,7 @@ PS_OUT PS_VA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    Out.vDiffuse = float4(0.7f, 0.3f, 0.1f, 1.f);
+    Out.vDiffuse = In.vTexcoord.y; //1.f; //float4(0.7f, 0.3f, 0.1f, 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
