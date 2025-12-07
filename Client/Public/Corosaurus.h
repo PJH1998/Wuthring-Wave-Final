@@ -61,6 +61,7 @@ private:
 	_float4					m_vBaseColor{};
 
 	const _float4x4*		m_pGrabSocket = { nullptr };
+	const _float4x4*		m_pForeHeadSocket = { nullptr };
 	_float4x4				m_GrabCombinedMat = {};
 
 #pragma region CONDITION_VARIABLE
@@ -103,6 +104,7 @@ private:
 #pragma region UI_BIND
 	_bool					m_isParalysis{};
 	_float					m_fParalysisRatio{}; //0.f ~ 1.f
+	_float3					m_vUIPosition{};
 #pragma endregion
 
 private:

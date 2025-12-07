@@ -78,14 +78,14 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_Player();
     Ready_Layer_SequnecePlayer();
-	Ready_Dummy();
+	//Ready_Dummy();
 	//Ready_MonsterTest();
+	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	//Ready_CoroSaurus();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	Ready_Leviatan();
+	//Ready_Leviatan();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -467,7 +467,7 @@ void CLevel_Test::Ready_CoroSaurus()
 	CoroDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CoroDesc.fSpeedPerSec = 10.f;
 	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
-	CoroDesc.pAnimationTag = "Idle1";
+	CoroDesc.pAnimationTag = "burst01_5";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Monster/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
 	CoroDesc.fAttackDmg = pInfo->fAttack;
@@ -985,15 +985,15 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
-	{
-		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
-			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
-
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
-	}
-#pragma endregion
+//#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
+//	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
+//	{
+//		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
+//			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
+//
+//		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
+//	}
+//#pragma endregion
 
 
 #pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR

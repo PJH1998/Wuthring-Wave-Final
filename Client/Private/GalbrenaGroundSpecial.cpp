@@ -61,6 +61,8 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		m_pGalbrena->Set_Gravity(false);
 		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), true);
+
+		m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 		break;
 	case EGalbrenaSpecialType::ATTACK08:
 		break;
@@ -112,6 +114,8 @@ void CGalbrenaGroundSpecial::OnExit()
 
 	// 공격 콜라이더 비활성화
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
+
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }

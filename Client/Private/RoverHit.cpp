@@ -32,8 +32,10 @@ void CRoverHit::OnEnter(void* pArg)
 	// 4. 상태 리셋.
     State_Reset();
 
+	m_strPrevInfo = context.m_strPrevInfo;
+
 	// 5. Hit Description을 이용하여 시작 초기 작업을 정의합니다.
-	if (m_strPrevInfo.empty())
+	if (context.m_strPrevInfo.empty())
 		Enter_Hit();
 	
 	// 6. 중력 적용

@@ -125,7 +125,7 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 void CAugustaGroundLand::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_HEAVY), "Land_Heavy", 1.f, 22.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
 }
 
