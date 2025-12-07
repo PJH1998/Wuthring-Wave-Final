@@ -104,6 +104,15 @@ void CGalbrenaGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
+		const CCharacter::HIT_DESC* pDesc = m_pGalbrena->GetPendingHitDesc();
+		if (nullptr == pDesc)
+			return;
+
+		if (pDesc->IsBack)
+			m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
+		else
+			m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_B;
+
 		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
 		return;

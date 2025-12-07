@@ -40,10 +40,10 @@ public:
 
 
 private:
-	CShader*						m_pShaderCom = { nullptr };
+	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
 	CTexture*					m_pColorTextureCom = { nullptr };
-
+	CVAMesh*					m_pVAMesh = { nullptr };
 	VA_DESC						m_tDesc = {};
 
 	//_float							m_fTimeAcc = {};					// Anim 진행 시간 누적
@@ -57,7 +57,7 @@ private:
 public:
 	static		CEffect_VA*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc);
 	virtual		CGameObject*		Clone(void* pArg) override;
-	virtual		void					Free() override;
+	virtual		void				Free() override;
 };
 
 NS_END

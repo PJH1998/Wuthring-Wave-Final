@@ -47,6 +47,7 @@ namespace Client
 		DISSOLVE = 1 << 14,
 		LANDSLIDE_READY = 1 << 15, // Player에서 LandSlide 이벤트.
 		LANDSLIDE = 1 << 16, // Player에서 LandSlide 이벤트.
+		FPS = 1 << 17, // 1인칭 시점 상태.
 		END
 	};
 

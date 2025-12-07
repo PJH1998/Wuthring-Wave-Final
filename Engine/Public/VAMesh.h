@@ -11,6 +11,9 @@ private:
 	virtual ~CVAMesh() = default;
 
 public:
+	_float							Get_MaxFrame(_uint iTextureIndex);
+
+public:
 	virtual		HRESULT				Initialize_Prototype(const _tchar* pFilePath, _fmatrix PreTransformMatrix, _uint iNumAnimation);
 	virtual		HRESULT				Initialize_Clone(void* pArg) override;
 

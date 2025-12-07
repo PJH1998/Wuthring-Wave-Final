@@ -48,6 +48,7 @@ public:
 public:
 	_bool Is_AnimationEnd() { return m_IsAnimationEnd; }
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false); 
+	
 	void Set_SocketMatrix(const _float4x4* pSocketMatrix) { m_pSocketMatrix = pSocketMatrix; }
 	void Change_ShaderPath(_uint iShaderPath) { m_iShaderPath = iShaderPath; }
 	void Clear_Animation(const _string& strAnimName);

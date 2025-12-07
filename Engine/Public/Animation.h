@@ -16,6 +16,8 @@ public:
 	//void				Set_CurrentTrackPosition(_float fTrackPos) { m_fCurrentTrackPosition = fTrackPos; m_iNotifyIndex = 0; }
 	void				Set_CurrentTrackPosition(_float fTrackPos);
 	_float				Get_Duration() { return m_fDuration; }
+
+	void				Release_Channels();
 	
 #ifdef _DEBUG
 	_float*				Get_TrackPositionPtr() { return &m_fCurrentTrackPosition; }
@@ -62,7 +64,7 @@ private:
 	_uint							m_iNotifyIndex = {};
 	
 	// Notify 
-	vector<class CAnimNotify*> m_AnimNotifies;
+	vector<class CAnimNotify*>		m_AnimNotifies;
 
 #pragma region MORPH TARGET
 	// Morph Target Data

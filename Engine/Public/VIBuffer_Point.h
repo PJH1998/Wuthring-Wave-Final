@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "VIBuffer.h"
 NS_BEGIN(Engine)
 class ENGINE_DLL CVIBuffer_Point final: public CVIBuffer

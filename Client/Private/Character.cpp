@@ -284,6 +284,12 @@ void CCharacter::Set_Position(_fvector vPos)
 	m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
+void CCharacter::ColliderActive(_bool IsActive)
+{
+	ASSERT_CRASH(m_pColliderCom);
+	m_pColliderCom->IsActivate(IsActive);
+}
+
 #pragma endregion
 
 #ifdef _DEBUG
@@ -392,6 +398,18 @@ void CCharacter::ResetPose()
 void CCharacter::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
 {
 	m_pGameInstance->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
+}
+
+// Duration
+void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+{
+	m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, fDuration);
+}
+
+// TimeStop
+void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
+{
+	m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
 }
 
 void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
@@ -586,6 +604,14 @@ void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iCondition
 		return;
 
 	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
+}
+
+_vector CCharacter::Get_Position()
+{
+	if (nullptr == m_pTransformCom)
+		return XMVectorZero();
+
+	return m_pTransformCom->Get_State(STATE::POSITION);
 }
 
 _vector CCharacter::Get_LookVector()
@@ -946,18 +972,38 @@ void CCharacter::Rotate_Direction(_fvector vDir)
 
 void CCharacter::Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
-    _vector vDirFlat = XMVectorSetY(vDir, 0.f);
+	_vector vDirFlat = XMVectorSetW(vDir, 0.f);
+    vDirFlat = XMVectorSetY(vDirFlat, 0.f);
     vDirFlat = XMVector3Normalize(vDirFlat);
 
     if (XMVector3Equal(vDirFlat, XMVectorZero()))
         return;
 
-    m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
+	_vector vCurrentLook = m_pTransformCom->Get_State(STATE::LOOK);
+	vCurrentLook = XMVectorSetW(vCurrentLook, 0.f);
+	vCurrentLook = XMVector3Normalize(vCurrentLook);
+
+	_vector vNewLook = XMVectorLerp(vCurrentLook, vDirFlat, fTimeDelta * fSpeed);
+	vNewLook = XMVectorSetW(vNewLook, 0.f); 
+	vNewLook = XMVector3Normalize(vNewLook);
+
+	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	_vector vRight = XMVector3Cross(vWorldUp, vNewLook);
+	vRight = XMVectorSetW(vRight, 0.f);
+	vRight = XMVector3Normalize(vRight);
+
+	_vector vUp = XMVector3Cross(vNewLook, vRight);
+	vUp = XMVectorSetW(vUp, 0.f);
+	vUp = XMVector3Normalize(vUp);
+
+	// 5. Transform에 값 강제 주입
+	m_pTransformCom->Set_State(STATE::RIGHT, vRight);
+	m_pTransformCom->Set_State(STATE::UP, vUp);
+	m_pTransformCom->Set_State(STATE::LOOK, vNewLook);
 }
 
 void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
-
 	_vector vDirFlat = XMVector3Normalize(vDir);
 	if (XMVector3Equal(vDirFlat, XMVectorZero()))
 		return;
@@ -1204,6 +1250,7 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	Safe_Release(m_pFpsStateMachineCom);
 	Safe_Release(m_pQTEColliderCom);
 	Safe_Release(m_pFlyComputeShaderCom);
 	Safe_Release(m_pFacialComputeShaderCom);

@@ -6,6 +6,7 @@ class CGalbrenaFactory final : public CBase
 {
 public:
 	static void Register_States(class CStateMachine* pStateMachineCom, class CGalbrena* pCharacter);
+	static void Register_FPSStates(class CStateMachine* pFpsStateMachineCom, class CGalbrena* pCharacter);
 };
 NS_END
 

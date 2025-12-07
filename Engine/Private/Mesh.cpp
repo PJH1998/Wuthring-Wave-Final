@@ -689,6 +689,11 @@ HRESULT CMesh::Ready_InstanceBuffers_ForMorph()
 	BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	BufferDesc.StructureByteStride = sizeof(BASE_VERTEX_INFO);
 
+#ifdef _DEBUG
+	cout << "Mesh BASE_VERTEX_INFO Buffer : " << BufferDesc.ByteWidth << endl;
+#endif // _DEBUG
+
+
 	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_Buffers[BUF_MORPH_OUTPUT])))
 		return E_FAIL;
 

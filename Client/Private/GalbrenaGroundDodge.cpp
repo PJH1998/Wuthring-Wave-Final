@@ -168,8 +168,8 @@ void CGalbrenaGroundDodge::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundDodge::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.3f, 52.f, 2.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.3f, 52.f, 2.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 30.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 30.f, 2.f);
 }
 
 void CGalbrenaGroundDodge::State_Reset()

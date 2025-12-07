@@ -38,25 +38,18 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	m_fHP = pDesc->fHP;
-	//m_fHP = 200.f;
+	//m_fHP = pDesc->fHP;
+	m_fHP = 200.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
 
 #pragma region ATTACK_STATE
-	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK3] = 25.f;
-	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK5] = 25.f;
-	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK12] = 40.f;
-	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK13] = 40.f;
-	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::BURST] = 90.f;
-	//m_fAttackCoolTime[PHASE::ONE][ATK_PATTERN::ATTACK18] = 40.f;
-
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
-	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 120.f;
+	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 10.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
@@ -67,8 +60,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_Volumes(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	_float temp{};
-	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
-	m_iPhase = PHASE::TWO;
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+	//m_iPhase = PHASE::TWO;
 	
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -280,8 +273,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
-	m_fHP = Info.fMaxHp;
-	//m_fHP = 200.f;
+	//m_fHP = Info.fMaxHp;
+	m_fHP = 200.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -843,8 +836,15 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 					m_iPhase = PHASE::TWO;
 					Reset(XMMatrixIdentity(), nullptr);
 				}
+				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
+				{
+					m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+					return;
+				}
 				m_iActionIndex++;
 				m_iAnimCheck = 0;
+				m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+				m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 			}
 		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -933,17 +933,19 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		if (m_isAggro)
 			return;
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
-		m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
-		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		//m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		//m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 		//조우 연출 시작
-		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Born");
+		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
+		m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
+		m_isAnimationFinished = false;
 		m_isAggro = true;
 	}
 }
 
 void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+	if (m_iState & (ENUM_CLASS(TEST_STATE::DEAD) | ENUM_CLASS(TEST_STATE::SPLINT)))
 		return;
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
@@ -960,6 +962,12 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+#pragma endregion
+#pragma region UI_UNBIND
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #pragma endregion
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
@@ -1107,8 +1115,8 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex != ATK_PATTERN::ATTACK22)
-	//	return false;
+	if (iIndex != ATK_PATTERN::BURST)
+		return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{

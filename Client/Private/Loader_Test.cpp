@@ -99,6 +99,8 @@
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
 
+#include "UI_CurveTrace.h"
+
 #include "UI_Ovfl_Palette.h"
 #pragma endregion
 
@@ -127,14 +129,14 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
-	
+
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 
-	// Sequence Player
+	//// Sequence Player
 	m_pGameInstance->Add_Work([this]() {Load_Yuno(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_SequenceAugusta(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_SequenceLupa(); Complete_Load(); });
-    m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_SequencePlayer(); Complete_Load(); });
 	
 	
 	
@@ -476,13 +478,13 @@ HRESULT CLoader_Test::Load_Leviatan()
 		CRASH("Prototype Create Failed");
 
 	// Prototype_Component_Model_Leviatan_Projectile
-	PreWeaponMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(90.f));
+	PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationX(XMConvertToRadians(90.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_Projectile"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/Projectile/SwordProjectile.dat"))))
 		CRASH("Prototype Create Failed");
 
 	// Prototype_Component_Model_Leviatan_SwordAura
-	PreWeaponMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	PreWeaponMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Leviatan_SwordAura"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreWeaponMatrix, "../../Client/Bin/Resource/Model/Monster/Levi_Prop/SwordAura/SwordAura.dat"))))
 		CRASH("Prototype Create Failed");
@@ -592,6 +594,10 @@ HRESULT CLoader_Test::Load_Augusta()
     //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
     //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
     //    CRASH("Prototype Create Failed");
+
+#ifdef _DEBUG
+	cout << "Augusta Model Prototype " << endl;
+#endif // _DEBUG
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
@@ -740,6 +746,11 @@ HRESULT CLoader_Test::Load_Rover()
   /*  if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");*/
+
+#ifdef _DEBUG
+	cout << "Rover Model Prototype " << endl;
+#endif // _DEBUG
+
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::CHARACTER, PreTransformMatrix, strFilePath.c_str()))))
 		CRASH("Prototype Create Failed");
@@ -831,6 +842,10 @@ HRESULT CLoader_Test::Load_Galbrena()
 	// Editor에서 isCharacter AnimationActor 생성과 동일하게.
 	_float fSize = 0.01f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+#ifdef _DEBUG
+	cout << "Galbrena Model Prototype " << endl;
+#endif // _DEBUG
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -1170,6 +1185,13 @@ HRESULT CLoader_Test::Load_UI()
 		CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
 		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
+	// VIBuffer_CurveTrace
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_CurveTrace"),
+		CVIBuffer_CurveTrace::Create(m_pDevice, m_pContext, 64))))
+		OutputDebugString(L"[Loader_Test::Load_Model] VIBuffer_CurveTrace Load Failed. The VIBuffer_CurveTrace  may have already been loaded.\n");
+
+	//
+
 
 	// ==============================
 	cout << "[Loader_Test] Shader" << endl;
@@ -1189,6 +1211,16 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_Text_Instance"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_TextInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
 		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_TextInstance Load Failed. The Shader_TextInstance may have already been loaded.\n");
+	
+	// Shader_CurveTrace
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxCurveTrace.hlsl"), VTXUICURVE::Elements, VTXUICURVE::iNumElements))))
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_CurveTrace Load Failed. The Shader_CurveTrace may have already been loaded.\n");
+
+	// Shader_CurveTrace_Sphere
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxCurveTrace_Sphere"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxCurveTrace_Sphere.hlsl"), VTXUICURVE::Elements, VTXUICURVE::iNumElements))))
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_CurveTrace_Sphere Load Failed. The Shader_CurveTrace_Sphere may have already been loaded.\n");
 
 
 	// ==============================
@@ -1244,10 +1276,14 @@ HRESULT CLoader_Test::Load_UI()
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
 
 	// Custom UI (MiniGames)
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_CurveTrace",
+		CUI_CurveTrace::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_CurveTrace Load Failed. The UI_CurveTrace may have already been loaded.\n");
+
+	// Custom...
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Ovfl_Palette",
 		CUI_Ovfl_Palette::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Ovfl_Palette Load Failed. The UI_Ovfl_Palette may have already been loaded.\n");
-
 
 
 

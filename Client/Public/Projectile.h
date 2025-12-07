@@ -21,6 +21,7 @@ public:
 		_float				fRadius;
 		_float				fAttackDamage;
 		_float				fLifeTime{ 10.f };
+		_float				fMaxDelay{ 1.f };
 		_bool				isCollisionDestroy;
 		TEXT_COLOR_TYPE		eType;
 	}PROJECTILEDESC;
@@ -55,6 +56,7 @@ private:
 	_float				m_fLifeTime{};
 	_float				m_fMaxLifeTime{};
 	_float				m_fDelay{};
+	_float				m_fMaxDelay{};
 	// Effect?
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};

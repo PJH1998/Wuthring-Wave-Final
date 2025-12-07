@@ -4,8 +4,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 Texture2D g_VatTexture;
 
-float g_fTexelSize;
-float g_fFrameCount;
+float g_fTrackPosition;
 
 struct VS_IN
 {
@@ -31,10 +30,12 @@ VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
     
-    float fVatCoordY = In.vVATcoord.y + (g_fTexelSize * g_fFrameCount);
+    float fVatCoordY = In.vVATcoord.y + (g_fTrackPosition);
     float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
    
     float4 vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
+
+    vMovement /= 1000.f;
     
     float3 vPosition = In.vPosition + vMovement.xyz;
     
@@ -65,14 +66,22 @@ struct PS_IN
 struct PS_OUT
 {
     float4 vDiffuse : SV_TARGET0;
-    float4 vEmissive : SV_TARGET1;
+    float4 vNormal : SV_TARGET1;
+    float4 vDepth : SV_TARGET2;
+    float4 vEmissive : SV_TARGET3;
+    float4 vDistortion : SV_TARGET4;
+    float4 vPBR : SV_TARGET5;
+    float4 vSSS : SV_TARGET6;
 };
 
 PS_OUT PS_VA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    Out.vDiffuse = 1.f;
+    Out.vDiffuse = float4(0.7f, 0.3f, 0.1f, 1.f);
+    Out.vNormal = In.vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
     
     return Out;
 }

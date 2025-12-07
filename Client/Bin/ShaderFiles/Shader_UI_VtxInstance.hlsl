@@ -833,6 +833,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // [STARTRATIO(DEG)] [ISUSENOISE] [ELAPSEDTIME] [UVSCROLLSPEED]
             // >> MASK : [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
             // ==============================
+            // (MASK) : Extra0
+            // ==============================
             float fCooldown = In.mExtra0.x; // 0 ~ 1.
             float fColorMul1 = In.mExtra0.y;
             float fColorMul2 = In.mExtra0.z;
@@ -938,11 +940,21 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * matrix info [size : 2] (hp_background, hp_normal)
             // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
             // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
-            // [HPRATE] -
+            // [HPRATE] [ISUSENOISE] [ELAPSEDTIME] [UVSCROLLSPEED]
+            // >> MASK : [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // ==============================
+            // (MASK) : Extra0
             // ==============================
             vector vColor1 = In.mExtra0.xyzw;
             vector vColor2 = In.mExtra1.xyzw;
             float fHPRatio = saturate(In.mExtra2.x);
+            
+            bool isUseNoise = _BOOL(In.mExtra2.y);
+            float fElapsedTime = In.mExtra2.z;
+            float fUVScrollSpeed = In.mExtra2.w;
+            float4 vMaskColor = In.mExtra3;
+            
+            
             
             // 9sector.. 
             float2 vSize = {
@@ -969,6 +981,24 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             //Out.vColor.rgb = vColor.rgb;
             Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
             Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength);
+            
+            
+            // 최종에 노이즈 반영. 다만 픽셀 위치를 반영해야.
+            if (isUseNoise)
+            {
+                float2 originUV = In.vTexcoord;
+                float2 offset = fElapsedTime * fUVScrollSpeed;
+                
+                float maskWeight = g_TextureExtra0.Sample(DefaultSampler, frac(originUV + offset)).x;
+                
+                Out.vColor.rgb = (1.f - maskWeight) * Out.vColor.rgb + (maskWeight) * vMaskColor.rgb;
+                Out.vColor.a = (1.f - maskWeight) * Out.vColor.a + (maskWeight) * vMaskColor.a * Out.vColor.a;
+            }
+            
+            
+            
+            
+            
             
             return Out;
         } break;
@@ -1139,6 +1169,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // 텍스쳐를 하나 더 받아와서
             // 현재 winsize 및 inst transform (pos, sca) 기준으로 uv를 적절히 슬라이싱하여 적용하고
             // 색상을 흑백화 및 컬러링해서 out. 하면 될 것 같기도? 아닌가
+            // ==============================
+            // (MASK) : Extra0
             // ==============================
             
             float4  vCurrColor          = In.mExtra0.xyzw;
@@ -1329,6 +1361,9 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
             // [ISDISTORT] [TIMEELAPSED] [DISTORTSTRENGTH] [ROTATESPEED(DRG)]
             // [DISABLENORMALIZE] [fAlphaMultiplier]
+            // ==============================
+            // (NOISE) : Extra0
+            // (MASK) : Extra1
             // ==============================
             float4 fCurColor        = In.mExtra0.rgba;
             bool isDistort          = _BOOL(In.mExtra1.x);
