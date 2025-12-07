@@ -615,7 +615,7 @@ void CAugusta::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
@@ -933,7 +933,7 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 				//m_IsHit = true;
 				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-				//m_pAbillityCom->Add_Hp(-10.f);
+				m_pAbillityCom->Add_Hp(-10.f); // 최소감소?
 				break;
 			}
 			case DELAYED_ACTION::TYPE::GRAB:

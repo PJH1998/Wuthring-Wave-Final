@@ -88,11 +88,13 @@ void CGalbrenaGroundSpecialDash::Update_SprintAnimation(_float fTimeDelta)
     m_eDir = m_pGalbrena->Calculate_Direction();
 
     // 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
-    if (m_pGalbrena->Is_LockOn())
-    {
-        _vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
-        m_pGalbrena->Rotate_Direction(vMoveDir);
-    }
+    //if (m_pGalbrena->Is_LockOn())
+    //{
+    //    _vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
+    //    m_pGalbrena->Rotate_Direction(vMoveDir);
+    //}
+	_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
+	m_pGalbrena->Rotate_Direction(vMoveDir);
 
     CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta);
 }
@@ -157,7 +159,7 @@ void CGalbrenaGroundSpecialDash::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundSpecialDash::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialDashType::ATTACK_CHARGE), "Attack_charge", 1.5f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialDashType::ATTACK_CHARGE), "Attack_charge", 1.5f, 20.f);
 }
 
 void CGalbrenaGroundSpecialDash::State_Reset()

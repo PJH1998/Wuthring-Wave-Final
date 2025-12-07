@@ -75,7 +75,6 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-	m_fMaxDissolveTime = 0.35f;
 	// 0. Delayed Action 수행.
 	Process_DelayedActions(fTimeDelta);
 
@@ -829,6 +828,7 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 			//m_IsHit = true;
 			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+			m_pAbillityCom->Add_Hp(-10.f);
 			break;
 		}
 		case DELAYED_ACTION::TYPE::GRAB:
