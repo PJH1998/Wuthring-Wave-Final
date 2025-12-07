@@ -56,6 +56,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
+	m_pSpineMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2");
 
 	m_fHP = pDesc->fHP;
 	m_fAttackDmg = pDesc->fAttackDmg;
@@ -91,6 +92,11 @@ void CMonsterTest::Update(_float fTimeDelta)
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
+
+	if (false == m_isActivate)
+	{
+		//소멸 트리거
+	}
 
 	After_Condition(fTimeDelta);
 
@@ -360,6 +366,7 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		CProjectile::PROJECTILERESET ProiDesc{};
 		ProiDesc.vTargetPos = m_vTargetPosition;
 		//ProiDesc.vTargetPos.y += 0.5f; // 대상 높이 offset
+		ProiDesc.pOwnerTransform = m_pTransformCom;
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_ShinWang"), WorldMatrix, &ProiDesc);
 	}
 	else if (wstrTypeTag == TEXT("Type"))
@@ -379,6 +386,10 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 			for (auto& pATKVolume : m_pAtkVolumes)
 				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_SKILL);
 		}
+	}
+	else if (wstrTypeTag == TEXT("Parry"))
+	{
+		m_pGameSystem->Attach_Parry(&m_vUIPosition);
 	}
 	else if (wstrTypeTag == TEXT("Look"))
 	{
@@ -641,6 +652,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 #pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+	_matrix WorldSpine = XMLoadFloat4x4(m_pSpineMatrix) * m_pTransformCom->Get_WorldMatrix();
+	XMStoreFloat3(&m_vUIPosition, WorldSpine.r[3]);
 #pragma endregion
 
 	if(m_isParalysis)
@@ -849,6 +862,11 @@ void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold&
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+
+#pragma region PARRY_UI
+	m_pGameSystem->Enable_Parried();
+#pragma endregion
+
 #ifdef _DEBUG
 	cout << "Parry! Shim Wang)" << endl;
 #endif // _DEBUG

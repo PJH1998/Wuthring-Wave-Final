@@ -64,6 +64,7 @@ void CProjectile::Late_Update(_float fTimeDelta)
 		if(m_isCollisionDestroy || m_fLifeTime >= m_fMaxLifeTime)
 		{
 			m_isActivate = false;
+			m_CallBack.pTransform = nullptr;
 			m_pRigidBodyCom->IsActivate(false);
 			return;
 		}
@@ -110,10 +111,14 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->LookAt(XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
 	m_isCollision = false;
-	m_pRigidBodyCom->IsActivate(true);
+	
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
 	m_fDelay = 0.f;
+
+	m_CallBack.pTransform = pDesc->pOwnerTransform;
+	m_pRigidBodyCom->Set_Desc(&m_CallBack);
+	m_pRigidBodyCom->IsActivate(true);
 }
 
 HRESULT CProjectile::Bind_Resources()
@@ -143,7 +148,7 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
 
-	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.pTransform = nullptr;
 	m_CallBack.fAttack = pDesc->fAttackDamage;
 	//m_CallBack.pCondition = &m_iState;
 	//m_tCallDesc.strEffectTag = ;

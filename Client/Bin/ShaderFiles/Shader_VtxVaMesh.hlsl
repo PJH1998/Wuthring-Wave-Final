@@ -37,7 +37,7 @@ VS_OUT VS_MAIN(VS_IN In)
 
     vMovement /= 1000.f;
     
-    float3 vPosition = In.vPosition + vMovement.xyz;
+    float3 vPosition = In.vPosition /*+ vMovement.xyz*/;
     
     matrix matWV, matWVP;
     
