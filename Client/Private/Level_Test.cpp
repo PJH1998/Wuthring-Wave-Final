@@ -35,7 +35,9 @@
 #include "UI_MobHPBar.h"
 #include "UI_GrafflePoint.h"
 #include "UI_QTE.h"
-#include"NPC_Griffin.h"
+#include "UI_CurveTrace.h"
+
+#include "NPC_Griffin.h"
 #include "DummyNPC.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
@@ -78,7 +80,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_SequnecePlayer();
 	Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();mm
+	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_CoroSaurus();
 	//Ready_Spawner();
@@ -701,6 +703,11 @@ void CLevel_Test::Ready_UI()
 		CRASH("Failed Ready QTE");
 
 
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_UI_CurveTrace"),
+		iDestLevel, TEXT("Layer_Custom_UI_CurveTrace"), TEXT("Pool_Custom_CurveTrace"), 1)))
+		CRASH("Failed Ready CurveTrace");
+
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Ovfl_Palette"),
 		iDestLevel, TEXT("Layer_Custom_UI_Ovfl_Palette"), TEXT("Pool_Custom_Ovfl_Palette"), 1)))
 		CRASH("Failed Ready Ovfl_Palette");
@@ -870,6 +877,43 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 
+	// Interact
+
+	//static _uint iInteractIndex = 0;
+	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
+	//
+	//
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
+	//{
+	//	switch (iInteractIndex)
+	//	{
+	//	case TEST_INTERACT0:
+	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	case TEST_INTERACT1:
+	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	}
+	//}
+	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	//{
+	//	m_pGameSystem->Hide_InteractUI(true);
+	//}
+	//
+	//
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endlㅡ
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
+	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+
 
 
 #endif // KSTA_UITEST_OLD
@@ -911,43 +955,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 	if (!isEnableUITest) return;
 
-
-
-	
-	//static _uint iInteractIndex = 0;
-	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
-	//
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
-	//{
-	//	switch (iInteractIndex)
-	//	{
-	//	case TEST_INTERACT0:
-	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	case TEST_INTERACT1:
-	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	}
-	//}
-	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
-	//{
-	//	m_pGameSystem->Hide_InteractUI(true);
-	//}
-	//
-	//
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endlㅡ
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
-	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
 	static _bool isInteractActivate = false;
 	
@@ -1136,6 +1143,69 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	}
 #pragma endregion
 
+
+#pragma region [LCTRL + NUMPAD3] KSTA_UITEST_CURVETRACE
+
+	static _bool isCurveTraceOn = false;
+
+	if (!isCurveTraceOn &&
+		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	{
+		isCurveTraceOn = true;
+		std::cout << "[Level_Test::Testing_UI] CurveTrace On" << std::endl;
+	}
+	else if (isCurveTraceOn &&
+		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	{
+		isCurveTraceOn = false;
+		std::cout << "[Level_Test::Testing_UI] CurveTrace Off" << std::endl;
+	}
+
+
+	if (isCurveTraceOn)
+	{
+//#define KSTA_UITEST_BASEDONPLAYER	// 디버그용 매크로
+
+
+#ifndef KSTA_UITEST_BASEDONPLAYER
+		// 사용 예시..
+		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
+
+		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
+		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
+
+		_float fDEBUG_Radius = 10.f;
+		_float fDEBUG_RotateX = sinf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
+		_float fDEBUG_RotateZ = cosf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
+
+		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
+		_float3 vStartVel		= _float3(fDEBUG_RotateX, fDEBUG_Radius, fDEBUG_RotateZ);
+		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
+		
+		
+		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
+#endif // !KSTA_UITEST_BASEDONPLAYER
+
+
+
+#ifdef KSTA_UITEST_BASEDONPLAYER
+		// 임시로 플레이어 정면 바라보도록
+		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
+
+		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
+		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
+
+		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
+		_float3 vStartVel		= _float3(0.f, 10.f, 10.f);
+		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
+
+		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
+#endif // KSTA_UITEST_BASEDONPLAYER
+	}
+
+#pragma endregion
 
 }
 

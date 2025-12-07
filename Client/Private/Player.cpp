@@ -297,6 +297,18 @@ _vector CPlayer::Get_Position()
 	return m_pTransformCom->Get_State(STATE::POSITION);
 }
 
+const _float4x4* CPlayer::Get_PlayerMatrixPtr()
+{
+	if (nullptr == m_pTransformCom)
+		return nullptr;
+	//{
+	//	_float4x4 identityMatrix = {}; XMStoreFloat4x4(&identityMatrix, (XMMatrixIdentity()));
+	//	return identityMatrix;
+	//}
+
+	return m_pTransformCom->Get_WorldMatrixPtr();
+}
+
 #pragma endregion
 
 void CPlayer::Player_KeyInput()
@@ -653,6 +665,8 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		HitDesc.fAttack = pClientDesc.fAttack;
 		HitDesc.iLayer = iLayer;
+		HitDesc.IsBack = IsHitBack(HitDesc.pTransform);
+
 		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&HitDesc);
 	}
 }
@@ -857,6 +871,33 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 void CPlayer::Manage_Condition()
 {
 
+}
+
+_bool CPlayer::IsHitBack(CTransform* pTransform)
+{
+	if (nullptr == pTransform)
+		return false;
+
+	_vector vPlayerPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vAttackerPos = pTransform->Get_State(STATE::POSITION);
+
+	_vector vDirToAttacker = vAttackerPos - vPlayerPos;
+	vDirToAttacker = XMVectorSetY(vDirToAttacker, 0.f); // 높이 차이로 인한 오차 제거
+
+	if (XMVectorGetX(XMVector3Length(vDirToAttacker)) < 0.001f) // 거리가 너무적다면. 그냥 false 리턴.
+		return false;
+
+	vDirToAttacker = XMVector3Normalize(vDirToAttacker);
+
+	_vector vPlayerLook = m_pTransformCom->Get_State(STATE::LOOK);
+	vPlayerLook = XMVectorSetY(vPlayerLook, 0.f);
+	vPlayerLook = XMVector3Normalize(vPlayerLook);
+
+	_float fDot = XMVectorGetX(XMVector3Dot(vPlayerLook, vDirToAttacker));
+	if (fDot < 0.f)
+		return true;
+
+	return false;
 }
 
 #ifdef _DEBUG

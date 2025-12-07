@@ -316,6 +316,29 @@ void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
 	m_pUI_ControlHelper->Detach_ObjectPos_ToMinimap(pOwner);
 }
 
+void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
+										_float3& vStartVelocity,
+										_float3& vAcceleration,
+										_float fMaxTime,
+										_uint iSegmentCount,
+										_float fRibbonWidth,
+										_bool isUseCustomColor,
+										_float4 vBaseColor,
+										_float4 vHeadColor,
+										_float4 vTailColor)
+{
+	m_pUI_ControlHelper->Req_Render_CurveTrace(	vStartPos,
+												vStartVelocity,
+												vAcceleration, 
+												fMaxTime,
+												iSegmentCount, 
+												fRibbonWidth, 
+												isUseCustomColor,
+												vBaseColor,
+												vHeadColor,
+												vTailColor);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
@@ -489,9 +512,15 @@ _vector CGameSystem::Get_PlayerLookVector()
 {
 	return m_pPlayer->Get_LookVector();
 }
+
 _vector CGameSystem::Get_PlayerPosition()
 {
 	return m_pPlayer->Get_Position();
+}
+
+const _float4x4* CGameSystem::Get_PlayerMatrixPtr()
+{
+	return m_pPlayer->Get_PlayerMatrixPtr();
 }
 
 // 보스 근처에 소환.

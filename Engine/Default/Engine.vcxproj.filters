@@ -401,6 +401,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Decal\Cube">
       <UniqueIdentifier>{aeca2a29-2bc2-452c-ba24-3ac0a2cca864}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Sphere">
+      <UniqueIdentifier>{cd2f6b4f-76fe-450c-bf95-755b087841c6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\FireFly">
       <UniqueIdentifier>{88af8b60-72fe-4c43-931f-273f2bf6f234}</UniqueIdentifier>
     </Filter>
@@ -821,6 +824,9 @@
     <ClInclude Include="..\public\VIBuffer_Decal_Cube.h">
       <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\VIBuffer_Sphere.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Sphere</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance_FireFly.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\FireFly</Filter>
     </ClInclude>
@@ -1231,6 +1237,9 @@
     </ClCompile>
     <ClCompile Include="..\private\VIBuffer_Decal_Cube.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Decal\Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Sphere.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Sphere</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Mesh_Instance_FireFly.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\FireFly</Filter>
