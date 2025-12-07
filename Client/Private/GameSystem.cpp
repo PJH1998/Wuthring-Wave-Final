@@ -469,30 +469,6 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition)
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
 	}
 }
-void CGameSystem::Call_Animation() // => 땅에 부딪혔을 때 => 탈출 가능한 지점.
-{
-	if (nullptr == m_pPlayer)
-		return;
-
-	// 탈출 가능하다고 알림.
-	m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
-	//m_pPlayer->Notify_GrabVisible(true); // 다시 보이게
-}
-void CGameSystem::Call_PlayerVisible()
-{
-	if (nullptr == m_pPlayer)
-		return;
-
-	//m_pPlayer->Notify_GrabVisible(false);
-}
-void CGameSystem::Unbind_Grab() // => 몬스터 잡기애니메이션이 거의 끝났을 때?
-{
-	if (nullptr == m_pPlayer)
-		return;
-
-	// 탈출 가능하다고 알림.
-	m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
-}
 
 #pragma endregion
 
