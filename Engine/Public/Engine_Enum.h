@@ -10,6 +10,9 @@ namespace Engine
 	enum class POINTS { A, B, C, END};
 	enum class LINE { AB, BC, CA, END };
 
+	// Fade
+	enum class FADE { FADE_OUT, FADE_IN };
+
 	// Morph Target
 	enum class KEY_INPTEROLATION : unsigned int { LINEAR = 0, CONSTANT, CUBIC, END };
 	enum class KEY_TARGENT_MODE : unsigned int { AUTO = 0, USER, BREAK, END };
