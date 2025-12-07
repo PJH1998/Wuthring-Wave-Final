@@ -23,6 +23,7 @@ private:
 
 private:
 	CShader_Interface*		m_pShader_Interface = { nullptr };
+	LIGHT_DESC				m_TestLight = {};
 
 public:
 	static		CLevel_Shader*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

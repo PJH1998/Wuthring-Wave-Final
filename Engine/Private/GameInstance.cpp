@@ -599,6 +599,10 @@ HRESULT CGameInstance::Bind_LightDatas(CShader* pShader)
 {
 	return m_pLight_Manager->Bind_LightDatas(pShader);
 }
+HRESULT CGameInstance::Update_LightDesc(const _wstring& strLightTag, const LIGHT_DESC& LightDesc)
+{
+	return m_pLight_Manager->Update_LightDesc(strLightTag, LightDesc);
+}
 const vector<LIGHT_DATA>* CGameInstance::Get_LightDatas()
 {
 	return m_pLight_Manager->Get_LightDatas();

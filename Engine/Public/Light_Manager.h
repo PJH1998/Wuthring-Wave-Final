@@ -15,6 +15,7 @@ public:
 	HRESULT				Initialize();
 
 	const LIGHT_DESC*	Get_LightDesc(const _wstring& strLightTag);
+	HRESULT				Update_LightDesc(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	void				Set_Active(const _wstring& strLightTag, _bool isActive);
 #ifdef _DEBUG
 	LIGHT_DESC*			Get_LightDesc_For_Map(const _wstring& strLightTag);
