@@ -64,8 +64,9 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 			m_pGalbrena->Rotate_Target(); // 한번 회전.
 
 			// CutScene 실행?
+			m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.1f, 5.f);
 			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"));
-			m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
+			//m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			m_pGalbrena->Set_OutLineVisible(false);
 			break;
 		}

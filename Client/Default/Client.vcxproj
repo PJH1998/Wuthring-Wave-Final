@@ -389,7 +389,7 @@
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_CurveTrace.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
-    <ClInclude Include="..\public\UI_GrafflePoint.h" />
+    <ClInclude Include="..\public\UI_GrapplePoint.h" />
     <ClInclude Include="..\public\UI_HUD.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -657,7 +657,7 @@
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_CurveTrace.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
-    <ClCompile Include="..\private\UI_GrafflePoint.cpp" />
+    <ClCompile Include="..\private\UI_GrapplePoint.cpp" />
     <ClCompile Include="..\private\UI_HUD.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

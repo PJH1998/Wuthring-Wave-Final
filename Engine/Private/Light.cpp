@@ -34,6 +34,13 @@ _bool CLight::IsInFrustrum()
 	return false;
 }
 
+HRESULT CLight::Update_LightDesc(const LIGHT_DESC& LightDesc)
+{
+	memcpy(&m_LightDesc, &LightDesc, sizeof(LIGHT_DESC));
+
+	return S_OK;
+}
+
 HRESULT CLight::Initialize(const LIGHT_DESC& LightDesc)
 {
     memcpy(&m_LightDesc, &LightDesc, sizeof(LIGHT_DESC));

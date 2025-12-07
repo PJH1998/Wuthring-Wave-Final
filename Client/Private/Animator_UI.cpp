@@ -112,6 +112,7 @@ HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName, _bool isForceRestar
 		m_fElapsedTime = 0;
 		
     m_pCurAnimDesc = pDesc;
+	Update_Animation_Calculate();
 
     return S_OK;
 }
@@ -127,7 +128,8 @@ HRESULT CAnimator_UI::Change_Animation(_uint iAnimIndex, _bool isForceRestart)
 		m_fElapsedTime = 0;
 
     m_pCurAnimDesc = pDesc;
-    m_fElapsedTime = 0;
+    //m_fElapsedTime = 0;??
+	Update_Animation_Calculate();
 
     return S_OK;
 }

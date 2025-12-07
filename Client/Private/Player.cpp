@@ -147,6 +147,7 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
+	Sync_UtilityType();
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -441,6 +442,7 @@ void CPlayer::Player_KeyInput()
 	}
 
 
+	
 	
 	
 }
@@ -871,6 +873,14 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 void CPlayer::Manage_Condition()
 {
 
+}
+
+void CPlayer::Sync_UtilityType()
+{
+	if (nullptr == m_pPlayerStatus)
+		return;
+
+	m_pPlayerStatus->Bind_UtilityType(m_eUtilityType);
 }
 
 _bool CPlayer::IsHitBack(CTransform* pTransform)

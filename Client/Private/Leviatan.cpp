@@ -59,6 +59,16 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_PartObjects(pDesc);
 	Ready_Volumes(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
+
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_tCallDesc.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+	m_pColliderCom->Set_Desc(&m_CallBack);
+	m_pColliderCom->Set_Gravity(true);
+
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	//m_iPhase = PHASE::TWO;
@@ -604,14 +614,6 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.fAttack = m_fAttackDmg;
-	m_CallBack.pCondition = &m_iState;
-	//m_tCallDesc.strEffectTag = ;
-	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
-	m_pColliderCom->Set_Desc(&m_CallBack);
-	m_pColliderCom->Set_Gravity(true);
-
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -707,7 +709,7 @@ void CLeviatan::Ready_PartObjects(LEVIATAN_DESC* pDesc)
 {
 	m_pBowSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	m_pSwordSocket = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
-	m_pSpineMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2");
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
 
 	CLevi_Bayonet::LEVIBAYONET_DESC BayonetDesc{};
 	BayonetDesc.eType = TEXT_COLOR_TYPE::DARK;
@@ -880,8 +882,8 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 
 #pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
-	_matrix WorldSpine = XMLoadFloat4x4(m_pSpineMatrix) * m_pTransformCom->Get_WorldMatrix();
-	XMStoreFloat3(&m_vUIPosition, WorldSpine.r[3]);
+	_matrix WorldCamBind = XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix();
+	XMStoreFloat3(&m_vUIPosition, WorldCamBind.r[3]);
 #pragma endregion
 
 	if (m_isParalysis)

@@ -53,7 +53,7 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
 
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_LightDatas[iLightIndex].vDiffuse.xyz;
     
-    float vAmbient = 0.f;
+    float3 vAmbient = 0.f;
     
     float3 vLightDiffuse = 0.f;
     float3 vLightSpecular = 0.f;
@@ -86,7 +86,6 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
         
         if (false == IsSkin)      // �ݼ� �κи� PBR ó��
         {
-          
             Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
             Out.vLightSpecular = float4(vLightSpecular, 1.f);
             
@@ -96,9 +95,14 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
         {
             float3 vOrigin = vDiffuse.xyz * fShadowMap;
             
+            //Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, g_LightDatas[iLightIndex].vAmbient.xyz), 1.f);
+            //Out.vLightSpecular = float4(vLightSpecular, 1.f);
+            // 
+            //vAmbient = g_LightDatas[iLightIndex].vAmbient;
+            
             Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, 0.6f), 1.f);
             Out.vLightSpecular = float4(lerp(vRim, vLightSpecular, 0.6f), 1.f);
-            
+        
             vAmbient = g_vDynamicMtrlAmbient * 0.6f;
         }
         
@@ -198,7 +202,7 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
 
     //float4 vAmbientColor = vDiffuse * g_LightDatas[iLightIndex].vDiffuse; //Ambient ���� ������ �ӽ�
     float4 vAmbientColor = lerp(vDiffuse, g_LightDatas[iLightIndex].vDiffuse, g_LightDatas[iLightIndex].vAmbient.r);
-    float4 vAmbient = float4((vAmbientColor * g_LightDatas[iLightIndex].vAmbient.r).xyz * fAtt, 1.f);
+    float4 vAmbient = float4((vAmbientColor * g_LightDatas[iLightIndex].vAmbient).xyz * fAtt, 1.f);
     //float4 vAmbient = float4((vAmbientColor.xyz * 0.5f) * fAtt, 1.f);
     
     Out.vLightAmbient = vAmbient;
