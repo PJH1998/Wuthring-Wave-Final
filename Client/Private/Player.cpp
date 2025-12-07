@@ -147,6 +147,9 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
+
+	// 8. PlayerStatus에 Utility Type 바인딩.
+	Sync_UtilityType();
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -440,9 +443,6 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 
-
-	
-	
 	
 }
 
