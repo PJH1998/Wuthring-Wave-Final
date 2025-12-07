@@ -152,11 +152,11 @@ void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
 
 
 	// selected icon on center
-	targetDesc = m_pUI_CHSelectedIcon->Get_UIDesc();
-	targetInstDesc = targetDesc.vecInstanceDescs;
+	auto& targetIconDesc = m_pUI_CHSelectedIcon->Get_UIDesc();
+	auto& targetIconInstDesc = targetIconDesc.vecInstanceDescs;
 
-	targetInstDesc[0].vSInstCoordX = m_arrCoordPresets[m_iCharSelectedIndex][0]; // 현재 인덱스에 해당하는 coord로 변경.
-	targetInstDesc[0].vSInstCoordY = m_arrCoordPresets[m_iCharSelectedIndex][1];
+	targetIconInstDesc[0].vSInstCoordX = m_arrCoordPresets[m_iCharSelectedIndex][0]; // 현재 인덱스에 해당하는 coord로 변경.
+	targetIconInstDesc[0].vSInstCoordY = m_arrCoordPresets[m_iCharSelectedIndex][1];
 
 	//m_pUI_CHSelectedIcon->Set_UIDesc(targetDesc);
 

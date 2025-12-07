@@ -257,9 +257,19 @@ void CUI_ControlHelper::Attach_LockOnUI(_float3* pTargetPos)
 	if (!pRootUI)
 		return; 
 
-	// 풀링으로부터 꺼내기
-	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetPos };
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
+	if (pRootUI->IsActivate())
+	{
+		// 켜져있으면 현재좌표 갱신.
+		static_cast<CUI_LockOn*>(pRootUI)->Change_TargetPos(pTargetPos);
+	}
+	else
+	{
+		// 꺼져있으면 풀링으로부터 꺼내기
+		CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetPos };
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
+	}
+
+
 }
 void CUI_ControlHelper::Detach_LockOnUI()
 {

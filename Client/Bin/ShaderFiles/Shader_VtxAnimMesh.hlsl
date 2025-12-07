@@ -18,6 +18,10 @@ float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
 float4 g_vBaseColor = 1.f;
 
+uint g_iTexPaddingCount = 1;
+float g_fFaceSize = 1.f;
+uint g_iFaceIndex = 0;
+
 matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
 bool g_HasSkinMask = false;
@@ -82,6 +86,50 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = mul(vPosition, matWVP);  
+
+    return Out;
+}
+
+VS_OUT VS_FACE(VS_IN In)
+{
+    VS_OUT Out = (VS_OUT) 0;
+    
+    matrix matBone, matBW, matWV, matWVP;
+    
+    uint iX = max(In.vBlendIndex.x, g_iNumBlendWeightsToUse);
+    uint iY = max(In.vBlendIndex.y, g_iNumBlendWeightsToUse);
+    uint iZ = max(In.vBlendIndex.z, g_iNumBlendWeightsToUse);
+    uint iW = max(In.vBlendIndex.w, g_iNumBlendWeightsToUse);
+    
+    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
+    matBone =
+    g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
+    g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
+    g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
+    g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
+    
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    float4 vNormal = mul(float4(In.vNormal, 0.f), matBone);
+    float4 vTangent = mul(float4(In.vTangent, 0.f), matBone);
+    float4 vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWV, g_ProjMatrix);
+    
+    Out.vPosition = mul(vPosition, matWVP);
+    Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
+    Out.vTangent = normalize(mul(vTangent, g_WorldMatrix));
+    Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
+    
+    int iIndexX = g_iFaceIndex % g_iTexPaddingCount;
+    int iIndexY = g_iFaceIndex / g_iTexPaddingCount;
+    float2 vTexCoordRemap = In.vTexcoord * g_fFaceSize;
+    
+    vTexCoordRemap.x -= (1 - iIndexX) * g_fFaceSize;
+    vTexCoordRemap.y -= (1 - iIndexY) * g_fFaceSize;
+    
+    Out.vTexcoord = vTexCoordRemap;
+    
+    Out.vProjPos = mul(vPosition, matWVP);
 
     return Out;
 }
@@ -759,5 +807,14 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DISSOLVE_CHARACTER();
     }
 
-  
+    pass NPCFace // 10
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_FACE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN();
+    }
 }
