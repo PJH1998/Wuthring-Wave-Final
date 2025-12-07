@@ -416,6 +416,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\VAMesh">
       <UniqueIdentifier>{c5b7554b-e188-40ac-8ea3-675d46b5f23b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\95. Fade">
+      <UniqueIdentifier>{07c11269-25bc-4e69-bb07-d03ab17546ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -854,6 +857,9 @@
     <ClInclude Include="..\Public\VAMesh.h">
       <Filter>01. Utility\04. Component\VIBuffer\VAMesh</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Fade.h">
+      <Filter>01. Utility\95. Fade</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1268,6 +1274,9 @@
     <ClCompile Include="..\Private\VAMesh.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\VAMesh</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Fade.cpp">
+      <Filter>01. Utility\95. Fade</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
@@ -1339,6 +1348,9 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_EnvMapDeferred.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Fade.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

@@ -395,6 +395,10 @@ public:
 	ID3D11ShaderResourceView*	Get_Resource(const _string& strResourceTag);
 #pragma endregion
 
+#pragma region Fade
+	void						OnFade(FADE eFade, _float fDuration, function<void()> func);
+#pragma endregion
+
 
 public:
 	HRESULT					SetUp_CameraNF();
@@ -433,8 +437,9 @@ private:
 	class CVolumetricFog*		m_pVF = { nullptr };
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
 	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
-	class CEnvironmentMap*		m_pEnvMap = { nullptr };
+	class CEnvironmentMap*	m_pEnvMap = { nullptr };
 	class CResource_Manager*	m_pResource_Manager = { nullptr };
+	class CFade*					m_pFade = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

@@ -50,8 +50,8 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 
 	if (m_strPrevInfo == "ULTI")
 	{
-		//m_pRover->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
-		m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.1f, 3.f);
+		m_pRover->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
+		m_pRover->Play_Action(TEXT("Action_Rover_Burst01"));
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
