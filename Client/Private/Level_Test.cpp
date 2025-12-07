@@ -1119,7 +1119,11 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	{
 		for (_uint i = 0; i < iNumGraffleUI; i++)
 		{
-			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), nullptr);
+			
+
+			UI_GRAFFLE_TYPE eType = static_cast<UI_GRAFFLE_TYPE>(m_pGameInstance->Rand(0.f, 1.999f));
+			CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { nullptr, eType };
+			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
 		}
 
 		isInitialized_GrafflePoint = true;

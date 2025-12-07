@@ -108,7 +108,7 @@ void CUI_GrafflePoint::Update(_float fTimeDelta)
 
 
 
-
+	Update_TargetColor();
 	Update_AnimOrder(fTimeDelta);
 
 	Update_ApplyTargetPos(m_pStaticUI, *m_pTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
@@ -147,7 +147,14 @@ void CUI_GrafflePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Graffle_Initialize", true);
 
 	if (pArg != nullptr)
-		m_pTargetPos = static_cast<UI_GRAFFLEPOINT_DESC*>(pArg)->pTargetPos;
+	{
+		UI_GRAFFLEPOINT_DESC* pDesc = static_cast<UI_GRAFFLEPOINT_DESC*>(pArg);
+
+		m_pTargetPos = pDesc->pTargetPos;
+		m_eGraffleType = pDesc->eType;
+	}
+
+
 #ifndef KSTA_UITEST_GRAFFLE_TOZERO
 	else
 		MSG_BOX("GrafflePoint doesn't receive position information.");
@@ -165,12 +172,17 @@ void CUI_GrafflePoint::PreAssign_ChildUIs()
 
 	m_pSubAnimUI	= dynamic_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"));
 	m_pStaticAnimUI = dynamic_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"));
-	m_pDynamicAnimUI = dynamic_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"));
+	m_pDynamicAnimUI= dynamic_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"));
+
+	m_pUIGrafflePoint	= Find_ChildObject(L"GrafflePoint");
+	m_pUIGraffleOutline	= Find_ChildObject(L"GraffleOutline");
 }
 
 void CUI_GrafflePoint::Ready_Presets()
 {
-
+	arrTypeColors[ENUM_CLASS(UI_GRAFFLE_TYPE::MOVEABLE)]	= _float4(1.000f, 0.957f, 0.631f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAFFLE_TYPE::PULLABLE)]	= _float4(0.631f, 1.000f, 0.914f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAFFLE_TYPE::END)]			= _float4(1.000f, 0.000f, 1.000f, 1.0f);
 }
 
 void CUI_GrafflePoint::Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos)
@@ -220,6 +232,21 @@ void CUI_GrafflePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotD
 	};
 
 	pTargetTransform->Scale(vFinalScale);
+}
+
+void CUI_GrafflePoint::Update_TargetColor()
+{
+	static vector<_float4x4> vecVariantMat = { _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMat[0]) = arrTypeColors[ENUM_CLASS(m_eGraffleType)];	// Ready_Presets 에서 정의해 둔 색상으로.
+
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLE_COLORIZE),
+		true
+	};
+
+	m_pUIGrafflePoint	->Set_VariantUIDesc(tVariantDesc);
+	m_pUIGraffleOutline	->Set_VariantUIDesc(tVariantDesc);
 }
 
 void CUI_GrafflePoint::Update_AnimOrder(_float fTimeDelta)

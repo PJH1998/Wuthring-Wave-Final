@@ -358,14 +358,15 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
-void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos)
+void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos, UI_GRAFFLE_TYPE eType)
 {
+	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
 	//CCustom_UI* pRootUI = m_pRootUI_GrafflePoint;
 	//
 	//if (!pRootUI)
 	//	return;
 
-	CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { pTargetPos };
+	CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { pTargetPos, eType };
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
 }

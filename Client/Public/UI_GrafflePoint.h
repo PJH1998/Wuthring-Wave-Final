@@ -10,6 +10,7 @@ class CUI_GrafflePoint final : public CUI_Image
 public:
 	typedef struct tUILockOnDesc {
 		_float3* pTargetPos = nullptr;
+		UI_GRAFFLE_TYPE eType = UI_GRAFFLE_TYPE::END;
 	} UI_GRAFFLEPOINT_DESC;
 
 private:
@@ -38,14 +39,10 @@ private:
 	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
 
 private:
+	void			Update_TargetColor();
 	void			Update_AnimOrder(_float fTimeDelta);
 
 private:
-	const _float	m_fPivotDistance = 10.f;		// 거리에 따른 크기 조절용. 이 거리일 때 최대 크기로 보임.
-
-	const _float	m_fTriggerDistance = 50.f;		// 상호작용 가이드가 뜰 범위
-	const _float	m_fVisibleDistance = 80.f;		// 보이기 시작할 범위 (가까워질수록.. 안보임 -> 보임 -> 애니메이션도 보임 순)
-	
 	CCustom_UI*		m_pRUI_All		= nullptr;
 	CCustom_UI*		m_pStaticUI		= nullptr;
 	CCustom_UI*		m_pDynamicUI	= nullptr;
@@ -53,6 +50,18 @@ private:
 	CAnimator_UI*	m_pSubAnimUI	= nullptr;	
 	CAnimator_UI*	m_pStaticAnimUI	= nullptr;	
 	CAnimator_UI*	m_pDynamicAnimUI= nullptr;
+
+	CCustom_UI*		m_pUIGrafflePoint		= nullptr;
+	CCustom_UI*		m_pUIGraffleOutline		= nullptr;
+
+	array<_float4, ENUM_CLASS(UI_GRAFFLE_TYPE::END) + 1> arrTypeColors = {};
+
+
+private:
+	const _float	m_fPivotDistance = 10.f;		// 거리에 따른 크기 조절용. 이 거리일 때 최대 크기로 보임.
+
+	const _float	m_fTriggerDistance = 50.f;		// 상호작용 가이드가 뜰 범위
+	const _float	m_fVisibleDistance = 80.f;		// 보이기 시작할 범위 (가까워질수록.. 안보임 -> 보임 -> 애니메이션도 보임 순)
 
 	_float3*		m_pTargetPos = { nullptr };
 
@@ -64,6 +73,7 @@ private:
 #endif // KSTA_UITEST_GRAFFLE_TOZERO
 
 
+	UI_GRAFFLE_TYPE		m_eGraffleType = UI_GRAFFLE_TYPE::END;
 
 	// Animation Control
 

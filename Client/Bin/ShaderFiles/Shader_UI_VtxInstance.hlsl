@@ -1341,7 +1341,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // ==============================
             
             float4  vColor          = In.mExtra0.rgba;
-            float4  vColorTex       = smoothstep(0.f, 1.f, (g_Texture.Sample(DefaultSampler, In.vTexcoord)));
+            float4  vColorTex       = smoothstep(0.f, 1.f, (g_Texture.Sample(DefaultSampler, fixedUV /*In.vTexcoord*/)));
             
             float   fColorAverage   = (vColorTex.r + vColorTex.g + vColorTex.b) / 3.f;
             Out.vColor.rgb = vColor.rgb * fColorAverage.xxx;
