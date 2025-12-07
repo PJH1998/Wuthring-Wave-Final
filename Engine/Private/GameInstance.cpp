@@ -268,6 +268,10 @@ HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoun
 {
 	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath);
 }
+HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath)
+{
+	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath);
+}
 void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop)
 {
 	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, isStop);

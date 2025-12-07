@@ -29,11 +29,6 @@ HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSo
     return S_OK;
 }
 
-HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath)
-{
-	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath);
-}
-
 HRESULT CSound_Manager::Load_Sound_FromFolder(const _char* pFolderPath)
 {
 	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
