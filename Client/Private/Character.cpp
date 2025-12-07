@@ -46,6 +46,8 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	// 2. 그랩 용도 Matrix
 	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
 
+	
+
     return S_OK;
 }
 
@@ -86,13 +88,17 @@ void CCharacter::Render_Shadow()
 #pragma region 객체 공유
 void CCharacter::Set_InputController(CInputController* pInputControllerCom)
 {
+	ASSERT_CRASH(pInputControllerCom);
     m_pInputControllerCom = pInputControllerCom;
     Safe_AddRef(m_pInputControllerCom);
 }
 
 void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
 {
+	ASSERT_CRASH(pSpringCamera);
     m_pSpringCamera = pSpringCamera;
+	m_fCameraOriginDistance = m_pSpringCamera->Get_Distance();
+	m_fCaemraDistance = m_fCameraOriginDistance;
     Safe_AddRef(pSpringCamera);
 }
 
@@ -424,6 +430,16 @@ void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fM
 	Desc.fDuration = fDuration;
 	Desc.iShaderPassIndex = 0; 
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_MotionTrail"), XMMatrixIdentity(), &Desc);
+}
+
+
+
+void CCharacter::Use_Spring(_float fDestination, _float fDuration)
+{
+	if (nullptr == m_pSpringCamera)
+		return;
+
+	m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 
 

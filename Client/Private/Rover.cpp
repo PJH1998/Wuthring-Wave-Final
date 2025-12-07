@@ -42,32 +42,17 @@ HRESULT CRover::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_eCurLevel = pDesc->eCurLevel;
-
     Ready_Components(pDesc);
-    Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
 	Ready_AttackVolumes();
     Register_AllNotifies(pDesc->strFolderPath);
-	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
 	
-	// 비활성화. 
-	PartActivate(PART_SWORD, false);
-	PartActivate(PART_DARKWING, false);
-	PartActivate(PART_DARKSCYTHE, false);
 	
-	PartActivate(PART_WING, false);
 	
-
-	m_IsQTE = false; // QTE
-    XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-
-	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
-	XMStoreFloat4(&m_vQTEPos, vPos);
-	m_pQTEColliderCom->Set_Position(vPos);
-
+	Ready_Variables(pDesc);
 
 
 
@@ -1089,6 +1074,21 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fEmissiveIntensity = 1.5f;
 
 	m_ShaderPaths[MESH_MASK] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVERMASK);
+
+
+	// 비활성화. 
+	PartActivate(PART_SWORD, false);
+	PartActivate(PART_DARKWING, false);
+	PartActivate(PART_DARKSCYTHE, false);
+	PartActivate(PART_WING, false);
+
+
+	m_IsQTE = false; // QTE
+	XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
 }
 
 void CRover::Ready_Positions(const CHARACTER_DESC* pDesc)

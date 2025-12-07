@@ -190,6 +190,8 @@ public:
 
 	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
 	
+
+	void Use_Spring(_float fDestination, _float fDuration);
 #pragma endregion
 
 
@@ -250,6 +252,7 @@ public:
 	
 	// TargetPosition
 	void Bind_TargetPosition(_fvector vPos);
+
 	// Hit
 	_bool Is_Hit() { return m_IsHit; }
 	void Set_Hit(_bool IsHit) { m_IsHit = IsHit; }
@@ -389,21 +392,15 @@ protected:
 	class CComputeShader* m_pFacialComputeShaderCom = { nullptr }; // Facial 용도.
 
 	class CCollider* m_pQTEColliderCom = { nullptr };
-	
-	_float m_fTargetDistance = {}; // 타겟과의 거리
+	_float4 m_vQTEPos = {};
+	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 
-	_float4x4 m_MatrixIdentity = {};
+	_float m_fTargetDistance = {}; // 타겟과의 거리
+	
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
 	
-
-	_string m_strColliderReferenceBone = {}; // strColliderRefBone
-	_float3 m_vAnimColliderOffset = {};
-	
-
-	_float4 m_vQTEPos = {};
-	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING };
 
 	// Shader 변수.
@@ -414,6 +411,7 @@ protected:
 	_float  m_fEmissiveIntensity = {};
 
 	_float4x4 m_DissolveWorldMatrix = {};
+	_float4x4 m_MatrixIdentity = {}; // SocketMatrix 전달 시 아무것도 없으면 Identity 행렬 전달.
 protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
@@ -424,14 +422,14 @@ protected:
 	_bool m_IsOutLineVisible = { true };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
+
+	// Event Data
 	queue<DELAYED_ACTION> m_DelayedActions;
 	
-
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
 	CAPTURE_DESC m_PendingCaptureDesc = {};
 	SLIDE_DATA  m_PendingSlideData = {};
-
 
 	_float m_fDodgeableDuration = 0.2f;
 	_float m_fDodgeableHitTimer = {};
@@ -449,8 +447,11 @@ protected:
 	_float m_fStateTimeRate = { 1.f }; //
 	_float m_fOriginTimeRate = { 1.f };
 	_float m_fStateDelayTimer = {}; // StateDelayTimer;
-
 	_float4 m_vTargetPosition = {};
+
+
+	_float m_fCameraOriginDistance = {};
+	_float m_fCaemraDistance = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

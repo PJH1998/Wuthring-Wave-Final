@@ -285,7 +285,8 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 			// 스킬 그리폰 막타
 			if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
 			{
-				m_pAugusta->PartActivate(CAugusta::PARTTYPE::PART_GRIFFON, false);
+				if (m_fTrackPosition >= 60.f)
+					m_pAugusta->PartActivate(CAugusta::PARTTYPE::PART_GRIFFON, false);
 
 				if (m_States[MOVE])
 				{

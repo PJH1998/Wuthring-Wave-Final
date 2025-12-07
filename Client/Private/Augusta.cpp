@@ -50,7 +50,6 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);
-    Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
 	Ready_AttackVolumes();
@@ -59,21 +58,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
-	m_pBayonet->SetActivate(false);
-    m_pSkillWeapon->SetActivate(false);
-    m_pGriffon->SetActivate(false);
-	m_pWing->SetActivate(false);
-	m_pFxObject->SetActivate(false);
-	m_pHeadProp->SetActivate(false);
-	m_pBurstWeapon->SetActivate(false);
 	
-	m_IsQTE = false;
-    XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-	
-	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
-	XMStoreFloat4(&m_vQTEPos, vPos);
-	m_pQTEColliderCom->Set_Position(vPos);
-
+	Ready_Variables(pDesc);
 	
 
 	
@@ -861,6 +847,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_HitStop(wStrObjectTag);
 	else if (var1 == TEXT("CAMERA"))
 		Process_CameraAction(wStrObjectTag);
+	else if (var1 == TEXT("CAMERA_SPRING"))
+		Process_CameraSpring(wStrObjectTag);
 	else if (var1 == TEXT("StateDelay")) // 애니메이션 State의 속도를 Delay 시킵니다.
 	{
 		m_fStateTimeRate = stof(var2);
@@ -871,6 +859,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	{
 		Process_FxObject(wStrObjectTag);
 	}
+	
+	
 
 
 	return;
@@ -1217,6 +1207,21 @@ void CAugusta::Process_FxObject(const _wstring& wStrObjectTag)
 		
 }
 
+void CAugusta::Process_CameraSpring(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+
+	_float fDestination = stof(var2);
+	_float fDuration = stof(var3);
+
+	if (nullptr == m_pSpringCamera)
+		m_pSpringCamera->Use_Spring(fDestination, fDuration);
+}
+
 void CAugusta::Render_Default(_uint iMeshIndex)
 {
 	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
@@ -1473,6 +1478,22 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	m_pBayonet->SetActivate(false);
+	m_pSkillWeapon->SetActivate(false);
+	m_pGriffon->SetActivate(false);
+	m_pWing->SetActivate(false);
+	m_pFxObject->SetActivate(false);
+	m_pHeadProp->SetActivate(false);
+	m_pBurstWeapon->SetActivate(false);
+
+	m_IsQTE = false;
+	XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
+
 }
 
 void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)

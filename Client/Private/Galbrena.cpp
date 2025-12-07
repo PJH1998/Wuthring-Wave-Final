@@ -40,7 +40,6 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
     Ready_Components(pDesc);
-    Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
 	Ready_AttackVolumes();
@@ -49,21 +48,10 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	CGalbrenaFactory::Register_States(m_pStateMachineCom, this);    // 기본 StateMachineCom
 	CGalbrenaFactory::Register_States(m_pFpsStateMachineCom, this); // FPS StateMachineCom
 	
+	Ready_Variables(pDesc);
 	// 비활성화. 
 	//PartActivate(PART_FIRSTGUN, false);
-	PartActivate(PART_FIRSTGUN, false);
-	PartActivate(PART_SECONDGUN, false);
-	PartActivate(PART_DARKWING, false);
-	PartActivate(PART_LION, false);
-	PartActivate(PART_WING, false);
 	
-
-	m_IsQTE = false; // QTE
-    XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-
-	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
-	XMStoreFloat4(&m_vQTEPos, vPos);
-	m_pQTEColliderCom->Set_Position(vPos);
 
 
 
@@ -1185,6 +1173,19 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	PartActivate(PART_FIRSTGUN, false);
+	PartActivate(PART_SECONDGUN, false);
+	PartActivate(PART_DARKWING, false);
+	PartActivate(PART_LION, false);
+	PartActivate(PART_WING, false);
+
+	m_IsQTE = false; // QTE
+	XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
 }
 
 void CGalbrena::Ready_Positions(const CHARACTER_DESC* pDesc)
