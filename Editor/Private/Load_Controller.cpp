@@ -901,7 +901,7 @@ void CLoad_Controller::Load_FXDecal_FromJson(const _string& strFilePath, const _
 	JsonStream >> DecalJson;
 	JsonStream.close();
 
-	CEffect_Decal::DECAL_DESC Desc = {};
+	CEffect_Light::DECAL_DESC Desc = {};
 
 	if (DecalJson.contains("MyTag"))
 		Desc.strMyTag = StringToWString(DecalJson["MyTag"].get<_string>());
@@ -1031,7 +1031,7 @@ void CLoad_Controller::Get_FXRect_Desc(const _wstring& RectTag, CEffect_Rect::FX
 		RectDesc = iter->second;
 }
 
-void CLoad_Controller::Get_FXDecal_Desc(const _wstring& DecalTag, CEffect_Decal::DECAL_DESC& DecalDesc)
+void CLoad_Controller::Get_FXDecal_Desc(const _wstring& DecalTag, CEffect_Light::DECAL_DESC& DecalDesc)
 {
 	auto iter = m_tDecalDesc.find(DecalTag);
 

@@ -229,6 +229,12 @@
     <Filter Include="01. Level\Effect\Effect_Controller\VA_Controller">
       <UniqueIdentifier>{e59009cf-230b-4ab5-b7c4-508acbc36321}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Light_Controller">
+      <UniqueIdentifier>{0ac5dddb-8f12-46dd-bc9f-6a2d00560acb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Light_Controller\FXLight">
+      <UniqueIdentifier>{5389f285-edee-4fc2-8c14-a508a90bb558}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -517,6 +523,12 @@
     <ClInclude Include="..\Public\VA_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Effect_Light.h">
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller\FXLight</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Light_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -777,6 +789,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\VA_Controller.cpp">
       <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Light.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller\FXLight</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Light_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

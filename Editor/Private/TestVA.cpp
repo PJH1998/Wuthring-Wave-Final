@@ -66,7 +66,9 @@ void CTestVA::Render()
 
 void CTestVA::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	m_isActivate = true;
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	m_isActivate = pDesc->IsActive;
 
 	m_fTrackPosition = 0.f;
 

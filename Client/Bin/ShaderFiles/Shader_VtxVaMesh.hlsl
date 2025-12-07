@@ -105,7 +105,7 @@ PS_OUT PS_VA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    Out.vDiffuse = In.vTexcoord.y; //1.f; //float4(0.7f, 0.3f, 0.1f, 1.f);
+    Out.vDiffuse = /*In.vTexcoord.y; //1.f; /*/float4(0.3f, 0.25f, 0.2f, 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
