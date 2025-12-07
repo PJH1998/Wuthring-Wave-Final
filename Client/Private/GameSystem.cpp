@@ -18,8 +18,8 @@
 #include "MouseController.h"
 #include "Player.h"
 #include "SequencePlayer.h"
-
-
+#include"Potal.h"
+#include "TimeLack.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -56,6 +56,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pMouseController = CMouseController::Create();
 	ASSERT_CRASH(m_pMouseController);
+	
+	m_pTimeLack = CTimeLack::Create();
+	ASSERT_CRASH(m_pTimeLack);
 
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
@@ -66,6 +69,12 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	AbilityFolders[CPlayer::CHARACTERTYPE::GALBRENA] = "../Bin/Resource/Model/Player/Galbrena/Ability/";
 	m_pPlayerStatus = CPlayerStatus::Create(pDevice, pContext, AbilityFolders);
 }
+
+void CGameSystem::Update(_float fTimeDelta)
+{
+	m_pSonoro_Manager->Update(fTimeDelta);
+}
+
 void CGameSystem::Clear_Resource()
 {
 	m_pDirector->Clear_Action();
@@ -400,11 +409,6 @@ _bool* CGameSystem::Add_To_Management(INSTANCETYPE eType, CMapObject_Instance* p
 	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
-void CGameSystem::Update(_float fTimeDelta)
-{
-	m_pSonoro_Manager->Update(fTimeDelta);
-}
-
 _bool  CGameSystem::Change_Sonoro(_bool IsSonoro)
 {
 	return m_pSonoro_Manager->Change_Sonoro(IsSonoro);
@@ -509,7 +513,41 @@ void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
 	// 
 	m_pSequencePlayer->Summon_Squad_Near_Boss(pTransform);
 }
+#pragma endregion
 
+#pragma region TIMELACK
+void CGameSystem::Update_TimeLack(_float fTimeDelta)
+{
+	m_pTimeLack->Update(fTimeDelta);
+}
+void CGameSystem::Change_TimeRate(COLLISIONLAYER eLayer, _float fRate)
+{
+	m_pTimeLack->Change_TimeRate(eLayer, fRate);
+}
+
+void CGameSystem::Change_TimeRate(COLLISIONLAYER eLayer, _float fRate, _float fDuration)
+{
+	m_pTimeLack->Change_TimeRate(eLayer, fRate, fDuration);
+}
+
+_float CGameSystem::TimeLack(COLLISIONLAYER eLayer)
+{
+	return m_pTimeLack->TimeLack(eLayer);
+}
+
+#pragma endregion
+
+#pragma region POTAL
+void CGameSystem::Potal_Register(CPotal* pPotal)
+{
+	m_pPotal = pPotal;
+	Safe_AddRef(m_pPotal);
+}
+
+void CGameSystem::Set_Potal_Active(_bool B)
+{
+	m_pPotal->SetActivate(B);
+}
 
 #pragma endregion
 
@@ -518,6 +556,7 @@ void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
+	Safe_Release(m_pPotal);
 
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);
@@ -529,6 +568,8 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pMouseController);
 	Safe_Release(m_pPlayer);
 	Safe_Release(m_pSequencePlayer);
+
+	Safe_Release(m_pTimeLack);
 
 	Release();
 }

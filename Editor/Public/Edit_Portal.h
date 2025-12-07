@@ -21,7 +21,11 @@ private:
 	CShader* m_pShaderCom = { nullptr };
 	class CModel* m_pModelCom = { nullptr };
 	class CVIBuffer_Rect* m_pVIBufferCom = { nullptr };
+	class CTexture* m_pDiffuseTextureCom = { nullptr };
+	class CTexture* m_pMaskTextureCom = { nullptr };
 	_uint m_iShaderPassIndex = {};
+	_float m_fTotalTime = {};
+	_float	m_vColor[4];
 public:
 	static 	CEdit_Portal* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

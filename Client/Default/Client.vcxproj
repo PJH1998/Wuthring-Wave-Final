@@ -208,7 +208,7 @@
     <ClInclude Include="..\Public\Effect_VA.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
-    <ClInclude Include="..\Public\MapObject_SlideZone.h" />
+    <ClInclude Include="..\Public\Potal.h" />
     <ClInclude Include="..\Public\Slide_Navigation.h" />
     <ClInclude Include="..\Public\NPC_Griffin.h" />
     <ClInclude Include="..\Public\SequenceAugusta.h" />
@@ -378,6 +378,7 @@
     <ClInclude Include="..\public\Spawner.h" />
     <ClInclude Include="..\public\ScreenEffect.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
+    <ClInclude Include="..\Public\TimeLack.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\public\UI_Button.h">
@@ -486,7 +487,7 @@
     <ClCompile Include="..\Private\Effect_VA.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
-    <ClCompile Include="..\Private\MapObject_SlideZone.cpp" />
+    <ClCompile Include="..\Private\Potal.cpp" />
     <ClCompile Include="..\Private\Slide_Navigation.cpp" />
     <ClCompile Include="..\Private\NPC_Griffin.cpp" />
     <ClCompile Include="..\Private\SequenceAugusta.cpp" />
@@ -635,6 +636,7 @@
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
     <ClCompile Include="..\private\ScreenEffect.cpp" />
+    <ClCompile Include="..\Private\TimeLack.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />
