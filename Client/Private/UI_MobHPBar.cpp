@@ -664,6 +664,20 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		_bool isDead = (currentMobRT.tInfoDesc.fMobCurHP <= 0);
 
+
+		// + 거리에 따른 알파 추가
+		_float fAlphaViaDistance = {};
+		_vector vPlayerPos = m_pGameSystem->Get_PlayerPosition();
+		_vector vInstPos = XMLoadFloat3(&currentMobRT.tInfoDesc.vMobPos);
+		
+		_float fDistance = XMVectorGetX(XMVector3Length(vPlayerPos - vInstPos));
+		// 한 40부터 안보이면 될 듯
+		// 35~40에 보간?
+		_float fMaxAlphaDistance = 40.f;
+		_float fMinAlphaDistance = 35.f;
+		fAlphaViaDistance = 1.f - clamp(((-fMinAlphaDistance + fDistance) / (fMaxAlphaDistance - fMinAlphaDistance)), 0.f, 1.f);
+
+
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
 		auto& targetVariantMat = vecVariantMat[i];
@@ -679,28 +693,28 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		*reinterpret_cast<_float4*>(&targetVariantMat._11)		= vColorRate;
 		*reinterpret_cast<_float4*>(&targetVariantMat._21)		= vColorRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._31)		= arrAlphaRate[0];
+		*reinterpret_cast<_float*>(&targetVariantMat._31)		= arrAlphaRate[0] * fAlphaViaDistance;
 		*reinterpret_cast<_float*>(&targetVariantMat._32)		= fScaleRate;
 		*reinterpret_cast<_float*>(&targetVariantMat._33)		= fStackedTime;
 		*reinterpret_cast<_float*>(&targetVariantMat._34)		= fCoordSpeedX;
 
 		*reinterpret_cast<_float4*>(&targetInvVariantMat._11)	= vColorRate;
 		*reinterpret_cast<_float4*>(&targetInvVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetInvVariantMat._31)	= arrAlphaRate[1];
+		*reinterpret_cast<_float*>(&targetInvVariantMat._31)	= arrAlphaRate[1] * fAlphaViaDistance;
 		*reinterpret_cast<_float*>(&targetInvVariantMat._32)	= fScaleRate;
 		*reinterpret_cast<_float*>(&targetInvVariantMat._33)	= fStackedTime;
 		*reinterpret_cast<_float*>(&targetInvVariantMat._34)	= fCoordSpeedX;
 
 		*reinterpret_cast<_float4*>(&targetLineVariantMat._11)	= vColorRate;
 		*reinterpret_cast<_float4*>(&targetLineVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._31)	= (isDead) ? targetLineVariantMat._31 : (0.5f + fAlphaRate * 0.5f);
+		*reinterpret_cast<_float*>(&targetLineVariantMat._31)	= (isDead) ? targetLineVariantMat._31 : (0.5f + fAlphaRate * 0.5f) * fAlphaViaDistance;
 		*reinterpret_cast<_float*>(&targetLineVariantMat._32)	= 0.7f;					// 기본 선의 굵기
 		*reinterpret_cast<_float*>(&targetLineVariantMat._33)	= fStackedTime;
 		*reinterpret_cast<_float*>(&targetLineVariantMat._34)	= fCoordSpeedX;
 
 		*reinterpret_cast<_float4*>(&targetBGVariantMat._11)	= m_arrColorPresets[HRC_BACKGROUND];
 		*reinterpret_cast<_float4*>(&targetBGVariantMat._21)	= m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float*>(&targetBGVariantMat._31)		= (isDead) ? targetBGVariantMat._31 :(0.5f + fAlphaRate * 0.5f);// fAlphaRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._31)		= (isDead) ? targetBGVariantMat._31 :(0.5f + fAlphaRate * 0.5f) * fAlphaViaDistance;// fAlphaRate;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._32)		= fScaleRate;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._33)		= fStackedTime;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._34)		= fCoordSpeedX;
