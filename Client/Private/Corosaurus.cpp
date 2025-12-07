@@ -116,7 +116,10 @@ void CCorosaurus::Late_Update(_float fTimeDelta)
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
+	{
 		m_isParalysis = true;
+		Reset_NotifyInteraction();
+	}
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
@@ -408,6 +411,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.fAttackDmg = pDesc->fAttackDmg;
 	m_pForeHeadSocket = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
 	TriggerDesc.pSocketMatrix = m_pForeHeadSocket;
 	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);

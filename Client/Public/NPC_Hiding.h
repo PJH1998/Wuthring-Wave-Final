@@ -16,6 +16,7 @@ public:
 		const _char* pAnimationTag;
 		const _tchar* pAnimMachineTag;
 	}HIDINGDESC;
+	enum MESH_TYPE { FACE, HAIR, BODY, END };
 
 private:
 	explicit CNPC_Hiding(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -47,6 +48,7 @@ private:
 	_float					m_fScanAcc{};
 	_float					m_fDesolveRate{};
 	_float4					m_vBaseColor{};
+	_uint					m_iFaceIndex{};
 
 private:
 	HRESULT		Bind_Resources();

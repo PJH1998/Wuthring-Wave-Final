@@ -69,8 +69,17 @@ void CNPC_Hiding::Render()
 
 		HRESULT hr = m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		if (i == MESH_TYPE::FACE)
+		{
+			_uint iPadding = 3;
+			_float fFaceSize = 1.f / 3;
+			m_pShaderCom->Bind_Value("g_iTexPaddingCount", &iPadding, sizeof(_uint));
+			m_pShaderCom->Bind_Value("g_fFaceSize",&fFaceSize, sizeof(_float));
+			m_pShaderCom->Bind_Value("g_iFaceIndex", &m_iFaceIndex, sizeof(_uint));
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NPC_FACE));
+		}
+		else
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 		
 		m_pModelCom->Render(i);
 
@@ -103,6 +112,7 @@ void CNPC_Hiding::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->Save_PreviousPosition();
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_iFaceIndex = 5;
 	m_pColliderCom->IsActivate(true);
 	m_pColliderCom->Set_Gravity(true);
 	m_pRigidBodyCom->IsActivate(true);
