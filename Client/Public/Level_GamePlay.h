@@ -28,7 +28,7 @@ private:
 	void						Ready_SFX();
 	void						Ready_NPC();
 	void						Ready_Production();
-
+	void						Ready_Potal();
 #ifdef _DEBUG
 private:
 	void DEBUG_FUNCTION();
