@@ -48,8 +48,9 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 	m_pAugusta->Part_ShaderPathChange(m_iSubPartType, ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_HEADPROP));
 	
+	//m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
+	m_pAugusta->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pAugusta->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.f, true);
 
-	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
@@ -92,6 +93,8 @@ void CAugustaGroundBurst::OnExit()
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 	m_pAugusta->Set_OutLineVisible(true);
+
+	m_pAugusta->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pAugusta->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.f, false);
 }
 
 void CAugustaGroundBurst::Handle_Input()

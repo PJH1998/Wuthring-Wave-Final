@@ -261,9 +261,12 @@ void CUI_MobHPBar::Update_CachedData(_float fTimeDelta)
 				
 				if (mobRTInfo.tInfoDesc.isAtkedCurFrame)								// 피격 감지 시 랜덤한거 피드백 타이머 시작
 				{
-					_uint iRand = (_uint)m_pGameInstance->Rand(0.f, 1.999f);			// ?? : 기준 변경 필요할수도.
-					//mobRTInfo.fAtkedElapsedTime[iRand] = 0.f;
-					mobRTInfo.isTimerActived[iRand] = true;
+					if (mobRTInfo.tInfoDesc.fMobCurHP > 0)								// 체력이 있을 때만
+					{
+						_uint iRand = (_uint)m_pGameInstance->Rand(0.f, 1.999f);			// ?? : 기준 변경 필요할수도.
+						//mobRTInfo.fAtkedElapsedTime[iRand] = 0.f;
+						mobRTInfo.isTimerActived[iRand] = true;
+					}
 				}
 
 				isFind_CachedData = true;
@@ -634,7 +637,7 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		const _float fCoordSpeedX = 1.5f; //                                    			<<<<<<<<<<<<<<<<<<<<
 
-
+		_bool isDead = (m_vecMobInfo_RT[i].tInfoDesc.fMobCurHP <= 0);
 
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
@@ -665,14 +668,14 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		*reinterpret_cast<_float4*>(&targetLineVariantMat._11)	= vColorRate;
 		*reinterpret_cast<_float4*>(&targetLineVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._31)	= 0.5f + fAlphaRate * 0.5f;
+		*reinterpret_cast<_float*>(&targetLineVariantMat._31)	= (isDead) ? targetLineVariantMat._31 : (0.5f + fAlphaRate * 0.5f);
 		*reinterpret_cast<_float*>(&targetLineVariantMat._32)	= 0.7f;					// 기본 선의 굵기
 		*reinterpret_cast<_float*>(&targetLineVariantMat._33)	= fStackedTime;
 		*reinterpret_cast<_float*>(&targetLineVariantMat._34)	= fCoordSpeedX;
 
 		*reinterpret_cast<_float4*>(&targetBGVariantMat._11)	= m_arrColorPresets[HRC_BACKGROUND];
 		*reinterpret_cast<_float4*>(&targetBGVariantMat._21)	= m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float*>(&targetBGVariantMat._31)		= 0.5f + fAlphaRate * 0.5f;// fAlphaRate;
+		*reinterpret_cast<_float*>(&targetBGVariantMat._31)		= (isDead) ? targetBGVariantMat._31 :(0.5f + fAlphaRate * 0.5f);// fAlphaRate;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._32)		= fScaleRate;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._33)		= fStackedTime;
 		*reinterpret_cast<_float*>(&targetBGVariantMat._34)		= fCoordSpeedX;

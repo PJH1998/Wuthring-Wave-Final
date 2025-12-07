@@ -7,7 +7,7 @@ class ENGINE_DLL CHdrTexture final : public CComponent
 {
 private:
 	CHdrTexture(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CHdrTexture(const CHdrTexture& Prototype);
+	CHdrTexture(const CHdrTexture& Prototype) = delete;
 	virtual ~CHdrTexture() = default;
 
 public:
@@ -28,7 +28,7 @@ private:
 
 public:
 	static CHdrTexture* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath, _uint iNumTextures);
-	virtual CComponent* Clone(void* pArg) override;
+	virtual CComponent* Clone(void* pArg) { return nullptr; }
 	virtual void Free() override;
 };
 

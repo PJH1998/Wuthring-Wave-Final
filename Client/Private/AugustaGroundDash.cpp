@@ -112,7 +112,18 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
-		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		// 맞은 방향에 따라서 애니메이션 선택. => 후방에서 맞으면 MOVE_LIMIT_F
+		// 맞은 방향에 따라서 애니메이션 선택. => 전방에서 맞으면 MOVE_LIMIT_B
+
+		const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+		if (nullptr == pDesc)
+			return;
+
+		if (pDesc->IsBack)
+			m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		else 
+			m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_B;
+		
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
 		return;
 	}
@@ -174,10 +185,10 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundDash::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_F), "Move_F", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_B), "Move_B", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_LIMIT_B), "Move_Limit_B", 30.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_LIMIT_F), "Move_Limit_F", 30.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_F), "Move_F", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_B), "Move_B", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_LIMIT_B), "Move_Limit_B", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_LIMIT_F), "Move_Limit_F", 1.f, 0.f);
 }
 
 void CAugustaGroundDash::State_Reset()

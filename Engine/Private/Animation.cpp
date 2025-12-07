@@ -44,6 +44,15 @@ void CAnimation::Set_CurrentTrackPosition(_float fTrackPos)
 		m_iNotifyIndex++;
 }
 
+void CAnimation::Release_Channels()
+{
+	for (auto& pChannel : m_Channels)
+		Safe_Release(pChannel);
+	m_Channels.clear();
+}
+
+
+
 #ifdef _DEBUG
 void CAnimation::Print_MorphKeyIndices()
 {
@@ -281,10 +290,6 @@ _bool CAnimation::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition
 	while (m_iNotifyIndex < m_AnimNotifies.size() && m_fCurrentTrackPosition >= m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
 		m_AnimNotifies[m_iNotifyIndex++]->Execute();
 
-	/* 
-	* ?먮옒 ?ш린??Animation 媛깆떊 濡쒖쭅??議댁옱.
-	*/
-
  	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
 
 	
@@ -335,52 +340,6 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 	fill(modelWeights.begin(), modelWeights.end(), 0.0f);
 
 	// MorphMeshChannel[i] -> m_MorphKeyIndices[i] = 들어있는 값(modelWeights의 인덱스)
-
-#ifdef _DEBUG
-	/*string strName = m_szName;
-	_bool IsCheck = { false };
-	if (strName == "Burst01")
-	{
-		
-		if (m_fCurrentTrackPosition >= 45.f && m_fCurrentTrackPosition >= 46.f)
-		{
-			for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
-			{
-				_wstring OutputValue = {};
-				_string strMorph = m_MorphMeshChannels[i]->Get_Name();
-				OutputValue += StringToWString(strMorph);
-				_float fValue = m_MorphMeshChannels[i]->Get_Weight(45);
-				if (fValue > 0.f)
-				OutPutDebugFloat(OutputValue, fValue);
-			}
-		}
-		
-		IsCheck = true;
-	}*/
-	/*if (strName == "Stand1_Action02")
-	{
-
-		if (m_fCurrentTrackPosition >= 0.f && m_fCurrentTrackPosition <= 20.f)
-		{
-			for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
-			{
-				_wstring OutputValue = {};
-				_string strMorph = m_MorphMeshChannels[i]->Get_Name();
-				OutputValue += StringToWString(strMorph);
-				_float fValue = m_MorphMeshChannels[i]->Get_Weight(45);
-				if (fValue > 0.f)
-					OutPutDebugFloat(OutputValue, fValue);
-			}
-		}
-
-		IsCheck = true;
-	}*/
-
-		
-
-
-#endif 
-
 	for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
 	{
 		_int iTargetIndex = m_MorphKeyIndicies[i];

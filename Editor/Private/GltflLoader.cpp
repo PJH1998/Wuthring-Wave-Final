@@ -230,7 +230,7 @@ HRESULT CGltfLoader::Save_Dat_Character(const _char* pFileName)
 			}
 				
 		}
-		// [최적화 1 종료] 루프가 다 끝난 뒤 메모리 해제
+		// 루프가 다 끝난 뒤 메모리 해제
 		Safe_Delete_Array(pDeltaPosBuffer);
 		Safe_Delete_Array(pDeltaNormalBuffer);
 

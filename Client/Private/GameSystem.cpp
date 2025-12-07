@@ -19,7 +19,7 @@
 #include "Player.h"
 #include "SequencePlayer.h"
 #include"Potal.h"
-
+#include "TimeLack.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -56,6 +56,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pMouseController = CMouseController::Create();
 	ASSERT_CRASH(m_pMouseController);
+	
+	m_pTimeLack = CTimeLack::Create();
+	ASSERT_CRASH(m_pTimeLack);
 
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
@@ -66,6 +69,12 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	AbilityFolders[CPlayer::CHARACTERTYPE::GALBRENA] = "../Bin/Resource/Model/Player/Galbrena/Ability/";
 	m_pPlayerStatus = CPlayerStatus::Create(pDevice, pContext, AbilityFolders);
 }
+
+void CGameSystem::Update(_float fTimeDelta)
+{
+	m_pSonoro_Manager->Update(fTimeDelta);
+}
+
 void CGameSystem::Clear_Resource()
 {
 	m_pDirector->Clear_Action();
@@ -316,6 +325,29 @@ void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
 	m_pUI_ControlHelper->Detach_ObjectPos_ToMinimap(pOwner);
 }
 
+void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
+										_float3& vStartVelocity,
+										_float3& vAcceleration,
+										_float fMaxTime,
+										_uint iSegmentCount,
+										_float fRibbonWidth,
+										_bool isUseCustomColor,
+										_float4 vBaseColor,
+										_float4 vHeadColor,
+										_float4 vTailColor)
+{
+	m_pUI_ControlHelper->Req_Render_CurveTrace(	vStartPos,
+												vStartVelocity,
+												vAcceleration, 
+												fMaxTime,
+												iSegmentCount, 
+												fRibbonWidth, 
+												isUseCustomColor,
+												vBaseColor,
+												vHeadColor,
+												vTailColor);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
@@ -375,11 +407,6 @@ _bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pO
 _bool* CGameSystem::Add_To_Management(INSTANCETYPE eType, CMapObject_Instance* pObjects, _bool** SonoroMode)
 {
 	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
-}
-
-void CGameSystem::Update(_float fTimeDelta)
-{
-	m_pSonoro_Manager->Update(fTimeDelta);
 }
 
 _bool  CGameSystem::Change_Sonoro(_bool IsSonoro)
@@ -489,9 +516,15 @@ _vector CGameSystem::Get_PlayerLookVector()
 {
 	return m_pPlayer->Get_LookVector();
 }
+
 _vector CGameSystem::Get_PlayerPosition()
 {
 	return m_pPlayer->Get_Position();
+}
+
+const _float4x4* CGameSystem::Get_PlayerMatrixPtr()
+{
+	return m_pPlayer->Get_PlayerMatrixPtr();
 }
 
 // 보스 근처에 소환.
@@ -504,8 +537,27 @@ void CGameSystem::Summon_SequenceCharacter(class CTransform* pTransform)
 	// 
 	m_pSequencePlayer->Summon_Squad_Near_Boss(pTransform);
 }
+#pragma endregion
 
+#pragma region TIMELACK
+void CGameSystem::Update_TimeLack(_float fTimeDelta)
+{
+	m_pTimeLack->Update(fTimeDelta);
+}
+void CGameSystem::Change_TimeRate(COLLISIONLAYER eLayer, _float fRate)
+{
+	m_pTimeLack->Change_TimeRate(eLayer, fRate);
+}
 
+void CGameSystem::Change_TimeRate(COLLISIONLAYER eLayer, _float fRate, _float fDuration)
+{
+	m_pTimeLack->Change_TimeRate(eLayer, fRate, fDuration);
+}
+
+_float CGameSystem::TimeLack(COLLISIONLAYER eLayer)
+{
+	return m_pTimeLack->TimeLack(eLayer);
+}
 
 #pragma endregion
 
@@ -520,6 +572,7 @@ void CGameSystem::Set_Potal_Active(_bool B)
 {
 	m_pPotal->SetActivate(B);
 }
+
 #pragma endregion
 
 
@@ -539,6 +592,8 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pMouseController);
 	Safe_Release(m_pPlayer);
 	Safe_Release(m_pSequencePlayer);
+
+	Safe_Release(m_pTimeLack);
 
 	Release();
 }

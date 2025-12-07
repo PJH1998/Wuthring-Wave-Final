@@ -5,6 +5,7 @@
 #include "UI_Text.h"
 #include "GameSystem.h"
 
+#include "Event_Level.h"
 
 //#define	KSTA_UITEST_RANDOM_GENERATE
 
@@ -916,6 +917,7 @@ void CUI_Ovfl_Palette::Update_FinishEvent()
 
 	else if	(m_isGoinSuccess)
 	{
+		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 		Req_OffPalette();
 	}
 

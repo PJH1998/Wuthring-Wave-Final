@@ -51,7 +51,9 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 
 	//조우 애니메이션 고정하기
-	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, nullptr);
+
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 51.f);
 	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;

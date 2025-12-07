@@ -17,6 +17,7 @@ public:
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
+		_bool IsBack = { false };
 	}HIT_DESC;
 
 	typedef struct tagParryDesc {
@@ -132,7 +133,6 @@ public:
 	void Set_Gravity(_bool IsGravity);
 
 	// Collider
-	
 	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
@@ -141,6 +141,8 @@ public:
 	// WorldMatrix
 	_matrix Get_WorldMatrix();
 	void Set_Position(_fvector vPos);
+
+	void ColliderActive(_bool IsActive);
 
 #ifdef _DEBUG
 	void Print_LookRay();
@@ -180,6 +182,12 @@ public:
 	void ResetPose();
 
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
+	void Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration);
+	// 끝날때 False
+	void Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop); 
+
+	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
+
 	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
 	
 #pragma endregion
@@ -228,6 +236,7 @@ public:
 	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) {};
 
 	// Look Vector
+	_vector Get_Position();
 	_vector Get_LookVector();
 	_vector Get_CameraLookVector();
 	_vector Get_LookVector_NoPitch();
@@ -365,6 +374,7 @@ protected:
 	class CGameSystem* m_pGameSystem = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
+	class CStateMachine* m_pFpsStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도

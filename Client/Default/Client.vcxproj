@@ -378,6 +378,7 @@
     <ClInclude Include="..\public\Spawner.h" />
     <ClInclude Include="..\public\ScreenEffect.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
+    <ClInclude Include="..\Public\TimeLack.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\public\UI_Button.h">
@@ -386,6 +387,7 @@
     </ClInclude>
     <ClInclude Include="..\public\UI_Button_Interact.h" />
     <ClInclude Include="..\public\UI_ControlHelper.h" />
+    <ClInclude Include="..\public\UI_CurveTrace.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
     <ClInclude Include="..\public\UI_GrafflePoint.h" />
     <ClInclude Include="..\public\UI_HUD.h">
@@ -420,6 +422,7 @@
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
     <ClInclude Include="..\public\UI_Text_Damage.h" />
+    <ClInclude Include="..\Public\VIBuffer_CurveTrace.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
     <ClInclude Include="..\Public\WeaponDummy.h" />
@@ -633,6 +636,7 @@
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
     <ClCompile Include="..\private\ScreenEffect.cpp" />
+    <ClCompile Include="..\Private\TimeLack.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />
@@ -651,6 +655,7 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_Button_Interact.cpp" />
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
+    <ClCompile Include="..\private\UI_CurveTrace.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
     <ClCompile Include="..\private\UI_GrafflePoint.cpp" />
     <ClCompile Include="..\private\UI_HUD.cpp">
@@ -684,6 +689,7 @@
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
     <ClCompile Include="..\private\UI_Text_Damage.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_CurveTrace.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\WeaponDummy.cpp" />
@@ -751,6 +757,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_TextInstance.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxCurveTrace.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxCurveTrace_Sphere.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxInstance.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

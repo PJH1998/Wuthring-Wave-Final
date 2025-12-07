@@ -243,6 +243,7 @@
     <ClInclude Include="..\Public\SQ_Effect_Edit.h" />
     <ClInclude Include="..\Public\SQ_Item_Edit.h" />
     <ClInclude Include="..\Public\SQ_SFX_Edit.h" />
+    <ClInclude Include="..\public\TestVA.h" />
     <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
     <ClInclude Include="..\Public\Spectrum.h" />
@@ -335,6 +336,7 @@
     <ClCompile Include="..\Private\SQ_Effect_Edit.cpp" />
     <ClCompile Include="..\Private\SQ_Item_Edit.cpp" />
     <ClCompile Include="..\Private\SQ_SFX_Edit.cpp" />
+    <ClCompile Include="..\private\TestVA.cpp" />
     <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
     <ClCompile Include="..\Private\Spectrum.cpp" />

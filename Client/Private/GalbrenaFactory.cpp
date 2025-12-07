@@ -71,8 +71,9 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 
 	// Capture 카테고리 하위 State들.
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EGalbrenaCaptureState::CAPTURE), CGalbrenaCapture::Create(pCharacter));
+}
 
-
-
-
+// 1인칭 전용 State들.
+void CGalbrenaFactory::Register_FPSStates(CStateMachine* pFpsStateMachineCom, CGalbrena* pCharacter)
+{
 }
