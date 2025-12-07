@@ -16,6 +16,11 @@ private:
 		_float3				vTargetPos = {};
 	} UI_MINIMAP_OBJ_DESC;
 
+	typedef struct tUIMinimapCalcedObjDesc {
+		UI_MINIMAP_OBJTYPE	eType = UI_MINIMAP_OBJTYPE::END;
+		_float2				vCalcedTargetPos = {};
+	} UI_MINIMAP_CALCEDOBJ_DESC;
+
 public:
 	explicit CUI_HUD_Sector_Minimap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CUI_HUD_Sector_Minimap(const CUI_HUD_Sector_Minimap& Prototype);
@@ -72,13 +77,14 @@ private:
 	_float				m_fPlayerDirDegree		= 0;
 	
 	vector<_float3>		m_vecTmpRelativeObjects = {};
-	vector<_float2>		m_vecTmpCacledRelativeObjects = {};
+	vector<UI_MINIMAP_CALCEDOBJ_DESC> m_vecTmpCacledRelativeObjects = {};
 	
 
 	vector<UI_MINIMAP_OBJ_DESC>					m_vecObjectPos_PerFrame = {};
 	unordered_map<void*, UI_MINIMAP_OBJ_DESC>	m_mapObjectPos_Attached = {};
 
 
+	array<_float4, ENUM_CLASS(UI_MINIMAP_OBJTYPE::END)> m_arrColorPreset = {};
 
 	class CGameSystem*	m_pGameSystem		= { nullptr };
 

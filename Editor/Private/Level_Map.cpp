@@ -22,6 +22,7 @@
 #include"Edit_MapEffectCollector.h"
 #include"Edit_FireFly_Manager.h"
 #include"Edit_SlideZone.h"
+#include"Edit_Portal.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -56,6 +57,9 @@ HRESULT CLevel_Map::Initialize()
 	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 	m_pEffectCollector = CEdit_MapEffectCollector::Create();
 	m_SaveObjects["Map_Effect"].push_back(nullptr);
+
+	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_Potal"), m_iLevel, TEXT("Potal"));
+	
 	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
 	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
@@ -1073,10 +1077,10 @@ void CLevel_Map::Load_Objects()
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
 
@@ -1732,6 +1736,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_SlideBox"),
 		CEdit_SlideZone::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Potal"),
+		CEdit_Portal::Create(m_pDevice, m_pContext));
 
     Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);

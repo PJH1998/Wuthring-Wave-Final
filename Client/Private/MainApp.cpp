@@ -10,6 +10,7 @@
 #include "Level_GamePlay.h"
 #include "Level_Heaven.h"
 #include "Level_Test.h"
+
 #include "Level_Test_UI.h"
 
 #include "SpringCamera.h"
@@ -134,6 +135,7 @@ void CMainApp::Post_Update()
 void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
+	m_pGameSystem->Update_TimeLack(fTimeDelta);
 
 	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
@@ -465,6 +467,10 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
 		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
 		CRASH("Failed to Add Prototype VIBuffer Rect");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_VIBuffer_Sphere"),
+		CVIBuffer_Sphere::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype VIBuffer Sphere");
 
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect_Instance"),
 		CVIBuffer_Rect_Instance::Create(m_pDevice, m_pContext, 10))))

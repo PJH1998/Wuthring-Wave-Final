@@ -63,6 +63,7 @@ public:
 
 	_vector Get_LookVector();
 	_vector Get_Position();
+	const _float4x4* Get_PlayerMatrixPtr();
 #pragma endregion
 	
 
@@ -160,6 +161,8 @@ private:
 	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
 
 	void Manage_Condition();
+
+	_bool IsHitBack(class CTransform* pTransform);
 	
 
 #ifdef _DEBUG

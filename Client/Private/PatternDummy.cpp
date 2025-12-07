@@ -2,6 +2,7 @@
 #include "PatternDummy.h"
 #include "WeaponDummy.h"
 #include "Projectile.h"
+#include "Levi_Anchor.h"
 
 CPatternDummy::CPatternDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CContainerObject { pDevice, pContext }
@@ -274,6 +275,16 @@ void CPatternDummy::Object_Func(const _wstring& wStrObjectTag)
 		{
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviWave"), m_pTransformCom->Get_WorldMatrix(), nullptr);
 		}
+	}
+	else if(wstrTypeTag == TEXT("Anchor"))
+	{
+		_float3 vInitPosition{};
+		CLevi_Anchor::ANCHORRESET Anchor{};
+		Anchor.vTargetPos = _float3(0.f, 0.f, 0.f);
+		_vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
+		_vector vInitPos = XMLoadFloat3(&Anchor.vTargetPos) - vRight + XMVectorSet(0.f, 1.f, 0.f, 0.f) * 5.f;
+		XMStoreFloat3(&vInitPosition, vInitPos);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviAnchor"), XMMatrixTranslation(vInitPosition.x, vInitPosition.y, vInitPosition.z), &Anchor);
 	}
 	// 레비아탄 투사체 end
 }

@@ -44,7 +44,7 @@ void CRoverGroundDash::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 실행
-    Update_SprintAnimation(fTimeDelta);
+	Update_DashAnimation(fTimeDelta);
     
     // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
@@ -81,7 +81,7 @@ void CRoverGroundDash::Handle_Input()
 
 
 
-void CRoverGroundDash::Update_SprintAnimation(_float fTimeDelta)
+void CRoverGroundDash::Update_DashAnimation(_float fTimeDelta)
 {
     // 1. 누른키에 따른 방향 계산
     m_eDir = m_pRover->Calculate_Direction();
@@ -92,6 +92,7 @@ void CRoverGroundDash::Update_SprintAnimation(_float fTimeDelta)
         _vector vMoveDir = m_pRover->Calculate_Move_Direction(m_eDir);
         m_pRover->Rotate_Direction(vMoveDir);
     }
+
     CCharacterState::Play_Animation(m_pRover, fTimeDelta);
 }
 
@@ -103,6 +104,16 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
+		const CCharacter::HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
+		if (nullptr == pDesc)
+			return;
+
+		if (pDesc->IsBack)
+			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+		else
+			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_B;
+
+
 		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
 		return;
@@ -154,8 +165,8 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundDash::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverDashType::MOVE_F), "Move_F", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverDashType::MOVE_B), "Move_B", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverDashType::MOVE_F), "Move_F", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverDashType::MOVE_B), "Move_B", 1.f, 10.f);
     CState::Add_Animations(ENUM_CLASS(ERoverDashType::MOVE_LIMIT_B), "Move_Limit_B", 30.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverDashType::MOVE_LIMIT_F), "Move_Limit_F", 30.f, 0.f);
 }

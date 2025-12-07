@@ -52,7 +52,8 @@ typedef struct tagOnHoverExitUI : public CEvent
 	_uint iInstanceIndex;
 	tagOnHoverExitUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
 }ONHOVEREXIT_UI_EVENT;
-//typedef struct tagOnScrollUI : public CEvent, UIEVENT_INSTNACE
-//{
-//	tagOnScrollUI(_uint iInstanceIndex) {};
-//}ONSCROLL_UI_EVENT;
+typedef struct tagMinigamePaletteSuccessUI : public CEvent
+{
+	_bool isSuccess;
+	tagMinigamePaletteSuccessUI(_uint iInstanceIndex = 0) : isSuccess{ isSuccess } {};
+}MINIGAMEPALETTE_SUCCESS_UI_EVENT;

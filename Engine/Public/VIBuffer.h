@@ -20,15 +20,15 @@ public:
 	virtual HRESULT		Bind_Resources(ID3D11DeviceContext* pDC);
 
 protected:
-	ID3D11Buffer*						m_pVB = { nullptr };
-	ID3D11Buffer*						m_pIB = { nullptr };
+	ID3D11Buffer*					m_pVB = { nullptr };
+	ID3D11Buffer*					m_pIB = { nullptr };
 
-	_uint								m_iNumVertices = {};
-	_uint								m_iVertexStride = {};
-	_uint								m_iNumVertexBuffers = {};
+	_uint							m_iNumVertices = {};
+	_uint							m_iVertexStride = {};
+	_uint							m_iNumVertexBuffers = {};
 
-	_uint								m_iNumIndices = {};
-	_uint								m_iIndexStride = {};
+	_uint							m_iNumIndices = {};
+	_uint							m_iIndexStride = {};
 	DXGI_FORMAT						m_eIndexFormat = {};
 
 	D3D11_PRIMITIVE_TOPOLOGY m_ePrimitiveType = {};

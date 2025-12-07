@@ -100,9 +100,6 @@
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. Level\Loader\VIBuffer">
-      <UniqueIdentifier>{212f9fd5-3f73-4c1d-a296-1208dfe69bde}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\Player\Augusta">
       <UniqueIdentifier>{1ddcb2b8-3bfd-4a31-90e1-cf1db119a67f}</UniqueIdentifier>
     </Filter>
@@ -418,6 +415,12 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect\Anchor">
       <UniqueIdentifier>{5db8e06d-ff67-4b7d-820b-cebd945a1f1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\VIBuffer">
+      <UniqueIdentifier>{212f9fd5-3f73-4c1d-a296-1208dfe69bde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Others">
+      <UniqueIdentifier>{3db830a3-56a7-4b61-9453-a38e334a9c65}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\SequencePlayer">
       <UniqueIdentifier>{359acbfd-96ca-4db0-b9c7-f11321c0c0b8}</UniqueIdentifier>
     </Filter>
@@ -486,6 +489,18 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\FXVA">
       <UniqueIdentifier>{a0858081-8918-47d3-874e-57bd9194d4a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Instance">
+      <UniqueIdentifier>{9b65dc42-2c2f-43ee-97df-bf59ce0db45b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Interact">
+      <UniqueIdentifier>{194f6e9d-20f6-4268-9cf7-c987aa050421}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\NPC\Griffin">
+      <UniqueIdentifier>{c5121e69-e30f-44ac-a04a-c9a9995d7347}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="01. GameSystem\TimeLack">
+      <UniqueIdentifier>{94a08454-8c6c-48b1-83a2-741536fb8eb5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -657,9 +672,6 @@
     <ClInclude Include="..\Public\Prop.h">
       <Filter>03. GameObject\Weapon</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
-      <Filter>02. Level\Loader\VIBuffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Client_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
@@ -780,9 +792,6 @@
     <ClInclude Include="..\Public\FS_Scythe.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Trigger_Box.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\Corosaurus.h" />
     <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h">
@@ -839,9 +848,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\RoverGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Instance.h">
-      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
@@ -1155,6 +1161,15 @@
     <ClInclude Include="..\Public\Levi_Anchor.h">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
+      <Filter>03. GameObject\UI\VIBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_CurveTrace.h">
+      <Filter>03. GameObject\UI\VIBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_CurveTrace.h">
+      <Filter>03. GameObject\UI\Containers_Prop\Others</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\Scan.h">
       <Filter>03. GameObject\PlayerInteraction</Filter>
     </ClInclude>
@@ -1201,9 +1216,6 @@
       <Filter>03. GameObject\Actor\SequencePlayer\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h" />
-    <ClInclude Include="..\Public\MapObject_FireFly.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\YunoGroundIdle.h">
       <Filter>03. GameObject\Actor\SequencePlayer\State\Ground\Yuno</Filter>
     </ClInclude>
@@ -1249,11 +1261,29 @@
     <ClInclude Include="..\Public\AugustaGroundLandSlide.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\NPC_Griffin.h" />
-    <ClInclude Include="..\Public\MapObject_SlideZone.h" />
-    <ClInclude Include="..\Public\Slide_Navigation.h" />
     <ClInclude Include="..\Public\Effect_VA.h">
       <Filter>03. GameObject\Effect\Prefab\FXVA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Instance.h">
+      <Filter>03. GameObject\MapObject\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_FireFly.h">
+      <Filter>03. GameObject\MapObject\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trigger_Box.h">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Potal.h">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Slide_Navigation.h">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\NPC_Griffin.h">
+      <Filter>03. GameObject\Actor\NPC\Griffin</Filter>
+	</ClInclude>
+    <ClInclude Include="..\Public\TimeLack.h">
+      <Filter>01. GameSystem\TimeLack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1340,9 +1370,6 @@
     <ClCompile Include="..\private\UI_Interact.cpp">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Loader.cpp">
-      <Filter>02. Level\Loader</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Augusta.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
@@ -1402,9 +1429,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\Prop.cpp">
       <Filter>03. GameObject\Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
-      <Filter>02. Level\Loader\VIBuffer</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
@@ -1514,9 +1538,6 @@
     <ClCompile Include="..\Private\FS_Scythe.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Trigger_Box.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClCompile>
@@ -1578,9 +1599,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Instance.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
@@ -1888,6 +1906,18 @@
     <ClCompile Include="..\Private\Levi_Anchor.cpp">
       <Filter>03. GameObject\Actor\Monster\Leviatan\Effect\Anchor</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Loader.cpp">
+      <Filter>02. Level\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
+      <Filter>03. GameObject\UI\VIBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_CurveTrace.cpp">
+      <Filter>03. GameObject\UI\VIBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_CurveTrace.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\Others</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\AugustaBurstWeapon.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
@@ -1928,9 +1958,6 @@
       <Filter>03. GameObject\MotionTrail</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
-    <ClCompile Include="..\Private\MapObject_FireFly.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\NPC_Hiding.cpp">
       <Filter>03. GameObject\Actor\NPC\HideNSeek</Filter>
     </ClCompile>
@@ -1971,11 +1998,29 @@
     <ClCompile Include="..\Private\AugustaGroundLandSlide.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\NPC_Griffin.cpp" />
-    <ClCompile Include="..\Private\MapObject_SlideZone.cpp" />
-    <ClCompile Include="..\Private\Slide_Navigation.cpp" />
     <ClCompile Include="..\Private\Effect_VA.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXVA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_FireFly.cpp">
+      <Filter>03. GameObject\MapObject\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Instance.cpp">
+      <Filter>03. GameObject\MapObject\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Slide_Navigation.cpp">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trigger_Box.cpp">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Potal.cpp">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\NPC_Griffin.cpp">
+      <Filter>03. GameObject\Actor\NPC\Griffin</Filter>
+	</ClCompile>
+    <ClCompile Include="..\Private\TimeLack.cpp">
+      <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2064,6 +2109,12 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Logo.hlsl">
       <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxCurveTrace.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxCurveTrace_Sphere.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxScan.hlsl">
       <Filter>96. ShaderFiles</Filter>

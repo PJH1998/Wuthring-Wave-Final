@@ -47,16 +47,11 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 	m_pAugusta->Set_Gravity(true);
 
 	// 6. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
-	// 회피 가능 창을 닫습니다. => Timer 실행 방지.
-	
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	// 7. Hit Stop
 	CGameInstance* pGameInstance = CGameInstance::GetInstance();
-	//pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f);
-	//pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
-	//pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
 
 	// 8. Resolve Perfect Dodge?
 	m_pAugusta->Resolve_PerfectDodge();
@@ -134,7 +129,6 @@ void CAugustaGroundDodge::Update_SprintAnimation(_float fTimeDelta)
 void CAugustaGroundDodge::Check_StateTransition(_float fTimeDelta)
 {
 	EAugustaDodgeType eDodgeType = static_cast<EAugustaDodgeType>(m_iCurrentAnimIdx);
-
 	_bool IsEscapePossible =CState::Is_EscapePossible();
   
 
@@ -156,7 +150,6 @@ void CAugustaGroundDodge::Check_StateTransition(_float fTimeDelta)
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
 			return;
 		}
-
 	}
 
 
@@ -172,8 +165,8 @@ void CAugustaGroundDodge::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundDodge::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.3f, 52.f, 2.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.3f, 52.f, 2.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 20.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 20.f, 2.f);
 }
 
 void CAugustaGroundDodge::State_Reset()

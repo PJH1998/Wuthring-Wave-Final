@@ -6,6 +6,8 @@
 #include"Edit_Meteo.h"
 #include"Edit_MapObject_Instance.h"
 #include"Edit_TriggerBox.h"
+#include"Edit_MapObject_Collaps.h"
+#include"Edit_LightObject.h"
 
 CMap_Interface::CMap_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CInterface_Edit(pDevice,pContext)
@@ -19,6 +21,7 @@ HRESULT CMap_Interface::Initialize()
 	m_FilePaths.push_back("../../Client/Bin/Resource/Map/Logo/");
 	m_FilePaths.push_back("../../Client/Bin/Resource/Map/The_False_Sovereign/");
 	m_FilePaths.push_back("../../Client/Bin/Resource/Map/");
+	m_FilePaths.push_back("../../Client/Bin/Resource/Map/Heaven/");
 
     return S_OK;
 }
@@ -433,7 +436,12 @@ void CMap_Interface::Load_Map_GUI()
 					{
 						MSG_BOX("Load Failed");
 					}
-					if (strFilePath.find("Meteo") != std::string::npos)
+					if (strFilePath.find("Spawn") != std::string::npos ||
+						strFilePath.find("Effect") != std::string::npos || 
+						strFilePath.find("SlideBox") != std::string::npos || 
+						strFilePath.find("FireFly") != std::string::npos)
+						continue;
+					else if (strFilePath.find("Meteo") != std::string::npos)
 					{
 						continue;
 						CEdit_Meteo::MAP_LOAD Desc{};
@@ -546,9 +554,6 @@ void CMap_Interface::Load_Map_GUI()
 							Safe_Delete_Array(InstanceMatrix);
 						}
 					}
-					else if (entry.path().string().find("Spawn") != std::string::npos)
-						continue;
-
 					else if (strFilePath.find("Destruction") != std::string::npos)
 					{
 						_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -593,6 +598,51 @@ void CMap_Interface::Load_Map_GUI()
 							Desc.WorldMatrix = &Matrix;
 							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox")
 								, m_iLevel, TEXT("Layer_Test"), &Desc);
+						}
+					}
+					else if (strFilePath.find("Collaps") != std::string::npos)
+					{
+						CEdit_MapObject_Collaps::MAP_LOAD Desc{};
+						while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+						{
+							memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+							File.read(Desc.ModelName, NameLength);
+
+							File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+							File.read(reinterpret_cast<char*>(&Desc.vSourWorldMatrix), sizeof(_float4x4));
+							File.read(reinterpret_cast<char*>(&Desc.vDestWorldMatrix), sizeof(_float4x4));
+
+							File.read(reinterpret_cast<char*>(&Desc.fDuration), sizeof(_float));
+							File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
+
+							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Collaps")
+								, m_iLevel, TEXT("Layer_MapObject_Collaps"), &Desc);
+
+						}
+					}
+					else if (strFilePath.find("Object_Light") != std::string::npos)
+					{
+						LIGHT_DESC ReadDesc{};
+
+						_uint iSize = {};
+						File.read(reinterpret_cast<char*>(&iSize), sizeof(_uint));
+						for (_uint i = 0; i < iSize; ++i)
+						{
+							File.read(reinterpret_cast<char*>(&ReadDesc.eType), sizeof(_uint));
+							File.read(reinterpret_cast<char*>(&ReadDesc.fRange), sizeof(_float));
+							File.read(reinterpret_cast<char*>(&ReadDesc.vAmbient), sizeof(_float4));
+							File.read(reinterpret_cast<char*>(&ReadDesc.vDiffuse), sizeof(_float4));
+							File.read(reinterpret_cast<char*>(&ReadDesc.vDirection), sizeof(_float4));
+							File.read(reinterpret_cast<char*>(&ReadDesc.vPosition), sizeof(_float4));
+							File.read(reinterpret_cast<char*>(&ReadDesc.vSpecular), sizeof(_float4));
+
+							CEdit_LightObject::MAP_LOAD Desc{};
+							Desc.vWorldPos = ReadDesc.vPosition;
+							Desc.CopyDesc = &ReadDesc;
+							m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
+								, m_iLevel, TEXT("Layer_Light"), &Desc);
 						}
 					}
 					else

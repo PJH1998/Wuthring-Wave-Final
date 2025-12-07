@@ -48,6 +48,8 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	return S_OK;
 }
 
@@ -449,6 +451,25 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 		m_fIdleAcc = m_fIdleDuration;
 	}
 	
+#pragma region MONSTER_HP
+	// 변수
+	_float3 vMobPos = {};
+	XMStoreFloat3(&vMobPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	// 체력바
+	UI_MOBINFO_DESC tDesc = {};
+	tDesc.fMobCurHP = m_fHP;
+	tDesc.fMobMaxHP = m_pGameSystem->Get_MonsterInfo("HavocWarrior")->fMaxHp;
+	tDesc.isAtkedCurFrame = m_beHit;
+	tDesc.pMonsterPtrKey = this;
+	tDesc.vMobPos = vMobPos;
+	tDesc.vMobPos.y += 1.25f;
+	m_pGameSystem->Update_MobStatus(tDesc);
+
+	// 미니맵
+	//m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(vMobPos, UI_MINIMAP_OBJTYPE::MONSTER);
+#pragma endregion
+
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)

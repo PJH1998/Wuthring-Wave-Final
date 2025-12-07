@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "VIBuffer_Rect.h"
 #include "VIBuffer_Cube.h"
+#include "VIBuffer_Sphere.h"
 #include "VIBuffer_Point_Instance.h"
 #include "VIBuffer_Point.h"
 #include "VIBuffer_FXMesh_Instance.h"

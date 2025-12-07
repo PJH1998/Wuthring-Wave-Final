@@ -17,6 +17,7 @@ public:
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
+		_bool IsBack = { false };
 	}HIT_DESC;
 
 	typedef struct tagParryDesc {
@@ -132,7 +133,6 @@ public:
 	void Set_Gravity(_bool IsGravity);
 
 	// Collider
-	
 	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
@@ -182,6 +182,12 @@ public:
 	void ResetPose();
 
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
+	void Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration);
+	// 끝날때 False
+	void Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop); 
+
+	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
+
 	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
 	
 #pragma endregion

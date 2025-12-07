@@ -183,6 +183,7 @@ enum class ERoverSpecialType : _uint
 enum class ERoverBurstType : _uint // 강공.
 {
 	BURST01 = 0,
+	EX_SKILL01_01 = 1,
 	END
 };
 

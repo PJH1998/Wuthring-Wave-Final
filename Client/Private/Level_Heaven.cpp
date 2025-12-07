@@ -377,6 +377,7 @@ void CLevel_Heaven::Ready_Leviatan()
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
 	MobDesc.vInitPosition = _float3(0.f, 0.f, 0.f);
+	MobDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	MobDesc.pAnimationTag = "Stand2";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/Leviatan/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
