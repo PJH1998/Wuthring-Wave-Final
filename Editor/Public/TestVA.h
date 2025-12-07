@@ -14,14 +14,14 @@ class CTestVA : public CGameObject
 public:
 	typedef struct tagVADesc : Engine::EFFECT_DESC
 	{
-		_wstring		strTextureTag;
-		_wstring		strColorTextureTag;
-		_wstring		strMeshTag;
+		_wstring		strTextureTag = {};
+		_wstring		strColorTextureTag = {};
+		_wstring		strMeshTag = {};
 
-		_float			fAnimSpeed;
-		_float			fMovementScale;
+		_float			fAnimSpeed = 10.f;
+		_float			fMovementScale = 0.2f;
 
-		_int			iShaderPass;
+		_int			iShaderPass = 0;
 	}VA_DESC;
 
 private:

@@ -6,6 +6,7 @@ Texture2D g_VatTexture;
 
 float g_fTrackPosition;
 float g_fAnimationDuration;
+float g_fMovementScale;
 
 struct VS_IN
 {
@@ -61,7 +62,7 @@ VS_OUT VS_MAIN(VS_IN In)
         vMovement = lerp(vStartMovement, vNextMovement, fRatio);
     }
     
-    vMovement *= 0.1f;  // 0.1f 대신에 채워주기
+    vMovement *= g_fMovementScale;
     
     float3 vPosition = In.vPosition + vMovement.xyz;
     
@@ -108,7 +109,8 @@ PS_OUT PS_VA(PS_IN In)
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    
+   
+
     return Out;
 }
 

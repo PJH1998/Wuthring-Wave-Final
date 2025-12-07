@@ -1144,6 +1144,27 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
 			jsonStream << RadialJson.dump(2);
 			jsonStream.close();
 		}
+		if (Prefab->second.FrameDesc[i].eChildrenType == EFFECT_TYPE::VA)
+		{
+			_string VAPath = {};
+			CTestVA::VA_DESC* pVADesc = {};
+
+			pVADesc = m_pVA_Controller->Get_VADesc(Prefab->second.FrameDesc[i].strChildrenTag);
+
+			VAPath = DefaultPath;
+			VAPath += "/FXVA/";
+			VAPath += WStringToString(Prefab->second.FrameDesc[i].strChildrenTag);
+			VAPath += ".json";
+
+			ofstream jsonStream(VAPath);
+
+			json VAJson;
+
+			VA_To_Json(VAJson, pVADesc);
+
+			jsonStream << VAJson.dump(2);
+			jsonStream.close();
+		}
     }
 }
 
@@ -1524,6 +1545,21 @@ void CEffect_Controller::Radial_To_Json(json& Radial, CEffect_Radial::RADIAL_DES
 	Radial["DistanceRange"] = DistanceRange;
 
 	Radial["IntensityRange"] = pRadialDesc->IntensityRange;
+}
+
+void CEffect_Controller::VA_To_Json(json& VA, CTestVA::VA_DESC* pVADesc)
+{
+	VA["MyTag"] = WStringToString(pVADesc->strMyTag);
+	VA["MyType"] = pVADesc->eMyType;
+
+	VA["MaskTextureTag"] = WStringToString(pVADesc->strTextureTag);
+	VA["ColorTextureTag"] = WStringToString(pVADesc->strColorTextureTag);
+	VA["MeshTag"] = WStringToString(pVADesc->strMeshTag);
+
+	VA["AnimSpeed"] = pVADesc->fAnimSpeed;
+	VA["MovementScale"] = pVADesc->fMovementScale;
+
+	VA["ShaderPass"] = pVADesc->iShaderPass;
 }
 
 void CEffect_Controller::Load_Prefab()

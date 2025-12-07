@@ -69,6 +69,8 @@ void CTestVA::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 
 	m_fTrackPosition = 0.f;
+
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 }
 
 void CTestVA::Bind_Resource()
@@ -89,6 +91,9 @@ void CTestVA::Bind_Resource()
 		CRASH("Failed to Bind TrackPosition");
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_fAnimationDuration", &m_fAnimationDuration, sizeof(_float))))
+		CRASH("Failed to Bind AnimationDuration");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fMovementScale", &m_tDesc.fMovementScale, sizeof(_float))))
 		CRASH("Failed to Bind AnimationDuration");
 }
 

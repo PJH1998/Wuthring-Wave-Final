@@ -10,6 +10,7 @@
 
 #include "Decal_Controller.h"
 #include "Radial_Controller.h"
+#include "VA_Controller.h"
 
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
@@ -66,6 +67,8 @@ public:
 	void Decal_To_Json(json& Decal, CEffect_Decal::DECAL_DESC* pDecalDesc);
 
 	void Radial_To_Json(json& Radial, CEffect_Radial::RADIAL_DESC* pRadialDesc);
+
+	void VA_To_Json(json& VA, CTestVA::VA_DESC* pVADesc);
 
 public:
 	void Load_Prefab();
