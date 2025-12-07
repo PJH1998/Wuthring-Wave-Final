@@ -612,6 +612,10 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Water")
 							, PROTOTYPE::GAMEOBJECT, &pDesc);
 						break;
+					case OBJECTTYPE::THROW:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Throw")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Throw"), &pDesc);
+						break;
 					default:
 						if (ModelName.find("_Wat_") != string::npos)
 							m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Water")
