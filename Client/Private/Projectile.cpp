@@ -65,6 +65,7 @@ void CProjectile::Late_Update(_float fTimeDelta)
 		{
 			m_isActivate = false;
 			m_CallBack.pTransform = nullptr;
+			m_pRigidBodyCom->Set_Desc(&m_CallBack);
 			m_pRigidBodyCom->IsActivate(false);
 			return;
 		}

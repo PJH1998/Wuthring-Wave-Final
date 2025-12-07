@@ -31,6 +31,16 @@ const LIGHT_DESC* CLight_Manager::Get_LightDesc(const _wstring& strLightTag)
 	return iter->second->Get_LightDesc();
 }
 
+HRESULT CLight_Manager::Update_LightDesc(const _wstring& strLightTag, const LIGHT_DESC& LightDesc)
+{
+	auto iter = m_Lights.find(strLightTag);
+
+	if (iter == m_Lights.end())
+		return E_FAIL;
+
+	return iter->second->Update_LightDesc(LightDesc);
+}
+
 void CLight_Manager::Set_Active(const _wstring& strLightTag, _bool isActive)
 {
 	auto iter = m_Lights.find(strLightTag);

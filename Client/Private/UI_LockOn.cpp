@@ -6,7 +6,7 @@
 #include "GameSystem.h"
 #include "Animator_UI.h"
 
-#define KSTA_UITEST_LOCKON_TOZERO
+//#define KSTA_UITEST_LOCKON_TOZERO
 
 
 // 락온UI 생성 자체는 그냥  데미지나 상호작용 만들듯이 만들고 (pooling으로 관리), 
@@ -100,7 +100,6 @@ void CUI_LockOn::Update(_float fTimeDelta)
 	vTargetWorldPos = XMVectorSet(0.f, -10.f, 0.f, 1.f);
 #endif // KSTA_UITEST_LOCKON_TOZERO
 
-
 	_matrix matViewProj = matCamView * matCamProj;
 	_vector vTargetClipRaw = XMVector3Transform(vTargetWorldPos, matViewProj);
 
@@ -120,7 +119,7 @@ void CUI_LockOn::Update(_float fTimeDelta)
 		vScreenPos = { -2000.f, -2000.f }; // 카메라 뒤면 밖으로 쫒아냄
 
 #ifndef KSTA_UITEST_LOCKON_TOZERO
-	if (!m_pTargetTransform)
+	if (!m_pTargetPos)
 		vScreenPos = { -2000.f, -2000.f }; // 타겟 없으면 밖으로 쫒아냄
 #endif
 	

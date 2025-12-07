@@ -17,7 +17,7 @@
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
 #include "UI_Ovfl_Palette.h"
-#include "UI_GrafflePoint.h"
+#include "UI_GrapplePoint.h"
 #include "UI_QTE.h"
 #include "UI_HUD_Sector_Minimap.h"
 #include "UI_CurveTrace.h"
@@ -66,7 +66,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_Parry					= Find_RootUI (L"UI_Parry");
 	m_pRootUI_MobHPBar				= Find_RootUI (L"UI_MobHPBar");
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
-	m_pRootUI_GrafflePoint			= Find_RootUI (L"UI_GrafflePoint");
+	m_pRootUI_GrapplePoint			= Find_RootUI (L"UI_GrapplePoint");
 	//m_pRootUI_QTE					= Find_RootUI (L"UI_QTE");
 
 	// MiniGames
@@ -257,9 +257,19 @@ void CUI_ControlHelper::Attach_LockOnUI(_float3* pTargetPos)
 	if (!pRootUI)
 		return; 
 
-	// 풀링으로부터 꺼내기
-	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetPos };
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
+	if (pRootUI->IsActivate())
+	{
+		// 켜져있으면 현재좌표 갱신.
+		static_cast<CUI_LockOn*>(pRootUI)->Change_TargetPos(pTargetPos);
+	}
+	else
+	{
+		// 꺼져있으면 풀링으로부터 꺼내기
+		CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetPos };
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
+	}
+
+
 }
 void CUI_ControlHelper::Detach_LockOnUI()
 {
@@ -358,16 +368,17 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
-void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos)
+void CUI_ControlHelper::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
 {
-	//CCustom_UI* pRootUI = m_pRootUI_GrafflePoint;
+	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
+	//CCustom_UI* pRootUI = m_pRootUI_GrapplePoint;
 	//
 	//if (!pRootUI)
 	//	return;
 
-	CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { pTargetPos };
+	CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { pTargetPos, eType };
 
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
 }
 
 void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)

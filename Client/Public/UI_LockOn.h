@@ -25,6 +25,9 @@ public: // 생성/복제
 	virtual void    Render()										override;
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
+	
+public:
+	void			Change_TargetPos(_float3* pTargetPos) { m_pTargetPos = pTargetPos; }
 
 private:
 	void			PreAssign_ChildUIs();

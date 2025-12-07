@@ -56,7 +56,15 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
-	m_pSpineMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2");
+	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_tCallDesc.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
+	m_CallBack.pSocketMatrix = m_pCameraMatrix;
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
 	m_fHP = pDesc->fHP;
 	m_fAttackDmg = pDesc->fAttackDmg;
@@ -450,12 +458,6 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.fAttack = m_fAttackDmg;
-	m_CallBack.pCondition = &m_iState;
-	//m_tCallDesc.strEffectTag = ;
-	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
-	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
 
 
@@ -652,7 +654,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 #pragma region UI_BIND
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
-	_matrix WorldSpine = XMLoadFloat4x4(m_pSpineMatrix) * m_pTransformCom->Get_WorldMatrix();
+	_matrix WorldSpine = XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix();
 	XMStoreFloat3(&m_vUIPosition, WorldSpine.r[3]);
 #pragma endregion
 
