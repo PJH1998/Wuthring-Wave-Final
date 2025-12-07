@@ -161,7 +161,8 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 
 	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
 
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) || 
+		Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
 	{
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
 	}
@@ -947,7 +948,7 @@ void CGalbrena::Update_Physics(_float fTimeDelta)
 			m_pTransformCom->Set_State(STATE::POSITION, vTrans);
 		}
 	}
-	else
+	else if(!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
 	{
 		// 3. 현재 위치 - 1Frame 이전 위치 값 계산'
 		_vector vVelocity = m_pTransformCom->Get_Velocity();

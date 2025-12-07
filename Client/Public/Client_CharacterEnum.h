@@ -48,6 +48,7 @@ namespace Client
 		LANDSLIDE_READY = 1 << 15, // Player에서 LandSlide 이벤트.
 		LANDSLIDE = 1 << 16, // Player에서 LandSlide 이벤트.
 		FPS = 1 << 17, // 1인칭 시점 상태.
+		COLLIDER_UNACTIVE = 1 << 18, // 콜라이더 끈상태.
 		END
 	};
 
