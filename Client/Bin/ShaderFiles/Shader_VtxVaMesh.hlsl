@@ -3,6 +3,7 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 Texture2D g_VatTexture;
+Texture2D g_DiffuseTexture;
 
 float g_fTrackPosition;
 float g_fAnimationDuration;
@@ -106,7 +107,9 @@ PS_OUT PS_VA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    Out.vDiffuse = In.vTexcoord.y; //1.f; //float4(0.7f, 0.3f, 0.1f, 1.f);
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vDiffuse = vDiffuse;
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
