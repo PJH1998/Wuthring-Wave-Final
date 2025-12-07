@@ -162,7 +162,7 @@ private:
 	array<_float4, CH_END>							m_arrPlayerAdvColors = {};
 
 private:
-	_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+	//_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
 
 
 private:

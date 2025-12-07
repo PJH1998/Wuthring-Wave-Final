@@ -300,9 +300,9 @@ void CGameSystem::Close_Game_OverflowPalette()
 	m_pUI_ControlHelper->Close_Game_OverflowPalette();
 }
 
-void CGameSystem::Attach_GrafflePoint(_float3* pTargetPos)
+void CGameSystem::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
 {
-	m_pUI_ControlHelper->Attach_GrafflePoint(pTargetPos);
+	m_pUI_ControlHelper->Attach_GrapplePoint(pTargetPos, eType);
 }
 
 void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)

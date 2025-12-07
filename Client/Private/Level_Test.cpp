@@ -33,7 +33,7 @@
 #include "SceneCamera.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
-#include "UI_GrafflePoint.h"
+#include "UI_GrapplePoint.h"
 #include "UI_QTE.h"
 #include "UI_CurveTrace.h"
 
@@ -693,9 +693,9 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
-		CRASH("Failed Ready GrafflePoint");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+		CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
@@ -921,40 +921,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	// interact
 #pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
-	static _bool isPrinted_FirstInfoMsg = false;
-
-	if (!isPrinted_FirstInfoMsg)
-	{
-		std::cout << "[Level_Test::Testing_UI] If you want to enable UI Test, Press [Ctrl + I]." << std::endl;
-		std::cout << "[Level_Test::Testing_UI] Default is Disabled Mode." << std::endl;
-
-		isPrinted_FirstInfoMsg = true;
-	}
-
-
-
-	static _bool isEnableUITest = false;
-	
-	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
-		m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-	{
-		isEnableUITest = !isEnableUITest;
-
-		if (isEnableUITest)
-		{
-			std::cout << "[Level_Test::Testing_UI] UI Testing Enabled." << std::endl;
-			std::cout << "[Level_Test::Testing_UI] \t[NUMPAD4] MobHP, \t[NUMPAD1] MobHP -10, \t[NUMPAD2] MobHP +10: " << std::endl;
-			std::cout << "[Level_Test::Testing_UI] \t[NUMPAD+] Interact, \t[NUMPAD6] Parry, \t[NUMPAD.] LockOn" << std::endl;
-			std::cout << "[Level_Test::Testing_UI] \t[TAB] TabUI(Hold), \t[NUMPAD5] Overflowing Palette" << std::endl;
-		}
-
-		if (!isEnableUITest)	std::cout << "[Level_Test::Testing_UI] UI Testing Disabled." << std::endl;
-	}
-
-
-
-	if (!isEnableUITest) return;
-
 
 	static _bool isInteractActivate = false;
 	
@@ -1109,20 +1075,24 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [INSTANT] KSTA_UITEST_GRAFFLEPOINT
+#pragma region [INSTANT] KSTA_UITEST_GRAPPLEPOINT
 
-	static _bool isInitialized_GrafflePoint = false;
+	static _bool isInitialized_GrapplePoint = false;
 
-	_uint iNumGraffleUI = 50;
+	_uint iNumGrappleUI = 50;
 
-	if (!isInitialized_GrafflePoint)
+	if (!isInitialized_GrapplePoint)
 	{
-		for (_uint i = 0; i < iNumGraffleUI; i++)
+		for (_uint i = 0; i < iNumGrappleUI; i++)
 		{
-			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), nullptr);
+			
+
+			UI_GRAPPLE_TYPE eType = static_cast<UI_GRAPPLE_TYPE>(m_pGameInstance->Rand(0.f, 1.999f));
+			CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { nullptr, eType };
+			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
 		}
 
-		isInitialized_GrafflePoint = true;
+		isInitialized_GrapplePoint = true;
 	}
 
 #pragma endregion	

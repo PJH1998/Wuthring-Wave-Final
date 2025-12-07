@@ -171,4 +171,10 @@ namespace Client
 		MONSTER, END	// 나중에 더 필요한 것 있으면 추가? 상호작용 요소..
 	};
 
+	enum class UI_GRAPPLE_TYPE {	// 다른점? 색깔..
+		MOVEABLE,		// 이동용
+		PULLABLE,		// 벽 부수는 등의 상호작용 용도
+		END 
+	};
+
 }
