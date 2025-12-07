@@ -576,19 +576,37 @@ void CUI_MobHPBar::Calc_HBEff()
 	vector<_float4x4> vecBGVariantMat = {};		// for BG Variant Desc
 	vecBGVariantMat.resize(vecBGInstDesc.size());
 
+
+
 	// 갯수만큼 수정,
 
-	for (_uint i = 0; i < m_vecMobInfo_RT.size(); i++)
+	for (_uint i = 0; i < m_vecMobInfo.size(); i++)
 	{
+		// 렌더 순서가 맞는, 이번 프레임 컨테이너로부터 고유 키를 받아와 RT에서 탐색.
+		void* pCurrentKey = m_vecMobInfo[i].pMonsterPtrKey;
+
+		auto iter = std::find_if(m_vecMobInfo_RT.begin(), m_vecMobInfo_RT.end(),
+			[pCurrentKey](const UI_MOBRT_DESC& rtDesc) {
+				return rtDesc.tInfoDesc.pMonsterPtrKey == pCurrentKey;
+			});
+
+		if (iter == m_vecMobInfo_RT.end())
+			continue;
+
+		// 찾은 RT 정보를 참조로 가져와 이하 로직에서 사용...
+		UI_MOBRT_DESC& currentMobRT = *iter;
+
+		// ======= 이 위까지 순서꼬임 방지용.. 이렇게 안하면 m_vecMobInfo 와 m_vecMobInfo_RT 의 순서는 다르므로 1번 몬스터 머리 위에 3번 몬스터 체력바가 있는 이상한 상황이 생김.
+
 		// 변수 도출용
-		const _float fInstCurHP = m_vecMobInfo_RT[i].tInfoDesc.fMobCurHP;		// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
-		const _float fInstMaxHP = m_vecMobInfo_RT[i].tInfoDesc.fMobMaxHP;		// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
+		const _float fInstCurHP = currentMobRT.tInfoDesc.fMobCurHP;		// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
+		const _float fInstMaxHP = currentMobRT.tInfoDesc.fMobMaxHP;		// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
 		const _float fMinHBTime = m_fMinRTTime;	// 최대 주기값
 		const _float fMaxHBTime = m_fMaxRTTime;	// 최소 주기값
 		const _float fColorBranchHP = 0.4f;	// 색상이 변할 기준점
 
 		// >> 게산에 쓸 것 
-		const _float fElapsedLifetime = m_vecMobInfo_RT[i].fCurElapsedTime;		// 인스턴스 별 경과 시간
+		const _float fElapsedLifetime = currentMobRT.fCurElapsedTime;		// 인스턴스 별 경과 시간
 		const _float fHPRatio = fInstCurHP / fInstMaxHP;						// 현재 체력 비율. 이에 따라 색상 변화, 애니메이션 주기 등을 제어할 것. 
 		
 		const _float fFillTime	= 0.35f;			// 매 주기 시작마다, 차오르는 데에 걸리는 시간
@@ -603,12 +621,19 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		array<_float, 2>	arrClipXRate = {};
 		for (_uint j = 0; j < arrClipXRate.size(); j++)		// 내부적으로 계산된 각 웨이브 별 델타타임을 기준으로 계산
-			arrClipXRate[j] = (m_vecMobInfo_RT[i].fAtkedElapsedTime[j] / fFillTime > 1.f) ? 1 : m_vecMobInfo_RT[i].fAtkedElapsedTime[j] / fFillTime;	
+			arrClipXRate[j] = (currentMobRT.fAtkedElapsedTime[j] / fFillTime > 1.f) ? 1 : currentMobRT.fAtkedElapsedTime[j] / fFillTime;	
 		array<_float, 2>	arrAlphaRate = {};
 		for (_uint j = 0; j < arrAlphaRate.size(); j++)		// 내부적으로 계산된 각 웨이브 별 델타타임을 기준으로 계산
-			arrAlphaRate[j] = (m_vecMobInfo_RT[i].fAtkedElapsedTime[j] <= fFillTime) ?				// 얼마나 보였다 사라질건지
-				m_vecMobInfo_RT[i].fAtkedElapsedTime[j] / fFillTime :									// filltime 도달 전 알파
-				(m_fMaxAtkedTimer - m_vecMobInfo_RT[i].fAtkedElapsedTime[j]) / (m_fMaxAtkedTimer - fFillTime);		// filltime 도달 후 알파
+			arrAlphaRate[j] = (currentMobRT.fAtkedElapsedTime[j] <= fFillTime) ?				// 얼마나 보였다 사라질건지
+				currentMobRT.fAtkedElapsedTime[j] / fFillTime :									// filltime 도달 전 알파
+				(m_fMaxAtkedTimer - currentMobRT.fAtkedElapsedTime[j]) / (m_fMaxAtkedTimer - fFillTime);		// filltime 도달 후 알파
+
+
+
+
+
+
+
 
 		//if (i == 2)
 		//	std::cout << "[arrAlphaRate] [0] : " << arrAlphaRate[0] << ", \t[1] : " << arrAlphaRate[1] << std::endl;
@@ -633,11 +658,11 @@ void CUI_MobHPBar::Calc_HBEff()
 		const _float fScaleMultiply = 2.5f;	//												<<<<<<<<<<<<<<<<<<<<
 		_float fScaleRate = 1.f + fAlphaRate * (fScaleMultiply - 1.f);	// 얼마나 커졌다 작아질건지			
 
-		_float fStackedTime = m_vecMobInfo_RT[i].fCurStackedTime;
+		_float fStackedTime = currentMobRT.fCurStackedTime;
 
 		const _float fCoordSpeedX = 1.5f; //                                    			<<<<<<<<<<<<<<<<<<<<
 
-		_bool isDead = (m_vecMobInfo_RT[i].tInfoDesc.fMobCurHP <= 0);
+		_bool isDead = (currentMobRT.tInfoDesc.fMobCurHP <= 0);
 
 		// 3. 실질 적용부
 		auto& targetInst = vecInstDesc[i];		// 적용 할 인스턴스의 데이터
@@ -687,12 +712,12 @@ void CUI_MobHPBar::Calc_HBEff()
 		//	*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;		// alpha
 		//	*reinterpret_cast<_float*>(&targetBGVariantMat._31) = 1.f;		// alpha
 		//
-		//	//m_vecMobInfo_RT[i].fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
+		//	//currentMobRT.fCurElapsedTime = fFillTime;		// 조건 미충족으로 넘어갈 시 애니메이션 부자연스럽게 넘어감을 방지
 		//}
-		//else if (!m_vecMobInfo_RT[i].isPendingFlick)	// 체력이 내려갔지만 다음 계산상의 alpha가 1이 되기 전에는 계속 1이어야 함
+		//else if (!currentMobRT.isPendingFlick)	// 체력이 내려갔지만 다음 계산상의 alpha가 1이 되기 전에는 계속 1이어야 함
 		//{
 		//	if (fAlphaRate >= 0.95f)
-		//		m_vecMobInfo_RT[i].isPendingFlick = true;
+		//		currentMobRT.isPendingFlick = true;
 		//
 		//	targetInst.vClipTexcoordX = { 0.f, 1.f };
 		//	*reinterpret_cast<_float*>(&targetVariantMat._31) = 1.f;
@@ -701,8 +726,8 @@ void CUI_MobHPBar::Calc_HBEff()
 
 		
 		// END : 시간 초기화 관리
-		if (m_vecMobInfo_RT[i].fCurElapsedTime >= fCurHBTime)
-			m_vecMobInfo_RT[i].fCurElapsedTime = 0.f;
+		if (currentMobRT.fCurElapsedTime >= fCurHBTime)
+			currentMobRT.fCurElapsedTime = 0.f;
 	}
 
 
