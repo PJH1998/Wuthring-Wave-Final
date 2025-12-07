@@ -101,17 +101,11 @@ void CAugustaCapture::Check_StateTransition(_float fTimeDelta)
 	// 올라갈때는 Fly로
 	if (m_IsAnimationEnd && m_eCaptureStep == CAPTURESTEP::STEP_START)
 	{
-		//m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_LOOP);
 		m_pAugusta->Set_Visible(false);
 		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::CAPTURED);
 		m_eCaptureStep = CAPTURESTEP::STEP_END;
 		return;
 	}
-//	if (m_IsAnimationEnd && eCaptureType == EAugustaCaptureType::BEHIT_FLY_LOOP)
-//	{
-//		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaCaptureType::CAPTURED);
-//		return;
-//	}
 
 	// 탈출했다면?
 	if (m_States[GRAB_EXIT])
@@ -134,9 +128,6 @@ void CAugustaCapture::Setup_Animations()
 	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::CAPTURED), "Captured", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_PUSH_LOOP), "Behit_Push_Loop", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_START), "Behit_Fly_Start", 0.5f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.3f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaCaptureType::BEHIT_PUSH_FALL), "Behit_Push_Fall", 1.f, 0.f);
 }
 
 void CAugustaCapture::State_Reset()

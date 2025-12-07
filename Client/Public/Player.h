@@ -161,6 +161,8 @@ private:
 	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
 
 	void Manage_Condition();
+	
+	void Sync_UtilityType();
 
 	_bool IsHitBack(class CTransform* pTransform);
 	

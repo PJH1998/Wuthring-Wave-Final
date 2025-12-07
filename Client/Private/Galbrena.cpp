@@ -1004,8 +1004,8 @@ void CGalbrena::Render_Back(_uint iMeshIndex)
 	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
 
-	_float4 vEmissiveColor = { 0.7f, 0.2f, 0.3f, 1.f};
-	_float fEmissiveIntensity = { 0.5f };
+	_float4 vEmissiveColor = { 0.5f, 0.2f, 0.3f, 1.f};
+	_float fEmissiveIntensity = { 0.25f };
 
 	// 1. MaskTexture 배열 바인딩.
 	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK); // MaskTexture 배열을 바인딩.
