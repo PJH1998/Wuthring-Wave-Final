@@ -18,6 +18,10 @@ public:
 		_wstring		strColorTextureTag;
 		_wstring		strMeshTag;
 
+		_float			fAnimSpeed;
+		_float			fMovementScale;
+
+		_int			iShaderPass;
 	}VA_DESC;
 
 private:
@@ -26,7 +30,7 @@ private:
 	virtual ~CTestVA() = default;
 
 public:
-	virtual		HRESULT			Initialize_Prototype(const VA_DESC* pDesc);
+	virtual		HRESULT			Initialize_Prototype();
 	virtual		HRESULT			Initialize_Clone(void* pArg) override;
 	virtual		void				Priority_Update(_float fTimeDelta) override;
 	virtual		void				Update(_float fTimeDelta) override;
@@ -57,7 +61,7 @@ private:
 	HRESULT						Ready_Components();
 
 public:
-	static		CTestVA* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc);
+	static		CTestVA* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void				Free() override;
 };

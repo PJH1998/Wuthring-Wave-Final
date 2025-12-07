@@ -7,6 +7,8 @@
 #include "Effect_Decal.h"
 #include "Effect_Radial.h"
 
+#include "TestVA.h"
+
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
 {
@@ -216,6 +218,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 	CEffect_Rect::FXRECT_DESC* pRectDesc = {};
 	CEffect_Decal::DECAL_DESC* pDecalDesc = {};
 	CEffect_Radial::RADIAL_DESC* pRadialDesc = {};
+	CTestVA::VA_DESC* pVADesc = {};
 
     //프리팹 프레임에 미리 추가.
     FRAME_DESC FrameDesc = {};
@@ -275,6 +278,16 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 		FrameDesc.eChildrenType = eType;
 
 		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectRadial"), PROTOTYPE::GAMEOBJECT, pArg));
+		break;
+
+	case EFFECT_TYPE::VA:
+		pVADesc = static_cast<CTestVA::VA_DESC*>(pArg);
+		strChildrenTag = pVADesc->strMyTag;
+
+		FrameDesc.strChildrenTag = pVADesc->strMyTag;
+		FrameDesc.eChildrenType = eType;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectVA"), PROTOTYPE::GAMEOBJECT, pArg));
 		break;
 
     case EFFECT_TYPE::END:

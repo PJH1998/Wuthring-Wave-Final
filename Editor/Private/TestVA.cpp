@@ -1,5 +1,5 @@
 ﻿#include "EditorPch.h"
-#include "TestVa.h"
+#include "TestVA.h"
 
 CTestVA::CTestVA(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject{ pDevice, pContext }
@@ -12,15 +12,17 @@ CTestVA::CTestVA(const CTestVA& Prototype)
 {
 }
 
-HRESULT CTestVA::Initialize_Prototype(const VA_DESC* pDesc)
+HRESULT CTestVA::Initialize_Prototype()
 {
-	m_tDesc = *pDesc;
-
 	return S_OK;
 }
 
 HRESULT CTestVA::Initialize_Clone(void* pArg)
 {
+	VA_DESC* pDesc = static_cast<VA_DESC*>(pArg);
+
+	m_tDesc = *pDesc;
+
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		CRASH("Transform");
 
@@ -43,7 +45,7 @@ void CTestVA::Update(_float fTimeDelta)
 	if (m_fTrackPosition > m_fAnimationDuration)
 		m_isActivate = false;
 
-	m_fTrackPosition += (fTimeDelta * 10.f);
+	m_fTrackPosition += (fTimeDelta * m_tDesc.fAnimSpeed);
 }
 
 void CTestVA::Late_Update(_float fTimeDelta)
@@ -88,17 +90,15 @@ void CTestVA::Bind_Resource()
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_fAnimationDuration", &m_fAnimationDuration, sizeof(_float))))
 		CRASH("Failed to Bind AnimationDuration");
-
-
 }
 
 HRESULT CTestVA::Ready_Components()
 {
-	//if(FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strTextureTag, TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
-	//	ASSERT_CRASH(m_pTextureCom);
+	if(FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strTextureTag, TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
+		ASSERT_CRASH(m_pTextureCom);
 
-	//if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strColorTextureTag, TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
-	//	ASSERT_CRASH(m_pColorTextureCom);
+	if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strColorTextureTag, TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
+		ASSERT_CRASH(m_pColorTextureCom);
 
 	if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), m_tDesc.strMeshTag, TEXT("Com_Mesh"), reinterpret_cast<CComponent**>(&m_pVAMesh), nullptr)))
 		ASSERT_CRASH(m_pVAMesh);
@@ -109,11 +109,11 @@ HRESULT CTestVA::Ready_Components()
 	return S_OK;
 }
 
-CTestVA* CTestVA::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc)
+CTestVA* CTestVA::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CTestVA* pInstance = new CTestVA(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize_Prototype(pDesc)))
+	if (FAILED(pInstance->Initialize_Prototype()))
 		CRASH("EFfect_VA");
 
 	return pInstance;

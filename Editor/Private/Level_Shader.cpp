@@ -39,7 +39,7 @@ HRESULT CLevel_Shader::Initialize()
 
 	Desc.strMeshTag = TEXT("Prototype_Test_VAMesh");
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), CTestVA::Create(m_pDevice, m_pContext, &Desc))))
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), CTestVA::Create(m_pDevice, m_pContext))))
 		return E_FAIL;
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::SHADER), TEXT("Prototype_TestVA"), ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_TEST"),

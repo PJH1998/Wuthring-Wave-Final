@@ -41,31 +41,29 @@ VS_OUT VS_MAIN(VS_IN In)
     float2 vVatCoord = float2(fVatCoorX, fVatCoordY);
 //    float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
 
-    vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
-
-    //int iCurentTexelCount = (int) (fVatCoordY / fTexelSize);
-    //if ((iCurentTexelCount + 1) >= (int) g_fAnimationDuration)
-    //{
-    //    float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
+    int iCurentTexelCount = (int) (fVatCoordY / fTexelSize);
+    if ((iCurentTexelCount + 1) >= (int) g_fAnimationDuration)
+    {
+        float2 vVatCoord = float2(In.vVATcoord.x, fVatCoordY);
         
-    //    vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
-    //}
-    //else
-    //{
-    //    int iNextTexelCount = iCurentTexelCount + 1;
-    //    float fStartY = fTexelSize * iCurentTexelCount;
-    //    float fEndY = fTexelSize * iNextTexelCount;
+        vMovement = g_VatTexture.SampleLevel(DefaultSampler, vVatCoord, 0);
+    }
+    else
+    {
+        int iNextTexelCount = iCurentTexelCount + 1;
+        float fStartY = fTexelSize * iCurentTexelCount;
+        float fEndY = fTexelSize * iNextTexelCount;
         
-    //    float4 vStartMovement = g_VatTexture.SampleLevel(DefaultSampler, float2(In.vVATcoord.x, fStartY), 0);
-    //    float4 vNextMovement = g_VatTexture.SampleLevel(DefaultSampler, float2(In.vVATcoord.x, fEndY), 0);
+        float4 vStartMovement = g_VatTexture.SampleLevel(DefaultSampler, float2(In.vVATcoord.x, fStartY), 0);
+        float4 vNextMovement = g_VatTexture.SampleLevel(DefaultSampler, float2(In.vVATcoord.x, fEndY), 0);
         
-    //    float fRatio = 1.f - ((fEndY - fVatCoordY) / fTexelSize);
-    //    vMovement = lerp(vStartMovement, vNextMovement, fRatio);
-    //}
+        float fRatio = 1.f - ((fEndY - fVatCoordY) / fTexelSize);
+        vMovement = lerp(vStartMovement, vNextMovement, fRatio);
+    }
     
-    vMovement *= 0.1f;
+    vMovement *= 0.1f;  // 0.1f 대신에 채워주기
     
-    float3 vPosition = In.vPosition /*+ vMovement.xyz*/;
+    float3 vPosition = In.vPosition + vMovement.xyz;
     
     matrix matWV, matWVP;
     

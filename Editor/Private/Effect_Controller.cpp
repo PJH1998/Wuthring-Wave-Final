@@ -6,6 +6,7 @@
 #include "AnimationActor.h"
 #include "Rect_Controller.h"
 #include "Decal_Controller.h"
+#include "VA_Controller.h"
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -26,6 +27,7 @@ HRESULT CEffect_Controller::Initialize()
 	m_pRect_Controller = CRect_Controller::Create(m_pDevice, m_pContext);
 	m_pDecal_Controller = CDecal_Controller::Create(m_pDevice, m_pContext);
 	m_pRadial_Controller = CRadial_Controller::Create(m_pDevice, m_pContext);
+	m_pVA_Controller = CVA_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -38,8 +40,6 @@ void CEffect_Controller::Update()
 	if (m_AnimActorDesc.pAnimActor != nullptr && m_pSelectedPrefab != nullptr)
 		PrefabBinding_Tab();
 #endif // _DEBUG
-
-    
 }
 
 void CEffect_Controller::Render()
@@ -177,12 +177,21 @@ void CEffect_Controller::Prefab_Tab()
 
 						m_eChildrenType = EFFECT_TYPE::DECAL;
 					}
+					ImGui::SameLine(0.f, 20.f);
 
 					if (ImGui::Button("Radial"))
 					{
 						m_pRadial_Controller->Set_RadialTag(m_ChildrenTag);
 
 						m_eChildrenType = EFFECT_TYPE::RADIAL;
+					}
+					ImGui::SameLine(0.f, 20.f);
+
+					if (ImGui::Button("VA"))
+					{
+						m_pVA_Controller->Set_VATag(m_ChildrenTag);
+
+						m_eChildrenType = EFFECT_TYPE::VA;
 					}
 
                     //위에서 정해진 타입에 따라 컨트롤러 활성화
@@ -331,6 +340,30 @@ void CEffect_Controller::Prefab_Tab()
 							m_eChildrenType = EFFECT_TYPE::END;
 						}
 					}
+
+					if (m_eChildrenType == EFFECT_TYPE::VA)
+					{
+						CTestVA::VA_DESC pDesc = {};
+
+						m_pVA_Controller->VA_Base_Tab(pDesc, m_bChildrenCreatFlag);
+
+						if (m_bChildrenCreatFlag)
+						{
+							m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
+
+							CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
+							Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+							Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::VA;
+
+							m_pSelectedPrefabDesc->ChildrenCount += 1;
+							m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
+
+							m_ChildrenTag[0] = _T('\0');
+							m_bChildrenCreatFlag = false;
+							m_bChildrenTagFlag = false;
+							m_eChildrenType = EFFECT_TYPE::END;
+						}
+					}
                 }
 
                 if (ImGui::Button("Load Children"))
@@ -381,6 +414,9 @@ void CEffect_Controller::Prefab_Tab()
 
 					if (m_IsRadialEffect)
 						m_pRadial_Controller->Update();
+
+					if (m_IsVAEffect)
+						m_pVA_Controller->Update();
                     
                     if (ImGui::Button("Apply"))
                     {
@@ -455,6 +491,16 @@ void CEffect_Controller::Prefab_Tab()
 						   m_pSelectedPrefab->Remove_Children(pDecalDesc->strMyTag);
 
 						   m_pSelectedPrefab->Add_Children(pDecalDesc, EFFECT_TYPE::RADIAL);
+					   }
+
+					   if (m_IsVAEffect)
+					   {
+						   CTestVA::VA_DESC* pVADesc = m_pVA_Controller->Get_VADesc(m_strChildrenTag);
+
+						   m_pSelectedPrefab->Remove_Children(pVADesc->strMyTag);
+
+						   m_pSelectedPrefab->Add_Children(pVADesc, EFFECT_TYPE::VA);
+
 					   }
 
                     }
@@ -591,6 +637,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
+		m_IsVAEffect = false;
 
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
@@ -602,6 +649,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
+		m_IsVAEffect = false;
 
         m_pMesh_Controller->UpdateSelected_FXMeshFormTag(m_strChildrenTag);
     }
@@ -624,6 +672,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = true;
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
+		m_IsVAEffect = false;
 
 		m_pRect_Controller->UpdateSelected_RectFormTag(m_strChildrenTag);
 	}
@@ -647,8 +696,21 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = true;
+		m_IsVAEffect = false;
 
 		m_pRadial_Controller->UpdateSelected_RadialFormTag(m_strChildrenTag);
+	}
+	else if (dynamic_cast<CTestVA*>(m_pSelectedPrefab->Get_Children(m_strChildrenTag)))
+	{
+		m_IsParticle = false;
+		m_IsMeshEffect = false;
+		m_IsTrailMesh = false;
+		m_IsRectEffect = false;
+		m_IsDecalEffect = false;
+		m_IsRadialEffect = false;
+		m_IsVAEffect = true;
+
+		m_pVA_Controller->UpdateSelected_VAFormTag(m_strChildrenTag);
 	}
 
     //프리팹이 들고 있는 구조체에서 자식과 동일한 프레임 찾기
@@ -780,6 +842,7 @@ void CEffect_Controller::Reset_ChildrenInfo()
     m_IsTrailMesh = false;
 	m_IsRectEffect = false;
 	m_IsDecalEffect = false;
+	m_IsVAEffect = false;
 }
 
 void CEffect_Controller::Reset_PrefabInfo()
@@ -954,6 +1017,7 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
             josnStream << ParticleJson.dump(2);
             jsonStream.close();
         }
+
         if (Prefab->second.FrameDesc[i].eChildrenType == EFFECT_TYPE::MESH)
         {
             _string MeshVBPath = {};
