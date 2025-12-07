@@ -403,20 +403,19 @@ void CCharacter::ResetPose()
 
 void CCharacter::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
 {
+	if (nullptr == m_pGameInstance)
+		return;
+
 	m_pGameInstance->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
 }
 
-// Duration
-void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration)
 {
-	m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, fDuration);
-}
+	if (nullptr == m_pGameSystem)
+		return;
 
-// TimeStop
-void CCharacter::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
-{
-	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
-	//m_pGameInstance->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
+	//m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio, fDuration);
 }
 
 void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)

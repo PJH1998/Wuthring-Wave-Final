@@ -182,9 +182,8 @@ public:
 	void ResetPose();
 
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
-	void Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration);
-	// 끝날때 False
-	void Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop); 
+
+	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration);
 
 	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
 
