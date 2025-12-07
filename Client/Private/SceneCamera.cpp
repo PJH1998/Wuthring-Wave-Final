@@ -99,10 +99,28 @@ void CSceneCamera::Lerp_Quat()
 void CSceneCamera::Spline()
 {
 	_int iEnd = m_Frames.size() - 1;
-	_int iIndex0 = clamp(m_iFrameIndex - 1, 0, iEnd);
-	_int iIndex1 = clamp(m_iFrameIndex, 0, iEnd);
-	_int iIndex2 = clamp(m_iFrameIndex + 1, 0, iEnd);
-	_int iIndex3 = clamp(m_iFrameIndex + 2, 0, iEnd);
+
+	_int iIndex0{}, iIndex1{}, iIndex2{}, iIndex3{};
+
+	if (true == m_Frames[m_iFrameIndex].isLerp)
+		iIndex0 = clamp(m_iFrameIndex - 1, 0, iEnd);
+	else
+		iIndex0 = clamp(m_iFrameIndex, 0, iEnd);
+
+	iIndex1 = clamp(m_iFrameIndex, 0, iEnd);
+	iIndex2 = clamp(m_iFrameIndex + 1, 0, iEnd);
+	iIndex3 = clamp(m_iFrameIndex + 2, 0, iEnd);
+
+	if (false == m_Frames[iIndex3].isLerp)
+	{
+		if (false == m_Frames[iIndex2].isLerp)
+		{
+			iIndex3 = m_iFrameIndex;
+			iIndex2 = m_iFrameIndex;
+		}
+		else
+			iIndex3 = clamp(m_iFrameIndex + 1, 0, iEnd);
+	}
 
 	_vector vP0 = XMLoadFloat3(&m_Frames[iIndex0].vPosition);
 	_vector vP1 = XMLoadFloat3(&m_Frames[iIndex1].vPosition);
