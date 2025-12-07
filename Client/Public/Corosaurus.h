@@ -61,7 +61,7 @@ private:
 	_float4					m_vBaseColor{};
 
 	const _float4x4*		m_pGrabSocket = { nullptr };
-	const _float4x4*		m_pForeHeadSocket = { nullptr };
+	const _float4x4*		m_pCameraSocket = { nullptr };
 	_float4x4				m_GrabCombinedMat = {};
 
 #pragma region CONDITION_VARIABLE

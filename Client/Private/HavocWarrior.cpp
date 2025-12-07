@@ -37,6 +37,15 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
+
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+	m_pColliderCom->Set_Desc(&m_CallBack);
+
 	m_vDistanceRange = _float2(2.6f, 2.9f);
 	m_fHP = pDesc->fHp;
 	m_fAttackDmg = pDesc->fAttackDmg;
@@ -324,12 +333,7 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		BeHit(iLayer, pDesc, Manifold);
 		});
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.fAttack = m_fAttackDmg;
-	m_CallBack.pCondition = &m_iState;
-	//m_CallBack.strEffectTag = ;
-	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
-	m_pColliderCom->Set_Desc(&m_CallBack);
+	
 	m_pColliderCom->Set_Gravity(true);
 	m_pColliderCom->IsActivate(false);
 
@@ -382,6 +386,8 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 
 void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 {
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+
 	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
 	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
