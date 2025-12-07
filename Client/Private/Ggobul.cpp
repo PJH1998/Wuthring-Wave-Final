@@ -51,7 +51,7 @@ void CGgobul::Update(_float fTimeDelta)
 	{
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(m_pRootMatrix));
 	}
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
 	if (isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);

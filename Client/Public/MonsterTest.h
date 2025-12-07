@@ -59,6 +59,7 @@ private:
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
 	CGameSystem*			m_pGameSystem = { nullptr };
 	const _float4x4*		m_pToeMatrix = { nullptr };
+	const _float4x4*		m_pSpineMatrix = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 	CAttackVolume*			m_pParryVolume = {nullptr,};
@@ -110,6 +111,7 @@ private:
 #pragma region UI_BIND
 	_bool					m_isParalysis{};
 	_float					m_fParalysisRatio{}; //0.f ~ 1.f
+	_float3					m_vUIPosition{};
 #pragma endregion
 
 private:
