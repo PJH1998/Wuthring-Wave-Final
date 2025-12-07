@@ -162,7 +162,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1206_first/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1207_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
