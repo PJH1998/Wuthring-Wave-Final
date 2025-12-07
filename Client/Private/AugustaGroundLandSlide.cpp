@@ -41,7 +41,7 @@ void CAugustaGroundLandSlide::OnEnter(void* pArg)
 	// 5. 중력 끕니다. => 정해진 경로로 이동할 것이므로.
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->ColliderActive(false);
-	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
+	//m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 	// 6. 현재 위치를 받아옵니다.
 	XMStoreFloat3(&m_vStart, m_pAugusta->Get_Position());
 
@@ -84,7 +84,7 @@ void CAugustaGroundLandSlide::OnExit()
 	m_pAugusta->Set_Gravity(true);
 	//m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
+	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 	m_iWayPoint = 0;
 	m_SlideData.Reset();
 }
