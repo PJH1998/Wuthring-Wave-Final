@@ -17,7 +17,7 @@
 #include "UI_MobHPBar.h"
 #include "UI_TabUtility.h"
 #include "UI_Ovfl_Palette.h"
-#include "UI_GrafflePoint.h"
+#include "UI_GrapplePoint.h"
 #include "UI_QTE.h"
 #include "UI_HUD_Sector_Minimap.h"
 #include "UI_CurveTrace.h"
@@ -66,7 +66,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_Parry					= Find_RootUI (L"UI_Parry");
 	m_pRootUI_MobHPBar				= Find_RootUI (L"UI_MobHPBar");
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
-	m_pRootUI_GrafflePoint			= Find_RootUI (L"UI_GrafflePoint");
+	m_pRootUI_GrapplePoint			= Find_RootUI (L"UI_GrapplePoint");
 	//m_pRootUI_QTE					= Find_RootUI (L"UI_QTE");
 
 	// MiniGames
@@ -358,17 +358,17 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
-void CUI_ControlHelper::Attach_GrafflePoint(_float3* pTargetPos, UI_GRAFFLE_TYPE eType)
+void CUI_ControlHelper::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
 {
 	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
-	//CCustom_UI* pRootUI = m_pRootUI_GrafflePoint;
+	//CCustom_UI* pRootUI = m_pRootUI_GrapplePoint;
 	//
 	//if (!pRootUI)
 	//	return;
 
-	CUI_GrafflePoint::UI_GRAFFLEPOINT_DESC tDesc = { pTargetPos, eType };
+	CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { pTargetPos, eType };
 
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrafflePoint", _fmatrix(), &tDesc);
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
 }
 
 void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)

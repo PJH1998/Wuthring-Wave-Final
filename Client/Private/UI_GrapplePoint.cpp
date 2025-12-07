@@ -1,33 +1,33 @@
 ﻿// Single LockOn 
 
 #include "ClientPch.h"
-#include "UI_GrafflePoint.h"
+#include "UI_GrapplePoint.h"
 
 #include "GameSystem.h"
 #include "Animator_UI.h"
 
-#define KSTA_UITEST_GRAFFLE_TOZERO  
+#define KSTA_UITEST_GRAPPLE_TOZERO  
 #define	 IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
 
 
-CUI_GrafflePoint::CUI_GrafflePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CUI_GrapplePoint::CUI_GrapplePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Image(pDevice, pContext)
 {
 }
 
-CUI_GrafflePoint::CUI_GrafflePoint(const CUI_GrafflePoint& Prototype)
+CUI_GrapplePoint::CUI_GrapplePoint(const CUI_GrapplePoint& Prototype)
 	: CUI_Image(Prototype)
 	//, m_pGameSystem (CGameSystem::GetInstance())
 {
 	//Safe_AddRef(m_pGameSystem);
 }
 
-HRESULT CUI_GrafflePoint::Initialize_Prototype()
+HRESULT CUI_GrapplePoint::Initialize_Prototype()
 {
 	return S_OK;
 }
 
-HRESULT CUI_GrafflePoint::Initialize_Clone(void* pArg)
+HRESULT CUI_GrapplePoint::Initialize_Clone(void* pArg)
 {
 	CGameObject::Initialize_Clone(pArg);
 
@@ -36,24 +36,24 @@ HRESULT CUI_GrafflePoint::Initialize_Clone(void* pArg)
 	Ready_Presets();
 
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
-	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_GrafflePoint.json";
+	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_GrapplePoint.json";
 	Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
 
 	// Load Animations from json.
 	vector<_wstring> vecAnimFilePaths = {
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Initialize.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_FadeIn.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_FadeOut.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_FadeIn.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_FadeOut.json",
 
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Static_Initialize.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Static_FadeIn.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Static_FadeOut.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Static_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Static_FadeIn.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Static_FadeOut.json",
 
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Dynamic_Initialize.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Dynamic_FadeIn.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Dynamic_FadeOut.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Graffle_Dynamic_TickLoop.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Dynamic_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Dynamic_FadeIn.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Dynamic_FadeOut.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Grapple_Dynamic_TickLoop.json",
 	};
 	Load_Animations(vecAnimFilePaths);
 
@@ -62,19 +62,19 @@ HRESULT CUI_GrafflePoint::Initialize_Clone(void* pArg)
 	m_pStaticAnimUI	->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 	m_pDynamicAnimUI->Set_DisableFlag(ENUM_CLASS(CAnimator_UI::UI_ANIM_DISABLE::POS));
 
-	//static_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Graffle_Dynamic_Initialize");
+	//static_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Dynamic_Initialize");
 
 	Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
 
 	m_isClone = true;
-	//m_pGameInstance->Add_RootUI(L"UI_GrafflePoint", this);
+	//m_pGameInstance->Add_RootUI(L"UI_GrapplePoint", this);
 
 
 	return S_OK;
 }
 
-void CUI_GrafflePoint::Priority_Update(_float fTimeDelta)
+void CUI_GrapplePoint::Priority_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
@@ -83,12 +83,12 @@ void CUI_GrafflePoint::Priority_Update(_float fTimeDelta)
 	__super::Priority_Update(fTimeDelta);
 }
 
-void CUI_GrafflePoint::Update(_float fTimeDelta)
+void CUI_GrapplePoint::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
 
-#ifdef KSTA_UITEST_GRAFFLE_TOZERO
+#ifdef KSTA_UITEST_GRAPPLE_TOZERO
 	if (!m_DEBUG_isAssignedPosition)
 	{
 		m_DEBUG_isAssignedPosition = true;
@@ -104,7 +104,7 @@ void CUI_GrafflePoint::Update(_float fTimeDelta)
 
 		m_pTargetPos = pDEBUG_vTargetPos;
 	}
-#endif // KSTA_UITEST_GRAFFLE_TOZERO
+#endif // KSTA_UITEST_GRAPPLE_TOZERO
 
 
 
@@ -117,7 +117,7 @@ void CUI_GrafflePoint::Update(_float fTimeDelta)
 	__super::Update(fTimeDelta);
 }
 
-void CUI_GrafflePoint::Late_Update(_float fTimeDelta)
+void CUI_GrapplePoint::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
@@ -134,7 +134,7 @@ void CUI_GrafflePoint::Late_Update(_float fTimeDelta)
 	__super::Late_Update(fTimeDelta);
 }
 
-void CUI_GrafflePoint::Render()
+void CUI_GrapplePoint::Render()
 {
 	if (!m_isActivate)
 		return;
@@ -142,29 +142,29 @@ void CUI_GrafflePoint::Render()
 
 }
 
-void CUI_GrafflePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
+void CUI_GrapplePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Graffle_Initialize", true);
+	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Initialize", true);
 
 	if (pArg != nullptr)
 	{
-		UI_GRAFFLEPOINT_DESC* pDesc = static_cast<UI_GRAFFLEPOINT_DESC*>(pArg);
+		UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
 
 		m_pTargetPos = pDesc->pTargetPos;
-		m_eGraffleType = pDesc->eType;
+		m_eGrappleType = pDesc->eType;
 	}
 
 
-#ifndef KSTA_UITEST_GRAFFLE_TOZERO
+#ifndef KSTA_UITEST_GRAPPLE_TOZERO
 	else
-		MSG_BOX("GrafflePoint doesn't receive position information.");
-#endif // !KSTA_UITEST_GRAFFLE_TOZERO
+		MSG_BOX("GrapplePoint doesn't receive position information.");
+#endif // !KSTA_UITEST_GRAPPLE_TOZERO
 
 
 	m_isActivate = true;
 }
 
-void CUI_GrafflePoint::PreAssign_ChildUIs()
+void CUI_GrapplePoint::PreAssign_ChildUIs()
 {
 	m_pRUI_All		= Find_ChildObject(L"Sub_All");
 	m_pStaticUI		= Find_ChildObject(L"SectorA_Static");
@@ -174,18 +174,18 @@ void CUI_GrafflePoint::PreAssign_ChildUIs()
 	m_pStaticAnimUI = dynamic_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"));
 	m_pDynamicAnimUI= dynamic_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"));
 
-	m_pUIGrafflePoint	= Find_ChildObject(L"GrafflePoint");
-	m_pUIGraffleOutline	= Find_ChildObject(L"GraffleOutline");
+	m_pUIGrapplePoint	= Find_ChildObject(L"GrapplePoint");
+	m_pUIGrappleOutline	= Find_ChildObject(L"GrappleOutline");
 }
 
-void CUI_GrafflePoint::Ready_Presets()
+void CUI_GrapplePoint::Ready_Presets()
 {
-	arrTypeColors[ENUM_CLASS(UI_GRAFFLE_TYPE::MOVEABLE)]	= _float4(1.000f, 0.957f, 0.631f, 1.0f);
-	arrTypeColors[ENUM_CLASS(UI_GRAFFLE_TYPE::PULLABLE)]	= _float4(0.631f, 1.000f, 0.914f, 1.0f);
-	arrTypeColors[ENUM_CLASS(UI_GRAFFLE_TYPE::END)]			= _float4(1.000f, 0.000f, 1.000f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::MOVEABLE)]	= _float4(1.000f, 0.957f, 0.631f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULLABLE)]	= _float4(0.631f, 1.000f, 0.914f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::END)]			= _float4(1.000f, 0.000f, 1.000f, 1.0f);
 }
 
-void CUI_GrafflePoint::Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos)
+void CUI_GrapplePoint::Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos)
 {
 	const _matrix matCamView = m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW);
 	const _matrix matCamProj = m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ);
@@ -215,7 +215,7 @@ void CUI_GrafflePoint::Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTar
 	static_cast<CTransform*>(pTargetUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
 }
 
-void CUI_GrafflePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance)
+void CUI_GrapplePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance)
 {
 	CTransform* pTargetTransform = static_cast<CTransform*>(pTargetUI->Get_Component(L"Com_Transform"));
 
@@ -234,10 +234,10 @@ void CUI_GrafflePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotD
 	pTargetTransform->Scale(vFinalScale);
 }
 
-void CUI_GrafflePoint::Update_TargetColor()
+void CUI_GrapplePoint::Update_TargetColor()
 {
 	static vector<_float4x4> vecVariantMat = { _float4x4() };
-	*reinterpret_cast<_float4*>(&vecVariantMat[0]) = arrTypeColors[ENUM_CLASS(m_eGraffleType)];	// Ready_Presets 에서 정의해 둔 색상으로.
+	*reinterpret_cast<_float4*>(&vecVariantMat[0]) = arrTypeColors[ENUM_CLASS(m_eGrappleType)];	// Ready_Presets 에서 정의해 둔 색상으로.
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
@@ -245,11 +245,11 @@ void CUI_GrafflePoint::Update_TargetColor()
 		true
 	};
 
-	m_pUIGrafflePoint	->Set_VariantUIDesc(tVariantDesc);
-	m_pUIGraffleOutline	->Set_VariantUIDesc(tVariantDesc);
+	m_pUIGrapplePoint	->Set_VariantUIDesc(tVariantDesc);
+	m_pUIGrappleOutline	->Set_VariantUIDesc(tVariantDesc);
 }
 
-void CUI_GrafflePoint::Update_AnimOrder(_float fTimeDelta)
+void CUI_GrapplePoint::Update_AnimOrder(_float fTimeDelta)
 {
 	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
 	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(m_pTargetPos) - XMLoadFloat4(&vCamPos))));	// 카메라와 타겟 간 거리
@@ -275,15 +275,15 @@ void CUI_GrafflePoint::Update_AnimOrder(_float fTimeDelta)
 	// 3. 일정 거리를 조건으로 애니메이션 분기 진행
 	switch (m_eTriggerState)
 	{
-	case CUI_GrafflePoint::ENTER:		m_pSubAnimUI->Change_Animation(L"Graffle_FadeIn", true);						
-										m_pStaticAnimUI->Change_Animation(L"Graffle_Static_FadeIn", true);				break;
-	case CUI_GrafflePoint::EXIT:		m_pSubAnimUI->Change_Animation(L"Graffle_FadeOut", true);						
-										m_pStaticAnimUI->Change_Animation(L"Graffle_Static_FadeOut", true);				break;
-	case CUI_GrafflePoint::SEMIENTER:	m_pDynamicAnimUI->Change_Animation(L"Graffle_Dynamic_TickLoop", true);			break;
-	case CUI_GrafflePoint::SEMIEXIT:	m_pDynamicAnimUI->Change_Animation(L"Graffle_Dynamic_FadeOut", true);			break;
-	//case CUI_GrafflePoint::NONE:		
-	//default:							m_pSubAnimUI->Change_Animation(L"Graffle_Initialize", true);
-	//									m_pDynamicAnimUI->Change_Animation(L"Graffle_Dynamic_Initialize", true);		break;
+	case CUI_GrapplePoint::ENTER:		m_pSubAnimUI->Change_Animation(L"Grapple_FadeIn", true);						
+										m_pStaticAnimUI->Change_Animation(L"Grapple_Static_FadeIn", true);				break;
+	case CUI_GrapplePoint::EXIT:		m_pSubAnimUI->Change_Animation(L"Grapple_FadeOut", true);						
+										m_pStaticAnimUI->Change_Animation(L"Grapple_Static_FadeOut", true);				break;
+	case CUI_GrapplePoint::SEMIENTER:	m_pDynamicAnimUI->Change_Animation(L"Grapple_Dynamic_TickLoop", true);			break;
+	case CUI_GrapplePoint::SEMIEXIT:	m_pDynamicAnimUI->Change_Animation(L"Grapple_Dynamic_FadeOut", true);			break;
+	//case CUI_GrapplePoint::NONE:		
+	//default:							m_pSubAnimUI->Change_Animation(L"Grapple_Initialize", true);
+	//									m_pDynamicAnimUI->Change_Animation(L"Grapple_Dynamic_Initialize", true);		break;
 	}
 
 	// 4. 비교용 이전상태 갱신
@@ -317,36 +317,36 @@ void CUI_GrafflePoint::Update_AnimOrder(_float fTimeDelta)
 
 }
 
-CUI_GrafflePoint* CUI_GrafflePoint::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CUI_GrapplePoint* CUI_GrapplePoint::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CUI_GrafflePoint* pInstance = new CUI_GrafflePoint(pDevice, pContext);
+	CUI_GrapplePoint* pInstance = new CUI_GrapplePoint(pDevice, pContext);
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
-		MSG_BOX("Failed to Created : CUI_GrafflePoint");
+		MSG_BOX("Failed to Created : CUI_GrapplePoint");
 		Safe_Release(pInstance);
 	}
 	return pInstance;
 }
 
-CGameObject* CUI_GrafflePoint::Clone(void* pArg)
+CGameObject* CUI_GrapplePoint::Clone(void* pArg)
 {
-	CUI_GrafflePoint* pInstance = new CUI_GrafflePoint(*this);
+	CUI_GrapplePoint* pInstance = new CUI_GrapplePoint(*this);
 	if (FAILED(pInstance->Initialize_Clone(pArg)))
 	{
-		MSG_BOX("Failed to Clone : CUI_GrafflePoint");
+		MSG_BOX("Failed to Clone : CUI_GrapplePoint");
 		Safe_Release(pInstance);
 	}
 	return pInstance;
 }
 
-void CUI_GrafflePoint::Free()
+void CUI_GrapplePoint::Free()
 {
-#ifdef KSTA_UITEST_GRAFFLE_TOZERO
+#ifdef KSTA_UITEST_GRAPPLE_TOZERO
 	delete m_pTargetPos;
-#endif // !KSTA_UITEST_GRAFFLE_TOZERO
+#endif // !KSTA_UITEST_GRAPPLE_TOZERO
 
 	//if (m_isClone)
-	//	m_pGameInstance->Remove_RootUI(L"UI_GrafflePoint");
+	//	m_pGameInstance->Remove_RootUI(L"UI_GrapplePoint");
 
 	__super::Free();
 

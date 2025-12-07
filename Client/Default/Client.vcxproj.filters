@@ -376,9 +376,6 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Containers_Prop\GrafflePoint">
-      <UniqueIdentifier>{1dda4253-7a9b-4853-9436-0d14c8a74145}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\MapObject\NonStatic">
       <UniqueIdentifier>{7775ba39-3792-4e81-b9a0-73409fa53076}</UniqueIdentifier>
     </Filter>
@@ -489,6 +486,9 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\FXVA">
       <UniqueIdentifier>{a0858081-8918-47d3-874e-57bd9194d4a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\GrapplePoint">
+      <UniqueIdentifier>{1dda4253-7a9b-4853-9436-0d14c8a74145}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1080,8 +1080,8 @@
     <ClInclude Include="..\Public\MouseController.h">
       <Filter>93. Mouse</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\UI_GrafflePoint.h">
-      <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
+    <ClInclude Include="..\public\UI_GrapplePoint.h">
+      <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_QTE.h">
       <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>
@@ -1816,8 +1816,8 @@
     <ClCompile Include="..\Private\MouseController.cpp">
       <Filter>93. Mouse</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\UI_GrafflePoint.cpp">
-      <Filter>03. GameObject\UI\Containers_Prop\GrafflePoint</Filter>
+    <ClCompile Include="..\private\UI_GrapplePoint.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_QTE.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\QTE</Filter>

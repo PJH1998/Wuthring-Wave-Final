@@ -1,26 +1,26 @@
 ﻿#pragma once
 #include "UI_Image.h"
 
-#define KSTA_UITEST_GRAFFLE_TOZERO
+#define KSTA_UITEST_GRAPPLE_TOZERO
 
 NS_BEGIN(Client)
 
-class CUI_GrafflePoint final : public CUI_Image
+class CUI_GrapplePoint final : public CUI_Image
 {
 public:
 	typedef struct tUILockOnDesc {
 		_float3* pTargetPos = nullptr;
-		UI_GRAFFLE_TYPE eType = UI_GRAFFLE_TYPE::END;
-	} UI_GRAFFLEPOINT_DESC;
+		UI_GRAPPLE_TYPE eType = UI_GRAPPLE_TYPE::END;
+	} UI_GRAPPLEPOINT_DESC;
 
 private:
-	enum UI_GRAFFLE_TRIGGER { ENTER, EXIT, SEMIENTER, SEMIEXIT, NONE };
-	enum UI_GRAFFLE_STATE { UNVISIBLE, OUTER, INNER };
+	enum UI_GRAPPLE_TRIGGER { ENTER, EXIT, SEMIENTER, SEMIEXIT, NONE };
+	enum UI_GRAPPLE_STATE { UNVISIBLE, OUTER, INNER };
 
 public:
-	explicit CUI_GrafflePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CUI_GrafflePoint(const CUI_GrafflePoint& Prototype);
-	virtual ~CUI_GrafflePoint() = default;
+	explicit CUI_GrapplePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CUI_GrapplePoint(const CUI_GrapplePoint& Prototype);
+	virtual ~CUI_GrapplePoint() = default;
 
 public: // 생성/복제
 	virtual HRESULT Initialize_Prototype()							override;
@@ -51,10 +51,10 @@ private:
 	CAnimator_UI*	m_pStaticAnimUI	= nullptr;	
 	CAnimator_UI*	m_pDynamicAnimUI= nullptr;
 
-	CCustom_UI*		m_pUIGrafflePoint		= nullptr;
-	CCustom_UI*		m_pUIGraffleOutline		= nullptr;
+	CCustom_UI*		m_pUIGrapplePoint		= nullptr;
+	CCustom_UI*		m_pUIGrappleOutline		= nullptr;
 
-	array<_float4, ENUM_CLASS(UI_GRAFFLE_TYPE::END) + 1> arrTypeColors = {};
+	array<_float4, ENUM_CLASS(UI_GRAPPLE_TYPE::END) + 1> arrTypeColors = {};
 
 
 private:
@@ -68,19 +68,19 @@ private:
 
 	//_bool			m_i
 
-#ifdef KSTA_UITEST_GRAFFLE_TOZERO
+#ifdef KSTA_UITEST_GRAPPLE_TOZERO
 	_bool			m_DEBUG_isAssignedPosition = false;
-#endif // KSTA_UITEST_GRAFFLE_TOZERO
+#endif // KSTA_UITEST_GRAPPLE_TOZERO
 
 
-	UI_GRAFFLE_TYPE		m_eGraffleType = UI_GRAFFLE_TYPE::END;
+	UI_GRAPPLE_TYPE		m_eGrappleType = UI_GRAPPLE_TYPE::END;
 
 	// Animation Control
 
-	UI_GRAFFLE_TRIGGER  m_eTriggerState = NONE;
+	UI_GRAPPLE_TRIGGER  m_eTriggerState = NONE;
 
-	UI_GRAFFLE_STATE	m_eCurDistState = UNVISIBLE;
-	UI_GRAFFLE_STATE	m_ePrevDistState = UNVISIBLE;
+	UI_GRAPPLE_STATE	m_eCurDistState = UNVISIBLE;
+	UI_GRAPPLE_STATE	m_ePrevDistState = UNVISIBLE;
 
 	_bool				m_isUnvisible = false;
 	_bool				m_isUnvisibleStandby = false;
@@ -88,7 +88,7 @@ private:
 	const _float		m_fUnvisibledTime = 0.25f;
 	
 public:
-	static CUI_GrafflePoint* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CUI_GrapplePoint* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject*	Clone(void* pArg) override;
 	virtual void			Free() override;
 };

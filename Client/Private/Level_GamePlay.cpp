@@ -515,9 +515,9 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrafflePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrafflePoint"), TEXT("Pool_Custom_GrafflePoint"), 50)))
-		CRASH("Failed Ready GrafflePoint");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+		CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
