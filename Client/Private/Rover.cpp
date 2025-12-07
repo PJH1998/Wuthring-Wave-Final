@@ -501,7 +501,7 @@ void CRover::Hit_Judge(void* pArg)
 	if (!IsAttack && !IsSpecialAttack)
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f); // Attack은 살짝만 느려지게
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Attack은 살짝만 느려지게
 
 	
 	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
