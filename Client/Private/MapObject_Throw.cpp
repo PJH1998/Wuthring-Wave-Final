@@ -34,7 +34,6 @@ HRESULT CMapObject_Throw::Initialize_Clone(void* pArg)
 
 void CMapObject_Throw::Priority_Update(_float fTimeDelta)
 {
-	//목표 방향은 화면의 정중앙.
 }
 
 void CMapObject_Throw::Update(_float fTimeDelta)
@@ -71,15 +70,6 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		_vector vGravityAccel = XMVectorSet(0.f, -9.81f, 0.f, 0.f);
 		_vector vGravityDrop = vGravityAccel * 0.5f * fTime * fTime;
 		XMStoreFloat3(&m_vImpulse, (DisplaceMent - vGravityDrop) / fTime);
-
-
-
-		////_float GravityTerm = 0.5f * -9.8f * fTime * fTime;
-
-		////_vector Velocity = XMVectorSet(DisplaceMent.m128_f32[0] - GravityTerm / fTime, DisplaceMent.m128_f32[1] - GravityTerm / fTime, DisplaceMent.m128_f32[2] - GravityTerm / fTime, 0.f);
-
-		////Velocity *= 10.f;
-		//XMStoreFloat3(&m_vImpulse, Velocity);
 	}
 	else 
 	{
@@ -94,17 +84,11 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 			_vector NewPos = XMLoadFloat3(&m_vStartPos) + vt + gt2;
 			m_pTransformCom->Set_State(STATE::POSITION, NewPos);
 		}
-
-		//_vector Pos = m_pTransformCom->Get_State(STATE::POSITION);
-		//
-		//if (T < 1.f)
-		//	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMVectorLerp(XMLoadFloat3(&m_vStartPos), XMLoadFloat3(&m_vTargetPos), T), 1.f));
-
 	}
 	m_pCollideRigidbodyCom->Set_Transform(m_pTransformCom->Get_WorldMatrix());
 
 	_float3 Grav(0.f, -9.8f, 0.f);
-	m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
+	//m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
 }
 
 void CMapObject_Throw::Late_Update(_float fTimeDelta)
@@ -161,6 +145,10 @@ void CMapObject_Throw::Render()
 	}
 }
 
+void CMapObject_Throw::Render_Shadow()
+{
+}
+
 void CMapObject_Throw::Ready_Components(void* pArg)
 {
 
@@ -177,11 +165,6 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
-
-	//// ShadowShader
-	//if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
-	//	TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
-	//	CRASH("FAILED");
 
 	_wstring ModelName = Model;
 	ModelName.pop_back();
@@ -229,8 +212,6 @@ void CMapObject_Throw::Collide()
 	m_pDetectRigidbodyCom->IsActivate(false);
 	//m_pCollideRigidbodyCom->IsActivate(false);
 	SetActivate(false);
-
-	//사운드 및 이펙트 호출.
 }
 
 void CMapObject_Throw::Graped()

@@ -30,12 +30,13 @@ private:
 
 
 public:
-	virtual		HRESULT			Initialize_Prototype();
-	virtual		HRESULT			Initialize_Clone(void* pArg);
-	virtual		void			Priority_Update(_float fTimeDelta);
-	virtual		void			Update(_float fTimeDelta);
-	virtual		void			Late_Update(_float fTimeDelta);
-	virtual		void			Render();
+	virtual		HRESULT			Initialize_Prototype()override;
+	virtual		HRESULT			Initialize_Clone(void* pArg)override;
+	virtual		void			Priority_Update(_float fTimeDelta)override;
+	virtual		void			Update(_float fTimeDelta)override;
+	virtual		void			Late_Update(_float fTimeDelta)override;
+	virtual		void			Render()override;
+	virtual		void			Render_Shadow()override;
 private:
 	void						Change_Level();
 	void						Ready_Components(void* pArg);

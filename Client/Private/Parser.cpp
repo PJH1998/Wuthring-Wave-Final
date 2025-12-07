@@ -617,6 +617,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 							, ENUM_CLASS(eLevel), TEXT("Layer_Throw"), &pDesc);
 						break;
 					default:
+						//return;
 						if (ModelName.find("_Wat_") != string::npos)
 							m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Water")
 								, ENUM_CLASS(eLevel), TEXT("Layer_Water"), &pDesc);
