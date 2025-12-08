@@ -215,7 +215,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnDetect_Remove(iLayer, pDesc, Manifold);
 		});
-	m_pRigidBodyCom->IsActivate(false);
+	//m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -234,7 +234,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
-	m_pColliderCom->IsActivate(false);
+	//m_pColliderCom->IsActivate(false);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
