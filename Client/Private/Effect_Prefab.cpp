@@ -1,8 +1,5 @@
 ﻿#include "ClientPch.h"
 #include "Effect_Prefab.h"
-#include "Particle.h"
-//#include "Effect_Mesh.h"
-#include "Trail_Mesh.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
@@ -228,6 +225,20 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
 
 	case EFFECT_TYPE::RADIAL:
 		strChildrenProtoTag += TEXT("FXRadial_");
+		strChildrenProtoTag += strChildrenNameTag;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+		break;
+
+	case EFFECT_TYPE::VA:
+		strChildrenProtoTag += TEXT("FXVA_");
+		strChildrenProtoTag += strChildrenNameTag;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+		break;
+
+	case EFFECT_TYPE::LIGHT:
+		strChildrenProtoTag += TEXT("FXLight_");
 		strChildrenProtoTag += strChildrenNameTag;
 
 		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));

@@ -80,6 +80,9 @@ void CTestVA::Bind_Resource()
 	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
 		CRASH("Failed to Bind WolrdMatrix");
 
+	if (FAILED(m_pColorTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
+		CRASH("Failed to Bind DiffuseTexture");
+
 	if(FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Failed to Bind ViewMatrix");
 

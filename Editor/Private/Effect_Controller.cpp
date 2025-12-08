@@ -960,6 +960,7 @@ void CEffect_Controller::Remove_PrefabDesc_Children()
 		{
 			PrefabDesc->second.FrameDesc.erase(iter);
 			PrefabDesc->second.ChildrenCount -= 1;
+			break;
 		}
 		else
 			++iter;

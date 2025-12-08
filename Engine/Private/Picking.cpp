@@ -90,6 +90,43 @@ _bool CPicking::isPicked(_float3* pOut)
 	return true;
 }
 
+_bool CPicking::GetCenterPos(_float3* pOut)
+{
+	_uint MousePos = m_ptMouse.y * m_iWinSizeX + m_ptMouse.x;
+	if (MousePos > m_iWinSizeX * m_iWinSizeY)
+		return false;
+
+	// Mouse ��ǥ�� DepthDesc ����
+	D3D11_MAPPED_SUBRESOURCE SubResource = {};
+	if (FAILED(m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ, 0, &SubResource)))
+		return false;
+
+	memcpy(m_pPoints, SubResource.pData, sizeof(_float4) * m_iWinSizeX * m_iWinSizeY);
+
+	_uint iIndex = ((m_iWinSizeY / 2 - 10) * m_iWinSizeX) + m_iWinSizeX / 2 - 100;
+
+	_float4 DepthDesc = m_pPoints[iIndex];
+
+	m_pContext->Unmap(m_pTexture2D, 0);
+
+	// Picking??Object ?꾨떂
+	if (0.f == DepthDesc.w)
+		return false;
+
+	// World濡?移섑솚
+	_vector WorldPos = {};
+	WorldPos = XMVectorSetX(WorldPos, m_ptMouse.x / (m_iWinSizeX * 0.5f) - 1.f);
+	WorldPos = XMVectorSetY(WorldPos, m_ptMouse.y / (m_iWinSizeY * -0.5f) + 1.f);
+	WorldPos = XMVectorSetZ(WorldPos, DepthDesc.x);
+	WorldPos = XMVectorSetW(WorldPos, 1.f);
+
+	WorldPos = XMVector3TransformCoord(WorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ));
+	WorldPos = XMVector3TransformCoord(WorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW));
+
+	XMStoreFloat3(pOut, WorldPos);
+	return true;
+}
+
 _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels,_float4* pOutMousePos)
 {
 

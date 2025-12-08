@@ -68,7 +68,6 @@ public:
 	
 
 public:
-	//void Switch_Skill(CHARACTERTYPE eCharacter);
 	// State에서 호출: Ensemble Skill이 끝났음을 알림
 	void Notify_HarmonyEnd();
 	void On_HarmonyEnd(CHARACTERTYPE eCharacter);
@@ -112,13 +111,17 @@ private:
 	class CPlayerStatus* m_pPlayerStatus = { nullptr }; // 플레이어 Interface
 
 	// LockOn
-	vector<class CTransform*> m_TargetTransforms;
+	//vector<class CTransform*> m_TargetTransforms;
+	vector<TARGET_INFO> m_TargetCandidates;
 	//vector<pair<class CTransform*, OBJECTTYPE>> m_GrappleCandidates;
 	vector<GRAPPLE_INFO> m_GrappleCandidates;
 	//vector<class CTransform*> m_GrappleTargetTransforms;
 
-	class CTransform* m_pTargetTransform = { nullptr };
-	class CTransform* m_pLockOnTargetTransform = { nullptr };
+	//class CTransform* m_pTargetTransform = { nullptr };
+	//class CTransform* m_pLockOnTargetTransform = { nullptr };
+
+	TARGET_INFO m_TargetInfo = {};
+	TARGET_INFO m_LockOnTargetInfo = {};
 	GRAPPLE_INFO m_TargetGrappleInfo = { };
 	class CCollider* m_pColliderCom = { nullptr };
 
@@ -144,6 +147,8 @@ private:
 	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END];
 	_float m_fChangeCoolTime = {};
 
+	_float3 m_vLockOnPos = {};
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
@@ -161,10 +166,9 @@ private:
 	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
 
 	void Manage_Condition();
-	
 	void Sync_UtilityType();
-
 	_bool IsHitBack(class CTransform* pTransform);
+	void Calc_LockOnPos();
 	
 
 #ifdef _DEBUG

@@ -82,6 +82,7 @@ void CEdit_MapObject_Destruction_Piece::Update(_float fTimeDelta)
 		m_isActivate = false;
 		m_pRigidbodyCom->IsActivate(false);
 	}
+
 }
 
 void CEdit_MapObject_Destruction_Piece::Late_Update(_float fTimeDelta)

@@ -232,8 +232,9 @@ HRESULT CUI_HUD::Ready_ChildExtraComponents()
 	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_DistortionMap0_DM");	// Extra 0
 	m_pUI_Skill_ReadyFrame->Add_ExtraTexture(L"T_Caustic_Noise");		// Extra 1
 
-	m_pUI_BossHPBar->Add_ExtraTexture(L"T_DistortionMap0_DM");
+	m_pUI_BossHPBar->Add_ExtraTexture(L"T_DistortionMap0_DM");			// Extra 0
 
+	m_pUI_Icon_ElementGuage->Add_ExtraTexture(L"T_DistortionMap0_DM");	// Extra 1
 
 	return S_OK;
 }
@@ -1568,6 +1569,11 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_float>(true);
     *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
+
+	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._32) = static_cast<_float>(fElementAmounts[m_iSelectedCHIndex] == 100.f);	// isUseNoise
+	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._33) = m_fElapsedTime;							// Elapsed Time
+	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._34) = 0.2f;							// UV Scroll Speed
+	*reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
 
 
 
