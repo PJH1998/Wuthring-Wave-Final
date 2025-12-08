@@ -9,7 +9,8 @@
 #include "Effect_Radial.h"
 #include "VIBuffer_FXMesh_Instance.h"
 #include "VIBuffer_Point_Instance.h"
-
+#include "TestVA.h"
+#include "Effect_Light.h"
 NS_BEGIN(Editor)
 
 //다른 곳에서 이펙트 불러오는 연동성을 위해 추가한 것.?
@@ -53,6 +54,10 @@ public:
 	void Load_FXDecal_FromJson(const _string& strFilePath, const _wstring& DecalTag);
 
 	void Load_FXRadial_FromJson(const _string& strFilePath, const _wstring& RadialTag);
+	
+	void Load_FXVA_FromJson(const _string& strFilePath, const _wstring& VATag);
+
+	void Load_FXLight_FromJson(const _string& strFilePath, const _wstring& LightTag);
 
 public:
 	void Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc);
@@ -71,6 +76,9 @@ public:
 
 	void Get_FXRadial_Desc(const _wstring& RadialTag, CEffect_Radial::RADIAL_DESC& RadialDesc);
 
+	void Get_FXVA_Desc(const _wstring& VATag, CTestVA::VA_DESC& VADesc);
+
+	void Get_FXLight_Desc(const _wstring& LightTag, CEffect_Light::LIGHT_DESC& LightDesc);
 public:
 	void Reset_Load();
 
@@ -105,6 +113,12 @@ private:
 
 	//Radial 저장
 	map<const _wstring, CEffect_Radial::RADIAL_DESC>						m_tRadialDesc = {};
+
+	//VA 저장
+	map<const _wstring, CTestVA::VA_DESC>									m_tVADesc = {};
+
+	//Light 저장
+	map<const _wstring, CEffect_Light::LIGHT_DESC>							m_tLightDesc = {};
 
 public:
 	static CLoad_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eCurrentLevel);

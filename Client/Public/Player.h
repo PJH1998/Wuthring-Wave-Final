@@ -87,7 +87,12 @@ public:
 	void Notify_GrabVisible(_bool IsVisible);
 	void Notify_EscapeGrabReady();
 	void Notify_EscapeGrabExecute();
+	void Notify_Event(CHARACTER_EVENT eEvent);
+
+
 #pragma endregion
+
+
 
 
 
@@ -98,8 +103,6 @@ private:
 	class CRigidbody* m_pGrappleRigidbodyCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 
-	
-	
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iPrevCharacterIdx = { CHARACTERTYPE::NONE };

@@ -29,6 +29,9 @@ public:
 	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
+	void							Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectLightData_FromFolder(const string& strFolderPath) ;
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
@@ -210,7 +213,7 @@ public:
 #pragma endregion
 
 #pragma region PLAYER_INTERACT
-	void						Bind_Condition_ToPlayer(const _string& strTransition);
+	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
 	void						Call_Animation();
 	void						Call_PlayerVisible();
 	void						Unbind_Grab();

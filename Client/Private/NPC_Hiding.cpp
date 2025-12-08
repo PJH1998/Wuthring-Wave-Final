@@ -31,12 +31,22 @@ HRESULT CNPC_Hiding::Initialize_Clone(void* pArg)
 	m_iFaceIndex = 5;
 	m_isFind = false;
 	//m_isActivate = false;
+	m_isRender = true;
     return S_OK;
 }
 
 void CNPC_Hiding::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
+
+	if (m_isScaned)
+	{
+		if (m_fScanAcc < 10.f)
+			m_fScanAcc += fTimeDelta;
+		else
+			m_isScaned = false;
+		
+	}
 }
 
 void CNPC_Hiding::Update(_float fTimeDelta)
@@ -44,6 +54,16 @@ void CNPC_Hiding::Update(_float fTimeDelta)
 	_bool isAnimFinished{ false };
 	if (m_pAnimMachineCom)
 		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	
+	if (m_iState & ENUM_CLASS(TEST_STATE::MOVE_FORWARD))
+	{
+		if (isAnimFinished)
+		{
+			if (m_pAnimMachineCom->Get_CurrentAnimationTag() == "Run_F")
+				m_isReturn = true;
+		}
+	}
+
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -56,6 +76,8 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 		m_isFind = false;
 		m_pRigidBodyCom->IsActivate(false);
 	}
+
+	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_isRender)
 	{
@@ -80,26 +102,37 @@ void CNPC_Hiding::Render()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		SHADER_ANIMMESH ePath = SHADER_ANIMMESH::DEFAULT_NORMAL;
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		_bool HasNormal{ false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 
-		HRESULT hr = m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		if (i == MESH_TYPE::FACE)
 		{
 			_uint iPadding = 3;
 			_float fFaceSize = 1.f / 3;
 			m_pShaderCom->Bind_Value("g_iTexPaddingCount", &iPadding, sizeof(_uint));
-			m_pShaderCom->Bind_Value("g_fFaceSize",&fFaceSize, sizeof(_float));
+			m_pShaderCom->Bind_Value("g_fFaceSize", &fFaceSize, sizeof(_float));
 			m_pShaderCom->Bind_Value("g_iFaceIndex", &m_iFaceIndex, sizeof(_uint));
-			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NPC_FACE));
+			ePath = SHADER_ANIMMESH::NPC_FACE;
 		}
 		else
-			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
-		
+			ePath = SHADER_ANIMMESH::NORMAL_N_COLOR;
+
+		m_pShaderCom->Begin(ENUM_CLASS(ePath));
 		m_pModelCom->Render(i);
 
 		m_pShaderCom->UndBind_All_VS_SRV();
 	}
+
+#ifdef _DEBUG
+	m_pColliderCom->Render();
+#endif // _DEBUG
+
 }
 
 void CNPC_Hiding::Render_Shadow()
@@ -161,7 +194,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	// Com_Rigidbody
 	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eShape = SHAPE::SPHERE;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
 	RigidbodyDesc.fRadius = 1.5f;
@@ -182,16 +215,17 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnDetect_Remove(iLayer, pDesc, Manifold);
 		});
-	m_pRigidBodyCom->IsActivate(false);
+	//m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.5f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 0.55f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NPC);
-	ColliderDesc.fHeight = 0.9f;
-	ColliderDesc.fRadius = 0.4f;
+	ColliderDesc.fHeight = 0.5f;
+	ColliderDesc.fRadius = 0.3f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -200,7 +234,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
-	m_pColliderCom->IsActivate(false);
+	//m_pColliderCom->IsActivate(false);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
@@ -238,7 +272,11 @@ void CNPC_Hiding::OnDetect_During(_uint iLayer, void* pDesc, const ContactManifo
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
-		m_isFind = true;
+		// 근처에 다가갔을 경우 상호작용 연동
+		if (false)
+		{
+			m_isFind = true;
+		}
 #ifdef _DEBUG
 
 #endif // _DEBUG
@@ -262,8 +300,11 @@ void CNPC_Hiding::OnCollide_During(_uint iLayer, void* pDesc, const ContactManif
 		if (fDistance <= pScan->fRadius)
 		{
 			//스캔 성공
-			m_isScaned = true;
-			m_fScanAcc = 0.f;
+			if(false == m_isScaned)
+			{
+				m_isScaned = true;
+				m_fScanAcc = 0.f;
+			}
 		}
 	}
 }

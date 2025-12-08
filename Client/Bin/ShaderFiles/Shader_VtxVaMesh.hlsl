@@ -109,11 +109,11 @@ PS_OUT PS_VA(PS_IN In)
     float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     Out.vDiffuse = vDiffuse;
+
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
    
-
     return Out;
 }
 

@@ -11,6 +11,7 @@
 #include "Decal_Controller.h"
 #include "Radial_Controller.h"
 #include "VA_Controller.h"
+#include "Light_Controller.h"
 
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
@@ -70,6 +71,8 @@ public:
 
 	void VA_To_Json(json& VA, CTestVA::VA_DESC* pVADesc);
 
+	void Light_To_Json(json& LightJson, CEffect_Light::LIGHT_DESC* pLightDesc);
+
 public:
 	void Load_Prefab();
 
@@ -84,6 +87,10 @@ public:
 	void Load_FXDecal(const _wstring& DecalTag);
 
 	void Load_FXRadial(const _wstring& RadialTag);
+
+	void Load_FXVA(const _wstring& VATag);
+
+	void Load_FXLight(const _wstring& LightTag);
 
 public:
 	void Save_SelectedChildren_To_Json();
@@ -110,6 +117,7 @@ private:
 	class CDecal_Controller*									m_pDecal_Controller = { nullptr };
 	class CRadial_Controller*									m_pRadial_Controller = { nullptr };
 	class CVA_Controller*										m_pVA_Controller = { nullptr };
+	class CLight_Controller*									m_pLight_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -137,6 +145,7 @@ private:
 	_bool														m_IsDecalEffect = false;
 	_bool														m_IsRadialEffect = false;
 	_bool														m_IsVAEffect = false;
+	_bool														m_IsLightEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
