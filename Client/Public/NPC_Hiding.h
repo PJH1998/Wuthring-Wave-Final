@@ -6,6 +6,8 @@ class CAnimMachine;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CNPC_Hiding final : public CActor
 {
 public:
@@ -13,6 +15,7 @@ public:
 	{
 		_float3 vInitPos;
 		_float3 vInitRot;
+		_bool isCollide;
 		const _char* pAnimationTag;
 		const _tchar* pAnimMachineTag;
 	}HIDINGDESC;
@@ -41,6 +44,7 @@ public:
 
 private:
 	CAnimMachine*			m_pAnimMachineCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 
 	_bool					m_isRender{};
 	_bool					m_isDesolve{};

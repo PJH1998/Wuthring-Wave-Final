@@ -126,7 +126,7 @@ HRESULT CScan::Ready_Components()
 	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::SPHERE;
-	RigidbodyDesc.eType = EMotionType::Dynamic;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::INTERACTION);
 	RigidbodyDesc.fRadius = m_vRadius.y;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
