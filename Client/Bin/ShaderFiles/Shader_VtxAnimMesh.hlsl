@@ -175,7 +175,7 @@ PS_OUT PS_NORMALTEX(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
 
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * g_vBaseColor;
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
@@ -183,6 +183,38 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
     Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    
+    Out.vPBR.y = 0.2f;
+    Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+PS_OUT PS_NORMALCOLOR(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * g_vBaseColor;
+    if (g_HasNormal)
+    {
+        vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+        float3 vNormal = NormalDesc.xyz;
+    
+        float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+        Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    }
+    else
+        Out.vNormal = In.vNormal * 0.5f + 0.5f;
+   
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
@@ -815,6 +847,17 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_FACE();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN();
+        PixelShader = compile ps_5_0 PS_NORMALCOLOR();
+    }
+
+    pass NormalAndColor // 11
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NORMALCOLOR();
     }
 }
