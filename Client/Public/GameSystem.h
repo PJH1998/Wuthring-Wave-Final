@@ -178,7 +178,6 @@ public:
 #pragma endregion
 
 
-
 #pragma region PLAYER STATUS
 	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
 #pragma endregion

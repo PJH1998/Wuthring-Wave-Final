@@ -733,15 +733,20 @@ void CCustom_UI::Free()
 {
     __super::Free(); 
 
-    Safe_Release(m_pShaderCom);
-    Safe_Release(m_pVIBufferCom);
+	if (m_pShaderCom)
+		Safe_Release(m_pShaderCom);
+
+	if (m_pVIBufferCom)
+		Safe_Release(m_pVIBufferCom);
     
-	Safe_Release(m_pTextureCom); 
+	if (m_pTextureCom)
+		Safe_Release(m_pTextureCom); 
 
 	for (auto& extraTextureCom : m_vecExtraTextureCom)		Safe_Release(extraTextureCom);
 	m_vecExtraTextureCom.clear();
 
-    Safe_Release(m_pAnimator_UICom);
+	if (m_pAnimator_UICom)
+		Safe_Release(m_pAnimator_UICom);
 
     for (auto& child : m_vecChildObjects)					Safe_Release(child);
     m_vecChildObjects.clear();
