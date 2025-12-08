@@ -11,6 +11,7 @@
 #include "Levi_Wave.h"
 #include "Levi_Augusta.h"
 #include "GameSystem.h"
+#include "Event_Leviatan.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -38,8 +39,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	//m_fHP = pDesc->fHP;
-	m_fHP = 200.f;
+	m_fHP = pDesc->fHP * 0.7f;
+	//m_fHP = 200.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -58,6 +59,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	Ready_Volumes(pDesc);
+	Ready_Events();
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 
 	m_CallBack.pTransform = m_pTransformCom;
@@ -284,8 +286,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
-	//m_fHP = Info.fMaxHp;
-	m_fHP = 200.f;
+	m_fHP = Info.fMaxHp;
+	//m_fHP = 200.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -561,13 +563,24 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Teleport"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+		if (wstrAnimTag == TEXT("Front"))
+		{
+			if(m_fDistanceNonY > 10.f)
+				vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.4f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
+		else
+		{
+			vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
 		m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	}
+
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab");
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab", m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("QTE"))
 	{
@@ -808,6 +821,19 @@ void CLeviatan::Ready_Volumes(LEVIATAN_DESC* pDesc)
 	if (nullptr == m_pParryVolume)
 		CRASH(m_pParryVolume);
 	m_pParryVolume->TriggerActivate(false);
+}
+
+void CLeviatan::Ready_Events()
+{
+	m_pGameInstance->Subscribe<LEVI_GRAB>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), [this](const LEVI_GRAB event) {
+		if (event.isSuccess)
+			m_fStamina = 0.f;
+		});
+
+	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), [this](const LEVI_EXECUTE event) {
+		if (m_iPhase == PHASE::ONE && event.isSuccess)
+			m_fHP = 0.f;
+		});
 }
 
 void CLeviatan::Calculate_PosAndDir()
@@ -1156,6 +1182,7 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
+	// Attack1 빼기
 	if (iIndex != ATK_PATTERN::BURST)
 		return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;

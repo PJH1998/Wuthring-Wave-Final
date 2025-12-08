@@ -39,6 +39,7 @@
 
 #include "NPC_Griffin.h"
 #include "DummyNPC.h"
+#include "NPC_Hiding.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
 #include "UI_Text.h"
@@ -85,7 +86,8 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	Ready_Leviatan();
+	//Ready_Leviatan();
+	Ready_NPC();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -648,6 +650,27 @@ void CLevel_Test::Ready_Leviatan()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviWave"), 4, &Wave)))
 		CRASH("Failed Ready Projectile (Leviatan)");
+}
+
+void CLevel_Test::Ready_NPC()
+{
+	CNPC_Hiding::HIDINGDESC NPCDesc{};
+	NPCDesc.eCurLevel = m_eCurLevel;
+	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleS370437"));
+	NPCDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	//NPCDesc.strFolderPath = "../Bin/Resource/Model/Monster/ElectroPredator/Notify";
+	NPCDesc.fRotationPerSec = XMConvertToRadians(100.f);
+	NPCDesc.fSpeedPerSec = 10.f;
+	NPCDesc.vInitPos = _float3(3.f, -8.f, -33.f);
+	NPCDesc.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	NPCDesc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");
+	NPCDesc.pAnimationTag = "sing02_Loop";
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &NPCDesc)))
+		CRASH("Failed Ready NPC_Hiding");
 }
 
 void CLevel_Test::Ready_UI()
