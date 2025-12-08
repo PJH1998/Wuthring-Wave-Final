@@ -561,13 +561,24 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Teleport"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+		if (wstrAnimTag == TEXT("Front"))
+		{
+			if(m_fDistanceNonY > 10.f)
+				vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.4f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
+		else
+		{
+			vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
 		m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	}
+
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab");
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab", m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("QTE"))
 	{

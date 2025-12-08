@@ -475,11 +475,11 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	else if (strTransition == "LeviatanQTEStart")
 	{
 		CTransform* pBoss = static_cast<CTransform*>(pArg);
-		_int a = 10;
+		_int a = 10;							//레비아탄 속박 QTE
 	}
 	else if (strTransition == "LeviatanGrab")
 	{
-		_int a = 10;
+		_int a = 10;							//레비아탄 강제 넉백
 	}
 }
 
