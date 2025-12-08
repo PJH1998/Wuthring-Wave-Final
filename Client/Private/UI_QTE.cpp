@@ -5,6 +5,8 @@
 #include "Animator_UI.h"
 #include "GameSystem.h"
 
+#include "Event_Level.h"
+
 #define KSTA_UITEST_TEMPTRIGGER
 
 CUI_QTE::CUI_QTE(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -449,10 +451,16 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 	if		(m_isGoinSuccess)
 	{
 		std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+
+
 	}
 	else if (m_isGoinFail)
 	{
 		std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
+
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_QTESuccess", QTE_FAIL_UI_EVENT(m_isGoinFail));
 	}
 
 	m_IsGoinDisabled = true;
