@@ -259,10 +259,11 @@ void CMapObject::Ready_Component(void* pArg)
 	}
 	else
 	{
-		m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
+		if (pDesc->iLevel == ENUM_CLASS(LEVEL::GAMEPLAY))
+			m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
 			m_isActivate = false;
 			m_IsRender = false;
-			});
+				});
 	}
 }
 

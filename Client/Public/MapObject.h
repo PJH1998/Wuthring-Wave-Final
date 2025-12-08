@@ -5,7 +5,6 @@
 NS_BEGIN(Engine)
 class CDeferredShader;
 class CShader;
-class CModel;
 class CRigidbody;
 NS_END
 
@@ -51,11 +50,10 @@ private:
 	CDeferredShader*			m_pShaderCom = { nullptr };
 	CShader*					m_pShadowShaderCom = { nullptr };
 	CRigidbody*					m_pRigidbodyCom = { nullptr };
-	vector<CModel*>				m_pModelComArray;
 	class CModel_Streaming*		m_pModelCom;
+	class CGameSystem*			m_pGameSystem = { nullptr };
 
 	_uint						m_iShaderPassIndex = {};
-	class CGameSystem*			m_pGameSystem = { nullptr };
 	_bool						m_IsRender = { true };
 private:
 	void						Ready_Component(void* pArg);

@@ -462,7 +462,7 @@ _bool CGameSystem::IsFix()
 #pragma endregion
 
 #pragma region GRAB_INTERACT
-void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition)
+void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pArg)
 {
 	if (strTransition == "GrabRelease")
 	{
@@ -471,6 +471,15 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition)
 	else if (strTransition == "GrabUnbined")
 	{
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
+	}
+	else if (strTransition == "LeviatanQTEStart")
+	{
+		CTransform* pBoss = static_cast<CTransform*>(pArg);
+		_int a = 10;
+	}
+	else if (strTransition == "LeviatanGrab")
+	{
+		_int a = 10;
 	}
 }
 

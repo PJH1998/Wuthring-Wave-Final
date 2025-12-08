@@ -827,6 +827,10 @@ _bool CGameInstance::isPicked(_float3* pOut)
 {
 	return m_pPicking->isPicked(pOut);
 }
+_bool CGameInstance::GetCenterPos(_float3* pOut)
+{
+	return m_pPicking->GetCenterPos(pOut);
+}
 _bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos)
 {
 	return m_pPicking->Get_Points(fRange, pOut,NumPixels,pOutMousePos);

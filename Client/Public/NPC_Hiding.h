@@ -46,7 +46,9 @@ private:
 	_bool					m_isDesolve{};
 	_bool					m_isScaned{};
 	_bool					m_isFind{};
+	_bool					m_isReturn{};
 	_float					m_fScanAcc{};
+	_float					m_fScanRate{};
 	_float					m_fDesolveRate{};
 	_float4					m_vBaseColor{};
 	_uint					m_iFaceIndex{};
