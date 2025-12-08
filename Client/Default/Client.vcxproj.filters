@@ -1289,16 +1289,13 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Throw.h" />
-<<<<<<< HEAD
     <ClInclude Include="..\Public\MapObject_Burn.h" />
-=======
     <ClInclude Include="..\Public\Effect_Light.h">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Event_Leviatan.h">
       <Filter>97. Event</Filter>
     </ClInclude>
->>>>>>> dev
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2037,13 +2034,10 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="..\Private\MapObject_Burn.cpp" />
-=======
     <ClCompile Include="..\Private\Effect_Light.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
     </ClCompile>
->>>>>>> dev
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
