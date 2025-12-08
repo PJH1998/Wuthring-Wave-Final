@@ -38,7 +38,7 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 
-	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_N_COLOR));
 
 	m_vBaseColor = _float4(0.15f, 0.1f, 0.15f, 1.f);
 	_float temp{};
@@ -130,6 +130,11 @@ void CLevi_Bow::Change_Offset(LEVIBOW_DESC& Desc)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 
+}
+
+void CLevi_Bow::Change_Scale(_float fScale)
+{
+	m_pTransformCom->Scale(_float3(fScale, fScale, fScale));
 }
 
 HRESULT CLevi_Bow::Bind_Resources()

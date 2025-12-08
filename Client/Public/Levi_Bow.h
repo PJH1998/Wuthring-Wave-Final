@@ -45,6 +45,7 @@ public:
 
 
 	void			Change_Offset(LEVIBOW_DESC& Desc);
+	void			Change_Scale(_float fScale);
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CComputeShader* m_pComputeShaderCom = { nullptr };

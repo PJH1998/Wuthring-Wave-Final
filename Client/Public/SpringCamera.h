@@ -121,6 +121,7 @@ private:
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 	void							Dynamic_Distance();
 	void							Adjust_LockOn_Distance();
+	void							Dynamic_Fov(_float fTimeDelta);
 
 	// Action
 	void							Action(_float fTimeDelta);
