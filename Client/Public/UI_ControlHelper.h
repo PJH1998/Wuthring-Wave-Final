@@ -63,6 +63,7 @@ public:
 	void				Req_Render_CurveTrace(	_float3& vStartPos,
 												_float3& vStartVelocity,
 												_float3& vAcceleration,
+												_float3* pCustomSpherePos,
 												_float fMaxTime,
 												_uint iSegmentCount,
 												_float fRibbonWidth,

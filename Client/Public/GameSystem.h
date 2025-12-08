@@ -151,6 +151,7 @@ public:
 	// - vStartVelocity : 시작 속도. 즉, 던지려는 방향과 그 세기(power)
 	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
 	// ===== 이하는 필요 시 수정 ===== 
+	// - vCustomSpherePos : 임의로 구체 좌표 설정. nullptr이면 ray cast 를 통해 도출된 좌표를 기준으로 삼음
 	// - fMaxTime : 해당 값 기준 몇초까지 날아갈 거리만큼 리본메쉬를 그릴 것인지
 	// - iSegmentCount : 리본메쉬 정밀도 (낮으면 버텍스의 굴곡짐이 잘 보임)
 	// - fRibbonWidth : 리본메쉬 가로두께
@@ -160,6 +161,7 @@ public:
 		_float3& vStartPos,
 		_float3& vStartVelocity,
 		_float3& vAcceleration, 
+		_float3* pCustomSpherePos = nullptr,
 		_float fMaxTime = 4.f, 
 		_uint iSegmentCount = 50, 
 		_float fRibbonWidth = 0.25f, 

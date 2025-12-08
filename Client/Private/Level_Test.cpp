@@ -926,9 +926,9 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	auto pNearestPull = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, &fPullDistance);
 	_float3 vNearPullPos = {}; XMStoreFloat3(&vNearPullPos, static_cast<CTransform*>(pNearestPull->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
 
-	std::cout << "[CLevel_Test::Testing_UI] Nearest Grapple UI Distance : " << fDistance << std::endl;
-	std::cout << "[CLevel_Test::Testing_UI] Nearest Pull    UI Distance : " << fPullDistance << std::endl;
-	std::cout << "==================================================================" << std::endl;
+	//std::cout << "[CLevel_Test::Testing_UI] Nearest Grapple UI Distance : " << fDistance << std::endl;
+	//std::cout << "[CLevel_Test::Testing_UI] Nearest Pull    UI Distance : " << fPullDistance << std::endl;
+	//std::cout << "==================================================================" << std::endl;
 
 
 	

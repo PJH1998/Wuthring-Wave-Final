@@ -433,6 +433,7 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 												_float3& vStartVelocity,
 												_float3& vAcceleration,
+												_float3* pCustomSpherePos,
 												_float fMaxTime,
 												_uint iSegmentCount,
 												_float fRibbonWidth,
@@ -451,6 +452,7 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 		tDesc.vStartPos = vStartPos;// _float3(0.f, 0.f, 0.f);
 		tDesc.vStartVel = vStartVelocity;// _float3(0.f, 10.f, 10.f);
 		tDesc.vAcceleration = vAcceleration;// _float3(0.f, -9.8f, 0.f);
+		tDesc.pCustomSpherePos = pCustomSpherePos;
 		tDesc.fMaxTime = fMaxTime;
 		tDesc.iSegmentCount = iSegmentCount;
 		tDesc.fWidth = fRibbonWidth;
@@ -468,7 +470,17 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 	}
 	else
 	{
-		pRootUI->Req_Render_CurveTrace(vStartPos, vStartVelocity, vAcceleration);
+		pRootUI->Req_Render_CurveTrace(	vStartPos,
+										vStartVelocity,
+										vAcceleration,
+										pCustomSpherePos,
+										fMaxTime,
+										iSegmentCount,
+										fRibbonWidth,
+										isUseCustomColor,
+										vBaseColor,
+										vHeadColor,
+										vTailColor);
 	}
 }
 
