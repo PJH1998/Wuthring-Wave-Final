@@ -329,7 +329,8 @@ void CPlayer::Player_KeyInput()
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
 	}
 
-	if (!m_IsQTE) // QTE 도중이면 플레이어 변경 불가능.
+	if (!m_IsQTE && // QTE 도중이면 플레이어 변경 불가능.
+		!m_IsEventLock) // ANIMSTOP 도중이면 플레이어 변경 불가능.
 	{
 		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 		{
@@ -431,6 +432,7 @@ void CPlayer::Player_KeyInput()
 		LEVI_EXECUTE Desc{ true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute "), Desc);
 
+		Bind_EventLock(false);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
@@ -531,7 +533,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 
 
 	// 7. QTE 실행. 가능하면
-	if (IsQTEPossible(ePrevCharacterType))
+	if (IsQTEPossible(ePrevCharacterType) && !m_IsEventLock)
 	{
 		// QTE 실행.
 		ExecuteQTE(ePrevCharacterType);
@@ -745,17 +747,23 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
 			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
 		);
+
+
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
 	{
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			return;
 
-		// 1, 2, 3번 도 못누르게 막아야함.
+		// 1, 2, 3번 도 못누르게 막아야함. QTE도 안되게 하기.?
 		//m_Characters[m_iCurrentCharacterIdx]->Stop_Anim(); // Animation Stop
 	}
 
 	
+}
+void CPlayer::Bind_EventLock(_bool IsLock)
+{
+	m_IsEventLock = IsLock;
 }
 #pragma endregion
 

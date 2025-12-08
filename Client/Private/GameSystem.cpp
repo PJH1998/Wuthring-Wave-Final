@@ -493,9 +493,9 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	}
 	else if (strTransition == "LeviatanGrab")
 	{
-		//m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_GRAB, pArg);
-		//m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
+		m_pPlayer->Bind_EventLock(true);
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
+		
 	}
 	else if (strTransition == "LeviatanQTEStart")
 	{
@@ -504,9 +504,14 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 		_float2 vPos = {500.f, -200.f};
 		Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
 		// UI 띄우기.
+		
 		// 성공하면 UI 측에서 EventBus로 Player Leviatan에 정보 전달.
 		// Leviatan은 정보를 전달받으면 무력화 + GameSystem에서 Summon_SequenceCharacter소환?
 		// 저는 Player Stop Anim 풀리고, => 절대 2, 3번을 누르지마. (키를 막던가)
+	}
+	else if (strTransition == "LeviatanQTESuccess")
+	{
+		
 	}
 	
 	

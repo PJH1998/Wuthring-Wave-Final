@@ -72,6 +72,7 @@ public:
 	void Notify_HarmonyEnd();
 	void On_HarmonyEnd(CHARACTERTYPE eCharacter);
 
+
 public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
@@ -88,6 +89,8 @@ public:
 	void Notify_EscapeGrabReady();
 	void Notify_EscapeGrabExecute();
 	void Notify_Event(CHARACTER_EVENT eEvent, void* pArg);
+
+	void Bind_EventLock(_bool IsLock);
 
 
 #pragma endregion
@@ -131,6 +134,7 @@ private:
 	_bool m_IsLockOn = { false };
 	_bool m_IsChanage = { false };
 	_bool m_IsQTE = { false };
+	_bool m_IsEventLock = { false };
 
 	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};
