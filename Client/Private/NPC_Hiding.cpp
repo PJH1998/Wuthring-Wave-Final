@@ -44,6 +44,15 @@ void CNPC_Hiding::Update(_float fTimeDelta)
 	_bool isAnimFinished{ false };
 	if (m_pAnimMachineCom)
 		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+
+	if (m_isReturn)
+	{
+		if (isAnimFinished)
+		{
+
+		}
+	}
+
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -54,6 +63,7 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 	if (m_isFind)
 	{
 		m_isFind = false;
+		m_isReturn = true;
 		m_pRigidBodyCom->IsActivate(false);
 	}
 
