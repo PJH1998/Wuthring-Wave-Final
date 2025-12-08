@@ -1107,8 +1107,13 @@ void CRenderer::Render_Fade()
 
 void CRenderer::Render_NonStatic()
 {
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+		CRASH("Failed to Begin MRT_Object");
+
 	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONSTATIC));
+
+	m_pGameInstance->End_MRT();
 }
 
 #ifdef _DEBUG
