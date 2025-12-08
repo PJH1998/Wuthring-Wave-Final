@@ -103,7 +103,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	if (false == m_isActivate)
 	{
-		//소멸 트리거
+		//소멸 트리거, 포탈 생성
+		m_pGameSystem->Set_Potal_Active(true);
 	}
 
 	After_Condition(fTimeDelta);
@@ -184,7 +185,11 @@ void CMonsterTest::Render()
 	for(_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		_bool HasNormal{ false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 

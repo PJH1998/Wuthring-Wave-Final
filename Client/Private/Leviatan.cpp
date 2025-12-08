@@ -496,6 +496,17 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviWave"), m_pTransformCom->Get_WorldMatrix(), nullptr);
 		}
 	}
+	else if (wstrTypeTag == TEXT("Bow"))
+	{
+		if (wstrAnimTag == TEXT("Large"))
+		{
+			dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.5f);
+		}
+		else if (wstrAnimTag == TEXT("Default"))
+		{
+			dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
+		}
+	}
 	else if (wstrTypeTag == TEXT("SaveMatrix"))
 	{
 		XMStoreFloat4x4(&m_PreTransform, m_pTransformCom->Get_WorldMatrix());
@@ -565,6 +576,7 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
 		Reset_NotifyInteraction();
+		dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
 	}
 }
 
@@ -756,7 +768,7 @@ void CLeviatan::Ready_Volumes(LEVIATAN_DESC* pDesc)
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDmg;
