@@ -567,11 +567,11 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
-		
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab");
 	}
 	else if (wstrTypeTag == TEXT("QTE"))
 	{
-
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTEStart", m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("Reset"))
 	{

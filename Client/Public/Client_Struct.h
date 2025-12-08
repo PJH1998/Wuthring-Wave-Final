@@ -85,7 +85,10 @@ namespace Client
 		}
 	}GRAPPLE_INFO;
 
-
+	//typedef struct tagQTEInteraction
+	//{
+	//	
+	//}QTE_INTERACTION;
 
 #pragma endregion
 
