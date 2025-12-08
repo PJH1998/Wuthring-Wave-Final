@@ -66,7 +66,9 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 3.5f;
+	//m_fLockOnOffsetY = 3.5f;
+	m_fLockOnOffsetY = 0.f;
+
 	Ready_Event();
     return S_OK;
 }
@@ -89,7 +91,12 @@ void CSpringCamera::Update(_float fTimeDelta)
 
 	// Lock-On
 	if (CAMERA_STATE::LOCKON == m_eCameraState)
+	{
 		Dual_Targeting(fTimeDelta);
+		Dynamic_Fov(fTimeDelta);
+	}
+	else
+		m_fFovy = XMConvertToRadians(60.f);
 
 	// Action
 	if (CAMERA_STATE::ACTION == m_eCameraState)
@@ -186,11 +193,17 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	_vector vPreQuat = m_pTransformCom->Get_Quaternion();
 
 	// ���� Dir
-	_vector vDestinationDir = XMVector3Normalize(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition));
+	_vector vDestinationDir = XMVector3Normalize(XMVectorSetY(XMLoadFloat4(&m_vLookPosition), 0.f) - XMVectorSetY(XMLoadFloat4(&m_vTargetPosition), 0.f));
 
 	_vector vCamPos = XMLoadFloat4(&m_vLookPosition) - vDestinationDir * m_fDistance;
+
+	// LockOnOffsetY 조정
+	m_fLockOnOffsetY += fTimeDelta * 1.5f;
+	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, 3.f));
+
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
+
 	// ��ǥ Dir
 	m_pTransformCom->LookDir(vLookDir);
 	_vector vCurrentQuat = m_pTransformCom->Get_Quaternion();
@@ -223,7 +236,12 @@ void CSpringCamera::Dynamic_Distance()
 	if (nullptr == m_pTargetTransform)
 		return;
 	//_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition)));
-	_float fDistance = XMVectorGetX(XMVector3Length(m_pTargetTransform->Get_State(STATE::POSITION) - XMLoadFloat4(&m_vTargetPosition)));
+	_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vTargetPos = XMLoadFloat4(&m_vTargetPosition);
+	vLockOnPos.m128_f32[1] = 0.f;
+	vTargetPos.m128_f32[1] = 0.f;
+
+	_float fDistance = XMVectorGetX(XMVector3Length(vLockOnPos - vTargetPos));
 
 	m_fFixedDistance = max(m_fLockOnMinDistance, sqrt(fDistance * fDistance + m_fLockOnOffsetY * m_fLockOnOffsetY));
 }
@@ -237,7 +255,23 @@ void CSpringCamera::Adjust_LockOn_Distance()
 	_float fRadian = XMVectorGetX(XMVector3Dot(XMVector3Normalize(vLook), XMVector3Normalize(vLookRemoveY)));
 
 	_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&m_vLookPosition)));
+	
+	if (0.f == fRadian)
+		fRadian = 1.f;
 	m_fLockOnDistanceOffset = fLength / fRadian;
+}
+
+void CSpringCamera::Dynamic_Fov(_float fTimeDelta)
+{
+	if (nullptr == m_pTargetTransform)
+		return;
+
+	_vector vTargetPos = XMLoadFloat4(&m_vTargetPosition);
+	_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+
+	_float fGapY = fabsf(vLockOnPos.m128_f32[1] - vTargetPos.m128_f32[1]);
+
+	m_fFovy = XMConvertToRadians(min(60.f + fGapY, 75.f));
 }
 
 void CSpringCamera::Action(_float fTimeDelta)
