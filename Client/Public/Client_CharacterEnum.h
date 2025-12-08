@@ -5,6 +5,7 @@ namespace Client
 		LANDSLIDE, // 경사면 슬라이딩.
 		LEVIATAN_QTE, // Leviatan QTE
 		LEVIATAN_GRAB,
+		LEVIATAN_QTE_SUCCESS,
 		END
 	};
 

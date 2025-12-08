@@ -47,7 +47,7 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 
-		m_pCollideRigidbodyCom->Impulse(m_vImpulse);
+		//m_pCollideRigidbodyCom->Impulse(m_vImpulse);
 
 		//
 	}
@@ -85,7 +85,7 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 			m_pTransformCom->Set_State(STATE::POSITION, NewPos);
 		}
 	}
-	m_pCollideRigidbodyCom->Set_Transform(m_pTransformCom->Get_WorldMatrix());
+	//m_pCollideRigidbodyCom->Set_Transform(m_pTransformCom->Get_WorldMatrix());
 
 	_float3 Grav(0.f, -9.8f, 0.f);
 	//m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
@@ -93,8 +93,8 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 
 void CMapObject_Throw::Late_Update(_float fTimeDelta)
 {
-	if (m_IsThrowed)
-		m_pCollideRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
+	//if (m_IsThrowed)
+	//	m_pCollideRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 }
 
@@ -191,20 +191,20 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_DetectRigidbody"), reinterpret_cast<CComponent**>(&m_pDetectRigidbodyCom), &RigidbodyDesc);
 
-	CRigidbody::BOXBODY_DESC Sibal{};
-	XMStoreFloat4(&Sibal.vQuat, m_pTransformCom->Get_Quaternion());
-	Sibal.eShape = SHAPE::BOX;
-	XMStoreFloat3(&Sibal.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	Sibal.eType = EMotionType::Dynamic;
-	Sibal.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	Sibal.vExtent = _float3(1.f, 1.f, 1.f);
+	//CRigidbody::BOXBODY_DESC Sibal{};
+	//XMStoreFloat4(&Sibal.vQuat, m_pTransformCom->Get_Quaternion());
+	//Sibal.eShape = SHAPE::BOX;
+	//XMStoreFloat3(&Sibal.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//Sibal.eType = EMotionType::Dynamic;
+	//Sibal.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	//Sibal.vExtent = _float3(1.f, 1.f, 1.f);
 
 	RigidbodyDesc.eType = EMotionType::Dynamic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::THROW);
 	RigidbodyDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	//불타는 벽과 충돌 감지용
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_CollideRigidbody"), reinterpret_cast<CComponent**>(&m_pCollideRigidbodyCom), &Sibal);
+	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_CollideRigidbody"), reinterpret_cast<CComponent**>(&m_pCollideRigidbodyCom), &Sibal);
 }
 
 void CMapObject_Throw::Collide()

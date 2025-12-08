@@ -780,7 +780,6 @@ void CCharacter::Bind_TargetPosition(_fvector vPos)
 	XMStoreFloat4(&m_vTargetPosition, vPos); // 타겟 지점.
 }
 
-
 void CCharacter::ActiveCaptureState()
 {
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));

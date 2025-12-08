@@ -418,8 +418,10 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 
 		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
-		LEVI_GRAB Desc{ true };
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+		//LEVI_GRAB Desc{ true };
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+
+		Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -429,8 +431,8 @@ void CPlayer::Player_KeyInput()
 		// 임시
 		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
 		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
-		LEVI_EXECUTE Desc{ true };
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute "), Desc);
+		//LEVI_EXECUTE Desc{ true };
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
 
 		Bind_EventLock(false);
 	}
@@ -438,9 +440,7 @@ void CPlayer::Player_KeyInput()
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
-
 		// 임시
-		
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 
 	}
@@ -728,6 +728,7 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_IsLockOn = false;
 }
 
+// 이게이상하다?
 void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 {
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
@@ -747,8 +748,18 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
 			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
 		);
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
+	{
+		if (m_iCurrentCharacterIdx == CHARACTERTYPE::ROVER)
+		{
+			Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
 
-
+			LEVI_GRAB Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+			Bind_EventLock(false);
+		}
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
 	{
@@ -758,6 +769,7 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 		// 1, 2, 3번 도 못누르게 막아야함. QTE도 안되게 하기.?
 		//m_Characters[m_iCurrentCharacterIdx]->Stop_Anim(); // Animation Stop
 	}
+	
 
 	
 }

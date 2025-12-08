@@ -32,7 +32,9 @@ HRESULT CUI_QTE::Initialize_Clone(void* pArg)
 	CGameObject::Initialize_Clone(pArg);
 	
 	Ready_Components(pArg);
-	__super::Ready_Events();
+	//__super::Ready_Events();
+
+	Ready_Events();
 	
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath =
@@ -389,7 +391,7 @@ void CUI_QTE::Update_QTE_Fillguage(_float fTimeDelta)
 		
 	}
 		
-	std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
+	//std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
 
 	if (!m_isGoinSuccess &&
 		m_fQTEElapsedTime >= m_fQTEMaxTime)
@@ -450,15 +452,17 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 
 	if		(m_isGoinSuccess)
 	{
-		std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
-
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+		
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
+		//m_isGoinSuccess = false;
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 	}
 	else if (m_isGoinFail)
 	{
-		std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
+		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
 
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_QTEFail", QTE_FAIL_UI_EVENT(m_isGoinFail));
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTEFail", QTE_FAIL_UI_EVENT(m_isGoinFail));
 	}
 
 	m_IsGoinDisabled = true;
@@ -499,6 +503,19 @@ void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
 	m_fDisableTimer += fTimeDelta;
 }
 
+
+void CUI_QTE::Ready_Events()
+{
+	// 1. 이벤트를 GameInstance에 등록하고 Publish 해서 안에 있는 함수를 실행시킨다.
+	m_pGameInstance->Subscribe<QTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_QTESuccess"), [this](const QTE_SUCCESS_UI_EVENT event) {
+		if (event.isSuccess)
+		{
+			// event가 Success 라면 실행시킨다.
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
+		}
+	});
+
+}
 
 CUI_QTE* CUI_QTE::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

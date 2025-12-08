@@ -260,6 +260,7 @@ public:
 	
 	// TargetPosition
 	void Bind_TargetPosition(_fvector vPos);
+	void Bind_Target(class CTransform* pTransform);
 
 	// Hit
 	_bool Is_Hit() { return m_IsHit; }
