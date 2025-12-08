@@ -53,7 +53,7 @@ void CVA_Controller::Load_AllMaskTextureFromFolder(const _string& strFolderPath)
 
                 //파일명으로 텍스처 컴포넌트 이름 지정
                 _char szDefault[MAX_PATH];
-                strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
+                strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_VATexture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
@@ -146,7 +146,7 @@ void CVA_Controller::Load_AllColorTextureFormFolder(const _string& strFolderPath
 
                 //파일명으로 텍스처 컴포넌트 이름 지정
                 _char szDefault[MAX_PATH];
-                strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
+                strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_VATexture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
