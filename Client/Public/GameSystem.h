@@ -127,7 +127,7 @@ public:
 
 	// 그래플링 UI가 생길 지점의 점 위치를 할당합니다. (pooling 이용, 최대 50) 
 	// 카메라 거리에 따른 크기 변화 기준 등 내부에서 상수로 변경 가능. 너무 멀면 렌더콜X
-	void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
+	//void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
 
 	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
 	// eQTEType : QTE 종류 (연타로 게이지채우기, 단발성 중 선택), eIconIndex : 사용 버튼 종류.
@@ -168,9 +168,14 @@ public:
 		_float4 vHeadColor = _float4(1.f, 0.f, 0.f, 1.f),
 		_float4 vTailColor = _float4(.8f, 0.f, 0.f, 1.f)
 	);
-
-
 #pragma endregion
+
+#pragma region [UI] GRAPPLE
+	HRESULT					Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType);
+	class CUI_GrapplePoint* Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance);
+#pragma endregion
+
+
 
 #pragma region PLAYER STATUS
 	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
@@ -243,24 +248,25 @@ public:
 #pragma endregion
 
 private:
-	class	CParser*			m_pParser						= { nullptr };
-	class	CFactory*			m_pFactory						= { nullptr };
+	class	CParser*				m_pParser					= { nullptr };
+	class	CFactory*				m_pFactory					= { nullptr };
 
-	class	CUI_FontPreset*		m_pUI_FontPreset				= { nullptr };
-	class	CUI_ControlHelper*	m_pUI_ControlHelper				= { nullptr };
+	class	CUI_FontPreset*			m_pUI_FontPreset			= { nullptr };
+	class	CUI_ControlHelper*		m_pUI_ControlHelper			= { nullptr };
+	class	CUI_GrappleController*	m_pUI_GrappleController		= { nullptr };
 	//class	CUI_StatusSyncer*	m_pUI_StatusSyncer				= { nullptr };
 
-	class	CDirector*			m_pDirector 					= { nullptr };
-	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
-	class	CPlayer*			m_pPlayer						= { nullptr };
-	class   CSequencePlayer*	m_pSequencePlayer				= { nullptr };
-	
-	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
+	class	CDirector*				m_pDirector 				= { nullptr };
+	class	CPlayerStatus* 			m_pPlayerStatus 			= { nullptr };
+	class	CPlayer*				m_pPlayer					= { nullptr };
+	class   CSequencePlayer*		m_pSequencePlayer			= { nullptr };
 
-	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
-	class	CMouseController*	m_pMouseController				= { nullptr };
+	class	CSonoro_Manager*		m_pSonoro_Manager			= { nullptr };
 
-	class  CPotal*				m_pPotal						= { nullptr };
+	class	CMonsterTable*			m_pMonsterTable				= { nullptr };
+	class	CMouseController*		m_pMouseController			= { nullptr };
+
+	class   CPotal*					m_pPotal					= { nullptr };
 	class	CTimeLack*				m_pTimeLack = { nullptr };
 
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

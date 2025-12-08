@@ -460,7 +460,7 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 	{
 		std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
 
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_QTESuccess", QTE_FAIL_UI_EVENT(m_isGoinFail));
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_QTEFail", QTE_FAIL_UI_EVENT(m_isGoinFail));
 	}
 
 	m_IsGoinDisabled = true;

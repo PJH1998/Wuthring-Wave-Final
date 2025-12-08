@@ -29,6 +29,12 @@ HRESULT CUI_GrapplePoint::Initialize_Prototype()
 
 HRESULT CUI_GrapplePoint::Initialize_Clone(void* pArg)
 {
+	UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
+	
+	m_vTargetPos = pDesc->vTargetPos;
+	m_eGrappleType = pDesc->eType;
+
+
 	CGameObject::Initialize_Clone(pArg);
 
 	Ready_Components(pArg);
@@ -65,7 +71,7 @@ HRESULT CUI_GrapplePoint::Initialize_Clone(void* pArg)
 	//static_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Dynamic_Initialize");
 
 	Reset(_fmatrix(), nullptr);
-	m_isActivate = false;
+	m_isActivate = true;
 
 	m_isClone = true;
 	//m_pGameInstance->Add_RootUI(L"UI_GrapplePoint", this);
@@ -96,13 +102,18 @@ void CUI_GrapplePoint::Update(_float fTimeDelta)
 		const _float fDEBUG_randRadius = 30.f;//30.f;
 		const _float3 vDEBUG_offset = { 0.f, -10.f, 0.f };
 		
-		_float3* pDEBUG_vTargetPos = new _float3();
+		//_float3* pDEBUG_vTargetPos = new _float3();
+		//
+		//pDEBUG_vTargetPos->x = vDEBUG_offset.x + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//pDEBUG_vTargetPos->y = vDEBUG_offset.y + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//pDEBUG_vTargetPos->z = vDEBUG_offset.z + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
 		
-		pDEBUG_vTargetPos->x = vDEBUG_offset.x + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
-		pDEBUG_vTargetPos->y = vDEBUG_offset.y + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
-		pDEBUG_vTargetPos->z = vDEBUG_offset.z + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
-
-		m_pTargetPos = pDEBUG_vTargetPos;
+		//_float3 vDEBUG_TargetPos = {};
+		//vDEBUG_TargetPos.x = vDEBUG_offset.x + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//vDEBUG_TargetPos.y = vDEBUG_offset.y + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//vDEBUG_TargetPos.z = vDEBUG_offset.z + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//
+		//m_vTargetPos = vDEBUG_TargetPos;
 	}
 #endif // KSTA_UITEST_GRAPPLE_TOZERO
 
@@ -111,8 +122,8 @@ void CUI_GrapplePoint::Update(_float fTimeDelta)
 	Update_TargetColor();
 	Update_AnimOrder(fTimeDelta);
 
-	Update_ApplyTargetPos(m_pStaticUI, *m_pTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
-	Update_ApplyTargetPos(m_pDynamicUI, *m_pTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pStaticUI, m_vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pDynamicUI, m_vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
 
 	__super::Update(fTimeDelta);
 }
@@ -142,27 +153,27 @@ void CUI_GrapplePoint::Render()
 
 }
 
-void CUI_GrapplePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
-{
-	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Initialize", true);
-
-	if (pArg != nullptr)
-	{
-		UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
-
-		m_pTargetPos = pDesc->pTargetPos;
-		m_eGrappleType = pDesc->eType;
-	}
-
-
-#ifndef KSTA_UITEST_GRAPPLE_TOZERO
-	else
-		MSG_BOX("GrapplePoint doesn't receive position information.");
-#endif // !KSTA_UITEST_GRAPPLE_TOZERO
-
-
-	m_isActivate = true;
-}
+//void CUI_GrapplePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
+//{
+//	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Initialize", true);
+//
+//	if (pArg != nullptr)
+//	{
+//		UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
+//
+//		m_vTargetPos = pDesc->vTargetPos;
+//		m_eGrappleType = pDesc->eType;
+//	}
+//
+//
+//#ifndef KSTA_UITEST_GRAPPLE_TOZERO
+//	else
+//		MSG_BOX("GrapplePoint doesn't receive position information.");
+//#endif // !KSTA_UITEST_GRAPPLE_TOZERO
+//
+//
+//	m_isActivate = true;
+//}
 
 void CUI_GrapplePoint::PreAssign_ChildUIs()
 {
@@ -180,8 +191,8 @@ void CUI_GrapplePoint::PreAssign_ChildUIs()
 
 void CUI_GrapplePoint::Ready_Presets()
 {
-	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::MOVEABLE)]	= _float4(1.000f, 0.957f, 0.631f, 1.0f);
-	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULLABLE)]	= _float4(0.631f, 1.000f, 0.914f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::ANCHOR)]		= _float4(1.000f, 0.957f, 0.631f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULL)]		= _float4(0.631f, 1.000f, 0.914f, 1.0f);
 	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::END)]			= _float4(1.000f, 0.000f, 1.000f, 1.0f);
 }
 
@@ -221,7 +232,7 @@ void CUI_GrapplePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotD
 
 	_float3 vScale =/* (pTargetUI == this)? m_vOriginSca :*/ pTargetTransform->Get_Scaled();
 
-	_float3 vTargetPos = *m_pTargetPos;				// ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
+	_float3 vTargetPos = m_vTargetPos;				// ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
 	_float fDist = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat3(&vTargetPos)));
 	_float fScaleMultiple = fPivotDistance / fDist;
 
@@ -251,8 +262,8 @@ void CUI_GrapplePoint::Update_TargetColor()
 
 void CUI_GrapplePoint::Update_AnimOrder(_float fTimeDelta)
 {
-	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
-	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(m_pTargetPos) - XMLoadFloat4(&vCamPos))));	// 카메라와 타겟 간 거리
+	_float4 vCamPos = *m_pGameInstance->Get_CamPos();	// ksta : 나중에 플레이어 좌표로..
+	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(&m_vTargetPos) - XMLoadFloat4(&vCamPos))));	// 카메라와 타겟 간 거리
 
 
 	// 이전 상태 확인 후 트리거 분기 및 사용, 이후 상태 갱신
@@ -342,7 +353,7 @@ CGameObject* CUI_GrapplePoint::Clone(void* pArg)
 void CUI_GrapplePoint::Free()
 {
 #ifdef KSTA_UITEST_GRAPPLE_TOZERO
-	delete m_pTargetPos;
+	//delete m_pTargetPos;
 #endif // !KSTA_UITEST_GRAPPLE_TOZERO
 
 	//if (m_isClone)

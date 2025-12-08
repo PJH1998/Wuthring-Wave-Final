@@ -34,7 +34,7 @@ public:
 	void				Show_InteractUI(_wstring strText);
 	void				Hide_InteractUI(_bool isPressedAs = false);
 	void				Req_Render_InteractUI(_wstring xstrText, _bool isPressedAs);
-
+	 
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 
@@ -52,7 +52,7 @@ public:
 	void				Open_Game_OverflowPalette(_uint iTargetLevel);
 	void				Close_Game_OverflowPalette();
 
-	void				Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);		// 외부 값 받아올거면, 그래플 UI 헤더, cpp에 최상단 define 해제 필요
+	//void				Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);		// 외부 값 받아올거면, 그래플 UI 헤더, cpp에 최상단 define 해제 필요
 
 	void				Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale);
 
@@ -106,7 +106,7 @@ private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };
 
-	vector<CCustom_UI*>		m_vecInteractions = {};
+	//vector<CCustom_UI*>		m_vecInteractions = {};
 
 public:
 	static CUI_ControlHelper* Create();

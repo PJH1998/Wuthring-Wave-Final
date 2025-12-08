@@ -172,8 +172,8 @@ namespace Client
 	};
 
 	enum class UI_GRAPPLE_TYPE {	// 다른점? 색깔..
-		MOVEABLE,		// 이동용
-		PULLABLE,		// 벽 부수는 등의 상호작용 용도
+		ANCHOR,		// 이동용
+		PULL,		// 벽 부수는 등의 상호작용 용도
 		END 
 	};
 

@@ -8,8 +8,8 @@ NS_BEGIN(Client)
 class CUI_GrapplePoint final : public CUI_Image
 {
 public:
-	typedef struct tUILockOnDesc {
-		_float3* pTargetPos = nullptr;
+	typedef struct tUIGrapplePointDesc {
+		_float3 vTargetPos = {};
 		UI_GRAPPLE_TYPE eType = UI_GRAPPLE_TYPE::END;
 	} UI_GRAPPLEPOINT_DESC;
 
@@ -30,7 +30,11 @@ public: // 생성/복제
 	virtual void    Late_Update(_float fTimeDelta)					override;
 	virtual void    Render()										override;
 
-	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
+	//virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
+
+public:
+	_float3			Get_TargetPos()		{ return m_vTargetPos; }
+	UI_GRAPPLE_TYPE	Get_GrappleType()	{ return m_eGrappleType; }
 
 private:
 	void			PreAssign_ChildUIs();
@@ -63,7 +67,7 @@ private:
 	const _float	m_fTriggerDistance = 50.f;		// 상호작용 가이드가 뜰 범위
 	const _float	m_fVisibleDistance = 80.f;		// 보이기 시작할 범위 (가까워질수록.. 안보임 -> 보임 -> 애니메이션도 보임 순)
 
-	_float3*		m_pTargetPos = { nullptr };
+	_float3			m_vTargetPos = {};
 
 
 	//_bool			m_i
