@@ -1295,6 +1295,9 @@
     <ClInclude Include="..\Public\Effect_Light.h">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Event_Leviatan.h">
+      <Filter>97. Event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

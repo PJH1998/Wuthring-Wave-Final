@@ -10,6 +10,7 @@
 #include "Ability.h"
 #include "GameSystem.h"
 #include "PlayerStatus.h"
+#include "Event_Leviatan.h"
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -416,6 +417,8 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 
 		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		LEVI_GRAB Desc{ true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -425,6 +428,9 @@ void CPlayer::Player_KeyInput()
 		// 임시
 		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
 		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		LEVI_EXECUTE Desc{ true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute "), Desc);
+
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)

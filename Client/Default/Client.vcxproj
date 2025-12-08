@@ -207,6 +207,7 @@
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\Effect_Light.h" />
     <ClInclude Include="..\Public\Effect_VA.h" />
+    <ClInclude Include="..\Public\Event_Leviatan.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
     <ClInclude Include="..\Public\MapObject_Throw.h" />
