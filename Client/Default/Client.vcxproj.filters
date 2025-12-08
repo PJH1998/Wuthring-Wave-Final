@@ -1286,6 +1286,7 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Throw.h" />
+    <ClInclude Include="..\Public\MapObject_Burn.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2024,6 +2025,7 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
+    <ClCompile Include="..\Private\MapObject_Burn.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

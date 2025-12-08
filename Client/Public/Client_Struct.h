@@ -146,6 +146,8 @@ namespace Client
 
 		SLIDE_DATA eSlideData;
 		_bool		IsStart = { false };
+		_bool*		IsGrab  = { nullptr };
+		_bool*		IsThrow = { nullptr };
 	}CALLBACK_CLIENT;
 
 	typedef struct tagTargetInfo
