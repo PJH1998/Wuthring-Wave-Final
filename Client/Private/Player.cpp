@@ -701,8 +701,6 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 
 
-
-
 #pragma region GameSystem 연계함수.
 void CPlayer::Notify_GrabVisible(_bool IsVisible)
 {
@@ -719,7 +717,7 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_IsLockOn = false;
 }
 
-void CPlayer::Notify_Event(CHARACTER_EVENT eEvent)
+void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 {
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)

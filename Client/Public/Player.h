@@ -87,7 +87,7 @@ public:
 	void Notify_GrabVisible(_bool IsVisible);
 	void Notify_EscapeGrabReady();
 	void Notify_EscapeGrabExecute();
-	void Notify_Event(CHARACTER_EVENT eEvent);
+	void Notify_Event(CHARACTER_EVENT eEvent, void* pArg);
 
 
 #pragma endregion
