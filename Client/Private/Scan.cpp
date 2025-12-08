@@ -65,7 +65,7 @@ void CScan::Late_Update(_float fTimeDelta)
 	if (m_fCurRadius >= m_vRadius.y)
 	{
 		m_pRigidBody->IsActivate(false);
-		m_pRigidBody->Set_Desc(nullptr);
+		
 		m_isActivate = false;
 		return;
 	}
