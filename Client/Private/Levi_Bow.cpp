@@ -66,9 +66,9 @@ void CLevi_Bow::Update(_float fTimeDelta)
 	_vector vScale, vQuaternion, vTransition;
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
+	ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
-	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
+	//m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
 }
 
 void CLevi_Bow::Late_Update(_float fTimeDelta)
