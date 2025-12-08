@@ -718,6 +718,16 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapeExecute();
 	m_IsLockOn = false;
 }
+
+void CPlayer::Notify_Event(CHARACTER_EVENT eEvent)
+{
+	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
+	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
+	{
+		_int x = 10;
+	}
+	
+}
 #pragma endregion
 
 

@@ -3,6 +3,7 @@ namespace Client
 {
 	enum class CHARACTER_EVENT : unsigned int {
 		LANDSLIDE, // 경사면 슬라이딩.
+		LEVIATAN_QTE, // Leviatan QTE
 		END
 	};
 
