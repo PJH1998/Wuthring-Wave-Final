@@ -136,12 +136,15 @@ void CSequenceLupa::Late_Update(_float fTimeDelta)
 	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
 	_float4 vDebugPos = {};
 	XMStoreFloat4(&vDebugPos, m_pTransformCom->Get_State(STATE::POSITION));
+#ifdef _DEBUG
 	OutPutDebugFloat4(TEXT("Lupa Pos Non Sync"), vDebugPos);
-
+#endif
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	XMStoreFloat4(&vDebugPos, m_pTransformCom->Get_State(STATE::POSITION));
+#ifdef _DEBUG
 	OutPutDebugFloat4(TEXT("Lupa Pos Sync"), vDebugPos);
+#endif
 
 	if (m_IsVisible)
 	{

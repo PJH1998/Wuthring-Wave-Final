@@ -22,19 +22,20 @@ private:
 	virtual ~CRopeAnchor() = default;
 
 public:
-	virtual		HRESULT			Initialize_Prototype() override;
-	virtual		HRESULT			Initialize_Clone(void* pArg) override;
-	virtual		void			Priority_Update(_float fTimeDelta) override;
-	virtual		void			Update(_float fTimeDelta) override;
-	virtual		void			Late_Update(_float fTimeDelta) override;
-	virtual		void			Render() override;
+	virtual		HRESULT		Initialize_Prototype() override;
+	virtual		HRESULT		Initialize_Clone(void* pArg) override;
+	virtual		void		Priority_Update(_float fTimeDelta) override;
+	virtual		void		Update(_float fTimeDelta) override;
+	virtual		void		Late_Update(_float fTimeDelta) override;
+	virtual		void		Render() override;
 
 	// Pooling Spawn CallBack
-	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
+	virtual		void		Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 
 public:
-	virtual void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	virtual		void	OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
 private:
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CModel* m_pModelCom = { nullptr };

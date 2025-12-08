@@ -620,6 +620,8 @@ void CGameSystem::Release_System()
 
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);
+	Safe_Release(m_pUI_GrappleController);
+
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);

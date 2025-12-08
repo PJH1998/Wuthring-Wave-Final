@@ -33,6 +33,10 @@ public: // 생성/복제
 	//virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
 public:
+	HRESULT			Ready_Components(void* pArg);
+	virtual void	OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
+public:
 	_float3			Get_TargetPos()		{ return m_vTargetPos; }
 	UI_GRAPPLE_TYPE	Get_GrappleType()	{ return m_eGrappleType; }
 
@@ -60,6 +64,19 @@ private:
 
 	array<_float4, ENUM_CLASS(UI_GRAPPLE_TYPE::END) + 1> arrTypeColors = {};
 
+private:
+	CALLBACK_CLIENT	m_CallBack = {};
+
+	CTransform*		m_pTargetTransformCom = nullptr;
+	CTransform*		m_pWorldTransformCom = nullptr;		// 원래같으면 메쉬였을 것
+	CRigidbody*		m_pRigidbodyCom = nullptr;
+	
+	_uint			m_iCondition = {};
+	_float			m_fTargetDistance = {};
+	_float			m_fEventDistance = {};
+
+	mutex			m_Mutex;
+
 
 private:
 	const _float	m_fPivotDistance = 10.f;		// 거리에 따른 크기 조절용. 이 거리일 때 최대 크기로 보임.
@@ -69,8 +86,6 @@ private:
 
 	_float3			m_vTargetPos = {};
 
-
-	//_bool			m_i
 
 #ifdef KSTA_UITEST_GRAPPLE_TOZERO
 	_bool			m_DEBUG_isAssignedPosition = false;

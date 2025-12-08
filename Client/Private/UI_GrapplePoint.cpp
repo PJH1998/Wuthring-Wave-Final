@@ -7,7 +7,7 @@
 #include "Animator_UI.h"
 
 #define KSTA_UITEST_GRAPPLE_TOZERO  
-#define	 IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
+#define	IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
 
 
 CUI_GrapplePoint::CUI_GrapplePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -85,6 +85,7 @@ void CUI_GrapplePoint::Priority_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+	m_pWorldTransformCom->Save_PreviousPosition();
 
 	__super::Priority_Update(fTimeDelta);
 }
@@ -126,6 +127,19 @@ void CUI_GrapplePoint::Update(_float fTimeDelta)
 	Update_ApplyTargetPos(m_pDynamicUI, m_vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
 
 	__super::Update(fTimeDelta);
+
+	// from ropeanchor..
+	// 1. 플레이어 카메라 범위 안에 들어가 있으면서 거리도 적절하다면?
+	if (nullptr != m_pTargetTransformCom)
+	{
+		_vector vMyPos = m_pWorldTransformCom->Get_State(STATE::POSITION);
+		_vector vTargetPos = m_pTargetTransformCom->Get_State(STATE::POSITION);
+		m_fTargetDistance = XMVectorGetX(XMVector3Length(vMyPos - vTargetPos));
+	}
+	// 2. RigidBodyCom 업데이트
+	m_pRigidbodyCom->Update_Rigidbody(m_pWorldTransformCom->Get_WorldMatrix(), fTimeDelta);
+	// Last => TargetTransform 비우기?
+	m_pTargetTransformCom = nullptr;
 }
 
 void CUI_GrapplePoint::Late_Update(_float fTimeDelta)
@@ -150,7 +164,71 @@ void CUI_GrapplePoint::Render()
 	if (!m_isActivate)
 		return;
 
+#ifdef _DEBUG
+	m_pRigidbodyCom->Render();
+#endif // DEBUG
 
+}
+
+void CUI_GrapplePoint::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	// 1. Detect 감지되면?
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+		return;
+
+	// 2. CallBack 정보 가져오기
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+	if (nullptr == pTargetTransform)
+		return;
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_pTargetTransformCom = pTargetTransform;
+	}
+}
+
+HRESULT CUI_GrapplePoint::Ready_Components(void* pArg)
+{
+	__super::Ready_Components(pArg);
+
+	UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
+
+	// Additional Transform (Based On World)
+	m_pWorldTransformCom = CTransform::Create(m_pDevice, m_pContext);
+	if (FAILED(m_pWorldTransformCom->Initialize_Clone(pArg)))
+		return E_FAIL;
+	m_Components.emplace(TEXT("Com_WorldTransform"), m_pWorldTransformCom);
+	Safe_AddRef(m_pWorldTransformCom);
+
+	m_pWorldTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
+
+
+	// Rigidbody
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+	RigidbodyDesc.vExtent = _float3(1.5f, 1.5f, 1.5f); // 탐지 범위 안에 들어가있다면?
+	RigidbodyDesc.vPos = m_vTargetPos;
+
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_During(iLayer, pDesc, Manifold);
+	});
+
+	// Transform과 Rope_Anchor 타입임을 알립니다.
+	m_CallBack.pTransform = m_pWorldTransformCom;
+	if		(pDesc->eType == UI_GRAPPLE_TYPE::ANCHOR)	m_CallBack.eObjectType = OBJECTTYPE::ROPE_ANCHOR;
+	else if (pDesc->eType == UI_GRAPPLE_TYPE::PULL)		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+	m_CallBack.pCondition = &m_iCondition;
+
+	m_pRigidbodyCom->Set_Desc(&m_CallBack);
+	return S_OK;
 }
 
 //void CUI_GrapplePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -331,6 +409,7 @@ void CUI_GrapplePoint::Update_AnimOrder(_float fTimeDelta)
 CUI_GrapplePoint* CUI_GrapplePoint::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CUI_GrapplePoint* pInstance = new CUI_GrapplePoint(pDevice, pContext);
+
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
 		MSG_BOX("Failed to Created : CUI_GrapplePoint");
@@ -363,4 +442,7 @@ void CUI_GrapplePoint::Free()
 
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
+
+	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pWorldTransformCom);
 }
