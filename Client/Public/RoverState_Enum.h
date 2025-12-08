@@ -59,6 +59,7 @@ enum class ERoverInteractionState : _uint
 {
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
+	CONTROL,
 	EVENT,
 	INTERACTION_END
 };

@@ -61,6 +61,7 @@ enum class EGalbrenaInteractionState : _uint
 {
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
+	CONTROL,
 	INTERACTION_END
 };
 

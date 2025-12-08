@@ -60,6 +60,7 @@ enum class EAugustaInteractionState : _uint
 {
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
+	CONTROL, // 잡고 던지는 용도.
 	INTERACTION_END
 };
 
