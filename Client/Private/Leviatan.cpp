@@ -11,6 +11,7 @@
 #include "Levi_Wave.h"
 #include "Levi_Augusta.h"
 #include "GameSystem.h"
+#include "Event_Leviatan.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -58,6 +59,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	Ready_Volumes(pDesc);
+	Ready_Events();
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 
 	m_CallBack.pTransform = m_pTransformCom;
@@ -819,6 +821,19 @@ void CLeviatan::Ready_Volumes(LEVIATAN_DESC* pDesc)
 	if (nullptr == m_pParryVolume)
 		CRASH(m_pParryVolume);
 	m_pParryVolume->TriggerActivate(false);
+}
+
+void CLeviatan::Ready_Events()
+{
+	m_pGameInstance->Subscribe<LEVI_GRAB>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), [this](const LEVI_GRAB event) {
+		if (event.isSuccess)
+			m_fStamina = 0.f;
+		});
+
+	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), [this](const LEVI_EXECUTE event) {
+		if (m_iPhase == PHASE::ONE && event.isSuccess)
+			m_fHP = 0.f;
+		});
 }
 
 void CLeviatan::Calculate_PosAndDir()
