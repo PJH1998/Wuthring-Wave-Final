@@ -464,6 +464,9 @@ _bool CGameSystem::IsFix()
 #pragma region GRAB_INTERACT
 void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pArg)
 {
+	if (nullptr == m_pPlayer)
+		return;
+
 	if (strTransition == "GrabRelease")
 	{
 		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
@@ -472,15 +475,23 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	{
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
 	}
-	else if (strTransition == "LeviatanQTEStart")
-	{
-		CTransform* pBoss = static_cast<CTransform*>(pArg);
-		_int a = 10;
-	}
 	else if (strTransition == "LeviatanGrab")
 	{
-		_int a = 10;
+		//m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_GRAB, pArg);
+		//m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
 	}
+	else if (strTransition == "LeviatanQTEStart")
+	{
+		///CTransform* pBoss = static_cast<CTransform*>(pArg);
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
+
+		//Play_QTE()
+		// UI 띄우기.
+		// 성공하면 UI 측에서 EventBus로 Player Leviatan에 정보 전달.
+		// Leviatan은 정보를 전달받으면 무력화 + GameSystem에서 Summon_SequenceCharacter소환?
+		// 저는 Player Stop Anim 풀리고, => 절대 2, 3번을 누르지마. (키를 막던가)
+	}
+	
 }
 
 #pragma endregion

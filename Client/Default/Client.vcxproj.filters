@@ -1286,6 +1286,9 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Throw.h" />
+    <ClInclude Include="..\Public\RoverEvent.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2024,6 +2027,9 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
+    <ClCompile Include="..\Private\RoverEvent.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

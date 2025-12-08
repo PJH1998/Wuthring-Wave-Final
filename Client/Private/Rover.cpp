@@ -290,7 +290,7 @@ void CRover::Render_Shadow()
 
 
 // 캐릭터 전환시 Idle로 상태 전환..
-void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	m_pStateMachineCom->Exit_State();
 
@@ -321,6 +321,16 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE:
+		{
+			if (nullptr == pArg)
+				return;
+
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+		}
+		break;
+
 	}
 
 	// 상태 변수 초기화

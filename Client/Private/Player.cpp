@@ -414,6 +414,8 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
+
+		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -421,7 +423,8 @@ void CPlayer::Player_KeyInput()
 
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
 		// 임시
-		m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
@@ -722,8 +725,30 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
-		_int x = 10;
+		//CTransform* pTransform = static_cast<CTransform*>(pArg); // Leviatan Transform
+
+		// 2. Rover로 변경.
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+
+		// 3. 작업
+		// => Rover 위치 변경 (위치는 안변경되는거 같기도하고..)
+		// => Rover State 변경. (Leviatan 전용 QTE로)
+		// => Rover 시간 멈춤 (State Machine만)
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
+		);
 	}
+	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
+	{
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			return;
+
+		// 1, 2, 3번 도 못누르게 막아야함.
+		//m_Characters[m_iCurrentCharacterIdx]->Stop_Anim(); // Animation Stop
+	}
+
 	
 }
 #pragma endregion
@@ -904,6 +929,10 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
 	}
+}
+
+void CPlayer::Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg)
+{
 }
 
 void CPlayer::Manage_Condition()
