@@ -224,6 +224,11 @@ void CAnimMachine::Reset(CModel* pModelCom, const _string& strAnimTag)
 	m_fAnimationSpeed = Desc.fAnimationSpeed;
 }
 
+_string CAnimMachine::Get_CurrentAnimationTag() const
+{
+	return m_strCurrentAnimTag;
+}
+
 #ifdef _DEBUG
 void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 {

@@ -172,7 +172,7 @@ void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
 		
 		CellDesc.vStartPos = NpcData[i].vPosition;
 		CellDesc.vStartRot = NpcData[i].vRotation;
-		CellDesc.fTrackPos = m_pGameInstance->Rand(0.f, 30.f);
+		CellDesc.fTrackPos = m_pGameInstance->Rand(0.f, 60.f);
 		CellDesc.iFaceIndex = m_pGameInstance->Rand(0.f, 9.f - XMVectorGetX(g_XMEpsilon));
 		CellDesc.iNumMeshType = 0;
 		CellDesc.fSpeedPerSec = 10.f;

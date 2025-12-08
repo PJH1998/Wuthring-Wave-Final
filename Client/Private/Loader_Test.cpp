@@ -79,6 +79,7 @@
 #include "DummyNPC.h"
 #include "DummyCell.h"
 #include"NPC_Griffin.h"
+#include "NPC_Hiding.h"
 #pragma endregion
 
 
@@ -1078,7 +1079,7 @@ HRESULT CLoader_Test::Load_NPC()
 		CRASH("Prototype Create Failed");
 
 
-	// Prototype_Component_AnimMachine_FalseSovereign
+	// Prototype_Component_AnimMachine_NPCGriffin
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
 		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
 		CRASH("Monster AnimMachine Create Failed");
@@ -1091,6 +1092,23 @@ HRESULT CLoader_Test::Load_NPC()
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
 			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
 		CRASH("Prototype Create Failed");
+
+	//Prototype_Component_Model_FemaleS370437
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370437"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS370437/FemaleS370437.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_NPC_Hiding
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPC_Hiding"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS_StateMachine.json"))))
+		CRASH("NPC AnimMachine Create Failed");
+
+	// Prototype_GameObject_NPC_Hiding
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+		CNPC_Hiding::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 	return S_OK;
 }
 
