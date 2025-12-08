@@ -207,6 +207,7 @@
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\Effect_Light.h" />
     <ClInclude Include="..\Public\Effect_VA.h" />
+    <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Event_Leviatan.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
@@ -392,6 +393,7 @@
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_CurveTrace.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
+    <ClInclude Include="..\public\UI_GrappleController.h" />
     <ClInclude Include="..\public\UI_GrapplePoint.h" />
     <ClInclude Include="..\public\UI_HUD.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -489,6 +491,7 @@
     <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\Effect_Light.cpp" />
     <ClCompile Include="..\Private\Effect_VA.cpp" />
+    <ClCompile Include="..\Private\MapObject_Burn.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
@@ -662,6 +665,7 @@
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_CurveTrace.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
+    <ClCompile Include="..\private\UI_GrappleController.cpp" />
     <ClCompile Include="..\private\UI_GrapplePoint.cpp" />
     <ClCompile Include="..\private\UI_HUD.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

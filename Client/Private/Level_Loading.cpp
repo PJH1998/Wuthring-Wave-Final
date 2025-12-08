@@ -77,7 +77,7 @@ void CLevel_Loading::Update(_float fTimeDelta)
     {
 		cout << "Loading End" << endl;
         CHANGE_LEVEL_EVENT event{ m_eNextLevel, false };
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
+        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
     }
 }
 
