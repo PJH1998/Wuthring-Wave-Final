@@ -495,6 +495,7 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	}
 	else if (strTransition == "LeviatanGrab")
 	{
+		CTransform* pBoss = static_cast<CTransform*>(pArg);
 		_int a = 10;							//레비아탄 강제 넉백
 	}
 }
