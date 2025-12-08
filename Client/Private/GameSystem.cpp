@@ -588,7 +588,7 @@ void CGameSystem::Potal_Register(CPotal* pPotal)
 
 void CGameSystem::Set_Potal_Active(_bool B)
 {
-	m_pPotal->SetActivate(B);
+	m_pPotal->PotalActive(B);
 }
 
 #pragma endregion
