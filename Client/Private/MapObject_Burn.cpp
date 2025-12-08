@@ -51,8 +51,8 @@ void CMapObject_Burn::Late_Update(_float fTimeDelta)
 	{
 #ifndef _DEBUG
 		m_pRigidbodyCom->IsActivate(false);
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 #endif
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 	}
 }
 
