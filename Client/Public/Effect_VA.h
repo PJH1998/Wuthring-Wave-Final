@@ -15,11 +15,14 @@ class CEffect_VA : public CGameObject
 public:
 	typedef struct tagVADesc : Engine::EFFECT_DESC
 	{
-		_wstring		strTextureTag;
-		_wstring		strColorTextureTag;
+		_wstring		strTextureTag = {};
+		_wstring		strColorTextureTag = {};
+		_wstring		strMeshTag = {};
 
-		_wstring		strMeshTag;
+		_float			fAnimSpeed = 10.f;
+		_float			fMovementScale = 0.2f;
 
+		_int			iShaderPass = 0;
 	}VA_DESC;
 
 private:
@@ -28,8 +31,8 @@ private:
 	virtual ~CEffect_VA() = default;
 
 public:
-	virtual		HRESULT			Initialize_Prototype(const VA_DESC* pDesc);
-	virtual		HRESULT			Initialize_Clone(void* pArg) override;
+	virtual		HRESULT				Initialize_Prototype(const VA_DESC* pDesc);
+	virtual		HRESULT				Initialize_Clone(void* pArg) override;
 	virtual		void				Priority_Update(_float fTimeDelta) override;
 	virtual		void				Update(_float fTimeDelta) override;
 	virtual		void				Late_Update(_float fTimeDelta) override;
@@ -40,20 +43,20 @@ public:
 
 
 private:
-	CShader*					m_pShaderCom = { nullptr };
-	CTexture*					m_pTextureCom = { nullptr };
-	CTexture*					m_pColorTextureCom = { nullptr };
-	CVAMesh*					m_pVAMesh = { nullptr };
-	VA_DESC						m_tDesc = {};
+	CShader*						m_pShaderCom = { nullptr };
+	CTexture*						m_pTextureCom = { nullptr };
+	CTexture*						m_pColorTextureCom = { nullptr };
+	CVAMesh*						m_pVAMesh = { nullptr };
+	VA_DESC							m_tDesc = {};
 
 	//_float							m_fTimeAcc = {};					// Anim 진행 시간 누적
 
-	_uint							m_iTrackPosition = {};			// Anim 진행 Pos
-	_uint							m_iAnimationDuration = {};		// 총 Animation 진행 시간 (HDR에서 Y Max 필요)
+	_float							m_fTrackPosition = {};			// Anim 진행 Pos
+	_float							m_fAnimationDuration = {};		// 총 Animation 진행 시간 (HDR에서 Y Max 필요)
 
 private:
 	void							Bind_Resource();
-
+	HRESULT							Ready_Components();
 public:
 	static		CEffect_VA*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const VA_DESC* pDesc);
 	virtual		CGameObject*		Clone(void* pArg) override;

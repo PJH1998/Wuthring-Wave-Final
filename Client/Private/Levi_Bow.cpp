@@ -38,7 +38,7 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 
-	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	m_ShaderPaths.resize(SHADERPATH::END, ENUM_CLASS(SHADER_ANIMMESH::NORMAL_N_COLOR));
 
 	m_vBaseColor = _float4(0.15f, 0.1f, 0.15f, 1.f);
 	_float temp{};
@@ -66,9 +66,9 @@ void CLevi_Bow::Update(_float fTimeDelta)
 	_vector vScale, vQuaternion, vTransition;
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	ComBinedMatrix = matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
+	ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParentTransform->Get_WorldMatrix();
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
-	m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
+	//m_pTransformCom->Set_WorldMatrix(ComBinedMatrix);
 }
 
 void CLevi_Bow::Late_Update(_float fTimeDelta)
@@ -130,6 +130,11 @@ void CLevi_Bow::Change_Offset(LEVIBOW_DESC& Desc)
 	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
 #endif // _DEBUG
 
+}
+
+void CLevi_Bow::Change_Scale(_float fScale)
+{
+	m_pTransformCom->Scale(_float3(fScale, fScale, fScale));
 }
 
 HRESULT CLevi_Bow::Bind_Resources()

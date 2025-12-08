@@ -718,6 +718,16 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_Characters[m_iCurrentCharacterIdx]->Bind_GrabEscapeExecute();
 	m_IsLockOn = false;
 }
+
+void CPlayer::Notify_Event(CHARACTER_EVENT eEvent)
+{
+	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
+	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
+	{
+		_int x = 10;
+	}
+	
+}
 #pragma endregion
 
 
@@ -805,8 +815,8 @@ void CPlayer::Toggle_LockOn()
 		Calc_LockOnPos();
 		_float3 vPos = {};
 		XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-		cout << "LockOn Pos (x, y, z) : " << m_vLockOnPos.x << " - " << m_vLockOnPos.y << " - " << m_vLockOnPos.z << endl;
-		cout << "Player Pos (x, y, z) : " << vPos.x << " - " << vPos.y << " - " << vPos.z << endl;
+		cout << "LockOn Pos (x, y, z) : " << m_vLockOnPos.x << ", " << m_vLockOnPos.y << ", " << m_vLockOnPos.z << endl;
+		cout << "Player Pos (x, y, z) : " << vPos.x << ", " << vPos.y << ", " << vPos.z << endl;
 
 		m_pGameSystem->Attach_LockOnUI(&m_vLockOnPos);
 
@@ -946,7 +956,14 @@ void CPlayer::Calc_LockOnPos()
 
 	_matrix matTarget = m_LockOnTargetInfo.pTransform->Get_WorldMatrix();
 	_matrix matSocket = XMLoadFloat4x4(m_LockOnTargetInfo.pSocketMatrix);
-	_matrix matCombined = matTarget * matSocket;
+
+	//_vector vSocektPos, vSocketRot, vSocketScale;
+	//XMMatrixDecompose(&vSocektPos, &vSocketRot, &vSocketScale, matSocket);
+	//
+	//// Scale 1.f로 고정
+	//matSocket = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vSocketRot, vSocektPos);
+
+	_matrix matCombined = matSocket * matTarget;
 
 	XMStoreFloat3(&m_vLockOnPos, matCombined.r[3]); // Position 저장.
 	

@@ -112,9 +112,6 @@
     <Filter Include="03. GameObject\Dummy\Augusta">
       <UniqueIdentifier>{e3b0fe7a-92fa-4d49-9339-e575e6ab1be3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Level\StateMachine">
-      <UniqueIdentifier>{cb31a44c-e4ba-40b8-9e45-14e9d8e0e9be}</UniqueIdentifier>
-    </Filter>
     <Filter Include="96. Interface\StateMachine">
       <UniqueIdentifier>{d30d9ac5-e7ba-40a0-a9c6-e7559e971818}</UniqueIdentifier>
     </Filter>
@@ -205,12 +202,6 @@
     <Filter Include="03. GameObject\SFX\Augusta">
       <UniqueIdentifier>{a57d6569-499a-4271-92bc-c4aa3f903e44}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Level\Effect\Effect_Controller\Radial_Controller">
-      <UniqueIdentifier>{ad4a7415-e98d-4f47-996d-36267f17b585}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Level\Effect\Effect_Controller\Radial_Controller\Radial">
-      <UniqueIdentifier>{606c33d5-720d-4502-82fe-1a443a9678bc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\SFX\Augusta\Slash">
       <UniqueIdentifier>{c319f2a6-687e-46aa-8a56-e1e6c61087c2}</UniqueIdentifier>
     </Filter>
@@ -228,6 +219,21 @@
     </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\VA_Controller">
       <UniqueIdentifier>{e59009cf-230b-4ab5-b7c4-508acbc36321}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller">
+      <UniqueIdentifier>{ad4a7415-e98d-4f47-996d-36267f17b585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller\Radial">
+      <UniqueIdentifier>{606c33d5-720d-4502-82fe-1a443a9678bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller">
+      <UniqueIdentifier>{0ac5dddb-8f12-46dd-bc9f-6a2d00560acb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller\FXLight">
+      <UniqueIdentifier>{5389f285-edee-4fc2-8c14-a508a90bb558}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Shader\StateMachine">
+      <UniqueIdentifier>{cb31a44c-e4ba-40b8-9e45-14e9d8e0e9be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -353,7 +359,7 @@
       <Filter>03. GameObject\Dummy\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_ASM.h">
-      <Filter>01. Level\StateMachine</Filter>
+      <Filter>01. Level\Shader\StateMachine</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ASM_Interface.h">
       <Filter>96. Interface\StateMachine</Filter>
@@ -468,10 +474,10 @@
       <Filter>03. GameObject\SFX\Augusta\Blur</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Radial_Controller.h">
-      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Effect_Radial.h">
-      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller\Radial</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Galbrena_SFX.h">
       <Filter>03. GameObject\SFX\Galbrena</Filter>
@@ -516,6 +522,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\VA_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Light.h">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller\FXLight</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Light_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -626,7 +638,7 @@
       <Filter>03. GameObject\Dummy\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_ASM.cpp">
-      <Filter>01. Level\StateMachine</Filter>
+      <Filter>01. Level\Shader\StateMachine</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ASM_Interface.cpp">
       <Filter>96. Interface\StateMachine</Filter>
@@ -729,10 +741,10 @@
       <Filter>03. GameObject\SFX\Augusta\Blur</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Radial_Controller.cpp">
-      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Radial.cpp">
-      <Filter>01. Level\Effect\Effect_Controller\Radial_Controller\Radial</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller\Radial</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Galbrena_SFX.cpp">
       <Filter>03. GameObject\SFX\Galbrena</Filter>
@@ -777,6 +789,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\VA_Controller.cpp">
       <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Light.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller\FXLight</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Light_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

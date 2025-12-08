@@ -28,6 +28,7 @@ HRESULT CEffect_Controller::Initialize()
 	m_pDecal_Controller = CDecal_Controller::Create(m_pDevice, m_pContext);
 	m_pRadial_Controller = CRadial_Controller::Create(m_pDevice, m_pContext);
 	m_pVA_Controller = CVA_Controller::Create(m_pDevice, m_pContext);
+	m_pLight_Controller = CLight_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -61,6 +62,7 @@ void CEffect_Controller::Prefab_Tab()
         {
             Load_Prefab();
             m_IsLoad = false;
+			//로더에 저장된 정보 삭제
             m_pLoad_Controller->Reset_Load();
         }
 
@@ -193,6 +195,15 @@ void CEffect_Controller::Prefab_Tab()
 
 						m_eChildrenType = EFFECT_TYPE::VA;
 					}
+					ImGui::SameLine(0.f, 20.f);
+
+					if (ImGui::Button("Light"))
+					{
+						m_pLight_Controller->Set_LightTag(m_ChildrenTag);
+
+						m_eChildrenType = EFFECT_TYPE::LIGHT;
+					}
+					
 
                     //위에서 정해진 타입에 따라 컨트롤러 활성화
                     if (m_eChildrenType == EFFECT_TYPE::PARTICLE)
@@ -364,6 +375,30 @@ void CEffect_Controller::Prefab_Tab()
 							m_eChildrenType = EFFECT_TYPE::END;
 						}
 					}
+
+					if (m_eChildrenType == EFFECT_TYPE::LIGHT)
+					{
+						CEffect_Light::LIGHT_DESC pDesc = {};
+
+						m_pLight_Controller->Light_Base_Tab(pDesc, m_bChildrenCreatFlag);
+
+						if (m_bChildrenCreatFlag)
+						{
+							m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
+
+							CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
+							Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+							Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::LIGHT;
+
+							m_pSelectedPrefabDesc->ChildrenCount += 1;
+							m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
+
+							m_ChildrenTag[0] = _T('\0');
+							m_bChildrenCreatFlag = false;
+							m_bChildrenTagFlag = false;
+							m_eChildrenType = EFFECT_TYPE::END;
+						}
+					}
                 }
 
                 if (ImGui::Button("Load Children"))
@@ -417,6 +452,9 @@ void CEffect_Controller::Prefab_Tab()
 
 					if (m_IsVAEffect)
 						m_pVA_Controller->Update();
+
+					if (m_IsLightEffect)
+						m_pLight_Controller->Update();
                     
                     if (ImGui::Button("Apply"))
                     {
@@ -503,10 +541,18 @@ void CEffect_Controller::Prefab_Tab()
 
 					   }
 
+					   if (m_IsLightEffect)
+					   {
+						   CEffect_Light::LIGHT_DESC* pLightDesc = m_pLight_Controller->Get_LightDesc(m_strChildrenTag);
+
+						   m_pSelectedPrefab->Remove_Children(pLightDesc->strMyTag);
+
+						   m_pSelectedPrefab->Add_Children(pLightDesc, EFFECT_TYPE::LIGHT);
+					   }
+
                     }
 
-                    if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
-                    {
+                   
                         if (ImGui::Button("Delete Effect"))
                         {
                             if (m_IsParticle)
@@ -576,8 +622,10 @@ void CEffect_Controller::Prefab_Tab()
 
 								Reset_ChildrenInfo();
 							}
+
+
                         }
-                    }
+                    
                   
                 }
          
@@ -638,6 +686,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
 		m_IsVAEffect = false;
+		m_IsLightEffect = false;
 
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
@@ -650,6 +699,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
 		m_IsVAEffect = false;
+		m_IsLightEffect = false;
 
         m_pMesh_Controller->UpdateSelected_FXMeshFormTag(m_strChildrenTag);
     }
@@ -661,6 +711,8 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
+		m_IsVAEffect = false;
+		m_IsLightEffect = false;
 
         m_pTrailMesh_Controller->UpdateSelected_TrailMeshFormTag(m_strChildrenTag);
     }
@@ -673,6 +725,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
 		m_IsVAEffect = false;
+		m_IsLightEffect = false;
 
 		m_pRect_Controller->UpdateSelected_RectFormTag(m_strChildrenTag);
 	}
@@ -684,7 +737,8 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = false;
 		m_IsDecalEffect = true;
 		m_IsRadialEffect = false;
-
+		m_IsVAEffect = false;
+		m_IsLightEffect = false;
 	
 		m_pDecal_Controller->UpdateSelected_DecalFormTag(m_strChildrenTag);
 	}
@@ -697,6 +751,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = true;
 		m_IsVAEffect = false;
+		m_IsLightEffect = false;
 
 		m_pRadial_Controller->UpdateSelected_RadialFormTag(m_strChildrenTag);
 	}
@@ -709,8 +764,22 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
 		m_IsVAEffect = true;
+		m_IsLightEffect = false;
 
 		m_pVA_Controller->UpdateSelected_VAFormTag(m_strChildrenTag);
+	}
+	else if (dynamic_cast<CEffect_Light*>(m_pSelectedPrefab->Get_Children(m_strChildrenTag)))
+	{
+		m_IsParticle = false;
+		m_IsMeshEffect = false;
+		m_IsTrailMesh = false;
+		m_IsRectEffect = false;
+		m_IsDecalEffect = false;
+		m_IsRadialEffect = false;
+		m_IsVAEffect = false;
+		m_IsLightEffect = true;
+
+		m_pLight_Controller->UpdateSelected_LightFormTag(m_strChildrenTag);
 	}
 
     //프리팹이 들고 있는 구조체에서 자식과 동일한 프레임 찾기
@@ -892,6 +961,7 @@ void CEffect_Controller::Remove_PrefabDesc_Children()
 		{
 			PrefabDesc->second.FrameDesc.erase(iter);
 			PrefabDesc->second.ChildrenCount -= 1;
+			break;
 		}
 		else
 			++iter;
@@ -1161,8 +1231,29 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
 			json VAJson;
 
 			VA_To_Json(VAJson, pVADesc);
-
+			 
 			jsonStream << VAJson.dump(2);
+			jsonStream.close();
+		}
+		if (Prefab->second.FrameDesc[i].eChildrenType == EFFECT_TYPE::LIGHT)
+		{
+			_string LightPath = {};
+			CEffect_Light::LIGHT_DESC* pLightDesc = {};
+
+			pLightDesc = m_pLight_Controller->Get_LightDesc(Prefab->second.FrameDesc[i].strChildrenTag);
+
+			LightPath = DefaultPath;
+			LightPath += "/FXLight/";
+			LightPath += WStringToString(Prefab->second.FrameDesc[i].strChildrenTag);
+			LightPath += ".json";
+
+			ofstream jsonStream(LightPath);
+
+			json LightJson;
+
+			Light_To_Json(LightJson, pLightDesc);
+
+			jsonStream << LightJson.dump(2);
 			jsonStream.close();
 		}
     }
@@ -1562,6 +1653,33 @@ void CEffect_Controller::VA_To_Json(json& VA, CTestVA::VA_DESC* pVADesc)
 	VA["ShaderPass"] = pVADesc->iShaderPass;
 }
 
+void CEffect_Controller::Light_To_Json(json& LightJson, CEffect_Light::LIGHT_DESC* pLightDesc)
+{
+	LightJson["MyTag"] = WStringToString(pLightDesc->strMyTag);
+	LightJson["MyType"] = pLightDesc->eMyType;
+
+	LightJson["LightTag"] = WStringToString(pLightDesc->wstrLightTag);
+	
+	json Color = json::array();
+	Color.push_back(pLightDesc->vColor.x);
+	Color.push_back(pLightDesc->vColor.y);
+	Color.push_back(pLightDesc->vColor.z);
+	Color.push_back(pLightDesc->vColor.w);
+	LightJson["Color"] = Color;
+
+	json LifeTime = json::array();
+	LifeTime.push_back(pLightDesc->vLifeTime.x);
+	LifeTime.push_back(pLightDesc->vLifeTime.y);
+	LightJson["LifeTime"] = LifeTime;
+
+	json Range = json::array();
+	Range.push_back(pLightDesc->vRange.x);
+	Range.push_back(pLightDesc->vRange.y);
+	LightJson["Range"] = Range;
+
+	LightJson["Speed"] = pLightDesc->fSpeed;
+}
+
 void CEffect_Controller::Load_Prefab()
 {
     CEffect_Prefab::PREFAB_DESC PrefabDesc = {};
@@ -1621,6 +1739,17 @@ void CEffect_Controller::Load_Prefab()
 		{
 			Load_FXRadial(FrameDesc.strChildrenTag);
 		}
+
+		else if (FrameDesc.eChildrenType == EFFECT_TYPE::VA)
+		{
+			Load_FXVA(FrameDesc.strChildrenTag);
+		}
+
+		else if (FrameDesc.eChildrenType == EFFECT_TYPE::LIGHT)
+		{
+			Load_FXLight(FrameDesc.strChildrenTag);
+		}
+
     }
 }
 
@@ -1713,6 +1842,30 @@ void CEffect_Controller::Load_FXRadial(const _wstring& RadialTag)
 	m_pSelectedPrefab->Add_Children(&RadialDesc, EFFECT_TYPE::RADIAL);
 
 	m_pRadial_Controller->Set_RadialDesc(Tag, RadialDesc);
+}
+
+void CEffect_Controller::Load_FXVA(const _wstring& VATag)
+{
+	CTestVA::VA_DESC VADesc= {};
+	_wstring Tag = VATag;
+
+	m_pLoad_Controller->Get_FXVA_Desc(Tag, VADesc);
+
+	m_pSelectedPrefab->Add_Children(&VADesc, EFFECT_TYPE::VA);
+
+	m_pVA_Controller->Set_VADesc(Tag, VADesc);
+}
+
+void CEffect_Controller::Load_FXLight(const _wstring& LightTag)
+{
+	CEffect_Light::LIGHT_DESC LightDesc = {};
+	_wstring Tag = LightTag;
+
+	m_pLoad_Controller->Get_FXLight_Desc(Tag, LightDesc);
+
+	m_pSelectedPrefab->Add_Children(&LightDesc, EFFECT_TYPE::LIGHT);
+
+	m_pLight_Controller->Set_LightDesc(Tag, LightDesc);
 }
 
 void CEffect_Controller::Save_SelectedChildren_To_Json()

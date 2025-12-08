@@ -166,7 +166,7 @@ void CLevi_Augusta::Ready_Components(const LEVIAUG_DESC* pDesc)
 
 void CLevi_Augusta::Ready_Variables(const LEVIAUG_DESC* pDesc)
 {
-    m_ShaderPaths.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+    m_ShaderPaths.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_N_COLOR));
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 }

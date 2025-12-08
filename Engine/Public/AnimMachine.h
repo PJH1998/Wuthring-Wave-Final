@@ -40,6 +40,8 @@ public:
 	
 	void Reset(CModel* pModelCom, const _string& strAnimTag);
 
+	_string Get_CurrentAnimationTag() const;
+
 #ifdef _DEBUG
 	void Create_AnimStates(const vector<_string>& AnimationNames);
 	void Clear_States();
