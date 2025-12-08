@@ -169,6 +169,13 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pGameSystem->Set_MouseFix(false);
 }
 
+HRESULT CUI_Ovfl_Palette::Ready_Events()
+{
+	//
+
+	return S_OK;
+}
+
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
 {
 	return S_OK;

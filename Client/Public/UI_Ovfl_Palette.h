@@ -33,6 +33,7 @@ public:
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
+	HRESULT			Ready_Events();
 	HRESULT			Ready_Components(void* pArg);
 	HRESULT			Ready_ChildExtraComponents();
 

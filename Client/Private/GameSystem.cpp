@@ -9,6 +9,7 @@
 
 #include "UI_FontPreset.h"
 #include "UI_ControlHelper.h"
+#include "UI_GrappleController.h"
 #include "UI_StatusSyncer.h"
 
 #include"Sonoro_Manager.h"
@@ -41,6 +42,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pUI_ControlHelper = CUI_ControlHelper::Create();
 	ASSERT_CRASH(m_pUI_ControlHelper);
+
+	m_pUI_GrappleController = CUI_GrappleController::Create();
+	ASSERT_CRASH(m_pUI_GrappleController);
 
 	//m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
 	//ASSERT_CRASH(m_pUI_ControlHelper);
@@ -316,10 +320,10 @@ void CGameSystem::Close_Game_OverflowPalette()
 	m_pUI_ControlHelper->Close_Game_OverflowPalette();
 }
 
-void CGameSystem::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
-{
-	m_pUI_ControlHelper->Attach_GrapplePoint(pTargetPos, eType);
-}
+//void CGameSystem::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
+//{
+//	m_pUI_ControlHelper->Attach_GrapplePoint(pTargetPos, eType);
+//}
 
 void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)
 {
@@ -344,6 +348,7 @@ void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
 void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 										_float3& vStartVelocity,
 										_float3& vAcceleration,
+										_float3* pCustomSpherePos,
 										_float fMaxTime,
 										_uint iSegmentCount,
 										_float fRibbonWidth,
@@ -355,6 +360,7 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 	m_pUI_ControlHelper->Req_Render_CurveTrace(	vStartPos,
 												vStartVelocity,
 												vAcceleration, 
+												pCustomSpherePos,
 												fMaxTime,
 												iSegmentCount, 
 												fRibbonWidth, 
@@ -362,6 +368,16 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vBaseColor,
 												vHeadColor,
 												vTailColor);
+}
+
+HRESULT CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType)
+{
+	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType);
+}
+
+CUI_GrapplePoint* CGameSystem::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance)
+{
+	return m_pUI_GrappleController->Find_NearGrapplePoint(vBasePos, eType, pOutDistance);
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
@@ -590,7 +606,7 @@ void CGameSystem::Potal_Register(CPotal* pPotal)
 
 void CGameSystem::Set_Potal_Active(_bool B)
 {
-	m_pPotal->SetActivate(B);
+	m_pPotal->PotalActive(B);
 }
 
 #pragma endregion

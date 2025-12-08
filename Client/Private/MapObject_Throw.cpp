@@ -23,78 +23,85 @@ HRESULT CMapObject_Throw::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	Ready_Components(pArg);
-
-	m_pDetectRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-			int a = 0;
-			//m_pCollideRigidbodyCom->Change_MotionType(EMotionType::Dynamic);
-		});
+	m_fFlyTime = 1.f;
     return S_OK;
 }
 
 void CMapObject_Throw::Priority_Update(_float fTimeDelta)
 {
+
+	if (!m_IsGrabbed && !m_IsThrow)
+	{
+		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vOriginPos));
+		m_fThrowTime = 0.f;
+		m_fattachTime = 0.f;
+	}
 }
 
 void CMapObject_Throw::Update(_float fTimeDelta)
 {
 	m_pDetectRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	//m_pTransformCom->Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), fTimeDelta);
+	//그랩 상태 전에는 물리 연산이나 목표 좌표 연산 안하다가
+	//그랩 상태일 때 좌표연산. 그랩에서 던짐 상태가 됐을 때 좌표 연산 안하기. 물리 연산만 하기.
 
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+	if (m_IsGrabbed && !m_IsThrow)
 	{
-		m_IsThrowed = true;
+		if (m_fattachTime < 1.f)
+			m_fattachTime += fTimeDelta;
+
 		XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
-
-
-		//m_pCollideRigidbodyCom->Impulse(m_vImpulse);
-
-		//
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
-	{
-		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vStartPos), 1.f));
-		m_IsThrowed = false;
-		m_fThrowTime = 0.f;
-	}
-
-	if (!m_IsThrowed)
-	{
-		if (m_pGameInstance->GetCenterPos(&m_vTargetPos))
-			int a = 0;
+		m_pGameInstance->GetCenterPos(&m_vTargetPos);
 
 		_vector DisplaceMent = XMLoadFloat3(&m_vTargetPos) - XMLoadFloat3(&m_vStartPos);
 
-		_float fTime = 1.f;
 
 		_vector vGravityAccel = XMVectorSet(0.f, -9.81f, 0.f, 0.f);
-		_vector vGravityDrop = vGravityAccel * 0.5f * fTime * fTime;
-		XMStoreFloat3(&m_vImpulse, (DisplaceMent - vGravityDrop) / fTime);
+		_vector vGravityDrop = vGravityAccel * 0.5f * m_fFlyTime * m_fFlyTime;
+		XMStoreFloat3(&m_vImpulse, (DisplaceMent - vGravityDrop) / m_fFlyTime);
+
+		_float3 Grav(0.f, -9.8f, 0.f);
+		m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav, &m_vTargetPos);
+		//m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
 	}
-	else 
+	
+	if (m_IsThrow)
 	{
 		m_fThrowTime += fTimeDelta;
-		if(m_fThrowTime<1.f)
+		if (m_fThrowTime < m_fFlyTime)
 		{
-
 
 			_vector vt = XMLoadFloat3(&m_vImpulse) * m_fThrowTime;
 
 			_vector gt2 = 0.5f * XMVectorSet(0.f, -9.81f, 0.f, 0.f) * m_fThrowTime * m_fThrowTime;
-			_vector NewPos = XMLoadFloat3(&m_vStartPos) + vt + gt2;
+			_vector NewPos = XMVectorSetW(XMLoadFloat3(&m_vStartPos) + vt + gt2, 1.f);
 			m_pTransformCom->Set_State(STATE::POSITION, NewPos);
 		}
-	}
-	//m_pCollideRigidbodyCom->Set_Transform(m_pTransformCom->Get_WorldMatrix());
+		else
+		{
+#ifdef _DEBUG
+			m_IsThrow = false;
+#endif
 
-	_float3 Grav(0.f, -9.8f, 0.f);
-	//m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
+#ifndef _DEBUG
+			m_isActivate = false;
+#endif
+			//이펙트 호출.		
+			m_pCollideRigidbodyCom->IsActivate(true);
+			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+		}
+
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_Y) == KEYSTATE::PRESS)
+	{
+		m_pCollideRigidbodyCom->IsActivate(true);
+		m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	}
 }
 
 void CMapObject_Throw::Late_Update(_float fTimeDelta)
 {
-	//if (m_IsThrowed)
-	//	m_pCollideRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
+
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 }
 
@@ -143,24 +150,62 @@ void CMapObject_Throw::Render()
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
+#ifdef _DEBUG
+	m_pDetectRigidbodyCom->Render();
+	m_pCollideRigidbodyCom->Render();
+#endif
 }
 
 void CMapObject_Throw::Render_Shadow()
 {
 }
 
+void CMapObject_Throw::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+		return;
+
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
+	{
+		if (!m_IsGrabbed && !m_IsThrow)
+			m_IsGrabbed = true;
+		else if (m_IsGrabbed && !m_IsThrow)
+		{
+			m_IsGrabbed = false;
+			m_IsThrow = true;
+		}
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
+	{
+		m_IsGrabbed = false;
+		m_IsThrow = false;
+	}
+
+	if (m_IsGrabbed && !m_IsThrow)
+	{
+		CTransform* pTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+		_vector Pos = pTransform->Get_State(STATE::POSITION);
+		_vector LerpPos;
+		if (m_fattachTime >= 1.f)
+			m_fattachTime = 1.f;
+
+		XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
+		LerpPos = XMVectorLerp(XMLoadFloat3(&m_vStartPos), XMVectorSetY(Pos, Pos.m128_f32[1] += 1.f), m_fattachTime * m_fattachTime);
+		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(LerpPos, 1.f));
+	}
+}
+
 void CMapObject_Throw::Ready_Components(void* pArg)
 {
-
-
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
-
 
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -177,11 +222,11 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
 
-
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	XMStoreFloat4(&m_vOriginPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+
 	CRigidbody::BOXBODY_DESC RigidbodyDesc{};
-	//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Kinematic;
@@ -190,27 +235,33 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	//플레이어 감지용 1개
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_DetectRigidbody"), reinterpret_cast<CComponent**>(&m_pDetectRigidbodyCom), &RigidbodyDesc);
-
-	//CRigidbody::BOXBODY_DESC Sibal{};
-	//XMStoreFloat4(&Sibal.vQuat, m_pTransformCom->Get_Quaternion());
-	//Sibal.eShape = SHAPE::BOX;
-	//XMStoreFloat3(&Sibal.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//Sibal.eType = EMotionType::Dynamic;
-	//Sibal.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	//Sibal.vExtent = _float3(1.f, 1.f, 1.f);
-
-	RigidbodyDesc.eType = EMotionType::Dynamic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::THROW);
-	RigidbodyDesc.vExtent = _float3(1.f, 1.f, 1.f);
+		
+	m_Desc.pTransform = m_pTransformCom;
+	m_Desc.eObjectType = OBJECTTYPE::THROW;
+	m_Desc.IsGrab  = &m_IsGrabbed;
+	m_Desc.IsThrow = &m_IsThrow;
+	m_pDetectRigidbodyCom->Set_Desc(&m_Desc);
+		
+	m_pDetectRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_During(iLayer, pDesc, Manifold);
+		});
+		
+	CRigidbody::BOXBODY_DESC BurnRigidboydDesc{};
+	XMStoreFloat4(&BurnRigidboydDesc.vQuat, m_pTransformCom->Get_Quaternion());
+	BurnRigidboydDesc.eShape = SHAPE::BOX;
+	XMStoreFloat3(&BurnRigidboydDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	BurnRigidboydDesc.eType = EMotionType::Kinematic;
+	BurnRigidboydDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::THROW);
+	BurnRigidboydDesc.vExtent = _float3(10.f, 10.f, 10.f);
 	//불타는 벽과 충돌 감지용
-	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-	//	TEXT("Com_CollideRigidbody"), reinterpret_cast<CComponent**>(&m_pCollideRigidbodyCom), &Sibal);
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_CollideRigidbody"), reinterpret_cast<CComponent**>(&m_pCollideRigidbodyCom), &BurnRigidboydDesc);
+	m_pCollideRigidbodyCom->IsActivate(false);
 }
 
 void CMapObject_Throw::Collide()
 {
 	m_pDetectRigidbodyCom->IsActivate(false);
-	//m_pCollideRigidbodyCom->IsActivate(false);
 	SetActivate(false);
 }
 
@@ -254,5 +305,4 @@ void CMapObject_Throw::Free()
 	Safe_Release(m_pDetectRigidbodyCom);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
-	
 }

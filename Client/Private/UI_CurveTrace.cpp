@@ -53,7 +53,7 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	//Update_CurveVB();
+	Update_CurveVB();
 	Update_CurrentColor();
 	
 
@@ -96,11 +96,30 @@ void CUI_CurveTrace::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isModified = true;
 }
 
-void CUI_CurveTrace::Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration)
+void CUI_CurveTrace::Req_Render_CurveTrace(_float3& vStartPos,
+										   _float3& vStartVelocity,
+										   _float3& vAcceleration,
+										   _float3* pCustomSpherePos,
+										   _float fMaxTime,
+										   _uint iSegmentCount,
+										   _float fRibbonWidth,
+										   _bool isUseCustomColor,
+										   _float4 vBaseColor,
+										   _float4 vHeadColor,
+										   _float4 vTailColor)
 {
 	m_tDesc.vStartPos = vStartPos;
 	m_tDesc.vStartVel = vStartVelocity;
 	m_tDesc.vAcceleration = vAcceleration;
+	m_tDesc.pCustomSpherePos = pCustomSpherePos;
+	m_tDesc.fMaxTime = fMaxTime;
+	m_tDesc.iSegmentCount = iSegmentCount;
+	m_tDesc.fWidth = fRibbonWidth;
+	m_tDesc.isUseCustomColor = isUseCustomColor;
+	m_tDesc.vBaseColor = vBaseColor;
+	m_tDesc.vHeadColor = vHeadColor;
+	m_tDesc.vTailColor = vTailColor;
+	
 
 	Update_CurveVB();
 	m_isReqedCurFrame = true;
@@ -232,6 +251,8 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 	// 타겟 표시 초기화
 	m_isShowTarget = false;
 
+
+
 	// [2] 시뮬레이션 루프. 각 선분 단위로, 가까운 선 부터,레이 검사하며 확인
 	for (_uint i = 0; i < iSegmentIndex; ++i)
 	{
@@ -263,6 +284,10 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 		_bool isRayDetected = m_pGameInstance->Ray_Cast(XMLoadFloat3(&vCurrentWorldPos), XMLoadFloat3(&vNextWorldPos), &vHitPos4);
 		vHitPos4.w = 1.f;
 
+
+
+
+
 		if (isRayDetected)	// 충돌O
 		{
 			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점. world
@@ -277,18 +302,28 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 
 			vecValidPoints.push_back(vLocalHitPos);										// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)		
 			m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
-			m_isShowTarget = true;														// 구 활성화
-			break;
+			m_isShowTarget = true;			
 		}
 		else				// 충돌X
 		{
 			vecValidPoints.push_back(vNextPos);											// 궤적 리스트에 점 추가.
 			if (i == iSegmentIndex - 1)													// 만약 끝까지 날아갔다면, 마지막 지점에 타겟 표시
 			{
-				m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat3(&vNextPos));
+				m_pSphereTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&vNextPos), 1.f));
 				m_isShowTarget = true;
 			}
 		}
+
+
+		if (m_isShowTarget)
+		{
+			// ksta : 임의 원 설정 좌표 있으면 그것으로 대체.
+			if (m_tDesc.pCustomSpherePos)
+				m_pSphereTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(m_tDesc.pCustomSpherePos), 1.f));
+			
+			break;
+		}
+
 	}
 
 

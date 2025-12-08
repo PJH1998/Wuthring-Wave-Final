@@ -505,6 +505,9 @@
     <Filter Include="03. GameObject\MapObject\Interact">
       <UniqueIdentifier>{194f6e9d-20f6-4268-9cf7-c987aa050421}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController">
+      <UniqueIdentifier>{aecd509e-973d-478c-92d9-dc4421872acb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1292,11 +1295,15 @@
     <ClInclude Include="..\Public\RoverEvent.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Effect_Light.h">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Event_Leviatan.h">
       <Filter>97. Event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_GrappleController.h">
+      <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2036,11 +2043,15 @@
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
+    <ClCompile Include="..\Private\MapObject_Burn.cpp" />
     <ClCompile Include="..\Private\RoverEvent.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Light.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_GrappleController.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
