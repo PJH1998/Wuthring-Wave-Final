@@ -917,7 +917,7 @@ void CUI_Ovfl_Palette::Update_FinishEvent()
 
 	else if	(m_isGoinSuccess)
 	{
-		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 		Req_OffPalette();
 	}
 
