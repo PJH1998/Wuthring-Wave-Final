@@ -113,7 +113,6 @@ PS_OUT PS_VA(PS_IN In)
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
    
-
     return Out;
 }
 
