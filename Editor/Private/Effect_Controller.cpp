@@ -711,6 +711,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsRectEffect = false;
 		m_IsDecalEffect = false;
 		m_IsRadialEffect = false;
+		m_IsVAEffect = false;
 		m_IsLightEffect = false;
 
         m_pTrailMesh_Controller->UpdateSelected_TrailMeshFormTag(m_strChildrenTag);

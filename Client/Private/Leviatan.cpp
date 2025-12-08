@@ -827,7 +827,10 @@ void CLeviatan::Ready_Events()
 {
 	m_pGameInstance->Subscribe<LEVI_GRAB>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), [this](const LEVI_GRAB event) {
 		if (event.isSuccess)
+		{
 			m_fStamina = 0.f;
+			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
+		}
 		});
 
 	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), [this](const LEVI_EXECUTE event) {
