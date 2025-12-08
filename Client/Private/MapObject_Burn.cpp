@@ -49,8 +49,10 @@ void CMapObject_Burn::Late_Update(_float fTimeDelta)
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 	else
 	{
-		//m_pRigidbodyCom->IsActivate(false);
-		//m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::BURN));
+#ifndef _DEBUG
+		m_pRigidbodyCom->IsActivate(false);
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+#endif
 	}
 }
 
