@@ -498,7 +498,7 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\NPC\Griffin">
       <UniqueIdentifier>{c5121e69-e30f-44ac-a04a-c9a9995d7347}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. GameSystem\TimeLack">
       <UniqueIdentifier>{94a08454-8c6c-48b1-83a2-741536fb8eb5}</UniqueIdentifier>
     </Filter>
@@ -1281,10 +1281,11 @@
     </ClInclude>
     <ClInclude Include="..\Public\NPC_Griffin.h">
       <Filter>03. GameObject\Actor\NPC\Griffin</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\TimeLack.h">
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Throw.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2018,10 +2019,11 @@
     </ClCompile>
     <ClCompile Include="..\Private\NPC_Griffin.cpp">
       <Filter>03. GameObject\Actor\NPC\Griffin</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\TimeLack.cpp">
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Throw.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

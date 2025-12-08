@@ -472,6 +472,10 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition)
 	{
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
 	}
+	else if (strTransition == "LeviatanQTEStart")
+	{
+
+	}
 }
 
 #pragma endregion

@@ -17,6 +17,7 @@ public:
 	void				Update();
 
 	_bool				isPicked(_float3* pOut);
+	_bool				GetCenterPos(_float3* pOut);
 	_bool				Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos);
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
