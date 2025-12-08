@@ -426,6 +426,21 @@ enum class EGalbrenaCaptureType : _uint
 };
 #pragma endregion
 
+#pragma region CONTROL
+enum class EGalbrenaControlType : _uint
+{
+	MANIPULATE_ABSORB_END = 0,
+	MANIPULATE_ABSORB_LOOP,
+	MANIPULATE_ABSORB_START,
+	MANIPULATE_HOLD,
+	MANIPULATE_RELEASE_F,
+	MANIPULATE_RELEASE_F_02,
+	END
+};
+
+#pragma endregion
+
+
 #pragma endregion
 
 NS_END

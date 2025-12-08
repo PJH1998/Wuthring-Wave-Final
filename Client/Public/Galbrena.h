@@ -79,6 +79,7 @@ private:
 
 		// Interaction
 		EGalbrenaRopeHookType m_eRopeHookType = EGalbrenaRopeHookType::END;
+		EGalbrenaControlType m_eControlType = EGalbrenaControlType::END;
 
 		// Capture
 		EGalbrenaCaptureType m_eCaptureType = EGalbrenaCaptureType::END;
@@ -121,6 +122,8 @@ private:
 
 			// Interaction
 			m_eRopeHookType = EGalbrenaRopeHookType::END;
+			m_eControlType = EGalbrenaControlType::END;
+			
 
 			// Capture
 			m_eCaptureType = EGalbrenaCaptureType::END;

@@ -228,6 +228,9 @@ public:
 	_bool Is_ReachedGrappleHook();
 	ROPEDIR Calculate_RopeDirection();
 
+	// Thorw Target 전달.
+	void Bind_ThrowTarget(const THROW_INFO& throwInfo);
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
@@ -260,7 +263,6 @@ public:
 	
 	// TargetPosition
 	void Bind_TargetPosition(_fvector vPos);
-	void Bind_Target(class CTransform* pTransform);
 
 	// Hit
 	_bool Is_Hit() { return m_IsHit; }
@@ -393,6 +395,7 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 
 	GRAPPLE_INFO m_GrappleInfo = {};
+	THROW_INFO m_ThrowInfo = {};
 
 	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
 	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };

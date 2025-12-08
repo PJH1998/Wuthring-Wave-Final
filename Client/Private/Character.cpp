@@ -614,6 +614,11 @@ ROPEDIR CCharacter::Calculate_RopeDirection()
 	return ROPEDIR::END;
 }
 
+void CCharacter::Bind_ThrowTarget(const THROW_INFO& throwInfo)
+{
+	m_ThrowInfo = throwInfo;
+}
+
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
 	if (nullptr == m_pAbillityCom)

@@ -148,7 +148,6 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
-
 	// 8. PlayerStatus에 Utility Type 바인딩.
 	Sync_UtilityType();
 }
@@ -609,6 +608,9 @@ void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactM
 	case COLLISIONLAYER::GRAPPLE:
 		Process_CollideGrapple(pcallDesc);
 		break;
+	case COLLISIONLAYER::THROW:
+		Process_CollideThrow(pcallDesc);
+		break;
 	}
 	
 }
@@ -864,9 +866,6 @@ void CPlayer::Toggle_LockOn()
 		Calc_LockOnPos();
 		_float3 vPos = {};
 		XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-		cout << "LockOn Pos (x, y, z) : " << m_vLockOnPos.x << ", " << m_vLockOnPos.y << ", " << m_vLockOnPos.z << endl;
-		cout << "Player Pos (x, y, z) : " << vPos.x << ", " << vPos.y << ", " << vPos.z << endl;
-
 		m_pGameSystem->Attach_LockOnUI(&m_vLockOnPos);
 
 	
@@ -913,14 +912,37 @@ void CPlayer::Sorting_GrappleTarget()
 
 
 void CPlayer::Toggle_Grapple()
-
 {
 	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
 	if (m_eUtilityType == UI_TAB_UTILITY::GRAPPLE)
 		m_Characters[m_iCurrentCharacterIdx]->Bind_GrappleTarget(
 			m_TargetGrappleInfo
 		);
+}
+void CPlayer::Sorting_ThrowTarget()
+{
+	// 거리순으로 정렬해서 넣어줍니다.
+	sort(m_ThrowCandidates.begin(), m_ThrowCandidates.end(), [this](const THROW_INFO& src, const THROW_INFO& dst)->_bool {
+		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
+		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pDstTransform->Get_State(STATE::POSITION)));
+		return fSrcDistance < fDstDistance;
+		});
+
+	if (0 < m_ThrowCandidates.size())
+		m_TargetThrowInfo = m_ThrowCandidates[0];
+}
+void CPlayer::Toggle_Throw()
+{
+	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
+	if (m_eUtilityType == UI_TAB_UTILITY::LEVITATOR)
+		m_Characters[m_iCurrentCharacterIdx]->Bind_ThrowTarget(
+			m_TargetThrowInfo
+		);
 }
 void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
 {
@@ -954,6 +976,31 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
+	}
+}
+
+void CPlayer::Process_CollideThrow(const CALLBACK_CLIENT* pcallDesc)
+{
+	{
+		CTransform* pTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+		if (nullptr == pTransform)
+			return;
+
+		lock_guard<mutex> lock(m_Mutex);
+
+		THROW_INFO ThrowInfo = {
+			pTransform,
+			pcallDesc->eObjectType,
+			pcallDesc->IsGrab,
+			pcallDesc->IsThrow,
+			pcallDesc->ppRefBoneMatrix,
+			pcallDesc->ppRefWorldMatrix
+		};
+
+		m_ThrowCandidates.push_back(ThrowInfo);
+
+		// 매프레임 초기화.
+		m_TargetThrowInfo.Reset();
 	}
 }
 
@@ -1150,7 +1197,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 	m_pGrappleRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
-		});
+	});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };

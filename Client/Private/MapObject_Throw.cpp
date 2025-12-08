@@ -245,6 +245,29 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	m_pDetectRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_During(iLayer, pDesc, Manifold);
 		});
+
+	// DETECT에 감지 될 수 있게 등록.
+	RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW);
+	RigidbodyDesc.vExtent = _float3(3.f, 3.f, 3.f); 
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pThrowRigidbodyCom), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+
+	m_Desc.pTransform = m_pTransformCom;
+	m_Desc.eObjectType = OBJECTTYPE::THROW;
+	m_Desc.IsGrab = &m_IsGrabbed;
+	m_Desc.IsThrow = &m_IsThrow;
+	m_Desc.ppRefBoneMatrix = &m_pAttachBoneMatrix;
+	m_Desc.ppRefWorldMatrix = &m_pAttachWorldMatrix;
+	m_pThrowRigidbodyCom->Set_Desc(&m_Desc);
+
 		
 	CRigidbody::BOXBODY_DESC BurnRigidboydDesc{};
 	XMStoreFloat4(&BurnRigidboydDesc.vQuat, m_pTransformCom->Get_Quaternion());
@@ -253,6 +276,7 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	BurnRigidboydDesc.eType = EMotionType::Kinematic;
 	BurnRigidboydDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::THROW);
 	BurnRigidboydDesc.vExtent = _float3(10.f, 10.f, 10.f);
+
 	//불타는 벽과 충돌 감지용
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_CollideRigidbody"), reinterpret_cast<CComponent**>(&m_pCollideRigidbodyCom), &BurnRigidboydDesc);
@@ -303,6 +327,7 @@ void CMapObject_Throw::Free()
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pCollideRigidbodyCom);
 	Safe_Release(m_pDetectRigidbodyCom);
+	Safe_Release(m_pThrowRigidbodyCom);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
 }

@@ -1305,6 +1305,9 @@
     <ClInclude Include="..\public\UI_GrappleController.h">
       <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaControl.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2052,6 +2055,9 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_GrappleController.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaControl.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
