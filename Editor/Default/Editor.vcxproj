@@ -200,6 +200,7 @@
     <ClInclude Include="..\Public\Edit_TriggerBox.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
+    <ClInclude Include="..\Public\Effect_Light.h" />
     <ClInclude Include="..\Public\Effect_Mesh.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Effect_Radial.h" />
@@ -224,6 +225,7 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Light_Controller.h" />
     <ClInclude Include="..\Public\Load_Controller.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Destruction_Piece.h" />
     <ClInclude Include="..\Public\Mesh_Controller.h" />
@@ -297,6 +299,7 @@
     <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
+    <ClCompile Include="..\Private\Effect_Light.cpp" />
     <ClCompile Include="..\Private\Effect_Mesh.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Effect_Radial.cpp" />
@@ -319,6 +322,7 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Light_Controller.cpp" />
     <ClCompile Include="..\Private\Load_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Destruction_Piece.cpp" />
     <ClCompile Include="..\Private\Mesh_Controller.cpp" />

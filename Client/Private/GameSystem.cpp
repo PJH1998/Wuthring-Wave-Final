@@ -138,6 +138,22 @@ void CGameSystem::Load_EffectDecalData_FromFolder(const string& strFolderPath)
 	return m_pParser->Load_FXDecal_Data_FromFolder(strFolderPath);
 }
 
+void CGameSystem::Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectVATexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectVAMeshDat_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectLightData_FromFolder(const string& strFolderPath)
+{
+	return m_pParser->Load_FXLight_Data_FromFolder(strFolderPath);
+}
+
+
 #pragma region FACTORY
 
 void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix)
@@ -475,11 +491,12 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	else if (strTransition == "LeviatanQTEStart")
 	{
 		CTransform* pBoss = static_cast<CTransform*>(pArg);
-		_int a = 10;
+		_int a = 10;							//레비아탄 속박 QTE
 	}
 	else if (strTransition == "LeviatanGrab")
 	{
-		_int a = 10;
+		CTransform* pBoss = static_cast<CTransform*>(pArg);
+		_int a = 10;							//레비아탄 강제 넉백
 	}
 }
 

@@ -29,6 +29,9 @@ public:
 	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
+	void							Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectLightData_FromFolder(const string& strFolderPath) ;
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
