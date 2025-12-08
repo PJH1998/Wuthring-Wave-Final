@@ -68,6 +68,9 @@ void CPotal::Render()
 	m_pVIBufferCom->Bind_Resources();
 	m_pShaderCom->Begin(2);
 	m_pVIBufferCom->Render();
+#ifdef _DEBUG
+	m_pRigidbodyCom->Render();
+#endif
 }
 
 void CPotal::PotalActive(_bool B)

@@ -61,16 +61,7 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		XMStoreFloat3(&m_vImpulse, (DisplaceMent - vGravityDrop) / m_fFlyTime);
 
 		_float3 Grav(0.f, -9.8f, 0.f);
-
-		// ========== UI Test ==========
-		_float3 vTargetPos = m_vTargetPos;
-
-		m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav, &vTargetPos);
-
-
-
-		// ==============================
-
+		m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav, &m_vTargetPos);
 		//m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
 	}
 	
