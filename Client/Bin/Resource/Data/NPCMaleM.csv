@@ -12,3 +12,4 @@ ID,posX,posY,posZ,rotX,rotY,rotZ,bodyIDX,faceIDX,hairIDX,isCollide,Animation
 "10										",3289.6,361.4,1577.4,0,0,0,-1,0,0,0,Common_Bend_01_Loop
 "11										",3288.9,361.4,1580.9,0,135,0,-1,0,0,0,Common_Agree_01
 "12										",3369.5,375.6,1570.1,0,0,0,-1,0,0,0,Common_Disagree_01
+13,3200.1,312.5,1673.2,0,45,0,-1,0,0,0,Treat_Stand

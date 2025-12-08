@@ -441,6 +441,22 @@ void CCharacter::Use_Spring(_float fDestination, _float fDuration)
 	m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 
+void CCharacter::Stop_Anim()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.f);
+}
+
+void CCharacter::Start_Anim()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
+}
+
 
 
 // 내 Velocity 고정.
@@ -764,7 +780,6 @@ void CCharacter::Bind_TargetPosition(_fvector vPos)
 	XMStoreFloat4(&m_vTargetPosition, vPos); // 타겟 지점.
 }
 
-
 void CCharacter::ActiveCaptureState()
 {
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
@@ -1045,6 +1060,19 @@ void CCharacter::Rotate_Target()
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
+}
+
+void CCharacter::Rotate_Target(CTransform* pTransform)
+{
+	if (nullptr == pTransform)
+		return;
+
+	_vector vTarget = pTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 }
 
 void CCharacter::Rotate_TargetPosition()

@@ -127,7 +127,7 @@ public:
 
 	// 그래플링 UI가 생길 지점의 점 위치를 할당합니다. (pooling 이용, 최대 50) 
 	// 카메라 거리에 따른 크기 변화 기준 등 내부에서 상수로 변경 가능. 너무 멀면 렌더콜X
-	void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
+	//void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
 
 	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
 	// eQTEType : QTE 종류 (연타로 게이지채우기, 단발성 중 선택), eIconIndex : 사용 버튼 종류.
@@ -151,6 +151,7 @@ public:
 	// - vStartVelocity : 시작 속도. 즉, 던지려는 방향과 그 세기(power)
 	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
 	// ===== 이하는 필요 시 수정 ===== 
+	// - vCustomSpherePos : 임의로 구체 좌표 설정. nullptr이면 ray cast 를 통해 도출된 좌표를 기준으로 삼음
 	// - fMaxTime : 해당 값 기준 몇초까지 날아갈 거리만큼 리본메쉬를 그릴 것인지
 	// - iSegmentCount : 리본메쉬 정밀도 (낮으면 버텍스의 굴곡짐이 잘 보임)
 	// - fRibbonWidth : 리본메쉬 가로두께
@@ -160,6 +161,7 @@ public:
 		_float3& vStartPos,
 		_float3& vStartVelocity,
 		_float3& vAcceleration, 
+		_float3* pCustomSpherePos = nullptr,
 		_float fMaxTime = 4.f, 
 		_uint iSegmentCount = 50, 
 		_float fRibbonWidth = 0.25f, 
@@ -168,9 +170,13 @@ public:
 		_float4 vHeadColor = _float4(1.f, 0.f, 0.f, 1.f),
 		_float4 vTailColor = _float4(.8f, 0.f, 0.f, 1.f)
 	);
-
-
 #pragma endregion
+
+#pragma region [UI] GRAPPLE
+	HRESULT					Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType);
+	class CUI_GrapplePoint* Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance);
+#pragma endregion
+
 
 #pragma region PLAYER STATUS
 	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
@@ -214,9 +220,6 @@ public:
 
 #pragma region PLAYER_INTERACT
 	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
-	void						Call_Animation();
-	void						Call_PlayerVisible();
-	void						Unbind_Grab();
 #pragma endregion
 
 #pragma region PLAYER
@@ -243,24 +246,25 @@ public:
 #pragma endregion
 
 private:
-	class	CParser*			m_pParser						= { nullptr };
-	class	CFactory*			m_pFactory						= { nullptr };
+	class	CParser*				m_pParser					= { nullptr };
+	class	CFactory*				m_pFactory					= { nullptr };
 
-	class	CUI_FontPreset*		m_pUI_FontPreset				= { nullptr };
-	class	CUI_ControlHelper*	m_pUI_ControlHelper				= { nullptr };
+	class	CUI_FontPreset*			m_pUI_FontPreset			= { nullptr };
+	class	CUI_ControlHelper*		m_pUI_ControlHelper			= { nullptr };
+	class	CUI_GrappleController*	m_pUI_GrappleController		= { nullptr };
 	//class	CUI_StatusSyncer*	m_pUI_StatusSyncer				= { nullptr };
 
-	class	CDirector*			m_pDirector 					= { nullptr };
-	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
-	class	CPlayer*			m_pPlayer						= { nullptr };
-	class   CSequencePlayer*	m_pSequencePlayer				= { nullptr };
-	
-	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
+	class	CDirector*				m_pDirector 				= { nullptr };
+	class	CPlayerStatus* 			m_pPlayerStatus 			= { nullptr };
+	class	CPlayer*				m_pPlayer					= { nullptr };
+	class   CSequencePlayer*		m_pSequencePlayer			= { nullptr };
 
-	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
-	class	CMouseController*	m_pMouseController				= { nullptr };
+	class	CSonoro_Manager*		m_pSonoro_Manager			= { nullptr };
 
-	class  CPotal*				m_pPotal						= { nullptr };
+	class	CMonsterTable*			m_pMonsterTable				= { nullptr };
+	class	CMouseController*		m_pMouseController			= { nullptr };
+
+	class   CPotal*					m_pPotal					= { nullptr };
 	class	CTimeLack*				m_pTimeLack = { nullptr };
 
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

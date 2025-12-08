@@ -70,6 +70,9 @@ private:
 		// Capture
 		ERoverCaptureType m_eCaptureType = ERoverCaptureType::END;
 
+		// Event 애니메이션
+		ERoverEventType  m_eEventType = ERoverEventType::END;
+
 		// Prev Info
 		_string m_strPrevInfo = {};
 		void Clear()
@@ -105,6 +108,10 @@ private:
 
 			// Capture
 			m_eCaptureType = ERoverCaptureType::END;
+
+			// Event
+			m_eEventType = ERoverEventType::END;
+
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
@@ -156,7 +163,7 @@ public:
 
 #pragma region 1. STATE
 public:
-	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) override;
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) override;

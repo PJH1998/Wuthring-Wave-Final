@@ -13,7 +13,9 @@
 #include "Leviatan.h"
 #include "Levi_Alter.h"
 #include "Levi_Ray.h"
-#include"Levi_Anchor.h"
+#include "Levi_Anchor.h"
+#include "Levi_Drop.h"
+#include "Levi_Wave.h"
 
 #include "Player.h"
 #include "SequencePlayer.h"
@@ -451,6 +453,22 @@ void CLevel_Heaven::Ready_Leviatan()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviAnchor"), 1, &Anchor)))
 		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Drop::DROPDESC Drop{};
+	Drop.fAttackDamage = pInfo->fAttack * 0.5f;
+	Drop.fSpeedPerSec = 10.f;
+	//Drop.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviDrop"), 16, &Drop)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Wave::WAVEDESC Wave{};
+	Wave.fAttackDamage = pInfo->fAttack;
+	Wave.fSpeedPerSec = 15.f;
+	//Wave.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviWave"), 4, &Wave)))
+		CRASH("Failed Ready Projectile (Leviatan)");
 }
 
 void CLevel_Heaven::Ready_Effect()
@@ -518,9 +536,9 @@ void CLevel_Heaven::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
-		CRASH("Failed Ready GrapplePoint");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+	//	CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),

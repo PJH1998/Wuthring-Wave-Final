@@ -301,7 +301,7 @@ void CGalbrena::Render_Shadow()
 
 
 // 캐릭터 전환시 Idle로 상태 전환..
-void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	// 현재 애니메이션 제거.
 	m_pStateMachineCom->Exit_State();

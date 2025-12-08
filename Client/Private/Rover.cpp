@@ -105,10 +105,14 @@ void CRover::Update(_float fTimeDelta)
 	
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
+
+	// 특정 상황일 때 TimeLack 감소.
+	_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+
 	if (!IsDissolve)
 	{
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
@@ -286,7 +290,7 @@ void CRover::Render_Shadow()
 
 
 // 캐릭터 전환시 Idle로 상태 전환..
-void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	m_pStateMachineCom->Exit_State();
 
@@ -317,6 +321,16 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE:
+		{
+			if (nullptr == pArg)
+				return;
+
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+		}
+		break;
+
 	}
 
 	// 상태 변수 초기화

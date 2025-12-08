@@ -7,7 +7,7 @@
 #include "Animator_UI.h"
 
 #define KSTA_UITEST_GRAPPLE_TOZERO  
-#define	 IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
+#define	IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
 
 
 CUI_GrapplePoint::CUI_GrapplePoint(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -29,6 +29,12 @@ HRESULT CUI_GrapplePoint::Initialize_Prototype()
 
 HRESULT CUI_GrapplePoint::Initialize_Clone(void* pArg)
 {
+	UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
+	
+	m_vTargetPos = pDesc->vTargetPos;
+	m_eGrappleType = pDesc->eType;
+
+
 	CGameObject::Initialize_Clone(pArg);
 
 	Ready_Components(pArg);
@@ -65,7 +71,7 @@ HRESULT CUI_GrapplePoint::Initialize_Clone(void* pArg)
 	//static_cast<CAnimator_UI*>(m_pDynamicUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Dynamic_Initialize");
 
 	Reset(_fmatrix(), nullptr);
-	m_isActivate = false;
+	m_isActivate = true;
 
 	m_isClone = true;
 	//m_pGameInstance->Add_RootUI(L"UI_GrapplePoint", this);
@@ -79,6 +85,7 @@ void CUI_GrapplePoint::Priority_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+	m_pWorldTransformCom->Save_PreviousPosition();
 
 	__super::Priority_Update(fTimeDelta);
 }
@@ -96,13 +103,18 @@ void CUI_GrapplePoint::Update(_float fTimeDelta)
 		const _float fDEBUG_randRadius = 30.f;//30.f;
 		const _float3 vDEBUG_offset = { 0.f, -10.f, 0.f };
 		
-		_float3* pDEBUG_vTargetPos = new _float3();
+		//_float3* pDEBUG_vTargetPos = new _float3();
+		//
+		//pDEBUG_vTargetPos->x = vDEBUG_offset.x + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//pDEBUG_vTargetPos->y = vDEBUG_offset.y + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//pDEBUG_vTargetPos->z = vDEBUG_offset.z + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
 		
-		pDEBUG_vTargetPos->x = vDEBUG_offset.x + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
-		pDEBUG_vTargetPos->y = vDEBUG_offset.y + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
-		pDEBUG_vTargetPos->z = vDEBUG_offset.z + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
-
-		m_pTargetPos = pDEBUG_vTargetPos;
+		//_float3 vDEBUG_TargetPos = {};
+		//vDEBUG_TargetPos.x = vDEBUG_offset.x + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//vDEBUG_TargetPos.y = vDEBUG_offset.y + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//vDEBUG_TargetPos.z = vDEBUG_offset.z + m_pGameInstance->Rand(-fDEBUG_randRadius, fDEBUG_randRadius);
+		//
+		//m_vTargetPos = vDEBUG_TargetPos;
 	}
 #endif // KSTA_UITEST_GRAPPLE_TOZERO
 
@@ -111,10 +123,23 @@ void CUI_GrapplePoint::Update(_float fTimeDelta)
 	Update_TargetColor();
 	Update_AnimOrder(fTimeDelta);
 
-	Update_ApplyTargetPos(m_pStaticUI, *m_pTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
-	Update_ApplyTargetPos(m_pDynamicUI, *m_pTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pStaticUI, m_vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
+	Update_ApplyTargetPos(m_pDynamicUI, m_vTargetPos);	// 해당 UI를 타겟 위치로 이동시킴.
 
 	__super::Update(fTimeDelta);
+
+	// from ropeanchor..
+	// 1. 플레이어 카메라 범위 안에 들어가 있으면서 거리도 적절하다면?
+	if (nullptr != m_pTargetTransformCom)
+	{
+		_vector vMyPos = m_pWorldTransformCom->Get_State(STATE::POSITION);
+		_vector vTargetPos = m_pTargetTransformCom->Get_State(STATE::POSITION);
+		m_fTargetDistance = XMVectorGetX(XMVector3Length(vMyPos - vTargetPos));
+	}
+	// 2. RigidBodyCom 업데이트
+	m_pRigidbodyCom->Update_Rigidbody(m_pWorldTransformCom->Get_WorldMatrix(), fTimeDelta);
+	// Last => TargetTransform 비우기?
+	m_pTargetTransformCom = nullptr;
 }
 
 void CUI_GrapplePoint::Late_Update(_float fTimeDelta)
@@ -139,30 +164,94 @@ void CUI_GrapplePoint::Render()
 	if (!m_isActivate)
 		return;
 
+#ifdef _DEBUG
+	m_pRigidbodyCom->Render();
+#endif // DEBUG
 
 }
 
-void CUI_GrapplePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
+void CUI_GrapplePoint::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Initialize", true);
+	// 1. Detect 감지되면?
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+		return;
 
-	if (pArg != nullptr)
+	// 2. CallBack 정보 가져오기
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+	if (nullptr == pTargetTransform)
+		return;
 	{
-		UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
-
-		m_pTargetPos = pDesc->pTargetPos;
-		m_eGrappleType = pDesc->eType;
+		lock_guard<mutex> lock(m_Mutex);
+		m_pTargetTransformCom = pTargetTransform;
 	}
-
-
-#ifndef KSTA_UITEST_GRAPPLE_TOZERO
-	else
-		MSG_BOX("GrapplePoint doesn't receive position information.");
-#endif // !KSTA_UITEST_GRAPPLE_TOZERO
-
-
-	m_isActivate = true;
 }
+
+HRESULT CUI_GrapplePoint::Ready_Components(void* pArg)
+{
+	__super::Ready_Components(pArg);
+
+	UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
+
+	// Additional Transform (Based On World)
+	m_pWorldTransformCom = CTransform::Create(m_pDevice, m_pContext);
+	if (FAILED(m_pWorldTransformCom->Initialize_Clone(pArg)))
+		return E_FAIL;
+	m_Components.emplace(TEXT("Com_WorldTransform"), m_pWorldTransformCom);
+	Safe_AddRef(m_pWorldTransformCom);
+
+	m_pWorldTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
+
+
+	// Rigidbody
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+	RigidbodyDesc.vExtent = _float3(1.5f, 1.5f, 1.5f); // 탐지 범위 안에 들어가있다면?
+	RigidbodyDesc.vPos = m_vTargetPos;
+
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_During(iLayer, pDesc, Manifold);
+	});
+
+	// Transform과 Rope_Anchor 타입임을 알립니다.
+	m_CallBack.pTransform = m_pWorldTransformCom;
+	if		(pDesc->eType == UI_GRAPPLE_TYPE::ANCHOR)	m_CallBack.eObjectType = OBJECTTYPE::ROPE_ANCHOR;
+	else if (pDesc->eType == UI_GRAPPLE_TYPE::PULL)		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+	m_CallBack.pCondition = &m_iCondition;
+
+	m_pRigidbodyCom->Set_Desc(&m_CallBack);
+	return S_OK;
+}
+
+//void CUI_GrapplePoint::Reset(const _fmatrix& WorldMatrix, void* pArg)
+//{
+//	static_cast<CAnimator_UI*>(m_pStaticUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Grapple_Initialize", true);
+//
+//	if (pArg != nullptr)
+//	{
+//		UI_GRAPPLEPOINT_DESC* pDesc = static_cast<UI_GRAPPLEPOINT_DESC*>(pArg);
+//
+//		m_vTargetPos = pDesc->vTargetPos;
+//		m_eGrappleType = pDesc->eType;
+//	}
+//
+//
+//#ifndef KSTA_UITEST_GRAPPLE_TOZERO
+//	else
+//		MSG_BOX("GrapplePoint doesn't receive position information.");
+//#endif // !KSTA_UITEST_GRAPPLE_TOZERO
+//
+//
+//	m_isActivate = true;
+//}
 
 void CUI_GrapplePoint::PreAssign_ChildUIs()
 {
@@ -180,8 +269,8 @@ void CUI_GrapplePoint::PreAssign_ChildUIs()
 
 void CUI_GrapplePoint::Ready_Presets()
 {
-	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::MOVEABLE)]	= _float4(1.000f, 0.957f, 0.631f, 1.0f);
-	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULLABLE)]	= _float4(0.631f, 1.000f, 0.914f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::ANCHOR)]		= _float4(1.000f, 0.957f, 0.631f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULL)]		= _float4(0.631f, 1.000f, 0.914f, 1.0f);
 	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::END)]			= _float4(1.000f, 0.000f, 1.000f, 1.0f);
 }
 
@@ -221,7 +310,7 @@ void CUI_GrapplePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotD
 
 	_float3 vScale =/* (pTargetUI == this)? m_vOriginSca :*/ pTargetTransform->Get_Scaled();
 
-	_float3 vTargetPos = *m_pTargetPos;				// ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
+	_float3 vTargetPos = m_vTargetPos;				// ksta : 테스트용, 나중에 수정. 받아온 타겟 좌표로.
 	_float fDist = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat3(&vTargetPos)));
 	_float fScaleMultiple = fPivotDistance / fDist;
 
@@ -251,8 +340,8 @@ void CUI_GrapplePoint::Update_TargetColor()
 
 void CUI_GrapplePoint::Update_AnimOrder(_float fTimeDelta)
 {
-	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
-	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(m_pTargetPos) - XMLoadFloat4(&vCamPos))));	// 카메라와 타겟 간 거리
+	_float4 vCamPos = *m_pGameInstance->Get_CamPos();	// ksta : 나중에 플레이어 좌표로..
+	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(&m_vTargetPos) - XMLoadFloat4(&vCamPos))));	// 카메라와 타겟 간 거리
 
 
 	// 이전 상태 확인 후 트리거 분기 및 사용, 이후 상태 갱신
@@ -320,6 +409,7 @@ void CUI_GrapplePoint::Update_AnimOrder(_float fTimeDelta)
 CUI_GrapplePoint* CUI_GrapplePoint::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CUI_GrapplePoint* pInstance = new CUI_GrapplePoint(pDevice, pContext);
+
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
 		MSG_BOX("Failed to Created : CUI_GrapplePoint");
@@ -342,7 +432,7 @@ CGameObject* CUI_GrapplePoint::Clone(void* pArg)
 void CUI_GrapplePoint::Free()
 {
 #ifdef KSTA_UITEST_GRAPPLE_TOZERO
-	delete m_pTargetPos;
+	//delete m_pTargetPos;
 #endif // !KSTA_UITEST_GRAPPLE_TOZERO
 
 	//if (m_isClone)
@@ -352,4 +442,7 @@ void CUI_GrapplePoint::Free()
 
 	for (auto& child : m_vecChildObjects)
 		Safe_Release(child);
+
+	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pWorldTransformCom);
 }

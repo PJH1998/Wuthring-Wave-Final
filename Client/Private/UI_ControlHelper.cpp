@@ -368,18 +368,19 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
-void CUI_ControlHelper::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
-{
-	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
-	//CCustom_UI* pRootUI = m_pRootUI_GrapplePoint;
-	//
-	//if (!pRootUI)
-	//	return;
-
-	CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { pTargetPos, eType };
-
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
-}
+//void CUI_ControlHelper::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
+//{
+//	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
+//	//CCustom_UI* pRootUI = m_pRootUI_GrapplePoint;
+//	//
+//	//if (!pRootUI)
+//	//	return;
+//
+//
+//	CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { pTargetPos, eType };
+//
+//	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
+//}
 
 void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)
 {
@@ -432,6 +433,7 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 												_float3& vStartVelocity,
 												_float3& vAcceleration,
+												_float3* pCustomSpherePos,
 												_float fMaxTime,
 												_uint iSegmentCount,
 												_float fRibbonWidth,
@@ -450,6 +452,7 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 		tDesc.vStartPos = vStartPos;// _float3(0.f, 0.f, 0.f);
 		tDesc.vStartVel = vStartVelocity;// _float3(0.f, 10.f, 10.f);
 		tDesc.vAcceleration = vAcceleration;// _float3(0.f, -9.8f, 0.f);
+		tDesc.pCustomSpherePos = pCustomSpherePos;
 		tDesc.fMaxTime = fMaxTime;
 		tDesc.iSegmentCount = iSegmentCount;
 		tDesc.fWidth = fRibbonWidth;
@@ -467,7 +470,17 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 	}
 	else
 	{
-		pRootUI->Req_Render_CurveTrace(vStartPos, vStartVelocity, vAcceleration);
+		pRootUI->Req_Render_CurveTrace(	vStartPos,
+										vStartVelocity,
+										vAcceleration,
+										pCustomSpherePos,
+										fMaxTime,
+										iSegmentCount,
+										fRibbonWidth,
+										isUseCustomColor,
+										vBaseColor,
+										vHeadColor,
+										vTailColor);
 	}
 }
 
