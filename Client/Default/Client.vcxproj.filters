@@ -55,9 +55,6 @@
     <Filter Include="03. GameObject\Dummy">
       <UniqueIdentifier>{ed07c1bd-b2ef-4167-a5d6-d28e30bdb8b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\MapObject">
-      <UniqueIdentifier>{040d8769-a965-4ca5-ae9c-fa3a893680fb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor">
       <UniqueIdentifier>{3751a3ce-7071-4ce5-8e29-f10ab8e03834}</UniqueIdentifier>
     </Filter>
@@ -232,15 +229,6 @@
     <Filter Include="03. GameObject\Effect\Prefab\Decal">
       <UniqueIdentifier>{d050ecdf-02ed-49e6-921c-5906b20ec564}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\MapObject\Destruction">
-      <UniqueIdentifier>{9a535f9d-e44c-4a68-b31a-05b1d01b84df}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\MapObject\Sonoro">
-      <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\MapObject\Spawner">
-      <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\Monster\ElectroPredator\Effect">
       <UniqueIdentifier>{89d75c0d-bb28-4915-b14d-ec5d4d40cfd3}</UniqueIdentifier>
     </Filter>
@@ -361,9 +349,6 @@
     <Filter Include="03. GameObject\Actor\Monster\Leviatan">
       <UniqueIdentifier>{27f3bd8e-5674-439d-81d5-bc02bfe16cc1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\MapObject\Rope">
-      <UniqueIdentifier>{caa54a84-d651-4f94-bc83-cd6220cba4bd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Effect">
       <UniqueIdentifier>{c7899f9b-3c7c-4da3-9c36-75c56bb77972}</UniqueIdentifier>
     </Filter>
@@ -375,9 +360,6 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Leviatan\Weapon">
       <UniqueIdentifier>{79007724-5ad5-4ba5-a52c-e8e2c235d61e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\MapObject\NonStatic">
-      <UniqueIdentifier>{7775ba39-3792-4e81-b9a0-73409fa53076}</UniqueIdentifier>
     </Filter>
     <Filter Include="93. Mouse">
       <UniqueIdentifier>{808949be-3865-47f6-a37d-453077a30ff9}</UniqueIdentifier>
@@ -490,17 +472,38 @@
     <Filter Include="03. GameObject\UI\Containers_Prop\GrapplePoint">
       <UniqueIdentifier>{1dda4253-7a9b-4853-9436-0d14c8a74145}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\MapObject\Instance">
-      <UniqueIdentifier>{9b65dc42-2c2f-43ee-97df-bf59ce0db45b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\MapObject\Interact">
-      <UniqueIdentifier>{194f6e9d-20f6-4268-9cf7-c987aa050421}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\NPC\Griffin">
       <UniqueIdentifier>{c5121e69-e30f-44ac-a04a-c9a9995d7347}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. GameSystem\TimeLack">
       <UniqueIdentifier>{94a08454-8c6c-48b1-83a2-741536fb8eb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\FXLight">
+      <UniqueIdentifier>{1c64c928-6bea-4599-82f3-cfec230a6a46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject">
+      <UniqueIdentifier>{040d8769-a965-4ca5-ae9c-fa3a893680fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Destruction">
+      <UniqueIdentifier>{9a535f9d-e44c-4a68-b31a-05b1d01b84df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Sonoro">
+      <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Spawner">
+      <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Rope">
+      <UniqueIdentifier>{caa54a84-d651-4f94-bc83-cd6220cba4bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\NonStatic">
+      <UniqueIdentifier>{7775ba39-3792-4e81-b9a0-73409fa53076}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Instance">
+      <UniqueIdentifier>{9b65dc42-2c2f-43ee-97df-bf59ce0db45b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Interact">
+      <UniqueIdentifier>{194f6e9d-20f6-4268-9cf7-c987aa050421}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1289,6 +1292,9 @@
     <ClInclude Include="..\Public\RoverEvent.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Effect_Light.h">
+      <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2029,6 +2035,9 @@
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
     <ClCompile Include="..\Private\RoverEvent.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Light.cpp">
+      <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

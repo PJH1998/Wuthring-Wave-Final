@@ -1059,7 +1059,6 @@ PS_OUT PS_SkyTrailColor(PS_IN In)
     else
         vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(FlowUV.y, saturate(FlowUV.x)));
     
-    
     vColor.rgb = saturate(vColor.rgb);
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;

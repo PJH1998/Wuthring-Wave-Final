@@ -378,6 +378,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh_MotionTrail.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Failed to Add Prototype Shader MotionTrail");
 
+	// Shader_VAMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VAMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxVaMesh.hlsl"), VTX_VAMESH::Elements, VTX_VAMESH::iNumElements))))
+		CRASH("Shader_VAMesh");
+
 
 #pragma endregion
 
