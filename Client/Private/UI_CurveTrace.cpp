@@ -53,7 +53,7 @@ void CUI_CurveTrace::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	//Update_CurveVB();
+	Update_CurveVB();
 	Update_CurrentColor();
 	
 
@@ -251,6 +251,8 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 	// 타겟 표시 초기화
 	m_isShowTarget = false;
 
+
+
 	// [2] 시뮬레이션 루프. 각 선분 단위로, 가까운 선 부터,레이 검사하며 확인
 	for (_uint i = 0; i < iSegmentIndex; ++i)
 	{
@@ -284,41 +286,44 @@ void CUI_CurveTrace::Update_CurveVB()					// 지금 시작점의 위치가, 플�
 
 
 
-		// ksta : 임의 원 설정 좌표 있으면 그것 사용.
-		if (m_tDesc.pCustomSpherePos)
-		{
-			m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat3(m_tDesc.pCustomSpherePos));
-			m_isShowTarget = true;
-		}
-		else
-		{
-			if (isRayDetected)	// 충돌O
-			{
-				_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점. world
-				// 이거는 다시 플레이어 기준 로컬 좌표로 변환하여 넣어야 함.
-	#ifdef KSTA_UITEST_BASEDONPLAYER
-				_vector vCalcedLocalHitPos = XMVector3TransformCoord(XMLoadFloat3(&vHitPos), XMMatrixInverse(nullptr, matTargetTransform));
-	#endif // KSTA_UITEST_BASEDONPLAYER
-	#ifndef KSTA_UITEST_BASEDONPLAYER
-				_vector vCalcedLocalHitPos = XMVectorSetW(XMLoadFloat3(&vHitPos), 1.f);
-	#endif // !KSTA_UITEST_BASEDONPLAYER
-				_float3 vLocalHitPos = {};	XMStoreFloat3(&vLocalHitPos, vCalcedLocalHitPos);
 
-				vecValidPoints.push_back(vLocalHitPos);										// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)		
-				m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
-				m_isShowTarget = true;														// 구 활성화
-				break;
-			}
-			else				// 충돌X
+
+		if (isRayDetected)	// 충돌O
+		{
+			_float3 vHitPos = _float3(vHitPos4.x, vHitPos4.y, vHitPos4.z);				// 충돌 지점. world
+			// 이거는 다시 플레이어 기준 로컬 좌표로 변환하여 넣어야 함.
+#ifdef KSTA_UITEST_BASEDONPLAYER
+			_vector vCalcedLocalHitPos = XMVector3TransformCoord(XMLoadFloat3(&vHitPos), XMMatrixInverse(nullptr, matTargetTransform));
+#endif // KSTA_UITEST_BASEDONPLAYER
+#ifndef KSTA_UITEST_BASEDONPLAYER
+			_vector vCalcedLocalHitPos = XMVectorSetW(XMLoadFloat3(&vHitPos), 1.f);
+#endif // !KSTA_UITEST_BASEDONPLAYER
+			_float3 vLocalHitPos = {};	XMStoreFloat3(&vLocalHitPos, vCalcedLocalHitPos);
+
+			vecValidPoints.push_back(vLocalHitPos);										// 궤적 리스트에 충돌 지점까지의 점 추가. (선 종료)		
+			m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vHitPos4));	// 구 위치 지정
+			m_isShowTarget = true;			
+		}
+		else				// 충돌X
+		{
+			vecValidPoints.push_back(vNextPos);											// 궤적 리스트에 점 추가.
+			if (i == iSegmentIndex - 1)													// 만약 끝까지 날아갔다면, 마지막 지점에 타겟 표시
 			{
-				vecValidPoints.push_back(vNextPos);											// 궤적 리스트에 점 추가.
-				if (i == iSegmentIndex - 1)													// 만약 끝까지 날아갔다면, 마지막 지점에 타겟 표시
-				{
-					m_pSphereTransformCom->Set_State(STATE::POSITION, XMLoadFloat3(&vNextPos));
-					m_isShowTarget = true;
-				}
+				m_pSphereTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&vNextPos), 1.f));
+				m_isShowTarget = true;
 			}
 		}
+
+
+		if (m_isShowTarget)
+		{
+			// ksta : 임의 원 설정 좌표 있으면 그것으로 대체.
+			if (m_tDesc.pCustomSpherePos)
+				m_pSphereTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(m_tDesc.pCustomSpherePos), 1.f));
+			
+			break;
+		}
+
 	}
 
 

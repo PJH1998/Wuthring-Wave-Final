@@ -4,6 +4,8 @@ namespace Client
 	enum class CHARACTER_EVENT : unsigned int {
 		LANDSLIDE, // 경사면 슬라이딩.
 		LEVIATAN_QTE, // Leviatan QTE
+		LEVIATAN_GRAB,
+		LEVIATAN_QTE_SUCCESS,
 		END
 	};
 
@@ -29,7 +31,7 @@ namespace Client
 		NOTHING			// UI OFF 시 아무것도 선택되지 않음
 	};
 
-	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
+	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, LEVIATAN_QTE, END }; // Character 전환시
 	enum class CHARACTER_CONDITION : unsigned int {
 		HIT = 1 << 0,
 		DODGE = 1 << 1, // Dodge 상태면 Hit 안되게.
@@ -50,6 +52,7 @@ namespace Client
 		LANDSLIDE = 1 << 16, // Player에서 LandSlide 이벤트.
 		FPS = 1 << 17, // 1인칭 시점 상태.
 		COLLIDER_UNACTIVE = 1 << 18, // 콜라이더 끈상태.
+		ANIMSTOP = 1<< 19, // Animation Stop 상태.
 		END
 	};
 

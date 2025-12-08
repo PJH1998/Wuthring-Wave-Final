@@ -72,6 +72,7 @@ public:
 	void Notify_HarmonyEnd();
 	void On_HarmonyEnd(CHARACTERTYPE eCharacter);
 
+
 public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
@@ -87,7 +88,12 @@ public:
 	void Notify_GrabVisible(_bool IsVisible);
 	void Notify_EscapeGrabReady();
 	void Notify_EscapeGrabExecute();
-	void Notify_Event(CHARACTER_EVENT eEvent);
+	void Notify_Event(CHARACTER_EVENT eEvent, void* pArg = nullptr);
+
+	
+	void Bind_EventLock(_bool IsLock);
+
+
 
 
 #pragma endregion
@@ -131,6 +137,7 @@ private:
 	_bool m_IsLockOn = { false };
 	_bool m_IsChanage = { false };
 	_bool m_IsQTE = { false };
+	_bool m_IsEventLock = { false };
 
 	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};
@@ -152,6 +159,7 @@ private:
 
 	_float3 m_vLockOnPos = {};
 
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
@@ -159,19 +167,30 @@ private:
 	void Sync_Condition_FromCharacter(class CCharacter* pCharacter);
 	void Sync_InteractionType_ToCharacter(class CCharacter* pCharacter);
 	
-	
+	// Target 검색 (매프레임)
 	void Sorting_Target();
 	void Toggle_LockOn();
+	// Grapple Target 검색 (매프레임)
 	void Sorting_GrappleTarget();
 	void Toggle_Grapple();
 
+	// Collider 처리.
 	void Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc);
 	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
+
+	// 몬스터 QTE Event 처리.
+	void Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg);
 
 	void Manage_Condition();
 	void Sync_UtilityType();
 	_bool IsHitBack(class CTransform* pTransform);
 	void Calc_LockOnPos();
+
+
+	void Stop_Anim();
+	void Start_Anim();
+
+	
 	
 
 #ifdef _DEBUG

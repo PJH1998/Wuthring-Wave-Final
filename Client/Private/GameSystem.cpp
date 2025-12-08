@@ -496,24 +496,42 @@ _bool CGameSystem::IsFix()
 #pragma region GRAB_INTERACT
 void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pArg)
 {
+	if (nullptr == m_pPlayer)
+		return;
+
+	
+	if (strTransition == "LeviatanGrab")
+	{
+		m_pPlayer->Bind_EventLock(true);
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
+		return;
+	}
+	else if (strTransition == "LeviatanQTEStart")
+	{
+		_float2 vPos = { 500.f, -200.f };
+		Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
+		return;
+	}
+	else if (strTransition == "LeviatanQTESuccess")
+	{
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
+		return;
+	}
+
 	if (strTransition == "GrabRelease")
 	{
 		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
+		return;
 	}
 	else if (strTransition == "GrabUnbined")
 	{
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
+		return;
 	}
-	else if (strTransition == "LeviatanQTEStart")
-	{
-		CTransform* pBoss = static_cast<CTransform*>(pArg);
-		_int a = 10;							//레비아탄 속박 QTE
-	}
-	else if (strTransition == "LeviatanGrab")
-	{
-		CTransform* pBoss = static_cast<CTransform*>(pArg);
-		_int a = 10;							//레비아탄 강제 넉백
-	}
+	
+	
+	
+	
 }
 
 #pragma endregion
@@ -588,7 +606,7 @@ void CGameSystem::Potal_Register(CPotal* pPotal)
 
 void CGameSystem::Set_Potal_Active(_bool B)
 {
-	m_pPotal->SetActivate(B);
+	m_pPotal->PotalActive(B);
 }
 
 #pragma endregion

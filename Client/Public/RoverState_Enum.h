@@ -59,6 +59,7 @@ enum class ERoverInteractionState : _uint
 {
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
+	EVENT,
 	INTERACTION_END
 };
 
@@ -384,6 +385,13 @@ enum class ERoverRopeDragType : _uint
 	DRAG_START_U,
 	END
 };
+
+enum class ERoverEventType : _uint
+{
+	BEHIT_FLY_FALL,
+	END
+};
+
 #pragma endregion
 
 #pragma region CAPTURED

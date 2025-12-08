@@ -10,6 +10,7 @@
 #include "Ability.h"
 #include "GameSystem.h"
 #include "PlayerStatus.h"
+#include "Event_Leviatan.h"
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -328,7 +329,8 @@ void CPlayer::Player_KeyInput()
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
 	}
 
-	if (!m_IsQTE) // QTE 도중이면 플레이어 변경 불가능.
+	if (!m_IsQTE && // QTE 도중이면 플레이어 변경 불가능.
+		!m_IsEventLock) // ANIMSTOP 도중이면 플레이어 변경 불가능.
 	{
 		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 		{
@@ -414,6 +416,12 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
+
+		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		//LEVI_GRAB Desc{ true };
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+
+		Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -421,15 +429,18 @@ void CPlayer::Player_KeyInput()
 
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
 		// 임시
-		m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		//LEVI_EXECUTE Desc{ true };
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+
+		Bind_EventLock(false);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
-
 		// 임시
-		
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 
 	}
@@ -522,7 +533,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 
 
 	// 7. QTE 실행. 가능하면
-	if (IsQTEPossible(ePrevCharacterType))
+	if (IsQTEPossible(ePrevCharacterType) && !m_IsEventLock)
 	{
 		// QTE 실행.
 		ExecuteQTE(ePrevCharacterType);
@@ -701,8 +712,6 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 
 
-
-
 #pragma region GameSystem 연계함수.
 void CPlayer::Notify_GrabVisible(_bool IsVisible)
 {
@@ -719,14 +728,54 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_IsLockOn = false;
 }
 
-void CPlayer::Notify_Event(CHARACTER_EVENT eEvent)
+// 이게이상하다?
+void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 {
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
-		_int x = 10;
+		//CTransform* pTransform = static_cast<CTransform*>(pArg); // Leviatan Transform
+
+		// 2. Rover로 변경.
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+
+		// 3. 작업
+		// => Rover 위치 변경 (위치는 안변경되는거 같기도하고..)
+		// => Rover State 변경. (Leviatan 전용 QTE로)
+		// => Rover 시간 멈춤 (State Machine만)
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
+		);
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
+	{
+		if (m_iCurrentCharacterIdx == CHARACTERTYPE::ROVER)
+		{
+			Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+
+			LEVI_GRAB Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+			Bind_EventLock(false);
+		}
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
+	{
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			return;
+
+		// 1, 2, 3번 도 못누르게 막아야함. QTE도 안되게 하기.?
+		//m_Characters[m_iCurrentCharacterIdx]->Stop_Anim(); // Animation Stop
 	}
 	
+
+	
+}
+void CPlayer::Bind_EventLock(_bool IsLock)
+{
+	m_IsEventLock = IsLock;
 }
 #pragma endregion
 
@@ -906,6 +955,10 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
 	}
+}
+
+void CPlayer::Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg)
+{
 }
 
 void CPlayer::Manage_Condition()

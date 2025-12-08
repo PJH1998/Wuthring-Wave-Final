@@ -28,6 +28,7 @@
 // Intraction 카테고리 State
 #include "RoverRopeHook.h"
 #include "RoverRopeDrag.h"
+#include "RoverEvent.h"
 
 // Capture 카테고리 State
 #include "RoverCapture.h"
@@ -69,6 +70,7 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 	// Interaction 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEHOOK), CRoverRopeHook::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG), CRoverRopeDrag::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), CRoverEvent::Create(pCharacter));
 
 	// Capture 하위 State들.
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(ERoverCaptureState::CAPTURE), CRoverCapture::Create(pCharacter));

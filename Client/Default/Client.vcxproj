@@ -213,6 +213,7 @@
     <ClInclude Include="..\Public\LupaSpear.h" />
     <ClInclude Include="..\Public\MapObject_Throw.h" />
     <ClInclude Include="..\Public\Potal.h" />
+    <ClInclude Include="..\Public\RoverEvent.h" />
     <ClInclude Include="..\Public\Slide_Navigation.h" />
     <ClInclude Include="..\Public\NPC_Griffin.h" />
     <ClInclude Include="..\Public\SequenceAugusta.h" />
@@ -496,6 +497,7 @@
     <ClCompile Include="..\Private\LupaSpear.cpp" />
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
     <ClCompile Include="..\Private\Potal.cpp" />
+    <ClCompile Include="..\Private\RoverEvent.cpp" />
     <ClCompile Include="..\Private\Slide_Navigation.cpp" />
     <ClCompile Include="..\Private\NPC_Griffin.cpp" />
     <ClCompile Include="..\Private\SequenceAugusta.cpp" />
