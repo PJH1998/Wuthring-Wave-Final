@@ -73,6 +73,9 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 	// 8. Effect
 	m_pGalbrena->Spawn_Effect(TEXT("Common_Limit"));
 
+	// 9. Change_TimeRate.
+	m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
+
 }
 
 void CGalbrenaGroundDodge::OnUpdate(_float fTimeDelta)

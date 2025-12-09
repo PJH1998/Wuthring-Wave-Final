@@ -71,6 +71,9 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 
 	// 8. Effect
 	m_pAugusta->Spawn_Effect(TEXT("Common_Limit"));
+
+	// 9. 효과 추가?
+	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
 	
 }
 

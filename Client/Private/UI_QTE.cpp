@@ -218,7 +218,6 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
 	}break;
 	}
-	
 
 
 

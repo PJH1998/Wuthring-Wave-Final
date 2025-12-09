@@ -506,7 +506,7 @@ void CGalbrena::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(EGalbrenaGroundState::ATTACK);
 
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 

@@ -68,6 +68,8 @@ void CRoverGroundDodge::OnEnter(void* pArg)
 	// 8. Effect
 	m_pRover->Spawn_Effect(TEXT("Common_Limit"));
 
+	// 9. Change_TimeRate.
+	m_pRover->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
 }
 
 void CRoverGroundDodge::OnUpdate(_float fTimeDelta)
