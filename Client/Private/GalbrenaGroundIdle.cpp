@@ -95,6 +95,10 @@ void CGalbrenaGroundIdle::Handle_Input()
 		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pGalbrena->Is_GrappleDrag());
 
+	m_States[THROW_CONTROL] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pGalbrena->Is_AttachThrowTarget());
+
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
