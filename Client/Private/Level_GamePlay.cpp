@@ -249,7 +249,8 @@ void CLevel_GamePlay::Ready_Layer_Player()
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
 	//vPosition = { 2375.42f, 317.92f, 1645.60f }; => 구 좌표
-	vPosition = { 2464.6f, 317.2f, 1832.9f };
+	//vPosition = { 2464.6f, 317.2f, 1832.9f };
+	vPosition = { 3228.9f, 317.5f, 1705.f };
 	
 
 	CPlayer::PLAYER_DESC Desc{};
@@ -636,6 +637,7 @@ void CLevel_GamePlay::Ready_NPC()
 	Hiding.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Hiding.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");
 	Hiding.fRotationPerSec = XMConvertToRadians(90.f);
+	Hiding.strFolderPath = "../Bin/Resource/Model/NPC/FemaleS/Notify";
 	Hiding.fSpeedPerSec = 1.f;
 
 	for (size_t i = 0; i < HidingData.size(); ++i)

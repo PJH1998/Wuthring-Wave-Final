@@ -1079,6 +1079,7 @@ HRESULT CLoader_GamePlay::Load_NPC()
 {
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
 	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
 
 	vector<_string> TypeName = { "Body", "Hair", "Face" };
@@ -1129,8 +1130,6 @@ HRESULT CLoader_GamePlay::Load_NPC()
 }
 HRESULT CLoader_GamePlay::Load_Hide_And_Seek()
 {
-	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
-
 	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
 	//Prototype_Component_Model_FemaleS370437
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370437"),
