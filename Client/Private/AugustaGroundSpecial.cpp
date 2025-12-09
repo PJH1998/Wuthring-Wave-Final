@@ -54,7 +54,6 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 	}
 		
 	// 6. 컨디션 추가.
-	//CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f);
 	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
