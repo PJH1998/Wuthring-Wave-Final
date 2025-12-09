@@ -161,4 +161,6 @@ void CPotal::Free()
 	Safe_Release(m_pDiffuseCom);
 	Safe_Release(m_pFirstMaskCom);
 	Safe_Release(m_pSecondMaskCom);
+	Safe_Release(m_pShaderCom);
+	Safe_Release(m_pRigidbodyCom);
 }
