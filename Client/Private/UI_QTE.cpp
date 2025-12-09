@@ -6,6 +6,7 @@
 #include "GameSystem.h"
 
 #include "Event_Level.h"
+#include "Event_Leviatan.h"
 
 #define KSTA_UITEST_TEMPTRIGGER
 
@@ -218,7 +219,6 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
 	}break;
 	}
-	
 
 
 
@@ -453,8 +453,14 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 	if		(m_isGoinSuccess)
 	{
 		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+		if (m_eQTEType == UI_QTE_TYPE::FILLGUAGE)
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
+		else if (m_eQTEType == UI_QTE_TYPE::TRIGGER_EXECUTE)
+		{
+			LEVI_EXECUTE Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+		}
 		
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
 		//m_isGoinSuccess = false;
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 	}
@@ -506,14 +512,6 @@ void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
 
 void CUI_QTE::Ready_Events()
 {
-	// 1. 이벤트를 GameInstance에 등록하고 Publish 해서 안에 있는 함수를 실행시킨다.
-	m_pGameInstance->Subscribe<QTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_QTESuccess"), [this](const QTE_SUCCESS_UI_EVENT event) {
-		if (event.isSuccess)
-		{
-			// event가 Success 라면 실행시킨다.
-			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
-		}
-	});
 
 }
 

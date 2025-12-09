@@ -280,10 +280,10 @@ void CAugustaBurstWeapon::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
+	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.fAttackDmg = 600.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
@@ -303,7 +303,7 @@ void CAugustaBurstWeapon::Ready_AttackVolumes()
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SWORD_ATTACK])
 		m_AttackVolumes[VOLUME_SWORD_ATTACK]->TriggerActivate(false);
 
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(30.f, 30.f, 30.f); // 3차원 크으게
 	TriggerDesc.fAttackDmg = 1500.f;

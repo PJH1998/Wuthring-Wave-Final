@@ -55,6 +55,7 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+		m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
 	}
 	else
 	{
@@ -108,6 +109,7 @@ void CRoverGroundBurst::OnExit()
 		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+		m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f);
 	}
 	
 

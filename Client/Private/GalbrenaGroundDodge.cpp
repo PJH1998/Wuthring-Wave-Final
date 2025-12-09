@@ -73,6 +73,9 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 	// 8. Effect
 	m_pGalbrena->Spawn_Effect(TEXT("Common_Limit"));
 
+	// 9. Change_TimeRate.
+	m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
+
 }
 
 void CGalbrenaGroundDodge::OnUpdate(_float fTimeDelta)
@@ -121,7 +124,8 @@ void CGalbrenaGroundDodge::Update_SprintAnimation(_float fTimeDelta)
     m_eDir = m_pGalbrena->Calculate_Direction();
 
 	// 2. Animation 실행.
-    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
+    //CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
+    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, 1.f); // Dodge는 제외.
 
 	
     

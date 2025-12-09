@@ -44,7 +44,7 @@ void CGalbrenaGroundDash::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 실행
-    Update_SprintAnimation(fTimeDelta);
+    Update_DodgeAnimation(fTimeDelta);
     
     // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
@@ -82,7 +82,7 @@ void CGalbrenaGroundDash::Handle_Input()
 
 
 
-void CGalbrenaGroundDash::Update_SprintAnimation(_float fTimeDelta)
+void CGalbrenaGroundDash::Update_DodgeAnimation(_float fTimeDelta)
 {
     // 1. 누른키에 따른 방향 계산
     m_eDir = m_pGalbrena->Calculate_Direction();
@@ -113,7 +113,10 @@ void CGalbrenaGroundDash::Check_StateTransition(_float fTimeDelta)
 		else
 			m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_B;
 
-		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
+		// Dodge 이전에 누른 방향으로 회전.
+		_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
+		m_pGalbrena->Rotate_Direction(vMoveDir);
+
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
 		return;
 	}

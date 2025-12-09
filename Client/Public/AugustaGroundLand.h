@@ -12,6 +12,7 @@ private:
         RUN = 0,
 		LANDSLIDE,
 		HIT,
+		LAND,
         END
     };
 

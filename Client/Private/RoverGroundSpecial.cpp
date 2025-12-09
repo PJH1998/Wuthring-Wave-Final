@@ -122,6 +122,8 @@ void CRoverGroundSpecial::Handle_Input()
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
     m_States[DASH] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	m_States[EXIT] = m_pRover->Get_Cost(COST_TYPE::COST1) <= 0.f;
 }
 
 void CRoverGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
@@ -170,7 +172,7 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 	if (IsEscapePossible)
 	{
 		// 가장 우선순위 높은 상황.
-		if (m_States[ATTACK])
+		if (m_States[ATTACK] && !m_States[EXIT])
 		{
 			switch (eSpType)
 			{

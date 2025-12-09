@@ -95,7 +95,7 @@ void CAugustaGroundSprint::Handle_Input()
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pAugusta->Is_GrappleHook());
 
-	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+	m_States[ROPE_DRAG] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pAugusta->Is_GrappleDrag());
 
@@ -228,7 +228,7 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ROPE_DRAG])
 	{
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK));
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEDRAG));
 		return;
 	}
 

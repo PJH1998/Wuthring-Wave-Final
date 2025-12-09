@@ -192,6 +192,7 @@ public:
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 
 	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration);
+	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio);
 
 	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
 
