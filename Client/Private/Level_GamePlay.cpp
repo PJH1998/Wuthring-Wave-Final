@@ -302,6 +302,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
+#ifdef _DEBUG
+	MobDesc.fHP = 150.f;
+#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
@@ -669,7 +672,7 @@ void CLevel_GamePlay::Ready_Potal()
 	CPotal::POTAL_DESC PotalDesc{};
 	PotalDesc.iLevel = ENUM_CLASS(m_eCurLevel);
 	PotalDesc.vExtent;
-	PotalDesc.vPos = _float4(3497.f, 147.84f, 3267.5f, 1.f);
+	PotalDesc.vPos = _float4(3497.f, 148.84f, 3267.5f, 1.f);
 
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Potal"), &PotalDesc);

@@ -30,6 +30,7 @@ HRESULT CMapObject_Collaps::Initialize_Clone(void* pArg)
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		m_IsTriggerd = true;
 		});
+
 	return S_OK;
 }
 
@@ -43,7 +44,8 @@ void CMapObject_Collaps::Update(_float fTimeDelta)
 	if (m_IsTriggerd) // Trigger 실행 이후.
 		LerpPos(fTimeDelta);
 
-	m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	if (m_pBoxRigidbodyCom)
+		m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	// 매프레임 Target Transform 비우기.
 	m_pTargetTransform = nullptr;
 }
@@ -101,7 +103,8 @@ void CMapObject_Collaps::Render()
 	}
 
 #ifdef _DEBUG
-	m_pBoxRigidbodyCom->Render();
+	if (m_pBoxRigidbodyCom)
+		m_pBoxRigidbodyCom->Render();
 #endif // _DEBUG
 
 }
@@ -205,21 +208,29 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->vSourWorldMatrix));
 
-	CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
-	RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyBoxDesc.eShape = SHAPE::BOX;
-	RigidbodyBoxDesc.eType = EMotionType::Kinematic;
-	RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
-	RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
-	XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	if (m_iTriggerIndex == 33)
+	{
+		_float3 vPointPos;
+		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+		vPointPos.y += 1.5f;
+		m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
+		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
+		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
+		RigidbodyBoxDesc.eShape = SHAPE::BOX;
+		RigidbodyBoxDesc.eType = EMotionType::Kinematic;
+		RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+		RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
+		XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
-	m_CallBack.pCondition = &m_iTriggerIndex;
-	m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+
+		m_CallBack.pTransform = m_pTransformCom;
+		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+		m_CallBack.pCondition = &m_iTriggerIndex;
+		m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+	}
 }
 
 

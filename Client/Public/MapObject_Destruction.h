@@ -50,19 +50,22 @@ private:
 	_char m_ModelName[MAX_PATH] = {};
 	_char m_BoneModelName[MAX_PATH] = {};
 	_uint m_iShaderPassIndex = {};
+	
+	CRigidbody* m_pBoxRigidbodyCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CModel* m_pBoneModel = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
 	class CModel_Streaming* m_pModelCom;
+	class CGameSystem* m_pGameSystem = { nullptr };
 
 	_bool m_IsDestroy = { false };
 	_bool m_IsChange = { false };
 	_float3 m_vImpulsePos = {};
 	_float3 m_vImpulsePower = {};
-
+	
 	_uint m_iTriggerIndex = {};
-	class CGameSystem* m_pGameSystem = { nullptr };
 	_wstring m_szDebrisName;
+	CALLBACK_CLIENT m_CallBack = {};
 public:
 	static CMapObject_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

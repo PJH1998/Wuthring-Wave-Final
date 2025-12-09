@@ -211,9 +211,11 @@
     <ClInclude Include="..\Public\GalbrenaControl.h" />
     <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Event_Leviatan.h" />
+    <ClInclude Include="..\Public\MapObject_Dome.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
     <ClInclude Include="..\Public\MapObject_Throw.h" />
+    <ClInclude Include="..\Public\MapObject_Turn.h" />
     <ClInclude Include="..\Public\Potal.h" />
     <ClInclude Include="..\Public\RoverControl.h" />
     <ClInclude Include="..\Public\RoverEvent.h" />
@@ -498,9 +500,11 @@
     <ClCompile Include="..\Private\Effect_VA.cpp" />
     <ClCompile Include="..\Private\GalbrenaControl.cpp" />
     <ClCompile Include="..\Private\MapObject_Burn.cpp" />
+    <ClCompile Include="..\Private\MapObject_Dome.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
+    <ClCompile Include="..\Private\MapObject_Turn.cpp" />
     <ClCompile Include="..\Private\Potal.cpp" />
     <ClCompile Include="..\Private\RoverControl.cpp" />
     <ClCompile Include="..\Private\RoverEvent.cpp" />

@@ -14,7 +14,6 @@ class CMapObject final: public CStaticObject
 public:
 	typedef struct tagMapLoad
 	{
-
 		_char ModelName[MAX_PATH] = {};
 		_uint iShaderPassIndex = {};
 		_float4x4* WorldMatrix = { nullptr };

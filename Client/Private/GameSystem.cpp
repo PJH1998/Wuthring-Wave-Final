@@ -86,6 +86,7 @@ void CGameSystem::Clear_Resource()
 	m_pSonoro_Manager->Clear_Resource();
 	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
+	Safe_Release(m_pPotal);
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)

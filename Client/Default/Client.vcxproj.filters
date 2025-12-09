@@ -1305,6 +1305,18 @@
     <ClInclude Include="..\public\UI_GrappleController.h">
       <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Turn.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Dome.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Throw.h">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Burn.h">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\GalbrenaControl.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClInclude>
@@ -2061,6 +2073,18 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_GrappleController.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Turn.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Dome.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Throw.cpp">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Burn.cpp">
+      <Filter>03. GameObject\MapObject\Interact</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaControl.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>

@@ -1,6 +1,5 @@
 ﻿#include"ClientPch.h"
 #include "MapObject.h"
-#include "MapObject_Destruction.h"
 #include"GameSystem.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
