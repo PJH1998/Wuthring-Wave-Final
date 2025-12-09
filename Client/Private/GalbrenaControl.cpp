@@ -21,22 +21,19 @@ void CGalbrenaControl::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
 
-	// 1. 애니메이션 결정을 위한 방향 설정.
-	m_eRopeDir = m_pGalbrena->Calculate_RopeDirection();
+	// 1. 초기 단계 설정.
+	m_eControlStep = CONTROLSTEP::STEP_ATTACH;
 
-	// 2. 초기 단계 설정.
-	m_eControlStep = CONTROLSTEP::STEP_START;
+	// 3. 애니메이션 선정 =>
+	m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_START);
 
-	// 3. 상태 리셋.
+	// 4. 장착 시키기.
+	m_pGalbrena->Attach_ThrowTarget(true);
+
+	// 5. 상태 리셋.
 	State_Reset();
 
-	// 4. 나중에 감지된 위치에 있는 방향으로 회전합니다. 
-	m_pGalbrena->Rotate_GrappleTarget();
-
-	// 5. 중력 끄기
-	m_pGalbrena->Set_Gravity(false);
-
-	// 6. 현재 상태 부여.
+	m_pGalbrena->Set_Gravity(true);
 
 }
 
@@ -66,7 +63,6 @@ void CGalbrenaControl::OnExit()
 {
 	CInteractionState::OnExit();
 	m_pGalbrena->Set_Gravity(false);
-	m_eRopeDir = ROPEDIR::END;
 	m_eControlStep = CONTROLSTEP::STEP_NONE;
 }
 
@@ -80,13 +76,25 @@ void CGalbrenaControl::Enter_Rope()
 void CGalbrenaControl::Handle_Input()
 {
 	m_eDir = m_pGalbrena->Calculate_Direction(); // 방향 계산.
-	m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
+	//m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
 
+	m_States[DETACH] = (m_eControlStep == CONTROLSTEP::STEP_ATTACH_LOOP
+		&& m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))) ||
+		(m_pGalbrena->Get_UtilityType() != UI_TAB_UTILITY::LEVITATOR);
+
+	m_States[THROW] = (m_eControlStep == CONTROLSTEP::STEP_ATTACH_LOOP)
+		&& m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	m_States[RUN] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
+
+	
+	// => 상호 작용 T 타입을 바꾸면?
 }
 
 void CGalbrenaControl::Update_ControlAnimation(_float fTimeDelta)
 {
 	CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta);
+
 }
 
 void CGalbrenaControl::Check_Physics(_float fTimeDelta)
@@ -98,16 +106,92 @@ void CGalbrenaControl::Check_StateTransition(_float fTimeDelta)
 	EGalbrenaControlType eRopeType = static_cast<EGalbrenaControlType>(m_iCurrentAnimIdx);
 	_bool IsEscapePossible = CState::Is_EscapePossible();
 
-
 	// 1. Step Start 인경우? => Start2로 변경.
+	if (m_eControlStep == CONTROLSTEP::STEP_ATTACH)
+	{
+		if (m_IsAnimationEnd)
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_LOOP);
+			m_eControlStep = CONTROLSTEP::STEP_ATTACH_LOOP;
+			return;
+		}
+	}
+
+	if (m_eControlStep == CONTROLSTEP::STEP_ATTACH_LOOP)
+	{
+		if (IsEscapePossible) // 탈출 가능 지점에서 분기 나누기.
+		{
+			if (m_States[DETACH]) // 해제.
+			{
+				m_pGalbrena->Attach_ThrowTarget(false);
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_END);
+				m_eControlStep = CONTROLSTEP::STEP_DETACH;
+				return;
+			}
+
+			if (m_States[THROW])
+			{
+				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaControlType::MANIPULATE_RELEASE_F);
+				m_eControlStep = CONTROLSTEP::STEP_THROW;
+				return;
+			}
+
+		}
+
+		if (m_IsAnimationEnd)
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_LOOP);
+			return;
+		}
+	}
+
+	if (m_eControlStep == CONTROLSTEP::STEP_DETACH)
+	{
+		if (IsEscapePossible)
+		{
+			if (m_States[RUN])
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
+				return;
+			}
+		}
+
+		if (m_IsAnimationEnd)
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+			return;
+		}
+	}
+
+	if (m_eControlStep == CONTROLSTEP::STEP_THROW)
+	{
+		if (IsEscapePossible)
+		{
+			if (m_States[RUN])
+			{
+				m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
+				return;
+			}
+		}
+
+		if (m_IsAnimationEnd)
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+			return;
+		}
+	}
 }
 
 
 void CGalbrenaControl::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_END), "Manipulate_Absorb_End", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_LOOP), "Manipulate_Absorb_Loop", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_START), "Manipulate_Absorb_Start", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_END), "Manipulate_Absorb_End", 1.5f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_LOOP), "Manipulate_Absorb_Loop", 1.5f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_ABSORB_START), "Manipulate_Absorb_Start", 1.5f, 0.f);
 
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_HOLD),		"Manipulate_Hold", 1.f, 0.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaControlType::MANIPULATE_RELEASE_F), "Manipulate_Release_F", 1.7f, 40.f);

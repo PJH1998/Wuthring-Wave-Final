@@ -158,6 +158,8 @@ private:
 
 	_float3 m_vLockOnPos = {};
 
+	_bool m_IsThrowReserve = { false };
+
 
 private:
 	void Player_KeyInput();

@@ -1308,6 +1308,12 @@
     <ClInclude Include="..\Public\GalbrenaControl.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaControl.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverControl.h">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2058,6 +2064,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaControl.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaControl.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverControl.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

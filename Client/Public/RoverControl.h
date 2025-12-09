@@ -2,7 +2,7 @@
 #include "InteractionState.h"
 
 NS_BEGIN(Client)
-class CGalbrenaControl final : public CInteractionState
+class CRoverControl final : public CInteractionState
 {
 private:
 	enum CONTROLSTATE
@@ -24,8 +24,8 @@ private:
 	};
 
 private:
-	explicit CGalbrenaControl() = default;
-	virtual ~CGalbrenaControl() = default;
+	explicit CRoverControl() = default;
+	virtual ~CRoverControl() = default;
 
 public:
 	virtual HRESULT Initialize(class CCharacter* pCharacter) override;
@@ -34,8 +34,9 @@ public:
 	virtual void OnExit() override;
 
 private:
-	class CGalbrena* m_pGalbrena = { nullptr };
+	class CRover* m_pRover = { nullptr };
 	_bool m_States[CONTROLSTATE::END] = {};
+
 	CONTROLSTEP m_eControlStep = { CONTROLSTEP::STEP_NONE };
 
 	_float m_fTargetDistance = { }; // 타겟과의 거리? => 이건 Character가 알고있죠.
@@ -55,7 +56,7 @@ private:
 
 
 public:
-	static CGalbrenaControl* Create(class CCharacter* pOwner);
+	static CRoverControl* Create(class CCharacter* pOwner);
 	virtual void Free() override;
 
 };

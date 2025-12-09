@@ -29,8 +29,8 @@ HRESULT CMapObject_Throw::Initialize_Clone(void* pArg)
 
 void CMapObject_Throw::Priority_Update(_float fTimeDelta)
 {
-
-	if (!m_IsGrabbed && !m_IsThrow)
+	// Interact 상황이 아닌 경우에는 기존의 위치에 고정(m_vOriginPos)
+	if (!m_IsGrabbed && !m_IsThrow) 
 	{
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vOriginPos));
 		m_fThrowTime = 0.f;
@@ -40,6 +40,8 @@ void CMapObject_Throw::Priority_Update(_float fTimeDelta)
 
 void CMapObject_Throw::Update(_float fTimeDelta)
 {
+	Calc_CombinedMatrix();
+
 	m_pDetectRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	//m_pTransformCom->Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), fTimeDelta);
 	//그랩 상태 전에는 물리 연산이나 목표 좌표 연산 안하다가
@@ -48,7 +50,12 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 	if (m_IsGrabbed && !m_IsThrow)
 	{
 		if (m_fattachTime < 1.f)
+		{
 			m_fattachTime += fTimeDelta;
+			Attach_Lerp(); // Character 로부터 전달받은 뼈행렬, World행렬을 이용해 Lerp.
+		}
+		else
+			Attach_Pos();
 
 		XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
 		m_pGameInstance->GetCenterPos(&m_vTargetPos);
@@ -167,7 +174,7 @@ void CMapObject_Throw::OnCollider_During(_uint iLayer, void* pDesc, const Contac
 
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
+	/*if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
 	{
 		if (!m_IsGrabbed && !m_IsThrow)
 			m_IsGrabbed = true;
@@ -182,9 +189,9 @@ void CMapObject_Throw::OnCollider_During(_uint iLayer, void* pDesc, const Contac
 	{
 		m_IsGrabbed = false;
 		m_IsThrow = false;
-	}
+	}*/
 
-	if (m_IsGrabbed && !m_IsThrow)
+	/*if (m_IsGrabbed && !m_IsThrow)
 	{
 		CTransform* pTransform = static_cast<CTransform*>(pcallDesc->pTransform);
 		_vector Pos = pTransform->Get_State(STATE::POSITION);
@@ -195,7 +202,7 @@ void CMapObject_Throw::OnCollider_During(_uint iLayer, void* pDesc, const Contac
 		XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
 		LerpPos = XMVectorLerp(XMLoadFloat3(&m_vStartPos), XMVectorSetY(Pos, Pos.m128_f32[1] += 1.f), m_fattachTime * m_fattachTime);
 		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(LerpPos, 1.f));
-	}
+	}*/
 }
 
 void CMapObject_Throw::Ready_Components(void* pArg)
@@ -256,7 +263,7 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pThrowRigidbodyCom), &RigidbodyDesc)))
+		TEXT("Com_ThrowRigidbody"), reinterpret_cast<CComponent**>(&m_pThrowRigidbodyCom), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
 
@@ -292,6 +299,52 @@ void CMapObject_Throw::Collide()
 void CMapObject_Throw::Graped()
 {
 	m_pCollideRigidbodyCom->Change_MotionType(EMotionType::Dynamic);
+}
+
+void CMapObject_Throw::Calc_CombinedMatrix()
+{
+	_matrix matResult = XMMatrixIdentity();
+	XMStoreFloat4x4(&m_AttachMatrix, matResult);
+	if (nullptr == m_pAttachBoneMatrix ||
+		nullptr == m_pAttachWorldMatrix)
+		return;
+
+	_matrix matBone = XMLoadFloat4x4(m_pAttachBoneMatrix);
+	_matrix matWorld = XMLoadFloat4x4(m_pAttachWorldMatrix);
+	XMStoreFloat4x4(&m_AttachMatrix, matBone * matWorld);
+}
+
+void CMapObject_Throw::Attach_Lerp()
+{
+	// 1. Position 추출.
+	_matrix matAttach = XMLoadFloat4x4(&m_AttachMatrix);
+
+	// 2. vTrans가 TargetPos 대상.
+	_vector vTrans = matAttach.r[3];
+	if (m_fattachTime >= 1.f)
+		m_fattachTime = 1.f;
+
+	// 3. 현재 위치를 LerpPos로 업데이트.
+	XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
+	_vector LerpPos = XMVectorLerp(XMLoadFloat3(&m_vStartPos)
+		, XMVectorSetY(vTrans, vTrans.m128_f32[1] += 1.f), m_fattachTime * m_fattachTime);
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(LerpPos, 1.f));
+
+}
+
+void CMapObject_Throw::Attach_Pos()
+{
+	_matrix matAttach = XMLoadFloat4x4(&m_AttachMatrix);
+
+	// 2. vTrans가 TargetPos 대상.
+	//_vector vScale, vRot, vTrans;
+	//XMMatrixDecompose(&vScale, &vRot, &vTrans, matAttach);
+
+	_vector vTrans = matAttach.r[3];
+	m_pTransformCom->Set_State(STATE::POSITION, 
+		XMVectorSetY(vTrans, vTrans.m128_f32[1] += 1.f)
+	);
+	
 }
 
 CMapObject_Throw* CMapObject_Throw::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

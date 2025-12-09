@@ -176,11 +176,14 @@ void CPlayer::Update(_float fTimeDelta)
 
 	Sorting_GrappleTarget(); // Grapple Target Sorting;
 	Toggle_Grapple(); 
+	Sorting_ThrowTarget();
+	Toggle_Throw();
 	Sorting_Target(); // 4. Target Sorting
     Toggle_LockOn(); // 5. Lock On
 	
 	m_GrappleCandidates.clear();
 	m_TargetCandidates.clear();
+	m_ThrowCandidates.clear();
 	//m_TargetTransforms.clear();
 
 	
@@ -367,6 +370,12 @@ void CPlayer::Player_KeyInput()
 		}
 
 		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
+		
+		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+		{
+			m_pGameSystem->Show_TabUtilityUI(ENUM_CLASS(m_eUtilityType));
+		}
+
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
 		{
 			_uint iSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
@@ -383,6 +392,7 @@ void CPlayer::Player_KeyInput()
 				}
 			}
 		}
+		
 
 	}
 
@@ -413,14 +423,15 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 
 		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 		//LEVI_GRAB Desc{ true };
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
+		// Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 
-		Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -429,10 +440,11 @@ void CPlayer::Player_KeyInput()
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
 		// 임시
 		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
-		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 		//LEVI_EXECUTE Desc{ true };
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
-
+		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget(); // 던지기 테스트.
+		
+		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(false);
 		Bind_EventLock(false);
 	}
 
@@ -441,6 +453,7 @@ void CPlayer::Player_KeyInput()
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
 		// 임시
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+		m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
 
 	}
 
@@ -597,7 +610,8 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 // Grapple 전용 .
 void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer))
+	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer) &&
+		(ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW) != iLayer))
 		return;
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
@@ -608,7 +622,7 @@ void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactM
 	case COLLISIONLAYER::GRAPPLE:
 		Process_CollideGrapple(pcallDesc);
 		break;
-	case COLLISIONLAYER::THROW:
+	case COLLISIONLAYER::INTERACT_THROW:
 		Process_CollideThrow(pcallDesc);
 		break;
 	}
@@ -934,7 +948,11 @@ void CPlayer::Sorting_ThrowTarget()
 		});
 
 	if (0 < m_ThrowCandidates.size())
+	{
 		m_TargetThrowInfo = m_ThrowCandidates[0];
+		m_TargetThrowInfo.IsActive = true;
+	}
+		
 }
 void CPlayer::Toggle_Throw()
 {

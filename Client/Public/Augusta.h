@@ -202,6 +202,9 @@ public:
 	virtual void Reset_QTECamera() override;
 	virtual void Bind_QTECamera() override;
 
+	virtual void Attach_ThrowTarget(_bool isAttach) override;
+	virtual void Throw_AttachTarget() override;
+
 #pragma region 2. NOTIFY
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;

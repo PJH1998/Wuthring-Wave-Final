@@ -570,6 +570,37 @@ void CRover::Bind_QTECamera()
 	m_fCameraOffset = 2.f; // 늘립니다.
 }
 
+void CRover::Attach_ThrowTarget(_bool isAttach)
+{
+	if (!m_ThrowInfo.IsActive) // 객체가 활성화 되어있지 않은 객체라면?
+		return;
+
+	if (isAttach)
+	{
+		const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+		const _float4x4* pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+
+		*m_ThrowInfo.ppRefBoneMatrix = pBoneMatrix;
+		*m_ThrowInfo.ppRefWorldMatrix = pWorldMatrix;
+		*m_ThrowInfo.pGrabbed = true;
+		*m_ThrowInfo.pThrow = false;
+	}
+	else
+	{
+		*m_ThrowInfo.pGrabbed = false;
+		*m_ThrowInfo.pThrow = false;
+	}
+}
+
+void CRover::Throw_AttachTarget()
+{
+	if (!m_ThrowInfo.IsActive)
+		return;
+
+	*m_ThrowInfo.pGrabbed = false;
+	*m_ThrowInfo.pThrow = true;
+}
+
 
 
 #pragma region NOTIFY
@@ -708,6 +739,8 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 				PartActivate(PARTTYPE::PART_DARKWING, true);
 		}
 	}
+	else if (var1 == TEXT("Throw"))
+		Throw_AttachTarget(); // 던지기.
 	
 
 }

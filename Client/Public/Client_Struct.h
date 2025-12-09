@@ -94,7 +94,8 @@ namespace Client
 
 		const _float4x4** ppRefBoneMatrix = { nullptr };
 		const _float4x4** ppRefWorldMatrix = { nullptr };
-
+		
+		_bool IsActive = { false };
 		void Reset()
 		{
 			pTransform = nullptr;
@@ -103,6 +104,7 @@ namespace Client
 			ppRefBoneMatrix = nullptr;
 			ppRefWorldMatrix = nullptr;
 			eObjectType = OBJECTTYPE::END;
+			IsActive = false;
 		}
 	}THROW_INFO;
 
