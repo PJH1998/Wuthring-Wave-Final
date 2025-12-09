@@ -172,6 +172,12 @@ void CRoverDarkWing::OnHitEnter(_uint iLayer, void* pOther, const ContactManifol
 
 	switch (m_iVolumeIdx)
 	{
+	case VOLUME::VOLUME_ATTACK:
+		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST1, 7.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
+		break;
+
 	default:
 		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST1, 7.f); // 궁 ULTI

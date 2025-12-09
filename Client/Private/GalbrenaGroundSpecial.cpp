@@ -124,7 +124,8 @@ void CGalbrenaGroundSpecial::Handle_Input()
 	EGalbrenaSpecialType eSpecialType = static_cast<EGalbrenaSpecialType>(m_iCurrentAnimIdx);
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
     m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB))
-		&& (eSpecialType == EGalbrenaSpecialType::ATTACK05 || eSpecialType == EGalbrenaSpecialType::ATTACK06);
+		&& (eSpecialType == EGalbrenaSpecialType::ATTACK05 || 
+			eSpecialType == EGalbrenaSpecialType::ATTACK06);
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
 	m_States[EXIT] = m_pGalbrena->Get_Cost(COST_TYPE::COST1) <= 0.f;

@@ -76,12 +76,13 @@ namespace Client
 		CTransform* pTransform = { nullptr };
 		OBJECTTYPE eObjectType;
 		uint* pTriggerIndex = { nullptr };
-
+		_bool IsActive = { false };
 		void Reset()
 		{
 			pTransform = nullptr;
 			eObjectType = OBJECTTYPE::END;
 			pTriggerIndex = { nullptr };
+			IsActive = { false };
 		}
 	}GRAPPLE_INFO;
 
@@ -183,9 +184,9 @@ namespace Client
 	{
 		CTransform* pTransform = nullptr;
 		const _float4x4* pSocketMatrix = nullptr;
-
+		_bool IsActive = { false };
 		// 초기화
-		void Reset() { pTransform = nullptr; pSocketMatrix = nullptr; }
+		void Reset() { pTransform = nullptr; pSocketMatrix = nullptr; IsActive = false; }
 
 		_bool operator== (const tagTargetInfo& target) const
 		{

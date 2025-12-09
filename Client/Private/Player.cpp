@@ -817,6 +817,7 @@ void CPlayer::Sorting_Target()
     {
         //m_pTargetTransform = m_TargetTransforms[0];
 		m_TargetInfo = m_TargetCandidates[0];
+		m_TargetInfo.IsActive = true;
     }
 
 }
@@ -923,7 +924,11 @@ void CPlayer::Sorting_GrappleTarget()
 		});
 
 	if (0 < m_GrappleCandidates.size())
+	{
 		m_TargetGrappleInfo = m_GrappleCandidates[0];
+		m_TargetGrappleInfo.IsActive = true;
+	}
+		
 }
 
 

@@ -252,6 +252,9 @@ void CGalbrena::Render()
 
 	m_pMainAttackVolume->Render();
 	Print_LookRay();
+	//Debug_ImGui();
+
+
 #endif // _DEBUG
 
 }
@@ -754,6 +757,8 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (var1 == TEXT("Throw"))
 		Throw_AttachTarget(); // 던지기.
+	else if (var1 == TEXT("MotionTrail"))
+		Process_MotionTrail(wStrObjectTag);
 
 
 	// GalbrenaWing|Bone
@@ -1039,27 +1044,6 @@ void CGalbrena::Render_Back(_uint iMeshIndex)
 	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
 
-//	_float4 vEmissiveColor = { 0.5f, 0.2f, 0.3f, 1.f };
-//	_float fEmissiveIntensity = { 0.25f };
-//
-//#ifdef _DEBUG
-//	ImGui::Begin("Begin Galbrena Back Emissive");
-//	static float vEmissiveColorArray[3] = { 0.5f, 0.2f, 0.3f};
-//	static float fEmissiveIntensityVal = { 0.25f };
-//
-//	ImGui::SliderFloat3("Galbrena Back", vEmissiveColorArray, 0.f, 1.f);
-//	ImGui::SliderFloat("Galbrena Back Intensity", &fEmissiveIntensityVal, 0.f, 1.f);
-//
-//	
-//	ImGui::End();
-//
-//	vEmissiveColor = { vEmissiveColorArray[0], vEmissiveColorArray[1], vEmissiveColorArray[2], 1.f };
-//	fEmissiveIntensity = fEmissiveIntensityVal;
-//#endif // _DEBUG
-
-
-
-
 	_float4 vEmissiveColor = { 0.235f, 0.1f, 0.31f, 1.f};
 	_float fEmissiveIntensity = { 0.45f };
 
@@ -1129,6 +1113,27 @@ _bool CGalbrena::IsEye(_uint iMeshIndex)
 		return true;
 
 	return false;
+}
+
+void CGalbrena::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
+
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
+
 }
 
 void CGalbrena::Bind_Resources()
@@ -1229,6 +1234,8 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	m_vMotionTrailColor = { 0.235f, 0.1f, 0.31f, 1.f }; // 기본
 
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);
