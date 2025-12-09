@@ -376,6 +376,9 @@ CGameObject* CMapObject_Throw::Clone(void* pArg)
 void CMapObject_Throw::Free()
 {
 	__super::Free();
+	
+	m_pAttachBoneMatrix = nullptr;
+	m_pAttachWorldMatrix = nullptr;
 
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pCollideRigidbodyCom);

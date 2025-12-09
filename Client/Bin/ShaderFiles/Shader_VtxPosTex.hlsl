@@ -160,84 +160,42 @@ struct PS_IN_POTAL
     float2 vTexcoord : TEXCOORD0;
     float2 vTempTexcoord : TEXCOORD1;
 };
-PS_OUT PS_POTAL2(PS_IN_POTAL In)
+PS_OUT PS_POTAL2(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-    //vector vMask = g_MaskTexture.Sample(DefaultSampler, In.vTempTexcoord);
+    float2 CenterUV = In.vTexcoord - float2(0.5f, 0.5f);
+    
 
-    //if (vMask.a < 0.1f)
+    float Theta = -(g_TotalTime * 1.f);
+    float C = cos(Theta);
+    float S = sin(Theta);
+    float2 NewTexcoord;
+    NewTexcoord.x = CenterUV.x * C - CenterUV.y * S;
+    NewTexcoord.y = CenterUV.x * S + CenterUV.y * C;
+    NewTexcoord += float2(0.5f, 0.5f);
+    
+    
+    //vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, NewTexcoord);
+    vector vMask = g_MaskTexture.Sample(DefaultSampler, NewTexcoord);
+
+    //if (vMask.a == 0.f)
     //    discard;
+    //Out.vColor = vDiffuse;
+    Out.vColor = float4(0.5f, 0.5f, 0.f, 1.f);
+    //Out.vColor*= vMask;
+    Out.vColor *= (1 - vMask.r);
     
-    //vector vDiffuseMask = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    //Out.vColor = vColor;
+    float Dist = distance(In.vTexcoord, float2(0.5f, 0.5f));
     
-    //if (vDiffuseMask.a == 1.f)
-    //    discard;
+    float EdgeSoftness = 0.02f;
+    float CircleAlpha = 1.f - smoothstep(0.45f, 0.49f, Dist);
     
-    //Out.vColor *= vDiffuseMask;
+    Out.vColor.a *= CircleAlpha;
+    if(Out.vColor.a <=0.01f)
+        discard;
+    if (Dist >= 0.5f)
+        discard;
     
-    //if (distance(In.vTempTexcoord, 0.5f) > 0.5f)
-    //    discard;
-    
-    
-    
-    // -----------------------------------------------------------
-    // 1. 극좌표계 변환 및 파라미터 설정 (이전과 동일)
-    // -----------------------------------------------------------
-    //float2 center = float2(0.5f, 0.5f);
-    //float2 centeredUV = In.vTexcoord - center;
-    //float radius = length(centeredUV);
-    //float angle = atan2(centeredUV.y, centeredUV.x);
-
-    //float rotationSpeed = 1.5f;
-    //float swirlStrength = 4.0f;
-    //float suctionSpeed = 0.8f;
-    
-    //// -----------------------------------------------------------
-    //// 2. 동적 UV 변형 계산 (이전과 동일)
-    //// -----------------------------------------------------------
-    //float angleOffset = (g_TotalTime * rotationSpeed) + (swirlStrength * (1.0f - smoothstep(0.0f, 0.5f, radius)));
-    //float distortedAngle = angle - angleOffset;
-
-    //float distortedRadius = radius + (g_TotalTime * suctionSpeed);
-
-    //float2 distortedUV;
-    //sincos(distortedAngle, distortedUV.y, distortedUV.x);
-    //distortedUV *= distortedRadius;
-    //distortedUV += center;
-
-    //// -----------------------------------------------------------
-    //// 3. 텍스처 샘플링
-    //// -----------------------------------------------------------
-    //// 변형된 UV로 마스크 텍스처를 샘플링합니다.
-    //float4 maskSample = g_MaskTexture.Sample(DefaultSampler, distortedUV);
-
-    //// -----------------------------------------------------------
-    //// 4. 최종 색상 및 알파 합성 (수정됨)
-    //// -----------------------------------------------------------
-    
-    //// [기본 색상 결정 - 빛 효과 제거]
-    //// 이전의 g_GlowColor * g_GlowIntensity 곱셈을 제거했습니다.
-    //// 마스크 텍스처가 흑백 이미지이므로, Red 채널 값을 이용해 하얀색 패턴을 만듭니다.
-    //float3 finalRGB = float3(1.0f, 1.0f, 1.0f) * maskSample.r;
-
-    //// [깊이감 및 가장자리 처리] (이전과 동일하게 유지)
-    //// 1. 중심부 깊이감 표현 (가운데로 갈수록 어두워짐)
-    //float depthFade = smoothstep(0.0f, 0.3f, radius);
-    //finalRGB *= depthFade;
-
-    //// 2. 외곽 원형 자르기
-    //float outerEdgeMask = 1.0f - smoothstep(0.45f, 0.5f, radius);
-    
-    //// [최종 출력]
-    //// 알파 값은 마스크 자체의 밝기와 외곽 마스크에 따라 결정됩니다.
-    //// 마스크의 검은 부분은 투명하게, 하얀 패턴 부분만 나타납니다.
-    //float finalAlpha = maskSample.r * outerEdgeMask;
-
-    //// (선택 사항) 중심부로 갈수록 투명해지게 하려면 아래 주석을 푸세요.
-    //// finalAlpha *= depthFade; 
-
-    //return float4(finalRGB, finalAlpha);
     return Out;
 }
 
@@ -282,7 +240,7 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
-        VertexShader = compile vs_5_0 VS_POTAL();
+        VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_POTAL2();
     }
