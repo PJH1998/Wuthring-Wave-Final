@@ -46,11 +46,17 @@ private:
 
 	void						Collide();
 	void						Graped();
+
+	void						Calc_CombinedMatrix();
+	void						Attach_Lerp();
+	void						Attach_Pos();
+
 private:
 	class CModel_Streaming* m_pModelCom = {};
 	CShader* m_pShaderCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
 	CRigidbody* m_pDetectRigidbodyCom = { nullptr };
+	CRigidbody* m_pThrowRigidbodyCom = { nullptr };
 	CRigidbody* m_pCollideRigidbodyCom = { nullptr };
 
 	_uint m_iShaderPassIndex = {};
@@ -69,6 +75,11 @@ private:
 
 
 	_float m_fattachTime = {};
+
+	const _float4x4* m_pAttachBoneMatrix = { nullptr };
+	const _float4x4* m_pAttachWorldMatrix = { nullptr };
+	_float4x4 m_AttachMatrix = {};
+
  public:
 	static CMapObject_Throw* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

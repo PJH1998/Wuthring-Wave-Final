@@ -601,7 +601,7 @@ void CAugusta::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
@@ -707,6 +707,39 @@ void CAugusta::Bind_QTECamera()
 {
 	m_fCameraOriginOffset = m_fCameraOffset;
 	m_fCameraOffset = 2.f; // 늘립니다.
+}
+
+
+void CAugusta::Attach_ThrowTarget(_bool isAttach)
+{
+	if (!m_ThrowInfo.IsActive) // 객체가 활성화 되어있지 않은 객체라면?
+		return;
+
+	if (isAttach)
+	{
+		const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+		const _float4x4* pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+
+		*m_ThrowInfo.ppRefBoneMatrix = pBoneMatrix;
+		*m_ThrowInfo.ppRefWorldMatrix = pWorldMatrix;
+		*m_ThrowInfo.pGrabbed = true;
+		*m_ThrowInfo.pThrow = false;
+	}
+	else
+	{
+		*m_ThrowInfo.pGrabbed = false;
+		*m_ThrowInfo.pThrow = false;
+	}
+
+}
+
+void CAugusta::Throw_AttachTarget()
+{
+	if (!m_ThrowInfo.IsActive)
+		return;
+
+	*m_ThrowInfo.pGrabbed = false;
+	*m_ThrowInfo.pThrow = true;
 }
 
 
@@ -820,7 +853,6 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
 
-
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -856,9 +888,10 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
 	else if (var1 == TEXT("FXOBJECT")) // 30 ~ 60fps?
-	{
 		Process_FxObject(wStrObjectTag);
-	}
+	else if (var1 == TEXT("Throw"))
+		Throw_AttachTarget(); // 던지기.
+	
 	
 	
 
@@ -1390,12 +1423,7 @@ void CAugusta::Update_Camera(_float fTimeDelta)
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 	}
 }
-
-
-
 #pragma endregion
-
-
 
 
 void CAugusta::Bind_Resources()
@@ -1438,10 +1466,6 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->facialComputeShaderData.first)
 		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
-
-#ifdef _DEBUG
-	cout << "Augusta Model Clone : " << endl;
-#endif // _DEBUG
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
@@ -1506,7 +1530,6 @@ void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
 
 void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
-
     _float3 vScale = {};
     _float3 vRotation = {};
     _float3 vPosition = {};

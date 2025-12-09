@@ -148,7 +148,6 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
-
 	// 8. PlayerStatus에 Utility Type 바인딩.
 	Sync_UtilityType();
 }
@@ -177,11 +176,14 @@ void CPlayer::Update(_float fTimeDelta)
 
 	Sorting_GrappleTarget(); // Grapple Target Sorting;
 	Toggle_Grapple(); 
+	Sorting_ThrowTarget();
+	Toggle_Throw();
 	Sorting_Target(); // 4. Target Sorting
     Toggle_LockOn(); // 5. Lock On
 	
 	m_GrappleCandidates.clear();
 	m_TargetCandidates.clear();
+	m_ThrowCandidates.clear();
 	//m_TargetTransforms.clear();
 
 	
@@ -368,6 +370,12 @@ void CPlayer::Player_KeyInput()
 		}
 
 		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
+		
+		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+		{
+			m_pGameSystem->Show_TabUtilityUI(ENUM_CLASS(m_eUtilityType));
+		}
+
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
 		{
 			_uint iSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
@@ -384,6 +392,7 @@ void CPlayer::Player_KeyInput()
 				}
 			}
 		}
+		
 
 	}
 
@@ -414,14 +423,15 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 
 		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 		//LEVI_GRAB Desc{ true };
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
+		// Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 
-		Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
@@ -430,10 +440,11 @@ void CPlayer::Player_KeyInput()
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
 		// 임시
 		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
-		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 		//LEVI_EXECUTE Desc{ true };
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
-
+		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget(); // 던지기 테스트.
+		
+		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(false);
 		Bind_EventLock(false);
 	}
 
@@ -442,6 +453,7 @@ void CPlayer::Player_KeyInput()
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
 		// 임시
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+		m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
 
 	}
 
@@ -598,7 +610,8 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 // Grapple 전용 .
 void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer))
+	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer) &&
+		(ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW) != iLayer))
 		return;
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
@@ -608,6 +621,9 @@ void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactM
 	{
 	case COLLISIONLAYER::GRAPPLE:
 		Process_CollideGrapple(pcallDesc);
+		break;
+	case COLLISIONLAYER::INTERACT_THROW:
+		Process_CollideThrow(pcallDesc);
 		break;
 	}
 	
@@ -864,9 +880,6 @@ void CPlayer::Toggle_LockOn()
 		Calc_LockOnPos();
 		_float3 vPos = {};
 		XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-		cout << "LockOn Pos (x, y, z) : " << m_vLockOnPos.x << ", " << m_vLockOnPos.y << ", " << m_vLockOnPos.z << endl;
-		cout << "Player Pos (x, y, z) : " << vPos.x << ", " << vPos.y << ", " << vPos.z << endl;
-
 		m_pGameSystem->Attach_LockOnUI(&m_vLockOnPos);
 
 	
@@ -913,14 +926,41 @@ void CPlayer::Sorting_GrappleTarget()
 
 
 void CPlayer::Toggle_Grapple()
-
 {
 	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
 	if (m_eUtilityType == UI_TAB_UTILITY::GRAPPLE)
 		m_Characters[m_iCurrentCharacterIdx]->Bind_GrappleTarget(
 			m_TargetGrappleInfo
 		);
+}
+void CPlayer::Sorting_ThrowTarget()
+{
+	// 거리순으로 정렬해서 넣어줍니다.
+	sort(m_ThrowCandidates.begin(), m_ThrowCandidates.end(), [this](const THROW_INFO& src, const THROW_INFO& dst)->_bool {
+		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
+		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pDstTransform->Get_State(STATE::POSITION)));
+		return fSrcDistance < fDstDistance;
+		});
+
+	if (0 < m_ThrowCandidates.size())
+	{
+		m_TargetThrowInfo = m_ThrowCandidates[0];
+		m_TargetThrowInfo.IsActive = true;
+	}
+		
+}
+void CPlayer::Toggle_Throw()
+{
+	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
+	if (m_eUtilityType == UI_TAB_UTILITY::LEVITATOR)
+		m_Characters[m_iCurrentCharacterIdx]->Bind_ThrowTarget(
+			m_TargetThrowInfo
+		);
 }
 void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
 {
@@ -954,6 +994,31 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
+	}
+}
+
+void CPlayer::Process_CollideThrow(const CALLBACK_CLIENT* pcallDesc)
+{
+	{
+		CTransform* pTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+		if (nullptr == pTransform)
+			return;
+
+		lock_guard<mutex> lock(m_Mutex);
+
+		THROW_INFO ThrowInfo = {
+			pTransform,
+			pcallDesc->eObjectType,
+			pcallDesc->IsGrab,
+			pcallDesc->IsThrow,
+			pcallDesc->ppRefBoneMatrix,
+			pcallDesc->ppRefWorldMatrix
+		};
+
+		m_ThrowCandidates.push_back(ThrowInfo);
+
+		// 매프레임 초기화.
+		m_TargetThrowInfo.Reset();
 	}
 }
 
@@ -1150,7 +1215,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 	m_pGrappleRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
-		});
+	});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };

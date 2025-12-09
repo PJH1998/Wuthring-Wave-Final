@@ -75,6 +75,7 @@ void CAugustaGroundLand::Handle_Input()
 		return;
 
 	m_States[RUN] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundLand::Update_LandAnimation(_float fTimeDelta)
@@ -103,12 +104,18 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-    if (IsEscapePossible)
+    if (IsEscapePossible && m_States[RUN])
     {
-		if (m_States[RUN])
+		if (m_States[LAND])
 		{
 			m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+			return;
+		}
+		else
+		{
+			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
 			return;
 		}
     }
