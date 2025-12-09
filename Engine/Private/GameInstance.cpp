@@ -1093,6 +1093,10 @@ void CGameInstance::Set_FogRayDensityScale(_float fFogRayDensityScale)
 {
 	m_pVF->Set_FogRayDensityScale(fFogRayDensityScale);
 }
+void CGameInstance::Set_FogScatterWeight(_float fFogScatterWeight)
+{
+	m_pVF->Set_FogScatterWeight(fFogScatterWeight);
+}
 void CGameInstance::Begin_VF()
 {
 	m_pVF->Begin_VF();

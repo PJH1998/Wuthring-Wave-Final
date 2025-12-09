@@ -36,6 +36,7 @@ private:
 	void				SetUp_CollisionLayer();
 	void				Ready_Event();
 	void				Ready_Prototype_ForStatic();
+	void				Ready_Pooling_ForStatic();
 	void				Ready_Sequence_Item();
 	void				Ready_Sequence();
 	void				Start_Level();
