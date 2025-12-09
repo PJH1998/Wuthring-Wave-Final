@@ -809,7 +809,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-
 #pragma region [TAB] KSTA_UITEST_TABUTILITY
 	static _bool isTabUtilityActive = false;
 	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
@@ -887,15 +886,15 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 	static _bool isInitialized_GrapplePoint = false;
 	
-	_uint iNumGrappleUI = 50;
+	_uint iNumGrappleUI = 1;
 	
 	if (!isInitialized_GrapplePoint)
 	{
 		for (_uint i = 0; i < iNumGrappleUI; i++)
 		{
-			UI_GRAPPLE_TYPE eType = static_cast<UI_GRAPPLE_TYPE>(m_pGameInstance->Rand(0.f, 1.999f));
+			UI_GRAPPLE_TYPE eType = UI_GRAPPLE_TYPE::PULL; /* static_cast<UI_GRAPPLE_TYPE>(m_pGameInstance->Rand(0.f, 1.999f));*/
 			_float3 vBasePos = { 0.f, -10.f, 0.f };
-			_float vRandRange= 50.f;
+			_float vRandRange= 0.f;
 			_float3 vTmpPos = {
 				m_pGameInstance->Rand(-vRandRange, vRandRange) + vBasePos.x,
 				m_pGameInstance->Rand(-vRandRange, vRandRange) + vBasePos.y,
@@ -912,18 +911,37 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	}
 
 	_float3 vPlayerPos = {}; XMStoreFloat3(&vPlayerPos, m_pGameSystem->Get_PlayerPosition());
-	_float fDistance = FLT_MAX;
-	auto pNearestGrapple = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::ANCHOR, &fDistance);
-	_float3 vNearGrapplePos = {}; XMStoreFloat3(&vNearGrapplePos, static_cast<CTransform*>(pNearestGrapple->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
-	_float fPullDistance = FLT_MAX;
-	auto pNearestPull = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, &fPullDistance);
-	_float3 vNearPullPos = {}; XMStoreFloat3(&vNearPullPos, static_cast<CTransform*>(pNearestPull->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
-
+	//_float fDistance = FLT_MAX;
+	//auto pNearestGrapple = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::ANCHOR, &fDistance);
+	//_float3 vNearGrapplePos = {}; XMStoreFloat3(&vNearGrapplePos, static_cast<CTransform*>(pNearestGrapple->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
+	//_float fPullDistance = FLT_MAX;
+	//auto pNearestPull = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, &fPullDistance);
+	//_float3 vNearPullPos = {}; XMStoreFloat3(&vNearPullPos, static_cast<CTransform*>(pNearestPull->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
+	//
 	//std::cout << "[CLevel_Test::Testing_UI] Nearest Grapple UI Distance : " << fDistance << std::endl;
 	//std::cout << "[CLevel_Test::Testing_UI] Nearest Pull    UI Distance : " << fPullDistance << std::endl;
 	//std::cout << "==================================================================" << std::endl;
 
 
+
+
+	// graffle control test
+	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+	{
+		_float3 vPlayerPos = {}; XMStoreFloat3(&vPlayerPos, m_pGameSystem->Get_PlayerPosition());
+
+		void* pTargetUIPtr = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, nullptr, true);
+
+		m_pGameSystem->Toggle_GrapplePoint(pTargetUIPtr, false);
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_B) == KEYSTATE::DOWN)
+	{
+		_float3 vPlayerPos = {}; XMStoreFloat3(&vPlayerPos, m_pGameSystem->Get_PlayerPosition());
+
+		void* pTargetUIPtr = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, nullptr, true);
+
+		m_pGameSystem->Toggle_GrapplePoint(pTargetUIPtr, true);
+	}
 	
 
 #pragma endregion	
