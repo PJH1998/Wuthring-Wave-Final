@@ -11,6 +11,7 @@ private:
     {
         RUN = 0,
 		HIT,
+		LAND,
         END
     };
 

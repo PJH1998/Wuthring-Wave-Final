@@ -64,6 +64,7 @@ public:
 	void						Set_FogMaxHeight(_float fFogMaxHeight) { m_VF_Data.fFogMaxHeight = fFogMaxHeight; }
 	void						Set_FogDistanceFallOff(_float fDistanceFallOf) { m_VF_Data.fDistanceFallOff = fDistanceFallOf; }
 	void						Set_FogRayDensityScale(_float fFogRayDensityScale) { m_VF_Data.fRayDensityScale = fFogRayDensityScale; }
+	void						Set_FogScatterWeight(_float fFogScatterWeight) { m_VF_Data.fScatterWeight = fFogScatterWeight; }
 
 public:
 	HRESULT						Initialize(_uint iWinSizeX, _uint iWinSizeY);

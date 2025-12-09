@@ -26,6 +26,17 @@
 #include "Scan.h"
 #include "MotionTrail.h"
 
+#pragma region SFX
+#include "SFX_Prefab.h"
+#include "SonoraChange.h"
+#include "Augusta_UltiSFX.h"
+#include "Augusta_UltiPostSFX.h"
+#include "GalbrenaUlti_SFX_Slash.h"
+#include "GalbrenaUlti_SFX_Star.h"
+#include "GalbrenaUlti_SFX_Circle.h"
+#include "GalbrenaUlti_PostSFX.h"
+#pragma endregion
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -63,6 +74,7 @@ HRESULT CMainApp::Initialize()
 	m_pGameSystem->Ready_GameSystem(m_pDevice, m_pContext);
 
 	Ready_Prototype_ForStatic();
+	Ready_Pooling_ForStatic();
 	Ready_Sequence();
 	Ready_Sequence_Item();
 	Ready_Event();
@@ -104,17 +116,21 @@ void CMainApp::Post_Update()
 				CRASH("Clear Resource");
 
 			CLevel* pLevel = { nullptr };
+			_float fFadeDuration = {};
 
 			switch (m_eNextLevel)
 			{
 			case LEVEL::LOGO:
 				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
+				fFadeDuration = 4.f;
 				break;
 			case LEVEL::GAMEPLAY:
 				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
+				fFadeDuration = 7.f;
 				break;
 			case LEVEL::HEAVEN:
 				pLevel = CLevel_Heaven::Create(m_pDevice, m_pContext);
+				fFadeDuration = 7.f;
 				break;
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
@@ -128,6 +144,7 @@ void CMainApp::Post_Update()
 			m_pGameInstance->Open_Level(ENUM_CLASS(m_eNextLevel), pLevel);
 
 			m_pGameInstance->IsChangeLevel_ForPhysicX(false);
+			m_pGameInstance->OnFade(FADE::FADE_IN, fFadeDuration, nullptr);
 		}
 	}
 }
@@ -566,8 +583,74 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"),
 		CMotionTrail::Create(m_pDevice, m_pContext))))
 		CRASH("Failed to Add Prototype GameObject MotionTrail");
+#pragma endregion
+
+#pragma region SCREEN_EFFECT
+#pragma region SFX_TEXTURE
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Texture_SFX_Slash"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_300156.png"), 1))))
+		CRASH("Failed Add Prototype SFX_Slash");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Texture_SFX_Noise"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Noise_12001.png"), 1))))
+		CRASH("Failed Add Prototype SFX_Noise");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Texture_SFX_Star"),
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_11000_WP20002.png"), 1))))
+		CRASH("Failed Add Prototype SFX_Star");
 
 #pragma endregion
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Prefab"),
+		CSFX_Prefab::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Prefab");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_SonoraChange"),
+		CSonoraChange::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_SonoraChange");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Augusta_UltiSFX"),
+		CAugusta_UltiSFX::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Augusta_UltiSFX");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
+		CAugusta_UltiPostSFX::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
+		CGalbrenaUlti_SFX_Slash::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Galbrena_UltiStar"),
+		CGalbrenaUlti_SFX_Star::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype_SFX_Galbrena_UltiStar");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Galbrena_UltiCircle"),
+		CGalbrenaUlti_SFX_Circle::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype SFX_Galbrena_UltiCircle");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Galbrena_UltiPostSFX"),
+		CGalbrenaUlti_PostSFX::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype_SFX_Galbrena_UltiPostSFX");
+#pragma endregion
+
+}
+
+void CMainApp::Ready_Pooling_ForStatic()
+{
+	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::STATIC));
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject_ForStatic(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_SonoraChange"),
+		ENUM_CLASS(LEVEL::STATIC), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
+		CRASH("Failed Add Pool SONORA_CHANGE");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject_ForStatic(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"),
+		ENUM_CLASS(LEVEL::STATIC), TEXT("Layer_Scan"), TEXT("Pooling_GameObject_Scan"), 1)))
+		CRASH("Failed Add Pool Pooling_GameObject_Scan");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject_ForStatic(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"),
+		ENUM_CLASS(LEVEL::STATIC), TEXT("Layer_MotionTrail"), TEXT("Pooling_GameObject_MotionTrail"), 5)))
+		CRASH("Failed Add Pool Pooling_GameObject_MotionTrail");
 }
 
 void CMainApp::Ready_Sequence_Item()

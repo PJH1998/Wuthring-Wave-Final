@@ -62,9 +62,31 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
 	m_pGameInstance->Subscribe<MAP_BOUND>(ENUM_CLASS(LEVEL::STATIC), TEXT("Calc_Size"), [this](const MAP_BOUND& event) {
+		if (!m_isActivate)
+			return;
 
-		_vector Center = XMLoadFloat3(&m_pModelCom->Get_BoundingBox()->Center);
-		_vector Extents = XMLoadFloat3(&m_pModelCom->Get_BoundingBox()->Extents);
+		_float4x4 WorldMatrix;
+		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
+
+		_float3 vBoundingBoxPos = m_pModelCom->Get_BoundingBox()->Center;
+		_float3 vBoundingBoxExtends = m_pModelCom->Get_BoundingBox()->Extents;
+		_float3 vLocalCorners[BoundingBox::CORNER_COUNT];
+
+		m_pModelCom->Get_BoundingBox()->GetCorners(vLocalCorners);
+
+		_float3 vTransformedCorners[BoundingBox::CORNER_COUNT];
+
+		for (_uint i = 0; i < BoundingBox::CORNER_COUNT; ++i)
+		{
+			XMStoreFloat3(&vTransformedCorners[i],
+				XMVector3TransformCoord(XMLoadFloat3(&vLocalCorners[i]), XMLoadFloat4x4(&WorldMatrix)));
+		}
+
+		BoundingBox RealBox;
+		BoundingBox::CreateFromPoints(RealBox, BoundingBox::CORNER_COUNT, vTransformedCorners, sizeof(_float3));
+
+		_vector Center = XMLoadFloat3(&RealBox.Center);
+		_vector Extents = XMLoadFloat3(&RealBox.Extents);
 
 		*event.vMin = XMVectorMin(*event.vMin, Center - Extents);
 		*event.vMax = XMVectorMax(*event.vMax, Center + Extents);

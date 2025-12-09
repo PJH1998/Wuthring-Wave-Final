@@ -122,10 +122,10 @@ void CLeviatan::Update(_float fTimeDelta)
 			m_pBehaviorTreeCom[m_iPhase]->tick(this);
 	}
 	After_Condition(fTimeDelta);
-	if (m_isAreaAttack)
-		AreaAttack(fTimeDelta);
-	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	if (m_isAreaAttack)
+		AreaAttack(fTimeDelta * fTimeRatio);
+	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	if(m_pAnimMachineCom[m_iPhase])
 	{
 		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
@@ -1107,7 +1107,7 @@ void CLeviatan::AreaAttack(_float fTimeDelta)
 	{
 		m_fDropAcc = 0.f;
 		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
-		_float fRange = m_pGameInstance->Rand(0.5f, 10.f);
+		_float fRange = m_pGameInstance->Rand(0.2f, 10.f);
 		_float3 vSpawnPos = { m_PreTransform.m[3][0], m_PreTransform.m[3][1], m_PreTransform.m[3][2] };
 		vSpawnPos.x -= sin(fRadius) * fRange;
 		//vSpawnPos.y = m_PreTransform.m[3][1];

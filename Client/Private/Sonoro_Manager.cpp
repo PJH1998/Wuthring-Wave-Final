@@ -123,7 +123,7 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 	Desc.fRadialTime = m_SonoroRigidActive == true ? 2.f : 1.f;
 	Desc.fFadeTime = m_SonoroRigidActive == true ? 2.f : 1.f;
 
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
 
 	if (m_SonoroRigidActive)
 	{

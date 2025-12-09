@@ -11,6 +11,7 @@ NS_END
 
 NS_BEGIN(Client)
 class CAttackVolume;
+class CGameSystem;
 
 class CFS_Scythe final : public CActor
 {
@@ -48,7 +49,8 @@ public:
 
 private:
 	CAttackVolume*			m_pAttackVolumes[5] = {nullptr,};
-	CAnimMachine*		m_pAnimMachineCom = { nullptr };
+	CAnimMachine*			m_pAnimMachineCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 
 	_bool		m_isVolumeActive[5]{};
 	_string		m_strAnimKey;

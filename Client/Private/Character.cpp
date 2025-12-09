@@ -421,6 +421,15 @@ void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float
 	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio, fDuration);
 }
 
+void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	//m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio);
+}
+
 void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
 {
 	CMotionTrail::MOTION_TRAIL_DESC Desc = {};
@@ -431,7 +440,7 @@ void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fM
 	Desc.fInterval = fInterval;
 	Desc.fDuration = fDuration;
 	Desc.iShaderPassIndex = 0; 
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_MotionTrail"), XMMatrixIdentity(), &Desc);
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
 }
 
 

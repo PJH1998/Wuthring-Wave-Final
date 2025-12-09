@@ -39,7 +39,6 @@ private:
 	HRESULT				Load_UI();
 	HRESULT				Load_Font();
 	HRESULT				Load_Effect();
-	HRESULT				Load_ScreenEffect();
 
 private:
 	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);

@@ -53,86 +53,86 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
     float2 vHitRange = float2(0.f, 0.f);
     float fHitDepth = 0.f;
     
-    float Jitter = lerp(0.2f, 1.f, Hash13(vViewPos.xyz));
+    //float Jitter = lerp(0.2f, 1.f, Hash13(vViewPos.xyz));
     
-    fOffsetSize *= Jitter;
+    //fOffsetSize *= Jitter;
     
-    for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
-    {   
-        float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
+    //for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
+    //{   
+    //    float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
        
-        vHitRange.x = vHitRange.y;
-        vHitRange.y = fOffsetSize;
+    //    vHitRange.x = vHitRange.y;
+    //    vHitRange.y = fOffsetSize;
        
-        float4 vProjPos = mul(vLay, g_CamProjMatrix);
+    //    float4 vProjPos = mul(vLay, g_CamProjMatrix);
         
-        vProjPos /= vProjPos.w;
+    //    vProjPos /= vProjPos.w;
 
-        if (false == IsInNDC(vProjPos))
-            break;
+    //    if (false == IsInNDC(vProjPos))
+    //        break;
         
-        vTexcoord = Compute_Texcoord(vProjPos.xy);
+    //    vTexcoord = Compute_Texcoord(vProjPos.xy);
         
-        float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+    //    float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
         
-        if(fDepth <= 0.f)
-            break; 
+    //    if(fDepth <= 0.f)
+    //        break; 
             
-        if (fDepth <= vLay.z)//            +g_fMaxTickness)
-        {
-            IsHit = true;
-            fHitDepth = fDepth;
-            break;
-        }
+    //    if (fDepth <= vLay.z)//            +g_fMaxTickness)
+    //    {
+    //        IsHit = true;
+    //        fHitDepth = fDepth;
+    //        break;
+    //    }
         
-        float fOffsetRatio = saturate((float) i / (float) g_iStep);
+    //    float fOffsetRatio = saturate((float) i / (float) g_iStep);
         
-        fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
-    }
-    
-    float fDistWeight = 1.f;
-    float fStepDepth = 0.f;
-    float4 vEnvColor = 0.f;
-    
-    if (IsHit && fHitDepth > 0.f)
-    { 
-        // binary Step
-        for (uint i = 0; i < g_iBinaryStep; ++i)
-        {
-            float fBinaryOffset = (vHitRange.x + vHitRange.y) * 0.5f;
-            
-            float4 vBinaryLay = vViewPos + float4((vReflect.xyz * fBinaryOffset), 0.f);
-            
-            float4 vProjPos = mul(vBinaryLay, g_CamProjMatrix);
-        
-            vProjPos /= vProjPos.w;
-
-            vTexcoord = Compute_Texcoord(vProjPos.xy);
-        
-            float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
-            
-
-            if (fDepth <= vBinaryLay.z)
-                vHitRange.y = fBinaryOffset;
-            else
-                vHitRange.x = fBinaryOffset;
-                
-            fStepDepth = fDepth;
-        }
-        
-        vReflectColor = SceneTexture.Sample(DefaultSampler, vTexcoord);
-        
-        fDistWeight = saturate(fStepDepth / g_fMaxDistance);
-    }
-    //else
-    //{
-    //    vReflectColor = vOriginColor;
+    //    fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
     //}
-    //else
+    
+    //float fDistWeight = 1.f;
+    //float fStepDepth = 0.f;
+    //float4 vEnvColor = 0.f;
+    
+    //if (IsHit && fHitDepth > 0.f)
+    //{ 
+    //    // binary Step
+    //    for (uint i = 0; i < g_iBinaryStep; ++i)
+    //    {
+    //        float fBinaryOffset = (vHitRange.x + vHitRange.y) * 0.5f;
+            
+    //        float4 vBinaryLay = vViewPos + float4((vReflect.xyz * fBinaryOffset), 0.f);
+            
+    //        float4 vProjPos = mul(vBinaryLay, g_CamProjMatrix);
+        
+    //        vProjPos /= vProjPos.w;
+
+    //        vTexcoord = Compute_Texcoord(vProjPos.xy);
+        
+    //        float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+            
+
+    //        if (fDepth <= vBinaryLay.z)
+    //            vHitRange.y = fBinaryOffset;
+    //        else
+    //            vHitRange.x = fBinaryOffset;
+                
+    //        fStepDepth = fDepth;
+    //    }
+        
+    //    vReflectColor = SceneTexture.Sample(DefaultSampler, vTexcoord);
+        
+    //    fDistWeight = saturate(fStepDepth / g_fMaxDistance);
+    //}
+    ////else
+    ////{
+    ////    vReflectColor = vOriginColor;
+    ////}
+    ////else
     {
         float fMinDistance = 10000.f;
     
-//        float4 vEnvColor = 0.f;
+        float4 vEnvColor = 0.f;
     
         uint iIndex = 0;
         uint iSampleCount = clamp(g_iNumEnvMaps, 0, 8);
@@ -167,22 +167,22 @@ float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, fl
               
                 vEnvColor = g_EnvMapTexture[j].Sample(DefaultSampler, normalize(vHitPlane));
               
-//                vReflectColor = vEnvColor;
+                vReflectColor = vEnvColor;
             }
         }
     }
     
 
-    float fWeight = IsHit ? fDistWeight : 1.f;
+    //float fWeight = IsHit ? fDistWeight : 1.f;
     
-    //vColor = float4(vReflectColor.xyz, 1.f);
+    vColor = float4(vReflectColor.xyz, 1.f);
 
-    vColor = lerp(vReflectColor, vEnvColor, fWeight);
+//    vColor = lerp(vReflectColor, vEnvColor, fWeight);
     
     return vColor;
 }
 
-float4 Compute_Refract(float4 vWolrdPos, float4 vNormal, float4 vWaterColor, Texture2D<float4> SceneTexture, float fWaterDepth)
+float4 Compute_Refract(float4 vWolrdPos, float4 vNormal, float4 vWaterColor, Texture2D<float4> SceneTexture, float fWaterDepth, Texture2D<float4> DepthTexture)
 {
     float4 vColor = 0.f;
     
@@ -205,6 +205,17 @@ float4 Compute_Refract(float4 vWolrdPos, float4 vNormal, float4 vWaterColor, Tex
     float2 vProjXY = vRefractProjPos.xy / vRefractProjPos.w;
     
     float2 vUV = Compute_Texcoord(vProjXY);
+    
+    float4 vSceneWorldPos = Compute_WorldPos(vUV, DepthTexture);
+    
+    float3 vDir = normalize(vSceneWorldPos.xyz - vWolrdPos.xyz);
+    
+    float IsOver = dot(vDir, vRefract) < 0.f;
+    
+    if(IsOver)
+    {
+        return vWaterColor;
+    }
     
     float4 vRefractvColor = SceneTexture.Sample(DefaultSampler, vUV);
     
