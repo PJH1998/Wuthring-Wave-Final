@@ -116,17 +116,21 @@ void CMainApp::Post_Update()
 				CRASH("Clear Resource");
 
 			CLevel* pLevel = { nullptr };
+			_float fFadeDuration = {};
 
 			switch (m_eNextLevel)
 			{
 			case LEVEL::LOGO:
 				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
+				fFadeDuration = 4.f;
 				break;
 			case LEVEL::GAMEPLAY:
 				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
+				fFadeDuration = 7.f;
 				break;
 			case LEVEL::HEAVEN:
 				pLevel = CLevel_Heaven::Create(m_pDevice, m_pContext);
+				fFadeDuration = 7.f;
 				break;
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
@@ -140,6 +144,7 @@ void CMainApp::Post_Update()
 			m_pGameInstance->Open_Level(ENUM_CLASS(m_eNextLevel), pLevel);
 
 			m_pGameInstance->IsChangeLevel_ForPhysicX(false);
+			m_pGameInstance->OnFade(FADE::FADE_IN, fFadeDuration, nullptr);
 		}
 	}
 }
