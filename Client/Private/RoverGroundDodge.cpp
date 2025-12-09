@@ -80,7 +80,7 @@ void CRoverGroundDodge::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 실행
-    Update_SprintAnimation(fTimeDelta);
+    Update_DodgeAnimation(fTimeDelta);
     
     // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
@@ -107,7 +107,7 @@ void CRoverGroundDodge::Handle_Input()
 
 
 
-void CRoverGroundDodge::Update_SprintAnimation(_float fTimeDelta)
+void CRoverGroundDodge::Update_DodgeAnimation(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pRover->Calculate_RootMotionScale();
@@ -117,7 +117,7 @@ void CRoverGroundDodge::Update_SprintAnimation(_float fTimeDelta)
     m_eDir = m_pRover->Calculate_Direction();
 
 	// 2. Animation 실행.
-    CCharacterState::Play_Animation(m_pRover, fTimeDelta, m_fAnimationScale);
+    CCharacterState::Play_Animation(m_pRover, fTimeDelta, 1.f);
 
 	
     

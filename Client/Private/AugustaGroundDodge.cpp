@@ -36,13 +36,13 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
     State_Reset();
 
 	// 4. 락온 중이였다면? => 한번만 입력방향에 따른 회전.
-	if (m_pAugusta->Is_LockOn())
-	{
-		// 5. 누른 키에 따른 입력 방향 받아오기.
-		m_eDir = m_pAugusta->Calculate_Direction();
-		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-		m_pAugusta->Rotate_Direction(vMoveDir);
-	}
+	//if (m_pAugusta->Is_LockOn())
+	//{
+	//	// 5. 누른 키에 따른 입력 방향 받아오기.
+	//	m_eDir = m_pAugusta->Calculate_Direction();
+	//	_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+	//	m_pAugusta->Rotate_Direction(vMoveDir);
+	//}
 
 	m_pAugusta->Set_Gravity(true);
 
@@ -85,7 +85,7 @@ void CAugustaGroundDodge::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 실행
-    Update_SprintAnimation(fTimeDelta);
+    Update_DodgeAnimation(fTimeDelta);
     
     // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
@@ -113,19 +113,20 @@ void CAugustaGroundDodge::Handle_Input()
 
 
 
-void CAugustaGroundDodge::Update_SprintAnimation(_float fTimeDelta)
+void CAugustaGroundDodge::Update_DodgeAnimation(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+    
 
-    // 1. 누른키에 따른 방향 계산
-    m_eDir = m_pAugusta->Calculate_Direction();
+	// 1. Animation 실행.
+	CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, 1.f);
 
-	// 2. Animation 실행.
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
-
-	
+	// 1. 누른키에 따른 방향 계산
+	//  m_eDir = m_pAugusta->Calculate_Direction();
+	//_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+	//m_pAugusta->Rotate_Direction(vMoveDir);
     
 }
 

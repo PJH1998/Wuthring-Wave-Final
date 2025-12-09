@@ -136,7 +136,6 @@ void CGalbrenaGroundSkill::Handle_Input()
 	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
-	m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Skill01")); // 연계 기
 }
 
 void CGalbrenaGroundSkill::Update_SkillAnimations(_float fTimeDelta)

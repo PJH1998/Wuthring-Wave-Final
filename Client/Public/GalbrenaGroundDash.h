@@ -3,7 +3,7 @@
 
 NS_BEGIN(Client)
 
-// Galbrena Sprint State - Sprint_F
+// Galbrena Dodge State - Dodge_F
 class CGalbrenaGroundDash final : public CGroundState
 {
 private:
@@ -35,7 +35,7 @@ private:
 
 private:
     virtual void Handle_Input() override;
-    void Update_SprintAnimation(_float fTimeDelta);
+    void Update_DodgeAnimation(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void Setup_Animations();
     void State_Reset();

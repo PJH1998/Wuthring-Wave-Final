@@ -124,7 +124,8 @@ void CGalbrenaGroundDodge::Update_SprintAnimation(_float fTimeDelta)
     m_eDir = m_pGalbrena->Calculate_Direction();
 
 	// 2. Animation 실행.
-    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
+    //CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
+    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, 1.f); // Dodge는 제외.
 
 	
     
