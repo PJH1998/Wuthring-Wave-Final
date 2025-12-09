@@ -25,6 +25,7 @@ private:
 	   EX_ATTACK05,
 	   EX_SKILL01,
 	   EX_SKILL02,
+	   EXIT,
        END
     };
 
@@ -64,6 +65,8 @@ private:
 private:
     virtual void Handle_Input() override;
     void Update_SkillAnimations(_float fTimeDelta);
+	
+
     void Check_Physcis(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta) ;
     void SetUp_Animations();

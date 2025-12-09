@@ -79,6 +79,7 @@ private:
 
 		// Interaction
 		EGalbrenaRopeHookType m_eRopeHookType = EGalbrenaRopeHookType::END;
+		EGalbrenaControlType m_eControlType = EGalbrenaControlType::END;
 
 		// Capture
 		EGalbrenaCaptureType m_eCaptureType = EGalbrenaCaptureType::END;
@@ -121,6 +122,8 @@ private:
 
 			// Interaction
 			m_eRopeHookType = EGalbrenaRopeHookType::END;
+			m_eControlType = EGalbrenaControlType::END;
+			
 
 			// Capture
 			m_eCaptureType = EGalbrenaCaptureType::END;
@@ -194,6 +197,9 @@ public:
 	virtual void Bind_QTE(_bool IsQTE) override;
 	virtual void Reset_QTECamera() override;
 	virtual void Bind_QTECamera() override;
+
+	virtual void Attach_ThrowTarget(_bool isAttach) override;
+	virtual void Throw_AttachTarget() override;
 #pragma region 2. NOTIFY
 	public:
 		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
@@ -252,6 +258,8 @@ private:
 	_bool IsBack(_uint iMeshIndex);
 	_bool IsEye(_uint iMeshIndex);
 
+
+	void Process_MotionTrail(const _wstring& wStrObjectTag);
 
 
 private:

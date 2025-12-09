@@ -81,6 +81,8 @@ public:
 		_float fHookRange = { 25.f };
 		_float fDragRange = { 15.f };
 		_float fReacedRopeHook = { 1.f };
+		_float fThrowRange = { 40.f };
+
 
 	}CHARACTER_DESC;
 
@@ -152,6 +154,7 @@ public:
 
 #ifdef _DEBUG
 	void Print_LookRay();
+	void Debug_ImGui();
 #endif // _DEBUG
 
 #pragma endregion
@@ -190,10 +193,11 @@ public:
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 
 	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration);
+	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio);
 
 	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
 
-	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
+	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor, _uint iShaderPath = 0);
 	
 
 	void Use_Spring(_float fDestination, _float fDuration);
@@ -219,6 +223,8 @@ public:
 
 	// Grapple Target 전달.
 	void Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo);
+
+	// Grapple Target을 이용한 사용 함수들
 	void Rotate_GrappleTarget();
 	void Move_Grapple(_float fTimeDelta, _float fSpeed);
 	void Execute_RopeDragTrigger();
@@ -227,6 +233,14 @@ public:
 	_bool Is_GrappleDrag();
 	_bool Is_ReachedGrappleHook();
 	ROPEDIR Calculate_RopeDirection();
+
+	// Thorw Target 전달.
+	void Bind_ThrowTarget(const THROW_INFO& throwInfo);
+	_bool Is_AttachThrowTarget();
+
+	virtual void Attach_ThrowTarget(_bool isAttach) {}; // ThrowTarget 객체를 손뼈에 붙입니다.
+	virtual void Throw_AttachTarget() {};
+	
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
@@ -260,7 +274,6 @@ public:
 	
 	// TargetPosition
 	void Bind_TargetPosition(_fvector vPos);
-	void Bind_Target(class CTransform* pTransform);
 
 	// Hit
 	_bool Is_Hit() { return m_IsHit; }
@@ -393,6 +406,7 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 
 	GRAPPLE_INFO m_GrappleInfo = {};
+	THROW_INFO m_ThrowInfo = {};
 
 	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
 	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };
@@ -419,6 +433,8 @@ protected:
 	_float4 m_vDissolveColor = { };
 	_float4 m_vEmissiveColor = {};
 	_float  m_fEmissiveIntensity = {};
+
+	_float4 m_vMotionTrailColor = {};
 
 	_float4x4 m_DissolveWorldMatrix = {};
 	_float4x4 m_MatrixIdentity = {}; // SocketMatrix 전달 시 아무것도 없으면 Identity 행렬 전달.
@@ -453,6 +469,7 @@ protected:
 	_float m_fHookRange = {};
 	_float m_fReachedHook = {};
 	_float m_fDragRange = {};
+	_float m_fThrowRange = {};
 
 	_float m_fStateTimeRate = { 1.f }; //
 	_float m_fOriginTimeRate = { 1.f };

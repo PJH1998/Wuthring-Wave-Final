@@ -16,6 +16,7 @@
 #include"MapObject_FireFly.h"
 #include"Slide_Navigation.h"
 #include"Potal.h"
+#include"MapObject_Turn.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -94,16 +95,7 @@
 #include "Player.h"
 #pragma endregion
 
-#pragma region SFX
-#include "SFX_Prefab.h"
-#include "SonoraChange.h"
-#include "Augusta_UltiSFX.h"
-#include "Augusta_UltiPostSFX.h"
-#include "GalbrenaUlti_SFX_Slash.h"
-#include "GalbrenaUlti_SFX_Star.h"
-#include "GalbrenaUlti_SFX_Circle.h"
-#include "GalbrenaUlti_PostSFX.h"
-#pragma endregion
+
 
 
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -138,8 +130,6 @@ HRESULT CLoader_GamePlay::Initialize()
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
 
-	Load_ScreenEffect();
-
     return S_OK;
 }
 
@@ -147,6 +137,7 @@ HRESULT CLoader_GamePlay::Load_Texture()
 {
 	cout << "Texture" << endl;
 
+#pragma region POTAL
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Mask"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Ring_011.png"), 1))))
 		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
@@ -154,6 +145,7 @@ HRESULT CLoader_GamePlay::Load_Texture()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Diffuse"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Mask_18312.png"), 1))))
 		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+#pragma endregion
 
 	return S_OK;
 }
@@ -167,7 +159,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1207_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1209_second/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -247,7 +239,10 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		CPotal::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Turn"),
+		CMapObject_Turn::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 	return S_OK;
 }
@@ -842,58 +837,6 @@ HRESULT CLoader_GamePlay::Load_Effect()
 	return S_OK;
 }
 
-HRESULT CLoader_GamePlay::Load_ScreenEffect()
-{
-#pragma region SFX_TEXTURE
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Texture_SFX_Slash"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_300156.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Slash");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Texture_SFX_Noise"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Noise_12001.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Noise");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Texture_SFX_Star"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_11000_WP20002.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Star");
-
-#pragma endregion
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"),
-		CSFX_Prefab::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Prefab");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
-		CSonoraChange::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_SonoraChange");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiSFX"),
-		CAugusta_UltiSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiSFX");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
-		CAugusta_UltiPostSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
-
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
-		CGalbrenaUlti_SFX_Slash::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
-		CGalbrenaUlti_SFX_Star::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype_SFX_Galbrena_UltiStar");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiCircle"),
-		CGalbrenaUlti_SFX_Circle::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Galbrena_UltiCircle");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiPostSFX"),
-		CGalbrenaUlti_PostSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype_SFX_Galbrena_UltiPostSFX");
-
-	return S_OK;
-}
-
 HRESULT CLoader_GamePlay::Load_MonsterTest()
 {
 	cout << "MonsterTest" << endl;
@@ -1073,6 +1016,7 @@ HRESULT CLoader_GamePlay::Load_NPC()
 {
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
 	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
 
 	vector<_string> TypeName = { "Body", "Hair", "Face" };
@@ -1123,8 +1067,6 @@ HRESULT CLoader_GamePlay::Load_NPC()
 }
 HRESULT CLoader_GamePlay::Load_Hide_And_Seek()
 {
-	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
-
 	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
 	//Prototype_Component_Model_FemaleS370437
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370437"),

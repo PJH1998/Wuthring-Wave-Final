@@ -60,6 +60,7 @@ enum class EAugustaInteractionState : _uint
 {
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
+	CONTROL, // 잡고 던지는 용도.
 	INTERACTION_END
 };
 
@@ -441,6 +442,20 @@ enum class EAugustaCaptureType : _uint
 };
 #pragma endregion
 
+
+#pragma region CONTROL
+enum class EAugustaControlType : _uint
+{
+	MANIPULATE_ABSORB_END = 0,
+	MANIPULATE_ABSORB_LOOP,
+	MANIPULATE_ABSORB_START,
+	MANIPULATE_HOLD,
+	MANIPULATE_RELEASE_F,
+	MANIPULATE_RELEASE_F_02,
+	END
+};
+
+#pragma endregion
 
 #pragma endregion
 

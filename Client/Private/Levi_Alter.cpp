@@ -2,6 +2,7 @@
 #include "Levi_Alter.h"
 #include "Levi_Bayonet.h"
 #include "Levi_Bow.h"
+#include "GameSystem.h"
 
 CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -10,7 +11,9 @@ CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CLevi_Alter::CLevi_Alter(const CLevi_Alter& Prototype)
 	: CActor { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevi_Alter::Initialize_Prototype()
@@ -37,6 +40,7 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12, 50)));
 	m_isActivate = false;
 	m_vBaseColor = _float4(0.25f, 0.2f, 0.25f, 1.f);
+	m_fRootMotionRate = 1.f;
 	return S_OK;
 }
 
@@ -65,7 +69,8 @@ void CLevi_Alter::Update(_float fTimeDelta)
 	{
 		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
 	}
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta, &fTrackPos, true, false, true, 1.f * temp);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta * fTimeRatio, &fTrackPos, true, false, true, m_fRootMotionRate * temp);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPos >= m_Tracks[m_strPatternKey].second)
 	{
@@ -177,6 +182,7 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	//m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
 	m_eType = pDesc->eType;
+	m_fRootMotionRate = 1.f;
 	if(Index == pDesc->strPatternKey.npos)
 		m_pModelCom->Set_TrackPosition(m_strAnimKey, m_Tracks[m_strAnimKey].first);
 	else
@@ -324,7 +330,7 @@ void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
-	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA));
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::CHARACTER_COLOR));
 }
 
 void CLevi_Alter::Ready_PartObject(ALTER_DESC* pDesc)
@@ -420,4 +426,6 @@ CGameObject* CLevi_Alter::Clone(void* pArg)
 void CLevi_Alter::Free()
 {
 	__super::Free();
+
+	Safe_Release(m_pGameSystem);
 }

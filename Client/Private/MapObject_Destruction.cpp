@@ -27,6 +27,7 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	if (FAILED(Ready_Component(pArg)))
 		return E_FAIL;
@@ -44,13 +45,13 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 	m_vImpulsePower = pDesc->m_vImpulsePower;
 
 
-	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		if (!m_IsDestroy)
 			Spawn_Particles();
 		});
 	m_IsDestroy = false;
+
 	return S_OK;
 }
 
@@ -60,6 +61,8 @@ void CMapObject_Destruction::Priority_Update(_float fTimeDelta)
 
 void CMapObject_Destruction::Update(_float fTimeDelta)
 {
+	if (m_pBoxRigidbodyCom)
+		m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CMapObject_Destruction::Late_Update(_float fTimeDelta)
@@ -181,6 +184,10 @@ void CMapObject_Destruction::Render()
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
+#ifdef _DEBUG
+		if (m_pBoxRigidbodyCom)
+			m_pBoxRigidbodyCom->Render();
+#endif // _DEBUG
 }
 
 
@@ -232,6 +239,30 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
 	_string ModelName = pDesc->ModelName;
+
+	if (m_iTriggerIndex == 37)
+	{
+		_float3 vPointPos;
+		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+		vPointPos.y += 1.5f;
+		m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
+		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
+		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
+		RigidbodyBoxDesc.eShape = SHAPE::BOX;
+		RigidbodyBoxDesc.eType = EMotionType::Kinematic;
+		RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+		RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
+		XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+
+		m_CallBack.pTransform = m_pTransformCom;
+		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+		m_CallBack.pCondition = &m_iTriggerIndex;
+		m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+	}
 
 	for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
 	{
@@ -348,5 +379,6 @@ void CMapObject_Destruction::Free()
 	Safe_Delete(m_pBoundingBox);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pBoxRigidbodyCom);
 	
 }

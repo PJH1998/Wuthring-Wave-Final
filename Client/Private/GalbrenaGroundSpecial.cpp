@@ -42,8 +42,6 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 	m_ActivePartTypes.clear(); // 파츠 목록 초기화
     // 5. 애니메이션 타입에 맞는 파츠 설정. => 0, 1 SWORD / 2, 3 DARKSCYTHE
 
-	m_pGalbrena->Rotate_Target();
-
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName; // 진입할때 한번 현재 스킬이름 저장.
 
@@ -51,9 +49,11 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 	{ 
 	case EGalbrenaSpecialType::ATTACK05:
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
+		m_pGalbrena->Rotate_Target();
 		break;
 	case EGalbrenaSpecialType::ATTACK06:
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
+		m_pGalbrena->Rotate_Target();
 		break;
 	case EGalbrenaSpecialType::ATTACK07:
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_FIRSTGUN);
@@ -61,7 +61,6 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		m_pGalbrena->Set_Gravity(false);
 		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), true);
-
 		m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 		break;
 	case EGalbrenaSpecialType::ATTACK08:
@@ -125,18 +124,30 @@ void CGalbrenaGroundSpecial::Handle_Input()
 	EGalbrenaSpecialType eSpecialType = static_cast<EGalbrenaSpecialType>(m_iCurrentAnimIdx);
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
     m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB))
-		&& (eSpecialType == EGalbrenaSpecialType::ATTACK05 || eSpecialType == EGalbrenaSpecialType::ATTACK06);
+		&& (eSpecialType == EGalbrenaSpecialType::ATTACK05 || 
+			eSpecialType == EGalbrenaSpecialType::ATTACK06);
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	m_States[EXIT] = m_pGalbrena->Get_Cost(COST_TYPE::COST1) <= 0.f;
 }
 
 void CGalbrenaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 {
+	EGalbrenaSpecialType eSpType = static_cast<EGalbrenaSpecialType>(m_iCurrentAnimIdx);
+
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pGalbrena->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 	
+	if (eSpType == EGalbrenaSpecialType::ATTACK07 || 
+		eSpType == EGalbrenaSpecialType::ATTACK08)
+		m_fAnimationScale = 1.f;
+
 	// 1. 애니메이션 실행
     CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta, m_fAnimationScale);
+    
+
+	
 
     // 2. 파츠 실행.
 	for (auto& iPartType : m_ActivePartTypes)
@@ -185,7 +196,7 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 	if (IsEscapePossible)
 	{
 		// 가장 우선순위 높은 상황.
-		if (m_States[ATTACK])
+		if (m_States[ATTACK] && !m_States[EXIT]) // Cost가 0보다 높은 경우에만 연계가 이어지게.3ㅈ$ㄸ
 		{
 			switch (eSpType)
 			{
@@ -242,7 +253,7 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 	{
 		if (m_States[LAND])
 		{
-			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
 			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			return;
 		}
@@ -258,12 +269,12 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundSpecial::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK05), "Attack05", 1.f, 12.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK06), "Attack06", 1.f, 19.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK07), "Attack07", 1.f, 50.f); // 25.f ~ 50.f 에 콤보 이펙트.
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK08), "Attack08", 1.2f, 20.f); // 
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK11), "Attack11", 1.2f, 50.f); //발차기.
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK_H_01), "Attack_H_01", 1.2f, 50.f); //발차기.
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK05), "Attack05", 1.5f, 12.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK06), "Attack06", 1.5f, 19.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK07), "Attack07", 1.5f, 50.f); // 25.f ~ 50.f 에 콤보 이펙트.
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK08), "Attack08", 1.5f, 20.f); // 
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK11), "Attack11", 1.5f, 50.f); //발차기.
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK_H_01), "Attack_H_01", 1.5f, 50.f); //발차기.
 
 
 	m_PartsAnimations.emplace("Attack05", "Gun01");

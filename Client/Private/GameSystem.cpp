@@ -86,6 +86,7 @@ void CGameSystem::Clear_Resource()
 	m_pSonoro_Manager->Clear_Resource();
 	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
+	Safe_Release(m_pPotal);
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
@@ -370,15 +371,23 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vTailColor);
 }
 
-HRESULT CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType)
+void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType)
 {
 	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType);
 }
 
-CUI_GrapplePoint* CGameSystem::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance)
+CUI_GrapplePoint* CGameSystem::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive)
 {
-	return m_pUI_GrappleController->Find_NearGrapplePoint(vBasePos, eType, pOutDistance);
+	return m_pUI_GrappleController->Find_NearGrapplePoint(vBasePos, eType, pOutDistance, isIncludeInactive);
 }
+
+void CGameSystem::Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive)
+{
+	m_pUI_GrappleController->Toggle_GrapplePoint(pTargetUIPtr, isActive);
+}
+
+
+
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{

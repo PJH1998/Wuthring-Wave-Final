@@ -37,7 +37,7 @@ CLevel_Heaven::CLevel_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Heaven::Initialize()
 {
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+	m_pGameInstance->SetUp_OctoTree(_float3(-830.1f, 506.82f, -216.83f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
 	m_pGameInstance->Setting_LUT(0, 0.25f, false);
@@ -50,8 +50,8 @@ HRESULT CLevel_Heaven::Initialize()
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
 	ShadowMapDesc.vCenterPos = _float3(-910.f, 0.f, -1870.f);
-	ShadowMapDesc.vExtents = _float3(200.f, 750.f, 160.f);
-	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+	ShadowMapDesc.vExtents = _float3(200.f, 700.f, 160.f);
+	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, -0.5f);
 
 	// Left Bottom : -910 / -1870
 	// Right Bottom : 600 / -2100
@@ -75,7 +75,7 @@ HRESULT CLevel_Heaven::Initialize()
 //	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
 //LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
-	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, -0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
@@ -98,9 +98,11 @@ HRESULT CLevel_Heaven::Initialize()
 	Ready_Skybox();
 	//Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
+	m_pGameInstance->Set_FogDistanceFallOff(0.01f);
 	m_pGameInstance->Set_FogMaxHeight(300.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+	m_pGameInstance->Set_FogScatterWeight(0.3f);
+
 
 	m_pGameInstance->Begin_VF();
 
@@ -133,7 +135,8 @@ void CLevel_Heaven::Ready_Layer_Player()
 	vRotation = { 0.f, 0.f, 0.f };
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
-	vPosition = { 0.f, 2.f, -40.f };
+	//vPosition = { 0.f, 2.f, -40.f };
+	vPosition = { -9.f, 0.f, -680.f };
 	
 	CPlayer::PLAYER_DESC Desc{};
 	Desc.eCurLevel = m_eCurLevel;

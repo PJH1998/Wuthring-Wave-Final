@@ -3,7 +3,7 @@
 
 NS_BEGIN(Client)
 
-// Rover Dodge State - Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R 처리
+// Rover Dodge State - Dodge_F, Super_Dodge_*, SpWalk_*, Stop_Dodge_L/R 처리
 class CRoverGroundDodge final : public CGroundState
 {
 private:
@@ -36,7 +36,7 @@ private:
 
 private:
     virtual void Handle_Input() override;
-    void Update_SprintAnimation(_float fTimeDelta);
+    void Update_DodgeAnimation(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void Setup_Animations();
     void State_Reset();

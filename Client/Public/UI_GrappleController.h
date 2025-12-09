@@ -15,14 +15,14 @@ public:
 	HRESULT				Initialize();
 
 public:
-	HRESULT				Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType);
-	CUI_GrapplePoint*	Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance);
+	void*				Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn = false);
 
-	//void				SendState_GrapplePoint(CUI_GrapplePoint* pUIPoint);			// send interact, destroy, etc..
-	//void				SendState_GrapplePoint(CUI_GrapplePoint* pUIPoint);			// send interact, destroy, etc..
-	
-	// SendStatus..?
-	//void				Remove_GrapplePoint();
+	CUI_GrapplePoint*	Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive);
+
+	void				Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive); 
+
+
+private:
 
 private:
 	vector<CUI_GrapplePoint*>	m_vecGrapplePoints = {};

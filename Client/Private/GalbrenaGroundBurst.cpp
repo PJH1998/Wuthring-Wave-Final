@@ -183,7 +183,7 @@ void CGalbrenaGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundBurst::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL01), "Skill01", 1.5f, 100.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL01), "Skill01", 1.5f, 70.f);
 }
 
 void CGalbrenaGroundBurst::State_Reset()

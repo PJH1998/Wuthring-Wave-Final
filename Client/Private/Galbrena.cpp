@@ -252,6 +252,9 @@ void CGalbrena::Render()
 
 	m_pMainAttackVolume->Render();
 	Print_LookRay();
+	//Debug_ImGui();
+
+
 #endif // _DEBUG
 
 }
@@ -506,7 +509,7 @@ void CGalbrena::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(EGalbrenaGroundState::ATTACK);
 
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
@@ -576,6 +579,38 @@ void CGalbrena::Bind_QTECamera()
 {
 	m_fCameraOriginOffset = m_fCameraOffset;
 	m_fCameraOffset = 5.f; // 늘립니다.
+}
+
+void CGalbrena::Attach_ThrowTarget(_bool isAttach)
+{
+	if (!m_ThrowInfo.IsActive) // 객체가 활성화 되어있지 않은 객체라면?
+		return;
+
+	if (isAttach)
+	{
+		const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+		const _float4x4* pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+
+		*m_ThrowInfo.ppRefBoneMatrix = pBoneMatrix;
+		*m_ThrowInfo.ppRefWorldMatrix = pWorldMatrix;
+		*m_ThrowInfo.pGrabbed = true;
+		*m_ThrowInfo.pThrow = false;
+	}
+	else
+	{
+		*m_ThrowInfo.pGrabbed = false;
+		*m_ThrowInfo.pThrow = false;
+	}
+	
+}
+
+void CGalbrena::Throw_AttachTarget()
+{
+	if (!m_ThrowInfo.IsActive)
+		return;
+
+	*m_ThrowInfo.pGrabbed = false;
+	*m_ThrowInfo.pThrow = true;
 }
 
 
@@ -720,6 +755,11 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 		m_fStateDelayTimer = stof(var3);
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
+	else if (var1 == TEXT("Throw"))
+		Throw_AttachTarget(); // 던지기.
+	else if (var1 == TEXT("MotionTrail"))
+		Process_MotionTrail(wStrObjectTag);
+
 
 	// GalbrenaWing|Bone
 
@@ -1004,8 +1044,8 @@ void CGalbrena::Render_Back(_uint iMeshIndex)
 	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
 
-	_float4 vEmissiveColor = { 0.5f, 0.2f, 0.3f, 1.f};
-	_float fEmissiveIntensity = { 0.25f };
+	_float4 vEmissiveColor = { 0.235f, 0.1f, 0.31f, 1.f};
+	_float fEmissiveIntensity = { 0.45f };
 
 	// 1. MaskTexture 배열 바인딩.
 	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK); // MaskTexture 배열을 바인딩.
@@ -1073,6 +1113,27 @@ _bool CGalbrena::IsEye(_uint iMeshIndex)
 		return true;
 
 	return false;
+}
+
+void CGalbrena::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
+
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
+
 }
 
 void CGalbrena::Bind_Resources()
@@ -1173,6 +1234,8 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	m_vMotionTrailColor = { 0.235f, 0.1f, 0.31f, 1.f }; // 기본
 
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);

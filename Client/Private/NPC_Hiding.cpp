@@ -29,7 +29,7 @@ HRESULT CNPC_Hiding::Initialize_Clone(void* pArg)
 	m_pTransformCom->Rotation_Quaternion(pDesc->vInitRot);
 	m_pTransformCom->Save_PreviousPosition();
 	Ready_Component(pDesc);
-
+	Register_AllNotifies(pDesc->strFolderPath);
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
 	m_iFaceIndex = 4;
 	m_isFind = false;
@@ -213,7 +213,10 @@ void CNPC_Hiding::Reset(const _fmatrix& WorldMatrix, void* pArg)
 void CNPC_Hiding::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
 	if (wStrColliderTag == TEXT("Active"))
+	{
 		m_pColliderCom->IsActivate(IsActive);
+		m_pColliderCom->Set_Offset(_float3(0.f, 0.55f, 0.f));
+	}
 }
 
 void CNPC_Hiding::Effect_Active(const _wstring& wStrEffectTag)
@@ -238,6 +241,7 @@ HRESULT CNPC_Hiding::Bind_Resources()
 
 void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 {
+	_string strAnimTag = pDesc->pAnimationTag;
 	// Com_Rigidbody
 	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
@@ -267,7 +271,10 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.55f, 0.f);
+	if(strAnimTag == "Common_NewSit_01_Loop")
+		ColliderDesc.vOffset = _float3(0.f, 0.55f, -0.85f);
+	else
+		ColliderDesc.vOffset = _float3(0.f, 0.55f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NPC);
 	ColliderDesc.fHeight = 0.5f;
@@ -300,7 +307,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	//m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
-	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
+	AnimMachineDesc.pAnimationTag = strAnimTag;
 	//Com_AnimMachine
 	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->pAnimMachineTag,
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))

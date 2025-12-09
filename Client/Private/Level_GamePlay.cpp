@@ -101,9 +101,10 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Skybox();
 	Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.02f);
+	m_pGameInstance->Set_FogDistanceFallOff(0.1f);
 	m_pGameInstance->Set_FogMaxHeight(230.f);
 	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+	m_pGameInstance->Set_FogScatterWeight(0.5f);
 
 	m_pGameInstance->Begin_VF();
 
@@ -112,7 +113,6 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameSystem->Create_MapEffects();
 
 	//TEST
-
 
 	return S_OK;
 }
@@ -301,6 +301,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
+#ifdef _DEBUG
+	MobDesc.fHP = 150.f;
+#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
@@ -543,22 +546,7 @@ void CLevel_GamePlay::Ready_UI()
 
 void CLevel_GamePlay::Ready_SFX()
 {
-	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::GAMEPLAY));
 
-#pragma region SFX
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
-		CRASH("Failed Add Pool SONORA_CHANGE");
-
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
-	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
-	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
-
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
-	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiStar"), 1)))
-	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
-
-#pragma endregion
 }
 
 void CLevel_GamePlay::Ready_NPC()
@@ -633,6 +621,7 @@ void CLevel_GamePlay::Ready_NPC()
 	Hiding.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Hiding.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");
 	Hiding.fRotationPerSec = XMConvertToRadians(90.f);
+	Hiding.strFolderPath = "../Bin/Resource/Model/NPC/FemaleS/Notify";
 	Hiding.fSpeedPerSec = 1.f;
 
 	for (size_t i = 0; i < HidingData.size(); ++i)
@@ -667,7 +656,7 @@ void CLevel_GamePlay::Ready_Potal()
 	CPotal::POTAL_DESC PotalDesc{};
 	PotalDesc.iLevel = ENUM_CLASS(m_eCurLevel);
 	PotalDesc.vExtent;
-	PotalDesc.vPos = _float4(3497.f, 147.84f, 3267.5f, 1.f);
+	PotalDesc.vPos = _float4(3497.f, 148.84f, 3267.5f, 1.f);
 
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Potal"), &PotalDesc);

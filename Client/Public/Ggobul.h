@@ -12,6 +12,7 @@ NS_END
 NS_BEGIN(Client)
 
 class CAttackVolume;
+class CGameSystem;
 
 class CGgobul final : public CActor
 {
@@ -56,6 +57,7 @@ public:
 private:
 	CAttackVolume*			m_pAttackVolumes[GGOBULTYPE::END] = {nullptr,};
 	CAnimMachine*			m_pAnimMachineCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 
 	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
 	const _float4x4*		m_pAttackTransform = { nullptr };

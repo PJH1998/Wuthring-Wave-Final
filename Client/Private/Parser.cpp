@@ -624,6 +624,14 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Burn")
 							, ENUM_CLASS(eLevel), TEXT("Layer_Burn"), &pDesc);
 						break;
+					case OBJECTTYPE::DOME:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Dome")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Dome"), &pDesc);
+						break;
+					case OBJECTTYPE::TURN:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Turn")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Turn"), &pDesc);
+						break;
 					default:
 						if (ModelName.find("_Wat_") != string::npos)
 							m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Water")
@@ -1759,7 +1767,7 @@ void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIn
 				_wstring strSfxTag = StringToWString(Data["Tag"]);
 				SFX_Data.strSfxTag = strPooling + strSfxTag;
 
-				m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
+				m_pGameInstance->Add_PoolingObject_ForStatic(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
 					SFX_Data.strSfxTag, 1, nullptr);
 
 				Children.push_back(SFX_Data);
@@ -1775,7 +1783,7 @@ void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIn
 
 			_wstring PoolingTag = StringToWString(PrefabJson["Tag"]);
 
-			m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
+			m_pGameInstance->Add_PoolingObject_ForStatic(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
 				PoolingTag, 1, &PrefabDesc);
 
 			InputFile.close();

@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "FS_Scythe.h"
 #include "AttackVolume.h"
+#include "GameSystem.h"
 
 CFS_Scythe::CFS_Scythe(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -9,7 +10,9 @@ CFS_Scythe::CFS_Scythe(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CFS_Scythe::CFS_Scythe(const CFS_Scythe& Prototype)
 	:CActor { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CFS_Scythe::Initialize_Prototype()
@@ -45,7 +48,8 @@ void CFS_Scythe::Priority_Update(_float fTimeDelta)
 void CFS_Scythe::Update(_float fTimeDelta)
 {
 	_bool isAnimFinished{};
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta * fTimeRatio);
 	if(!m_iState && isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
@@ -332,5 +336,5 @@ void CFS_Scythe::Free()
 	{
 		Safe_Release(m_pAttackVolumes[i]);
 	}
-
+	Safe_Release(m_pGameSystem);
 }

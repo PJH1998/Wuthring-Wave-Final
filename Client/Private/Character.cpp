@@ -43,7 +43,10 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	m_fDragRange = pDesc->fDragRange;
 	m_fReachedHook = pDesc->fReacedRopeHook;
 
-	// 2. 그랩 용도 Matrix
+	// 2. 잡기 가능한 거리 초기화 (모든 캐릭 공통)
+	m_fThrowRange = pDesc->fThrowRange; 
+
+	// 3. 그랩 용도 Matrix
 	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
 
 	
@@ -308,6 +311,20 @@ void CCharacter::Print_LookRay()
 	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
 }
 
+void CCharacter::Debug_ImGui()
+{
+	ImGui::Begin("Begin Character");
+
+	static float vColor[3] = { 0.f, 0.f, 0.f};
+	ImGui::SliderFloat3("Motion Trail Color", vColor, 0.f, 1.f);
+
+	m_vMotionTrailColor.x = vColor[0];
+	m_vMotionTrailColor.y = vColor[1];
+	m_vMotionTrailColor.z = vColor[2];
+
+	ImGui::End();
+}
+
 #endif // _DEBUG
 
 #pragma region STATE
@@ -418,7 +435,16 @@ void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float
 	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio, fDuration);
 }
 
-void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
+void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	//m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio);
+}
+
+void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor, _uint iShaderPath)
 {
 	CMotionTrail::MOTION_TRAIL_DESC Desc = {};
 	Desc.pModel = m_pModelCom;
@@ -427,8 +453,8 @@ void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fM
 	Desc.fMotionLifeTime = fMotionLifeTime;
 	Desc.fInterval = fInterval;
 	Desc.fDuration = fDuration;
-	Desc.iShaderPassIndex = 0; 
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_MotionTrail"), XMMatrixIdentity(), &Desc);
+	Desc.iShaderPassIndex = iShaderPath; 
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
 }
 
 
@@ -491,7 +517,9 @@ UI_TAB_UTILITY CCharacter::Get_UtilityType()
 _bool CCharacter::Is_GrappleHook()
 {
 	// 1. 예외 조건 처리.
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) || 
+		(OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
@@ -509,7 +537,9 @@ _bool CCharacter::Is_GrappleHook()
 _bool CCharacter::Is_GrappleDrag()
 {
 	// 1. 예외 조건 처리. 
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) ||
+		(OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	// 2. 카메라 Frustum 안에 있는가?
@@ -525,7 +555,9 @@ _bool CCharacter::Is_GrappleDrag()
 // Zip 로프액션 이후에 겹쳐지는 경우를 판단.
 _bool CCharacter::Is_ReachedGrappleHook()
 {
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) || 
+		(OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
@@ -613,6 +645,31 @@ ROPEDIR CCharacter::Calculate_RopeDirection()
 
 	return ROPEDIR::END;
 }
+
+void CCharacter::Bind_ThrowTarget(const THROW_INFO& throwInfo)
+{
+	m_ThrowInfo = throwInfo;
+}
+
+_bool CCharacter::Is_AttachThrowTarget()
+{
+	// 1. 예외 조건 처리. 
+	if ((nullptr == m_ThrowInfo.pTransform) || 
+		(!m_ThrowInfo.IsActive))
+		return false;
+
+	// 2. 카메라 Frustum 안에 있는가?
+	_vector vTargetPos = m_ThrowInfo.pTransform->Get_State(STATE::POSITION);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_bool IsFrustum = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+	// 3. 거리가 지정한 거리 이내인가?
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vPos));
+
+	return IsFrustum && fDistance <= m_fThrowRange;
+}
+
+
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {

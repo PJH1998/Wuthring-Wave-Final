@@ -14,6 +14,8 @@
 #include"MapObject_Water.h"
 #include"MapObject_Throw.h"
 #include"MapObject_Burn.h"
+#include"MapObject_Dome.h"
+
 #pragma endregion
 
 #pragma region MONSTER
@@ -148,8 +150,6 @@ HRESULT CLoader_Heaven::Initialize()
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
 
-	Load_ScreenEffect();
-
     return S_OK;
 }
 
@@ -163,7 +163,7 @@ HRESULT CLoader_Heaven::Load_Texture()
 HRESULT CLoader_Heaven::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1208_second/", m_eCurLevel, "Heaven");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1209_second/", m_eCurLevel, "Heaven");
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -231,6 +231,9 @@ HRESULT CLoader_Heaven::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Burn"),
 		CMapObject_Burn::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Dome"),
+		CMapObject_Dome::Create(m_pDevice, m_pContext));
 
 #pragma endregion
 
@@ -989,58 +992,6 @@ HRESULT CLoader_Heaven::Load_Effect()
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Sequence", m_eCurLevel);
-
-	return S_OK;
-}
-
-HRESULT CLoader_Heaven::Load_ScreenEffect()
-{
-#pragma region SFX_TEXTURE
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Texture_SFX_Slash"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_300156.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Slash");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Texture_SFX_Noise"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Noise_12001.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Noise");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Texture_SFX_Star"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_11000_WP20002.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Star");
-
-#pragma endregion
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Prefab"),
-		CSFX_Prefab::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Prefab");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_SonoraChange"),
-		CSonoraChange::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_SonoraChange");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Augusta_UltiSFX"),
-		CAugusta_UltiSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiSFX");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
-		CAugusta_UltiPostSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
-
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
-		CGalbrenaUlti_SFX_Slash::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiStar"),
-		CGalbrenaUlti_SFX_Star::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype_SFX_Galbrena_UltiStar");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiCircle"),
-		CGalbrenaUlti_SFX_Circle::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Galbrena_UltiCircle");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiPostSFX"),
-		CGalbrenaUlti_PostSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype_SFX_Galbrena_UltiPostSFX");
 
 	return S_OK;
 }
