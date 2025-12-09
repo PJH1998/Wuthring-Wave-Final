@@ -1039,8 +1039,29 @@ void CGalbrena::Render_Back(_uint iMeshIndex)
 	_bool IsCutScene = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_iGalbrenaMaskIndex = IsCutScene ? 2 : 1;
 
-	_float4 vEmissiveColor = { 0.5f, 0.2f, 0.3f, 1.f};
-	_float fEmissiveIntensity = { 0.25f };
+//	_float4 vEmissiveColor = { 0.5f, 0.2f, 0.3f, 1.f };
+//	_float fEmissiveIntensity = { 0.25f };
+//
+//#ifdef _DEBUG
+//	ImGui::Begin("Begin Galbrena Back Emissive");
+//	static float vEmissiveColorArray[3] = { 0.5f, 0.2f, 0.3f};
+//	static float fEmissiveIntensityVal = { 0.25f };
+//
+//	ImGui::SliderFloat3("Galbrena Back", vEmissiveColorArray, 0.f, 1.f);
+//	ImGui::SliderFloat("Galbrena Back Intensity", &fEmissiveIntensityVal, 0.f, 1.f);
+//
+//	
+//	ImGui::End();
+//
+//	vEmissiveColor = { vEmissiveColorArray[0], vEmissiveColorArray[1], vEmissiveColorArray[2], 1.f };
+//	fEmissiveIntensity = fEmissiveIntensityVal;
+//#endif // _DEBUG
+
+
+
+
+	_float4 vEmissiveColor = { 0.235f, 0.1f, 0.31f, 1.f};
+	_float fEmissiveIntensity = { 0.45f };
 
 	// 1. MaskTexture 배열 바인딩.
 	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK); // MaskTexture 배열을 바인딩.

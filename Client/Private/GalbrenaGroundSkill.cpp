@@ -68,6 +68,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"));
 			//m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			m_pGalbrena->Set_OutLineVisible(false);
+			m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
 			break;
 		}
     }
@@ -126,6 +127,8 @@ void CGalbrenaGroundSkill::OnExit()
 	m_pGalbrena->Collider_Active(TEXT("Galbrena|DEFAULT_E|SKILL"), false);
 
 	m_pGalbrena->Set_OutLineVisible(true);
+	m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f);
+
 }
 
 void CGalbrenaGroundSkill::Handle_Input()
