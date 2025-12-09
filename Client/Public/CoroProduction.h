@@ -55,7 +55,7 @@ private:
 	_bool										m_IsRootMotion = { false };
 	_bool										m_IsRootMotionRotate = { false };
 	_bool										m_IsRootMotionTranslate = { false };
-
+	_bool										m_isActionEnd[3] = {};
 
 private:
 	void Bind_Resources();

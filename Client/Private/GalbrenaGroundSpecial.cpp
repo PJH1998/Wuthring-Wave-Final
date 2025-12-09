@@ -127,6 +127,8 @@ void CGalbrenaGroundSpecial::Handle_Input()
     m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB))
 		&& (eSpecialType == EGalbrenaSpecialType::ATTACK05 || eSpecialType == EGalbrenaSpecialType::ATTACK06);
     m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	m_States[EXIT] = m_pGalbrena->Get_Cost(COST_TYPE::COST1) <= 0.f;
 }
 
 void CGalbrenaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
@@ -185,7 +187,7 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 	if (IsEscapePossible)
 	{
 		// 가장 우선순위 높은 상황.
-		if (m_States[ATTACK])
+		if (m_States[ATTACK] && !m_States[EXIT]) // Cost가 0보다 높은 경우에만 연계가 이어지게.3ㅈ$ㄸ
 		{
 			switch (eSpType)
 			{
@@ -242,7 +244,7 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 	{
 		if (m_States[LAND])
 		{
-			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
+			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
 			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 			return;
 		}

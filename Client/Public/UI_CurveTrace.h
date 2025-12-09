@@ -14,6 +14,9 @@ public:
 		_float3 vStartPos;       // 시작 위치
 		_float3 vStartVel;       // 초기 속도
 		_float3 vAcceleration;        // 중력 가속도
+
+		_float3* pCustomSpherePos = nullptr;
+
 		_float  fMaxTime;        // 궤적을 그릴 최대 시간 (0~fMaxTime)
 		_uint   iSegmentCount;   // 세그먼트 개수 (기준점 = seg+1)
 		_float  fWidth;          // 리본 두께 (월드 단위)
@@ -41,7 +44,17 @@ public:
 
 public:
 //	void			Req_Disable() { m_isActivate = false; };
-	void			Req_Render_CurveTrace(_float3& vStartPos, _float3& vStartVelocity, _float3& vAcceleration);
+	void			Req_Render_CurveTrace(_float3& vStartPos,
+										  _float3& vStartVelocity,
+										  _float3& vAcceleration,
+										  _float3* pCustomSpherePos,
+										  _float fMaxTime,
+										  _uint iSegmentCount,
+										  _float fRibbonWidth,
+										  _bool isUseCustomColor,
+										  _float4 vBaseColor,
+										  _float4 vHeadColor,
+										  _float4 vTailColor);
 
 private:
 	HRESULT			Ready_Components(void* pArg);

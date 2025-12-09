@@ -5,6 +5,9 @@
 #include "Animator_UI.h"
 #include "GameSystem.h"
 
+#include "Event_Level.h"
+#include "Event_Leviatan.h"
+
 #define KSTA_UITEST_TEMPTRIGGER
 
 CUI_QTE::CUI_QTE(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -30,7 +33,9 @@ HRESULT CUI_QTE::Initialize_Clone(void* pArg)
 	CGameObject::Initialize_Clone(pArg);
 	
 	Ready_Components(pArg);
-	__super::Ready_Events();
+	//__super::Ready_Events();
+
+	Ready_Events();
 	
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath =
@@ -214,7 +219,6 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
 	}break;
 	}
-	
 
 
 
@@ -387,7 +391,7 @@ void CUI_QTE::Update_QTE_Fillguage(_float fTimeDelta)
 		
 	}
 		
-	std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
+	//std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
 
 	if (!m_isGoinSuccess &&
 		m_fQTEElapsedTime >= m_fQTEMaxTime)
@@ -448,11 +452,23 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 
 	if		(m_isGoinSuccess)
 	{
-		std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+		if (m_eQTEType == UI_QTE_TYPE::FILLGUAGE)
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
+		else if (m_eQTEType == UI_QTE_TYPE::TRIGGER_EXECUTE)
+		{
+			LEVI_EXECUTE Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+		}
+		
+		//m_isGoinSuccess = false;
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 	}
 	else if (m_isGoinFail)
 	{
-		std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
+		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
+
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTEFail", QTE_FAIL_UI_EVENT(m_isGoinFail));
 	}
 
 	m_IsGoinDisabled = true;
@@ -493,6 +509,11 @@ void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
 	m_fDisableTimer += fTimeDelta;
 }
 
+
+void CUI_QTE::Ready_Events()
+{
+
+}
 
 CUI_QTE* CUI_QTE::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

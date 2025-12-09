@@ -43,7 +43,10 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	m_fDragRange = pDesc->fDragRange;
 	m_fReachedHook = pDesc->fReacedRopeHook;
 
-	// 2. 그랩 용도 Matrix
+	// 2. 잡기 가능한 거리 초기화 (모든 캐릭 공통)
+	m_fThrowRange = pDesc->fThrowRange; 
+
+	// 3. 그랩 용도 Matrix
 	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
 
 	
@@ -418,6 +421,15 @@ void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float
 	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio, fDuration);
 }
 
+void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	//m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio);
+}
+
 void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
 {
 	CMotionTrail::MOTION_TRAIL_DESC Desc = {};
@@ -439,6 +451,22 @@ void CCharacter::Use_Spring(_float fDestination, _float fDuration)
 		return;
 
 	m_pSpringCamera->Use_Spring(fDestination, fDuration);
+}
+
+void CCharacter::Stop_Anim()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.f);
+}
+
+void CCharacter::Start_Anim()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
 }
 
 
@@ -597,6 +625,31 @@ ROPEDIR CCharacter::Calculate_RopeDirection()
 
 	return ROPEDIR::END;
 }
+
+void CCharacter::Bind_ThrowTarget(const THROW_INFO& throwInfo)
+{
+	m_ThrowInfo = throwInfo;
+}
+
+_bool CCharacter::Is_AttachThrowTarget()
+{
+	// 1. 예외 조건 처리. 
+	if ((nullptr == m_ThrowInfo.pTransform) || 
+		(!m_ThrowInfo.IsActive))
+		return false;
+
+	// 2. 카메라 Frustum 안에 있는가?
+	_vector vTargetPos = m_ThrowInfo.pTransform->Get_State(STATE::POSITION);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_bool IsFrustum = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+	// 3. 거리가 지정한 거리 이내인가?
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vPos));
+
+	return IsFrustum && fDistance <= m_fThrowRange;
+}
+
+
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
@@ -763,7 +816,6 @@ void CCharacter::Bind_TargetPosition(_fvector vPos)
 {
 	XMStoreFloat4(&m_vTargetPosition, vPos); // 타겟 지점.
 }
-
 
 void CCharacter::ActiveCaptureState()
 {
@@ -1045,6 +1097,19 @@ void CCharacter::Rotate_Target()
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
+}
+
+void CCharacter::Rotate_Target(CTransform* pTransform)
+{
+	if (nullptr == pTransform)
+		return;
+
+	_vector vTarget = pTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 }
 
 void CCharacter::Rotate_TargetPosition()

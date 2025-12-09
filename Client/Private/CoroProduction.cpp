@@ -46,6 +46,8 @@ HRESULT CCoroProduction::Initialize_Clone(void* pArg)
 	m_pGameSystem->TriggerRegister(30, [this](void* pArg) {
 		Action1();
 		});
+	_float temp{};
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "PatrolToFight", 0.f, &temp);
     return S_OK;
 }
 
@@ -219,6 +221,8 @@ HRESULT CCoroProduction::Ready_Components(const COROPROD_DESC* pDesc)
 
 void CCoroProduction::Action1()
 {
+	if (m_isActionEnd[0])
+		return;
 	m_strCurrentAnimation = "PatrolToFight";
 	m_isActivate = true;
 	_vector vScale = XMVectorSet(1.5f, 1.5f, 1.5f, 0.f);
@@ -228,10 +232,16 @@ void CCoroProduction::Action1()
 	//m_pTransformCom->Rotation_Quaternion(vQuat);
 	m_pTransformCom->Set_WorldMatrix(XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vPos));
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
+
+#ifndef _DEBUG
+	m_isActionEnd[0] = true;
+#endif // !_DEBUG
 }
 
 void CCoroProduction::Action2()
 {
+	if (m_isActionEnd[1])
+		return;
 	m_strCurrentAnimation = "Attack4";
 	m_isActivate = true;
 	_vector vScale = XMVectorSet(1.3f, 1.3f, 1.3f, 0.f);
@@ -243,10 +253,16 @@ void CCoroProduction::Action2()
 	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = true;
+
+#ifndef _DEBUG
+	m_isActionEnd[1] = true;
+#endif // !_DEBUG
 }
 
 void CCoroProduction::Action3()
 {
+	if (m_isActionEnd[2])
+		return;
 	m_strCurrentAnimation = "Attack12";
 	m_isActivate = true;
 	_vector vScale = XMVectorSet(2.f, 2.f, 2.f, 0.f);
@@ -258,6 +274,11 @@ void CCoroProduction::Action3()
 	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = false;
+
+#ifndef _DEBUG
+	m_isActionEnd[2] = true;
+#endif // !_DEBUG
+
 }
 
 CGameObject* CCoroProduction::Clone(void* pArg)

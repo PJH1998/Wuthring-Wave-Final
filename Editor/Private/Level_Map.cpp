@@ -58,7 +58,7 @@ HRESULT CLevel_Map::Initialize()
 	m_pEffectCollector = CEdit_MapEffectCollector::Create();
 	m_SaveObjects["Map_Effect"].push_back(nullptr);
 
-	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_Potal"), m_iLevel, TEXT("Potal"));
+	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_Potal"), m_iLevel, TEXT("Potal"));
 	
 	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
@@ -477,7 +477,7 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water","Collaps" ,"Throw" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","NonSonoro_Floor","Meteo","Water","Collaps" ,"Throw" ,"Burn","Dome","Turn"};
 
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {
@@ -1074,13 +1074,13 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
 

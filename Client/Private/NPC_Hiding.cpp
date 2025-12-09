@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "NPC_Hiding.h"
+#include "GameSystem.h"
 
 CNPC_Hiding::CNPC_Hiding(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -8,7 +9,9 @@ CNPC_Hiding::CNPC_Hiding(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CNPC_Hiding::CNPC_Hiding(const CNPC_Hiding& Prototype)
 	: CActor { Prototype }
+	, m_pGameSystem {CGameSystem::GetInstance()}
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CNPC_Hiding::Initialize_Prototype()
@@ -24,13 +27,14 @@ HRESULT CNPC_Hiding::Initialize_Clone(void* pArg)
 	HIDINGDESC* pDesc = static_cast<HIDINGDESC*>(pArg);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPos), 1.f));
 	m_pTransformCom->Rotation_Quaternion(pDesc->vInitRot);
-
+	m_pTransformCom->Save_PreviousPosition();
 	Ready_Component(pDesc);
-
+	Register_AllNotifies(pDesc->strFolderPath);
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
-	m_iFaceIndex = 5;
+	m_iFaceIndex = 4;
 	m_isFind = false;
 	//m_isActivate = false;
+	m_isRender = true;
     return S_OK;
 }
 
@@ -41,10 +45,26 @@ void CNPC_Hiding::Priority_Update(_float fTimeDelta)
 	if (m_isScaned)
 	{
 		if (m_fScanAcc < 10.f)
+		{
 			m_fScanAcc += fTimeDelta;
+			if (m_fScanRate < 1.f)
+				m_fScanRate += fTimeDelta;
+			else
+				m_fScanRate = 1.f;
+		}
 		else
+		{
 			m_isScaned = false;
+			
+		}
 		
+	}
+	else
+	{
+		if (m_fScanRate > 0.f)
+			m_fScanRate -= fTimeDelta;
+		else
+			m_fScanRate = 0.f;
 	}
 }
 
@@ -53,17 +73,41 @@ void CNPC_Hiding::Update(_float fTimeDelta)
 	_bool isAnimFinished{ false };
 	if (m_pAnimMachineCom)
 		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
-
+	
 	if (m_iState & ENUM_CLASS(TEST_STATE::MOVE_FORWARD))
 	{
 		if (isAnimFinished)
 		{
+			if (m_pAnimMachineCom->Get_CurrentAnimationTag() == "Run_F")
+			{
+				//m_pColliderCom->IsActivate(true);
+				m_isReturn = true;
+			}
 
+		}
+	}
+	if (m_isReturn)
+	{
+		m_pTransformCom->Go_Straight(fTimeDelta);
+		if (m_fDesolveRate < 1.f)
+			m_fDesolveRate += fTimeDelta;
+		else
+		{
+			if (m_isDesolve)
+			{
+				m_isActivate = false;
+				m_pColliderCom->IsActivate(false);
+			}
+			else
+			{
+				m_isDesolve = true;
+				m_fDesolveRate = 0.f;
+			}
 		}
 	}
 
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
-	m_pColliderCom->Update(vVelocity);
+	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
@@ -72,9 +116,10 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 	if (m_isFind)
 	{
 		m_isFind = false;
-		m_isReturn = true;
 		m_pRigidBodyCom->IsActivate(false);
 	}
+
+	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_isRender)
 	{
@@ -125,6 +170,11 @@ void CNPC_Hiding::Render()
 
 		m_pShaderCom->UndBind_All_VS_SRV();
 	}
+
+#ifdef _DEBUG
+	m_pColliderCom->Render();
+#endif // _DEBUG
+
 }
 
 void CNPC_Hiding::Render_Shadow()
@@ -162,6 +212,11 @@ void CNPC_Hiding::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CNPC_Hiding::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
+	if (wStrColliderTag == TEXT("Active"))
+	{
+		m_pColliderCom->IsActivate(IsActive);
+		m_pColliderCom->Set_Offset(_float3(0.f, 0.55f, 0.f));
+	}
 }
 
 void CNPC_Hiding::Effect_Active(const _wstring& wStrEffectTag)
@@ -177,12 +232,16 @@ HRESULT CNPC_Hiding::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
-	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
+	_float4 ResultColor{};
+	_vector vResult = XMVectorLerp(XMLoadFloat4(&m_vBaseColor), XMVectorSet(0.87f, 0.95f, 0.02f, 1.f), m_fScanRate);
+	XMStoreFloat4(&ResultColor, vResult);
+	m_pShaderCom->Bind_Value("g_vBaseColor", &ResultColor, sizeof(_float4));
     return S_OK;
 }
 
 void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 {
+	_string strAnimTag = pDesc->pAnimationTag;
 	// Com_Rigidbody
 	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
@@ -207,25 +266,29 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnDetect_Remove(iLayer, pDesc, Manifold);
 		});
-	m_pRigidBodyCom->IsActivate(false);
+	//m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.5f, 0.f);
+	if(strAnimTag == "Common_NewSit_01_Loop")
+		ColliderDesc.vOffset = _float3(0.f, 0.55f, -1.f);
+	else
+		ColliderDesc.vOffset = _float3(0.f, 0.55f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NPC);
-	ColliderDesc.fHeight = 0.9f;
-	ColliderDesc.fRadius = 0.4f;
+	ColliderDesc.fHeight = 0.5f;
+	ColliderDesc.fRadius = 0.3f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
 
 	//스캔 상호작용
-	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
-	m_pColliderCom->IsActivate(false);
+	m_pColliderCom->IsActivate(pDesc->isCollide);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
@@ -244,7 +307,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	//m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
-	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
+	AnimMachineDesc.pAnimationTag = strAnimTag;
 	//Com_AnimMachine
 	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->pAnimMachineTag,
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
@@ -253,6 +316,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 
 void CNPC_Hiding::OnDetect_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	m_pGameSystem->Show_InteractUI(TEXT("집으로 보내기"));
 #ifdef _DEBUG
 	cout << "붙었어! (NPC_Hiding)" << endl;
 #endif // _DEBUG
@@ -263,12 +327,12 @@ void CNPC_Hiding::OnDetect_During(_uint iLayer, void* pDesc, const ContactManifo
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
-		m_isFind = true;
-
 		// 근처에 다가갔을 경우 상호작용 연동
-		if (false)
+		if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
 		{
-
+			m_pGameSystem->Hide_InteractUI(true);
+			m_isFind = true;
+			m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
 		}
 #ifdef _DEBUG
 
@@ -279,6 +343,7 @@ void CNPC_Hiding::OnDetect_During(_uint iLayer, void* pDesc, const ContactManifo
 
 void CNPC_Hiding::OnDetect_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	m_pGameSystem->Hide_InteractUI();
 #ifdef _DEBUG
 	cout << "떨어졌어! (NPC_Hiding)" << endl;
 #endif // _DEBUG
@@ -333,4 +398,5 @@ void CNPC_Hiding::Free()
 	__super::Free();
 
 	Safe_Release(m_pAnimMachineCom);
+	Safe_Release(m_pGameSystem);
 }

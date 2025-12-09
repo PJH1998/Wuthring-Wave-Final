@@ -1,0 +1,6 @@
+ID,posX,posY,posZ,rotX,rotY,rotZ,bodyIDX,faceIDX,hairIDX,isCollide,Animation
+0,3230.73,317.5,1707.2,0,165,0,-1,0,0,0,Common_NewSit_01_Loop
+1,3401.4,377.2,1598.4,0,0,0,-1,0,0,1,Common_Palming_01_Loop
+2,3244.1,313.6,1684,0,45,0,-1,0,0,1,Common_SquatScare_01_Loop
+3,3358.8,374.5,1577.9,0,-90,0,-1,0,0,1,sing02_Loop
+4,3230.1,317.6,1615.9,0,135,0,-1,0,0,1,Talk_Clap_01_loop

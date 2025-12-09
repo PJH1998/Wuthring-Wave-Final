@@ -68,6 +68,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"));
 			//m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			m_pGalbrena->Set_OutLineVisible(false);
+			m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
 			break;
 		}
     }
@@ -126,6 +127,8 @@ void CGalbrenaGroundSkill::OnExit()
 	m_pGalbrena->Collider_Active(TEXT("Galbrena|DEFAULT_E|SKILL"), false);
 
 	m_pGalbrena->Set_OutLineVisible(true);
+	m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f);
+
 }
 
 void CGalbrenaGroundSkill::Handle_Input()
@@ -136,7 +139,6 @@ void CGalbrenaGroundSkill::Handle_Input()
 	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
-	m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Skill01")); // 연계 기
 }
 
 void CGalbrenaGroundSkill::Update_SkillAnimations(_float fTimeDelta)

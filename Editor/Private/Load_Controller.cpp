@@ -298,6 +298,26 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
 				Load_FXRadial_FromJson(RadialPath, FrameDesc.strChildrenTag);
 			}
+
+			if (FrameDesc.eChildrenType == EFFECT_TYPE::VA)
+			{
+				_string VAPath = strFolderPath;
+				VAPath += "/FXVA/";
+				VAPath += WStringToString(FrameDesc.strChildrenTag);
+				VAPath += ".json";
+
+				Load_FXVA_FromJson(VAPath, FrameDesc.strChildrenTag);
+			}
+
+			if (FrameDesc.eChildrenType == EFFECT_TYPE::LIGHT)
+			{
+				_string LightPath = strFolderPath;
+				LightPath += "/FXLight/";
+				LightPath += WStringToString(FrameDesc.strChildrenTag);
+				LightPath += ".json";
+
+				Load_FXLight_FromJson(LightPath, FrameDesc.strChildrenTag);
+			}
         }
     }
 
@@ -978,6 +998,97 @@ void CLoad_Controller::Load_FXRadial_FromJson(const _string& strFilePath, const 
 	m_tRadialDesc.emplace(RadialTag, Desc);
 }
 
+void CLoad_Controller::Load_FXVA_FromJson(const _string& strFilePath, const _wstring& VATag)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json VAJson;
+	JsonStream >> VAJson;
+	JsonStream.close();
+
+	CTestVA::VA_DESC Desc = {};
+
+	if (VAJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(VAJson["MyTag"].get<_string>());
+
+	if (VAJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(VAJson["MyType"].get<double>());
+
+	if (VAJson.contains("MaskTextureTag"))
+		Desc.strTextureTag = StringToWString(VAJson["MaskTextureTag"].get<_string>());
+
+	if (VAJson.contains("ColorTextureTag"))
+		Desc.strColorTextureTag = StringToWString(VAJson["ColorTextureTag"].get<_string>());
+
+	if (VAJson.contains("MeshTag"))
+		Desc.strMeshTag = StringToWString(VAJson["MeshTag"].get<_string>());
+
+	if (VAJson.contains("AnimSpeed"))
+		Desc.fAnimSpeed = VAJson["AnimSpeed"].get<_float>();
+
+	if (VAJson.contains("MovementScale"))
+		Desc.fMovementScale = VAJson["MovementScale"].get<_float>();
+
+	if (VAJson.contains("ShaderPass"))
+		Desc.iShaderPass = VAJson["ShaderPass"].get<_int>();
+
+	m_tVADesc.emplace(VATag, Desc);
+}
+
+void CLoad_Controller::Load_FXLight_FromJson(const _string& strFilePath, const _wstring& LightTag)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json LightJson;
+	JsonStream >> LightJson;
+	JsonStream.close();
+
+	CEffect_Light::LIGHT_DESC Desc = {};
+
+	if (LightJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(LightJson["MyTag"].get<_string>());
+
+	if (LightJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(LightJson["MyType"].get<double>());
+
+	if (LightJson.contains("LightTag"))
+		Desc.wstrLightTag = StringToWString(LightJson["LightTag"].get<_string>());
+
+	if (LightJson.contains("Speed"))
+		Desc.fSpeed = LightJson["Speed"].get<_float>();
+
+	if (LightJson.contains("Color") && LightJson["Color"].is_array())
+	{
+		json Color = LightJson["Color"];
+		Desc.vColor.x = Color[0].get<_float>();
+		Desc.vColor.y = Color[1].get<_float>();
+		Desc.vColor.z = Color[2].get<_float>();
+		Desc.vColor.w = Color[3].get<_float>();
+	}
+
+	if (LightJson.contains("LifeTime") && LightJson["LifeTime"].is_array())
+	{
+		json LifeTime = LightJson["LifeTime"];
+		Desc.vLifeTime.x = LifeTime[0].get<_float>();
+		Desc.vLifeTime.y = LifeTime[1].get<_float>();
+	}
+
+	if (LightJson.contains("Range") && LightJson["Range"].is_array())
+	{
+		json Range = LightJson["Range"];
+		Desc.vRange.x = Range[0].get<_float>();
+		Desc.vRange.y = Range[1].get<_float>();
+	}
+
+	m_tLightDesc.emplace(LightTag, Desc);
+}
+
 void CLoad_Controller::Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc)
 {
     PrefabDesc = m_tPrefabDesc;
@@ -1047,6 +1158,22 @@ void CLoad_Controller::Get_FXRadial_Desc(const _wstring& RadialTag, CEffect_Radi
 		RadialDesc = iter->second;
 }
 
+void CLoad_Controller::Get_FXVA_Desc(const _wstring& VATag, CTestVA::VA_DESC& VADesc)
+{
+	auto iter = m_tVADesc.find(VATag);
+
+	if (iter != m_tVADesc.end())
+		VADesc = iter->second;
+}
+
+void CLoad_Controller::Get_FXLight_Desc(const _wstring& LightTag, CEffect_Light::LIGHT_DESC& LightDesc)
+{
+	auto iter = m_tLightDesc.find(LightTag);
+
+	if (iter != m_tLightDesc.end())
+		LightDesc = iter->second;
+}
+
 void CLoad_Controller::Reset_Load()
 {
     m_tEffectMeshDesc.clear();
@@ -1057,6 +1184,8 @@ void CLoad_Controller::Reset_Load()
 	m_tRectDesc.clear();
 	m_tDecalDesc.clear();
 	m_tRadialDesc.clear();
+	m_tVADesc.clear();
+	m_tLightDesc.clear();
 
     CEffect_Prefab::PREFAB_DESC Desc = {};
     m_tPrefabDesc = Desc;
@@ -1064,6 +1193,7 @@ void CLoad_Controller::Reset_Load()
 
 void CLoad_Controller::Add_CurrentLevel_Effect()
 {
+	//
 }
 
 CLoad_Controller* CLoad_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eCurrentLevel)

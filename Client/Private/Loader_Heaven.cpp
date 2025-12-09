@@ -13,6 +13,9 @@
 #include"MapObject_Meteo.h"
 #include"MapObject_Water.h"
 #include"MapObject_Throw.h"
+#include"MapObject_Burn.h"
+#include"MapObject_Dome.h"
+
 #pragma endregion
 
 #pragma region MONSTER
@@ -162,7 +165,7 @@ HRESULT CLoader_Heaven::Load_Texture()
 HRESULT CLoader_Heaven::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1207_second/", m_eCurLevel, "Heaven");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1209_second/", m_eCurLevel, "Heaven");
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -227,7 +230,13 @@ HRESULT CLoader_Heaven::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Throw"),
 		CMapObject_Throw::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Burn"),
+		CMapObject_Burn::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Dome"),
+		CMapObject_Dome::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 
 #pragma region SPAWN_OBJECT
@@ -978,6 +987,10 @@ HRESULT CLoader_Heaven::Load_Effect()
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
 	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+	m_pGameSystem->Load_EffectVAMeshDat_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Dat", m_eCurLevel);
+	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Color", m_eCurLevel);
+	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Mask", m_eCurLevel);
+	m_pGameSystem->Load_EffectLightData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Light");
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
 

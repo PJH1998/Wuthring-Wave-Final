@@ -33,6 +33,12 @@ public:
 		const _float4x4* pSocketMatrix = { nullptr };
 	}CAPTURE_DESC;
 
+	typedef struct tagQTEDesc {
+
+		CTransform* pTargetTransform = { nullptr };
+		CHARACTER_EVENT eEvent = { CHARACTER_EVENT::END };
+	}QTE_DESC;
+
 
 
 public:
@@ -75,6 +81,8 @@ public:
 		_float fHookRange = { 25.f };
 		_float fDragRange = { 15.f };
 		_float fReacedRopeHook = { 1.f };
+		_float fThrowRange = { 40.f };
+
 
 	}CHARACTER_DESC;
 
@@ -184,6 +192,7 @@ public:
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 
 	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration);
+	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio);
 
 	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
 
@@ -191,6 +200,9 @@ public:
 	
 
 	void Use_Spring(_float fDestination, _float fDuration);
+
+	void Stop_Anim();
+	void Start_Anim();
 #pragma endregion
 
 
@@ -210,6 +222,8 @@ public:
 
 	// Grapple Target 전달.
 	void Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo);
+
+	// Grapple Target을 이용한 사용 함수들
 	void Rotate_GrappleTarget();
 	void Move_Grapple(_float fTimeDelta, _float fSpeed);
 	void Execute_RopeDragTrigger();
@@ -219,13 +233,21 @@ public:
 	_bool Is_ReachedGrappleHook();
 	ROPEDIR Calculate_RopeDirection();
 
+	// Thorw Target 전달.
+	void Bind_ThrowTarget(const THROW_INFO& throwInfo);
+	_bool Is_AttachThrowTarget();
+
+	virtual void Attach_ThrowTarget(_bool isAttach) {}; // ThrowTarget 객체를 손뼈에 붙입니다.
+	virtual void Throw_AttachTarget() {};
+	
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
 	void Bind_CostCondition_ToAbility(_uint iConditionw, _uint iConditionFlag);
 
 	// Transition Character From Player
-	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) {}; // 전환 시 실행할 함수.
 
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
@@ -302,6 +324,7 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+	void Rotate_Target(class CTransform* pTransform);
 	void Rotate_TargetPosition();
 	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);
@@ -382,6 +405,7 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 
 	GRAPPLE_INFO m_GrappleInfo = {};
+	THROW_INFO m_ThrowInfo = {};
 
 	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
 	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };
@@ -442,6 +466,7 @@ protected:
 	_float m_fHookRange = {};
 	_float m_fReachedHook = {};
 	_float m_fDragRange = {};
+	_float m_fThrowRange = {};
 
 	_float m_fStateTimeRate = { 1.f }; //
 	_float m_fOriginTimeRate = { 1.f };

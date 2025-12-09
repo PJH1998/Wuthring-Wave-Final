@@ -72,6 +72,7 @@ public:
 	void Notify_HarmonyEnd();
 	void On_HarmonyEnd(CHARACTERTYPE eCharacter);
 
+
 public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
@@ -87,7 +88,12 @@ public:
 	void Notify_GrabVisible(_bool IsVisible);
 	void Notify_EscapeGrabReady();
 	void Notify_EscapeGrabExecute();
-	void Notify_Event(CHARACTER_EVENT eEvent);
+	void Notify_Event(CHARACTER_EVENT eEvent, void* pArg = nullptr);
+
+	
+	void Bind_EventLock(_bool IsLock);
+
+
 
 
 #pragma endregion
@@ -116,21 +122,21 @@ private:
 	// LockOn
 	//vector<class CTransform*> m_TargetTransforms;
 	vector<TARGET_INFO> m_TargetCandidates;
-	//vector<pair<class CTransform*, OBJECTTYPE>> m_GrappleCandidates;
 	vector<GRAPPLE_INFO> m_GrappleCandidates;
-	//vector<class CTransform*> m_GrappleTargetTransforms;
+	vector<THROW_INFO> m_ThrowCandidates;
 
-	//class CTransform* m_pTargetTransform = { nullptr };
-	//class CTransform* m_pLockOnTargetTransform = { nullptr };
 
 	TARGET_INFO m_TargetInfo = {};
 	TARGET_INFO m_LockOnTargetInfo = {};
 	GRAPPLE_INFO m_TargetGrappleInfo = { };
+	THROW_INFO m_TargetThrowInfo = {};
+
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };
 	_bool m_IsChanage = { false };
 	_bool m_IsQTE = { false };
+	_bool m_IsEventLock = { false };
 
 	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};
@@ -147,10 +153,13 @@ private:
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING }; // Player에서 관리.
 
 	// Timer 관리.
-	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END];
+	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END] = {};
 	_float m_fChangeCoolTime = {};
 
 	_float3 m_vLockOnPos = {};
+
+	_bool m_IsThrowReserve = { false };
+
 
 private:
 	void Player_KeyInput();
@@ -159,19 +168,35 @@ private:
 	void Sync_Condition_FromCharacter(class CCharacter* pCharacter);
 	void Sync_InteractionType_ToCharacter(class CCharacter* pCharacter);
 	
-	
+	// Target 검색 (매프레임)
 	void Sorting_Target();
 	void Toggle_LockOn();
+	// Grapple Target 검색 (매프레임)
 	void Sorting_GrappleTarget();
 	void Toggle_Grapple();
+	// Throw Target 검색 (매프레임)
 
+	void Sorting_ThrowTarget();
+	void Toggle_Throw();
+
+	// Collider 처리.
 	void Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc);
 	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
+	void Process_CollideThrow(const CALLBACK_CLIENT* pcallDesc);
+
+	// 몬스터 QTE Event 처리.
+	void Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg);
 
 	void Manage_Condition();
 	void Sync_UtilityType();
 	_bool IsHitBack(class CTransform* pTransform);
 	void Calc_LockOnPos();
+
+
+	void Stop_Anim();
+	void Start_Anim();
+
+	
 	
 
 #ifdef _DEBUG

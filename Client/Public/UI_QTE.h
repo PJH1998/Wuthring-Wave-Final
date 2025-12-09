@@ -41,6 +41,7 @@ private:
 	void			Update_QTE_Trigger(_float fTimeDelta);
 	void			Update_FinishEvent(_float fTimeDelta);
 	void			Update_GoinDisabled(_float fTimeDelta);
+
 		
 private:
 #pragma region Cached UI And Components
@@ -104,6 +105,9 @@ private:
 	_uint			m_iDisableAnimOrder = 0;
 
 	class CGameSystem* m_pGameSystem = { nullptr };
+
+private:
+	void Ready_Events();
 
 public:
 	static CUI_QTE*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -41,11 +41,15 @@ public:
 #pragma endregion
 
 #pragma region SOUND_MANAGER
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath);
-	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath);
-	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop = false);
-	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop = false);
+	void			Update_Listener(class CTransform* pTransform, _float fTimeDelta);
+
+	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D = false);
+	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D = false);
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
+	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
 	void			Play_Other(const _wstring& strSoundTag, _float fVolume);
+	void			Play_Other(const _wstring& strSoundTag, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);
 	void			Stop_Sound(_uint iChannelID);
 	void			Stop_All();
 	void			Set_ChannelVolume(_uint iChannelID, _float fVolume);

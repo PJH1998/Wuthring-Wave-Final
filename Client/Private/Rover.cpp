@@ -105,10 +105,14 @@ void CRover::Update(_float fTimeDelta)
 	
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
+
+	// 특정 상황일 때 TimeLack 감소.
+	_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+
 	if (!IsDissolve)
 	{
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
@@ -286,7 +290,7 @@ void CRover::Render_Shadow()
 
 
 // 캐릭터 전환시 Idle로 상태 전환..
-void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	m_pStateMachineCom->Exit_State();
 
@@ -317,6 +321,16 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE:
+		{
+			if (nullptr == pArg)
+				return;
+
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+		}
+		break;
+
 	}
 
 	// 상태 변수 초기화
@@ -484,7 +498,7 @@ void CRover::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(ERoverGroundState::SPECIAL);
 
 	if (!IsAttack && !IsSpecialAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Attack은 살짝만 느려지게
 
@@ -554,6 +568,37 @@ void CRover::Bind_QTECamera()
 {
 	m_fCameraOriginOffset = m_fCameraOffset;
 	m_fCameraOffset = 2.f; // 늘립니다.
+}
+
+void CRover::Attach_ThrowTarget(_bool isAttach)
+{
+	if (!m_ThrowInfo.IsActive) // 객체가 활성화 되어있지 않은 객체라면?
+		return;
+
+	if (isAttach)
+	{
+		const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+		const _float4x4* pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+
+		*m_ThrowInfo.ppRefBoneMatrix = pBoneMatrix;
+		*m_ThrowInfo.ppRefWorldMatrix = pWorldMatrix;
+		*m_ThrowInfo.pGrabbed = true;
+		*m_ThrowInfo.pThrow = false;
+	}
+	else
+	{
+		*m_ThrowInfo.pGrabbed = false;
+		*m_ThrowInfo.pThrow = false;
+	}
+}
+
+void CRover::Throw_AttachTarget()
+{
+	if (!m_ThrowInfo.IsActive)
+		return;
+
+	*m_ThrowInfo.pGrabbed = false;
+	*m_ThrowInfo.pThrow = true;
 }
 
 
@@ -694,6 +739,8 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 				PartActivate(PARTTYPE::PART_DARKWING, true);
 		}
 	}
+	else if (var1 == TEXT("Throw"))
+		Throw_AttachTarget(); // 던지기.
 	
 
 }

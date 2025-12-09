@@ -169,6 +169,20 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pGameSystem->Set_MouseFix(false);
 }
 
+HRESULT CUI_Ovfl_Palette::Ready_Events()
+{
+	m_pGameInstance->Subscribe<MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Minigame_Palette_Success"), [this](const MINIGAMEPALETTE_SUCCESS_UI_EVENT event) {
+		if (event.isSuccess)
+		{
+			// 성공 시 시행할 것은 여기에..
+
+			// 이걸 여기서?
+		}
+	});
+
+	return S_OK;
+}
+
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
 {
 	return S_OK;
@@ -917,7 +931,7 @@ void CUI_Ovfl_Palette::Update_FinishEvent()
 
 	else if	(m_isGoinSuccess)
 	{
-		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 		Req_OffPalette();
 	}
 

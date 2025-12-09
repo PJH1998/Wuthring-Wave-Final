@@ -20,6 +20,7 @@ private:
 		FLY,
 		ROPE_HOOK,
 		ROPE_DRAG,
+		THROW_CONTROL,
 		FALL,
         ATTACK,
         MOVE_U,

@@ -131,6 +131,10 @@ void CAugustaGroundIdle::Handle_Input()
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pAugusta->Is_GrappleDrag());
 
+	m_States[THROW_CONTROL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pAugusta->Is_AttachThrowTarget());
+
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 
@@ -274,6 +278,12 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 	{
 		// 애니메이션은 Rope 안에서 결정하기.
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEDRAG));
+		return;
+	}
+
+	if (m_States[THROW_CONTROL])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::CONTROL));
 		return;
 	}
 

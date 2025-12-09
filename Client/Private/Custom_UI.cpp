@@ -573,7 +573,7 @@ void CCustom_UI::Update_InputState()
         m_isClicked = true;
         // click enter..
         m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickEnterUI", ONCLICKENTER_UI_EVENT(m_iInputInstanceIndex));
+        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_OnClickEnterUI", ONCLICKENTER_UI_EVENT(m_iInputInstanceIndex));
     }
     else if (m_isClicked &&
         m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::PRESS &&
@@ -583,7 +583,7 @@ void CCustom_UI::Update_InputState()
         m_isClicked = true;
         // clicking..
         m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::CLICKING);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickingUI", ONCLICKING_UI_EVENT(m_iInputInstanceIndex));
+        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_OnClickingUI", ONCLICKING_UI_EVENT(m_iInputInstanceIndex));
     }
     else if (m_isClicked &&
         m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::UP)
@@ -591,7 +591,7 @@ void CCustom_UI::Update_InputState()
         m_isClicked = false;
         // click exit..
         m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickExitUI", ONCLICKEXIT_UI_EVENT(m_iInputInstanceIndex));
+        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_OnClickExitUI", ONCLICKEXIT_UI_EVENT(m_iInputInstanceIndex));
     }
     else if (!m_isClicked)
     {
@@ -610,13 +610,13 @@ void CCustom_UI::Update_InputState()
             m_isHovered = true;
             // hover enter
             m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER);
-            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverEnterUI", ONHOVERENTER_UI_EVENT(m_iInputInstanceIndex));
+            m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_OnHoverEnterUI", ONHOVERENTER_UI_EVENT(m_iInputInstanceIndex));
         }
         else
         {
             // hovering
             m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::HOVERING);
-            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoveringUI", ONHOVERING_UI_EVENT(m_iInputInstanceIndex));
+            m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_OnHoveringUI", ONHOVERING_UI_EVENT(m_iInputInstanceIndex));
         }
     }
     else if (m_isHovered)
@@ -624,7 +624,7 @@ void CCustom_UI::Update_InputState()
         m_isHovered = false;
         // hover exit
         m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverExitUI", ONHOVEREXIT_UI_EVENT(m_iInputInstanceIndex)); // 이 시점에 이미 m_iInputState 가 0인데?
+        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), L"Event_OnHoverExitUI", ONHOVEREXIT_UI_EVENT(m_iInputInstanceIndex)); // 이 시점에 이미 m_iInputState 가 0인데?
     }
 
 
@@ -733,15 +733,20 @@ void CCustom_UI::Free()
 {
     __super::Free(); 
 
-    Safe_Release(m_pShaderCom);
-    Safe_Release(m_pVIBufferCom);
+	if (m_pShaderCom)
+		Safe_Release(m_pShaderCom);
+
+	if (m_pVIBufferCom)
+		Safe_Release(m_pVIBufferCom);
     
-	Safe_Release(m_pTextureCom); 
+	if (m_pTextureCom)
+		Safe_Release(m_pTextureCom); 
 
 	for (auto& extraTextureCom : m_vecExtraTextureCom)		Safe_Release(extraTextureCom);
 	m_vecExtraTextureCom.clear();
 
-    Safe_Release(m_pAnimator_UICom);
+	if (m_pAnimator_UICom)
+		Safe_Release(m_pAnimator_UICom);
 
     for (auto& child : m_vecChildObjects)					Safe_Release(child);
     m_vecChildObjects.clear();

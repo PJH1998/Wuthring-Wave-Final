@@ -11,6 +11,7 @@
 #include "Levi_Wave.h"
 #include "Levi_Augusta.h"
 #include "GameSystem.h"
+#include "Event_Leviatan.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -38,8 +39,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	//m_fHP = pDesc->fHP;
-	m_fHP = 200.f;
+	m_fHP = pDesc->fHP * 0.7f;
+	//m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -49,7 +50,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
-	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 10.f;
+	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 120.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
@@ -58,6 +59,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	Ready_Volumes(pDesc);
+	Ready_Events();
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 
 	m_CallBack.pTransform = m_pTransformCom;
@@ -137,7 +139,8 @@ void CLeviatan::Update(_float fTimeDelta)
 		_float temp{};
 		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta * fTimeRatio, &temp);
 	}
-	
+	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 
 	//3. 거리 보간
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -151,6 +154,8 @@ void CLeviatan::Update(_float fTimeDelta)
 	
 	// 탐지 볼륨 갱신
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	if (nullptr != m_pExecuteCom)
+		m_pExecuteCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	//4. 충돌 상호작용 볼륨 갱신
 	for (_uint i = 0; i < ATK_SOCKET::ATKEND; i++)
@@ -160,6 +165,7 @@ void CLeviatan::Update(_float fTimeDelta)
 	}
 	if(m_pParryVolume)
 		m_pParryVolume->Update(fTimeDelta);
+	
 
 	//5. 파츠 갱신
 	for (auto& Pair : m_PartObjects)
@@ -175,7 +181,11 @@ void CLeviatan::Late_Update(_float fTimeDelta)
 
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
 		m_isParalysis = true;
-
+	if (m_isExecuteEnable)
+	{
+		m_isExecuteEnable = false;
+		m_pExecuteCom->IsActivate(true);
+	}
 	if(m_isRender)
 	{
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) 
@@ -284,8 +294,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
-	//m_fHP = Info.fMaxHp;
-	m_fHP = 200.f;
+	m_fHP = Info.fMaxHp;
+	//m_fHP = 200.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -561,13 +571,24 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Teleport"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+		if (wstrAnimTag == TEXT("Front"))
+		{
+			if(m_fDistanceNonY > 10.f)
+				vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.4f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
+		else
+		{
+			vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
 		m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	}
+
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab");
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab", m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("QTE"))
 	{
@@ -611,6 +632,15 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 		OnDetect_Enter(iLayer, pDesc, Manifold);
 		});
 
+	RigidbodyDesc.vExtent = _float3(1.5f, 1.5f, 1.5f);
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_RB_Execute"), reinterpret_cast<CComponent**>(&m_pExecuteCom), &RigidbodyDesc)))
+		CRASH("Com_RB_Execute");
+
+	m_pExecuteCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		Execute_Enter(iLayer, pDesc, Manifold);
+		});
+	m_pExecuteCom->IsActivate(false);
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
@@ -810,6 +840,26 @@ void CLeviatan::Ready_Volumes(LEVIATAN_DESC* pDesc)
 	m_pParryVolume->TriggerActivate(false);
 }
 
+void CLeviatan::Ready_Events()
+{
+	m_pGameInstance->Subscribe<LEVI_GRAB>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), [this](const LEVI_GRAB event) {
+		if (event.isSuccess)
+		{
+			m_fStamina = 0.f;
+			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
+		}
+		});
+
+	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), [this](const LEVI_EXECUTE event) {
+		if (m_iPhase == PHASE::ONE && event.isSuccess)
+		{
+			m_fHP = 0.f;
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pExecuteCom->IsActivate(false);
+		}
+		});
+}
+
 void CLeviatan::Calculate_PosAndDir()
 {
 	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
@@ -978,7 +1028,15 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 1.f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+		if (m_iPhase == PHASE::ONE && m_fHP > 5000.f && ((m_fHP - pDesc->fAttack) < 5000.f))
+			m_isExecuteEnable = true;
 		m_fHP -= pDesc->fAttack;
+
+#pragma region PHASE_1
+		if (m_iPhase == PHASE::ONE && m_fHP <= 0.f)
+			m_fHP = 1.f;
+#pragma endregion
+
 		if(m_fStamina > 0.f)
 			m_fStamina -= 1.f;
 #pragma region HIT_EFFECT
@@ -1032,19 +1090,27 @@ void CLeviatan::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 #endif // _DEBUG
 }
 
+void CLeviatan::Execute_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if(iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		m_pGameSystem->Play_QTE(_float2(400.f, 0.f), UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F, _float2(0.6f, 0.6f));
+	}
+}
+
 void CLeviatan::AreaAttack(_float fTimeDelta)
 {
 	m_fDropAcc += fTimeDelta;
 	m_fFenceAcc += fTimeDelta;
 
-	if (m_fDropAcc >= 0.5f)
+	if (m_fDropAcc >= 0.25f)
 	{
 		m_fDropAcc = 0.f;
 		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
-		_float fRange = m_pGameInstance->Rand(0.5f, 5.f);
-		_float3 vSpawnPos = m_vTargetPosition;
+		_float fRange = m_pGameInstance->Rand(0.5f, 10.f);
+		_float3 vSpawnPos = { m_PreTransform.m[3][0], m_PreTransform.m[3][1], m_PreTransform.m[3][2] };
 		vSpawnPos.x -= sin(fRadius) * fRange;
-		vSpawnPos.y = m_PreTransform.m[3][1];
+		//vSpawnPos.y = m_PreTransform.m[3][1];
 		vSpawnPos.z -= cos(fRadius) * fRange;
 
 		CLevi_Drop::DROPRESET Drop{};
@@ -1114,7 +1180,7 @@ void CLeviatan::Event1()
 void CLeviatan::Event2()
 {
 	//2페이즈 맵으로 이동하기
-	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 1079.f, 1.f));
 }
 
 _bool CLeviatan::isKnockDown()
@@ -1156,8 +1222,11 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::BURST)
+	// Attack1 빼기, Attack15 처형 활성화되면 사용 x
+	if (m_iPhase == PHASE::ONE && m_fHP < 5000.f && iIndex == ATK_PATTERN::BURST)
 		return false;
+	//if (iIndex != ATK_PATTERN::BURST)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
@@ -1243,6 +1312,7 @@ void CLeviatan::Free()
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pFacialComputeShaderCom);
 	Safe_Release(m_pParryVolume);
+	Safe_Release(m_pExecuteCom);
 	for (_uint i = 0; i < PHASE::P_END; ++i)
 		Safe_Release(m_pBehaviorTreeCom[i]);
 	for (_uint i = 0; i < PHASE::P_END; ++i)

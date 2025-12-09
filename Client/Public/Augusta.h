@@ -181,7 +181,7 @@ public:
 
 #pragma region 1. STATE.
 public:
-	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) override;
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) override;
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) override;
@@ -201,6 +201,9 @@ public:
 	virtual void Bind_QTE(_bool IsQTE) override;
 	virtual void Reset_QTECamera() override;
 	virtual void Bind_QTECamera() override;
+
+	virtual void Attach_ThrowTarget(_bool isAttach) override;
+	virtual void Throw_AttachTarget() override;
 
 #pragma region 2. NOTIFY
 public:

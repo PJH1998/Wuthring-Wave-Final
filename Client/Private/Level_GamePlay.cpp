@@ -12,6 +12,7 @@
 #include "NPCInstancing.h"
 #include "Napal.h"
 #include "CoroProduction.h"
+#include "NPC_Hiding.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -301,6 +302,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
+#ifdef _DEBUG
+	MobDesc.fHP = 150.f;
+#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
@@ -517,9 +521,9 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
-		CRASH("Failed Ready GrapplePoint");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+	//	CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
@@ -617,6 +621,37 @@ void CLevel_GamePlay::Ready_NPC()
 	XMStoreFloat4x4(&Desc.pTransformMatrix, XMMatrixRotationRollPitchYawFromVector(vRot) * XMMatrixTranslationFromVector(vTrans));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+
+	CNPC_Hiding::HIDINGDESC Hiding{};
+	vector<NPCINFO> HidingData = m_pGameSystem->Get_NpcData(3);
+	vector<_wstring> ModelTag;
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS370437"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS370708"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS380101"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS371438"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS381221"));
+
+	Hiding.eCurLevel = m_eCurLevel;
+	Hiding.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Hiding.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	Hiding.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Hiding.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");
+	Hiding.fRotationPerSec = XMConvertToRadians(90.f);
+	Hiding.strFolderPath = "../Bin/Resource/Model/NPC/FemaleS/Notify";
+	Hiding.fSpeedPerSec = 1.f;
+
+	for (size_t i = 0; i < HidingData.size(); ++i)
+	{
+		Hiding.modelData = make_pair(m_eCurLevel, ModelTag[i].c_str());
+		Hiding.isCollide = HidingData[i].isCollide;
+		Hiding.vInitPos = HidingData[i].vPosition;
+		Hiding.vInitRot = HidingData[i].vRotation;
+		Hiding.pAnimationTag = HidingData[i].strAnimTag.c_str();
+
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+			ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Hiding)))
+			CRASH("Failed Ready NPC_Hiding");
+	}
 }
 
 void CLevel_GamePlay::Ready_Production()
@@ -637,7 +672,7 @@ void CLevel_GamePlay::Ready_Potal()
 	CPotal::POTAL_DESC PotalDesc{};
 	PotalDesc.iLevel = ENUM_CLASS(m_eCurLevel);
 	PotalDesc.vExtent;
-	PotalDesc.vPos = _float4(3497.f, 147.84f, 3267.5f, 1.f);
+	PotalDesc.vPos = _float4(3497.f, 148.84f, 3267.5f, 1.f);
 
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Potal"), &PotalDesc);

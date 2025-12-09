@@ -41,6 +41,7 @@
 // Intraction 카테고리 State
 #include "AugustaRopeHook.h"
 #include "AugustaRopeDrag.h"
+#include "AugustaControl.h"
 
 // Capture State
 #include "AugustaCapture.h"
@@ -84,6 +85,7 @@ void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta*
 	// Interaction 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEHOOK), CAugustaRopeHook::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEDRAG), CAugustaRopeDrag::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::CONTROL), CAugustaControl::Create(pCharacter));
 
 	
 

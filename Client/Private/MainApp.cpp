@@ -191,6 +191,7 @@ void CMainApp::SetUp_CollisionLayer()
 
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::INTERACTION), ENUM_CLASS(BPLAYER::SENSOR)); // 상호 작용할 INTERACTION
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::GRAPPLE), ENUM_CLASS(BPLAYER::SENSOR));		 // PULL할 INTERACTION
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW), ENUM_CLASS(BPLAYER::SENSOR));		 // PULL할 INTERACTION
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::SLIDE), ENUM_CLASS(BPLAYER::SENSOR));		 // 땅바닥 Slide
 
 
@@ -208,6 +209,8 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::PLAYER));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::GRAPPLE));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::THROW));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW));
 	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::INTERACTION));
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::MAP));
@@ -222,11 +225,18 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::NPC), ENUM_CLASS(COLLISIONLAYER::MAP));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ALTER), ENUM_CLASS(COLLISIONLAYER::MAP));
 
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::THROW), ENUM_CLASS(COLLISIONLAYER::BURN));
+
+
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::THROW), ENUM_CLASS(BPLAYER::MOVE));		 // Burn과 상호작용
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::BURN), ENUM_CLASS(BPLAYER::SENSOR));
+
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::BURN), ENUM_CLASS(COLLISIONLAYER::THROW));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::BURN));
 
 
-
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::BURN), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::THROW), ENUM_CLASS(BPLAYER::SENSOR));
+	//m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::THROW), ENUM_CLASS(BPLAYER::MOVE));
 
 
 	// Object VS BroadPhase
@@ -263,6 +273,8 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::GRAPPLE), ENUM_CLASS(BPLAYER::SENSOR)); 
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::SLIDE), ENUM_CLASS(BPLAYER::MOVE)); 
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::SLIDE), ENUM_CLASS(BPLAYER::SENSOR)); 
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW), ENUM_CLASS(BPLAYER::SENSOR)); 
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW), ENUM_CLASS(BPLAYER::SENSOR));
 }
 
 void CMainApp::Ready_Event()
@@ -377,6 +389,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_MotionTrail"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh_MotionTrail.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Failed to Add Prototype Shader MotionTrail");
+
+	// Shader_VAMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VAMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxVaMesh.hlsl"), VTX_VAMESH::Elements, VTX_VAMESH::iNumElements))))
+		CRASH("Shader_VAMesh");
 
 
 #pragma endregion

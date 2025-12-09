@@ -85,6 +85,29 @@ namespace Client
 		}
 	}GRAPPLE_INFO;
 
+
+	typedef struct tagThrowInfo {
+		CTransform* pTransform = { nullptr };
+		OBJECTTYPE eObjectType;
+		_bool* pGrabbed = { nullptr }; // Grab (객체를 손으로 끌어오는 역할) => true 시 Throw false 로 설정.
+		_bool* pThrow = { nullptr }; // Throw (객체를 손에서 던지는 역할) => true 시 Grab False로 설정.
+
+		const _float4x4** ppRefBoneMatrix = { nullptr };
+		const _float4x4** ppRefWorldMatrix = { nullptr };
+		
+		_bool IsActive = { false };
+		void Reset()
+		{
+			pTransform = nullptr;
+			pGrabbed = nullptr;
+			pThrow = nullptr;
+			ppRefBoneMatrix = nullptr;
+			ppRefWorldMatrix = nullptr;
+			eObjectType = OBJECTTYPE::END;
+			IsActive = false;
+		}
+	}THROW_INFO;
+
 	//typedef struct tagQTEInteraction
 	//{
 	//	
@@ -149,6 +172,11 @@ namespace Client
 
 		SLIDE_DATA eSlideData;
 		_bool		IsStart = { false };
+		_bool*		IsGrab  = { nullptr };
+		_bool*		IsThrow = { nullptr };
+		const _float4x4** ppRefBoneMatrix = { nullptr };
+		const _float4x4** ppRefWorldMatrix = { nullptr };
+
 	}CALLBACK_CLIENT;
 
 	typedef struct tagTargetInfo

@@ -37,25 +37,49 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta)override;
 	virtual		void			Render()override;
 	virtual		void			Render_Shadow()override;
+
+	void						OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void						OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 private:
 	void						Change_Level();
 	void						Ready_Components(void* pArg);
 
 	void						Collide();
 	void						Graped();
+
+	void						Calc_CombinedMatrix();
+	void						Attach_Lerp();
+	void						Attach_Pos();
+
 private:
 	class CModel_Streaming* m_pModelCom = {};
 	CShader* m_pShaderCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
 	CRigidbody* m_pDetectRigidbodyCom = { nullptr };
+	CRigidbody* m_pThrowRigidbodyCom = { nullptr };
 	CRigidbody* m_pCollideRigidbodyCom = { nullptr };
 
 	_uint m_iShaderPassIndex = {};
 	_float3 m_vTargetPos = {};
-	_bool m_IsThrowed = {false};
 	_float m_fThrowTime = {};
 	_float3 m_vStartPos = {};
 	_float3 m_vImpulse = {};
+
+	_bool m_IsGrabbed = { false };
+	_bool m_IsThrow = { false };
+
+	_float4 m_vOriginPos = {};
+
+	CALLBACK_CLIENT m_Desc = {};
+	_float m_fFlyTime = {};
+
+
+	_float m_fattachTime = {};
+
+	const _float4x4* m_pAttachBoneMatrix = { nullptr };
+	const _float4x4* m_pAttachWorldMatrix = { nullptr };
+	_float4x4 m_AttachMatrix = {};
+
  public:
 	static CMapObject_Throw* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

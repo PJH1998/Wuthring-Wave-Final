@@ -93,6 +93,10 @@ void CRoverGroundIdle::Handle_Input()
 		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pRover->Is_GrappleDrag());
 
+	m_States[THROW_CONTROL] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pRover->Is_AttachThrowTarget());
+
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
@@ -211,6 +215,12 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 	if (m_States[ROPE_DRAG])
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG));
+		return;
+	}
+
+	if (m_States[THROW_CONTROL])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::CONTROL));
 		return;
 	}
 

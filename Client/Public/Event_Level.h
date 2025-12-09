@@ -55,5 +55,18 @@ typedef struct tagOnHoverExitUI : public CEvent
 typedef struct tagMinigamePaletteSuccessUI : public CEvent
 {
 	_bool isSuccess;
-	tagMinigamePaletteSuccessUI(_uint iInstanceIndex = 0) : isSuccess{ isSuccess } {};
+	tagMinigamePaletteSuccessUI(_bool isSuccess) : isSuccess{ isSuccess } {};
 }MINIGAMEPALETTE_SUCCESS_UI_EVENT;
+
+typedef struct tagQTESuccessUI : public CEvent
+{
+	_bool isSuccess;
+	tagQTESuccessUI(_bool isSuccess) : isSuccess{ isSuccess } {};
+}QTE_SUCCESS_UI_EVENT;
+
+typedef struct tagQTEFailUI : public CEvent
+{
+	_bool isFail;
+	tagQTEFailUI(_bool isFail) : isFail{ isFail } {};
+}QTE_FAIL_UI_EVENT;
+

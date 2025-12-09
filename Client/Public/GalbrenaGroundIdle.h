@@ -17,6 +17,7 @@ private:
 		FLY,
 		ROPE_HOOK,
 		ROPE_DRAG,
+		THROW_CONTROL,
         SPRINT,
         MOVE,
 		MOVE_U,
