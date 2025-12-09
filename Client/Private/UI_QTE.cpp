@@ -247,6 +247,8 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isGoinFail = false;
 
 	m_isActivate = true;
+
+	m_pGameSystem->HUD_FadeOut();
 }
 
 void CUI_QTE::PreAssign_ChildUIs()
@@ -466,6 +468,7 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 	}
 
 	m_IsGoinDisabled = true;
+	m_pGameSystem->HUD_FadeIn();
 }
 
 void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
