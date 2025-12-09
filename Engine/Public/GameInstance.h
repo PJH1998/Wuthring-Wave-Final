@@ -344,7 +344,7 @@ public:
 	void						Set_FogMaxHeight(_float fFogMaxHeight);
 	void						Set_FogDistanceFallOff(_float fDistanceFallOf);
 	void						Set_FogRayDensityScale(_float fFogRayDensityScale);
-
+	void						Set_FogScatterWeight(_float fFogScatterWeight);
 	void						Begin_VF();
 #pragma endregion
 

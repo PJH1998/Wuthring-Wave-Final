@@ -78,7 +78,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 HRESULT CVolumetricFog::SetUp_FogNF()
 {
 	m_vFogRange.x = m_pGameInstance->Get_CurrentCamera_Near();//m_pGameInstance->Get_CurrentCamera_Near(); 
-	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far() * 0.4f;
+	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far() * 0.3f;
 
 	m_VF_Data.fNear = m_vFogRange.x;
 	m_VF_Data.fFar = m_vFogRange.y;

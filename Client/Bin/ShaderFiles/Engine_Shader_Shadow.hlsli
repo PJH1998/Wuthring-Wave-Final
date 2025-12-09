@@ -189,7 +189,7 @@ struct NeighborData
 
 NeighborData Check_Neighbor(float2 vTexcoord, int2 vSector, float fNeighborDistance)
 {
-    NeighborData Neighbor = (NeighborData)0;
+    NeighborData Neighbor = (NeighborData) 0;
     
     bool4 Dir = false; // x = LEFT, y = RIGHT, z = UP, w = BOTTOM
     
@@ -197,7 +197,6 @@ NeighborData Check_Neighbor(float2 vTexcoord, int2 vSector, float fNeighborDista
     Dir.y = (vTexcoord.x + fNeighborDistance) >= 1.f;
     Dir.z = (vTexcoord.y - fNeighborDistance) <= 0.f;
     Dir.w = (vTexcoord.y + fNeighborDistance) >= 1.f;
-   
    
     int2 TempSectors[4];
     
@@ -273,9 +272,15 @@ float Compute_ShadowMap(float fViewZ, float NdotL, float4 vWorldPos, Texture2DAr
     
     int iIndex = vSector.x;
     
+    if (iIndex >= iNumSector || iIndex < 0)
+        return fShadow;
+    
     float4x4 matVP = mul(g_SectorViewMatrix[iIndex], g_SectorProjMatrix[iIndex]);
     float4 vProjPos = mul(vWorldPos, matVP);
     vProjPos.xyz /= vProjPos.w;
+        
+    if (vProjPos.z >= 1.f || vProjPos.z < 0.f)
+        return fShadow;
         
     float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
     NeighborData Neighbor =  Check_Neighbor(vTexcoord, vSector, 0.05f);

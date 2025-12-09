@@ -82,6 +82,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+	m_pShaderCom->Bind_Value("g_CamPos", m_pGameInstance->Get_CamPos(), sizeof(_float4), pEffect);
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
