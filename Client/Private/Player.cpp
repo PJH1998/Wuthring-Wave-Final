@@ -340,7 +340,7 @@ void CPlayer::Player_KeyInput()
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::ROVER;
-				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
+				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
 				m_ChangeTimers[CHARACTERTYPE::ROVER] = m_fChangeCoolTime;
 				return;
 			}
@@ -352,7 +352,7 @@ void CPlayer::Player_KeyInput()
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
-				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
+				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
 				m_ChangeTimers[CHARACTERTYPE::AUGUSTA] = m_fChangeCoolTime;
 				return;
 			}
@@ -363,7 +363,7 @@ void CPlayer::Player_KeyInput()
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::GALBRENA;
-				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
+				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
 				m_ChangeTimers[CHARACTERTYPE::GALBRENA] = m_fChangeCoolTime;
 				return;
 			}
@@ -426,9 +426,9 @@ void CPlayer::Player_KeyInput()
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 
-		//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
-		//LEVI_GRAB Desc{ true };
-		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		LEVI_GRAB Desc{ true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
 		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
 		// Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 
@@ -558,6 +558,8 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
 	}
 	
+	// 8. PlayerStatus 갱신
+	m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
 
 }
 
@@ -815,6 +817,7 @@ void CPlayer::Sorting_Target()
     {
         //m_pTargetTransform = m_TargetTransforms[0];
 		m_TargetInfo = m_TargetCandidates[0];
+		m_TargetInfo.IsActive = true;
     }
 
 }
@@ -921,7 +924,11 @@ void CPlayer::Sorting_GrappleTarget()
 		});
 
 	if (0 < m_GrappleCandidates.size())
+	{
 		m_TargetGrappleInfo = m_GrappleCandidates[0];
+		m_TargetGrappleInfo.IsActive = true;
+	}
+		
 }
 
 
