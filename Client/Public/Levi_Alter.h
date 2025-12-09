@@ -70,6 +70,7 @@ private:
 
 	_bool					m_isTurnLerp{};
 	_bool					m_isDist_Interp_Enable{};
+	_float					m_fRootMotionRate;
 
 private:
 	void			Bind_Resources();

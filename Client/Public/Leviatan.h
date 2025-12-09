@@ -64,9 +64,9 @@ private:
 	CComputeShader* m_pFacialComputeShaderCom = { nullptr };
 
 	//const _float4x4* m_pToeMatrix = { nullptr };
-
-	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
-	CAttackVolume* m_pParryVolume = { nullptr, };
+	CRigidbody*				m_pExecuteCom = { nullptr };
+	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
+	CAttackVolume*			m_pParryVolume = { nullptr, };
 	vector<_uint>			m_ShaderIndices;
 	//vector<_float3>			m_BowOffsets;
 	const _float4x4*		m_pBowSocket = { nullptr };
@@ -101,6 +101,7 @@ private:
 	_bool					m_isRender{};
 	_bool					m_isAreaAttack{};
 	_uint					m_iPhase{};
+	_bool					m_isExecuteEnable{};
 #pragma endregion
 
 #pragma region ACTION_PRODUCT
@@ -148,6 +149,7 @@ private:
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						Execute_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 	void						AreaAttack(_float fTimeDelta);
 	void						TurnFix();
