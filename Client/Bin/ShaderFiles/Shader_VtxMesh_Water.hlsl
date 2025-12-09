@@ -335,7 +335,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL_FOCUS();
     }
 
-    pass Emissive       //3
+    pass Emissive            // 3
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -346,7 +346,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_EMISSIVE();
     }
     
-    pass LogoWater
+    pass LogoWater        // 4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);

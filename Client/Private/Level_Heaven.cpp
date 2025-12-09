@@ -37,7 +37,7 @@ CLevel_Heaven::CLevel_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Heaven::Initialize()
 {
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+	m_pGameInstance->SetUp_OctoTree(_float3(-830.1f, 506.82f, -216.83f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
 	m_pGameInstance->Setting_LUT(0, 0.25f, false);

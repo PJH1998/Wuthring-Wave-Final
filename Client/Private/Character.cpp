@@ -311,6 +311,20 @@ void CCharacter::Print_LookRay()
 	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
 }
 
+void CCharacter::Debug_ImGui()
+{
+	ImGui::Begin("Begin Character");
+
+	static float vColor[3] = { 0.f, 0.f, 0.f};
+	ImGui::SliderFloat3("Motion Trail Color", vColor, 0.f, 1.f);
+
+	m_vMotionTrailColor.x = vColor[0];
+	m_vMotionTrailColor.y = vColor[1];
+	m_vMotionTrailColor.z = vColor[2];
+
+	ImGui::End();
+}
+
 #endif // _DEBUG
 
 #pragma region STATE
@@ -430,7 +444,7 @@ void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float
 	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio);
 }
 
-void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
+void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor, _uint iShaderPath)
 {
 	CMotionTrail::MOTION_TRAIL_DESC Desc = {};
 	Desc.pModel = m_pModelCom;
@@ -439,7 +453,7 @@ void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fM
 	Desc.fMotionLifeTime = fMotionLifeTime;
 	Desc.fInterval = fInterval;
 	Desc.fDuration = fDuration;
-	Desc.iShaderPassIndex = 0; 
+	Desc.iShaderPassIndex = iShaderPath; 
 	m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
 }
 
@@ -503,7 +517,9 @@ UI_TAB_UTILITY CCharacter::Get_UtilityType()
 _bool CCharacter::Is_GrappleHook()
 {
 	// 1. 예외 조건 처리.
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) || 
+		(OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
@@ -521,7 +537,9 @@ _bool CCharacter::Is_GrappleHook()
 _bool CCharacter::Is_GrappleDrag()
 {
 	// 1. 예외 조건 처리. 
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) ||
+		(OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	// 2. 카메라 Frustum 안에 있는가?
@@ -537,7 +555,9 @@ _bool CCharacter::Is_GrappleDrag()
 // Zip 로프액션 이후에 겹쳐지는 경우를 판단.
 _bool CCharacter::Is_ReachedGrappleHook()
 {
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) || 
+		(OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);

@@ -259,6 +259,8 @@ private:
 	_bool IsEye(_uint iMeshIndex);
 
 
+	void Process_MotionTrail(const _wstring& wStrObjectTag);
+
 
 private:
 	void Bind_Resources();

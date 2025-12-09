@@ -10,6 +10,8 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CLevi_Alter final : public CActor
 {
 public:
@@ -56,6 +58,8 @@ public:
 	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
+	CGameSystem*			m_pGameSystem = { nullptr };
+
 	//CAnimMachine* m_pAnimMachineCom = { nullptr };
 	ATTACK_TYPE				m_eType{};
 	_float4					m_vBaseColor{};
@@ -70,7 +74,7 @@ private:
 
 	_bool					m_isTurnLerp{};
 	_bool					m_isDist_Interp_Enable{};
-	_float					m_fRootMotionRate;
+	_float					m_fRootMotionRate{};
 
 private:
 	void			Bind_Resources();

@@ -2,6 +2,7 @@
 #include "Levi_Alter.h"
 #include "Levi_Bayonet.h"
 #include "Levi_Bow.h"
+#include "GameSystem.h"
 
 CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -10,7 +11,9 @@ CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CLevi_Alter::CLevi_Alter(const CLevi_Alter& Prototype)
 	: CActor { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevi_Alter::Initialize_Prototype()
@@ -66,7 +69,8 @@ void CLevi_Alter::Update(_float fTimeDelta)
 	{
 		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
 	}
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta, &fTrackPos, true, false, true, m_fRootMotionRate * temp);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta * fTimeRatio, &fTrackPos, true, false, true, m_fRootMotionRate * temp);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPos >= m_Tracks[m_strPatternKey].second)
 	{
@@ -422,4 +426,6 @@ CGameObject* CLevi_Alter::Clone(void* pArg)
 void CLevi_Alter::Free()
 {
 	__super::Free();
+
+	Safe_Release(m_pGameSystem);
 }
