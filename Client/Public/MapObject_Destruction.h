@@ -66,6 +66,7 @@ private:
 	_uint m_iTriggerIndex = {};
 	_wstring m_szDebrisName;
 	CALLBACK_CLIENT m_CallBack = {};
+	void* m_pUI;
 public:
 	static CMapObject_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
