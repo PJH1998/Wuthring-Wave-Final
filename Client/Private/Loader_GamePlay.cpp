@@ -16,6 +16,7 @@
 #include"MapObject_FireFly.h"
 #include"Slide_Navigation.h"
 #include"Potal.h"
+#include"MapObject_Turn.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -147,6 +148,7 @@ HRESULT CLoader_GamePlay::Load_Texture()
 {
 	cout << "Texture" << endl;
 
+#pragma region POTAL
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Mask"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Ring_011.png"), 1))))
 		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
@@ -154,6 +156,7 @@ HRESULT CLoader_GamePlay::Load_Texture()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Diffuse"),
 		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Mask_18312.png"), 1))))
 		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+#pragma endregion
 
 	return S_OK;
 }
@@ -167,7 +170,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1207_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1209_second/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -247,7 +250,10 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		CPotal::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Turn"),
+		CMapObject_Turn::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 	return S_OK;
 }
@@ -1073,6 +1079,7 @@ HRESULT CLoader_GamePlay::Load_NPC()
 {
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleM.csv", 0);
 	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCMaleM.csv", 1);
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
 	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
 
 	vector<_string> TypeName = { "Body", "Hair", "Face" };
@@ -1123,8 +1130,6 @@ HRESULT CLoader_GamePlay::Load_NPC()
 }
 HRESULT CLoader_GamePlay::Load_Hide_And_Seek()
 {
-	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
-
 	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
 	//Prototype_Component_Model_FemaleS370437
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370437"),

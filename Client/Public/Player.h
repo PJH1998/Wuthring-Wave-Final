@@ -122,16 +122,15 @@ private:
 	// LockOn
 	//vector<class CTransform*> m_TargetTransforms;
 	vector<TARGET_INFO> m_TargetCandidates;
-	//vector<pair<class CTransform*, OBJECTTYPE>> m_GrappleCandidates;
 	vector<GRAPPLE_INFO> m_GrappleCandidates;
-	//vector<class CTransform*> m_GrappleTargetTransforms;
+	vector<THROW_INFO> m_ThrowCandidates;
 
-	//class CTransform* m_pTargetTransform = { nullptr };
-	//class CTransform* m_pLockOnTargetTransform = { nullptr };
 
 	TARGET_INFO m_TargetInfo = {};
 	TARGET_INFO m_LockOnTargetInfo = {};
 	GRAPPLE_INFO m_TargetGrappleInfo = { };
+	THROW_INFO m_TargetThrowInfo = {};
+
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };
@@ -154,10 +153,12 @@ private:
 	UI_TAB_UTILITY m_eUtilityType = { UI_TAB_UTILITY::NOTHING }; // Player에서 관리.
 
 	// Timer 관리.
-	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END];
+	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END] = {};
 	_float m_fChangeCoolTime = {};
 
 	_float3 m_vLockOnPos = {};
+
+	_bool m_IsThrowReserve = { false };
 
 
 private:
@@ -173,10 +174,15 @@ private:
 	// Grapple Target 검색 (매프레임)
 	void Sorting_GrappleTarget();
 	void Toggle_Grapple();
+	// Throw Target 검색 (매프레임)
+
+	void Sorting_ThrowTarget();
+	void Toggle_Throw();
 
 	// Collider 처리.
 	void Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc);
 	void Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc);
+	void Process_CollideThrow(const CALLBACK_CLIENT* pcallDesc);
 
 	// 몬스터 QTE Event 처리.
 	void Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg);

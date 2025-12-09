@@ -624,6 +624,14 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Burn")
 							, ENUM_CLASS(eLevel), TEXT("Layer_Burn"), &pDesc);
 						break;
+					case OBJECTTYPE::DOME:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Dome")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Dome"), &pDesc);
+						break;
+					case OBJECTTYPE::TURN:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Turn")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Turn"), &pDesc);
+						break;
 					default:
 						if (ModelName.find("_Wat_") != string::npos)
 							m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Water")
