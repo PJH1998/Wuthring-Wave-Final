@@ -100,7 +100,7 @@ void CSequenceAugusta::Update(_float fTimeDelta)
 	if (!IsDissolve)
 	{
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 	}
@@ -454,7 +454,9 @@ void CSequenceAugusta::Activate(_bool IsActivate)
 		m_IsOutLineVisible = true;
 		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
+		m_pTransformCom->Save_PreviousPosition();
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+		Sync_Collider(XMVectorZero(), 0.f);
 
 		// State까지 결정
 		m_StateContext.m_eSkillType = ESequenceAugustaSkillType::ATTACK_SPSKILL;

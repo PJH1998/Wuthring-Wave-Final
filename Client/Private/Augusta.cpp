@@ -300,7 +300,7 @@ void CAugusta::Render_OutLine()
 	}
 }
 
-void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	// 현재 애니메이션 제거.
 	m_pStateMachineCom->Exit_State();

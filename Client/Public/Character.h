@@ -33,6 +33,12 @@ public:
 		const _float4x4* pSocketMatrix = { nullptr };
 	}CAPTURE_DESC;
 
+	typedef struct tagQTEDesc {
+
+		CTransform* pTargetTransform = { nullptr };
+		CHARACTER_EVENT eEvent = { CHARACTER_EVENT::END };
+	}QTE_DESC;
+
 
 
 public:
@@ -191,6 +197,9 @@ public:
 	
 
 	void Use_Spring(_float fDestination, _float fDuration);
+
+	void Stop_Anim();
+	void Start_Anim();
 #pragma endregion
 
 
@@ -225,7 +234,7 @@ public:
 	void Bind_CostCondition_ToAbility(_uint iConditionw, _uint iConditionFlag);
 
 	// Transition Character From Player
-	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) {}; // 전환 시 실행할 함수.
 
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
@@ -251,6 +260,7 @@ public:
 	
 	// TargetPosition
 	void Bind_TargetPosition(_fvector vPos);
+	void Bind_Target(class CTransform* pTransform);
 
 	// Hit
 	_bool Is_Hit() { return m_IsHit; }
@@ -302,6 +312,7 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+	void Rotate_Target(class CTransform* pTransform);
 	void Rotate_TargetPosition();
 	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);

@@ -38,7 +38,8 @@
 #include "NPCInstancing.h"
 #include "NPCCell.h"
 #include "Napal.h"
-#include"NPC_Griffin.h"
+#include "NPC_Griffin.h"
+#include "NPC_Hiding.h"
 #pragma endregion
 
 #pragma region UI
@@ -129,6 +130,7 @@ HRESULT CLoader_GamePlay::Initialize()
 
 	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Production(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Hide_And_Seek(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -1108,7 +1110,7 @@ HRESULT CLoader_GamePlay::Load_NPC()
 		CNapal::Create(m_pDevice, m_pContext))))
 		CRASH("NPCCell Prototype Create Failed");
 
-	// Prototype_Component_AnimMachine_FalseSovereign
+	// Prototype_Component_AnimMachine_NPCGriffin
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
 		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
 		CRASH("Monster AnimMachine Create Failed");
@@ -1120,6 +1122,52 @@ HRESULT CLoader_GamePlay::Load_NPC()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_NPCGriffin"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
 			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
+		CRASH("Prototype Create Failed");
+	return S_OK;
+}
+HRESULT CLoader_GamePlay::Load_Hide_And_Seek()
+{
+	m_pGameSystem->LoadNPCDataTable("../Bin/Resource/Data/NPCHiding.csv", 3);
+
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	//Prototype_Component_Model_FemaleS370437
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370437"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS370437/FemaleS370437.dat"))))
+		CRASH("Prototype Create Failed");
+
+	//Prototype_Component_Model_FemaleS370708
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370708"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS370708/FemaleS370708.dat"))))
+		CRASH("Prototype Create Failed");
+
+	//Prototype_Component_Model_FemaleS380101
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS380101"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS380101/FemaleS380101.dat"))))
+		CRASH("Prototype Create Failed");
+
+	//Prototype_Component_Model_FemaleS371438
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS371438"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS371438/FemaleS371438.dat"))))
+		CRASH("Prototype Create Failed");
+
+	//Prototype_Component_Model_FemaleS381221
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS381221"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS381221/FemaleS381221.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_NPC_Hiding
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPC_Hiding"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS_StateMachine.json"))))
+		CRASH("NPC AnimMachine Create Failed");
+
+	// Prototype_GameObject_NPC_Hiding
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+		CNPC_Hiding::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 	return S_OK;
 }

@@ -109,75 +109,6 @@ void CSequencePlayer::OnCollider_During(_uint iLayer, void* pDesc, const Contact
 	}
 }
 
-//void CSequencePlayer::Summon_Squad_Near_Boss(CTransform* pTarget)
-//{
-//	// 1. 이미 활성화 되어있다면 중복 소환 방지
-//	if (m_Characters.empty()) return;
-//	if (nullptr == pTarget) return;
-//
-//	// 1. 기존에 관리하던 활성화 리스트 초기화
-//	m_SequenceCharacters.clear();
-//	SetActivate(true);
-//
-//	// 2. 보스 주변 위치 계산
-//	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-//	_vector vBossPos = pTarget->Get_State(STATE::POSITION);
-//	_vector vBossLook = XMVector3Normalize(pTarget->Get_State(STATE::LOOK));
-//	_vector vBossRight = XMVector3Normalize(XMVector3Cross(vWorldUp, vBossLook));
-//	m_pTransformCom->Set_State(STATE::POSITION, vBossPos);
-//
-//	_float fDist = 2.0f;
-//
-//	// 3. 이번 턴에 소환할 3명 (혹은 남은 인원)
-//	_uint iSpawnBatchCount = 0; // 이번 배치에 몇 명 뽑았는지 카운트
-//
-//	for(_uint i = 0; i < 3; ++i)
-//	{
-//		// [중요] 현재 인덱스의 캐릭터 가져오기
-//		CCharacter* pCharacter = m_Characters[m_iNextSpawnIndex];
-//
-//		// --- 위치 계산 로직 (iSpawnBatchCount 기준) ---
-//		_vector vSpawnPos = vBossPos;
-//		switch (iSpawnBatchCount)
-//		{
-//		case 0: // 뒤
-//			vSpawnPos += (vBossLook * -1.f * fDist);
-//			break;
-//		case 1: // 왼쪽
-//			vSpawnPos += (vBossRight * -1.f * fDist);
-//			break;
-//		case 2: // 오른쪽
-//			vSpawnPos += (vBossRight * fDist);
-//			break;
-//		}
-//		vSpawnPos = XMVectorSetY(vSpawnPos, XMVectorGetY(vBossPos) + 1.0f); // Y축 보정
-//
-//		if (pCharacter)
-//		{
-//			// 타겟 바인딩 및 활성화 (Dissolve 상태 해제 포함됨)
-//			pCharacter->Set_Position(XMVectorSetW(vSpawnPos, 1.f));
-//			pCharacter->Bind_TargetPosition(vBossPos);
-//			pCharacter->Activate(true);
-//
-//			// 업데이트 리스트에 추가
-//			m_SequenceCharacters.push_back(pCharacter);
-//		}
-//
-//		iSpawnBatchCount++; 
-//		m_iNextSpawnIndex++;
-//
-//		// 만약 전체 리스트의 끝에 도달했다면?
-//		if (m_iNextSpawnIndex >= m_Characters.size())
-//		{
-//			m_iNextSpawnIndex = 0;
-//			break; 
-//		}
-//	}
-//
-//	// 4. SequencePlayer 활성화
-//	m_isActivate = true;
-//}
-
 void CSequencePlayer::Summon_Squad_Near_Boss(CTransform* pTarget)
 {
 	if (m_Characters.empty()) return;
@@ -190,12 +121,16 @@ void CSequencePlayer::Summon_Squad_Near_Boss(CTransform* pTarget)
 	// 2. 보스 주변 위치 계산
 	_vector vWorldUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
 	_vector vBossPos = pTarget->Get_State(STATE::POSITION);
-	_vector vBossLook = XMVector3Normalize(pTarget->Get_State(STATE::LOOK));
+	_vector vBossLook = XMVectorSetY(pTarget->Get_State(STATE::LOOK), 0.f);
+	vBossLook = XMVector3Normalize(vBossLook);
 	_vector vBossRight = XMVector3Normalize(XMVector3Cross(vWorldUp, vBossLook));
 	m_pTransformCom->Set_State(STATE::POSITION, vBossPos);
 
 	_float fDist = 2.0f;
 
+	_vector vPlayerPos = m_pGameSystem->Get_PlayerPosition();
+
+	cout << "Boss Pos " << vBossPos.m128_f32[0] << ", " << vBossPos.m128_f32[1] << ", " << vBossPos.m128_f32[2] << endl;
 
 	for (_int i = 0; i < SEQUENCECHARACTER::SEQUENCE_END; ++i)
 	{
@@ -205,17 +140,20 @@ void CSequencePlayer::Summon_Squad_Near_Boss(CTransform* pTarget)
 
 		if (i == YUNO)
 			vSpawnPos += (vBossLook * -1.f * fDist);
+			
 		if (i == AUGUSTA)
 			vSpawnPos += (vBossRight * 1.f * fDist * 2.f);
+			
 		if (i == LUPA)
 			vSpawnPos += (vBossRight * -1.f * fDist * 3.f);
-
+			
 		vSpawnPos = XMVectorSetY(vSpawnPos, XMVectorGetY(vBossPos) + 1.0f); // Y축 보정
 
 		if (pCharacter)
 		{
 			// 타겟 바인딩 및 활성화
 			pCharacter->Set_Position(XMVectorSetW(vSpawnPos, 1.f));
+			
 			pCharacter->Bind_TargetPosition(vBossPos);
 			pCharacter->Activate(true);
 
@@ -224,8 +162,8 @@ void CSequencePlayer::Summon_Squad_Near_Boss(CTransform* pTarget)
 		}
 	}
 
-	// 4. SequencePlayer 활성화
-	m_isActivate = true;
+
+
 }
 
 

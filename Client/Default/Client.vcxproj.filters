@@ -1291,6 +1291,11 @@
     <ClInclude Include="..\Public\TimeLack.h">
       <Filter>01. GameSystem\TimeLack</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Throw.h" />
+    <ClInclude Include="..\Public\RoverEvent.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Effect_Light.h">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>
     </ClInclude>
@@ -2048,6 +2053,11 @@
     </ClCompile>
     <ClCompile Include="..\Private\TimeLack.cpp">
       <Filter>01. GameSystem\TimeLack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Throw.cpp" />
+    <ClCompile Include="..\Private\MapObject_Burn.cpp" />
+    <ClCompile Include="..\Private\RoverEvent.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Light.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXLight</Filter>

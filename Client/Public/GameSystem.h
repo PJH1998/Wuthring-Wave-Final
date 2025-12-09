@@ -220,9 +220,6 @@ public:
 
 #pragma region PLAYER_INTERACT
 	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
-	void						Call_Animation();
-	void						Call_PlayerVisible();
-	void						Unbind_Grab();
 #pragma endregion
 
 #pragma region PLAYER

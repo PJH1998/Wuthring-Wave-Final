@@ -1339,12 +1339,12 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	{
 		//isHit = true;
 		fHPReduceLeftTime = fHPReduceTime;
-		cout << "[UI_HUD::Update_UI_BossHPBar] Triggered!" << endl;
+		//cout << "[UI_HUD::Update_UI_BossHPBar] Triggered!" << endl;
 	}
 
 	if (!(fHPReduceLeftTime <= 0.01f))
 	{
-		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
+		//cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
 	}
 
 
