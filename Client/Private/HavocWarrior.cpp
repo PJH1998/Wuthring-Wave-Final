@@ -85,7 +85,8 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //gpu
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); //gpu
 
 	//공격이 성공했을 때 상태 유지 시간 정의
 	if(m_iState & ENUM_CLASS(TEST_STATE::STRIKE))

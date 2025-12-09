@@ -1190,7 +1190,7 @@ void CRenderer::Render_ObjectList(_uint iRG_Index)
 HRESULT CRenderer::Ready_RT()
 {
 	/* RenderTarget Diffuse */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 0.f, 1.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(1.f, 0.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Normal */

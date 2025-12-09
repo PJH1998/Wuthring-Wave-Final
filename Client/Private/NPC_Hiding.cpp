@@ -272,7 +272,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	if(strAnimTag == "Common_NewSit_01_Loop")
-		ColliderDesc.vOffset = _float3(0.f, 0.55f, -1.f);
+		ColliderDesc.vOffset = _float3(0.f, 0.55f, -0.85f);
 	else
 		ColliderDesc.vOffset = _float3(0.f, 0.55f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;

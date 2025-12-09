@@ -1767,7 +1767,7 @@ void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIn
 				_wstring strSfxTag = StringToWString(Data["Tag"]);
 				SFX_Data.strSfxTag = strPooling + strSfxTag;
 
-				m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
+				m_pGameInstance->Add_PoolingObject_ForStatic(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
 					SFX_Data.strSfxTag, 1, nullptr);
 
 				Children.push_back(SFX_Data);
@@ -1783,7 +1783,7 @@ void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIn
 
 			_wstring PoolingTag = StringToWString(PrefabJson["Tag"]);
 
-			m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
+			m_pGameInstance->Add_PoolingObject_ForStatic(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
 				PoolingTag, 1, &PrefabDesc);
 
 			InputFile.close();

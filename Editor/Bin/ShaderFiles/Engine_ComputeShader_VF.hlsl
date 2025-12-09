@@ -251,8 +251,7 @@ NeighborData Check_Neighbor(float2 vTexcoord, int2 vSector, float fNeighborDista
     Dir.x = (vTexcoord.x - fNeighborDistance) <= 0.f;
     Dir.y = (vTexcoord.x + fNeighborDistance) >= 1.f;
     Dir.z = (vTexcoord.y - fNeighborDistance) <= 0.f;
-    Dir.w = (vTexcoord.y + fNeighborDistance) >= 1.f;
-   
+    Dir.w = (vTexcoord.y + fNeighborDistance) >= 1.f; 
    
     int2 TempSectors[4];
     
@@ -292,7 +291,7 @@ float Compute_NeighborShadow(int2 vNeighborSector, float4 vWorldPos, Texture2DAr
     float4x4 matVP = mul(g_SectorViewMatrix[iIndex], g_SectorProjMatrix[iIndex]);
     float4 vProjPos = mul(vWorldPos, matVP);
     vProjPos.xyz /= vProjPos.w;
-        
+    
     float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
     
     int iUVIndex = iIndex % iNumSectorToLayer;
@@ -340,9 +339,9 @@ float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture
     if(vProjPos.z >= 1.f || vProjPos.z < 0.f)
         return fShadow;
         
-    float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
+    float2 vTexcoord = Compute_Texcoord(vProjPos.xy);                   // Sector Proj
     
-    NeighborData Neighbor = Check_Neighbor(vTexcoord, vSector, 0.05f);
+    NeighborData Neighbor = Check_Neighbor(vTexcoord, vSector, 0.05f);  // 근처 Sector와 거리가 가깝다면 NeighborData 채우기 ( 상 하 좌 우 )
     
     if (any(Neighbor.iNumNeighbor))
     {
@@ -428,10 +427,11 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
    
     float4 vWorldPos = ComputeWorldPosToDTid(DTID);
     
-    float3 vLighting = 0.f;
-    float3 vRayLighting = 0.f;
-    float fRayAtt = 0.f;
-    float3 vOutDir = normalize(vCamPos.xyz - vWorldPosJitter.xyz); //normalize(vViewPos.xyz * -1.f);
+    float3 vLighting = 0.f;             
+    float3 vRayLighting = 0.f;              
+    float fRayAtt = 0.f;                
+    
+    float3 vOutDir = normalize(vCamPos.xyz - vWorldPosJitter.xyz);
         
     for (int i = 0; i < iLightCount; ++i)
     {
@@ -447,8 +447,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
                 float fVisible = Compute_ShadowMap(vWorldPosJitter, g_ShadowMapTexture);
                 fAtt = fVisible;
                 
-                //fRayWeight = saturate(1.f - fVisible);
-                fRayAtt = pow(saturate(1.f - fVisible), 2.f);
+                fRayAtt = pow(saturate(1.f - fVisible), 2.f); // Visible Inv
                 if (fRayAtt < 1.f)
                 {
                     float PhaseRay = HenyeyGreensteinPhasefunction(LightDirection, vOutDir, fRayPhaseFunctionG);
@@ -465,7 +464,9 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         
         float PhaseFunction = HenyeyGreensteinPhasefunction(LightDirection, vOutDir, fPhaseFunctionG);
         
-        float3 vFinalColor = (Light.vDiffuse.xyz * fAtt * PhaseFunction);
+        float fColorWeight = fAtt * PhaseFunction;
+        
+        float3 vFinalColor =  (Light.vDiffuse.xyz * fColorWeight);
         
         vLighting += vFinalColor;
     }
@@ -476,41 +477,30 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
     
     float fDistanceWeight = saturate(1.f - exp(-fDistance * fDistanceFallOff));
 
-    float fSkyWeight = saturate(exp(-fHegihtFallOff * (vWorldPosJitter.y - fFogMaxHeight)));        // exp
+    float fHeightWeight = saturate(exp(-fHegihtFallOff * (vWorldPosJitter.y - fFogMaxHeight)));
     
-//    float fSkyWeight = saturate(1.f - (vWorldPosJitter.y - fFogMaxHeight) / fFogMaxHeight);       // Linear
-    
-    //float fGroundWeight = saturate(exp(fGroundFallOff * ((vCamPos.y + fFogMinHeight) - vWorldPos.y)));
-    //float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPosJitter.y)));
-    
-    float fHeightWeight = fSkyWeight; //max(fSkyWeight, fGroundWeight); // fSkyWeight;
-    
-    float fLightWeight = saturate(fDistanceWeight * fHeightWeight);     
+    float fLightWeight = saturate(fDistanceWeight * fHeightWeight);// * fLightAtt);
     float fRayWeight = saturate(1.f - fLightWeight) * fRayAtt; // LightWieght 가 충분하다면 굳이 추가 X, LightWieght ( Fog가 보이지 않는곳 -> Ray는 살리기 )
     
     float fNoise = 1.f;
     
-    if (fSkyWeight < 1.f)
+    //if (fHeightWeight < 1.f)
     {
         float3 vNoiseUV = (vWorldPos.xyz) * fNoiseScale;
         vNoiseUV.x += fNoiseTimeDelta;
     
-        fNoise = lerp(max(g_NoiseTexture.SampleLevel(DefaultSampler, vNoiseUV, 0), 0.3f), 1.f, fSkyWeight);
+        fNoise = lerp(max(g_NoiseTexture.SampleLevel(DefaultSampler, vNoiseUV, 0), 0.1f), 1.f, fHeightWeight);
     }
     
     float fLightDensity = fDensity * fLightWeight * fNoise;
     float fCurRayDensity = fRayDensity * fRayWeight * fRayDensityScale;
     
-    ///TEST
-    //uint iLightDensity = (uint) round(fLightDensity * 255.f);
-    //uint iRayDensity = (uint) round(fCurRayDensity * 255.f);
-  
-    //float fFinalDensity = ((float) (iRayDensity << 8 | iLightDensity)) / 65535.f;
-    
-    float fFinalDensity = fLightDensity + fCurRayDensity; //max(fLightDensity + fCurRayDensity, 0.0005f);
+    float fFinalDensity = fLightDensity + fCurRayDensity;
     
    // Temporal Reprojection
-    float4 vCurScatterning = float4((vLighting * fLightIntensity * fLightDensity) + (vRayLighting * fRayIntensity * fCurRayDensity), fFinalDensity);
+    float3 vFinalColor = (vLighting * fLightIntensity * fLightDensity) + (vRayLighting * fRayIntensity * fCurRayDensity);
+   
+    float4 vCurScatterning = float4(vFinalColor, fFinalDensity); // (vRayLighting * fRayIntensity * fCurRayDensity)
     
     float4 vFinalScatterning = 0.f;
    
@@ -584,11 +574,6 @@ void VolumetricFog(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID,
         vIndex.z = iSlice;
         
         float4 vLighting = VFLightTexture.Load(int4(vIndex, 0));
-        
-        //uint iDensity = (uint) round(vLighting.a * 65535.f);
-        
-        //float fLightDensity = (iDensity & 0xFF) / 255.f;
-        //float fRayDensity = ((iDensity >> 8) & 0xFF) / 255.f;
         
         uint iNextSlice = clamp(iSlice + 1, 0, vFroxelSize.z);
         

@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "Projectile.h"
+#include "GameSystem.h"
 
 CProjectile::CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
@@ -8,7 +9,9 @@ CProjectile::CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CProjectile::CProjectile(const CProjectile& Prototype)
 	: CGameObject { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CProjectile::Initialize_Prototype()
@@ -42,7 +45,9 @@ void CProjectile::Priority_Update(_float fTimeDelta)
 
 void CProjectile::Update(_float fTimeDelta)
 {
-	m_pTransformCom->Go_Straight(fTimeDelta);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+
+	m_pTransformCom->Go_Straight(fTimeDelta * fTimeRatio);
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	if (m_fDelay <= 0.f)
@@ -54,7 +59,7 @@ void CProjectile::Update(_float fTimeDelta)
 		m_fDelay = m_fMaxDelay;
 	}
 	else
-		m_fDelay -= fTimeDelta;
+		m_fDelay -= fTimeDelta * fTimeRatio;
 }
 
 void CProjectile::Late_Update(_float fTimeDelta)

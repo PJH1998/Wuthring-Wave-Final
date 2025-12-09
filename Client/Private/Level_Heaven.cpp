@@ -50,8 +50,8 @@ HRESULT CLevel_Heaven::Initialize()
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
 	ShadowMapDesc.vCenterPos = _float3(-910.f, 0.f, -1870.f);
-	ShadowMapDesc.vExtents = _float3(200.f, 750.f, 160.f);
-	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+	ShadowMapDesc.vExtents = _float3(200.f, 700.f, 160.f);
+	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, -0.5f);
 
 	// Left Bottom : -910 / -1870
 	// Right Bottom : 600 / -2100
@@ -75,7 +75,7 @@ HRESULT CLevel_Heaven::Initialize()
 //	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
 //LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
-	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, -0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
@@ -98,9 +98,11 @@ HRESULT CLevel_Heaven::Initialize()
 	Ready_Skybox();
 	//Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
+	m_pGameInstance->Set_FogDistanceFallOff(0.01f);
 	m_pGameInstance->Set_FogMaxHeight(300.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+	m_pGameInstance->Set_FogScatterWeight(0.3f);
+
 
 	m_pGameInstance->Begin_VF();
 

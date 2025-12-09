@@ -2,6 +2,8 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
+float4 g_CamPos;
+
 //float4 g_GrassColor = float4(0.7019f, 0.24705f, 0.24705f, 1.f);
 float4 g_GrassColor = float4(0.7844f, 0.4567f, 0.1137f, 1.f);
 float g_fGrassColorIntensity = 0.53f;
@@ -52,6 +54,7 @@ struct VS_OUT
     float4 vBinormal : BINORMAL;
     float2 vTexcoord : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
 };
 
 VS_OUT VS_MAIN(VS_IN In)
@@ -68,7 +71,8 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), g_WorldMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = mul(float4(In.vPosition, 1.f), matWVP);
-
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    
     return Out;
 }
 
@@ -80,6 +84,7 @@ struct PS_IN
     float4 vBinormal : BINORMAL;
     float2 vTexcoord : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
 };
 
 struct PS_OUT_LIGHT
@@ -627,6 +632,7 @@ PS_OUT_LIGHT PS_LOGOMOUNTAIN(PS_IN In)
     
     float4 vDiffuse = lerp(vRockColor, vSnowColor, vMainMask.r);
     
+
     float3 vNormal;
     
     vNormal = vNormalDesc * 2.f - 1.f;
@@ -643,6 +649,24 @@ PS_OUT_LIGHT PS_LOGOMOUNTAIN(PS_IN In)
     vNormal = normalize(mul(vNormal, WorldMatrix));
     
     vNormal = lerp(vNormal, In.vNormal.xyz, vMainMask.r);
+    
+    if (vMainMask.r >= 0.8f)
+    {
+        float3 vLook = normalize(g_CamPos.xyz - In.vWorldPos.xyz);
+    
+        float fRimPower = 0.f;
+    
+        float fNdoV = dot(vNormal, vLook);
+    
+        fRimPower = 1.f - abs(fNdoV);
+    
+        fRimPower = smoothstep(cos(radians(45.f)), 1.f, fRimPower);
+    
+        fRimPower *= 0.5f;
+        
+        vDiffuse += vDiffuse * fRimPower;
+    }
+    
     
     vNormal = vNormal * 0.5f + 0.5f;
     
