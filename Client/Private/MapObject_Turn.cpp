@@ -295,8 +295,7 @@ CGameObject* CMapObject_Turn::Clone(void* pArg)
 void CMapObject_Turn::Free()
 {
 	__super::Free();
-	if (m_IsCloned)
-		Release();
+
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
