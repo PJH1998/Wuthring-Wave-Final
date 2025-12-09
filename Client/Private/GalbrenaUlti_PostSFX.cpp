@@ -172,7 +172,7 @@ HRESULT CGalbrenaUlti_PostSFX::Ready_Components()
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
 		ASSERT_CRASH(m_pShader);
 
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_Texture_SFX_Noise"),
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Texture_SFX_Noise"),
 		TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pNoiseTexture), nullptr)))
 		ASSERT_CRASH(m_pNoiseTexture);
 
