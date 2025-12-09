@@ -190,7 +190,7 @@ void CRoverGroundSkill::SetUp_Animations()
 {
     //CState::Add_Animations(ENUM_CLASS(ERoverSkillType::EX_SKILL02), "Ex_Skill02", 1.f, 120.f);
     CState::Add_Animations(ENUM_CLASS(ERoverSkillType::EX_SKILL02), "Ex_Skill02", 1.f, 40.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverSkillType::SKILL02), "Skill02", 1.f, 80.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverSkillType::SKILL02), "Skill02", 1.f, 40.f);
 
     m_PartsAnimations.emplace("Ex_Skill02", "Scythe_Ex_Attack03");
     m_PartsAnimations.emplace("Skill02", "G_Skill02");
