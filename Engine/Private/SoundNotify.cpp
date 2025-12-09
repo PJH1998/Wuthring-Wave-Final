@@ -19,8 +19,7 @@ void CSoundNotify::Execute()
 
 	iChannel = iChannel % 31;
 	if ("Effect" == m_strSoundType)
-		m_pGameInstance->Play_Sound(m_wStrSoundTag, iChannel++, m_fVolume); // ?쇰떒 梨꾨꼸 ?꾩떆.
-		//m_pGameInstance->Play_Other(m_wStrSoundTag, m_fVolume); // ?쇰떒 梨꾨꼸 ?꾩떆.
+		m_pGameInstance->Play_Sound(m_wStrSoundTag, iChannel++, m_fVolume);
 
 }
 

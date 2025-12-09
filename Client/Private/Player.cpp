@@ -208,6 +208,8 @@ void CPlayer::Late_Update(_float fTimeDelta)
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
+	// 채널에서 위치 갱신
+	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
 	
 
 #ifdef _DEBUG
