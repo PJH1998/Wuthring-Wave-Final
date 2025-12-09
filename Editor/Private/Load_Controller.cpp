@@ -406,8 +406,8 @@ void CLoad_Controller::Load_Particle_VB_FromJson(const _string& strFilePath, con
 	if (ParticleVBJson.contains("RingAngle_Min"))
 		Desc.fRmin = ParticleVBJson["RingAngle_Min"].get<_float>();
 
-	if (ParticleVBJson.contains("RingAngle_max"))
-		Desc.fRmax = ParticleVBJson["RingAngle_max"].get<_float>();
+	if (ParticleVBJson.contains("RingAngle_Max"))
+		Desc.fRmax = ParticleVBJson["RingAngle_Max"].get<_float>();
 
 	if (ParticleVBJson.contains("DegreeAngle") && ParticleVBJson["DegreeAngle"].is_array())
 	{
