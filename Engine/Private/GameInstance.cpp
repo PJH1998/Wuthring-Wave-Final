@@ -192,6 +192,8 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
 	m_pFade->Update(fTimeDelta);
+
+	m_pSound_Manager->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -264,25 +266,33 @@ _long CGameInstance::Get_DIMouseMove(MOUSEMOVESTATE eState)
 #pragma endregion
 
 #pragma region SOUND_MANAGER
-HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath)
+HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath, _bool is3D)
 {
-	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath);
+	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
 }
-HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath)
+HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D)
 {
-	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath);
+	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath, is3D);
 }
-void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop)
+void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
-	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, isStop);
+	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume);
 }
-void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop)
+void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
 {
-	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume, isStop);
+	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
+}
+void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+{
+	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume);
 }
 void CGameInstance::Play_Other(const _wstring& strSoundTag, _float fVolume)
 {
 	m_pSound_Manager->Play_Other(strSoundTag, fVolume);
+}
+void CGameInstance::Play_Other(const _wstring& strSoundTag, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+{
+	m_pSound_Manager->Play_Other(strSoundTag, fVolume, pTransform, fMinDistance, fMaxDistance);
 }
 void CGameInstance::Stop_Sound(_uint iChannelID)
 {
