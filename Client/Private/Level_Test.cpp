@@ -86,8 +86,8 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
 	Ready_AnimInstanceTest();
-	Ready_Leviatan();
-	//Ready_NPC();
+	//Ready_Leviatan();
+	Ready_NPC();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -661,8 +661,9 @@ void CLevel_Test::Ready_NPC()
 	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleS370437"));
 	NPCDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	//NPCDesc.strFolderPath = "../Bin/Resource/Model/Monster/ElectroPredator/Notify";
-	NPCDesc.fRotationPerSec = XMConvertToRadians(100.f);
-	NPCDesc.fSpeedPerSec = 10.f;
+	NPCDesc.isCollide = true;
+	NPCDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	NPCDesc.fSpeedPerSec = 1.f;
 	NPCDesc.vInitPos = _float3(3.f, -8.f, -33.f);
 	NPCDesc.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	NPCDesc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");

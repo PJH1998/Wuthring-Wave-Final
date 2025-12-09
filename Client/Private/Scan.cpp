@@ -65,7 +65,6 @@ void CScan::Late_Update(_float fTimeDelta)
 	if (m_fCurRadius >= m_vRadius.y)
 	{
 		m_pRigidBody->IsActivate(false);
-		
 		m_isActivate = false;
 		return;
 	}
@@ -100,7 +99,7 @@ void CScan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	_float fScale = (m_fCurRadius + m_fWidth) * 2.f;
 	_float fScaleY = (m_vRadius.y + m_fWidth) * 2.f;
-
+	
 	m_pTransformCom->Scale(_float3(fScale, fScaleY, fScale));
 
 	m_pRigidBody->Set_Position(vPosition);
@@ -122,11 +121,10 @@ HRESULT CScan::Ready_Components()
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShader), nullptr)))
 		ASSERT_CRASH(m_pShader);
 
-
 	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::SPHERE;
-	RigidbodyDesc.eType = EMotionType::Dynamic;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::INTERACTION);
 	RigidbodyDesc.fRadius = m_vRadius.y;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));

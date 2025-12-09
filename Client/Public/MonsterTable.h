@@ -8,7 +8,7 @@ class CGameSystem;
 class CMonsterTable final : public CBase
 {
 private:
-	enum NPCTYPE { FEMALE_M, MALE_M, FEMALE_S, END };
+	enum NPCTYPE { FEMALE_M, MALE_M, FEMALE_S, HIDING, END };
 
 private:
 	explicit CMonsterTable();

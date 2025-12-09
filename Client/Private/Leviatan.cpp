@@ -1066,14 +1066,14 @@ void CLeviatan::AreaAttack(_float fTimeDelta)
 	m_fDropAcc += fTimeDelta;
 	m_fFenceAcc += fTimeDelta;
 
-	if (m_fDropAcc >= 0.5f)
+	if (m_fDropAcc >= 0.25f)
 	{
 		m_fDropAcc = 0.f;
 		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
-		_float fRange = m_pGameInstance->Rand(0.5f, 5.f);
-		_float3 vSpawnPos = m_vTargetPosition;
+		_float fRange = m_pGameInstance->Rand(0.5f, 10.f);
+		_float3 vSpawnPos = { m_PreTransform.m[3][0], m_PreTransform.m[3][1], m_PreTransform.m[3][2] };
 		vSpawnPos.x -= sin(fRadius) * fRange;
-		vSpawnPos.y = m_PreTransform.m[3][1];
+		//vSpawnPos.y = m_PreTransform.m[3][1];
 		vSpawnPos.z -= cos(fRadius) * fRange;
 
 		CLevi_Drop::DROPRESET Drop{};
@@ -1186,8 +1186,8 @@ _bool CLeviatan::DodgeCooldown()
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
 	// Attack1 빼기
-	if (iIndex != ATK_PATTERN::BURST)
-		return false;
+	//if (iIndex != ATK_PATTERN::BURST)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
