@@ -326,7 +326,7 @@ void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
-	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA));
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::CHARACTER_COLOR));
 }
 
 void CLevi_Alter::Ready_PartObject(ALTER_DESC* pDesc)
