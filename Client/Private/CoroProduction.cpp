@@ -232,7 +232,10 @@ void CCoroProduction::Action1()
 	//m_pTransformCom->Rotation_Quaternion(vQuat);
 	m_pTransformCom->Set_WorldMatrix(XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vPos));
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
+
+#ifndef _DEBUG
 	m_isActionEnd[0] = true;
+#endif // !_DEBUG
 }
 
 void CCoroProduction::Action2()
@@ -250,7 +253,10 @@ void CCoroProduction::Action2()
 	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = true;
+
+#ifndef _DEBUG
 	m_isActionEnd[1] = true;
+#endif // !_DEBUG
 }
 
 void CCoroProduction::Action3()
@@ -268,7 +274,11 @@ void CCoroProduction::Action3()
 	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = false;
+
+#ifndef _DEBUG
 	m_isActionEnd[2] = true;
+#endif // !_DEBUG
+
 }
 
 CGameObject* CCoroProduction::Clone(void* pArg)
