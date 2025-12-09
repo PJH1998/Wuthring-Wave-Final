@@ -39,8 +39,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	m_fHP = pDesc->fHP * 0.7f;
-	//m_fHP = 200.f;
+	//m_fHP = pDesc->fHP * 0.7f;
+	m_fHP = 200.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -139,7 +139,8 @@ void CLeviatan::Update(_float fTimeDelta)
 		_float temp{};
 		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta * fTimeRatio, &temp);
 	}
-	
+	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 
 	//3. 거리 보간
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -1186,8 +1187,8 @@ _bool CLeviatan::DodgeCooldown()
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
 	// Attack1 빼기
-	//if (iIndex != ATK_PATTERN::BURST)
-	//	return false;
+	if (iIndex != ATK_PATTERN::BURST)
+		return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{

@@ -900,7 +900,7 @@ _bool CMonsterTest::isKnockDown()
 	if(m_isParalysis)
 		return true;
 
-	return m_iState & (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::BLOCK) | ENUM_CLASS(TEST_STATE::BEHIT));
+	return m_iState & (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::BLOCK));
 }
 
 _bool CMonsterTest::isAttackEnable()
