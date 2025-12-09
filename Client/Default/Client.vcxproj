@@ -209,9 +209,11 @@
     <ClInclude Include="..\Public\Effect_VA.h" />
     <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Event_Leviatan.h" />
+    <ClInclude Include="..\Public\MapObject_Dome.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
     <ClInclude Include="..\Public\MapObject_Throw.h" />
+    <ClInclude Include="..\Public\MapObject_Turn.h" />
     <ClInclude Include="..\Public\Potal.h" />
     <ClInclude Include="..\Public\Slide_Navigation.h" />
     <ClInclude Include="..\Public\NPC_Griffin.h" />
@@ -492,9 +494,11 @@
     <ClCompile Include="..\Private\Effect_Light.cpp" />
     <ClCompile Include="..\Private\Effect_VA.cpp" />
     <ClCompile Include="..\Private\MapObject_Burn.cpp" />
+    <ClCompile Include="..\Private\MapObject_Dome.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />
+    <ClCompile Include="..\Private\MapObject_Turn.cpp" />
     <ClCompile Include="..\Private\Potal.cpp" />
     <ClCompile Include="..\Private\Slide_Navigation.cpp" />
     <ClCompile Include="..\Private\NPC_Griffin.cpp" />

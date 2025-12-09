@@ -206,5 +206,7 @@ void CMapObject_Burn::Free()
 	Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
+	Safe_Release(m_pDetectRigidbodyCom);
+	
 	//Safe_Release(m_pGameSystem);
 }

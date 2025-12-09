@@ -96,7 +96,7 @@ protected:
 
 	_float4x4 m_DefaultMat = {};
 protected:
-
+	_float m_fTestRot = {};
 	_char m_ModelName[MAX_PATH];
 
 	_uint m_iShaderPassIndex = {};

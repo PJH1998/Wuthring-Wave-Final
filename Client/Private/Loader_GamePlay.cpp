@@ -16,6 +16,7 @@
 #include"MapObject_FireFly.h"
 #include"Slide_Navigation.h"
 #include"Potal.h"
+#include"MapObject_Turn.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -165,7 +166,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1207_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1204_first/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1209_first/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -245,7 +246,10 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		CPotal::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Turn"),
+		CMapObject_Turn::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 	return S_OK;
 }

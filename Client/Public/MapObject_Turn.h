@@ -9,7 +9,7 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
-class CMapObject final: public CStaticObject
+class CMapObject_Turn final : public CStaticObject
 {
 public:
 	typedef struct tagMapLoad
@@ -24,9 +24,9 @@ public:
 	}MAP_LOAD;
 
 private:
-	explicit CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CMapObject(const CMapObject& Prototype);
-	virtual ~CMapObject() = default;
+	explicit CMapObject_Turn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CMapObject_Turn(const CMapObject_Turn& Prototype);
+	virtual ~CMapObject_Turn() = default;
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -38,27 +38,29 @@ public:
 	virtual		void			Render_Shadow() override;
 	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 
-	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold){};
+	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
-	virtual		BoundingBox*	Get_BoundingBox()override;
+	virtual		BoundingBox* Get_BoundingBox()override;
 	virtual		void			Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)override;
 
 private:
-	CDeferredShader*			m_pShaderCom = { nullptr };
-	CShader*					m_pShadowShaderCom = { nullptr };
-	CRigidbody*					m_pRigidbodyCom = { nullptr };
-	class CModel_Streaming*		m_pModelCom;
-	class CGameSystem*			m_pGameSystem = { nullptr };
+	CDeferredShader* m_pShaderCom = { nullptr };
+	CShader* m_pShadowShaderCom = { nullptr };
+	CRigidbody* m_pRigidbodyCom = { nullptr };
+	class CModel_Streaming* m_pModelCom;
+	class CGameSystem* m_pGameSystem = { nullptr };
 
 	_uint						m_iShaderPassIndex = {};
 	_bool						m_IsRender = { true };
+	_float						m_fTurnSpeed = {};
+	_bool						m_IsCloned = { false };
 private:
 	void						Ready_Component(void* pArg);
 
 public:
-	static		CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CMapObject_Turn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 };

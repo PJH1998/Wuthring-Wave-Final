@@ -1,24 +1,24 @@
 ﻿#include"ClientPch.h"
-#include "MapObject.h"
+#include "MapObject_Turn.h"
 #include"GameSystem.h"
 
-CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CMapObject_Turn::CMapObject_Turn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CStaticObject{ pDevice, pContext }
 {
 }
 
-CMapObject::CMapObject(const CMapObject& Prototype)
-	: CStaticObject{ Prototype },m_pGameSystem(CGameSystem::GetInstance())
+CMapObject_Turn::CMapObject_Turn(const CMapObject_Turn& Prototype)
+	: CStaticObject{ Prototype }, m_pGameSystem(CGameSystem::GetInstance()), m_IsCloned(true)
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
-HRESULT CMapObject::Initialize_Prototype()
+HRESULT CMapObject_Turn::Initialize_Prototype()
 {
 	return S_OK;
 }
 
-HRESULT CMapObject::Initialize_Clone(void* pArg)
+HRESULT CMapObject_Turn::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
@@ -29,7 +29,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	Ready_Component(pArg);
 	m_iNumLOD = m_pModelCom->Get_LastLODIndex();
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
-
+	AddRef();
 	Sync_Sectors();
 
 	// Env Map Bake
@@ -38,29 +38,45 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;
 
+	m_fTurnSpeed = XMConvertToRadians(m_pGameInstance->Rand(200.f, 400.f) / 1000.f);
+
+	_vector vAddYRot = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(m_pGameInstance->Rand(0.f, 50.f)));
+	_vector vScale, vRot, vTrans;
+	XMMatrixDecompose(&vScale, &vRot, &vTrans, m_pTransformCom->Get_WorldMatrix());
+
+	m_pTransformCom->Set_WorldMatrix(XMMatrixScaling(m_pTransformCom->Get_Scaled().x, m_pTransformCom->Get_Scaled().y, m_pTransformCom->Get_Scaled().z) * XMMatrixRotationQuaternion(XMQuaternionNormalize(XMQuaternionMultiply(vAddYRot, vRot)))
+		* XMMatrixTranslationFromVector(m_pTransformCom->Get_State(STATE::POSITION)));
 	return S_OK;
 }
 
-void CMapObject::Priority_Update(_float fTimeDelta)
+void CMapObject_Turn::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CMapObject::Update(_float fTimeDelta)
+void CMapObject_Turn::Update(_float fTimeDelta)
 {
+	if (m_iLODIndex <= 1)
+	{
+		_vector vAddYRot = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), m_fTurnSpeed);
+		_vector vScale, vRot, vTrans;
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, m_pTransformCom->Get_WorldMatrix());
 
+		m_pTransformCom->Set_WorldMatrix(XMMatrixScaling(m_pTransformCom->Get_Scaled().x, m_pTransformCom->Get_Scaled().y, m_pTransformCom->Get_Scaled().z) * XMMatrixRotationQuaternion(XMQuaternionNormalize(XMQuaternionMultiply(vAddYRot, vRot)))
+			* XMMatrixTranslationFromVector(m_pTransformCom->Get_State(STATE::POSITION)));
+	}
 }
 
-void CMapObject::Late_Update(_float fTimeDelta)
+void CMapObject_Turn::Late_Update(_float fTimeDelta)
 {
-	
+
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
+void CMapObject_Turn::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
 	if (!m_IsRender)
 		return;
-	               
+
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
@@ -115,7 +131,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 	}
 }
 
-void CMapObject::Render_Shadow()
+void CMapObject_Turn::Render_Shadow()
 {
 	_uint iLODIndex = 0;
 	if (iLODIndex > m_pModelCom->Get_LastLODIndex())
@@ -143,7 +159,7 @@ void CMapObject::Render_Shadow()
 	}
 }
 
-void CMapObject::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
+void CMapObject_Turn::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix)
 {
 	_uint iLODIndex = 0;
 	if (iLODIndex > m_pModelCom->Get_LastLODIndex())
@@ -190,17 +206,17 @@ void CMapObject::Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 
 	}
 }
 
-BoundingBox* CMapObject::Get_BoundingBox()
+BoundingBox* CMapObject_Turn::Get_BoundingBox()
 {
 	return m_pBoundingBox;
 }
 
-void CMapObject::Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)
+void CMapObject_Turn::Set_RenderTime(_uint iLODIndex, _float m_fTotalPlayTime)
 {
 	m_pModelCom->Set_RenderTime(iLODIndex, m_fTotalPlayTime);
 }
 
-void CMapObject::Ready_Component(void* pArg)
+void CMapObject_Turn::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
@@ -244,31 +260,15 @@ void CMapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.eType = EMotionType::Static;
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 		RigidbodyDesc.pModel = m_pModelCom;
-		//RigidbodyDesc.pModel = m_pModelComArray[0];
-
-		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-		//RigidbodyDesc.vPos = pDesc->vBoundingPos;
-		//RigidbodyDesc.eShape = SHAPE::BOX;
-		//RigidbodyDesc.eType = EMotionType::Static;
-		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-		//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
 
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 	}
-	else
-	{
-		if (pDesc->iLevel == ENUM_CLASS(LEVEL::GAMEPLAY))
-			m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
-			m_isActivate = false;
-			m_IsRender = false;
-				});
-	}
 }
 
-CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CMapObject_Turn* CMapObject_Turn::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CMapObject* pInstance = new CMapObject(pDevice, pContext);
+	CMapObject_Turn* pInstance = new CMapObject_Turn(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
@@ -279,9 +279,9 @@ CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 	return pInstance;
 }
 
-CGameObject* CMapObject::Clone(void* pArg)
+CGameObject* CMapObject_Turn::Clone(void* pArg)
 {
-	CMapObject* pClone = new CMapObject(*this);
+	CMapObject_Turn* pClone = new CMapObject_Turn(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
@@ -292,9 +292,11 @@ CGameObject* CMapObject::Clone(void* pArg)
 	return pClone;
 }
 
-void CMapObject::Free()
+void CMapObject_Turn::Free()
 {
 	__super::Free();
+	if (m_IsCloned)
+		Release();
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
