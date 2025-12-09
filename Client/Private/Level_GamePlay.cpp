@@ -547,22 +547,7 @@ void CLevel_GamePlay::Ready_UI()
 
 void CLevel_GamePlay::Ready_SFX()
 {
-	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::GAMEPLAY));
 
-#pragma region SFX
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
-		CRASH("Failed Add Pool SONORA_CHANGE");
-
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
-	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
-	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
-
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
-	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiStar"), 1)))
-	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
-
-#pragma endregion
 }
 
 void CLevel_GamePlay::Ready_NPC()

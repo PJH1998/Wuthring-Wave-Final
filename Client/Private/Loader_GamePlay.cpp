@@ -95,16 +95,7 @@
 #include "Player.h"
 #pragma endregion
 
-#pragma region SFX
-#include "SFX_Prefab.h"
-#include "SonoraChange.h"
-#include "Augusta_UltiSFX.h"
-#include "Augusta_UltiPostSFX.h"
-#include "GalbrenaUlti_SFX_Slash.h"
-#include "GalbrenaUlti_SFX_Star.h"
-#include "GalbrenaUlti_SFX_Circle.h"
-#include "GalbrenaUlti_PostSFX.h"
-#pragma endregion
+
 
 
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
