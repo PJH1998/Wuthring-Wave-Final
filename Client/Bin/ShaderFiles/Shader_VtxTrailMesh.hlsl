@@ -870,7 +870,12 @@ PS_OUT PS_DefaultMeshRender(PS_IN In)
     if (Dissolve - fRatio < 0.f)
         discard;
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
 
     vColor.a = fAlpha;
     
@@ -886,9 +891,11 @@ PS_OUT PS_DefaultMeshRender(PS_IN In)
     float fWeight = Luminance(vColor.xyz);
 
     if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(vColor.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz, 1.f); 
     
     Out.vDiffuse = vColor;
+    
+    Out.vDiffuse.a *= g_Alpha;
     
     
     // 단순 매쉬랜더는 웨이트블랜드 적용 안하는게 나을지도
