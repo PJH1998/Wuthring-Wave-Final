@@ -9,6 +9,8 @@ class CModel;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CProjectile final : public CGameObject
 {
 public:
@@ -50,6 +52,7 @@ private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	CModel*				m_pModelCom = { nullptr };
 	CShader*			m_pShaderCom = { nullptr };
+	CGameSystem*		m_pGameSystem = { nullptr };
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
