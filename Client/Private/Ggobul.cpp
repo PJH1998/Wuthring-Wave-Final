@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Ggobul.h"
 #include "AttackVolume.h"
+#include "GameSystem.h"
 
 CGgobul::CGgobul(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -9,7 +10,9 @@ CGgobul::CGgobul(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CGgobul::CGgobul(const CGgobul& Prototype)
 	:CActor { Prototype }
+	, m_pGameSystem { CGameSystem::GetInstance()}
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CGgobul::Initialize_Prototype()
@@ -51,7 +54,8 @@ void CGgobul::Update(_float fTimeDelta)
 	{
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(m_pRootMatrix));
 	}
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta * fTimeRatio);
 	if (isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
@@ -309,4 +313,5 @@ void CGgobul::Free()
 	{
 		Safe_Release(m_pAttackVolumes[i]);
 	}
+	Safe_Release(m_pGameSystem);
 }

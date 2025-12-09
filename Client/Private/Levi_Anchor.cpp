@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "Levi_Anchor.h"
+#include "GameSystem.h"
 
 CLevi_Anchor::CLevi_Anchor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
@@ -8,7 +9,9 @@ CLevi_Anchor::CLevi_Anchor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CLevi_Anchor::CLevi_Anchor(const CLevi_Anchor& Prototype)
 	: CGameObject { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevi_Anchor::Initialize_Prototype()
@@ -37,9 +40,11 @@ void CLevi_Anchor::Priority_Update(_float fTimeDelta)
 
 void CLevi_Anchor::Update(_float fTimeDelta)
 {
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+
 	_vector vDir = XMVectorSetW(XMLoadFloat3(&m_vTargetPos) - m_pTransformCom->Get_State(STATE::POSITION), 1.f);
 	if (XMVectorGetX(XMVector3Dot(m_pTransformCom->Get_State(STATE::LOOK), vDir)) >= 0.f)
-		m_pTransformCom->Go_Straight(fTimeDelta);
+		m_pTransformCom->Go_Straight(fTimeDelta * fTimeRatio);
 	else
 	{
 		if (false == m_isDisolve)
@@ -208,4 +213,5 @@ void CLevi_Anchor::Free()
 	Safe_Release(m_pRigidBodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
+	Safe_Release(m_pGameSystem);
 }

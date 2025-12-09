@@ -328,7 +328,7 @@ void CPlayer::Player_KeyInput()
 
 		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_Scan"), WorldPosMatrix, nullptr);
 	}
 
 	if (!m_IsQTE && // QTE 도중이면 플레이어 변경 불가능.
