@@ -248,7 +248,8 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	m_isActivate = true;
 
-	m_pGameSystem->HUD_FadeOut();
+	if (m_isClone)
+		m_pGameSystem->HUD_FadeOut();
 }
 
 void CUI_QTE::PreAssign_ChildUIs()

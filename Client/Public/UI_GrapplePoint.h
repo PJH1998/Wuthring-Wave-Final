@@ -37,14 +37,24 @@ public:
 	virtual void	OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
-	_float3			Get_TargetPos()		{ return m_vTargetPos; }
-	UI_GRAPPLE_TYPE	Get_GrappleType()	{ return m_eGrappleType; }
+	//void			Set_HardActivate(_bool isHardActivate)	{ m_isHardActivate = isHardActivate; }
+	//_bool			Get_HardActivate()						{ m_isHardActivate; }
+
+	_float3			Get_TargetPos()				{ return m_vTargetPos;		}
+	UI_GRAPPLE_TYPE	Get_GrappleType()			{ return m_eGrappleType;	}
+
+	void			Req_ToggleGrapplePoint(_bool isActivate)	
+												{	m_fReqedTimer = 0.f;
+													if (isActivate)	{m_iReqedEnabled	= true;	m_isActivate = true;}
+													else			{m_iReqedDisabled	= true;}	}
 
 private:
 	void			PreAssign_ChildUIs();
 	void			Ready_Presets();
 	void			Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos);
 	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
+
+	void			Update_ToggleReqedEvent(_float );
 
 private:
 	void			Update_TargetColor();
@@ -77,6 +87,10 @@ private:
 
 	mutex			m_Mutex;
 
+
+	_bool			m_iReqedDisabled = false;
+	_bool			m_iReqedEnabled = false;
+	_float			m_fReqedTimer = 0.f;
 
 private:
 	const _float	m_fPivotDistance = 10.f;		// 거리에 따른 크기 조절용. 이 거리일 때 최대 크기로 보임.
