@@ -350,12 +350,12 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     float3 vFogColor = VF.xyz;
     
-    float fAlpha = VF.a;
-    //float fAlpha = lerp(0.4f, 1.f, saturate(VF.a));
+    //float fAlpha = VF.a;
+    float fAlpha = lerp(0.4f, 1.f, saturate(VF.a));
     
     if (true == IsDynamic)
     {
-        float3 vFinalColor = vOriginColor.xyz * fAlpha + vFogColor.xyz;
+        float3 vFinalColor = (vOriginColor.xyz * VF.a) + ToneMap(vFogColor.xyz * g_fExposure);
         Out.vColor = float4(vFinalColor, 1.f);
         return Out;
     }

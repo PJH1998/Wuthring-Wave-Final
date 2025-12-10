@@ -73,12 +73,10 @@ PS_OUT_SKYBOX PS_DOME(PS_IN In)
 PS_OUT_SKYBOX PS_CLOUD(PS_IN In)
 {
     PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
-
-    float2 vDir = float2(0.5f, 0.5f) - In.vTexcoord;
     
-    float2 vTexcoord = (In.vTexcoord + (vDir * g_fTime));
+    float fMask = 0.f;
     
-    float fMask = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord).r;
+    fMask = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord).r;
     
     Out.vDiffuse = (vCloudColor * fMask) * 1.5f;
     
