@@ -11,9 +11,8 @@ CSpectrum::CSpectrum(const CSpectrum& Prototype)
 {
 }
 
-HRESULT CSpectrum::Initialize_Prototype(const SPECTRUM_DESC* pDesc)
+HRESULT CSpectrum::Initialize_Prototype()
 {
-	m_tDesc = * pDesc;
 
     return S_OK;
 }
@@ -21,6 +20,7 @@ HRESULT CSpectrum::Initialize_Prototype(const SPECTRUM_DESC* pDesc)
 HRESULT CSpectrum::Initialize_Clone(void* pArg)
 {
     SPECTRUM_DESC* pDesc = static_cast<SPECTRUM_DESC*>(pArg);
+	m_tDesc = *pDesc;
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
@@ -32,8 +32,7 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
     m_fLifeTime = m_tDesc.fLifeTime;
     m_fGeneration = m_tDesc.fGeneration;
     
-    //임시처리
-    //m_isActivate = true;
+	m_isActivate = false;
 
     return S_OK;
 }
@@ -172,7 +171,7 @@ void CSpectrum::Update_Position()
 
 HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
 {
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxPosTex"),
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_Spectrum"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
@@ -220,11 +219,11 @@ HRESULT CSpectrum::Bind_ShaderResources()
     return S_OK;
 }
 
-CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const SPECTRUM_DESC* pDesc)
+CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CSpectrum* pInstance = new CSpectrum(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype(pDesc)))
+    if (FAILED(pInstance->Initialize_Prototype()))
     {
         MSG_BOX("Failed to Created : CSpectrum");
         Safe_Release(pInstance);
