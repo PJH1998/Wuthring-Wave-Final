@@ -19,7 +19,13 @@ private:
 	typedef struct tUIMinimapCalcedObjDesc {
 		UI_MINIMAP_OBJTYPE	eType = UI_MINIMAP_OBJTYPE::END;
 		_float2				vCalcedTargetPos = {};
+		_float				fIconScale = 16.f;
 	} UI_MINIMAP_CALCEDOBJ_DESC;
+
+	typedef struct tUIMinimapPresetDesc {
+		_float4				vColor = _float4(1.f, 0.f, 1.f, 1.f);
+		_float				fIconScale = 16.f;
+	} UI_MINIMAP_PRESET_DESC;
 
 public:
 	explicit CUI_HUD_Sector_Minimap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -84,7 +90,7 @@ private:
 	unordered_map<void*, UI_MINIMAP_OBJ_DESC>	m_mapObjectPos_Attached = {};
 
 
-	array<_float4, ENUM_CLASS(UI_MINIMAP_OBJTYPE::END)> m_arrColorPreset = {};
+	array<UI_MINIMAP_PRESET_DESC, ENUM_CLASS(UI_MINIMAP_OBJTYPE::END)>	m_arrPreset = {};		// color, scale preset
 
 	class CGameSystem*	m_pGameSystem		= { nullptr };
 

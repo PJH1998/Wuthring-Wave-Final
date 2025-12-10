@@ -371,9 +371,9 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vTailColor);
 }
 
-void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType)
+void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
-	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType);
+	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);
 }
 
 CUI_GrapplePoint* CGameSystem::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive)
