@@ -210,6 +210,7 @@
     <ClInclude Include="..\Public\Effect_VA.h" />
     <ClInclude Include="..\Public\GalbrenaControl.h" />
     <ClInclude Include="..\Public\GalbrenaEvent.h" />
+    <ClInclude Include="..\public\Heaven_SkyBox.h" />
     <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Event_Leviatan.h" />
     <ClInclude Include="..\Public\MapObject_Dome.h" />
@@ -501,6 +502,7 @@
     <ClCompile Include="..\Private\Effect_VA.cpp" />
     <ClCompile Include="..\Private\GalbrenaControl.cpp" />
     <ClCompile Include="..\Private\GalbrenaEvent.cpp" />
+    <ClCompile Include="..\private\Heaven_SkyBox.cpp" />
     <ClCompile Include="..\Private\MapObject_Burn.cpp" />
     <ClCompile Include="..\Private\MapObject_Dome.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
@@ -812,6 +814,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Heaven.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxVaMesh.hlsl" />
   </ItemGroup>
   <ItemGroup>

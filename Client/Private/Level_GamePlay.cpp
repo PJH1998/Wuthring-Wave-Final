@@ -105,6 +105,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->Set_FogMaxHeight(230.f);
 	m_pGameInstance->Set_FogRayDensityScale(0.4f);
 	m_pGameInstance->Set_FogScatterWeight(0.5f);
+	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
+	m_pGameInstance->Set_FogRayIntensity(3.f);
 
 	m_pGameInstance->Begin_VF();
 

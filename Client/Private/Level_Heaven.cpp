@@ -102,10 +102,11 @@ HRESULT CLevel_Heaven::Initialize()
 
 //	m_pGameInstance->Set_Fog
 	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
-	m_pGameInstance->Set_FogMaxHeight(200.f);
+	m_pGameInstance->Set_FogMaxHeight(5.f);
 	m_pGameInstance->Set_FogRayDensityScale(0.8f);
 	m_pGameInstance->Set_FogScatterWeight(0.3f);
-
+	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
+	m_pGameInstance->Set_FogRayIntensity(1.f);
 
 	m_pGameInstance->Begin_VF();
 
@@ -487,16 +488,19 @@ void CLevel_Heaven::Ready_Effect()
 
 void CLevel_Heaven::Ready_Skybox()
 {
-	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
-	SkyboxDesc.iNumModel = 3;
-	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
-	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
-	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
-	SkyboxDesc.vUVRate = _float2(1.f, 1.f);
-	SkyboxDesc.fFXScaleRate = 0.3f;
+	//CSkyBox::SKYBOX_DESC SkyboxDesc = {};
+	//SkyboxDesc.iNumModel = 3;
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
+	//SkyboxDesc.vUVRate = _float2(1.f, 1.f);
+	//SkyboxDesc.fFXScaleRate = 0.3f;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
-		TEXT("Layer_BackGround"), &SkyboxDesc)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
+	//	TEXT("Layer_BackGround"), &SkyboxDesc)))
+	//	CRASH("Skybox");
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Protottype_GameObject_Heaven_SkyBox"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"))))
 		CRASH("Skybox");
 }
 

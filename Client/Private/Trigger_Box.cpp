@@ -168,7 +168,10 @@ void CTrigger_Box::Register_Trigger()
 			break;
 
 		case 20:
+		{
 			m_pGameInstance->Set_CurrentCamera_Far(500.f);
+			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
+		}
 			break;
 
 		case 21:
