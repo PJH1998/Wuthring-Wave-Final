@@ -1203,6 +1203,7 @@ void CLeviatan::Reset_NotifyInteraction()
 
 void CLeviatan::Event1()
 {
+	m_pGameInstance->Set_CurrentCamera_Far(1000.f);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
 	m_pTransformCom->Save_PreviousPosition();
@@ -1213,8 +1214,9 @@ void CLeviatan::Event1()
 void CLeviatan::Event2()
 {
 	//2페이즈 맵으로 이동하기
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 1092.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_pTransformCom->Save_PreviousPosition();
+	m_pGameInstance->Set_CurrentCamera_Far(200.f);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 }
 

@@ -298,7 +298,7 @@ void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound(TEXT("ord_leilie_atk01_1_02 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
