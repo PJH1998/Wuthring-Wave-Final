@@ -508,6 +508,9 @@
     <Filter Include="03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController">
       <UniqueIdentifier>{aecd509e-973d-478c-92d9-dc4421872acb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Spectrum">
+      <UniqueIdentifier>{28253a35-b458-4b03-a494-d35c34b2b3de}</UniqueIdentifier>
+	</Filter>
     <Filter Include="03. GameObject\SkyBox\Heaven">
       <UniqueIdentifier>{a01c38c3-a063-4195-a39b-cb1a7e3b8613}</UniqueIdentifier>
     </Filter>
@@ -1332,6 +1335,9 @@
     <ClInclude Include="..\Public\GalbrenaEvent.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Spectrum.h">
+      <Filter>03. GameObject\Effect\Spectrum</Filter>
+	</ClInclude>
     <ClInclude Include="..\public\Heaven_SkyBox.h">
       <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClInclude>
@@ -2107,6 +2113,9 @@
     <ClCompile Include="..\Private\GalbrenaEvent.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Spectrum.cpp">
+      <Filter>03. GameObject\Effect\Spectrum</Filter>
+	</ClCompile>
     <ClCompile Include="..\private\Heaven_SkyBox.cpp">
       <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClCompile>

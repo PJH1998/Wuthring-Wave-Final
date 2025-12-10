@@ -135,8 +135,6 @@ void CSpectrum_Controller::Spectrum_Tab()
                 ImGui::DragInt("##ShaderPass", &(m_pSelectedSpectrumDesc->iShaderPass), 1.f);
                 ImGui::PopItemWidth();
 
-				ImGui::Checkbox("Loop", &(m_pSelectedSpectrumDesc->IsLoop));
-
 				ImGui::Separator();
 
                 ImGui::Text("Generation");
@@ -355,6 +353,8 @@ void CSpectrum_Controller::Spectrum_Info_Tab()
 				}
 
 			}
+
+			Save_SelectedSpectrum_To_Json();
 		}
 		ImGui::End();
 	}
@@ -550,6 +550,90 @@ void CSpectrum_Controller::Remove_Desc(const _wstring& DescTag)
     m_bSelectedSpectrum = false;
     m_pSelectedSpectrumDesc = nullptr;
 	m_pSelectedSpectrumVBDesc = nullptr;
+}
+
+void CSpectrum_Controller::Save_SelectedSpectrum_To_Json()
+{
+	if (ImGui::Button("Save Spectrum"))
+	{
+		IGFD::FileDialogConfig config;
+
+		config.path = "../../Client/Bin/Resource/Effect/Spectrum/";
+		config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+
+		ImGuiFileDialog::Instance()->OpenDialog("Save Spectrum", "Export", ".json", config);
+	}
+	if (ImGuiFileDialog::Instance()->Display("Save Spectrum", ImGuiWindowFlags_NoCollapse))
+	{
+		if (ImGuiFileDialog::Instance()->IsOk())
+		{
+			_string strFilePath = {};
+			_string strFolderPath = {};
+
+			strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			size_t lastSlashPos = strFilePath.find_last_of("\\");
+
+			//마지막 문자열 빼고 폴더 경로만 가져오기. 
+			if (lastSlashPos != string::npos) {
+				strFolderPath += strFilePath.substr(0, lastSlashPos);
+			}
+			
+			/// VB저장
+			_string SpectrumVBPath = {};
+			SpectrumVBPath = strFolderPath;
+			SpectrumVBPath += "/SpectrumVB/";
+			SpectrumVBPath += WStringToString(m_pSelectedSpecturm->Get_MyTag());
+			SpectrumVBPath += ".json";
+
+			ofstream VBjsonStream(SpectrumVBPath);
+			json SpectrumVBJson;
+
+			Spectrum_VB_To_Json(SpectrumVBJson);
+
+			VBjsonStream << SpectrumVBJson.dump(2);
+			VBjsonStream.close();
+
+			/// OB저장
+
+			_string SpectrumOBPath = {};
+			SpectrumOBPath = strFolderPath;
+			SpectrumOBPath += "/SpectrumOB/";
+			SpectrumOBPath += WStringToString(m_pSelectedSpecturm->Get_MyTag());
+			SpectrumOBPath += ".json";
+
+			ofstream OBjsonStream(SpectrumOBPath);
+			json SpectrumOBJson;
+
+			Spectrum_OB_To_Json(SpectrumOBJson);
+
+			OBjsonStream << SpectrumOBJson.dump(2);
+			OBjsonStream.close();
+		}
+
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
+
+void CSpectrum_Controller::Spectrum_VB_To_Json(json& SpectrumVBJson)
+{
+	SpectrumVBJson["MaxSamples"] = m_pSelectedSpectrumVBDesc->MaxSamples;
+	SpectrumVBJson["Size"] = m_pSelectedSpectrumVBDesc->fSize;
+}
+
+void CSpectrum_Controller::Spectrum_OB_To_Json(json& SpectrumJson)
+{
+	SpectrumJson["MyTag"] = WStringToString(m_pSelectedSpectrumDesc->strMyTag);
+	SpectrumJson["MyType"] = m_pSelectedSpectrumDesc->eMyType;
+
+	SpectrumJson["TextureTag"] = WStringToString(m_pSelectedSpectrumDesc->strTextureTag);
+	SpectrumJson["VIBufferTag"] = WStringToString(m_pSelectedSpectrumDesc->strVIBufferTag);
+	SpectrumJson["ColorTexturTag"] = WStringToString(m_pSelectedSpectrumDesc->strColorTextureTag);
+
+	SpectrumJson["ShaderPass"] = m_pSelectedSpectrumDesc->iShaderPass;
+	SpectrumJson["Generation"] = m_pSelectedSpectrumDesc->fGeneration;
+	SpectrumJson["LifeTime"] = m_pSelectedSpectrumDesc->fLifeTime;
 }
 
 CSpectrum_Controller* CSpectrum_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

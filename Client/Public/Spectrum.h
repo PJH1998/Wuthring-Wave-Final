@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Editor_Define.h"
+#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -9,7 +9,7 @@ class CVIBuffer_Spectrum;
 //class CComputeShader;
 NS_END
 
-NS_BEGIN(Editor)
+NS_BEGIN(Client)
 
 class CSpectrum final : public CGameObject
 {
@@ -33,23 +33,19 @@ private:
 	virtual ~CSpectrum() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype();
+	virtual HRESULT Initialize_Prototype(const SPECTRUM_DESC* pDesc);
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Priority_Update(_float fTimeDelta);
 	virtual void Update(_float fTimeDelta);
 	virtual void Late_Update(_float fTimeDelta);
 	virtual void Render();
 	
-public:
-	_wstring	Get_MyTag() {
-		return m_strMyTag;
-	};
 
 public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Test_Default_Pos();
+	void Update_Position();
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
@@ -58,7 +54,7 @@ private:
 	CVIBuffer_Spectrum*			m_pVIBufferCom = { nullptr };
 	//CComputeShader*			m_pComputeShaderCom = { nullptr };
 
-	
+	SPECTRUM_DESC				m_tDesc = {};
 
 	_float						m_fCurrentTime = 0.f;
 	_float						m_fSpawnTimer = 0.f;
@@ -77,24 +73,15 @@ private:
 
 	const _float4x4*			m_pBoneMatrixPtr = nullptr;
 	const _float4x4*			m_pObjectMatrixPtr = nullptr;
-	_float4x4					m_ComBindMatrix = {};
+	_vector						m_UpdatePosition = {};
 	_bool*						m_pIsActive = nullptr;
-
-	//Test
-	_float						m_fTestCurrentTime = 0.f;
-	_float						m_fTestTime = 1.f;
-	_float						m_fTestCallTime = 0.f;
-	_float3						m_vTestPos = {};
-
-	//Tool
-	_wstring					m_strMyTag = {};
 
 private:
 	HRESULT Ready_Components(SPECTRUM_DESC& Desc);
 	HRESULT Bind_ShaderResources();
 
 public:
-	static CSpectrum* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CSpectrum* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const SPECTRUM_DESC* pDesc);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void Free() override;
 };

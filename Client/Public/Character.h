@@ -204,6 +204,8 @@ public:
 
 	void Stop_Anim();
 	void Start_Anim();
+
+	
 #pragma endregion
 
 
