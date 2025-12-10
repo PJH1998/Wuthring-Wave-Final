@@ -31,7 +31,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	Ready_Components(pArg);
 	Register_Trigger();
 
-	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 24)
+	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 25)
 	{
 		if (m_iTriggerIndex == 24)
 			m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
@@ -161,18 +161,22 @@ void CTrigger_Box::Collision_End()
 void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
+		_float4x4 Mat;
 		switch (m_iTriggerIndex)
 		{
 		case 0:
 			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
+			m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Start"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false));
 			break;
 
 		case 2:
 			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Meteo"), m_pTransformCom->Get_WorldMatrix(), false);
+			m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Meteo"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false));
 			break;
 
 		case 4:
 			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Horizon"), m_pTransformCom->Get_WorldMatrix(), true);
+			m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true));
 			break;
 
 		case 7:
@@ -186,23 +190,38 @@ void CTrigger_Box::Register_Trigger()
 		case 21:
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
 			m_IsTriggered = true;
+
+			XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+			m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
 			break;
 
 		case 22:
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
 			m_IsTriggered = true;
+
+			XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+			m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
 			break;
 		case 23:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora_03"), XMMatrixRotationY(XMConvertToRadians(177.5f)), false);
 			m_IsTriggered = true;
+
+			XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+			m_CamMatrix = make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false));
 			break;
 		case 24:
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
 			m_IsTriggered = true;
+
+			XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+			m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
 			break;
 		case 25:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora_04"), m_pTransformCom->Get_WorldMatrix(), false);
 			m_IsTriggered = true;
+
+			XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+			m_CamMatrix = make_pair(TEXT("Action_False_Sonora_04"), make_pair(Mat, false));
 			break;
 		}
 		});

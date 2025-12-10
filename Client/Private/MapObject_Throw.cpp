@@ -86,13 +86,13 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		}
 		else
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			m_IsThrow = false;
-#endif
-
-#ifndef _DEBUG
-			m_isActivate = false;
-#endif
+//#endif
+//
+//#ifndef _DEBUG
+//			m_isActivate = false;
+//#endif
 			//이펙트 호출.		
 			m_pCollideRigidbodyCom->IsActivate(true);
 			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
