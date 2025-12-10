@@ -869,7 +869,7 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {
-
+	
 	// 3개의 변수 준비
 	_wstring var1, var2, var3;
 	wstringstream wss(wStrObjectTag);
@@ -896,6 +896,7 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag); // Character 함수
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
+		
 	
 
 
