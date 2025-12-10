@@ -25,6 +25,7 @@
 #include "SFX_Prefab.h"
 #include "Effect_VA.h"
 #include "Effect_Light.h"
+#include "Spectrum.h"
 
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -1737,6 +1738,93 @@ void CParser::Load_FXLight_Data_FromJson(const _string& strFilePath)
 	m_pGameInstance->Add_Light(LightDataTag, LightDesc);
 }
 
+void CParser::Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_Componenet_VIBuffer_Spectrum_";
+	strProtoTag += VBtag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json SpectrumVBjson;
+	JsonStream >> SpectrumVBjson;
+
+	CVIBuffer_Spectrum::VB_SPECTRUM_DESC Desc = {};
+
+	if (SpectrumVBjson.contains("MaxSamples"))
+		Desc.MaxSamples = SpectrumVBjson["MaxSamples"].get<_int>();
+
+	if (SpectrumVBjson.contains("Size"))
+		Desc.fSize = SpectrumVBjson["Size"].get<_float>();
+
+
+	JsonStream.close();
+
+	//읽은 정보로 원형 생성
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CVIBuffer_Spectrum::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("VIBuffer_Spectrum Load Fail");
+		return;
+	}
+}
+
+void CParser::Load_Spectrum_OB_FromJson(const _string& strFilePath, const _string& SpectrumTag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_GameObject_Spectrum_";
+	strProtoTag += SpectrumTag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json SpectrumJson;
+	JsonStream >> SpectrumJson;
+	JsonStream.close();
+
+	CSpectrum::SPECTRUM_DESC Desc = {};
+
+	if (SpectrumJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(SpectrumJson["MyTag"].get<_string>());
+
+	if (SpectrumJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(SpectrumJson["MyType"].get<double>());
+
+	if (SpectrumJson.contains("TextureTag"))
+		Desc.strTextureTag = StringToWString(SpectrumJson["TextureTag"].get<_string>());
+
+	if (SpectrumJson.contains("VIBufferTag"))
+		Desc.strVIBufferTag = StringToWString(SpectrumJson["VIBufferTag"].get<_string>());
+
+	if (SpectrumJson.contains("ColorTexturTag"))
+		Desc.strColorTextureTag = StringToWString(SpectrumJson["ColorTexturTag"].get<_string>());
+
+	if (SpectrumJson.contains("ShaderPass"))
+		Desc.iShaderPass = SpectrumJson["ShaderPass"].get<_int>();
+
+	if (SpectrumJson.contains("Generation"))
+		Desc.fGeneration = SpectrumJson["Generation"].get<_float>();
+
+	if (SpectrumJson.contains("LifeTime"))
+		Desc.fLifeTime = SpectrumJson["LifeTime"].get<_float>();
+
+	Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CSpectrum::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("Particle Load Fail");
+		return;
+	}
+}
+
 void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIndex, const _wstring& strPrototypeTag, _uint iLayerLevelIndex)
 {
 	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
@@ -1915,6 +2003,38 @@ void CParser::Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL
 					CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1))))
 				{
 					MSG_BOX("VATexture Load Fail");
+					return;
+				}
+			}
+		}
+	}
+}
+
+void CParser::Load_EffectSpectrumTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".png" || extension == ".Png")
+			{
+				//텍스처 파일이름만 추출
+				_string strTextureTag = entry.path().stem().string();
+
+				//텍스처 파일경로
+				_wstring wstrFilePath = StringToWString(filePath);
+
+				_wstring wstrDefaultTag = TEXT("Prototype_Component_SpectrumTexture_");
+				wstrDefaultTag += StringToWString(strTextureTag);
+
+				if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrDefaultTag,
+					CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1))))
+				{
+					MSG_BOX("SpectrumTexture Load Fail");
 					return;
 				}
 			}

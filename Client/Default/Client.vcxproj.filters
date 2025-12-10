@@ -508,6 +508,9 @@
     <Filter Include="03. GameObject\UI\Containers_Prop\GrapplePoint\GrappleController">
       <UniqueIdentifier>{aecd509e-973d-478c-92d9-dc4421872acb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Spectrum">
+      <UniqueIdentifier>{28253a35-b458-4b03-a494-d35c34b2b3de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1329,6 +1332,9 @@
     <ClInclude Include="..\Public\GalbrenaEvent.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Spectrum.h">
+      <Filter>03. GameObject\Effect\Spectrum</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2100,6 +2106,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaEvent.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Spectrum.cpp">
+      <Filter>03. GameObject\Effect\Spectrum</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

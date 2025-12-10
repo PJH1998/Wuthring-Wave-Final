@@ -1,4 +1,4 @@
-﻿#include "Editorpch.h"
+﻿#include "ClientPch.h"
 #include "Spectrum.h"
 
 CSpectrum::CSpectrum(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -11,8 +11,10 @@ CSpectrum::CSpectrum(const CSpectrum& Prototype)
 {
 }
 
-HRESULT CSpectrum::Initialize_Prototype()
+HRESULT CSpectrum::Initialize_Prototype(const SPECTRUM_DESC* pDesc)
 {
+	m_tDesc = * pDesc;
+
     return S_OK;
 }
 
@@ -26,12 +28,9 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Components(*pDesc)))
         return E_FAIL;
 
-	m_strMyTag = pDesc->strMyTag;
-
-    m_iShaderPass = pDesc->iShaderPass;
-    m_fLifeTime = pDesc->fLifeTime;
-    m_fGeneration = pDesc->fGeneration;
-
+    m_iShaderPass = m_tDesc.iShaderPass;
+    m_fLifeTime = m_tDesc.fLifeTime;
+    m_fGeneration = m_tDesc.fGeneration;
     
     //임시처리
     //m_isActivate = true;
@@ -49,13 +48,12 @@ void CSpectrum::Update(_float fTimeDelta)
         return;
 
 
-	m_fTestCurrentTime += fTimeDelta;
-	Test_Default_Pos();
+    Update_Position();
 
     m_fCurrentTime += fTimeDelta;
     m_fSpawnTimer += fTimeDelta;
 	m_fSweep += fTimeDelta;
-
+	 
     //라이프타임 체크.
     while (!m_Samples.empty())
     {
@@ -72,22 +70,12 @@ void CSpectrum::Update(_float fTimeDelta)
             break;
     }
 
-    if (m_Samples.empty())
-    {
-        SAMPLE_DESC Desc = {};
-        Desc.vPos = m_vTestPos;
-        Desc.fSpawnTime = m_fCurrentTime;
-
-        m_SamleCount += 1;
-        m_Samples.push_back(Desc);
-        m_vPreviousPos = m_vTestPos;
-    }
-    else if (m_fSpawnTimer >= m_fGeneration)
+    if (m_fSpawnTimer >= m_fGeneration)
     {
         XMVECTOR vPrevPos = XMLoadFloat3(&m_vPreviousPos);
         _float fPrevLength = XMVectorGetX(XMVector3Length(vPrevPos));
 
-        XMVECTOR vCurrentPos = XMLoadFloat3(&m_vTestPos);
+		XMVECTOR vCurrentPos = m_UpdatePosition;
         _float fCurrentLength = XMVectorGetX(XMVector3Length(vCurrentPos));
 
         _float fDistance = fCurrentLength - fPrevLength;
@@ -95,13 +83,13 @@ void CSpectrum::Update(_float fTimeDelta)
         if (fDistance > m_fMinDistance)
         {
             SAMPLE_DESC Desc = {};
-            Desc.vPos = m_vTestPos;
+            XMStoreFloat3(&Desc.vPos, m_UpdatePosition);
             Desc.fSpawnTime = m_fCurrentTime;
 
             m_SamleCount += 1;
             m_Samples.push_back(Desc);
 
-            m_vPreviousPos = m_vTestPos;
+			XMStoreFloat3(&m_vPreviousPos, m_UpdatePosition);
             m_fSpawnTimer = 0.f;
         }
     }
@@ -138,51 +126,66 @@ void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	SPECTRUM_INFO* pDesc = static_cast<SPECTRUM_INFO*>(pArg);
 
-    m_fTestCallTime = 0.f;
-    m_vTestPos = _float3(0.f, 0.f, 0.f);
-    m_fCurrentTime = 0.f;
-    m_fTestCurrentTime = 0.f;
+	m_fCurrentTime = 0.f;
 	m_fSweep = 0.f;
 
 	m_pIsActive = pDesc->pIsActive;
+	m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
+	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 
-	m_isActivate = true;
+	m_isActivate = *m_pIsActive;
 }
 
-
-void CSpectrum::Test_Default_Pos()
+void CSpectrum::Update_Position()
 {
-    if (m_fTestCurrentTime >= m_fTestTime)
-    {
-        m_vTestPos.x += 0.5f;
-        m_vTestPos.y += 0.5f;
-        m_fTestCallTime += m_fTestTime;
-        m_fTestCurrentTime = 0.f;
-    }
+	if (m_pBoneMatrixPtr != nullptr)
+	{
 
-    if (m_fTestCallTime >= 6.f)
-    {
-        m_fTestCallTime = 0.f;
-        m_vTestPos = _float3(0.f, 0.f, 0.f);
-    }
+		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+		_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
+
+		_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
+
+		_vector vScale = {};
+		_vector vPos = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+		m_UpdatePosition = vPos;
+
+	}
+	else if (m_pObjectMatrixPtr != nullptr)
+	{
+
+		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+		_matrix SpawnMatrix = XMLoadFloat4x4(&ObjectMatrix);
+
+		_vector vScale = {};
+		_vector vPos = {};
+		_vector vRot = {};
+		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+		m_UpdatePosition = vPos;
+	}
 }
+
 
 HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
 {
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxPosTex"),
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxPosTex"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strVIBufferTag,
+    if (FAILED(CGameObject::Add_Component(m_tDesc.CurrentLevel, Desc.strVIBufferTag,
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
     //텍스처 여러개 써야하는데 어떻게 할지 고민해보자
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
+    if (FAILED(CGameObject::Add_Component(m_tDesc.CurrentLevel, Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strColorTextureTag,
+    if (FAILED(CGameObject::Add_Component(m_tDesc.CurrentLevel, Desc.strColorTextureTag,
         TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
         return E_FAIL;
 
@@ -191,9 +194,11 @@ HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
 
 HRESULT CSpectrum::Bind_ShaderResources()
 {
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
   
+    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+            return E_FAIL;
+ 
+
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
 
@@ -215,11 +220,11 @@ HRESULT CSpectrum::Bind_ShaderResources()
     return S_OK;
 }
 
-CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const SPECTRUM_DESC* pDesc)
 {
     CSpectrum* pInstance = new CSpectrum(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype()))
+    if (FAILED(pInstance->Initialize_Prototype(pDesc)))
     {
         MSG_BOX("Failed to Created : CSpectrum");
         Safe_Release(pInstance);
