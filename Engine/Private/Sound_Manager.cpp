@@ -54,16 +54,19 @@ HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSo
 
 	FMOD_MODE mode = {};
 	FMOD_RESULT eResult = {};
-	if (false == is3D)
-	{
-		mode = FMOD_DEFAULT | FMOD_CREATESAMPLE;
-		eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
-	}
-	else
-	{
-		mode = FMOD_DEFAULT | FMOD_CREATESAMPLE | FMOD_3D;
-		eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
-	}
+
+	mode = FMOD_DEFAULT;
+	eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
+
+	//if (false == is3D)
+	//{
+	//
+	//}
+	//else
+	//{
+	//	mode = FMOD_DEFAULT | FMOD_CREATESAMPLE | FMOD_3D;
+	//	eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
+	//}
 
     if (FMOD_OK == eResult)
         m_Sounds.emplace(strSoundTag, pSound);

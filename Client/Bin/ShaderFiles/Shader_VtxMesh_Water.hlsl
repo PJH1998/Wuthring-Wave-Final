@@ -352,11 +352,11 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
     //float2 vUV = In.vTexcoord;
     
     // Noise
-    float fNoiseTiling = 1.f;
+    float fNoiseTiling = 0.1f;
     float fNoiseSpeed = 0.01f;
     
     float2 vNoiseUV = vUV * fNoiseTiling + g_fTime * fNoiseSpeed;
-    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV).b * 2.f - 1.f;
+    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV * 30.f).b * 2.f - 1.f;
     float fDistortionStrength = 0.1f;
     float2 UVDist = vNoiseUV + fNoise * fDistortionStrength;
     
