@@ -248,7 +248,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 
 	if (wstrTypeTag == TEXT("Sound"))
 	{
-		Sound_Active(wstrPartTag);
+		//Sound_Active(wstrPartTag);
 	}
 	else if (wstrTypeTag == TEXT("Shoot"))
 	{
