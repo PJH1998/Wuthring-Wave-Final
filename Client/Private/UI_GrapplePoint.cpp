@@ -271,8 +271,8 @@ void CUI_GrapplePoint::PreAssign_ChildUIs()
 
 void CUI_GrapplePoint::Ready_Presets()
 {
-	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::ANCHOR)]		= _float4(1.000f, 0.957f, 0.631f, 1.0f);
-	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULL)]		= _float4(0.631f, 1.000f, 0.914f, 1.0f);
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::ANCHOR)]		= _float4(0.631f, 1.000f, 0.914f, 1.0f); 
+	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::PULL)]		= _float4(1.000f, 0.957f, 0.631f, 1.0f);
 	arrTypeColors[ENUM_CLASS(UI_GRAPPLE_TYPE::END)]			= _float4(1.000f, 0.000f, 1.000f, 1.0f);
 }
 
