@@ -292,38 +292,48 @@ void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
 
 	if (wstrTypeTag == TEXT("Atk01"))
 	{
-		m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
 	}
 	else if (wstrTypeTag == TEXT("Atk02"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
-		}
-		else if (wstrPartTag == TEXT("3"))
-		{
-			m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk03"))
 	{
-		m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
 	}
 	else if (wstrTypeTag == TEXT("Aggro"))
 	{
-		m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), 0.4f, m_pTransformCom, 0.f, 16.f);
+		m_pGameInstance->Play_Sound(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 16.f);
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Other(TEXT("mon_qixuezhanshi_death_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 8.f);
+		m_pGameInstance->Play_Sound(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 8.f);
 	}
 	else if (wstrTypeTag == TEXT("Stand"))
 	{
-		m_pGameInstance->Play_Other(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), 0.3f, m_pTransformCom, 0.f, 18.f);
+		m_pGameInstance->Play_Sound(TEXT("mon_leilie_stand2_action01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 18.f);
 	}
 }
 

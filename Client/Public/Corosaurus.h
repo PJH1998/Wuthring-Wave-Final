@@ -108,6 +108,10 @@ private:
 	_float3					m_vUIPosition{};
 #pragma endregion
 
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(CORROSAURUS_DESC* pDesc);

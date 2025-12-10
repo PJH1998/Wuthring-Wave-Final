@@ -71,6 +71,10 @@ private:
 
 	_float		m_fAttackDmg{};
 
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
 private:
 	void			Bind_Resources();
 	void			Ready_Component(GGOBUL_DESC* pDesc);

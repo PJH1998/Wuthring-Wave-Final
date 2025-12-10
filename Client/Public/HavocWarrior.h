@@ -97,6 +97,11 @@ private:
 	_bool					m_isHover{};
 	_bool					m_isSpawn{};
 #pragma endregion
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(HAVOCWARRIOR_DESC* pDesc);

@@ -93,6 +93,11 @@ private:
 	_float3					m_vBeHit_Normal{};
 	_bool					m_isTurnLerp{};
 #pragma endregion
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(ELECTROPREDATOR_DESC* pDesc);
