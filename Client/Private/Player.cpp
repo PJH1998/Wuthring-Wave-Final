@@ -150,6 +150,9 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	
 	// 8. PlayerStatus에 Utility Type 바인딩.
 	Sync_UtilityType();
+
+	// 9. Previous Position
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CPlayer::Update(_float fTimeDelta)

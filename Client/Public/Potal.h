@@ -43,9 +43,11 @@ private:
 	CTexture*			m_pSecondMaskCom = { nullptr };
 	class CGameSystem*  m_pGameSystem = { nullptr };
 	CRigidbody*			m_pRigidbodyCom = { nullptr };
-	_wstring			m_szText;
 	_float				m_fTotalTime = {};
 	_float4				m_vColor = {};
+
+	_float m_Size = {1.f};
+	_float m_MovePlus = { 1.f };
 public:
 	static CPotal* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

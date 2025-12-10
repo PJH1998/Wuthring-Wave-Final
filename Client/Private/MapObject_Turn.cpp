@@ -69,7 +69,6 @@ void CMapObject_Turn::Update(_float fTimeDelta)
 void CMapObject_Turn::Late_Update(_float fTimeDelta)
 {
 
-	//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CMapObject_Turn::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)

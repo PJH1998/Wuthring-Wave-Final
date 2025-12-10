@@ -239,6 +239,7 @@
     <ClInclude Include="..\Public\EditorProp.h" />
     <ClInclude Include="..\Public\Sequencer.h" />
     <ClInclude Include="..\public\SFX_Interface.h" />
+    <ClInclude Include="..\Public\Spectrum_Controller.h" />
     <ClInclude Include="..\Public\SQ_Actor_Edit.h" />
     <ClInclude Include="..\Public\SQ_Audio_Edit.h" />
     <ClInclude Include="..\Public\SQ_Camera_Edit.h" />
@@ -335,6 +336,7 @@
     <ClCompile Include="..\Private\EditorProp.cpp" />
     <ClCompile Include="..\Private\Sequencer.cpp" />
     <ClCompile Include="..\private\SFX_Interface.cpp" />
+    <ClCompile Include="..\Private\Spectrum_Controller.cpp" />
     <ClCompile Include="..\Private\SQ_Actor_Edit.cpp" />
     <ClCompile Include="..\Private\SQ_Audio_Edit.cpp" />
     <ClCompile Include="..\Private\SQ_Camera_Edit.cpp" />

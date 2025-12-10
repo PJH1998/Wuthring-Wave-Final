@@ -61,6 +61,9 @@ private:
 	_uint m_iShaderPassIndex = {};
 	_bool m_IsRender = { true };
 	_bool m_IsTriggerd = { false };
+
+	void* m_pTempPtr = { nullptr };
+	void* m_pSecondTempPtr = { nullptr };
 public:
 	static CMapObject_Meteo* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

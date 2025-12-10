@@ -4,7 +4,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float g_fCloudSpeed;
 float2 g_vUVRate = float2(1.f, 1.f);
 float3 g_vBackGroundColor = float3(1.f, 1.f, 1.f);
-float g_fFXScaleRate;
+float g_fFXScaleRate; 
 
 texture2D   g_DiffuseTexture[2];
 texture2D   g_NormalTexture[2];
@@ -137,16 +137,6 @@ PS_OUT_SKYBOX PS_CLOUD(PS_IN In)
     return Out;
 }
 
-
-PS_OUT_SKYBOX PS_LOGO(PS_IN In)
-{
-    PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
-    
-    Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
-
-    return Out;
-}
-
 technique11 DefaultTechnique
 {
     pass Dome         //0
@@ -156,7 +146,7 @@ technique11 DefaultTechnique
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
-        //GeometryShader = NULL;
+        GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_DOME();
     }
 
@@ -191,16 +181,5 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_CLOUD();
-    }
-
-    pass LOGO
-    {
-        SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-
-        VertexShader = compile vs_5_0 VS_MAIN();
-        GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_LOGO();
     }
 }

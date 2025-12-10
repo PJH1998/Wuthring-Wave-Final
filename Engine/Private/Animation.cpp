@@ -67,6 +67,14 @@ void CAnimation::Print_MorphKeyIndices()
 
 	OutputDebugString(strIndices.c_str());
 }
+void CAnimation::Clear_AnimNotifies()
+{
+	for (auto& pNotify : m_AnimNotifies)
+		Safe_Release(pNotify);
+	m_AnimNotifies.clear();
+
+	m_iNotifyIndex = 0;
+}
 #endif // _DEBUG
 
 
@@ -239,6 +247,12 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 	
 	//while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
 	//	m_Notifies[m_iNotifyIndex++].Func();
+
+#ifdef _DEBUG
+	while (m_iNotifyIndex > 0 && m_fCurrentTrackPosition < m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
+		m_AnimNotifies[m_iNotifyIndex--]->Execute();
+#endif // _DEBUG
+
 
 	while (m_iNotifyIndex < m_AnimNotifies.size() && m_fCurrentTrackPosition >= m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
 		m_AnimNotifies[m_iNotifyIndex++]->Execute();

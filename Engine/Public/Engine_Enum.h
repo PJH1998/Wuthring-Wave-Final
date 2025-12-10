@@ -51,7 +51,7 @@ namespace Engine
 	// Collide Timing
 	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
-	enum class EFFECT_TYPE { PARTICLE, MESH, TRAIL, RECT, DECAL, RADIAL, VA, LIGHT, END };
+	enum class EFFECT_TYPE { PARTICLE, MESH, TRAIL, RECT, DECAL, RADIAL, VA, LIGHT, SPECTRUM, END };
 
 	// Sequence
 	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SFX, ACTOR, EFFECT, END };

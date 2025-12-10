@@ -342,6 +342,24 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
     
+    float fZ = saturate(log(fViewZ / g_vFogRange.x) / log(g_vFogRange.y / g_vFogRange.x));
+    
+    float3 vUV = float3(In.vTexcoord, fZ);
+    
+    float4 VF = g_VoulmetricTexture.Sample(ClampSampler, vUV);
+    
+    float3 vFogColor = VF.xyz;
+    
+    //float fAlpha = VF.a;
+    float fAlpha = lerp(0.4f, 1.f, saturate(VF.a));
+    
+    if (true == IsDynamic)
+    {
+        float3 vFinalColor = (vOriginColor.xyz * VF.a) + ToneMap(vFogColor.xyz * g_fExposure);
+        Out.vColor = float4(vFinalColor, 1.f);
+        return Out;
+    }
+    
     if (fViewZ <= g_vFogRange.x)
     {
         vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
@@ -349,30 +367,8 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
         return Out;
     }
     
-    if (true == IsDynamic)
-    {
-        Out.vColor = vOriginColor;
-        return Out;
-    }
-        
-    float fZ = saturate(log(fViewZ / g_vFogRange.x) / log(g_vFogRange.y / g_vFogRange.x));
-    
-    float3 vUV = float3(In.vTexcoord, fZ);
-    
-    float4 VF = g_VoulmetricTexture.Sample(ClampSampler, vUV);
-    
-//    float3 vFogColor = ToneMap(VF.xyz);
-//    
-//    float fAlpha = saturate(1.f - VF.a);
-//  
-//    Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor.xyz, fAlpha);
-    
-    float3 vFogColor = VF.xyz;
-    
-    float fAlpha = lerp(0.3f, 1.f, saturate(VF.a));
-    
-    
     float3 vFinalColor = vOriginColor.xyz * fAlpha + vFogColor.xyz;
+//    float3 vFinalColor = lerp(vFogColor.xyz, vOriginColor.xyz, fAlpha);
     vFinalColor = ToneMap(vFinalColor.xyz * g_fExposure);
     
     Out.vColor.xyz = vFinalColor;

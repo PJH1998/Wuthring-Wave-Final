@@ -529,6 +529,9 @@
     <ClInclude Include="..\Public\Light_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Spectrum_Controller.h">
+      <Filter>01. Level\Effect\Spectrum_Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -795,6 +798,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Light_Controller.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Spectrum_Controller.cpp">
+      <Filter>01. Level\Effect\Spectrum_Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

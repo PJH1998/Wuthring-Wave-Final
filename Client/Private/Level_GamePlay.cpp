@@ -105,6 +105,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->Set_FogMaxHeight(230.f);
 	m_pGameInstance->Set_FogRayDensityScale(0.4f);
 	m_pGameInstance->Set_FogScatterWeight(0.5f);
+	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
+	m_pGameInstance->Set_FogRayIntensity(3.f);
 
 	m_pGameInstance->Begin_VF();
 
@@ -655,8 +657,8 @@ void CLevel_GamePlay::Ready_Potal()
 {
 	CPotal::POTAL_DESC PotalDesc{};
 	PotalDesc.iLevel = ENUM_CLASS(m_eCurLevel);
-	PotalDesc.vExtent;
-	PotalDesc.vPos = _float4(3497.f, 148.84f, 3267.5f, 1.f);
+	PotalDesc.vExtent = _float3(15.1f, 15.1f, 0.5f);
+	PotalDesc.vPos = _float4(3490.f, 164.8f, 3313.5f, 1.f);
 
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Potal"), &PotalDesc);

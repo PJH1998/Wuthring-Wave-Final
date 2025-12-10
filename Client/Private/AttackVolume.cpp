@@ -196,6 +196,7 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_CallBack.eType = pDesc->eDamageType;
 	m_CallBack.eDir = pDesc->eDir;
 	m_CallBack.pSocketMatrix = pDesc->pGrabMatrix;
+	m_CallBack.strSoundTag = pDesc->strSoundTag;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 

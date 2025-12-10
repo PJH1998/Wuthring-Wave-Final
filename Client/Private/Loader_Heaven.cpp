@@ -115,6 +115,7 @@
 #include "GalbrenaUlti_PostSFX.h"
 #pragma endregion
 
+#include "Heaven_SkyBox.h"
 
 CLoader_Heaven::CLoader_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -163,21 +164,33 @@ HRESULT CLoader_Heaven::Load_Texture()
 HRESULT CLoader_Heaven::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1209_second/", m_eCurLevel, "Heaven");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1210_second/", m_eCurLevel, "Heaven");
 
-	// SkyBox
-	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Dome"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
-		CRASH("SkyDome");
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Background"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground_Heaven.dat"))))
-		CRASH("SkyBackground");
+	//// SkyBox
+	//_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Dome"),
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
+	//	CRASH("SkyDome");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Background"),
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground_Heaven.dat"))))
+	//	CRASH("SkyBackground");
+	//PreTransformMatrix = XMMatrixScaling(0.07f, 0.07f, 0.07f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_FX"),
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Heaven.dat"))))
+	//	CRASH("SkyFX");
+
+		// SkyBox
+	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Dome"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Dome.dat"))))
+		CRASH("Failed to Add Prototype HeavenSB_Dome");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Cloud"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Cloud.dat"))))
+		CRASH("Failed to Add Prototype HeavenSB_Cloud");
 	PreTransformMatrix = XMMatrixScaling(0.07f, 0.07f, 0.07f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_FX"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Heaven.dat"))))
-		CRASH("SkyFX");
-
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_FX.dat"))))
+		CRASH("Failed to Add Prototype HeavenSB_Fx");
 
 	cout << "Model" << endl;
 
@@ -187,6 +200,10 @@ HRESULT CLoader_Heaven::Load_Model()
 HRESULT CLoader_Heaven::Load_Shader()
 {
 	cout << "Shader" << endl;
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Shader_HeavenSkyBox"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox_Heaven.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Failed to Add Prototype Shader_VtxSkyBox_Heaven");
 
     return S_OK;
 }
@@ -248,6 +265,14 @@ HRESULT CLoader_Heaven::Load_Object()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_AttackVolume"),
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
+
+#pragma region SKYBOX
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Protottype_GameObject_Heaven_SkyBox"),
+		CHeaven_SkyBox::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype Heaven_SkyBox");
+
+#pragma endregion
 
 	return S_OK;
 }
