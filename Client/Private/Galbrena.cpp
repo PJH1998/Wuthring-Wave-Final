@@ -759,6 +759,8 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 		Throw_AttachTarget(); // 던지기.
 	else if (var1 == TEXT("MotionTrail"))
 		Process_MotionTrail(wStrObjectTag);
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 
 
 	// GalbrenaWing|Bone
