@@ -311,22 +311,22 @@ void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Run"))
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.f, 7.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.f, 7.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk01"))
@@ -677,7 +677,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, m_iSoundChannel, 0.4f);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
@@ -719,7 +719,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, m_iSoundChannel, 0.4f);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
@@ -749,7 +749,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, m_iSoundChannel, 0.4f);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
 	}
 }
 
