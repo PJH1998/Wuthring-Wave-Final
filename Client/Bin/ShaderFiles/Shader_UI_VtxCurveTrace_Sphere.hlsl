@@ -44,12 +44,12 @@ VS_OUT_SPHERE VS_MAIN_SPHERE(VS_IN_SPHERE In)
 {
     VS_OUT_SPHERE Out;
     
-    float4 vWorld = mul(float4(In.vPosition, 1.0f), g_WorldMatrix);     // 위치 변환
-    float4 vView = mul(vWorld, g_ViewMatrix);
-    Out.vPosition = mul(vView, g_ProjMatrix);
+    float4 vWorld       = mul(float4(In.vPosition, 1.0f), g_WorldMatrix);     // 위치 변환
+    float4 vView        = mul(vWorld, g_ViewMatrix);
+    Out.vPosition       = mul(vView, g_ProjMatrix);
 
-    Out.vWorldPos = vWorld.xyz;
-    Out.vTexcoord = In.vTexcoord;
+    Out.vWorldPos       = vWorld.xyz;
+    Out.vTexcoord       = In.vTexcoord;
     
     // 구는 원점에서 뻗어나가는 방향이 곧 Normal!
     float3 vLocalNormal = normalize(In.vPosition);
