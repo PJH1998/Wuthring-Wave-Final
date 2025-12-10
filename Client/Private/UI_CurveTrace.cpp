@@ -433,6 +433,8 @@ void CUI_CurveTrace::Render_Curve()
 	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Binding_Matrix_Failed");
 
+	if (FAILED(m_pCurveShaderCom->Bind_Value("g_HolderPosition", &m_tDesc.vStartPos, sizeof(m_tDesc.vStartPos))))
+		CRASH("Binding_Value_Failed");
 	if (FAILED(m_pCurveShaderCom->Bind_Value("g_BaseColor", &m_arrSelectedColor[0], sizeof(m_arrSelectedColor[0]))))
 		CRASH("Binding_Value_Failed");
 	if (FAILED(m_pCurveShaderCom->Bind_Value("g_HeadColor", &m_arrSelectedColor[1], sizeof(m_arrSelectedColor[1]))))
