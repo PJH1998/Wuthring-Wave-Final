@@ -341,7 +341,7 @@ float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture
         
     float2 vTexcoord = Compute_Texcoord(vProjPos.xy);                   // Sector Proj
     
-    NeighborData Neighbor = Check_Neighbor(vTexcoord, vSector, 0.05f);  // 근처 Sector와 거리가 가깝다면 NeighborData 채우기 ( 상 하 좌 우 )
+    NeighborData Neighbor = Check_Neighbor(vTexcoord, vSector, 0.005f);  // 근처 Sector와 거리가 가깝다면 NeighborData 채우기 ( 상 하 좌 우 )
     
     if (any(Neighbor.iNumNeighbor))
     {
@@ -522,7 +522,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         vTexcoord.y = vPrevProjPos.y * -0.5f + 0.5f;
         vTexcoord.z = fNdcZ;
     
-        if (all(vTexcoord.xy <= 0.999f) && all(vTexcoord.xy >= 0.001f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
+        if (all(vTexcoord.xy <= 0.997f) && all(vTexcoord.xy >= 0.003f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
         {
             float4 vPrevScattering = PrevVFLightTexture.SampleLevel(DefaultSampler, vTexcoord, 0.f);
         

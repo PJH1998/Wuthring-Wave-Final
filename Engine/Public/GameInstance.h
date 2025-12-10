@@ -140,7 +140,7 @@ public:
 	HRESULT						Add_Render_StaticObject(class CStaticObject* pObject);
 	//HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT						Add_Render_StaticObject(vector<class CStaticObject*>* Container);
-	HRESULT						Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex);
+	HRESULT						Add_Render_StaticObject(class CStaticObject* pRenderObject, _uint iNumLODIndex);
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
@@ -350,6 +350,8 @@ public:
 	void						Set_FogDistanceFallOff(_float fDistanceFallOf);
 	void						Set_FogRayDensityScale(_float fFogRayDensityScale);
 	void						Set_FogScatterWeight(_float fFogScatterWeight);
+	void						Set_FogFarRatioToCameraFar(_float fFogFarRatio);
+	void						Set_FogRayIntensity(_float fRayIntensity);
 	void						Begin_VF();
 #pragma endregion
 
