@@ -249,6 +249,9 @@ float Compute_NeighborShadow(int2 vNeighborSector, float4 vWorldPos, Texture2DAr
     
     vTexcoord = (vTexcoord * vTexRange) + vStartTex;
     
+    if (any(vTexcoord < vStartTex) || any(vTexcoord > vEndTex))
+        return 1.f;
+    
     vTexcoord = clamp(vTexcoord, vStartTex, vEndTex);
     
     float2 vTexelSize = 1.f / vShadowMapSize;
@@ -283,7 +286,7 @@ float Compute_ShadowMap(float fViewZ, float NdotL, float4 vWorldPos, Texture2DAr
         return fShadow;
         
     float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
-    NeighborData Neighbor =  Check_Neighbor(vTexcoord, vSector, 0.05f);
+    NeighborData Neighbor =  Check_Neighbor(vTexcoord, vSector, 0.005f);
     
     if (any(Neighbor.iNumNeighbor))
     {

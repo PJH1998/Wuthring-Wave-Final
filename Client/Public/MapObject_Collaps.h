@@ -77,7 +77,7 @@ private:
 	CALLBACK_CLIENT m_CallBack = {};
 	Mutex m_Mutex;
 	
-
+	void* m_pPullUI = { nullptr };
 public:
 	static CMapObject_Collaps* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
