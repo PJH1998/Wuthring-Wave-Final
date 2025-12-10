@@ -48,6 +48,7 @@ private:
 	_uint					m_iShaderPassIndex = {};
 	_bool					m_IsRender = { true };
 
+	_float					m_fInverse = {};
 	_float					m_fTime = {};
 
 private:

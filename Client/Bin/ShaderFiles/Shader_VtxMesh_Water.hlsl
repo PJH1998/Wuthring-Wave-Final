@@ -4,7 +4,8 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
 float4 g_LogoWaterColor = float4(0.2627f, 0.3373f, 0.3725f, 1.f);
-float4 g_HeavenWaterColor = float4(0.1922f, 0.0235f, 0.2902, 1.f);
+//float4 g_HeavenWaterColor = float4(0.1922f, 0.0235f, 0.2902, 1.f);
+float4 g_HeavenWaterColor = float4(0.0961f, 0.0117f, 0.1451f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
@@ -365,11 +366,11 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
     float fWaterMask = g_MaskTexture[0].Sample(DefaultSampler, UVDist * fMaskTiling).g;
     
     // Animation
-    float fAnimTiling = 0.1f;
-    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.01f, 0.007f);
+    float fAnimTiling = 3.f;
+    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.006f, 0.003f);
     float fAnimated = g_MaskTexture[2].Sample(DefaultSampler, vUVAnimation).r;
     
-    Out.vDiffuse = float4(vColor.xyz + ((fAnimated + 0.3f) * fWaterMask), 1.f);
+    Out.vDiffuse = float4(vColor.xyz * ((fAnimated * 30.f) * fWaterMask), 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
