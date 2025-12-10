@@ -53,9 +53,10 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CAnimMachine* m_pAnimMachineCom[PHASE::P_END] = { nullptr };
@@ -126,6 +127,10 @@ private:
 	_bool					m_isTurnLerp{};
 	_float3					m_vBeHit_Normal{};
 	_float4x4				m_PreTransform{};
+#pragma endregion
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
