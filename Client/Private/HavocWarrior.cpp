@@ -677,7 +677,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+			m_pGameInstance->Play_Sound(strSoundTag, m_iSoundChannel, 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
@@ -719,7 +719,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+			m_pGameInstance->Play_Sound(strSoundTag, m_iSoundChannel, 0.4f);
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
@@ -749,7 +749,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+			m_pGameInstance->Play_Sound(strSoundTag, m_iSoundChannel, 0.4f);
 	}
 }
 
