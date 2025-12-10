@@ -82,11 +82,11 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_CoroSaurus();
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
-	//Ready_Spawner();
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
+	Ready_Spawner();
 	Ready_AnimInstanceTest();
-	Ready_Leviatan();
+	//Ready_Leviatan();
 	//Ready_NPC();
 
     Ready_Effect();

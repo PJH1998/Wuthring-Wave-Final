@@ -53,6 +53,9 @@ HRESULT CEditorApp::Initialize()
 	Ready_Prototype_ForStatic();
 	Start_Level();
 	Ready_Dummies();
+	Ready_Sound();
+
+
 
 	return S_OK;
 }
@@ -297,6 +300,12 @@ void CEditorApp::Ready_Dummies()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Target"), CEditDummy_Target::Create(m_pDevice, m_pContext))))
 		CRASH("Failed Add Prototype Dummy Target");
+}
+
+void CEditorApp::Ready_Sound()
+{
+	m_pGameInstance->Load_Sound_FromFolderRecursive("../../Client/Bin/Resource/Sound/2D/", false);
+	m_pGameInstance->Load_Sound_FromFolderRecursive("../../Client/Bin/Resource/Sound/3D/", true);
 }
 
 void CEditorApp::Start_Level()

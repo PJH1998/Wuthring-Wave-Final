@@ -159,6 +159,11 @@ void CCoroProduction::Object_Func(const _wstring& wStrObjectTag)
 	//}
 }
 
+void CCoroProduction::Sound_Active(const _wstring& wStrObjectTag)
+{
+
+}
+
 void CCoroProduction::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))

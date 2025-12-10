@@ -38,9 +38,10 @@ public:
 public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
-	void Collider_Active(const _wstring&, _bool IsActive);
-	void Effect_Active(const _wstring& wStrEffectTag);
-	virtual void Object_Func(const _wstring& wStrObjectTag);
+	void			Collider_Active(const _wstring&, _bool IsActive);
+	void			Effect_Active(const _wstring& wStrEffectTag);
+	void			Object_Func(const _wstring& wStrObjectTag);
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CModel*										m_pModelCom = { nullptr };
