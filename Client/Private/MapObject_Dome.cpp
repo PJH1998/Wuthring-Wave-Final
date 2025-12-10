@@ -145,8 +145,13 @@ void CMapObject_Dome::Ready_Component(void* pArg)
 	RigidbodyDesc.eShape = SHAPE::MESH;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Static;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+#ifdef _DEBUG
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+#endif
+
+#ifndef _DEBUG
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+#endif
 	RigidbodyDesc.pModel = m_pModelCom;
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
