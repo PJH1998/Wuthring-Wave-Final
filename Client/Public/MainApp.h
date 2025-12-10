@@ -39,6 +39,7 @@ private:
 	void				Ready_Pooling_ForStatic();
 	void				Ready_Sequence_Item();
 	void				Ready_Sequence();
+	void				Ready_Sound();
 	void				Start_Level();
 
 public:
