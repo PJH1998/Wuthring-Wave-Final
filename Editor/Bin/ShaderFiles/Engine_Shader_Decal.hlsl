@@ -118,7 +118,10 @@ PS_OUT PS_MAIN(PS_IN In)
     }
     
     if (g_HasNormal)
+    {
         vNormal = g_NormalTexture.Sample(DefaultSampler, vDecalUV);
+        vNormal.xyz = normalize(vNormal.xyz * 2.f - 1.f);
+    }
     
     if (g_HasMask)
     {
@@ -132,11 +135,14 @@ PS_OUT PS_MAIN(PS_IN In)
     float4 vColor = any(vDifffuse) ? vDifffuse : In.vColor;
         
     Out.vDiffuse = any(vMask) ? (vColor * vMask) : vColor;
-    Out.vDiffuse.a -= In.fAlpha;
+    
+    Out.vDiffuse.a = saturate(Out.vDiffuse.a - In.fAlpha);
     
     if(any(vEmissive.xyz))
     {
-        Out.vEmissive.a -= In.fAlpha;
+    
+        Out.vEmissive.a = saturate(Out.vEmissive.a - In.fAlpha);
+        
         Out.vEmissive.xyz *= Out.vEmissive.a;
     }
     

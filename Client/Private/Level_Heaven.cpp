@@ -100,9 +100,10 @@ HRESULT CLevel_Heaven::Initialize()
 	Ready_Skybox();
 	//Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.01f);
-	m_pGameInstance->Set_FogMaxHeight(300.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+//	m_pGameInstance->Set_Fog
+	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
+	m_pGameInstance->Set_FogMaxHeight(200.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.8f);
 	m_pGameInstance->Set_FogScatterWeight(0.3f);
 
 
