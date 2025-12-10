@@ -64,6 +64,7 @@ private:
 
 	void* m_pTempPtr = { nullptr };
 	void* m_pSecondTempPtr = { nullptr };
+	void* m_pThirdTempPtr = { nullptr };
 public:
 	static CMapObject_Meteo* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

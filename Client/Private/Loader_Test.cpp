@@ -8,6 +8,8 @@
 #include "MapObject_Collaps.h"
 #include "AnimationDummy.h"
 #include"Slide_Navigation.h"
+#include"MapObject_Throw.h"
+
 #pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
@@ -238,6 +240,9 @@ HRESULT CLoader_Test::Load_Object()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_AttackVolume"),
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Throw"),
+		CMapObject_Throw::Create(m_pDevice, m_pContext));
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
 		CSlide_Navigation::Create(m_pDevice, m_pContext));

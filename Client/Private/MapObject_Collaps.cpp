@@ -112,7 +112,10 @@ void CMapObject_Collaps::Render()
 void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 {
 	if (m_pPullUI)
+	{
 		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
+		m_pPullUI = nullptr;
+	}
 
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;

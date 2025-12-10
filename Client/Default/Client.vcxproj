@@ -389,6 +389,7 @@
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
     <ClInclude Include="..\public\ScreenEffect.h" />
+    <ClInclude Include="..\Public\Spectrum.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\Public\TimeLack.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
@@ -660,6 +661,7 @@
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
     <ClCompile Include="..\private\ScreenEffect.cpp" />
+    <ClCompile Include="..\Private\Spectrum.cpp" />
     <ClCompile Include="..\Private\TimeLack.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />

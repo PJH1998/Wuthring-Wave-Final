@@ -38,9 +38,7 @@ private:
 
 public:
 	void Spectrum_Tab();
-
 	void Spectrum_Info_Tab();
-
 	void Spectrum_Base_Tab();
 
 public:
@@ -55,6 +53,11 @@ public:
 	void Set_VBSpectrumDesc(_wstring& SpectrumTag, CVIBuffer_Spectrum::VB_SPECTRUM_DESC& SpectrumVBDesc);
 
 	void Remove_Desc(const _wstring& DescTag);
+	
+	void Save_SelectedSpectrum_To_Json();
+
+	void Spectrum_VB_To_Json(json& SpectrumVBJson);
+	void Spectrum_OB_To_Json(json& SpectrumJson);
 
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
@@ -65,7 +68,6 @@ private:
 	_int														m_iSelectedTexture = -1;
 	_bool														m_TexturPopOpend = false;
 
-	
 	vector<COLOR_TEXTURE>										m_ColorTextures = {};
 	_int														m_iSelectedColor = -1;
 	_bool														m_ColorTexturePopOpend = false;

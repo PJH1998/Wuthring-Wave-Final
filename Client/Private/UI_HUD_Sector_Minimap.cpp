@@ -69,13 +69,13 @@ void CUI_HUD_Sector_Minimap::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-#ifdef _DEBUG
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f, -10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f,  10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f,  10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f, -10.f) });  
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::BOSS, _float3( 0.f, -10.f, 0.f) });  
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f, -10.f) });
+//	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f,  10.f) });
+//	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f,  10.f) });
+//	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f, -10.f) });  
+//	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::BOSS, _float3( 0.f, -10.f, 0.f) });  
+//#endif // _DEBUG
 
 
 	__super::Update(fTimeDelta);
