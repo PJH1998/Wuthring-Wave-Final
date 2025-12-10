@@ -1636,6 +1636,17 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 
 	_bool isHarmonyGuageFull = m_pAbility->Get_Harmony() == 100.f;
 
+	// [Sound] harmony
+	static _bool isHarmonyGuageFull_PrevFrame = false;
+	if (!isHarmonyGuageFull_PrevFrame && isHarmonyGuageFull)
+	{
+		m_pGameInstance->Play_Sound(L"UI_Harmony_Full", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	}
+
+	isHarmonyGuageFull_PrevFrame = isHarmonyGuageFull;
+
+
+
 	if (!isHarmonyGuageFull)
 	{
 		pTargetUI->SetActivate(false);
@@ -1645,6 +1656,7 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 
 	pTargetUI->SetActivate(true);
 	pTargetBGUI->SetActivate(true);
+
 
 
 
@@ -1729,10 +1741,6 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 		targetInstDesc[i].vClipTexcoordX	= (m_iSelectedCHIndex == i)? _float2( 0.0f, 0.0f ) : _float2( 0.0f, 1.0f );
 		targetBGInstDesc[i].vClipTexcoordX	= (m_iSelectedCHIndex == i)? _float2( 0.0f, 0.0f ) : _float2( 0.0f, 1.0f );		
 	}
-
-
-
-
 
 }
 

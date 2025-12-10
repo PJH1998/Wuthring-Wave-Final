@@ -9,7 +9,7 @@
 #include "GameSystem.h"
 
 CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CLevel { pDevice, pContext }, m_pGameSystem(CGameSystem::GetInstance())
+	: CLevel{ pDevice, pContext }, m_pGameSystem(CGameSystem::GetInstance())
 {
 	Safe_AddRef(m_pGameSystem);
 }
@@ -19,9 +19,9 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-//	m_pGameInstance->Add_Probe(_float3(-55.f, 15.f, 50.f), 200.f);
+	//	m_pGameInstance->Add_Probe(_float3(-55.f, 15.f, 50.f), 200.f);
 	m_pGameInstance->Add_Probe(_float3(-36.f, 8.f, 25.f), 150.f);
-	
+
 	m_pGameInstance->Setting_LUT(0, 0.f, false);
 	m_pGameInstance->SettingFog(true);
 
@@ -55,18 +55,20 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Begin_VF();
 
-    return S_OK;
+	m_pGameInstance->Play_BGM(L"BGM_Logo", ENUM_CLASS(CHANNEL::BGM), 0.5f);
+
+	return S_OK;
 }
 
 void CLevel_Logo::Update(_float fTimeDelta)
 {
-    SetWindowText(g_hWnd, TEXT("Logo"));
+	SetWindowText(g_hWnd, TEXT("Logo"));
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
-    {
-        CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
-        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-    }
+	if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
@@ -74,21 +76,27 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
 	{
-
+	
 	}
-
-	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
+		!m_isGoinFinish)
 	{
 		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
 		m_pGameInstance->OnFade(FADE::FADE_OUT, 3.f, [&]() {
-				CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
-				m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+			CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 			});
+	
+		m_isGoinFinish = true;
 	}
+
+	Update_SoundOrder(fTimeDelta);		// n초 후 재생할 사운드 관리
+	Update_ClickSound();				// 클릭 시 사운드
+	Update_GoinFinish(fTimeDelta);		// 로고 종료 시 사운드 조절
 }
 
 void CLevel_Logo::Render()
-{ 
+{
 #ifdef _DEBUG
 	DEBUG_FUNCTION();
 #endif
@@ -106,7 +114,7 @@ void CLevel_Logo::Ready_Camera()
 	CameraDesc.fSpeedPerSec = 10.f;
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CameraDesc.fMouseSensor = 0.004f;
-	
+
 	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::LOGO), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
 		CRASH("Add Camera");
 
@@ -180,6 +188,40 @@ void CLevel_Logo::Ready_SkyBox()
 		CRASH("Failed to Add GameObject To Layer SkyBox");
 }
 
+void CLevel_Logo::Update_SoundOrder(_float fTimeDelta)
+{
+	if (m_iSoundOrder >= 1) return;
+
+	if ((m_iSoundOrder == 0) &&
+		(m_fElapsedTime >= m_fLoginStartTime))
+	{
+		m_pGameInstance->Play_Sound(L"SFX_Logo_LoginStart", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+		m_iSoundOrder++;
+	}
+	// if ((m_iSoundOrder == 1) && .. 필요시?
+	//
+
+	m_fElapsedTime += fTimeDelta;
+}
+
+void CLevel_Logo::Update_ClickSound()
+{
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+		m_pGameInstance->Play_Sound(L"UI_Click_Medium", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+}
+
+void CLevel_Logo::Update_GoinFinish(_float fTimeDelta)
+{
+	if (!m_isGoinFinish)
+		return;
+
+	const _float fOriginVolume = 0.5f;
+	_float fFadedVolume = clamp(1.f - m_fElapsedFinishTime / m_fFinishTime, 0.f, 1.f) * fOriginVolume;
+
+	m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BGM), fFadedVolume);	// 2.5초에 걸쳐 0.5 -> 0 으로
+
+	m_fElapsedFinishTime += fTimeDelta;
+}
 
 #ifdef _DEBUG
 void CLevel_Logo::DEBUG_FUNCTION()
@@ -198,22 +240,23 @@ void CLevel_Logo::DEBUG_FUNCTION()
 #endif
 CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CLevel_Logo* pInstance = new CLevel_Logo(pDevice, pContext);
+	CLevel_Logo* pInstance = new CLevel_Logo(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize()))
-    {
-        MSG_BOX("Failed to Create : Level_Logo");
-        Safe_Release(pInstance);
-    }
+	if (FAILED(pInstance->Initialize()))
+	{
+		MSG_BOX("Failed to Create : Level_Logo");
+		Safe_Release(pInstance);
+	}
 
-    return pInstance;
+	return pInstance;
 }
 
 void CLevel_Logo::Free()
 {
 	//m_pGameInstance->Clear_RootUI();
-	    
-    __super::Free();
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BGM));
+	m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BGM), 0.5f);	// 원래대로?
+	__super::Free();
 
 	Safe_Release(m_pGameSystem);
 }
