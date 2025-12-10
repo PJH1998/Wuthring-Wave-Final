@@ -589,6 +589,9 @@ void CCharacter::Rotate_GrappleTarget()
 
 void CCharacter::Move_Grapple(_float fTimeDelta, _float fSpeed)
 {
+	if (nullptr == m_GrappleInfo.pTransform)
+		return;
+
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
 	_vector vMoveDir = XMVector3Normalize(vTargetPos - vPos);

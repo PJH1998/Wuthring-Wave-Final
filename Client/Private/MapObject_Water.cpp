@@ -36,6 +36,8 @@ HRESULT CMapObject_Water::Initialize_Clone(void* pArg)
 	//if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 	//	return E_FAIL;
 
+	m_fInverse = 1.f;
+
 	return S_OK;
 }
 
@@ -49,8 +51,11 @@ void CMapObject_Water::Update(_float fTimeDelta)
 
 void CMapObject_Water::Late_Update(_float fTimeDelta)
 {
-	m_fTime = fmod((m_fTime + (fTimeDelta * 0.12f)), 1.f);
-	cout << m_fTime << endl;
+	if (m_fTime > 1.f) m_fInverse = -1.f;
+	else if (m_fTime < 0.f) m_fInverse = 1.f;
+
+	//m_fTime = fmod((m_fTime + (fTimeDelta * m_fInverse * 0.12f)), 1.f);
+	m_fTime = m_fTime + (fTimeDelta * m_fInverse * 0.12f);
 
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
