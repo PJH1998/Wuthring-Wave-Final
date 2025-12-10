@@ -894,7 +894,9 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	else if (var1 == TEXT("Throw"))
 		Throw_AttachTarget(); // 던지기.
 	else if (var1 == TEXT("MotionTrail"))
-		Process_MotionTrail(wStrObjectTag);
+		Process_MotionTrail(wStrObjectTag); // Character 함수
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 	
 
 
@@ -1338,26 +1340,6 @@ _bool CAugusta::IsEye(_uint iMeshIndex)
 		return true;
 
 	return false;
-}
-
-void CAugusta::Process_MotionTrail(const _wstring& wStrObjectTag)
-{
-	_wstring var1, var2, var3, var4, var5;
-	wstringstream wss(wStrObjectTag);
-
-	getline(wss, var1, L'|');
-	getline(wss, var2, L'|');
-	getline(wss, var3, L'|');
-	getline(wss, var4, L'|');
-	getline(wss, var5, L'|');
-
-	_float fDuration = stof(var2);
-	_float fInterval = stof(var3);
-	_float fMotionLifeTime = stof(var4);
-	_uint iShaderPath = stoul(var5);
-
-	// Color는 고정?
-	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
 }
 
 void CAugusta::Update_TargetDistance()
