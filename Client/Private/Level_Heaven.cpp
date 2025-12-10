@@ -98,6 +98,7 @@ HRESULT CLevel_Heaven::Initialize()
 
 	Ready_Effect();
 	Ready_Skybox();
+	Ready_Scene();
 	//Ready_SFX();
 
 //	m_pGameInstance->Set_Fog
