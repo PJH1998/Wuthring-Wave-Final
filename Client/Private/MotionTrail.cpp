@@ -47,7 +47,9 @@ void CMotionTrail::Update(_float fTimeDelta)
 		m_isActivate = false;
 
 		Safe_Release(m_pOwnerModel);
+		m_pOwnerModel = nullptr;
 		Safe_Release(m_pOwnerTransform);
+		m_pOwnerTransform = nullptr;
 
 		return;
 	}

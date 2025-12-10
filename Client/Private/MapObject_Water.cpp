@@ -51,7 +51,12 @@ void CMapObject_Water::Late_Update(_float fTimeDelta)
 {
 	m_fTime = fmod((m_fTime + (fTimeDelta * 0.12f)), 1.f);
 	cout << m_fTime << endl;
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
+
+	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
+	else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Water::Render()
@@ -77,14 +82,9 @@ void CMapObject_Water::Render()
 	_uint iPassIndex = {};
 
 	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
-	{
 		iPassIndex = 4;
-	}
 	else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
-	{
-
-	}
-
+		iPassIndex = 5;
 
 	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)

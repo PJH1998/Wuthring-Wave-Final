@@ -4,6 +4,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
 float4 g_LogoWaterColor = float4(0.2627f, 0.3373f, 0.3725f, 1.f);
+float4 g_HeavenWaterColor = float4(0.1922f, 0.0235f, 0.2902, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
@@ -42,6 +43,17 @@ struct VS_OUT
     float4 vProjPos : TEXCOORD1;
 };
 
+struct VS_HEAVEN
+{
+    float4 vPosition : SV_POSITION;
+    float4 vNormal : NORMAL;
+    float4 vTangent : TANGENT;
+    float4 vBinormal : BINORMAL;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
+};
+
 VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
@@ -60,6 +72,25 @@ VS_OUT VS_MAIN(VS_IN In)
     return Out;
 }
 
+VS_HEAVEN VS_NONREFLECT(VS_IN In)
+{
+    VS_HEAVEN Out = (VS_HEAVEN) 0;
+    
+    matrix matWV, matWVP;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWV, g_ProjMatrix);
+    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
+    Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
+    Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), g_WorldMatrix));
+    Out.vTexcoord = In.vTexcoord;
+    Out.vProjPos = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+
+    return Out;
+}
+
 struct PS_IN
 {
     float4 vPosition : SV_POSITION;
@@ -70,6 +101,17 @@ struct PS_IN
     float4 vProjPos : TEXCOORD1;
 };
 
+struct PS_IN_HEAVEN
+{
+    float4 vPosition : SV_POSITION;
+    float4 vNormal : NORMAL;
+    float4 vTangent : TANGENT;
+    float4 vBinormal : BINORMAL;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
+};
+
 struct PS_OUT_LIGHT
 {
     float4 vDiffuse : SV_TARGET0;
@@ -77,7 +119,6 @@ struct PS_OUT_LIGHT
     float4 vDepth : SV_TARGET2;
     float4 vPBR : SV_TARGET3;
 };
-
 
 PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
 {
@@ -300,37 +341,36 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     return Out;
 }
 
-PS_OUT_LIGHT PS_HEAVEN(PS_IN In)
+PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
  
-    float4 vColor = g_LogoWaterColor;
+    float4 vColor = g_HeavenWaterColor;
 
-    float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y);
+    // Wolrd ±â¹Ý UV
+    float2 vUV = In.vWorldPos.xz * 0.02f;
+    //float2 vUV = In.vTexcoord;
     
-    vector vNormalDesc = g_DiffuseTexture[0].Sample(DefaultSampler, vTexcoord);
+    // Noise
+    float fNoiseTiling = 0.1f;
+    float fNoiseSpeed = 0.01f;
     
-    float3 vMainNormal = 0.f;
-
-    vMainNormal = vNormalDesc.xyz * 2.f - 1.f;
-    vMainNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    float2 vNoiseUV = vUV * fNoiseTiling + g_fTime * fNoiseSpeed;
+    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV * 30.f).b * 2.f - 1.f;
+    float fDistortionStrength = 0.1f;
+    float2 UVDist = vNoiseUV + fNoise * fDistortionStrength;
     
-
-    float3 vTangent = In.vTangent.xyz;
-    float3 vBinormal = In.vBinormal.xyz * -1.f;
-    float3 vInNormal = In.vNormal.xyz;
-
-    float3x3 WorldMatrix;
-    WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-        
-    vMainNormal = mul(vMainNormal, WorldMatrix);
+    // Mask
+    float fMaskTiling = 1.f;
+    float fWaterMask = g_MaskTexture[0].Sample(DefaultSampler, UVDist * fMaskTiling).g;
     
-    float3 vNormal = normalize(vMainNormal.xyz * 0.2f);
+    // Animation
+    float fAnimTiling = 0.1f;
+    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.01f, 0.007f);
+    float fAnimated = g_MaskTexture[2].Sample(DefaultSampler, vUVAnimation).r;
     
-    vNormal = vNormal * 0.5f + 0.5f;
-    
-    Out.vDiffuse = vColor;
-    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDiffuse = float4(vColor.xyz + ((fAnimated + 0.3f) * fWaterMask), 1.f);
+    Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     
@@ -403,8 +443,8 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_NONREFLECT();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_HEAVEN();
+        PixelShader = compile ps_5_0 PS_NONREFLECT();
     }
 }

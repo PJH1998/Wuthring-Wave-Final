@@ -76,6 +76,10 @@ private:
 	_bool					m_isDist_Interp_Enable{};
 	_float					m_fRootMotionRate{};
 
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
 private:
 	void			Bind_Resources();
 	void			Ready_Component(ALTER_DESC* pDesc);

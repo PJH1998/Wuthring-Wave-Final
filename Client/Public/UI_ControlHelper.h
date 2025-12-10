@@ -74,6 +74,7 @@ public:
 
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
+	CCustom_UI*			m_pUI_HUD_Main_All					= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorR_PartyFrame		= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorB_Status			= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorA					= { nullptr };

@@ -15,7 +15,7 @@ public:
 	HRESULT				Initialize();
 
 public:
-	void*				Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn = false);
+	void*				Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn);
 
 	CUI_GrapplePoint*	Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive);
 

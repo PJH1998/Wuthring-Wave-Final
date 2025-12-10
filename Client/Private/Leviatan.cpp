@@ -39,8 +39,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	//m_fHP = pDesc->fHP * 0.7f;
-	m_fHP = 5100.f;
+	m_fHP = pDesc->fHP * 0.7f;
+	//m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -434,6 +434,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	}
+	else if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
 	else if (wstrTypeTag == TEXT("Alter"))
 	{
 		CLevi_Alter::ALTER_RESET Desc{};
@@ -605,6 +609,11 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		Reset_NotifyInteraction();
 		dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
 	}
+}
+
+void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
+{
+
 }
 
 HRESULT CLeviatan::Bind_Resources()

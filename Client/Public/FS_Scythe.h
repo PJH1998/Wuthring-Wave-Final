@@ -59,6 +59,10 @@ private:
 
 	_float m_fAttackDamage{};
 
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
 private:
 	void			Bind_Resources();
 	void			Ready_Component(SCYTHE_DESC* pDesc);
