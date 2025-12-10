@@ -21,11 +21,11 @@ public:
 
 public:
 	// Sound Load (Sound File Key, Sound File Path)
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D);
+	HRESULT			Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D);
 	// Sound Load From Folder
-	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D);
+	HRESULT			Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D);
 	// Sound Load From Folder Recursive(재귀)
-	HRESULT		Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D);
+	HRESULT			Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D);
 
 	// 고정 채널 Sound 재생
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);	// 2D

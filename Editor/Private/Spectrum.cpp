@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+ï»¿#include "Editorpch.h"
 #include "Spectrum.h"
 
 CSpectrum::CSpectrum(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -26,13 +26,14 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Components(*pDesc)))
         return E_FAIL;
 
+	m_strMyTag = pDesc->strMyTag;
+
     m_iShaderPass = pDesc->iShaderPass;
     m_fLifeTime = pDesc->fLifeTime;
     m_fGeneration = pDesc->fGeneration;
 
-    m_IsRoot = pDesc->IsRootOn;
     
-    //ÀÓ½ÃÃ³¸®
+    //ì„ì‹œì²˜ë¦¬
     //m_isActivate = true;
 
     return S_OK;
@@ -47,13 +48,15 @@ void CSpectrum::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if(m_IsRoot)
-        Root_Transform();
+
+	m_fTestCurrentTime += fTimeDelta;
+	Test_Default_Pos();
 
     m_fCurrentTime += fTimeDelta;
     m_fSpawnTimer += fTimeDelta;
+	m_fSweep += fTimeDelta;
 
-    //¶óÀÌÇÁÅ¸ÀÓ Ã¼Å©.
+    //ë¼ì´í”„íƒ€ì„ ì²´í¬.
     while (!m_Samples.empty())
     {
         SAMPLE_DESC Desc = m_Samples.front();
@@ -133,23 +136,19 @@ void CSpectrum::Render()
 
 void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	SPECTRUM_INFO* pDesc = static_cast<SPECTRUM_INFO*>(pArg);
+
     m_fTestCallTime = 0.f;
     m_vTestPos = _float3(0.f, 0.f, 0.f);
     m_fCurrentTime = 0.f;
     m_fTestCurrentTime = 0.f;
+	m_fSweep = 0.f;
+
+	m_pIsActive = pDesc->pIsActive;
+
+	m_isActivate = true;
 }
 
-//Test
-void CSpectrum::Root_Transform()
-{
-    _matrix RootMatrix = XMLoadFloat4x4(*m_ParentMatrix);
-
-    for (size_t i = 0; i < 3; i++)
-        RootMatrix.r[i] = XMVector3Normalize(RootMatrix.r[i]);
-
-    XMStoreFloat4x4(&m_ComBindMatrix,
-        (m_pTransformCom->Get_WorldMatrix() * RootMatrix));
-}
 
 void CSpectrum::Test_Default_Pos()
 {
@@ -170,7 +169,7 @@ void CSpectrum::Test_Default_Pos()
 
 HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
 {
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxTrailMesh"),
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxPosTex"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
@@ -178,7 +177,7 @@ HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //ÅØ½ºÃ³ ¿©·¯°³ ½á¾ßÇÏ´Âµ¥ ¾î¶»°Ô ÇÒÁö °í¹ÎÇØº¸ÀÚ
+    //í…ìŠ¤ì²˜ ì—¬ëŸ¬ê°œ ì¨ì•¼í•˜ëŠ”ë° ì–´ë–»ê²Œ í• ì§€ ê³ ë¯¼í•´ë³´ì
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -192,17 +191,9 @@ HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
 
 HRESULT CSpectrum::Bind_ShaderResources()
 {
-    if (!m_IsRoot)
-    {
-        if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-            return E_FAIL;
-    }
-    else
-    {
-        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
-            return E_FAIL;
-    }
-
+    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+        return E_FAIL;
+  
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
 
@@ -215,6 +206,11 @@ HRESULT CSpectrum::Bind_ShaderResources()
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture", 0)))
         return E_FAIL;
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fCurrentTime, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
+		return E_FAIL;
 
     return S_OK;
 }

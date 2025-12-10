@@ -450,8 +450,12 @@ namespace Engine
 		_matrix			OffsetMatrix = {};
 	}EFFECT_INFO;
 
+	typedef struct tagSpectrumInfo
+	{
+		const _float4x4*	pModelMarixPtr = nullptr;
+		const _float4x4*	pBoneMatrixPtr = nullptr;
+		_bool*				pIsActive = nullptr;
+	}SPECTRUM_INFO;
 
 }
-
-
 #endif // Engine_Struct_h__

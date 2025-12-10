@@ -4,7 +4,7 @@
 namespace Client
 {
 	enum class LEVEL { STATIC, LOGO, GAMEPLAY, HEAVEN, LOADING, TEST, TEST_UI, END };
-	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, HIT_EFFECT, END };
+	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, ENEMY_HIT, END };
 	enum class COLLISIONLAYER { NONE, MAP, QTE, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, GRAPPLE, DETECT, PARRY, GRAB, NPC, ALTER, SEQUENCE, SLIDE, INTERACT_THROW, THROW, BURN, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
@@ -128,6 +128,7 @@ namespace Client
 		DARK,	// 인멸
 		ELEC,	// 전도
 		FUSI,	// 용융
+		AERO,	// 기류
 
 		// 텍스트용 색상
 		TT_TITLE,
@@ -168,7 +169,7 @@ namespace Client
 	};
 
 	enum class UI_MINIMAP_OBJTYPE {
-		MONSTER, END	// 나중에 더 필요한 것 있으면 추가? 상호작용 요소..
+		MONSTER, BOSS, END	// 나중에 더 필요한 것 있으면 추가? 상호작용 요소..
 	};
 
 	enum class UI_GRAPPLE_TYPE {	// 다른점? 색깔..

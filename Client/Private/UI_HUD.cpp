@@ -489,6 +489,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// ==============================
 	// * [Skill Icon Updates] Apply CD Value.
 	// ==============================
+	auto& vecUISlots = m_pAbility->Get_UISkillSlots();
+
 	for (_uint i = 0; i < CH_END; i++)
 	{
 		auto targetUI = m_pUI_Skill[i];
@@ -527,23 +529,23 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         targetUI->Set_VariantUIDesc(tVariantDesc);
 
 
-		auto& UISlots = m_pAbility->Get_UISkillSlots();
+		
 		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(m_iSelectedCHIndex);
 		switch (eCharacterType)
 		{
 			// * [SK Icon Update] Rover
 		case UI_CHARACTERTYPE::ROVER:
-			Update_Icon_Rover(UISlots);
+			Update_Icon_Rover(vecUISlots);
 			break;
 
 			// * [SK Icon Update] Augusta
 		case UI_CHARACTERTYPE::AUGUSTA:
-			Update_Icon_Augusta(UISlots);
+			Update_Icon_Augusta(vecUISlots);
 			break;
 
 			// * [SK Icon Update] Galbrena
 		case UI_CHARACTERTYPE::GALBRENA:
-			Update_Icon_Galbrena(UISlots);
+			Update_Icon_Galbrena(vecUISlots);
 			break;
 		}
 
@@ -586,6 +588,15 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
+	_bool isReady_Augusta_Griffon = (m_iSelectedCHIndex != CH_AUGUSTA) ? false :
+		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_STATE::E_GRIFFON_READY;
+	_bool isReady_Augusta_Rise =	(m_iSelectedCHIndex != CH_AUGUSTA) ? false :
+		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_STATE::E_RISE_READY;
+	_bool isReady_Augusta_LBStrong =(m_iSelectedCHIndex != CH_AUGUSTA) ? false :
+		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isReady_Galbrena_Burst =	(m_iSelectedCHIndex != CH_GALBRENA) ? false :
+		static_cast<UI_GALBRENA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_GALBRENA_STATE::E_BURST_READY;
+
 
 	static _uint iIndex_EBtn = 2;		static _uint iIndex_PrevEBtn;
 	static _uint iIndex_RBtn = 0;		static _uint iIndex_PrevRBtn ;
@@ -603,6 +614,12 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			iIndex_EBtn = 2;
 			iIndex_RBtn = 0;
 			iIndex_LBBtn = 1;
+		}
+		else
+		{
+			iIndex_EBtn = 2;
+			iIndex_RBtn = 0;
+			iIndex_LBBtn = 4;
 		}
 	}break;
 	case CH_GALBRENA:
@@ -623,6 +640,11 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	
 	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
 
+
+
+
+
+
 	// - LB/E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
 	 
 	//if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
@@ -636,14 +658,21 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	else								readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
 
 
-	switch (m_iSelectedCHIndex)
+	switch (m_iSelectedCHIndex)	// LB
 	{
-	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Augusta_AdvUlt) ?		_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (!isIn_Augusta_AdvUlt && isReady_Augusta_LBStrong) ?
+																									_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	case CH_GALBRENA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Galbrena_BurstMode) ?	_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	default:			readyInstDesc[iIndex_LBBtn].vClipTexcoordX = _float2{ 0.f, 0.f };														break;
 	}
 	
-	
+	switch (m_iSelectedCHIndex)	// E
+	{
+	case CH_AUGUSTA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = ((isReady_Augusta_Griffon || isReady_Augusta_Rise) && (!isIn_Augusta_AdvUlt)) ?
+																									_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	case CH_GALBRENA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = (isReady_Galbrena_Burst) ?		_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	default:			readyInstDesc[iIndex_EBtn].vClipTexcoordX = _float2{ 0.f, 0.f };
+	}
 
 	;
 
@@ -697,12 +726,12 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._12) = 0.f;								// ColorMul1
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 1.f;								// ColorMul2
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._14) = static_cast<_float>(true);		// Is Use CustomColor?
-		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vecCustomColor[m_iSelectedCHIndex];	// CustomColor
+		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];	// CustomColor
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 0.f;							// CD Start Degree
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._33) = m_fElapsedTime;							// Elapsed Time
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._34) = 0.2f;							// UV Scroll Speed
-		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = vecAdvCustomColor[m_iSelectedCHIndex];	// Mask Color
+		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
 	}
 
 	// R에 대한 예외 적용
@@ -723,6 +752,9 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
 		true
 	};
+
+
+
 
 	// 만약 버튼 인덱스가 바뀐다면, 꼬임 방지를 위한 이전 버튼 인덱스의 비활성화.
 	if (iIndex_PrevEBtn != iIndex_EBtn)		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
@@ -802,6 +834,14 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 {
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+
+
 	CCustom_UI* pTargetUI = m_pUI_Skill_Utility;
 
 	auto& utilDesc = pTargetUI->Get_UIDesc();
@@ -812,9 +852,13 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	UI_TAB_UTILITY ePlayerUtility = m_pPlayerStatus->Get_UtilityType();
 
-
 	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][0];
 	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][1];
+
+
+
+	if (isIn_Augusta_AdvUlt)		utilInstDesc.vClipTexcoordX = { 0.f, 0.f };
+	else							utilInstDesc.vClipTexcoordX = { 0.f, 1.f };
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)

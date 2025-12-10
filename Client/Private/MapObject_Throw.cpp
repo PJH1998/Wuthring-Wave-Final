@@ -86,13 +86,13 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		}
 		else
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			m_IsThrow = false;
-#endif
-
-#ifndef _DEBUG
-			m_isActivate = false;
-#endif
+//#endif
+//
+//#ifndef _DEBUG
+//			m_isActivate = false;
+//#endif
 			//이펙트 호출.		
 			m_pCollideRigidbodyCom->IsActivate(true);
 			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -109,7 +109,7 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 void CMapObject_Throw::Late_Update(_float fTimeDelta)
 {
 
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Throw::Render()
@@ -126,7 +126,7 @@ void CMapObject_Throw::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	//m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
@@ -376,6 +376,9 @@ CGameObject* CMapObject_Throw::Clone(void* pArg)
 void CMapObject_Throw::Free()
 {
 	__super::Free();
+	
+	m_pAttachBoneMatrix = nullptr;
+	m_pAttachWorldMatrix = nullptr;
 
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pCollideRigidbodyCom);

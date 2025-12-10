@@ -87,6 +87,7 @@ void CGameSystem::Clear_Resource()
 	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
 	Safe_Release(m_pPotal);
+	m_pPotal = nullptr;
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
@@ -371,9 +372,9 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vTailColor);
 }
 
-void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType)
+void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
-	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType);
+	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);
 }
 
 CUI_GrapplePoint* CGameSystem::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive)
@@ -630,7 +631,8 @@ void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
-	Safe_Release(m_pPotal);
+	if (m_pPotal)
+		Safe_Release(m_pPotal);
 
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);

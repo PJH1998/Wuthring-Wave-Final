@@ -315,6 +315,18 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 		
 }
 
+#ifdef _DEBUG
+void CModel::Clear_AllNotifies()
+{
+	for (auto& pair : m_Animations)
+	{
+		pair.second->Clear_AnimNotifies();
+	}
+}
+#endif // _DEBUG
+
+
+
 HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {
 	m_eType = eType;

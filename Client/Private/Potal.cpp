@@ -21,20 +21,21 @@ HRESULT CPotal::Initialize_Prototype()
 
 HRESULT CPotal::Initialize_Clone(void* pArg)
 {
+	m_Size = 30.2f;
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
+	m_pTransformCom->Scaling(_float3(m_Size, m_Size, m_Size));
 	Ready_Components(pArg);
-	m_szText = TEXT("순례의 천국 입장하기");
 	PotalActive(false);
 	m_pGameSystem->Potal_Register(this);
-
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-			m_pGameSystem->Req_Render_InteractUI(m_szText);
+			m_pGameInstance->OnFade(FADE::FADE_OUT, 0.5f, [this]() {
 			Change_Level();
+				});
 		});
 
-    return S_OK;
+	return S_OK;
 }
 
 void CPotal::Priority_Update(_float fTimeDelta)
@@ -45,12 +46,14 @@ void CPotal::Priority_Update(_float fTimeDelta)
 void CPotal::Update(_float fTimeDelta)
 {
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	m_fTotalTime += fTimeDelta;
+	//m_pTransformCom->LookAt(m_pGameSystem->Get_PlayerPosition());
 }
 
 void CPotal::Late_Update(_float fTimeDelta)
 {
 	//빌보드 직접 만드셈ㅇㅇ
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 }
 
 void CPotal::Render()
@@ -59,8 +62,8 @@ void CPotal::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pDiffuseCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
-	m_pFirstMaskCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture");
+	m_pDiffuseCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0);
+	m_pFirstMaskCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture", 0);
 	//m_pSecondMaskCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture2");
 
 	m_pShaderCom->Bind_Value("g_TotalTime", &m_fTotalTime, sizeof(_float));
@@ -81,11 +84,8 @@ void CPotal::PotalActive(_bool B)
 
 void CPotal::Change_Level()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-	{
-		CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-	}
+	CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
+	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }
 
 void CPotal::Ready_Components(void* pArg)
@@ -105,7 +105,7 @@ void CPotal::Ready_Components(void* pArg)
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
-	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
+	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Potal"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 
@@ -124,7 +124,6 @@ void CPotal::Ready_Components(void* pArg)
 	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
 		TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
 		CRASH("FAILED");
-
 }
 
 CPotal* CPotal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

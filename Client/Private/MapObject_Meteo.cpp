@@ -43,12 +43,7 @@ void CMapObject_Meteo::Update(_float fTimeDelta)
 void CMapObject_Meteo::Late_Update(_float fTimeDelta)
 {
 	if (m_IsTriggerd)
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-	
-	//if (m_IsTriggerd)
-	//	if (FAILED(m_pGameInstance->Add_Render_StaticObject(this, 0)))
-
-			return;
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Meteo::Render()
@@ -126,7 +121,19 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 		m_isActivate = false;
 
 		if (m_iTriggerActiveIndex != -1)
+		{
 			m_pGameSystem->OnTriggerActivate(m_iTriggerActiveIndex);
+
+			if (m_pTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, true);
+
+			if (m_pSecondTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, true);
+
+			if (m_pThirdTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pThirdTempPtr, true);
+			
+		}
 	}
 }
 
@@ -162,6 +169,17 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return;
 
+	switch ((m_iTriggerActiveIndex))
+	{
+	case 11:
+		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3458.7f, 334.9, 1782.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pSecondTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3456.3f, 341.5f, 1769.5f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pThirdTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3454.8f, 341.61f, 1759.4), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
+		m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, false);
+		m_pGameSystem->Toggle_GrapplePoint(m_pThirdTempPtr, false);
+		break;
+	}
 }
 
 CMapObject_Meteo* CMapObject_Meteo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -193,7 +211,9 @@ CGameObject* CMapObject_Meteo::Clone(void* pArg)
 void CMapObject_Meteo::Free()
 {
 	__super::Free();
-
+	m_pTempPtr = nullptr;
+	m_pSecondTempPtr = nullptr;
+	m_pThirdTempPtr = nullptr;
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pModelCom);

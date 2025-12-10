@@ -102,45 +102,6 @@ void CLogo_SkyBox::Late_Update(_float fTimeDelta)
 
 void CLogo_SkyBox::Render()
 {
-#ifdef  _DEBUG
-
-	ImGui::Begin("LOGO_SKY");
-
-	if (ImGui::Button("BACK"))
-	{
-		m_iIndex = 0;
-
-	}
-
-	ImGui::SameLine();
-
-	if (ImGui::Button("FIRST"))
-	{
-		m_iIndex = 1;
-	}
-
-	ImGui::SameLine();
-	if (ImGui::Button("SEC"))
-	{
-		m_iIndex = 2;
-	}
-
-	ImGui::SameLine();
-	if (ImGui::Button("LAST"))
-	{
-		m_iIndex = 3;
-	}
-
-	//_matrix	WorldMatrix = XMMatrixScaling(m_vScale[m_iIndex].x, m_vScale[m_iIndex].y, m_vScale[m_iIndex].z) *
-	//	XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_vYawPitchRoll[m_iIndex].x), XMConvertToRadians(m_vYawPitchRoll[m_iIndex].y), XMConvertToRadians(m_vYawPitchRoll[m_iIndex].z))) *
-	//	XMMatrixTranslation(m_vPosition[m_iIndex].x, m_vPosition[m_iIndex].y, m_vPosition[m_iIndex].z);
-
-	//m_SkyMatrices[m_iIndex] = WorldMatrix;
-	
-
-	ImGui::End();
-#endif //  _DEBUG
-
 	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Failed to Bind ViewMatrix");
 	if(FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))

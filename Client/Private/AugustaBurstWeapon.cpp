@@ -290,14 +290,11 @@ void CAugustaBurstWeapon::Ready_AttackVolumes()
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
+	TriggerDesc.strSoundTag = TEXT("Augusta_Blade_Hit_Long_V3_03 (SFX)");
 	// Burst 궁 켰을때 평타.
 	m_AttackVolumes[VOLUME_SWORD_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
-	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f);
 
 	// 궁극기용도.
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SWORD_ATTACK])
@@ -307,6 +304,7 @@ void CAugustaBurstWeapon::Ready_AttackVolumes()
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(30.f, 30.f, 30.f); // 3차원 크으게
 	TriggerDesc.fAttackDmg = 1500.f;
+	TriggerDesc.strSoundTag = TEXT("Augusta_Blade_Hit_Long_V3_03 (SFX)");
 	m_AttackVolumes[VOLUME_SWORD_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
