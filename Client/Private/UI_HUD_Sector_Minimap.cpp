@@ -200,14 +200,14 @@ void CUI_HUD_Sector_Minimap::Update_RelativePos()
 	{	// This Frame Only.
 		_float2 relativePos = Calc_RelativePos(&objectDesc.vTargetPos, 1.f);
 		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.eType, relativePos });
+			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.eType, relativePos, m_arrPreset[ENUM_CLASS(objectDesc.eType)].fIconScale });
 	}
 
 	for (auto& objectDesc : m_mapObjectPos_Attached)
 	{	// contained
 		_float2 relativePos = Calc_RelativePos(&objectDesc.second.vTargetPos, 1.f);
 		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.second.eType, relativePos });
+			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.second.eType, relativePos, m_arrPreset[ENUM_CLASS(objectDesc.second.eType)].fIconScale });
 	}
 
 
