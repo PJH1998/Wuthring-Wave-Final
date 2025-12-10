@@ -43,13 +43,7 @@ void CMapObject_Meteo::Update(_float fTimeDelta)
 void CMapObject_Meteo::Late_Update(_float fTimeDelta)
 {
 	if (m_IsTriggerd)
-		//if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this)))
-	
-	//if (m_IsTriggerd)
-	//	if (FAILED(m_pGameInstance->Add_Render_StaticObject(this, 0)))
-
-			return;
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Meteo::Render()

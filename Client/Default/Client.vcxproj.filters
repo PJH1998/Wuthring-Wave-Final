@@ -510,6 +510,9 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Spectrum">
       <UniqueIdentifier>{28253a35-b458-4b03-a494-d35c34b2b3de}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="03. GameObject\SkyBox\Heaven">
+      <UniqueIdentifier>{a01c38c3-a063-4195-a39b-cb1a7e3b8613}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1334,6 +1337,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\Spectrum.h">
       <Filter>03. GameObject\Effect\Spectrum</Filter>
+	</ClInclude>
+    <ClInclude Include="..\public\Heaven_SkyBox.h">
+      <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2109,6 +2115,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Spectrum.cpp">
       <Filter>03. GameObject\Effect\Spectrum</Filter>
+	</ClCompile>
+    <ClCompile Include="..\private\Heaven_SkyBox.cpp">
+      <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2214,6 +2223,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxVaMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox_Heaven.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
