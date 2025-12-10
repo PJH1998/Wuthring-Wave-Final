@@ -54,8 +54,10 @@ public:
 	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);
 	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
 	void			Stop_Sound(_uint iChannelID);
+	void			Stop_Sound_Dynamic(_uint iChannelID);
 	void			Stop_All();
 	void			Set_ChannelVolume(_uint iChannelID, _float fVolume);
+	void			Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume);
 #pragma endregion
 
 #pragma region FONT_MANAGER
