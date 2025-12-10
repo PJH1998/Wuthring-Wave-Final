@@ -30,6 +30,10 @@ public:
 	// 고정 채널 Sound 재생
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);	// 2D
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
+	// 동적 채널 Sound 재생
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);
+
 	// BGM 재생
 	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
 	// 고정 채널 Sound 멈춤
