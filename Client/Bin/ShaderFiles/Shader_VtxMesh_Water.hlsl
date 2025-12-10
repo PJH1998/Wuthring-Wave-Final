@@ -352,11 +352,11 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
     //float2 vUV = In.vTexcoord;
     
     // Noise
-    float fNoiseTiling = 0.02f;
+    float fNoiseTiling = 1.f;
     float fNoiseSpeed = 0.01f;
     
     float2 vNoiseUV = vUV * fNoiseTiling + g_fTime * fNoiseSpeed;
-    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV * 80.f).b * 2.f - 1.f;
+    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV).b * 2.f - 1.f;
     float fDistortionStrength = 0.1f;
     float2 UVDist = vNoiseUV + fNoise * fDistortionStrength;
     
@@ -365,11 +365,11 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
     float fWaterMask = g_MaskTexture[0].Sample(DefaultSampler, UVDist * fMaskTiling).g;
     
     // Animation
-    float fAnimTiling = 1.f;
-    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.003f, 0.001f);
-    float fAnimated = g_MaskTexture[2].Sample(DefaultSampler, vUVAnimation * 80.f).r;
+    float fAnimTiling = 0.1f;
+    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.01f, 0.007f);
+    float fAnimated = g_MaskTexture[2].Sample(DefaultSampler, vUVAnimation).r;
     
-    Out.vDiffuse = float4(vColor.xyz + ((fAnimated + 0.2f) * fWaterMask), 1.f);
+    Out.vDiffuse = float4(vColor.xyz + ((fAnimated + 0.3f) * fWaterMask), 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
