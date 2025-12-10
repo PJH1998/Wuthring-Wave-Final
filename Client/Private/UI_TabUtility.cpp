@@ -108,6 +108,8 @@ void CUI_TabUtility::Render()
 
 void CUI_TabUtility::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	m_pGameInstance->Play_Sound(L"UI_TabUtility_Open", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+
 	static_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Initialize", true);
 	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Show", true);
 
