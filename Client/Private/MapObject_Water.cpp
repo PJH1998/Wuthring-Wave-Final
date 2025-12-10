@@ -50,6 +50,7 @@ void CMapObject_Water::Update(_float fTimeDelta)
 void CMapObject_Water::Late_Update(_float fTimeDelta)
 {
 	m_fTime = fmod((m_fTime + (fTimeDelta * 0.12f)), 1.f);
+	cout << m_fTime << endl;
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
 }
 
@@ -69,6 +70,21 @@ void CMapObject_Water::Render()
 	
 	if (FAILED(m_pShaderCom->Bind_Value("g_fTime", &m_fTime, sizeof(_float))))
 		CRASH("Failed to Bind fTime");
+
+	// Color
+
+	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+	_uint iPassIndex = {};
+
+	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
+	{
+		iPassIndex = 4;
+	}
+	else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
+	{
+
+	}
+
 
 	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
@@ -98,7 +114,7 @@ void CMapObject_Water::Render()
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
-		m_pShaderCom->Begin(4); // TEST
+		m_pShaderCom->Begin(iPassIndex); // TEST
 //		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}

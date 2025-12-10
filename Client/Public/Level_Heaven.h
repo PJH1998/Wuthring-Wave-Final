@@ -27,6 +27,7 @@ private:
 	void						Ready_Skybox();
 	void						Ready_UI();
 	void						Ready_SFX();
+	void						Ready_Scene();
 
 #ifdef _DEBUG
 private:
