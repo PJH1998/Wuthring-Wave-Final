@@ -80,6 +80,9 @@ void CMotionTrail::Render_OutLine()
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Failed to Bind Proj Matrix");
 
+	if(FAILED(m_pShader->Bind_Value("g_CamPos", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+		CRASH("Failed to Bind CamPos");
+
 	for (_uint i = 0; i < m_iNumTrails; ++i)
 	{
 		if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_Datas[i].WorldMatrix)))

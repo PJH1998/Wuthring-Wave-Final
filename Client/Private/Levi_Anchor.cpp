@@ -57,7 +57,12 @@ void CLevi_Anchor::Update(_float fTimeDelta)
 			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 			Info.pModelPtr = nullptr;
 
-			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), m_pTransformCom->Get_WorldMatrix(), &Info);
+			_matrix Matrix = m_pTransformCom->Get_WorldMatrix();
+			
+			_vector Trans = {}, Scale = {}, Rot = {};
+			XMMatrixDecompose(&Scale, &Rot, &Trans, Matrix);
+
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), XMMatrixTranslationFromVector(Trans), &Info);
 		}
 	}
 	

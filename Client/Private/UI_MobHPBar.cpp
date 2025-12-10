@@ -673,8 +673,8 @@ void CUI_MobHPBar::Calc_HBEff()
 		_float fDistance = XMVectorGetX(XMVector3Length(vPlayerPos - vInstPos));
 		// 한 40부터 안보이면 될 듯
 		// 35~40에 보간?
-		_float fMaxAlphaDistance = 40.f;
-		_float fMinAlphaDistance = 35.f;
+		_float fMaxAlphaDistance = 15.f;
+		_float fMinAlphaDistance = 10.f;
 		fAlphaViaDistance = 1.f - clamp(((-fMinAlphaDistance + fDistance) / (fMaxAlphaDistance - fMinAlphaDistance)), 0.f, 1.f);
 
 

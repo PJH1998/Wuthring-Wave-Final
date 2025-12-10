@@ -1052,7 +1052,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
             Out.vColor.rgb  = Out.vColor.rgb * lerp(vColor1, vColor2, fixedUV.y).rgb; // 색상 추가
             Out.vColor.a    = saturate(Out.vColor.a * 1.5f);
-            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength);
+            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength) * 2.f;
             
             return Out;
         } break;

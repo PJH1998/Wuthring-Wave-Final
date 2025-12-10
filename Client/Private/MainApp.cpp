@@ -77,6 +77,7 @@ HRESULT CMainApp::Initialize()
 	Ready_Pooling_ForStatic();
 	Ready_Sequence();
 	Ready_Sequence_Item();
+	Ready_Sound();
 	Ready_Event();
 	Start_Level();
 
@@ -116,17 +117,21 @@ void CMainApp::Post_Update()
 				CRASH("Clear Resource");
 
 			CLevel* pLevel = { nullptr };
+			_float fFadeDuration = {};
 
 			switch (m_eNextLevel)
 			{
 			case LEVEL::LOGO:
 				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
+				fFadeDuration = 4.f;
 				break;
 			case LEVEL::GAMEPLAY:
 				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
+				fFadeDuration = 7.f;
 				break;
 			case LEVEL::HEAVEN:
 				pLevel = CLevel_Heaven::Create(m_pDevice, m_pContext);
+				fFadeDuration = 7.f;
 				break;
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
@@ -140,6 +145,7 @@ void CMainApp::Post_Update()
 			m_pGameInstance->Open_Level(ENUM_CLASS(m_eNextLevel), pLevel);
 
 			m_pGameInstance->IsChangeLevel_ForPhysicX(false);
+			m_pGameInstance->OnFade(FADE::FADE_IN, fFadeDuration, nullptr);
 		}
 	}
 }
@@ -659,6 +665,12 @@ void CMainApp::Ready_Sequence_Item()
 void CMainApp::Ready_Sequence()
 {
 	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
+}
+
+void CMainApp::Ready_Sound()
+{
+	m_pGameInstance->Load_Sound_FromFolderRecursive("../Bin/Resource/Sound/2D/", false);
+	m_pGameInstance->Load_Sound_FromFolderRecursive("../Bin/Resource/Sound/3D/", true);
 }
 
 void CMainApp::Start_Level()

@@ -17,7 +17,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 {
 	m_vFroxelSize.x = iWinSizeX >> 3; // 3 = DownSacle Factor
 	m_vFroxelSize.y = iWinSizeY >> 3;
-	m_vFroxelSize.z = 128;				// 64~128
+	m_vFroxelSize.z = 192;				// 64~128
 
 	m_vDefinition.x = 8;
 	m_vDefinition.y = 8;
@@ -29,7 +29,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fWinSizeY = static_cast<_float>(iWinSizeY);
 
 	m_VF_Data.vFroxelSize = m_vFroxelSize;
-	m_VF_Data.iSliceCount = 128;
+	m_VF_Data.iSliceCount = m_vFroxelSize.z;
 	m_VF_Data.fLightIntensity = 1.f;
 	m_VF_Data.fDensity = 1.f;
 	m_VF_Data.fPhaseFunctionG = 0.5f;

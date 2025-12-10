@@ -266,6 +266,10 @@ _long CGameInstance::Get_DIMouseMove(MOUSEMOVESTATE eState)
 #pragma endregion
 
 #pragma region SOUND_MANAGER
+void CGameInstance::Update_Listener(CTransform* pTransform, _float fTimeDelta)
+{
+	m_pSound_Manager->Update_Listener(pTransform, fTimeDelta);
+}
 HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
@@ -273,6 +277,10 @@ HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoun
 HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath, is3D);
+}
+HRESULT CGameInstance::Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D)
+{
+	return m_pSound_Manager->Load_Sound_FromFolderRecursive(pFolderPath, is3D);
 }
 void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {

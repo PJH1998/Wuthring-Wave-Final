@@ -2,11 +2,12 @@
 #include "GameInstance.h"
 #include "SoundNotify.h"
 
-CSoundNotify::CSoundNotify(_float fTrackPosition, const _string& strTag, const _string& strSoundType, _float fVolume)
+CSoundNotify::CSoundNotify(_float fTrackPosition, const _string& strTag, const _string& strSoundType, _uint iChannel, _float fVolume)
 	: CAnimNotify{ fTrackPosition}
 	, m_strSoundTag { strTag }
 	, m_strSoundType { strSoundType }
 	, m_fVolume { fVolume }
+	, m_iChannel {iChannel }
 	, m_pGameInstance { CGameInstance::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
@@ -15,12 +16,10 @@ CSoundNotify::CSoundNotify(_float fTrackPosition, const _string& strTag, const _
 
 void CSoundNotify::Execute()
 {
-	static _uint iChannel = 0;
-
-	iChannel = iChannel % 31;
-	if ("Effect" == m_strSoundType)
-		m_pGameInstance->Play_Sound(m_wStrSoundTag, iChannel++, m_fVolume); // ?쇰떒 梨꾨꼸 ?꾩떆.
-		//m_pGameInstance->Play_Other(m_wStrSoundTag, m_fVolume); // ?쇰떒 梨꾨꼸 ?꾩떆.
+	if ("Sound" == m_strSoundType)
+		m_pGameInstance->Play_Sound(m_wStrSoundTag, m_iChannel, m_fVolume);
+	else if ("Other" == m_strSoundType)
+		m_pGameInstance->Play_Sound(m_wStrSoundTag, m_iChannel, m_fVolume);
 
 }
 
@@ -31,6 +30,7 @@ json CSoundNotify::To_Json() const
 	soundJson["TrackPosition"] = m_fTrackPosition;
 	soundJson["SoundTag"] = m_strSoundTag;
 	soundJson["SoundType"] = m_strSoundType;
+	soundJson["SoundChannel"] = m_iChannel;
 	soundJson["Volume"] = m_fVolume;
 	return soundJson;
 }
@@ -61,6 +61,7 @@ CSoundNotify* CSoundNotify::From_Json(const json& soundJson)
 		soundJson["TrackPosition"],
 		soundJson["SoundTag"],
 		soundJson["SoundType"],
+		soundJson["SoundChannel"],
 		soundJson["Volume"]
 	);
 }

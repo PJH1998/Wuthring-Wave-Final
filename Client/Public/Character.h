@@ -154,6 +154,7 @@ public:
 
 #ifdef _DEBUG
 	void Print_LookRay();
+	void Debug_ImGui();
 #endif // _DEBUG
 
 #pragma endregion
@@ -196,7 +197,7 @@ public:
 
 	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
 
-	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
+	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor, _uint iShaderPath = 0);
 	
 
 	void Use_Spring(_float fDestination, _float fDuration);
@@ -432,6 +433,8 @@ protected:
 	_float4 m_vDissolveColor = { };
 	_float4 m_vEmissiveColor = {};
 	_float  m_fEmissiveIntensity = {};
+
+	_float4 m_vMotionTrailColor = {};
 
 	_float4x4 m_DissolveWorldMatrix = {};
 	_float4x4 m_MatrixIdentity = {}; // SocketMatrix 전달 시 아무것도 없으면 Identity 행렬 전달.

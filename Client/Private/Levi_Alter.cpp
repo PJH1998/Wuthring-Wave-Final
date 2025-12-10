@@ -426,4 +426,6 @@ CGameObject* CLevi_Alter::Clone(void* pArg)
 void CLevi_Alter::Free()
 {
 	__super::Free();
+
+	Safe_Release(m_pGameSystem);
 }

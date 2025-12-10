@@ -114,7 +114,6 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	//TEST
 
-
 	return S_OK;
 }
 

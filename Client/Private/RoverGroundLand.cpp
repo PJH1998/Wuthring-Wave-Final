@@ -118,8 +118,8 @@ void CRoverGroundLand::Check_StateTransition(_float fTimeDelta)
 void CRoverGroundLand::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_HEAVY), "Land_Heavy", 1.5f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_ROLL), "Land_Roll", 1.5f, 22.f);
     CState::Add_Animations(ENUM_CLASS(ERoverLandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
 }
 

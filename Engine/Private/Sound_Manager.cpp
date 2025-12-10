@@ -29,11 +29,6 @@ void CSound_Manager::Update_Listener(class CTransform* pTransform, _float fTimeD
 	FMOD_System_Set3DListenerAttributes(m_pSystem, 0, &vPosition, &vVelocity, &vForward, &vUp);
 }
 
-void CGameInstance::Update_Listener(CTransform* pTransform, _float fTimeDelta)
-{
-	m_pSound_Manager->Update_Listener(pTransform, fTimeDelta);
-}
-
 HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
@@ -91,6 +86,30 @@ HRESULT CSound_Manager::Load_Sound_FromFolder(const _char* pFolderPath, _bool is
 	return S_OK;
 }
 
+
+HRESULT CSound_Manager::Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D)
+{
+	for (const auto& entry : filesystem::recursive_directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".wav" || extension == ".WAV")
+			{
+				// 중복 주의
+				_string soundTag = entry.path().stem().string();
+				_wstring wSoundTag = StringToWString(soundTag);
+
+				if (FAILED(Load_Sound(wSoundTag, filePath.c_str(), is3D)))
+					CRASH("Sound Load Failed");
+			}
+		}
+	}
+	return S_OK;
+}
+
 void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
@@ -98,7 +117,9 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
         return;
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
+	//FMOD_System_PlaySound(m_pSystem, pSound, nullptr, false, &m_pFixedChannels[iChannelID]);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
+	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
 }
 
 void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)

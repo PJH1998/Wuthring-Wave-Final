@@ -39,8 +39,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	m_fHP = pDesc->fHP * 0.7f;
-	//m_fHP = 5100.f;
+	//m_fHP = pDesc->fHP * 0.7f;
+	m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -88,6 +88,12 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_iActionChecker[ACTION::ENCOUNTER] = 2;
 	m_iActionChecker[ACTION::PHASE1_DOWN] = 3;
 	m_iActionChecker[ACTION::PHASE2_DEAD] = 4;
+
+	m_strSequenceTag[ACTION::ENCOUNTER].push_back(TEXT("Levi_Start"));
+	m_strSequenceTag[ACTION::ENCOUNTER].push_back(TEXT("Levi_Start02"));
+	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_Start"));
+	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_End"));
+	//m_strSequenceTag[ACTION::PHASE2_DEAD].push_back(TEXT(""));
 
 	return S_OK;
 }
@@ -856,6 +862,8 @@ void CLeviatan::Ready_Events()
 			m_fHP = 0.f;
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 			m_pExecuteCom->IsActivate(false);
+			Event1();
+			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
 		}
 		});
 }
@@ -896,17 +904,24 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 		_uint iRemainState{};
 		if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 			iRemainState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		//연출 진행중
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
 			m_iAnimCheck++;
 			if(m_iAnimCheck < m_iActionChecker[m_iActionIndex])
+			{
 				iRemainState |= ENUM_CLASS(TEST_STATE::SPLINT);
+				if (m_iAnimCheck == m_iActionChecker[m_iActionIndex] - 1)
+					m_pGameInstance->Play_Sequence(m_strSequenceTag[m_iActionIndex].back());
+			}
 			else
 			{
+				//2페이즈 시작
 				if(m_iActionIndex == ACTION::PHASE1_DOWN)
 				{
 					m_iPhase = PHASE::TWO;
 					Reset(XMMatrixIdentity(), nullptr);
+					Event2();
 				}
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
 				{
@@ -917,6 +932,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 				m_iAnimCheck = 0;
 				m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 				m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+				m_pGameInstance->Change_MainCamera(m_pGameInstance->Get_CurrentLevel(), TEXT("Camera_Spring"));
 			}
 		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -1013,6 +1029,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
 		m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
 		m_isAnimationFinished = false;
+		m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
 		m_isAggro = true;
 	}
 }
@@ -1175,12 +1192,16 @@ void CLeviatan::Event1()
 {
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
+	m_pTransformCom->Save_PreviousPosition();
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 }
 
 void CLeviatan::Event2()
 {
 	//2페이즈 맵으로 이동하기
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 1079.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 1092.f, 1.f));
+	m_pTransformCom->Save_PreviousPosition();
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 }
 
 _bool CLeviatan::isKnockDown()

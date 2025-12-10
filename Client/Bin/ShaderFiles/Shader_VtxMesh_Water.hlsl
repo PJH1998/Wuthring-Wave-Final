@@ -3,7 +3,7 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
-float4 g_LogoWaterColor = 0.f; //float4(0.669f, 0.921f, 1.f, 1.f);
+float4 g_LogoWaterColor = float4(0.2627f, 0.3373f, 0.3725f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
@@ -265,7 +265,7 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
  
     float4 vColor = g_LogoWaterColor;
-                                                                                                                                                                                                                                                                                                                      
+
     float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y);
     
     vector vNormalDesc = g_DiffuseTexture[0].Sample(DefaultSampler, vTexcoord);
@@ -296,6 +296,46 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     
     Out.vDepth.w = 1.f;
     Out.vPBR.w = 1.f; // Water Masking
+    
+    return Out;
+}
+
+PS_OUT_LIGHT PS_HEAVEN(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+ 
+    float4 vColor = g_LogoWaterColor;
+
+    float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y);
+    
+    vector vNormalDesc = g_DiffuseTexture[0].Sample(DefaultSampler, vTexcoord);
+    
+    float3 vMainNormal = 0.f;
+
+    vMainNormal = vNormalDesc.xyz * 2.f - 1.f;
+    vMainNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+
+    float3 vTangent = In.vTangent.xyz;
+    float3 vBinormal = In.vBinormal.xyz * -1.f;
+    float3 vInNormal = In.vNormal.xyz;
+
+    float3x3 WorldMatrix;
+    WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+    vMainNormal = mul(vMainNormal, WorldMatrix);
+    
+    float3 vNormal = normalize(vMainNormal.xyz * 0.2f);
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vDiffuse = vColor;
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    Out.vPBR.w = 0.f; // Water Masking
     
     return Out;
 }
@@ -335,7 +375,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL_FOCUS();
     }
 
-    pass Emissive       //3
+    pass Emissive            // 3
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -346,7 +386,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_EMISSIVE();
     }
     
-    pass LogoWater
+    pass LogoWater        // 4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -355,5 +395,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LOGO();
+    }
+
+    pass HeavenWater      // 5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_HEAVEN();
     }
 }

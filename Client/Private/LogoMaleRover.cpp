@@ -168,6 +168,12 @@ void CLogoMaleRover::Render_OutLine()
 
 void CLogoMaleRover::Logo_Input()
 {
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::UP)
+	{
+		m_States[STATE_PICK] = true;
+		m_strCurrentAnimation = "AppearanceLogin";
+	}
+
 	// 1번 누르면 선택됨. 두번 누르면 해제됨.
 	if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::UP)
 	{
