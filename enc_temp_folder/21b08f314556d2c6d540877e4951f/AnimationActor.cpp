@@ -344,11 +344,6 @@ void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 		this->Object_Func(tag);
 		};
 
-#ifdef _DEBUG
-	m_pModelCom->Clear_AllNotifies();
-#endif // _DEBUG
-
-	
 	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
     
 }
