@@ -6,8 +6,8 @@ CSoundNotify::CSoundNotify(_float fTrackPosition, const _string& strTag, const _
 	: CAnimNotify{ fTrackPosition}
 	, m_strSoundTag { strTag }
 	, m_strSoundType { strSoundType }
+	, m_iChannel{ iChannel }
 	, m_fVolume { fVolume }
-	, m_iChannel {iChannel }
 	, m_pGameInstance { CGameInstance::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
@@ -18,8 +18,8 @@ void CSoundNotify::Execute()
 {
 	if ("Sound" == m_strSoundType)
 		m_pGameInstance->Play_Sound(m_wStrSoundTag, m_iChannel, m_fVolume);
-	else if ("Other" == m_strSoundType)
-		m_pGameInstance->Play_Sound(m_wStrSoundTag, m_iChannel, m_fVolume);
+	else if ("BGM" == m_strSoundType)
+		m_pGameInstance->Play_BGM(m_wStrSoundTag, m_iChannel, m_fVolume);
 
 }
 
@@ -37,7 +37,6 @@ json CSoundNotify::To_Json() const
 
 const _string& CSoundNotify::Get_NotifyTypeName() const
 {
-	// ?명떚?뚯씠???щ윭媛??앹꽦?섎뒗??媛숈? typeName?대?濡?怨듭쑀?쒕떎.
 	static const _string typeName = "Sound";
 	return typeName;
 }

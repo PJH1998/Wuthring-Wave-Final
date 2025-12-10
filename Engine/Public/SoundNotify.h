@@ -23,9 +23,9 @@ public:
 
 private:
 	class CGameInstance* m_pGameInstance = { nullptr };
-	_string m_strSoundType; // BGM, Sound ?깅벑. 
-	_string m_strSoundTag;
-	_wstring m_wStrSoundTag;
+	_string m_strSoundType;  // SoundType
+	_string m_strSoundTag;   // SoundTag
+	_wstring m_wStrSoundTag; 
 	_uint m_iChannel;
 	_float m_fVolume;
 
