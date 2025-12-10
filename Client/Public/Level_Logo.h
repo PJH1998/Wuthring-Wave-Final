@@ -24,7 +24,7 @@ private:
 	void							Ready_SkyBox();
 
 private:
-	void							Standby_PlaySound(_float fTimeDelta);
+	void							Update_SoundOrder(_float fTimeDelta);
 	void							Update_ClickSound();
 	void							Update_GoinFinish(_float fTimeDelta);
 
