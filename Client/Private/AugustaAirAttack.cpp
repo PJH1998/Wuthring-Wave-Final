@@ -260,17 +260,6 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-        if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_START)
-        {
-            if (m_States[DOUBLE_JUMP])
-            {
-                m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F; // 애니메이션 상태 => 블랙보드에 기입.        
-                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
-                return;
-            }
-
-        }
-
         if (m_States[LAND])
         {
 			// 그리폰 스킬 하늘 진행중.

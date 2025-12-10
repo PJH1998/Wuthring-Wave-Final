@@ -33,7 +33,7 @@ private:
 	virtual ~CSpectrum() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype(const SPECTRUM_DESC* pDesc);
+	virtual HRESULT Initialize_Prototype();
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Priority_Update(_float fTimeDelta);
 	virtual void Update(_float fTimeDelta);
@@ -81,7 +81,7 @@ private:
 	HRESULT Bind_ShaderResources();
 
 public:
-	static CSpectrum* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const SPECTRUM_DESC* pDesc);
+	static CSpectrum* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void Free() override;
 };

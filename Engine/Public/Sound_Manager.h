@@ -38,10 +38,14 @@ public:
 	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
 	// 고정 채널 Sound 멈춤
 	void			Stop_Sound(_uint iChannelID);
+	// 동적 채널 Sound 재생
+	void			Stop_Sound_Dynamic(_uint iChannelID);
 	// Sound All Stop
 	void			Stop_All();
 	// 고정 채널 Volume 조절
 	void			Set_ChannelVolume(_uint iChannelID, _float fVolume);
+	// 동적 채널 Volume 조절
+	void			Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume);
 
 public:
 	HRESULT		Initialize(_uint iNumChannel);

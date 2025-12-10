@@ -35,6 +35,8 @@
 #include "GalbrenaUlti_SFX_Star.h"
 #include "GalbrenaUlti_SFX_Circle.h"
 #include "GalbrenaUlti_PostSFX.h"
+
+#include "Spectrum.h"
 #pragma endregion
 
 CMainApp::CMainApp()
@@ -413,6 +415,12 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxVaMesh.hlsl"), VTX_VAMESH::Elements, VTX_VAMESH::iNumElements))))
 		CRASH("Shader_VAMesh");
 
+	//Shader_VTXPOSTEX
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_Spectrum"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_ScreenEffect");
+
+
 
 #pragma endregion
 
@@ -546,6 +554,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
 		CEffect_Prefab::Create(m_pDevice, m_pContext))))
 		CRASH("Prefab");
+
+	//Spectrum
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Spectrum"),
+		CSpectrum::Create(m_pDevice, m_pContext))))
+		CRASH("Spectrum");
 
 	// Ability 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Ability"),

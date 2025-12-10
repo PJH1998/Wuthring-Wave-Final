@@ -89,10 +89,11 @@ HRESULT CLevel_Heaven::Initialize()
 	Ready_UI();
 	Ready_Layer_Player();
 	Ready_Layer_SequnecePlayer();
-
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
 	Ready_Leviatan();
 
-	//m_pGameSystem->Clone_Spawners(m_eCurLevel);
+	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
