@@ -50,6 +50,12 @@ void CWing::Update(_float fTimeDelta)
 
 	CProp::Update(fTimeDelta);
 
+	XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		XMLoadFloat4x4(m_pSocketMatrix) *
+		m_pParentTransform->Get_WorldMatrix());
+
+	_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 
 	//m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
 }
@@ -60,12 +66,7 @@ void CWing::Late_Update(_float fTimeDelta)
 		return;
 
 	//Wing은 본체 Transform이 완전히 확정된 후에 소켓 행렬을 갱신
-	XMStoreFloat4x4(&m_CombinedMatrix,
-		m_pTransformCom->Get_WorldMatrix() *
-		XMLoadFloat4x4(m_pSocketMatrix) *
-		m_pParentTransform->Get_WorldMatrix());
-
-	_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+	
 
 	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 
 	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
