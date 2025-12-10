@@ -47,58 +47,7 @@ void CSpectrum::Update(_float fTimeDelta)
         return;
 
 
-    Update_Position();
-
-    m_fCurrentTime += fTimeDelta;
-    m_fSpawnTimer += fTimeDelta;
-	m_fSweep += fTimeDelta;
-	 
-    //라이프타임 체크.
-    while (!m_Samples.empty())
-    {
-        SAMPLE_DESC Desc = m_Samples.front();
-
-        _float fAge = m_fCurrentTime - Desc.fSpawnTime;
-        
-        if (fAge >= m_fLifeTime)
-        {
-            m_Samples.pop_front();
-            m_SamleCount -= 1;
-        }
-        else
-            break;
-    }
-
-    if (m_fSpawnTimer >= m_fGeneration)
-    {
-        XMVECTOR vPrevPos = XMLoadFloat3(&m_vPreviousPos);
-        _float fPrevLength = XMVectorGetX(XMVector3Length(vPrevPos));
-
-		XMVECTOR vCurrentPos = m_UpdatePosition;
-        _float fCurrentLength = XMVectorGetX(XMVector3Length(vCurrentPos));
-
-        _float fDistance = fCurrentLength - fPrevLength;
-
-        if (fDistance > m_fMinDistance)
-        {
-            SAMPLE_DESC Desc = {};
-            XMStoreFloat3(&Desc.vPos, m_UpdatePosition);
-            Desc.fSpawnTime = m_fCurrentTime;
-
-            m_SamleCount += 1;
-            m_Samples.push_back(Desc);
-
-			XMStoreFloat3(&m_vPreviousPos, m_UpdatePosition);
-            m_fSpawnTimer = 0.f;
-        }
-    }
-
-    if (m_SamleCount >= 2)
-    {
-        const _float4* vCamPos = m_pGameInstance->Get_CamPos();
-        m_pVIBufferCom->Update_Spectrum(m_Samples, m_SamleCount, vCamPos);
-    }
-
+  
 }
 
 void CSpectrum::Late_Update(_float fTimeDelta)
@@ -106,7 +55,56 @@ void CSpectrum::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	Update_Position();
+
+	m_fCurrentTime += fTimeDelta;
+	m_fSpawnTimer += fTimeDelta;
+	m_fSweep += fTimeDelta;
+
+	//라이프타임 체크.
+	while (!m_Samples.empty())
+	{
+		SAMPLE_DESC Desc = m_Samples.front();
+
+		_float fAge = m_fCurrentTime - Desc.fSpawnTime;
+
+		if (fAge >= m_fLifeTime)
+		{
+			m_Samples.pop_front();
+		}
+		else
+			break;
+	}
+
+	if (m_fSpawnTimer >= m_fGeneration)
+	{
+		_vector vPrevPos = XMLoadFloat3(&m_vPreviousPos);
+
+		_vector vCurrentPos = m_UpdatePosition;
+		_vector vDistance = vPrevPos - vCurrentPos;
+
+		_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+		if (fDistance > m_fMinDistance)
+		{
+			SAMPLE_DESC Desc = {};
+			XMStoreFloat3(&Desc.vPos, m_UpdatePosition);
+			Desc.fSpawnTime = m_fCurrentTime;
+
+			m_Samples.push_back(Desc);
+
+			XMStoreFloat3(&m_vPreviousPos, m_UpdatePosition);
+			m_fSpawnTimer = 0.f;
+		}
+	}
+
+	if (m_Samples.size() >= 2)
+	{
+		const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+		m_pVIBufferCom->Update_Spectrum(m_Samples, m_Samples.size(), vCamPos);
+	}
+
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CSpectrum::Render()

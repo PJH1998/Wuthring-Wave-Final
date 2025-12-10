@@ -136,15 +136,12 @@ void CSpectrum::Render()
 
 void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	SPECTRUM_INFO* pDesc = static_cast<SPECTRUM_INFO*>(pArg);
 
     m_fTestCallTime = 0.f;
     m_vTestPos = _float3(0.f, 0.f, 0.f);
     m_fCurrentTime = 0.f;
     m_fTestCurrentTime = 0.f;
 	m_fSweep = 0.f;
-
-	m_pIsActive = pDesc->pIsActive;
 
 	m_isActivate = true;
 }
