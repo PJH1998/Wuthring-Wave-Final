@@ -85,7 +85,10 @@ void CElectroPredator::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
-
+	if (false == m_isActivate)
+	{
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+	}
 	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
@@ -215,8 +218,9 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDeadTrigger = false;
 	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
-	m_fAttackAcc[1] = 10.f;
+	m_fAttackAcc[1] = 5.f;
 	m_fAttackAcc[2] = 20.f;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
@@ -242,7 +246,15 @@ void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 
 void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 {
-	if (wStrObjectTag == TEXT("Shoot"))
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		//Sound_Active(wstrPartTag);
+	}
+	else if (wstrTypeTag == TEXT("Shoot"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
@@ -256,7 +268,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		ProiDesc.pOwnerTransform = m_pTransformCom;
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_Electro"), WorldMat, &ProiDesc);
 	}
-	else if (wStrObjectTag == TEXT("AoE"))
+	else if (wstrTypeTag == TEXT("AoE"))
 	{
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
@@ -270,9 +282,62 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AOEDOT_Electro"), WorldMat, &AoEDesc);
 	}
-	else if (wStrObjectTag == TEXT("Look"))
+	else if (wstrTypeTag == TEXT("Look"))
 	{
 		TurnFix();
+	}
+}
+
+void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Atk01"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk02"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk03"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Aggro"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 16.f);
+	}
+	else if (wstrTypeTag == TEXT("Death"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 8.f);
+	}
+	else if (wstrTypeTag == TEXT("Stand"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("mon_leilie_stand2_action01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 18.f);
 	}
 }
 
