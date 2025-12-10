@@ -52,12 +52,23 @@ struct RampEdit : public ImCurveEdit::Delegate
 		mPoints.push_back(value);
 		if (ENUM_CLASS(ITEM_TYPE::ACTION) == iType)
 		{
-			CAMERA_FRAME frame = {};
-			frame.vTranslation = _float3(0.f, 0.f, 0.f);
-			frame.vRotation = _float4(0.f, 0.f, 0.f, 0.f);
-			frame.fDistance = 10.f;
-			frame.fStartFrame = 0.f;
-			mTargetCameraFrames.push_back(frame);
+			for (size_t i = 0; i < mPoints.size(); ++i)
+			{
+				if (mPoints[i].x < value.x)
+					continue;
+				CAMERA_FRAME frame = {};
+				memcpy(&frame, &mTargetCameraFrames[i - 1], sizeof(CAMERA_FRAME));
+				//frame.vTranslation = _float3(0.f, 0.f, 0.f);
+				//frame.vRotation = _float4(0.f, 0.f, 0.f, 0.f);
+				//frame.fDistance = 10.f;
+				//frame.fStartFrame = 0.f;
+				mTargetCameraFrames.push_back(frame);
+
+				for (_uint j = mTargetCameraFrames.size() - 1; j > i; --j)
+					swap(mTargetCameraFrames[j], mTargetCameraFrames[j - 1]);
+
+				break;
+			}
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::ACTOR) == iType)
 		{
