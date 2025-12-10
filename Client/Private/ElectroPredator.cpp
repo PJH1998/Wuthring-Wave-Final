@@ -276,6 +276,11 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 	}
 }
 
+void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
+{
+
+}
+
 HRESULT CElectroPredator::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");

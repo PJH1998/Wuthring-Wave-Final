@@ -417,6 +417,11 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	}
 }
 
+void CMonsterTest::Sound_Active(const _wstring& wStrObjectTag)
+{
+
+}
+
 HRESULT CMonsterTest::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
