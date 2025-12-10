@@ -41,60 +41,111 @@ void CMapObject_Dome::Late_Update(_float fTimeDelta)
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
+	//if (!m_IsRender)
+	//	return;
+
+	//if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
+	//	return;
+
+	//if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
+	//{
+	//	if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
+	//		m_pModelCom->Request_LOD(m_iLODIndex);
+
+	//	m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
+	//	return;
+	//}
+	//_bool HasNormal = { true };
+	//_bool HasMask = { true };
+	//_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
+
+	//ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
+
+	//m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
+	//m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
+	//m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+
+	//for (_uint i = 0; i < iNumMesh; ++i)
+	//{
+	//	if (m_pModelCom->Is_Overed(m_iLODIndex, i))
+	//		return;
+	//	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
+	//	{
+	//		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
+	//		HasMask = false;
+	//	}
+
+	//	if (HasMask)
+	//	{
+	//		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
+
+	//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
+	//			HasNormal = false;
+	//	}
+	//	else
+	//	{
+	//		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
+
+	//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
+	//			HasNormal = false;
+	//	}
+	//	m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
+	//	m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
+
+	//	m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
+
+	//	m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
+	//}
+}
+
+void CMapObject_Dome::Render()
+{
 	if (!m_IsRender)
 		return;
 
+	_uint m_iLODIndex = 0;
 	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
 		return;
 
-	if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
-	{
-		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
-			m_pModelCom->Request_LOD(m_iLODIndex);
-
-		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
-		return;
-	}
 	_bool HasNormal = { true };
 	_bool HasMask = { true };
 	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
 
-	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
-	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
-	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+	m_pGameInstance->Bind_SharedBuffer(m_iLODIndex, m_pContext);
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
 			return;
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
 		{
-			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
+			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
 			HasMask = false;
 		}
 
 		if (HasMask)
 		{
-			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE);
 
-			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
+			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0);
 
-			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0)))
 				HasNormal = false;
 		}
-		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
-		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
-		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
-
-		m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
+		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
 
@@ -121,7 +172,7 @@ void CMapObject_Dome::Ready_Component(void* pArg)
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 

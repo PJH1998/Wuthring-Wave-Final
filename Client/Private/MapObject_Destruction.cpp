@@ -48,7 +48,11 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		if (!m_IsDestroy)
+		{
 			Spawn_Particles();
+			if (m_pPullUI)
+				m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
+		}
 		});
 	m_IsDestroy = false;
 
@@ -76,67 +80,6 @@ void CMapObject_Destruction::Late_Update(_float fTimeDelta)
 			m_IsChange = true;
 		}
 }
-
-//void CMapObject_Destruction::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
-//{
-//	if (m_IsDestroy)
-//		return;
-//
-//	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
-//		return;
-//
-//	if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
-//	{
-//		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
-//			m_pModelCom->Request_LOD(m_iLODIndex);
-//
-//		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
-//		return;
-//	}
-//	_bool HasNormal = { true };
-//	_bool HasMask = { true };
-//	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
-//
-//	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
-//
-//	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
-//	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
-//	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
-//
-//	//m_pModelCom->Bind_Buffer(pDeferredContext,m_iLODIndex);
-//
-//	for (_uint i = 0; i < iNumMesh; ++i)
-//	{
-//		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
-//			return;
-//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
-//		{
-//			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
-//			HasMask = false;
-//		}
-//
-//		if (HasMask)
-//		{
-//			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
-//
-//			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
-//				HasNormal = false;
-//		}
-//		else
-//		{
-//			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
-//
-//			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
-//				HasNormal = false;
-//		}
-//		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
-//		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
-//
-//		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
-//
-//		m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
-//	}
-//}
 
 void CMapObject_Destruction::Render()
 {
@@ -373,6 +316,7 @@ void CMapObject_Destruction::Free()
 {
 	__super::Free();
 
+	m_pPullUI = nullptr;
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pBoneModel);
 	Safe_Release(m_pGameSystem);

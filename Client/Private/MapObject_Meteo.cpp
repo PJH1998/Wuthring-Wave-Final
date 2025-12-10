@@ -66,7 +66,7 @@ void CMapObject_Meteo::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	//m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
@@ -127,7 +127,15 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 		m_isActivate = false;
 
 		if (m_iTriggerActiveIndex != -1)
+		{
 			m_pGameSystem->OnTriggerActivate(m_iTriggerActiveIndex);
+
+			if (m_pTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, true);
+
+			if (m_pSecondTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, true);
+		}
 	}
 }
 
@@ -163,6 +171,15 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return;
 
+	switch ((m_iTriggerActiveIndex))
+	{
+	case 11:
+		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3458.7f, 334.9, 1787.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pSecondTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3456.3f, 341.5f, 1769.5f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
+		m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, false);
+		break;
+	}
 }
 
 CMapObject_Meteo* CMapObject_Meteo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -194,7 +211,8 @@ CGameObject* CMapObject_Meteo::Clone(void* pArg)
 void CMapObject_Meteo::Free()
 {
 	__super::Free();
-
+	m_pTempPtr = nullptr;
+	m_pSecondTempPtr = nullptr;
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pModelCom);

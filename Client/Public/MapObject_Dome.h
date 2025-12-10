@@ -36,6 +36,7 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
 	virtual		void			Render_EnvMap(_float4 vCenter, _float4x4 ViewMatrix, _float4x4 ProjMatrix) override;
 
@@ -45,7 +46,7 @@ public:
 	virtual		BoundingBox* Get_BoundingBox()override;
 
 private:
-	CDeferredShader* m_pShaderCom = { nullptr };
+	CShader* m_pShaderCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CModel_Streaming* m_pModelCom;
 

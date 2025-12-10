@@ -82,7 +82,7 @@ void CMapObject_Destruction_Debris::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	//m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))

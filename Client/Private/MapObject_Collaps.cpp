@@ -69,7 +69,7 @@ void CMapObject_Collaps::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	//m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
+	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
@@ -111,6 +111,9 @@ void CMapObject_Collaps::Render()
 
 void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 {
+	if (m_pPullUI)
+		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
+
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 
@@ -181,6 +184,7 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return;
+
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->vSourWorldMatrix));
 
 	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
@@ -214,7 +218,7 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 		vPointPos.y += 1.5f;
-		m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
+		m_pPullUI = m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
 		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
 		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
 		RigidbodyBoxDesc.eShape = SHAPE::BOX;
@@ -263,10 +267,12 @@ CGameObject* CMapObject_Collaps::Clone(void* pArg)
 void CMapObject_Collaps::Free()
 {
 	__super::Free();
+	m_pPullUI = nullptr;
 	Safe_Release(m_pSourRigidbodyCom);
 	Safe_Release(m_pDestRigidbodyCom);
 	Safe_Release(m_pBoxRigidbodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
+
 }
