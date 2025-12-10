@@ -278,7 +278,7 @@ void CGameInstance::Return_Channel(_uint iChannelIndex)
 {
 	m_pSound_Manager->Return_Channel(iChannelIndex);
 }
-HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath, _bool is3D)
+HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
 }

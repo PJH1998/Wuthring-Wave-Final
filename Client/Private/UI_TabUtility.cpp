@@ -298,6 +298,14 @@ void CUI_TabUtility::Update_MouseSelection()
 	}
 		
 
+	// [Sound] 선택 중인 게 변경될 시 사운드 재생. 단, nothing으로 바뀌는 경우 제외 / 끌 때에 끄는 사운드, 켤 때에 켜는 사운드
+	if (isIndexChanged &&
+		m_iSelectedIndex != ENUM_CLASS(UI_TAB_UTILITY::NOTHING))
+		m_pGameInstance->Play_Sound(L"UI_TabUtility_Tick", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+
+	
+
+
 
 
 	m_isFirstCheckedIndex = true;
