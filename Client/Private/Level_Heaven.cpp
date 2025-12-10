@@ -24,6 +24,8 @@
 #include "UI_Text_Damage.h"
 #include "UI_QTE.h"
 
+#include "SceneCamera.h"
+
 //SFX
 #ifdef _DEBUG
 #include "SonoraChange.h"
@@ -96,11 +98,13 @@ HRESULT CLevel_Heaven::Initialize()
 
 	Ready_Effect();
 	Ready_Skybox();
+	Ready_Scene();
 	//Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.01f);
-	m_pGameInstance->Set_FogMaxHeight(300.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+//	m_pGameInstance->Set_Fog
+	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
+	m_pGameInstance->Set_FogMaxHeight(200.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.8f);
 	m_pGameInstance->Set_FogScatterWeight(0.3f);
 
 
@@ -581,6 +585,22 @@ void CLevel_Heaven::Ready_SFX()
 	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
 
 #pragma endregion
+}
+
+void CLevel_Heaven::Ready_Scene()
+{
+	// Camera
+	CCamera::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 1000.f;
+	CameraDesc.vEye = _float4(-1.019107f, 5.458634f, -15.936163f, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
+	CameraDesc.fSpeedPerSec = 10.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fMouseSensor = 0.004f;
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+		CRASH("SceneCamera");
 }
 
 #ifdef _DEBUG

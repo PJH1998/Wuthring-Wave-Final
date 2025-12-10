@@ -7,6 +7,8 @@ matrix g_BoneMatrices[512];
 float4 g_vTrailColor = 1.f;
 float2 g_vLifeTime;
 
+float4 g_CamPos;
+
 cbuffer GlobalConstants
 {
     int g_iNumBlendWeightsToUse = 2; 
@@ -29,6 +31,7 @@ struct VS_OUT
     float4 vNormal : NORMAL;
     float2 vTexcoord : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
 };
 
 VS_OUT VS_MAIN(VS_IN In)
@@ -54,6 +57,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = Out.vPosition;
+    Out.vWorldPos = mul(vPosition, g_WorldMatrix);
     
     return Out;
 }
@@ -64,6 +68,7 @@ struct PS_IN
     float4 vNormal : NORMAL;
     float2 vTexcoord : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
 };
 
 struct PS_OUT
@@ -79,7 +84,23 @@ PS_OUT PS_MAIN(PS_IN In)
     
     float fAlpha = 1.f - saturate(g_vLifeTime.x / g_vLifeTime.y);
     
-    Out.vDiffuse = float4(g_vTrailColor.xyz, fAlpha);
+    float4 vDiffuse = float4(g_vTrailColor.xyz, fAlpha);
+    
+    float3 vLook = normalize(g_CamPos.xyz - In.vWorldPos.xyz);
+    
+    float fRimPower = 0.f;
+    
+    float fNdoV = dot(normalize(In.vNormal.xyz), vLook);
+    
+    fRimPower = 1.f - abs(fNdoV);
+    
+    fRimPower = smoothstep(cos(radians(45.f)), 1.f, fRimPower);
+    
+//    fRimPower *= 0.5f;
+        
+    vDiffuse.xyz += vDiffuse.xyz * fRimPower;
+    
+    Out.vDiffuse = vDiffuse;
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;

@@ -135,6 +135,10 @@ private:
 	_float3					m_vUIPosition{};
 #pragma endregion
 
+#pragma region	SEQUENCE
+	vector<_wstring>		m_strSequenceTag[ACTION::ACTEND];
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(LEVIATAN_DESC* pDesc);

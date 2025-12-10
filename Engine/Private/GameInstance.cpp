@@ -270,7 +270,6 @@ void CGameInstance::Update_Listener(CTransform* pTransform, _float fTimeDelta)
 {
 	m_pSound_Manager->Update_Listener(pTransform, fTimeDelta);
 }
-
 HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
