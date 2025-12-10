@@ -202,7 +202,8 @@ void CRoverSword::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& 
 	{
 	case VOLUME::VOLUME_ATTACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
 		pAbility->Add_HarmonyGauge(4.f); // 공명 게이지 채우기.
-		pAbility->Add_Cost(COST_TYPE::COST1, 3.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST1, 3.f); // 궁 ULTI // 강공 게이지
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f);
 		break;
 	}
 }

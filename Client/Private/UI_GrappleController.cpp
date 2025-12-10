@@ -16,7 +16,7 @@ HRESULT CUI_GrappleController::Initialize()
 	return S_OK;
 }
 
-HRESULT CUI_GrappleController::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType)
+void* CUI_GrappleController::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
 
@@ -30,14 +30,14 @@ HRESULT CUI_GrappleController::Create_GrapplePoint(const _float3& vPointPos, UI_
 	ASSERT_CRASH(pTargetPoint);
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_Image_GrapplePoint", pTargetPoint)))
-		return E_FAIL;
+		return nullptr;
 
 	m_vecGrapplePoints.push_back(pTargetPoint);
 
-	return S_OK;
+	return pTargetPoint;
 }
 
-CUI_GrapplePoint* CUI_GrappleController::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance)
+CUI_GrapplePoint* CUI_GrappleController::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive)
 {
 	if (m_vecGrapplePoints.empty())
 		return nullptr;
@@ -49,7 +49,9 @@ CUI_GrapplePoint* CUI_GrappleController::Find_NearGrapplePoint(const _float3& vB
 	{
 		_bool isSameType = (grapplePoint->Get_GrappleType() == eType);
 		_bool isActivate = grapplePoint->IsActivate();
-		if (!isSameType || !isActivate)
+
+		_bool isContinue = !isSameType || ((isIncludeInactive) ? false : !isActivate);
+		if (isContinue)
 			continue;
 
 		_float3 vBasePosition = vBasePos;
@@ -70,12 +72,13 @@ CUI_GrapplePoint* CUI_GrappleController::Find_NearGrapplePoint(const _float3& vB
 	return pNearPoint;
 }
 
-//HRESULT CUI_GrappleController::Disable_GrapplePoint(CUI_GrapplePoint* pUIPoint)
-//{
-//	pUIPoint->
-//
-//	return S_OK;
-//}
+void CUI_GrappleController::Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive)
+{
+	CUI_GrapplePoint* pTargetUI = static_cast<CUI_GrapplePoint*>(pTargetUIPtr);
+
+	//pTargetUI->Set_HardActivate(isHardActive);	
+	pTargetUI->Req_ToggleGrapplePoint(isActive);	
+}
 
 CUI_GrappleController* CUI_GrappleController::Create()
 {

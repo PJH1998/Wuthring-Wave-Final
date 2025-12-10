@@ -173,8 +173,9 @@ public:
 #pragma endregion
 
 #pragma region [UI] GRAPPLE
-	HRESULT					Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType);
-	class CUI_GrapplePoint* Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance);
+	void*					Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType);
+	class CUI_GrapplePoint* Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance = nullptr, _bool isIncludeInactive = false);
+	void					Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive);
 #pragma endregion
 
 

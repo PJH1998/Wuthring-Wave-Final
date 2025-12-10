@@ -80,6 +80,7 @@ private:
 		// Interaction
 		EGalbrenaRopeHookType m_eRopeHookType = EGalbrenaRopeHookType::END;
 		EGalbrenaControlType m_eControlType = EGalbrenaControlType::END;
+		EGalbrenaEventType m_eEventType = EGalbrenaEventType::END;
 
 		// Capture
 		EGalbrenaCaptureType m_eCaptureType = EGalbrenaCaptureType::END;
@@ -123,7 +124,8 @@ private:
 			// Interaction
 			m_eRopeHookType = EGalbrenaRopeHookType::END;
 			m_eControlType = EGalbrenaControlType::END;
-			
+			m_eEventType = EGalbrenaEventType::END;
+
 
 			// Capture
 			m_eCaptureType = EGalbrenaCaptureType::END;
@@ -258,6 +260,8 @@ private:
 	_bool IsBack(_uint iMeshIndex);
 	_bool IsEye(_uint iMeshIndex);
 
+
+	void Process_MotionTrail(const _wstring& wStrObjectTag);
 
 
 private:

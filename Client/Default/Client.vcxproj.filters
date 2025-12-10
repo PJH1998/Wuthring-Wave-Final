@@ -1326,6 +1326,9 @@
     <ClInclude Include="..\Public\RoverControl.h">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaEvent.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2094,6 +2097,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverControl.cpp">
       <Filter>03. GameObject\Actor\Player\State\Interaction\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaEvent.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

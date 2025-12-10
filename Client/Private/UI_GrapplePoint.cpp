@@ -92,6 +92,8 @@ void CUI_GrapplePoint::Priority_Update(_float fTimeDelta)
 
 void CUI_GrapplePoint::Update(_float fTimeDelta)
 {
+	Update_ToggleReqedEvent(fTimeDelta);
+
 	if (!m_isActivate)
 		return;
 
@@ -321,6 +323,55 @@ void CUI_GrapplePoint::Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotD
 	};
 
 	pTargetTransform->Scale(vFinalScale);
+}
+
+void CUI_GrapplePoint::Update_ToggleReqedEvent(_float fTimeDelta)
+{
+	if (!(m_iReqedDisabled || m_iReqedEnabled))
+		return;
+	
+
+	const _float fMaxReqTime = 0.5f;	// 애니메이션 적용 시간..
+	
+
+	if (m_iReqedEnabled)
+	{
+		//if (m_isActivate)		// 이미 해당 상태면 무시
+		//{	m_iReqedEnabled = false;	return;	}
+
+		if (m_fReqedTimer == 0.f)
+		{
+			m_pSubAnimUI->Change_Animation(L"Grapple_FadeIn", true);						
+			m_pStaticAnimUI->Change_Animation(L"Grapple_Static_FadeIn", true);				
+		}
+		m_fReqedTimer += fTimeDelta;
+		if (m_fReqedTimer >= fMaxReqTime)
+		{
+			m_isActivate = true;
+			m_iReqedEnabled = false;
+			return;
+		}
+	}
+
+
+	if (m_iReqedDisabled)
+	{
+		if (!m_isActivate)		// 이미 해당 상태면 무시
+		{	m_iReqedEnabled = true;		return;	}
+
+		if (m_fReqedTimer == 0.f)
+		{
+			m_pSubAnimUI->Change_Animation(L"Grapple_FadeOut", true);
+			m_pStaticAnimUI->Change_Animation(L"Grapple_Static_FadeOut", true);
+		}
+		m_fReqedTimer += fTimeDelta;
+		if (m_fReqedTimer >= fMaxReqTime)
+		{
+			m_isActivate = false;
+			m_iReqedDisabled = false;
+			return;
+		}
+	}
 }
 
 void CUI_GrapplePoint::Update_TargetColor()

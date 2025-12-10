@@ -991,7 +991,7 @@ HRESULT CLoader_Heaven::Load_Effect()
 	m_pGameSystem->Load_EffectLightData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Light");
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
-
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Sequence", m_eCurLevel);
 
 	return S_OK;
 }

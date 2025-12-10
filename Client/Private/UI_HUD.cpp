@@ -606,8 +606,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		}
 	}break;
 	case CH_GALBRENA:
-	{	// ksta : 버스트 모드 시에 5로 늘려야 함
-	}break;
 	default:
 		iIndex_EBtn = 2;
 		iIndex_RBtn = 0;

@@ -200,7 +200,8 @@ void CAugusta::Late_Update(_float fTimeDelta)
 void CAugusta::Render()
 {
 #ifdef _DEBUG
-	Debug_BurstWeapon();
+	//Debug_BurstWeapon();
+	
 #endif // _DEBUG
 
 	
@@ -251,6 +252,7 @@ void CAugusta::Render()
 #ifdef _DEBUG
 	m_pColliderCom->Render();
 	Print_LookRay();
+	//Debug_ImGui();
 	
 	//if (m_pMainAttackVolume->IsActivate())
 	//	m_pMainAttackVolume->Render();
@@ -891,8 +893,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_FxObject(wStrObjectTag);
 	else if (var1 == TEXT("Throw"))
 		Throw_AttachTarget(); // 던지기.
-	
-	
+	else if (var1 == TEXT("MotionTrail"))
+		Process_MotionTrail(wStrObjectTag);
 	
 
 
@@ -1338,6 +1340,26 @@ _bool CAugusta::IsEye(_uint iMeshIndex)
 	return false;
 }
 
+void CAugusta::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
+
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
+}
+
 void CAugusta::Update_TargetDistance()
 {
 	const _float4x4* pTargetMatrix = nullptr;
@@ -1502,6 +1524,9 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	//m_vMotionTrailColor = { 0.5f, 0.2f, 0.1f, 1.f }; // 기본
+	m_vMotionTrailColor = { 1.f, 0.5f, 0.1f, 1.f }; // 기본
 
 	m_pBayonet->SetActivate(false);
 	m_pSkillWeapon->SetActivate(false);

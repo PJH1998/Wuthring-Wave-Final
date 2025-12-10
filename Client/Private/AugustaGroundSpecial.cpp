@@ -54,7 +54,6 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 	}
 		
 	// 6. 컨디션 추가.
-	//CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f);
 	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
@@ -191,7 +190,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK01;
-				m_pAugusta->Rotate_Target();
+				m_pAugusta->Rotate_Target(); // 회전 하고, 왼쪽 이동?
 				return;
 			}
 
@@ -344,9 +343,9 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundSpecial::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.f, 10.f, 0.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.f, 10.f, 0.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.f, 10.f, 0.5f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.f, 10.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.f, 10.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 0.5f, true, false );
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
