@@ -128,6 +128,7 @@ namespace Client
 		DARK,	// 인멸
 		ELEC,	// 전도
 		FUSI,	// 용융
+		AERO,	// 기류
 
 		// 텍스트용 색상
 		TT_TITLE,
