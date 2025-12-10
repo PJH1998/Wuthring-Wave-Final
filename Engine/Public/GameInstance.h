@@ -160,7 +160,7 @@ public:
 
 #pragma region LIGHT_MANAGER
 	const LIGHT_DESC*			Get_LightDesc(const _wstring& strLightTag);
-	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	void						Set_LightActive(const _wstring& strLightTag, _bool isActive);
 	HRESULT						Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT						Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT						Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);

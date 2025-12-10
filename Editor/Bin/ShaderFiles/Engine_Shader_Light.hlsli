@@ -74,22 +74,26 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
     {
         if (g_HasShadowMap)
         {
-            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.7f, 1.f);
+            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.5f, 1.f);
         }
  
  //       float fToonShade = 0.f; //smoothstep(-0.3f, -0.1f, NdotL);
 //        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
         
+        float fToonShade = clamp(smoothstep(cos(radians(120.f)), cos(radians(100.f)), NdotL), 0.5f, 1.f);
+        
+        float fFinalShadow = min(fToonShade, fShadowMap);
+        
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
-        vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
-        vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
+        vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse * fFinalShadow));
+        vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular * fFinalShadow)) + vRim;
         
         if (false == IsSkin)      // �ݼ� �κи� PBR ó��
         {
             Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
             Out.vLightSpecular = float4(vLightSpecular, 1.f);
             
-            vAmbient = g_vDynamicMtrlAmbient * fShadowMap;
+            vAmbient = g_vDynamicMtrlAmbient * fFinalShadow;
         }
         else
         {
@@ -103,7 +107,7 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
             Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, 0.6f), 1.f);
             Out.vLightSpecular = float4(lerp(vRim, vLightSpecular, 0.6f), 1.f);
         
-            vAmbient = g_vDynamicMtrlAmbient * 0.6f * fShadowMap;
+            vAmbient = g_vDynamicMtrlAmbient * 0.8f * fFinalShadow;
         }
         
         vAmbientColor = vDiffuse;
@@ -168,7 +172,7 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
     if (IsDynamic)
         fRimPower = Compute_RimPower(vNormal.xyz, vLook, NdotL);
         
-    float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
+    float fToonShade = clamp(smoothstep(cos(radians(120.f)), cos(radians(100.f)), NdotL), 0.5f, 1.f);
  
     float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_LightDatas[iLightIndex].vDiffuse.xyz;
  
@@ -182,8 +186,8 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
     {
         Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, fMetallic, fRoughness, vResultDiffuse, vResultSpecular);
         
-        vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse /* * fToonShade */));
-        vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular /* * fToonShade */)) + (fRimPower * vRimColor);
+        vLightDiffuse = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultDiffuse * fToonShade));
+        vLightSpecular = g_LightDatas[iLightIndex].vDiffuse.xyz * ((vResultSpecular  * fToonShade)) + (fRimPower * vRimColor);
         
         Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
         Out.vLightSpecular= float4(vLightSpecular * fAtt, 1.f);
@@ -205,7 +209,7 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
     float4 vAmbient = float4((vAmbientColor * g_LightDatas[iLightIndex].vAmbient).xyz * fAtt, 1.f);
     //float4 vAmbient = float4((vAmbientColor.xyz * 0.5f) * fAtt, 1.f);
     
-    Out.vLightAmbient = vAmbient;
+    Out.vLightAmbient = vAmbient * fToonShade;
     
     return Out;
 }
