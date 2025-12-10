@@ -30,6 +30,7 @@ public:
 		TEXT_COLOR_TYPE		eDamageType;
 		ATTACKVOULME_DIR	eDir{};
 		_wstring				strEffectTag{};
+		_wstring				strSoundTag{};
 	}ATKVOLUME_DESC;
 
 private:

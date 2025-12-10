@@ -287,13 +287,15 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(1.5f, 1.5f, 1.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.fAttackDmg = 250.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 			this->OnHitEnter(iLayer, pOther, Manifold);
 	};
-
+	
+	TriggerDesc.strSoundTag = TEXT("Augusta_Sword_Hit_Mid_01 (SFX)");
+	
 	// Attack용 만들기.
 	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
@@ -305,6 +307,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f);
 	TriggerDesc.fAttackDmg = 400.f;
+	TriggerDesc.strSoundTag = TEXT("Augusta_Sword_Hit_Big_06 (SFX)");
 	m_AttackVolumes[VOLUME_STRONG_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -316,6 +319,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 1.5f); // 평면으로 크게
 	TriggerDesc.fAttackDmg = 600.f;
+	TriggerDesc.strSoundTag = TEXT("Augusta_Sword_Hit_Big_05 (SFX)");
 	m_AttackVolumes[VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
