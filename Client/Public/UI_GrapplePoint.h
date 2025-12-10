@@ -120,6 +120,8 @@ private:
 	_float				m_fGoinUnvisibleTime = 0.f;
 	const _float		m_fUnvisibledTime = 0.25f;
 	
+	class CGameSystem*	m_pGameSystem = { nullptr };
+
 public:
 	static CUI_GrapplePoint* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject*	Clone(void* pArg) override;

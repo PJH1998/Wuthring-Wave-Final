@@ -9,6 +9,7 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float4 g_CamPosition;
+float3 g_HolderPosition;
 //Texture2D g_Texture;
 //float g_AlphaStrength;
 
@@ -93,7 +94,7 @@ PS_OUT PS_MAIN_CURVE(PS_IN_CURVE In) : SV_Target
     
     
     // 출발 타겟과 가까울 시에 투명화
-    float3 vStartTargetPos = g_WorldMatrix._41_42_43;
+    float3 vStartTargetPos = g_HolderPosition.xyz;
     float3 vFocusedPixelPos = In.vWorldPos;
     
     const float fMinLength = 2.f;   // 이보다 작으면 알파.
