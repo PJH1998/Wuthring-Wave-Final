@@ -59,7 +59,7 @@ PS_OUT_SKYBOX PS_DOME(PS_IN In)
     
     float2 vTexcoord = float2(0.5f, fY);
     
-    float4 vBackColor = g_Texture.Sample(DefaultSampler, vTexcoord) * 0.6f;
+    float4 vBackColor = g_Texture.Sample(DefaultSampler, vTexcoord) * 0.2f;
     
     Out.vColor = vBackColor;
     

@@ -29,11 +29,6 @@ void CSound_Manager::Update_Listener(class CTransform* pTransform, _float fTimeD
 	FMOD_System_Set3DListenerAttributes(m_pSystem, 0, &vPosition, &vVelocity, &vForward, &vUp);
 }
 
-void CGameInstance::Update_Listener(CTransform* pTransform, _float fTimeDelta)
-{
-	m_pSound_Manager->Update_Listener(pTransform, fTimeDelta);
-}
-
 HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
