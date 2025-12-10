@@ -11,9 +11,8 @@ CSpectrum::CSpectrum(const CSpectrum& Prototype)
 {
 }
 
-HRESULT CSpectrum::Initialize_Prototype(const SPECTRUM_DESC* pDesc)
+HRESULT CSpectrum::Initialize_Prototype()
 {
-	m_tDesc = * pDesc;
 
     return S_OK;
 }
@@ -21,6 +20,7 @@ HRESULT CSpectrum::Initialize_Prototype(const SPECTRUM_DESC* pDesc)
 HRESULT CSpectrum::Initialize_Clone(void* pArg)
 {
     SPECTRUM_DESC* pDesc = static_cast<SPECTRUM_DESC*>(pArg);
+	m_tDesc = *pDesc;
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
@@ -32,8 +32,7 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
     m_fLifeTime = m_tDesc.fLifeTime;
     m_fGeneration = m_tDesc.fGeneration;
     
-    //임시처리
-    //m_isActivate = true;
+	m_isActivate = false;
 
     return S_OK;
 }
@@ -48,58 +47,7 @@ void CSpectrum::Update(_float fTimeDelta)
         return;
 
 
-    Update_Position();
-
-    m_fCurrentTime += fTimeDelta;
-    m_fSpawnTimer += fTimeDelta;
-	m_fSweep += fTimeDelta;
-	 
-    //라이프타임 체크.
-    while (!m_Samples.empty())
-    {
-        SAMPLE_DESC Desc = m_Samples.front();
-
-        _float fAge = m_fCurrentTime - Desc.fSpawnTime;
-        
-        if (fAge >= m_fLifeTime)
-        {
-            m_Samples.pop_front();
-            m_SamleCount -= 1;
-        }
-        else
-            break;
-    }
-
-    if (m_fSpawnTimer >= m_fGeneration)
-    {
-        XMVECTOR vPrevPos = XMLoadFloat3(&m_vPreviousPos);
-        _float fPrevLength = XMVectorGetX(XMVector3Length(vPrevPos));
-
-		XMVECTOR vCurrentPos = m_UpdatePosition;
-        _float fCurrentLength = XMVectorGetX(XMVector3Length(vCurrentPos));
-
-        _float fDistance = fCurrentLength - fPrevLength;
-
-        if (fDistance > m_fMinDistance)
-        {
-            SAMPLE_DESC Desc = {};
-            XMStoreFloat3(&Desc.vPos, m_UpdatePosition);
-            Desc.fSpawnTime = m_fCurrentTime;
-
-            m_SamleCount += 1;
-            m_Samples.push_back(Desc);
-
-			XMStoreFloat3(&m_vPreviousPos, m_UpdatePosition);
-            m_fSpawnTimer = 0.f;
-        }
-    }
-
-    if (m_SamleCount >= 2)
-    {
-        const _float4* vCamPos = m_pGameInstance->Get_CamPos();
-        m_pVIBufferCom->Update_Spectrum(m_Samples, m_SamleCount, vCamPos);
-    }
-
+  
 }
 
 void CSpectrum::Late_Update(_float fTimeDelta)
@@ -107,7 +55,56 @@ void CSpectrum::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	Update_Position();
+
+	m_fCurrentTime += fTimeDelta;
+	m_fSpawnTimer += fTimeDelta;
+	m_fSweep += fTimeDelta;
+
+	//라이프타임 체크.
+	while (!m_Samples.empty())
+	{
+		SAMPLE_DESC Desc = m_Samples.front();
+
+		_float fAge = m_fCurrentTime - Desc.fSpawnTime;
+
+		if (fAge >= m_fLifeTime)
+		{
+			m_Samples.pop_front();
+		}
+		else
+			break;
+	}
+
+	if (m_fSpawnTimer >= m_fGeneration)
+	{
+		_vector vPrevPos = XMLoadFloat3(&m_vPreviousPos);
+
+		_vector vCurrentPos = m_UpdatePosition;
+		_vector vDistance = vPrevPos - vCurrentPos;
+
+		_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+		if (fDistance > m_fMinDistance)
+		{
+			SAMPLE_DESC Desc = {};
+			XMStoreFloat3(&Desc.vPos, m_UpdatePosition);
+			Desc.fSpawnTime = m_fCurrentTime;
+
+			m_Samples.push_back(Desc);
+
+			XMStoreFloat3(&m_vPreviousPos, m_UpdatePosition);
+			m_fSpawnTimer = 0.f;
+		}
+	}
+
+	if (m_Samples.size() >= 2)
+	{
+		const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+		m_pVIBufferCom->Update_Spectrum(m_Samples, m_Samples.size(), vCamPos);
+	}
+
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CSpectrum::Render()
@@ -172,7 +169,7 @@ void CSpectrum::Update_Position()
 
 HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
 {
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxPosTex"),
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_Spectrum"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
@@ -220,11 +217,11 @@ HRESULT CSpectrum::Bind_ShaderResources()
     return S_OK;
 }
 
-CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const SPECTRUM_DESC* pDesc)
+CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CSpectrum* pInstance = new CSpectrum(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype(pDesc)))
+    if (FAILED(pInstance->Initialize_Prototype()))
     {
         MSG_BOX("Failed to Created : CSpectrum");
         Safe_Release(pInstance);

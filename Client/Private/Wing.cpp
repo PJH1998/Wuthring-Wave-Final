@@ -119,14 +119,14 @@ void CWing::Activate(_bool IsActivate)
 		RightSpectrum.pIsActive = &m_isActivate;
 
 		_matrix mat = XMMatrixIdentity();
-		//m_pGameInstance->Spawn_PoolingObject(TEXT("tat"), mat, &RightSpectrum);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("tat"), mat, &RightSpectrum);
 
 		SPECTRUM_INFO LeftSpectrum{};
 		LeftSpectrum.pModelMarixPtr = &m_CombinedMatrix;
 		LeftSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_L");
 		LeftSpectrum.pIsActive = &m_isActivate;
 
-		//m_pGameInstance->Spawn_PoolingObject(TEXT("tat"), mat, &LeftSpectrum);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("tat"), mat, &LeftSpectrum);
 	}
 
 }

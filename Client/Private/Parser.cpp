@@ -343,7 +343,7 @@ void CParser::Clone_Spawners(LEVEL eLevel)
 	{
 		CSpawner::SPAWNERDESC Spawner{};
 		Spawner.vPosition = tSpawnerData.vMonsterSpawnorPos;
-		Spawner.vExtent = _float3(100.f, 20.f, 100.f);
+		Spawner.vExtent = _float3(50.f, 20.f, 50.f);
 		Spawner.strMonsterKey = { tSpawnerData.szMonsterName1, tSpawnerData.szMonsterName2 , tSpawnerData.szMonsterName3 };
 		Spawner.vSpawnPositions = { tSpawnerData.vMonsterPos1, tSpawnerData.vMonsterPos2 ,tSpawnerData.vMonsterPos3 };
 		Spawner.fSpawnTime = 5.f;
@@ -858,6 +858,30 @@ void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int Pool
             }
         }
     }
+}
+
+void CParser::Create_Spectrum(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
+{
+	//프리팹 폴더 경로 까지 지정해주면 내부에있는 프리팹들 다 읽어줌.
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strPrefabTag = entry.path().stem().string();
+
+				Load_Spectrum_OB_FromJson(filePath, eLevel, PoolingNum);
+			}
+		}
+	}
 }
 
 void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel, _int PoolingNum)
@@ -1773,13 +1797,8 @@ void CParser::Load_Spectrum_VB_FromJson(const _string& strFilePath, const _strin
 	}
 }
 
-void CParser::Load_Spectrum_OB_FromJson(const _string& strFilePath, const _string& SpectrumTag, LEVEL eLevel)
+void CParser::Load_Spectrum_OB_FromJson(const _string& strFilePath, LEVEL eLevel, _uint iNum)
 {
-	_string strProtoTag = "Prototype_GameObject_Spectrum_";
-	strProtoTag += SpectrumTag;
-
-	_wstring wstrPrototTag = StringToWString(strProtoTag);
-
 	ifstream JsonStream(strFilePath.c_str());
 
 	if (!JsonStream.is_open())
@@ -1817,10 +1836,11 @@ void CParser::Load_Spectrum_OB_FromJson(const _string& strFilePath, const _strin
 
 	Desc.CurrentLevel = ENUM_CLASS(eLevel);
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
-		CSpectrum::Create(m_pDevice, m_pContext, &Desc))))
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Spectrum"),
+		ENUM_CLASS(eLevel), TEXT("Layer_Effect"), Desc.strMyTag, iNum, &Desc)))
 	{
-		MSG_BOX("Particle Load Fail");
+		MSG_BOX("Prefab Load Fail");
 		return;
 	}
 }
@@ -2074,6 +2094,26 @@ void CParser::Load_FXLight_Data_FromFolder(const string& strFolderPath)
 			if (extension == ".json")
 			{
 				Load_FXLight_Data_FromJson(filePath);
+			}
+		}
+	}
+}
+
+void CParser::Load_Spectrum_VB_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strVBTag = entry.path().stem().string();
+
+				Load_Spectrum_VB_FromJson(filePath, strVBTag, eLevel);
 			}
 		}
 	}

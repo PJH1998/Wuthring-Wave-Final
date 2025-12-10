@@ -66,6 +66,7 @@ public:
 	//폴더째로 프리팹 읽을거면 개수를 여기서 지정해줘야됨.
 	//폴더째로 읽고, 폴더로 나눠두면 좋을거 같은데 ex) 보스, 아우구스타, 공용, 등등.
 	void						Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum); 
+	void						Create_Spectrum(const string& strFolderPath, LEVEL eLevel, _int PoolingNum);
 
 	//텍스처랑 Dat 먼저 읽어놔야 위에 이펙트 문제없이 클론가능.
 	void						Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
@@ -75,6 +76,7 @@ public:
 	void						Load_EffectSpectrumTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void						Load_FXDecal_Data_FromFolder(const string& strFolderPath);
 	void						Load_FXLight_Data_FromFolder(const string& strFolderPath);
+	void						Load_Spectrum_VB_FromFolder(const string& strFolderPath, LEVEL eLevel);
 private:
 	//원형 있어야 클론가능.
 	void						Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel, _int PoolingNum);
@@ -90,8 +92,8 @@ private:
 	void						Load_FXVA_FromJson(const _string& strFilePath, const _string& VATag, LEVEL eLevel);
 	void						Load_FXLight_FromJson(const _string& strFilePath, const _string& LightTag, LEVEL eLevel);
 	void						Load_FXLight_Data_FromJson(const _string& strFilePath);
+	void						Load_Spectrum_OB_FromJson(const _string& strFilePath, LEVEL eLevel, _uint iNum);
 	void						Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel);
-	void						Load_Spectrum_OB_FromJson(const _string& strFilePath, const _string& SpectrumTag, LEVEL eLevel);
 #pragma endregion
 
 #pragma region SFX

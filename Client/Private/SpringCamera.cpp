@@ -86,7 +86,7 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// Spring
 	if (CAMERA_STATE::SPRING == m_eCameraState)
 		Spring(fTimeDelta);
-	else
+	else if(CAMERA_STATE::ACTION != m_eCameraState)
 		Lerp_Distance(fTimeDelta);
 
 	// Lock-On
@@ -299,10 +299,12 @@ void CSpringCamera::Action(_float fTimeDelta)
 	// Rotation
 	_vector vPreQuaternion = {};
 	_vector vPreTranslation = {};
+	_float fPreDistance = {};
 	if (-1 == m_iFrameIndex)
 	{
 		vPreQuaternion = XMLoadFloat4(&m_vPreQuaternion);
 		vPreTranslation = XMLoadFloat3(&m_vPreTranslation);
+		fPreDistance = m_fDistance;
 		m_fPreFovy = m_fFovy;
 	}
 	else
@@ -311,6 +313,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 		vPreQuaternion = XMQuaternionMultiply(vPreQuaternion, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
 		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMMatrixRotationQuaternion(vPreQuaternion));
+		fPreDistance = m_Frames[m_iFrameIndex].fDistance;
 		// Fov
 		m_fPreFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
@@ -333,7 +336,9 @@ void CSpringCamera::Action(_float fTimeDelta)
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
 		// Distance
-		m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+		//m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+		_float fDestDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+		m_fDistance = lerp(fPreDistance, fDestDistance, fRatio);
 
 		// Fov Lerp
 		m_fFovy = m_fPreFovy + (XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy) - m_fPreFovy) * fRatio;
@@ -351,8 +356,9 @@ void CSpringCamera::Action(_float fTimeDelta)
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
-		m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
-		m_fDistance = m_fFixedDistance;
+		//m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+		//m_fDistance = m_fFixedDistance;
+		m_fDistance = m_Frames[m_iFrameIndex + 1].fDistance;
 
 		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy);
 	}

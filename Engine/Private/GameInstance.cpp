@@ -298,6 +298,14 @@ void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _f
 {
 	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
 }
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+{
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume);
+}
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+{
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
+}
 void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume);
@@ -306,6 +314,10 @@ void CGameInstance::Stop_Sound(_uint iChannelID)
 {
 	m_pSound_Manager->Stop_Sound(iChannelID);
 }
+void CGameInstance::Stop_Sound_Dynamic(_uint iChannelID)
+{
+	m_pSound_Manager->Stop_Sound_Dynamic(iChannelID);
+}
 void CGameInstance::Stop_All()
 {
 	m_pSound_Manager->Stop_All();
@@ -313,6 +325,10 @@ void CGameInstance::Stop_All()
 void CGameInstance::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Set_ChannelVolume(iChannelID, fVolume);
+}
+void CGameInstance::Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume)
+{
+	m_pSound_Manager->Set_ChannelVolume_Dynamic(iChannelID, fVolume);
 }
 #pragma endregion
 
