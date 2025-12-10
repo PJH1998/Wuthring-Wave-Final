@@ -52,7 +52,7 @@ void CMapObject_Collaps::Update(_float fTimeDelta)
 
 void CMapObject_Collaps::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Collaps::Render()
@@ -69,7 +69,7 @@ void CMapObject_Collaps::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
+	//m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{

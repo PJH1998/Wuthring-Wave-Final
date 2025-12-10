@@ -43,7 +43,8 @@ void CMapObject_Meteo::Update(_float fTimeDelta)
 void CMapObject_Meteo::Late_Update(_float fTimeDelta)
 {
 	if (m_IsTriggerd)
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		//if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this)))
 	
 	//if (m_IsTriggerd)
 	//	if (FAILED(m_pGameInstance->Add_Render_StaticObject(this, 0)))
@@ -65,7 +66,7 @@ void CMapObject_Meteo::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	//m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (m_pModelCom->Is_Overed(m_iLODIndex, i))

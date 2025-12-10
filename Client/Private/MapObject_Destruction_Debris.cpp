@@ -40,7 +40,6 @@ HRESULT CMapObject_Destruction_Debris::Initialize_Clone(void* pArg)
 
 void CMapObject_Destruction_Debris::Priority_Update(_float fTimeDelta)
 {
-	m_pModelCom->Request_LOD(m_iLODIndex);
 
 	if (m_IsTriggered)
 	{
@@ -70,7 +69,7 @@ void CMapObject_Destruction_Debris::Update(_float fTimeDelta)
 void CMapObject_Destruction_Debris::Late_Update(_float fTimeDelta)
 {
 	m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Destruction_Debris::Render()
@@ -83,7 +82,7 @@ void CMapObject_Destruction_Debris::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
+	//m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
