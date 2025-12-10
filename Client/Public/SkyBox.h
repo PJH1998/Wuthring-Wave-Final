@@ -15,9 +15,9 @@ public:
 public:
 	typedef struct tagSkyBoxDesc {
 		vector<_wstring>	strModelTags;
-		_uint					iNumModel = {};
-		_float					fCloudSpeed = {};
-		_float					fFXScaleRate = {};
+		_uint				iNumModel = {};
+		_float				fCloudSpeed = {};
+		_float				fFXScaleRate = {};
 		_float2				vUVRate = {};
 	}SKYBOX_DESC;
 

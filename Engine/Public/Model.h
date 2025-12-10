@@ -83,6 +83,11 @@ public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
 	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback);
 
+#ifdef _DEBUG
+	void								Clear_AllNotifies(); // Debug 용도
+#endif // _DEBUG
+
+
 
 public:
 	virtual		HRESULT				Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);

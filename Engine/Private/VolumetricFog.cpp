@@ -13,8 +13,19 @@ CVolumetricFog::CVolumetricFog(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 	Safe_AddRef(m_pGameInstance);
 }
 
+void CVolumetricFog::Set_FogFarRatioToCameraFar(_float fFogFarRatio)
+{
+	m_fFogFarRatioToCamera = fFogFarRatio;
+
+	m_vFogRange.y = m_VF_Data.fCamFar * m_fFogFarRatioToCamera;
+
+	m_VF_Data.fFar = m_vFogRange.y;
+}
+
 HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 {
+	m_fFogFarRatioToCamera = 0.3f;
+
 	m_vFroxelSize.x = iWinSizeX >> 3; // 3 = DownSacle Factor
 	m_vFroxelSize.y = iWinSizeY >> 3;
 	//m_vFroxelSize.z = 192;				// 64~128
@@ -78,15 +89,15 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 HRESULT CVolumetricFog::SetUp_FogNF()
 {
-	m_vFogRange.x = m_pGameInstance->Get_CurrentCamera_Near();//m_pGameInstance->Get_CurrentCamera_Near(); 
-	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far() * 0.3f;
+	m_VF_Data.fCamNear = m_pGameInstance->Get_CurrentCamera_Near();
+	m_VF_Data.fCamFar = m_pGameInstance->Get_CurrentCamera_Far();
+	
+	m_vFogRange.x = m_VF_Data.fCamNear;
+	m_vFogRange.y = m_VF_Data.fCamFar * m_fFogFarRatioToCamera;
 
 	m_VF_Data.fNear = m_vFogRange.x;
 	m_VF_Data.fFar = m_vFogRange.y;
-
-	m_VF_Data.fCamNear = m_pGameInstance->Get_CurrentCamera_Near();
-	m_VF_Data.fCamFar = m_pGameInstance->Get_CurrentCamera_Far();
-
+	
 	return S_OK;
 }
 

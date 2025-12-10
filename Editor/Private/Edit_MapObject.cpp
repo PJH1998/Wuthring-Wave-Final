@@ -439,6 +439,13 @@ void CEdit_MapObject::Set_ImGuiOption()
 	if (ImGui::Button("Destroy"))
 		m_isActivate = false;
 
+	if (ImGui::Button("Destroy_All"))
+	{
+		m_isActivate = false;
+		for (auto& pChild : m_ChildObjects)
+			pChild->SetActivate(false);
+	}
+
 	About_Texture();
 #endif
 }

@@ -332,7 +332,6 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
 // 폴더에 존재하는 모든 애니메이션 json을 읽어와서 등록합니다.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
-    //m_pModelCom->Register_Notify(strFilePath);
 
     auto colliderCallback = [this](const _wstring& tag, bool active) {
         this->Collider_Active(tag, active); // 'this->'는 생략 가능
@@ -345,6 +344,11 @@ void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 		this->Object_Func(tag);
 		};
 
+#ifdef _DEBUG
+	m_pModelCom->Clear_AllNotifies();
+#endif // _DEBUG
+
+	
 	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
     
 }
@@ -356,6 +360,30 @@ void CAnimationActor::Effect_Active(const _wstring& tag)
 {
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
     m_pGameInstance->Spawn_PoolingObject(tag, matWorld, m_pModelCom);
+}
+
+void CAnimationActor::Object_Func(const _wstring& tag)
+{
+	_wstring var1, var2, var3, var4;
+	wstringstream wss(tag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+
+	if (var1 == TEXT("Sound"))
+	{
+		_wstring strSoundType = var2; // Sound Type
+		_wstring strSoundTag = var3; // Sound Tag
+		_float fVolume = stof(var4); // Volume 크기.
+
+		if (var2 == TEXT("Voice"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+		else if (var2 == TEXT("Action"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+	}
+
 }
 
 const _float4x4* CAnimationActor::Get_BoneMatrix(const _string& strBoneName)

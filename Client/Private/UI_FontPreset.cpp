@@ -51,6 +51,11 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vColor			= { 0.984f, 0.592f, 0.443f, 1.0f };
 	tDesc.vOutlineColor		= { 0.620f, 0.306f, 0.212f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::FUSI)] = tDesc;
+	// - Aero (기류)
+	tDesc.vColor			= { 0.522f, 0.914f, 0.933f, 1.0f };
+	tDesc.vOutlineColor		= { 0.231f, 0.420f, 0.522f, 1.0f };
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::AERO)] = tDesc;
+
 
 	// - Title (제목용 색상)
 	tDesc.vColor			= { 0.631f, 0.607f, 0.424f, 1.0f };

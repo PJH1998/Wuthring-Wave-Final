@@ -1113,6 +1113,14 @@ void CGameInstance::Set_FogScatterWeight(_float fFogScatterWeight)
 {
 	m_pVF->Set_FogScatterWeight(fFogScatterWeight);
 }
+void CGameInstance::Set_FogFarRatioToCameraFar(_float fFogFarRatio)
+{
+	m_pVF->Set_FogFarRatioToCameraFar(fFogFarRatio);
+}
+void CGameInstance::Set_FogRayIntensity(_float fRayIntensity)
+{
+	m_pVF->Set_FogRayIntensity(fRayIntensity);
+}
 void CGameInstance::Begin_VF()
 {
 	m_pVF->Begin_VF();

@@ -91,6 +91,8 @@ private:
 	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
 
 private:
+	CCustom_UI* m_pRUI_All									= nullptr;
+
 	CCustom_UI* m_pUI_SectorT_BossStatus					= nullptr;
 	CCustom_UI* m_pUI_SectorB_Status						= nullptr;
 	CCustom_UI* m_pUI_Skill[3]								= { };
