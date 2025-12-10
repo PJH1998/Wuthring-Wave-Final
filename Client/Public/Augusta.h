@@ -277,7 +277,7 @@ private:
 	_bool IsSkin(_uint iMeshIndex);
 	_bool IsEye(_uint iMeshIndex);
 
-	void Process_MotionTrail(const _wstring& wStrObjectTag);
+
 #pragma endregion
 
 

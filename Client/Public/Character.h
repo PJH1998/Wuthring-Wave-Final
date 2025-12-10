@@ -484,7 +484,9 @@ protected:
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	_float4x4 m_GrabComibinedMatrix = {};
 
-	
+protected: // 헬퍼 함수 상속
+	void Process_MotionTrail(const _wstring& wStrObjectTag);
+	void Process_PlaySound(const _wstring& wStrObjectTag);
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;
