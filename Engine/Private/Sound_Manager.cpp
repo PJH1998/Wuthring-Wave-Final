@@ -136,7 +136,6 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
         return;
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
-	//FMOD_System_PlaySound(m_pSystem, pSound, nullptr, false, &m_pFixedChannels[iChannelID]);
 	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_2D);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
@@ -155,15 +154,59 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	FMOD_VECTOR vVelocity = {};
 
 	memcpy(&vPosition, &vObjectPosition, sizeof(_float) * 3);
-	//memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
+	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
 
+	_float fMinDst = fMinDistance;
+	if (fMinDst <= 0.f)
+		fMinDst = 0.01f;
+
 	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_3D);
 	FMOD_Channel_Set3DAttributes(m_pFixedChannels[iChannelID], &vPosition, &vVelocity);
-	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDistance, fMaxDistance);
+	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDst * 10000.f, fMaxDistance * 10000.f);
 	FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
+}
+
+void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+{
+	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
+	if (nullptr == pSound)
+		return;
+
+	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelID]);
+	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelID], FMOD_2D);
+	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
+	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelID], false);
+}
+
+void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+{
+	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
+	if (nullptr == pSound)
+		return;
+
+	_vector vObjectPosition = pTransform->Get_State(STATE::POSITION);
+	_vector vObjectVelocity = pTransform->Get_Velocity();
+
+	FMOD_VECTOR vPosition = {};
+	FMOD_VECTOR vVelocity = {};
+
+	memcpy(&vPosition, &vObjectPosition, sizeof(_float) * 3);
+	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
+
+	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelID]);
+
+	_float fMinDst = fMinDistance;
+	if (fMinDistance <= 0.f)
+		fMinDst = 0.01f;
+
+	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelID], FMOD_3D);
+	FMOD_Channel_Set3DAttributes(m_pPoolingChannels[iChannelID], &vPosition, &vVelocity);
+	FMOD_Channel_Set3DMinMaxDistance(m_pPoolingChannels[iChannelID], fMinDst * 10000.f, fMaxDistance * 10000.f);
+	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
+	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelID], false);
 }
 
 void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
@@ -181,6 +224,11 @@ void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _fl
 void CSound_Manager::Stop_Sound(_uint iChannelID)
 {
     FMOD_Channel_Stop(m_pFixedChannels[iChannelID]);
+}
+
+void CSound_Manager::Stop_Sound_Dynamic(_uint iChannelID)
+{
+	FMOD_Channel_Stop(m_pPoolingChannels[iChannelID]);
 }
 
 void CSound_Manager::Stop_All()
@@ -203,6 +251,11 @@ void CSound_Manager::Set_ChannelVolume(_uint iChannelID, _float fVolume)
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 }
 
+void CSound_Manager::Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume)
+{
+	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
+}
+
 HRESULT CSound_Manager::Initialize(_uint iNumChannel)
 {
 	m_iNumChannels = iNumChannel;
@@ -221,6 +274,8 @@ HRESULT CSound_Manager::Initialize(_uint iNumChannel)
     FMOD_System_Create(&m_pSystem, FMOD_VERSION);
 
     FMOD_System_Init(m_pSystem, m_iNumChannels, FMOD_INIT_NORMAL, nullptr);
+
+	FMOD_System_Set3DSettings(m_pSystem, 1.f, 0.01f, 1.f);
 
     return S_OK;
 }

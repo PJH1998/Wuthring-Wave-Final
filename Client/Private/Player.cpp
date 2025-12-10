@@ -917,13 +917,19 @@ void CPlayer::Toggle_LockOn()
 void CPlayer::Sorting_GrappleTarget()
 {
 	// 거리순으로 정렬해서 넣어줍니다.
+
+
 	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const GRAPPLE_INFO& src, const GRAPPLE_INFO& dst)->_bool {
 		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
 		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
-		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+		/*_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
 			- pSrcTransform->Get_State(STATE::POSITION)));
 		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+			- pDstTransform->Get_State(STATE::POSITION)));*/
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
 			- pDstTransform->Get_State(STATE::POSITION)));
 		return fSrcDistance < fDstDistance;
 		});
@@ -1001,11 +1007,21 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 		if (nullptr == pTargetTransform)
 			return;
 
-		lock_guard<mutex> lock(m_Mutex);
-		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
-
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
+
+		lock_guard<mutex> lock(m_Mutex);
+
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+		_vector vTargetPos = pTargetTransform->Get_State(STATE::POSITION);
+		_bool IsinWorldSpace = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 0.f);
+		_float fLength = XMVectorGetX(XMVector3Length(vPos - vTargetPos));
+
+		// Camera View Space 안에 있으면 넣기.
+		if (IsinWorldSpace)
+			m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
+
+		
 	}
 }
 
@@ -1218,7 +1234,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
+	RigidbodyDesc.vExtent = _float3(15.f, 15.f, 15.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
