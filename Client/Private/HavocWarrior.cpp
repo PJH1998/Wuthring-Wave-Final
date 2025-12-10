@@ -674,6 +674,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 		 * XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
@@ -690,6 +694,8 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+
+
 #pragma endregion
 
 #pragma region HIT_EFFECT
@@ -710,6 +716,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
@@ -736,6 +746,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		cout << "Knock Back! (Havoc Warrior)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 	}
 }
 
