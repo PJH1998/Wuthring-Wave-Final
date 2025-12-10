@@ -116,9 +116,10 @@ void CEdit_FireFly::Set_ImGuiOption()
 {
 	ImGui::Begin("FireFly Pos");
 	m_pMapInterface->Set_Transform(m_pTransformCom);
-
+#ifdef _DEBUG
 	if (ImGui::Button("Change Pos") || m_pGameInstance->Get_DIKeyState(DIK_RETURN) == KEYSTATE::PRESS)
 		m_pModelCom->Change_Pos(m_pTransformCom->Get_State(STATE::POSITION));
+#endif
 	ImGui::End();
 }
 

@@ -33,12 +33,13 @@ void CEdit_Portal::Update(_float fTimeDelta)
 
 	ImGuiID Portal = ImGui::GetID("Container");
 	ImGui::BeginChildFrame(Portal, ImVec2(100, 200));
-
+#ifdef _DEBUG
 	for (_uint i = 0; i < m_pShaderCom->Get_PassCount(); ++i)
 	{
 		if (ImGui::Button(m_pShaderCom->Get_PassName(i)))
 			m_iShaderPassIndex = i;
 	}
+#endif
 	ImGui::EndChildFrame();
 	//DirectX::
 
