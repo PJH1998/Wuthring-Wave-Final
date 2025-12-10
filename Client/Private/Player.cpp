@@ -917,13 +917,19 @@ void CPlayer::Toggle_LockOn()
 void CPlayer::Sorting_GrappleTarget()
 {
 	// 거리순으로 정렬해서 넣어줍니다.
+
+
 	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const GRAPPLE_INFO& src, const GRAPPLE_INFO& dst)->_bool {
 		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
 		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
-		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+		/*_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
 			- pSrcTransform->Get_State(STATE::POSITION)));
 		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+			- pDstTransform->Get_State(STATE::POSITION)));*/
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
 			- pDstTransform->Get_State(STATE::POSITION)));
 		return fSrcDistance < fDstDistance;
 		});
@@ -1002,7 +1008,13 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 			return;
 
 		lock_guard<mutex> lock(m_Mutex);
-		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
+
+		_vector vTargetPos = pTargetTransform->Get_State(STATE::POSITION);
+		_bool IsinWorldSpace = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+		// Camera View Space 안에 있으면 넣기.
+		if (IsinWorldSpace)
+			m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
 
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
