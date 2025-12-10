@@ -99,17 +99,10 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 
 	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 25)
 	{
-		//if (m_iTriggerIndex == 24)
-			m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
+		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
 			m_IsTriggered = true;
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-				});
-		//else
-		//	m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
-		//	m_IsTriggered = true;
-		//	m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-		//		});
-
+			});
 	}
 
 	return S_OK;
@@ -173,6 +166,9 @@ void CTrigger_Box::Ready_Components(void* pArg)
 
 void CTrigger_Box::Collision_Enter()
 {
+	if (m_IsTriggered)
+		return;
+
 	m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
 
 	if (m_pTempPtr)
@@ -209,7 +205,7 @@ void CTrigger_Box::Register_Trigger()
 		{
 		case 0:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;		
+			break;
 
 
 		case 2:
@@ -230,26 +226,24 @@ void CTrigger_Box::Register_Trigger()
 
 		case 21:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			m_IsTriggered = true;
 			break;
-
 		case 22:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			m_IsTriggered = true;
 			break;
 		case 23:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			m_IsTriggered = true;
 			break;
 		case 24:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			m_IsTriggered = true;;
 			break;
 		case 25:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			m_IsTriggered = true;
 			break;
+		/*case 34:
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ATTACK, 0.f, 0.f);
+			break;*/
 		}
+		m_IsTriggered = true;
 		});
 }
 

@@ -173,7 +173,7 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 	{
 	case 11:
 		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3458.7f, 334.9, 1782.2f), UI_GRAPPLE_TYPE::ANCHOR);
-		m_pSecondTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3456.3f, 341.5f, 1769.5f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pSecondTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3456.3f, 338.5f, 1769.5f), UI_GRAPPLE_TYPE::ANCHOR);
 		m_pThirdTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3454.8f, 341.61f, 1759.4), UI_GRAPPLE_TYPE::ANCHOR);
 		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
 		m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, false);
