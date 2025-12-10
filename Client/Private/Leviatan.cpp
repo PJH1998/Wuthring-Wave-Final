@@ -39,8 +39,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	//m_fHP = pDesc->fHP * 0.7f;
-	m_fHP = 5100.f;
+	m_fHP = pDesc->fHP * 0.7f;
+	//m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -434,6 +434,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	}
+	else if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
 	else if (wstrTypeTag == TEXT("Alter"))
 	{
 		CLevi_Alter::ALTER_RESET Desc{};
@@ -605,6 +609,11 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		Reset_NotifyInteraction();
 		dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
 	}
+}
+
+void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
+{
+
 }
 
 HRESULT CLeviatan::Bind_Resources()
@@ -852,7 +861,8 @@ void CLeviatan::Ready_Events()
 		if (event.isSuccess)
 		{
 			m_fStamina = 0.f;
-			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
+			if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+				m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
 		}
 		});
 
@@ -862,8 +872,8 @@ void CLeviatan::Ready_Events()
 			m_fHP = 0.f;
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 			m_pExecuteCom->IsActivate(false);
-			Event1();
-			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
+			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+				Event1();
 		}
 		});
 }
@@ -912,7 +922,8 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 			{
 				iRemainState |= ENUM_CLASS(TEST_STATE::SPLINT);
 				if (m_iAnimCheck == m_iActionChecker[m_iActionIndex] - 1)
-					m_pGameInstance->Play_Sequence(m_strSequenceTag[m_iActionIndex].back());
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+						m_pGameInstance->Play_Sequence(m_strSequenceTag[m_iActionIndex].back());
 			}
 			else
 			{
@@ -921,7 +932,8 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 				{
 					m_iPhase = PHASE::TWO;
 					Reset(XMMatrixIdentity(), nullptr);
-					Event2();
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+						Event2();
 				}
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
 				{
@@ -1029,7 +1041,8 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
 		m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
 		m_isAnimationFinished = false;
-		m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
 		m_isAggro = true;
 	}
 }
@@ -1183,7 +1196,7 @@ void CLeviatan::Reset_NotifyInteraction()
 	}
 	if (nullptr != m_pParryVolume)
 		m_pParryVolume->SetActivate(false);
-
+	m_isAreaAttack = false;
 	//for (auto& Pair : m_PartObjects)
 	//	Pair.second->Reset(XMMatrixIdentity(), nullptr);
 }
@@ -1194,6 +1207,7 @@ void CLeviatan::Event1()
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
 	m_pTransformCom->Save_PreviousPosition();
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
 }
 
 void CLeviatan::Event2()

@@ -82,6 +82,10 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
+	if (false == m_isActivate)
+	{
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+	}
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
@@ -257,6 +261,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
@@ -283,9 +288,82 @@ void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 
 void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
 {
-	if (wStrObjectTag == TEXT("Look"))
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Look"))
 	{
 		TurnFix();
+	}
+	else if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrPartTag);
+	}
+}
+
+void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Walk"))
+	{
+		if (wstrPartTag == TEXT("L"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 4.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 4.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Run"))
+	{
+		if (wstrPartTag == TEXT("L"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk01"))
+	{
+		//m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+	}
+	else if (wstrTypeTag == TEXT("Atk02"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk03"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+	}
+	else if (wstrTypeTag == TEXT("Aggro"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 7.f);
+	}
+	else if (wstrTypeTag == TEXT("Death"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("mon_qixuezhanshi_death_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+	}
+	else if (wstrTypeTag == TEXT("Stand"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 7.f);
 	}
 }
 

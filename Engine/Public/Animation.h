@@ -24,6 +24,8 @@ public:
 	
 
 	void				Print_MorphKeyIndices();
+
+	void				Clear_AnimNotifies();
 #endif // _DEBUG
 
 public:

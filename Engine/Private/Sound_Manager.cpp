@@ -29,6 +29,22 @@ void CSound_Manager::Update_Listener(class CTransform* pTransform, _float fTimeD
 	FMOD_System_Set3DListenerAttributes(m_pSystem, 0, &vPosition, &vVelocity, &vForward, &vUp);
 }
 
+_uint CSound_Manager::Register_Channel()
+{
+	if (0 == m_iPoolingChannelIndex.size())
+		return MAX_CHANNEL - 1;
+
+	_uint iChannelIndex = m_iPoolingChannelIndex.front();
+	m_iPoolingChannelIndex.pop();
+
+	return iChannelIndex;
+}
+
+void CSound_Manager::Return_Channel(_uint iChannelIndex)
+{
+	m_iPoolingChannelIndex.push(iChannelIndex);
+}
+
 HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
@@ -38,16 +54,19 @@ HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSo
 
 	FMOD_MODE mode = {};
 	FMOD_RESULT eResult = {};
-	if (false == is3D)
-	{
-		mode = FMOD_DEFAULT | FMOD_CREATESAMPLE;
-		eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
-	}
-	else
-	{
-		mode = FMOD_DEFAULT | FMOD_CREATESAMPLE | FMOD_3D;
-		eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
-	}
+
+	mode = FMOD_DEFAULT;
+	eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
+
+	//if (false == is3D)
+	//{
+	//
+	//}
+	//else
+	//{
+	//	mode = FMOD_DEFAULT | FMOD_CREATESAMPLE | FMOD_3D;
+	//	eResult = FMOD_System_CreateSound(m_pSystem, pSoundFilePath, mode, 0, &pSound);
+	//}
 
     if (FMOD_OK == eResult)
         m_Sounds.emplace(strSoundTag, pSound);
@@ -86,6 +105,30 @@ HRESULT CSound_Manager::Load_Sound_FromFolder(const _char* pFolderPath, _bool is
 	return S_OK;
 }
 
+
+HRESULT CSound_Manager::Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D)
+{
+	for (const auto& entry : filesystem::recursive_directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".wav" || extension == ".WAV")
+			{
+				// 중복 주의
+				_string soundTag = entry.path().stem().string();
+				_wstring wSoundTag = StringToWString(soundTag);
+
+				if (FAILED(Load_Sound(wSoundTag, filePath.c_str(), is3D)))
+					CRASH("Sound Load Failed");
+			}
+		}
+	}
+	return S_OK;
+}
+
 void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
@@ -93,7 +136,10 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
         return;
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
+	//FMOD_System_PlaySound(m_pSystem, pSound, nullptr, false, &m_pFixedChannels[iChannelID]);
+	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_2D);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
+	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
 }
 
 void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
@@ -109,13 +155,15 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	FMOD_VECTOR vVelocity = {};
 
 	memcpy(&vPosition, &vObjectPosition, sizeof(_float) * 3);
-	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
+	//memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
 
+	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_3D);
 	FMOD_Channel_Set3DAttributes(m_pFixedChannels[iChannelID], &vPosition, &vVelocity);
 	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDistance, fMaxDistance);
 	FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
+	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
 }
 
 void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
@@ -127,51 +175,7 @@ void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _fl
     FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
     FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_LOOP_NORMAL);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
-}
-
-void CSound_Manager::Play_Other(const _wstring& strSoundTag, _float fVolume)
-{
-	if (0 == m_iPoolingChannelIndex.size())
-		return;
-
-	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
-	if (nullptr == pSound)
-		return;
-
-	_uint iChannelIndex = m_iPoolingChannelIndex.front();
-	m_iPoolingChannelIndex.pop();
-	m_iPoolingChannelIndex.push(iChannelIndex);
-
-	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelIndex]);
-	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelIndex], fVolume);
-}
-
-void CSound_Manager::Play_Other(const _wstring& strSoundTag, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
-{
-	if (0 == m_iPoolingChannelIndex.size())
-		return;
-
-	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
-	if (nullptr == pSound)
-		return;
-
-	_uint iChannelIndex = m_iPoolingChannelIndex.front();
-	m_iPoolingChannelIndex.pop();
-	m_iPoolingChannelIndex.push(iChannelIndex);
-
-	_vector vObjectPosition = pTransform->Get_State(STATE::POSITION);
-	_vector vObjectVelocity = pTransform->Get_Velocity();
-
-	FMOD_VECTOR vPosition = {};
-	FMOD_VECTOR vVelocity = {};
-
-	memcpy(&vPosition, &vObjectPosition, sizeof(_float) * 3);
-	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
-
-	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelIndex]);
-	FMOD_Channel_Set3DAttributes(m_pPoolingChannels[iChannelIndex], &vPosition, &vVelocity);
-	FMOD_Channel_Set3DMinMaxDistance(m_pPoolingChannels[iChannelIndex], fMinDistance, fMaxDistance);
-	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelIndex], fVolume);
+	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
 }
 
 void CSound_Manager::Stop_Sound(_uint iChannelID)

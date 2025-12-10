@@ -14,20 +14,24 @@ private:
 public:
 	// Player에서 호출할 함수 (Listener Attribute 갱신)
 	void			Update_Listener(class CTransform* pTransform, _float fTimeDelta);
+	// Pooling Channel
+	_uint			Register_Channel();
+	// Return Channel
+	void			Return_Channel(_uint iChannelIndex);
 
 public:
 	// Sound Load (Sound File Key, Sound File Path)
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D);
+	HRESULT			Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D);
 	// Sound Load From Folder
-	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D);
+	HRESULT			Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D);
+	// Sound Load From Folder Recursive(재귀)
+	HRESULT			Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D);
+
 	// 고정 채널 Sound 재생
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);	// 2D
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
 	// BGM 재생
 	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
-	// Pooling 통해 유동적 재생
-	void			Play_Other(const _wstring& strSoundTag, _float fVolume);
-	void			Play_Other(const _wstring& strSoundTag, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
 	// 고정 채널 Sound 멈춤
 	void			Stop_Sound(_uint iChannelID);
 	// Sound All Stop

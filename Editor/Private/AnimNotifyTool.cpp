@@ -303,6 +303,7 @@ void CAnimNotifyTool::RenderUI_LoadNotify()
     {
         m_IsLoadNotify = true;
         ASSERT_CRASH(m_pCurrentActor);
+		
         m_pCurrentActor->Register_AllNotifies(m_strCurrentFolderPath);
     }
 #endif

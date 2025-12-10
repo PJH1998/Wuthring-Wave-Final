@@ -119,9 +119,16 @@ void CGalbrenaGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 	if (IsEscapePossible && m_strPrevInfo.empty())
 	{
-
 		if (m_States[LAND])
 		{
+			if (m_States[ATTACK])
+			{
+				// Burst 상태라면 Special 상태로?
+				m_pGalbrena->GetStateContextForWrite().m_eSpecialType = EGalbrenaSpecialType::ATTACK05;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIAL)); // 상위, 하위 상태
+				return;
+			}
+
 			if (m_States[MOVE])
 			{
 				m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
@@ -183,7 +190,7 @@ void CGalbrenaGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundBurst::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL01), "Skill01", 1.5f, 70.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaBurstType::SKILL01), "Skill01", 1.5f, 30.f);
 }
 
 void CGalbrenaGroundBurst::State_Reset()

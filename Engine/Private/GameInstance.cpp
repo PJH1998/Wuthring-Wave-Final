@@ -270,6 +270,14 @@ void CGameInstance::Update_Listener(CTransform* pTransform, _float fTimeDelta)
 {
 	m_pSound_Manager->Update_Listener(pTransform, fTimeDelta);
 }
+_uint CGameInstance::Register_Channel()
+{
+	return m_pSound_Manager->Register_Channel();
+}
+void CGameInstance::Return_Channel(_uint iChannelIndex)
+{
+	m_pSound_Manager->Return_Channel(iChannelIndex);
+}
 HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
@@ -277,6 +285,10 @@ HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoun
 HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath, is3D);
+}
+HRESULT CGameInstance::Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D)
+{
+	return m_pSound_Manager->Load_Sound_FromFolderRecursive(pFolderPath, is3D);
 }
 void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
@@ -289,14 +301,6 @@ void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _f
 void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume);
-}
-void CGameInstance::Play_Other(const _wstring& strSoundTag, _float fVolume)
-{
-	m_pSound_Manager->Play_Other(strSoundTag, fVolume);
-}
-void CGameInstance::Play_Other(const _wstring& strSoundTag, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
-{
-	m_pSound_Manager->Play_Other(strSoundTag, fVolume, pTransform, fMinDistance, fMaxDistance);
 }
 void CGameInstance::Stop_Sound(_uint iChannelID)
 {

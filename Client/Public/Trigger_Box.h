@@ -51,6 +51,9 @@ private:
 	_bool m_IsTriggered = { false };
 	_bool   m_bOnCoolDown = { false }; 
 	_float  m_fCoolDown = { 0.f };     
+
+	void* m_pTempPtr = { nullptr };
+	void* m_pSecondTempPtr = { nullptr };
 public:
 	static CTrigger_Box* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

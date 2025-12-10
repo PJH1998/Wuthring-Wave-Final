@@ -300,6 +300,10 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 //	}
 }
 
+void CCorosaurus::Sound_Active(const _wstring& wStrObjectTag)
+{
+}
+
 HRESULT CCorosaurus::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");

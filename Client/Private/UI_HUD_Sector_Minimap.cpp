@@ -69,10 +69,14 @@ void CUI_HUD_Sector_Minimap::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+#ifdef _DEBUG
 	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f, -10.f) });
 	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3(-10.f, -10.f,  10.f) });
 	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f,  10.f) });
-	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f, -10.f) });
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::MONSTER, _float3( 10.f, -10.f, -10.f) });  
+	m_vecObjectPos_PerFrame.push_back(UI_MINIMAP_OBJ_DESC{ UI_MINIMAP_OBJTYPE::BOSS, _float3( 0.f, -10.f, 0.f) });  
+#endif // _DEBUG
+
 
 	__super::Update(fTimeDelta);
 }
@@ -144,7 +148,9 @@ void CUI_HUD_Sector_Minimap::PreAssign_Presets()
 {
 	m_vecTmpCacledRelativeObjects.reserve(16);
 
-	m_arrColorPreset[ENUM_CLASS(UI_MINIMAP_OBJTYPE::MONSTER)] = _float4(0.8f, 0.5f, 0.5f, 0.8f);
+	// 프리셋 지정. 프리셋은 { 색상, 크기 } 순서. 원하는 프리셋 추가 시 ENUM 및 여기에 추가 후 사용하면 됨.
+	m_arrPreset[ENUM_CLASS(UI_MINIMAP_OBJTYPE::MONSTER)]	= { _float4(0.8f, 0.5f, 0.5f, 0.8f), 16.f };
+	m_arrPreset[ENUM_CLASS(UI_MINIMAP_OBJTYPE::BOSS)]		= { _float4(1.0f, 0.1f, 0.1f, 0.8f), 25.f };
 }
 
 void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
@@ -154,7 +160,7 @@ void CUI_HUD_Sector_Minimap::Update_TargetDegrees()
 
 	_float4x4 camViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
 
-	_float3 camViewLook = { camViewMatrix._13, camViewMatrix._23, camViewMatrix._33 };			
+	_float3 camViewLook = { camViewMatrix._13, camViewMatrix._23, camViewMatrix._33 };
 	_vector camLookDir = XMVector3Normalize(XMVectorSetY(XMLoadFloat3(&camViewLook), 0.f));
 	_float dot = clamp(XMVectorGetX(XMVector3Dot(camLookDir, XMVectorSet(0.f, 0.f, 1.f, 0.f))), 0.f, 1.f);	// z = 1 단위벡터 기준 사잇
 
@@ -194,14 +200,14 @@ void CUI_HUD_Sector_Minimap::Update_RelativePos()
 	{	// This Frame Only.
 		_float2 relativePos = Calc_RelativePos(&objectDesc.vTargetPos, 1.f);
 		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.eType, relativePos });
+			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.eType, relativePos, m_arrPreset[ENUM_CLASS(objectDesc.eType)].fIconScale });
 	}
 
 	for (auto& objectDesc : m_mapObjectPos_Attached)
 	{	// contained
 		_float2 relativePos = Calc_RelativePos(&objectDesc.second.vTargetPos, 1.f);
 		if (XMVectorGetX(XMVector2Length(XMLoadFloat2(&relativePos))) < fMinimapRadius)
-			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.second.eType, relativePos });
+			m_vecTmpCacledRelativeObjects.push_back(UI_MINIMAP_CALCEDOBJ_DESC{ objectDesc.second.eType, relativePos, m_arrPreset[ENUM_CLASS(objectDesc.second.eType)].fIconScale });
 	}
 
 
@@ -258,8 +264,9 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 	{
 		auto& objdesc = objIndiInstDesc[i];
 		auto& targetPos = m_vecTmpCacledRelativeObjects[i].vCalcedTargetPos;
+		_float targetObjScale = m_vecTmpCacledRelativeObjects[i].fIconScale;
 
-		_float vInstSca = 16.f;
+		_float vInstSca = targetObjScale;
 		objdesc.vSInstTrans = _float4(targetPos.x, targetPos.y, 0.f, 1.f);
 		objdesc.vSInstRight = _float4(vInstSca, 0.f, 0.f, 0.f);
 		objdesc.vSInstUp	= _float4(0.f, vInstSca, 0.f, 0.f);
@@ -272,7 +279,7 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 	for (_uint i = 0; i < m_vecTmpCacledRelativeObjects.size(); i++)
 	{
 		auto targetObjType = m_vecTmpCacledRelativeObjects[i].eType;
-		*reinterpret_cast<_float4*>(&vecObjIndiVariantMat[i]) = m_arrColorPreset[ENUM_CLASS(targetObjType)];
+		*reinterpret_cast<_float4*>(&vecObjIndiVariantMat[i]) = m_arrPreset[ENUM_CLASS(targetObjType)].vColor;
 	}
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {

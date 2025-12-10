@@ -25,10 +25,10 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));;
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	Ready_Components(pArg);
-	m_iTriggerIndex = pDesc->iTriggerIndex;
 	Register_Trigger();
 
 	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 24)
@@ -101,7 +101,7 @@ void CTrigger_Box::Update(_float fTimeDelta)
 
 void CTrigger_Box::Late_Update(_float fTimeDelta)
 {
-
+	m_pRigidbodyCom->Render();
 }
 
 void CTrigger_Box::Ready_Components(void* pArg)
@@ -119,12 +119,24 @@ void CTrigger_Box::Ready_Components(void* pArg)
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
-
+	switch (m_iTriggerIndex)
+	{
+	case 34:
+		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3396.9f, 323.6f, 2016.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
+		break;
+	}
 }
 
 void CTrigger_Box::Collision_Enter()
 {
 	m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+
+	if (m_pTempPtr)
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, true);
+
+	if (m_pSecondTempPtr)
+		m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, true);
 }
 
 void CTrigger_Box::Collision_During()
@@ -233,6 +245,8 @@ CGameObject* CTrigger_Box::Clone(void* pArg)
 void CTrigger_Box::Free()
 {
 	__super::Free();
+	m_pTempPtr = nullptr;
+	m_pSecondTempPtr= nullptr;
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidbodyCom);
 }
