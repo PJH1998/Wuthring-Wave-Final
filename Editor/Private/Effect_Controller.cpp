@@ -29,13 +29,29 @@ HRESULT CEffect_Controller::Initialize()
 	m_pRadial_Controller = CRadial_Controller::Create(m_pDevice, m_pContext);
 	m_pVA_Controller = CVA_Controller::Create(m_pDevice, m_pContext);
 	m_pLight_Controller = CLight_Controller::Create(m_pDevice, m_pContext);
+	m_pSpectrum_Controller = CSpectrum_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
 
 void CEffect_Controller::Update()
 {
-    Prefab_Tab();
+	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+	if (ImGui::BeginTabBar("TabBar", tab_bar_flags))
+	{
+		if (ImGui::BeginTabItem("Prefab"))
+		{
+			Prefab_Tab();
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Spectrum"))
+		{
+			Spectrum_Tab();
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
 
 #ifdef _DEBUG
 	if (m_AnimActorDesc.pAnimActor != nullptr && m_pSelectedPrefab != nullptr)
@@ -2280,7 +2296,18 @@ void CEffect_Controller::PrefabBinding_Tab()
 		ImGui::End();
 	}
 }
+
 #endif // _DEBUG
+
+void CEffect_Controller::Spectrum_Tab()
+{
+	if (ImGui::Begin("Spectrum_Info"))
+	{
+		m_pSpectrum_Controller->Update();
+
+		ImGui::End();
+	}
+}
 
 
 
