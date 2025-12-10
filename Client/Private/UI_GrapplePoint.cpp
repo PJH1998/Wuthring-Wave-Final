@@ -17,7 +17,7 @@ CUI_GrapplePoint::CUI_GrapplePoint(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 CUI_GrapplePoint::CUI_GrapplePoint(const CUI_GrapplePoint& Prototype)
 	: CUI_Image(Prototype)
-	//, m_pGameSystem (CGameSystem::GetInstance())
+	, m_pGameSystem (CGameSystem::GetInstance())
 {
 	//Safe_AddRef(m_pGameSystem);
 }
@@ -391,9 +391,9 @@ void CUI_GrapplePoint::Update_TargetColor()
 
 void CUI_GrapplePoint::Update_AnimOrder(_float fTimeDelta)
 {
-	_float4 vCamPos = *m_pGameInstance->Get_CamPos();	// ksta : 나중에 플레이어 좌표로..
-	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(&m_vTargetPos) - XMLoadFloat4(&vCamPos))));	// 카메라와 타겟 간 거리
-
+	//_float4 vCamPos = *m_pGameInstance->Get_CamPos();	// ksta : 나중에 플레이어 좌표로..
+	_vector vPlayerPos = m_pGameSystem->Get_PlayerPosition();
+	_float fDistance = XMVectorGetX(XMVector3Length((XMLoadFloat3(&m_vTargetPos) - vPlayerPos)));	// 카메라와 타겟 간 거리
 
 	// 이전 상태 확인 후 트리거 분기 및 사용, 이후 상태 갱신
 	

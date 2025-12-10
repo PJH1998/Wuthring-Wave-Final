@@ -421,9 +421,9 @@ void CUI_CurveTrace::Render_Curve()
 #endif // KSTA_UITEST_BASEDONPLAYER
 
 #ifndef KSTA_UITEST_BASEDONPLAYER
-	_float4x4 matCurveStart = {};
-	XMStoreFloat4x4(&matCurveStart, XMMatrixTranslationFromVector(XMLoadFloat3(&m_tDesc.vStartPos)));
-	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_WorldMatrix", &matCurveStart)))
+	//_float4x4 matCurveStart = {};			// 왜 계산 다 된 좌표에 또 계산해주고있음??
+	//XMStoreFloat4x4(&matCurveStart, XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_tDesc.vStartPos), 1.f)));
+	if (FAILED(m_pCurveShaderCom->Bind_Matrix("g_WorldMatrix", &IdentityMatrix)))
 		CRASH("Binding_Matrix_Failed");
 #endif // !KSTA_UITEST_BASEDONPLAYER
 
