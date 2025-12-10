@@ -72,6 +72,7 @@ public:
 	void						Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void						Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void						Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void						Load_EffectSpectrumTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void						Load_FXDecal_Data_FromFolder(const string& strFolderPath);
 	void						Load_FXLight_Data_FromFolder(const string& strFolderPath);
 private:
@@ -89,6 +90,8 @@ private:
 	void						Load_FXVA_FromJson(const _string& strFilePath, const _string& VATag, LEVEL eLevel);
 	void						Load_FXLight_FromJson(const _string& strFilePath, const _string& LightTag, LEVEL eLevel);
 	void						Load_FXLight_Data_FromJson(const _string& strFilePath);
+	void						Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel);
+	void						Load_Spectrum_OB_FromJson(const _string& strFilePath, const _string& SpectrumTag, LEVEL eLevel);
 #pragma endregion
 
 #pragma region SFX
