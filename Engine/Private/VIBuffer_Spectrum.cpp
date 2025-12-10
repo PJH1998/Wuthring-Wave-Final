@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "VIBuffer_Spectrum.h"
 
 CVIBuffer_Spectrum::CVIBuffer_Spectrum(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -31,8 +31,8 @@ HRESULT CVIBuffer_Spectrum::Initialize_Prototype(VB_SPECTRUM_DESC* pDesc)
     VBDesc.MiscFlags = 0;
     VBDesc.StructureByteStride = m_iVertexStride;
 
-    //ÀÎµ¦½º ¾øÀÌ ¹öÆÛ·Î¸¸ ±×¸±°ÅÀÓ.
-    //±×¸± ¶§´Â VertexCount ¸¦ ¼³Á¤ ÇØÁà¾ßÇÔ (¹ÙÀÎµù µÇ¾îÀÖ´Â ¹öÅÍ°¡ ¸î°³ÀÎÁö ¾Ë·ÁÁÖ±â)
+    //ì¸ë±ìŠ¤ ì—†ì´ ë²„í¼ë¡œë§Œ ê·¸ë¦´ê±°ìž„.
+    //ê·¸ë¦´ ë•ŒëŠ” VertexCount ë¥¼ ì„¤ì • í•´ì¤˜ì•¼í•¨ (ë°”ì¸ë”© ë˜ì–´ìžˆëŠ” ë²„í„°ê°€ ëª‡ê°œì¸ì§€ ì•Œë ¤ì£¼ê¸°)
     if (FAILED(m_pDevice->CreateBuffer(&VBDesc, nullptr, &m_pVB)))
         return E_FAIL;
 
@@ -75,6 +75,8 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
 {
     if (SampleCount < 2)
         return;
+
+	m_iVtxCount = 2 * SampleCount;
 
     D3D11_MAPPED_SUBRESOURCE	Resource{};
 

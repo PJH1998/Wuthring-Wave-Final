@@ -11,6 +11,17 @@ float g_swirlStrength = 3.0f; // 휘어짐 강도 (클수록 많이 꼬임)
 float g_suctionSpeed = 0.5f; // 빨려 들어가는 속도 (텍스처 줌인 효과)
 float g_TotalTime;
 float4 vColor = float4(1.f, 1.f, 1.f, 1.f);
+
+
+//TEST
+float g_Sweep = 2.f;
+float g_SweepWitdh = 1.f;
+float g_Soft = 0.3f;
+float g_Alpha = 1.f;
+float g_MaskSpeed = 1.f;
+float g_Time;
+
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -53,6 +64,12 @@ struct PS_IN
 struct PS_OUT
 {
     float4 vColor : SV_TARGET0;
+};
+
+struct PS_SPECTRUMOUT
+{
+    float4 vColor : SV_TARGET0;
+    float4 vEmissive : SV_TARGET1;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -125,6 +142,41 @@ PS_OUT_POTAL PS_POTAL2(PS_IN In)
     return Out;
 }
 
+PS_SPECTRUMOUT PS_SPUCTRUM(PS_IN In)
+{
+    PS_SPECTRUMOUT Out = (PS_SPECTRUMOUT) 0;
+    
+    float2 UV = In.vTexcoord;
+    
+    float Radial = frac(UV.y + g_MaskSpeed * g_Time);
+
+    float2 FlowUV;
+    FlowUV.x = UV.x;
+    FlowUV.y = Radial;
+    
+    float MaskR = g_MaskTexture.Sample(DefaultSampler, float2(FlowUV.y, FlowUV.x)).r;
+    
+    if (MaskR < 0.2f)
+        discard;
+
+    float4 vColor;
+
+    vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    Out.vColor = float4(vColor.rgb, 1.f);
+
+    float fWeight = Luminance(Out.vColor.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vColor.xyz, 1.f);
+
+    Out.vColor.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vColor.a;
+    
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -158,5 +210,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_POTAL2();
+    }
+
+    pass SpectrumTest
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SPUCTRUM();
     }
 }

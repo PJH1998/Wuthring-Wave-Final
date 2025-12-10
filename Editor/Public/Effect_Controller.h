@@ -12,6 +12,7 @@
 #include "Radial_Controller.h"
 #include "VA_Controller.h"
 #include "Light_Controller.h"
+#include "Spectrum_Controller.h"
 
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
@@ -103,7 +104,9 @@ public:
 
 
 public:
-	void Decal_Tab();
+	void Spectrum_Tab();
+
+
 
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
@@ -118,6 +121,7 @@ private:
 	class CRadial_Controller*									m_pRadial_Controller = { nullptr };
 	class CVA_Controller*										m_pVA_Controller = { nullptr };
 	class CLight_Controller*									m_pLight_Controller = { nullptr };
+	class CSpectrum_Controller*									m_pSpectrum_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;

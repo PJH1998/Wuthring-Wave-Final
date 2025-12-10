@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Editor_Define.h"
 #include "GameObject.h"
 
@@ -21,7 +21,10 @@ public:
 		_wstring strVIBufferTag;
 
 		_int	iShaderPass = 0;
+
+		_bool	IsLoop = false;
 		_float	fLifeTime = 0.f;
+
 		_float  fGeneration = 0.f;
 	}SPECTRUM_DESC;
 
@@ -39,6 +42,11 @@ public:
 	virtual void Render();
 	
 public:
+	_wstring	Get_MyTag() {
+		return m_strMyTag;
+	};
+
+public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
@@ -55,6 +63,8 @@ private:
 
 	_float						m_fCurrentTime = 0.f;
 	_float						m_fSpawnTimer = 0.f;
+	_float						m_fSweep = 0.f;
+
 
 	_int						m_iShaderPass = 0;
 	_float						m_fLifeTime = {};
@@ -76,6 +86,8 @@ private:
 	_float						m_fTestCallTime = 0.f;
 	_float3						m_vTestPos = {};
 
+	//Tool
+	_wstring					m_strMyTag = {};
 
 private:
 	HRESULT Ready_Components(SPECTRUM_DESC& Desc);
