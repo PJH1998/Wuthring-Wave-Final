@@ -50,7 +50,7 @@ private:
 	class CModel_Streaming* m_pModelCom;
 
 	_uint					m_iShaderPassIndex = {};
-	_bool					m_IsRender = { false };
+	_bool					m_IsRender = { true };
 
 private:
 	virtual		void						Ready_Component(void* pArg);

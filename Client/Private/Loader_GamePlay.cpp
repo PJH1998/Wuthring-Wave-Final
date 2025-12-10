@@ -138,12 +138,16 @@ HRESULT CLoader_GamePlay::Load_Texture()
 	cout << "Texture" << endl;
 
 #pragma region POTAL
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxPosTex_Potal"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Mask"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Ring_011.png"), 1))))
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Ring_10016.png"), 1))))
 		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Texture_Potal_Diffuse"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Mask_18312.png"), 1))))
+		CTexture::Create(m_pDevice, m_pContext, TEXT("../Bin/Resource/Map/Potal/T_Ring_10016.png"), 1))))
 		OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
 #pragma endregion
 

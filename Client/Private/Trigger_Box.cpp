@@ -25,7 +25,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));;
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 
 	Ready_Components(pArg);
 	m_iTriggerIndex = pDesc->iTriggerIndex;
