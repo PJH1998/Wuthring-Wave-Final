@@ -278,6 +278,10 @@ HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath, _bool is3
 {
 	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath, is3D);
 }
+HRESULT CGameInstance::Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D)
+{
+	return m_pSound_Manager->Load_Sound_FromFolderRecursive(pFolderPath, is3D);
+}
 void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume);

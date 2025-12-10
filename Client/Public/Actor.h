@@ -59,6 +59,12 @@ public:
 
 #pragma endregion
 
+#pragma region SOUND
+	void Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume);
+	void Play_BGM(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume);
+#pragma endregion
+
+
 
 protected:
 	class CModel* m_pModelCom = { nullptr };

@@ -85,6 +85,14 @@ void CActor::Print_CoolTime()
 
 	m_pAbillityCom->Print_CoolTime();
 }
+void CActor::Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume)
+{
+	m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(eChannel), fVolume);
+}
+void CActor::Play_BGM(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume)
+{
+	m_pGameInstance->Play_BGM(strSoundTag, ENUM_CLASS(eChannel), fVolume);
+}
 #else
 void CActor::Print_Cost()
 {

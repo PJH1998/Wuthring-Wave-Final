@@ -77,6 +77,7 @@ HRESULT CMainApp::Initialize()
 	Ready_Pooling_ForStatic();
 	Ready_Sequence();
 	Ready_Sequence_Item();
+	Ready_Sound();
 	Ready_Event();
 	Start_Level();
 
@@ -664,6 +665,12 @@ void CMainApp::Ready_Sequence_Item()
 void CMainApp::Ready_Sequence()
 {
 	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
+}
+
+void CMainApp::Ready_Sound()
+{
+	m_pGameInstance->Load_Sound_FromFolderRecursive("../Bin/Resource/Sound/2D/", false);
+	m_pGameInstance->Load_Sound_FromFolderRecursive("../Bin/Resource/Sound/3D/", true);
 }
 
 void CMainApp::Start_Level()

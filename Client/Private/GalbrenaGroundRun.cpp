@@ -37,7 +37,7 @@ void CGalbrenaGroundRun::OnEnter(void* pArg)
     m_pGalbrena->Set_Gravity(true);
 
 	// 5. SFX Motion 시작.
-	m_pGalbrena->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	//m_pGalbrena->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CGalbrenaGroundRun::OnUpdate(_float fTimeDelta)
@@ -68,7 +68,7 @@ void CGalbrenaGroundRun::OnExit()
     m_pGalbrena->Set_Gravity(true);
 	m_fFallTime = 0.f;
 
-	m_pGalbrena->End_SFX();
+	//m_pGalbrena->End_SFX();
 }
 
 void CGalbrenaGroundRun::Handle_Input()
