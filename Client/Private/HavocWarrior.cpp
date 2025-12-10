@@ -82,6 +82,10 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
+	if (false == m_isActivate)
+	{
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+	}
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
@@ -257,6 +261,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)

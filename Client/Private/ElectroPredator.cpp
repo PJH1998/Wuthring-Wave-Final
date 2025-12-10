@@ -85,7 +85,10 @@ void CElectroPredator::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
-
+	if (false == m_isActivate)
+	{
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+	}
 	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
@@ -215,8 +218,9 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDeadTrigger = false;
 	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
-	m_fAttackAcc[1] = 10.f;
+	m_fAttackAcc[1] = 5.f;
 	m_fAttackAcc[2] = 20.f;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
