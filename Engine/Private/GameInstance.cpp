@@ -298,6 +298,14 @@ void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _f
 {
 	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
 }
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+{
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume);
+}
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+{
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
+}
 void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume);

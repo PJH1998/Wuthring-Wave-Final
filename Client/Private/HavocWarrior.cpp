@@ -311,59 +311,59 @@ void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.04f, 4.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.04f, 4.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Run"))
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk01"))
 	{
-		//m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
-		m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		//m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
 	}
 	else if (wstrTypeTag == TEXT("Atk02"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
 		}
 		else if (wstrPartTag == TEXT("3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk03"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
 	}
 	else if (wstrTypeTag == TEXT("Aggro"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 7.f);
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("mon_qixuezhanshi_death_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_qixuezhanshi_death_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
 	}
 	else if (wstrTypeTag == TEXT("Stand"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 7.f);
 	}
 }
 

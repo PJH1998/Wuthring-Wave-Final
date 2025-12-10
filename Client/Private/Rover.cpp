@@ -741,6 +741,8 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (var1 == TEXT("Throw"))
 		Throw_AttachTarget(); // 던지기.
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 	
 
 }

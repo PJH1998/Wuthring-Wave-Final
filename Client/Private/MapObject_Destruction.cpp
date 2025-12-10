@@ -252,6 +252,11 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 
 void CMapObject_Destruction::Spawn_Particles()
 {
+	if (m_pPullUI)
+	{
+		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
+		m_pPullUI = nullptr;
+	}
 	m_IsDestroy = true;
 	for(_uint i=2; i<m_pBoneModel->Get_BoneSize();++i)
 	{
