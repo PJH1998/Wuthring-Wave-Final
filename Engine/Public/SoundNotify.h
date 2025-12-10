@@ -5,7 +5,7 @@ NS_BEGIN(Engine)
 class ENGINE_DLL CSoundNotify final : public CAnimNotify
 {
 public:
-	explicit CSoundNotify(_float fTrackPosition, const _string& strTag, const _string& strSoundType, _float fVolume);
+	explicit CSoundNotify(_float fTrackPosition, const _string& strTag, const _string& strSoundType, _uint iChannel, _float fVolume);
 	virtual void Execute() override;
 	virtual json To_Json() const override;
 	virtual const _string& Get_NotifyTypeName() const override;
@@ -26,6 +26,7 @@ private:
 	_string m_strSoundType; // BGM, Sound ?깅벑. 
 	_string m_strSoundTag;
 	_wstring m_wStrSoundTag;
+	_uint m_iChannel;
 	_float m_fVolume;
 
 	
