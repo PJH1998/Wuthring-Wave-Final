@@ -118,6 +118,7 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
 	//FMOD_System_PlaySound(m_pSystem, pSound, nullptr, false, &m_pFixedChannels[iChannelID]);
+	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_2D);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
 }
@@ -139,6 +140,7 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
 
+	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_3D);
 	FMOD_Channel_Set3DAttributes(m_pFixedChannels[iChannelID], &vPosition, &vVelocity);
 	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDistance, fMaxDistance);
 	FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
@@ -171,6 +173,8 @@ void CSound_Manager::Play_Other(const _wstring& strSoundTag, _float fVolume)
 	m_iPoolingChannelIndex.push(iChannelIndex);
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelIndex]);
+
+	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelIndex], FMOD_2D);
 	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelIndex], fVolume);
 	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelIndex], false);
 }
@@ -198,6 +202,8 @@ void CSound_Manager::Play_Other(const _wstring& strSoundTag, _float fVolume, CTr
 	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelIndex]);
+
+	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelIndex], FMOD_3D);
 	FMOD_Channel_Set3DAttributes(m_pPoolingChannels[iChannelIndex], &vPosition, &vVelocity);
 	FMOD_Channel_Set3DMinMaxDistance(m_pPoolingChannels[iChannelIndex], fMinDistance, fMaxDistance);
 	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelIndex], fVolume);
