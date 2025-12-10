@@ -242,7 +242,15 @@ void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 
 void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 {
-	if (wStrObjectTag == TEXT("Shoot"))
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrPartTag);
+	}
+	else if (wstrTypeTag == TEXT("Shoot"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
@@ -256,7 +264,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		ProiDesc.pOwnerTransform = m_pTransformCom;
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_Electro"), WorldMat, &ProiDesc);
 	}
-	else if (wStrObjectTag == TEXT("AoE"))
+	else if (wstrTypeTag == TEXT("AoE"))
 	{
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
@@ -270,7 +278,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AOEDOT_Electro"), WorldMat, &AoEDesc);
 	}
-	else if (wStrObjectTag == TEXT("Look"))
+	else if (wstrTypeTag == TEXT("Look"))
 	{
 		TurnFix();
 	}
@@ -278,7 +286,45 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 
 void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
 {
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
 
+	if (wstrTypeTag == TEXT("Atk01"))
+	{
+		m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+	}
+	else if (wstrTypeTag == TEXT("Atk02"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		}
+		else if (wstrPartTag == TEXT("3"))
+		{
+			m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk03"))
+	{
+		m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+	}
+	else if (wstrTypeTag == TEXT("Aggro"))
+	{
+		m_pGameInstance->Play_Other(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), 0.4f, m_pTransformCom, 0.f, 16.f);
+	}
+	else if (wstrTypeTag == TEXT("Death"))
+	{
+		m_pGameInstance->Play_Other(TEXT("mon_qixuezhanshi_death_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 8.f);
+	}
+	else if (wstrTypeTag == TEXT("Stand"))
+	{
+		m_pGameInstance->Play_Other(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), 0.3f, m_pTransformCom, 0.f, 18.f);
+	}
 }
 
 HRESULT CElectroPredator::Bind_Resources()
