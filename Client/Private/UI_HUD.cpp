@@ -615,6 +615,12 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			iIndex_RBtn = 0;
 			iIndex_LBBtn = 1;
 		}
+		else
+		{
+			iIndex_EBtn = 2;
+			iIndex_RBtn = 0;
+			iIndex_LBBtn = 4;
+		}
 	}break;
 	case CH_GALBRENA:
 	default:
@@ -654,7 +660,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	switch (m_iSelectedCHIndex)	// LB
 	{
-	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Augusta_AdvUlt || isReady_Augusta_LBStrong) ?
+	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (!isIn_Augusta_AdvUlt && isReady_Augusta_LBStrong) ?
 																									_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	case CH_GALBRENA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Galbrena_BurstMode) ?	_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	default:			readyInstDesc[iIndex_LBBtn].vClipTexcoordX = _float2{ 0.f, 0.f };														break;
@@ -662,7 +668,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	
 	switch (m_iSelectedCHIndex)	// E
 	{
-	case CH_AUGUSTA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = (isReady_Augusta_Griffon || isReady_Augusta_Rise) ?
+	case CH_AUGUSTA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = ((isReady_Augusta_Griffon || isReady_Augusta_Rise) && (!isIn_Augusta_AdvUlt)) ?
 																									_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	case CH_GALBRENA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = (isReady_Galbrena_Burst) ?		_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	default:			readyInstDesc[iIndex_EBtn].vClipTexcoordX = _float2{ 0.f, 0.f };
@@ -828,6 +834,14 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 {
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+
+
 	CCustom_UI* pTargetUI = m_pUI_Skill_Utility;
 
 	auto& utilDesc = pTargetUI->Get_UIDesc();
@@ -838,9 +852,13 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	UI_TAB_UTILITY ePlayerUtility = m_pPlayerStatus->Get_UtilityType();
 
-
 	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][0];
 	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][1];
+
+
+
+	if (isIn_Augusta_AdvUlt)		utilInstDesc.vClipTexcoordX = { 0.f, 0.f };
+	else							utilInstDesc.vClipTexcoordX = { 0.f, 1.f };
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
