@@ -1335,14 +1335,49 @@ void CCharacter::Remove_Condition_FromPlayer(_uint iCondition)
 	m_iCondition &= ~iCondition;
 }
 
-
-
-
 #pragma endregion
 
+void CCharacter::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
 
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
 
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
 
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
+}
+
+void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
+{
+	// return; 추가하면 캐릭터 사운드 안들림.
+	
+	_wstring var1, var2, var3, var4;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+
+	_wstring strSoundType = var2; // Sound Type
+	_wstring strSoundTag = var3; // Sound Tag
+	_float fVolume = stof(var4); // Volume 크기.
+
+	if (var2 == TEXT("Voice"))
+		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+	else if (var2 == TEXT("Action"))
+		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+}
 
 void CCharacter::Free()
 {
