@@ -49,14 +49,15 @@ private:
 	_float						m_fLifeTime = {};
 	_float						m_fMinDistance = 0.1f;
 
-	_float3						m_vPreviousPos = {};
+	_float3						m_vPlayerPos = {};
+	_float3						m_vRopeObjectPos = {};
 
 	_int						m_SamleCount = 0;
 	deque<SAMPLE_DESC>			m_Samples = {};
 
 	const _float4x4*			m_pBoneMatrixPtr = nullptr;
-	const _float4x4*			m_pObjectMatrixPtr = nullptr;
-	_vector						m_UpdatePosition = {};
+	const _float4x4*			m_pPlayerMatrixPtr = nullptr;
+
 	_bool*						m_pIsActive = nullptr;
 
 	_bool						m_IsObectActive = false;

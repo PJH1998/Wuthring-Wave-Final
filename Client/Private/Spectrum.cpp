@@ -143,6 +143,7 @@ void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	SPECTRUM_INFO* pDesc = static_cast<SPECTRUM_INFO*>(pArg);
 
 	m_fCurrentTime = 0.f;
+	m_fSpawnTimer = 0.f;
 
 	m_pIsActive = pDesc->pIsActive;
 	m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
