@@ -122,6 +122,8 @@ private:
 #pragma region SHADER_VALUE
 	_float					m_fBehitMaxTime{};
 	_float					m_fBehitAcc{};
+	_float					m_fOutlineRadious{};
+	_float4					m_vOutlineColor{};
 #pragma endregion
 
 private:
