@@ -75,7 +75,7 @@ void CLevel_Logo::Update(_float fTimeDelta)
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
 
-	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
+	/*if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		!m_isGoinFinish)
 	{
 		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
@@ -85,7 +85,7 @@ void CLevel_Logo::Update(_float fTimeDelta)
 			});
 
 		m_isGoinFinish = true;
-	}
+	}*/
 
 	Update_SoundOrder(fTimeDelta);		// n초 후 재생할 사운드 관리
 	Update_ClickSound();				// 클릭 시 사운드

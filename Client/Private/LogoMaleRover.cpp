@@ -4,6 +4,7 @@
 #include "SpringCamera.h"
 #include "Collider.h"
 #include "GameSystem.h"
+#include "Event_Level.h"
 
 CLogoMaleRover::CLogoMaleRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -36,7 +37,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
-	
+	Register_AllNotifies(pDesc->strFolderPath);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
@@ -172,6 +173,7 @@ void CLogoMaleRover::Logo_Input()
 	{
 		m_States[STATE_PICK] = true;
 		m_strCurrentAnimation = "AppearanceLogin";
+		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
 	}
 
 	// 1번 누르면 선택됨. 두번 누르면 해제됨.
@@ -186,6 +188,31 @@ void CLogoMaleRover::Logo_Input()
 		m_strCurrentAnimation = "AppearanceIdle";
 	}
 		
+}
+
+void CLogoMaleRover::Object_Func(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|'); 
+	getline(wss, var2, L'|'); 
+
+	_float fDuration = stof(var2);
+	if (var1 == TEXT("FADEOUT"))
+	{
+		
+		m_pGameInstance->OnFade(FADE::FADE_OUT, fDuration, [&]() {
+			CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+		});
+	}
+		
+		
+
+	
+
+	
 }
 
 
@@ -243,6 +270,8 @@ void CLogoMaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::LOGOROVER);
+
+	m_ShaderPaths[5] = ENUM_CLASS(SHADER_ANIMMESH::LOGO_ROVERMASK);
 }
 
 void CLogoMaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)
