@@ -25,14 +25,18 @@ HRESULT CInputController::Initialize_Clone(void* pArg)
 void CInputController::Update()
 {
     // 1. Update Key Input
-    Update_KeyInput();
+	if (!m_IsBlock)
+		Update_KeyInput();
+	else
+		m_KeyInput = 0; // KeyInput이 아무것도 안눌린 상태로.
+    
 }
 
 void CInputController::Update_KeyInput()
 {
     m_PrevKeyInput = m_KeyInput;
 
-    // 1. ���� ������ Ű ���� �ʱ�ȭ
+    // 1.
     m_KeyInput = 0;
     KEYSTATE eState = { KEYSTATE::END };
 

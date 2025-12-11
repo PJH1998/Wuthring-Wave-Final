@@ -1377,13 +1377,14 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 {
 	// return; 추가하면 캐릭터 사운드 안들림.
 	
-	_wstring var1, var2, var3, var4;
+	_wstring var1, var2, var3, var4, var5;
 	wstringstream wss(wStrObjectTag);
 
 	getline(wss, var1, L'|');
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|');
 	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
 
 	_wstring strSoundType = var2; // Sound Type
 	_wstring strSoundTag = var3; // Sound Tag
