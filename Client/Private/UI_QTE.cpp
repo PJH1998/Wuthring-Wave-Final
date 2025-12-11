@@ -247,7 +247,10 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 
 	if (m_isClone)
+	{
 		m_pGameSystem->HUD_FadeOut();
+		m_pGameInstance->Play_Sound(L"UI_QTE_Appear", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	}
 }
 
 void CUI_QTE::PreAssign_ChildUIs()
@@ -390,6 +393,8 @@ void CUI_QTE::Update_QTE_Fillguage(_float fTimeDelta)
 		if (m_fQTEGuage == 1.f)
 			m_isGoinSuccess = true;
 		
+		m_pGameInstance->Play_Sound(L"UI_QTE_Tick", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+
 	}
 		
 	//std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
@@ -464,6 +469,7 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 		
 		//m_isGoinSuccess = false;
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+		m_pGameInstance->Play_Sound(L"UI_QTE_Complete", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 	}
 	else if (m_isGoinFail)
 	{

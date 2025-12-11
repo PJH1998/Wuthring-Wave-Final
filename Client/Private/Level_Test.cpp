@@ -966,7 +966,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	}
 	else if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
+		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::F);
 		isQTETrigger = !isQTETrigger;
 	}
 #pragma endregion
