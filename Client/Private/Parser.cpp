@@ -343,7 +343,7 @@ void CParser::Clone_Spawners(LEVEL eLevel)
 	{
 		CSpawner::SPAWNERDESC Spawner{};
 		Spawner.vPosition = tSpawnerData.vMonsterSpawnorPos;
-		Spawner.vExtent = _float3(50.f, 20.f, 50.f);
+		Spawner.vExtent = _float3(20.f, 20.f, 20.f);
 		Spawner.strMonsterKey = { tSpawnerData.szMonsterName1, tSpawnerData.szMonsterName2 , tSpawnerData.szMonsterName3 };
 		Spawner.vSpawnPositions = { tSpawnerData.vMonsterPos1, tSpawnerData.vMonsterPos2 ,tSpawnerData.vMonsterPos3 };
 		Spawner.fSpawnTime = 5.f;
