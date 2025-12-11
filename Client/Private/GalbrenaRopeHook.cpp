@@ -205,6 +205,12 @@ void CGalbrenaRopeHook::Check_StateTransition(_float fTimeDelta)
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
 					return;
 				}
+				else
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+					return;
+				}
 
 				if (m_States[JUMP])
 				{

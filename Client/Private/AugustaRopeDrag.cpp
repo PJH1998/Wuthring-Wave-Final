@@ -197,6 +197,7 @@ void CAugustaRopeDrag::Check_StateTransition(_float fTimeDelta)
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
 					return;
 				}
+				
 
 				if (m_States[JUMP])
 				{
@@ -204,6 +205,8 @@ void CAugustaRopeDrag::Check_StateTransition(_float fTimeDelta)
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
 					return;
 				}
+
+				
 			}
 
 			if (!m_States[LAND]) // 땅이 아니라면?

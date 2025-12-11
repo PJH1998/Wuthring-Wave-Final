@@ -112,11 +112,13 @@ void CRover::Update(_float fTimeDelta)
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
 
-	// 특정 상황일 때 TimeLack 감소.
-	_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+	
 
 	if (!IsDissolve)
 	{
+		// 특정 상황일 때 TimeLack 감소.
+		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+
 		// 2. 상태 머신 갱신
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
