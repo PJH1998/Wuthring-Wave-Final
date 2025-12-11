@@ -115,7 +115,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameSystem->Create_MapEffects();
 
 	//TEST
-
+	m_pGameSystem->Change_Level(m_pGameInstance->Get_CurrentLevel());
 	return S_OK;
 }
 
@@ -303,9 +303,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	MobDesc.fHP = 150.f;
-#endif
+//#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
@@ -463,6 +463,13 @@ void CLevel_GamePlay::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
 
 	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/SpectrumOB", m_eCurLevel, 5);
+
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Effect_Rope"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Effect"), TEXT("Rope"), 3, nullptr)))
+	{
+		MSG_BOX("Rope Load Fail");
+		return;
+	}
 }
 
 void CLevel_GamePlay::Ready_Skybox()

@@ -13,6 +13,7 @@
 #include "UI_StatusSyncer.h"
 
 #include"Sonoro_Manager.h"
+#include"BGM_Manager.h"
 
 #include "MonsterTable.h"
 
@@ -64,6 +65,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pTimeLack = CTimeLack::Create();
 	ASSERT_CRASH(m_pTimeLack);
 
+	m_pBGM_Manager = CBGM_Manager::Create();
+	ASSERT_CRASH(m_pBGM_Manager);
+
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
 	AbilityFolders.resize(CPlayer::CHARACTERTYPE::TYPE_END);
@@ -77,10 +81,12 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 void CGameSystem::Update(_float fTimeDelta)
 {
 	m_pSonoro_Manager->Update(fTimeDelta);
+	m_pBGM_Manager->Update(fTimeDelta);
 }
 
 void CGameSystem::Clear_Resource()
 {
+	m_pBGM_Manager->Stop_BGM();
 	m_pDirector->Clear_Action();
 	m_pMonsterTable->Clear_NPCData();
 	m_pSonoro_Manager->Clear_Resource();
@@ -563,6 +569,14 @@ void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)
 	m_pPlayer->Lock_Input(IsLock);
 }
 
+void CGameSystem::Bind_Gravity_ToPlayer(_bool IsGravity)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Bind_Gravity(IsGravity);
+}
+
 #pragma endregion
 
 #pragma region PLAYER
@@ -639,7 +653,28 @@ void CGameSystem::Set_Potal_Active(_bool B)
 }
 
 #pragma endregion
+#pragma region BGM_MANAGER
 
+void CGameSystem::Change_Level(_uint iLevel)
+{
+	m_pBGM_Manager->Change_Level(iLevel);
+}
+
+void CGameSystem::Stop_BGM()
+{
+	m_pBGM_Manager->Stop_BGM();
+}
+
+void CGameSystem::Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel)
+{
+	m_pBGM_Manager->Engage_Battle(IsBattle, eBossLevel);
+}
+
+void CGameSystem::Change_BGM(const _wstring& BGMText)
+{
+	m_pBGM_Manager->Change_BGM(BGMText);
+}
+#pragma endregion
 
 void CGameSystem::Release_System()
 {
@@ -662,7 +697,8 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pSequencePlayer);
 
 	Safe_Release(m_pTimeLack);
-
+	Safe_Release(m_pBGM_Manager);
+	
 	Release();
 }
 

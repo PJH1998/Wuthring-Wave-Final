@@ -48,7 +48,6 @@ void CSpectrum::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-
 	m_fTestCurrentTime += fTimeDelta;
 	Test_Default_Pos();
 
@@ -82,6 +81,7 @@ void CSpectrum::Update(_float fTimeDelta)
         m_Samples.push_back(Desc);
         m_vPreviousPos = m_vTestPos;
     }
+
     else if (m_fSpawnTimer >= m_fGeneration)
     {
         XMVECTOR vPrevPos = XMLoadFloat3(&m_vPreviousPos);
@@ -119,7 +119,7 @@ void CSpectrum::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CSpectrum::Render()
@@ -204,9 +204,6 @@ HRESULT CSpectrum::Bind_ShaderResources()
         return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fCurrentTime, sizeof(_float))))
-		return E_FAIL;
-
-	if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
 		return E_FAIL;
 
     return S_OK;
