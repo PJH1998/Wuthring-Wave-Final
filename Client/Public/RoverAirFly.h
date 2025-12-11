@@ -42,7 +42,9 @@ private:
     class CRover* m_pRover = { nullptr };
     _bool m_States[AIRFLYSTATE::END] = {};
     
-	
+	_float m_fSoundTimer = {};
+	_float m_fMaxTime = {};
+	vector<_wstring> m_SoundTags = {};
 
 	_float m_fSpeed = {};		// Speed (힘)
 	_float m_fAccel = {};		// 가속.
@@ -59,6 +61,7 @@ private:
      
 
 private:
+	void Process_Timer(_float fTimeDelta);
     virtual void Handle_Input() override;
     void Update_FlyAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);

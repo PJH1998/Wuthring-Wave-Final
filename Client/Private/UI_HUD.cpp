@@ -286,6 +286,11 @@ HRESULT CUI_HUD::Ready_Presets()
 	m_arrPlayerAdvSymbolicColors[CLR_GALBRENA]		= _float4(0.600f, 0.250f, 0.250f, 1.0f);
 	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT]	= _float4(0.595f, 0.449f, 0.205f, 1.0f);
 
+	for (_uint i = 0; i < m_arrKeyGuidePresets.size(); i++)
+	{
+		auto& keyGuide = m_arrKeyGuidePresets[i];
+		keyGuide = Calc_SpriteSpace(i % 4, i / 4, { 4, 4 });
+	}
 
 	return S_OK;
 }
@@ -749,7 +754,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
-		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE_ADV),
 		true
 	};
 
@@ -1452,7 +1457,7 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
 
-    // ĳ���Ϳ� ���� Ű ���̵� ���̱� ���� �б�
+    // Sector Right
     CCustom_UI* pKeyButtonUI = m_pUI_KeyButton;
     auto& keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
@@ -1474,6 +1479,10 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
         keyButtonDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.0f, 0.0f }; 
         break;
     }
+
+	// Sector Bottom
+
+
 }
 
 void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
@@ -1484,7 +1493,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 	auto& skillSlots = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
 
 
-		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;

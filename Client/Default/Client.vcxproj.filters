@@ -1344,6 +1344,7 @@
     <ClInclude Include="..\public\Heaven_SkyBox.h">
       <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BGM_Manager.h" />
     <ClInclude Include="..\Public\Effect_Rope.h">
       <Filter>03. GameObject\Effect\Rope</Filter>
     </ClInclude>
@@ -2125,6 +2126,7 @@
     <ClCompile Include="..\private\Heaven_SkyBox.cpp">
       <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\BGM_Manager.cpp" />
     <ClCompile Include="..\Private\Effect_Rope.cpp">
       <Filter>03. GameObject\Effect\Rope</Filter>
     </ClCompile>

@@ -202,6 +202,8 @@ void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
 			m_pUI_Interact_Focused->SetActivate(true);
 			static_cast<CAnimator_UI*>(m_pUI_Interact_Focused->Get_Component(L"Com_Animator_UI"))
 				->Change_Animation(L"Interact_Focused_On", true);
+
+			m_pGameInstance->Play_Sound(L"UI_ClickHide", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 		}
 
 		pInteractBtn->Req_OffInteract();
@@ -232,6 +234,8 @@ void CUI_ControlHelper::Req_Render_InteractUI(_wstring strText, _bool isPressedA
 		m_pUI_Interact_Focused->SetActivate(true);
 		static_cast<CAnimator_UI*>(m_pUI_Interact_Focused->Get_Component(L"Com_Animator_UI"))
 			->Change_Animation(L"Interact_Focused_On", true);
+
+		m_pGameInstance->Play_Sound(L"UI_ClickHide", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 
 		pRootUI->Req_OffInteract();
 	}

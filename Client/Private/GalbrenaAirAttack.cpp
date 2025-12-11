@@ -65,6 +65,9 @@ void CGalbrenaAirAttack::OnEnter(void* pArg)
 		m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 		m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strSubBoneName);
 		break;
+	default:
+		m_pGalbrena->Set_Gravity(true);
+		break;
 	}
 
    

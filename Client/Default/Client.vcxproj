@@ -205,6 +205,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\BGM_Manager.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\Effect_Light.h" />
     <ClInclude Include="..\Public\Effect_Rope.h">
@@ -501,6 +502,7 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\BGM_Manager.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\Effect_Light.cpp" />
     <ClCompile Include="..\Private\Effect_Rope.cpp">

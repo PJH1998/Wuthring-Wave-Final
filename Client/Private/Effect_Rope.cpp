@@ -139,7 +139,7 @@ void CEffect_Rope::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pPlayerMatrixPtr = pDesc->pPlayerMatrixPtr;
 	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 
-	m_vRopeObjectPos = pDesc->vRopeObjecstPos;
+	m_vRopeObjectPos = pDesc->vRopeObjectPos;
 
 	m_isActivate = *m_pIsActive;
 	m_IsObectActive = *m_pIsActive;

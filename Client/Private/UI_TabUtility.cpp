@@ -20,6 +20,7 @@ CUI_TabUtility::CUI_TabUtility(const CUI_TabUtility& Prototype)
 	: CCustom_UI(Prototype)
 	, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_TabUtility::Initialize_Prototype()
@@ -124,6 +125,19 @@ void CUI_TabUtility::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isFirstCheckedSelectedUtil = false;
 
 	m_pGameSystem->Set_MouseFix(false);
+	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR);
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.1f);
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f);
+}
+
+_uint CUI_TabUtility::Req_OffTabUI()
+{
+	m_IsGoinDisabled = true;
+	m_pGameInstance->Play_Sound(L"UI_TabUtility_Close", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	m_pGameInstance->End_SFX();
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f);
+	return m_iSelectedIndex;
 }
 
 void CUI_TabUtility::Update_InitialCheck_SelectedUtility()
@@ -463,6 +477,8 @@ CGameObject* CUI_TabUtility::Clone(void* pArg)
 
 void CUI_TabUtility::Free()
 {
+	Safe_Release(m_pGameSystem);
+
 	if (m_isClone)
 		m_pGameInstance->Remove_RootUI(L"UI_TabUtility");
 
