@@ -677,6 +677,10 @@ void CGameSystem::Change_BGM(const _wstring& BGMText)
 {
 	m_pBGM_Manager->Change_BGM(BGMText);
 }
+_bool CGameSystem::IsModinaryBattle()
+{
+	return m_pBGM_Manager->IsModinaryBattle();
+}
 #pragma endregion
 
 void CGameSystem::Release_System()

@@ -8,7 +8,7 @@ class CEdit_MapEffectCollector final: public CBase
 		_float3 float_3;
 		_float arr[3];
 	};
-	enum EFFECTTAG { HEARTH_FIRE, HEARTH_FIRE2, CAMPFIRE, END };
+	enum EFFECTTAG { HEARTH_FIRE, HEARTH_FIRE2, CAMPFIRE, STATUE,END };
 public:
 	typedef struct tagEternalEffect {
 		EFFECTTAG EffectTag = {};
