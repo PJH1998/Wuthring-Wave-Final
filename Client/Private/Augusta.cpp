@@ -130,7 +130,7 @@ void CAugusta::Update(_float fTimeDelta)
 		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
-		Update_Physics(fTimeDelta * fTimeLack);
+		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
 		Update_Camera(fTimeDelta);
 	}
@@ -908,11 +908,9 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag); // Character 함수
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
-		
-	
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
 
-
-	return;
 }
 
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)

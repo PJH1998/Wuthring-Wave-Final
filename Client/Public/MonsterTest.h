@@ -68,6 +68,11 @@ private:
 	vector<_uint>			m_ShaderIndices;
 	_float4					m_vBaseColor{};
 
+#pragma region	OUTLINE
+	_float4					m_vOutLineColor = {};
+	_float					m_fOutLineRadius = {};
+#pragma endregion
+
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};
 	_bool					m_isDetecting{};

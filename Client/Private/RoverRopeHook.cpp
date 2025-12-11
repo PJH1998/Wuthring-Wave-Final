@@ -53,7 +53,7 @@ void CRoverRopeHook::OnEnter(void* pArg)
 	// 6. 중력 끄기
 	m_pRover->Set_Gravity(false);
 	m_pRover->Rope_Active(true);
-	m_pRover->Spwan_RopeEffect(TEXT("Rope"));
+	m_pRover->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp01");
 }
 
 void CRoverRopeHook::OnUpdate(_float fTimeDelta)

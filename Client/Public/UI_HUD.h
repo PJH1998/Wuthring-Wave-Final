@@ -18,6 +18,10 @@ private:
 	enum HUD_BOSS_SABAR			{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
 	enum HUD_PLAYER_SYMBOLCOLOR { CLR_ROVER, CLR_AUGUSTA, CLR_GALBRENA, CLR_AUGUSTA_ULT, CLR_END };
 	enum HUD_BTN_INDEX			{ BTN_E, BTN_R, BTN_LB /* 아우구스타, 갈브만 존재 */, BTN_END };
+	enum HUD_KEY_INDEX			{ HUDKEY_2, HUDKEY_3, HUDKEY_F, HUDKEY_E, 
+								  HUDKEY_4, HUDKEY_5, HUDKEY_0, HUDKEY_Q, 
+								  HUDKEY_8, HUDKEY_6, HUDKEY_7, HUDKEY_R, 
+								  HUDKEY_9, HUDKEY_1, HUDKEY_T, HUDKEY_LB };
 
 private:
 	explicit				CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -155,6 +159,8 @@ private:
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
 	array<array<_float2, 2>, 5>						m_arrUtilCoordPresets = {};
+	array<array<_float2, 2>, 16>					m_arrKeyGuidePresets = {};
+
 	array<_float4, 4>								m_arrPlayerSymbolicColors = {};
 	array<_float4, 4>								m_arrPlayerAdvSymbolicColors = {};
 	_uint m_iSelectedCHIndex = 0;
@@ -164,7 +170,9 @@ private:
 	array<_float4, CH_END>							m_arrPlayerAdvColors = {};
 
 private:
-	//_uint					m_iUtilityIndex_Tmp = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+	_bool					m_isIn_UltMode_Augusta = false;
+	_bool					m_isIn_StrongAtk_Augusta = false;
+	_bool					m_isIn_BurstMode_Galbrena = false;
 
 
 private:

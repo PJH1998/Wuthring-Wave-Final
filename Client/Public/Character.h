@@ -180,10 +180,12 @@ public:
 	virtual void Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	virtual void End_SFX();
 
+	virtual void Spawn_SFX(const _wstring& strSFXTag);
+
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
 
-	void Spwan_RopeEffect(const _wstring& wStrEffectTag);
+	void Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName);
 	void Execute_Telport(_vector vPos);
 
 	void Reserve_LandSlide(const SLIDE_DATA& eData);
@@ -502,6 +504,7 @@ protected:
 protected: // 헬퍼 함수 상속
 	void Process_MotionTrail(const _wstring& wStrObjectTag);
 	void Process_PlaySound(const _wstring& wStrObjectTag);
+	void Process_SpawnSFX(const _wstring& wStrobjectTag);
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

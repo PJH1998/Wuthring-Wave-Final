@@ -122,7 +122,7 @@ void CGalbrena::Update(_float fTimeDelta)
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 		// 4. Physcics, Camera 업데이트
-		Update_Physics(fTimeDelta * fTimeLack);
+		Update_Physics(fTimeDelta);
 		Update_Camera(fTimeDelta);
 	}
 
@@ -768,6 +768,8 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag);
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
 
 
 	// GalbrenaWing|Bone
@@ -1244,7 +1246,8 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_vDissolveColor = { 0.407f, 0.619f, 1.f, 1.f };
 	m_fEmissiveIntensity = 3.f;
 
-	m_vMotionTrailColor = { 0.235f, 0.1f, 0.31f, 1.f }; // 기본
+	//m_vMotionTrailColor = { 0.235f, 0.1f, 0.31f, 1.f }; // 기본
+	m_vMotionTrailColor = { 0.261f, 0.341f, 0.618f, 1.f }; // 기본
 
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);

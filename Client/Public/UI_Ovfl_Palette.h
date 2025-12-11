@@ -16,7 +16,7 @@ private:
 	typedef struct tUIPaletteDesc {
 		array<_uint, 2>		arrIndex = {};
 		PALETTE_COLOR		eColor = PCOLOR_END;
-	} UI_PALETTE_DESC;
+	} UI_PALETTE_DESC;;
 
 public:
 	explicit CUI_Ovfl_Palette(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -122,7 +122,8 @@ private:
 	array<_uint, 80>						m_arrDepth = {};				// 깊이 확인
 	vector<vector<UI_PALETTE_DESC>>			m_vecTargetsByDepth = {};
 
-
+private:
+	array<_bool, 80>						m_arrIsVisited_Sound = {};		// 사운드용 방문 체크
 
 private:
 	// local variables for shader.
@@ -161,6 +162,9 @@ private:
 
 	_uint						m_iPrevHoveredIndex = UINT_MAX;
 	_uint						m_iPrevHoveredColorIndex = UINT_MAX;
+
+	_uint						m_iPrevDestColorIndex = CUI_Ovfl_Palette::PCOLOR_END;
+
 
 public:
 	static CUI_Ovfl_Palette*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

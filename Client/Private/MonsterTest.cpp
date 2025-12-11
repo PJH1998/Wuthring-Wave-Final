@@ -14,12 +14,17 @@ CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CMonsterTest::CMonsterTest(const CMonsterTest& Prototype)
 	: CActor { Prototype }
 	, m_pGameSystem { CGameSystem::GetInstance() }
+	, m_vOutLineColor { Prototype.m_vOutLineColor }
+	, m_fOutLineRadius { Prototype.m_fOutLineRadius }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMonsterTest::Initialize_Prototype()
 {
+	m_vOutLineColor = _float4(0.9535f, 0.9015f, 0.3218f, 1.f);
+	m_fOutLineRadius = 0.05f;
+
 	return S_OK;
 }
 
@@ -168,7 +173,7 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 			return;
 
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONDEPTH, this)))
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
 			return;
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
@@ -244,11 +249,10 @@ void CMonsterTest::Render_OutLine()
 {
 	Bind_Resources();
 	
-	_float4 vOutLineColor = _float4(1.f, 1.f, 1.f, 1.f);
-	_float fOutLineRadius = 0.1f;
+	m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutLineColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutLineRadius, sizeof(_float));
 
-	m_pShaderCom->Bind_Value("g_vOutLineColor", &vOutLineColor, sizeof(_float4));
-	m_pShaderCom->Bind_Value("g_fOutLineRadius", &fOutLineRadius, sizeof(_float));
+	m_pShaderCom->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW));
 
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMeshes; i++)
@@ -1000,6 +1004,7 @@ void CMonsterTest::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManif
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("거짓된 신왕"), "FalseSovereign", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 		m_isRender = true;
+		m_pGameSystem->Engage_Battle(true, BOSSBGM::SOERVERIGN);
 	}
 }
 
@@ -1021,6 +1026,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
 		}
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};

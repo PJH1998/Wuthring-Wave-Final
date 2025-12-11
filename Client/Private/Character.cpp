@@ -343,6 +343,12 @@ void CCharacter::End_SFX()
 	m_pGameInstance->End_SFX();
 }
 
+void CCharacter::Spawn_SFX(const _wstring& strSFXTag)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(strSFXTag, mat, nullptr);
+}
+
 void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 {
 	PREFAB_INFO EffectDesc{};
@@ -356,18 +362,18 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 
 
-void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag)
+void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName)
 {
-	if (nullptr == m_pTargetGrappleTransform ||
+	if (nullptr == m_GrappleInfo.pTransform ||
 		false == m_IsRopeActive)
 		return;
 
 	_float3 vPos = {};
-	XMStoreFloat3(&vPos, m_pTargetGrappleTransform->Get_State(STATE::POSITION));
+	XMStoreFloat3(&vPos, m_GrappleInfo.pTransform->Get_State(STATE::POSITION));
 
 	ROPE_INFO RopeInfo{};
 	RopeInfo.pPlayerMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	RopeInfo.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	RopeInfo.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
 	RopeInfo.vRopeObjectPos = vPos;
 	RopeInfo.pIsActive = &m_IsRopeActive;
 
@@ -1431,6 +1437,19 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
 	else if (var2 == TEXT("Action"))
 		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+}
+
+void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	
+
+	_matrix mat = XMMatrixIdentity();
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(var2, mat, nullptr);
 }
 
 void CCharacter::Free()

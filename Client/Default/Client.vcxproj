@@ -205,6 +205,7 @@
     <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
+    <ClInclude Include="..\Public\BGM_Manager.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
     <ClInclude Include="..\Public\Effect_Light.h" />
     <ClInclude Include="..\Public\Effect_Rope.h">
@@ -404,6 +405,7 @@
     <ClInclude Include="..\public\UI_Button_Interact.h" />
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_CurveTrace.h" />
+    <ClInclude Include="..\public\UI_Dialog.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
     <ClInclude Include="..\public\UI_GrappleController.h" />
     <ClInclude Include="..\public\UI_GrapplePoint.h" />
@@ -501,6 +503,7 @@
     <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiPostSFX.cpp" />
     <ClCompile Include="..\Private\Augusta_UltiSFX.cpp" />
+    <ClCompile Include="..\Private\BGM_Manager.cpp" />
     <ClCompile Include="..\Private\CaptureState.cpp" />
     <ClCompile Include="..\Private\Effect_Light.cpp" />
     <ClCompile Include="..\Private\Effect_Rope.cpp">
@@ -688,6 +691,7 @@
     <ClCompile Include="..\private\UI_Button_Interact.cpp" />
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_CurveTrace.cpp" />
+    <ClCompile Include="..\private\UI_Dialog.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
     <ClCompile Include="..\private\UI_GrappleController.cpp" />
     <ClCompile Include="..\private\UI_GrapplePoint.cpp" />
