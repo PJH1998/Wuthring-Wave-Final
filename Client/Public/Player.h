@@ -90,8 +90,9 @@ public:
 	void Notify_EscapeGrabExecute();
 	void Notify_Event(CHARACTER_EVENT eEvent, void* pArg = nullptr);
 
-	
 	void Bind_EventLock(_bool IsLock);
+
+
 
 
 

@@ -63,33 +63,11 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-	// 0. Delayed Action 수행.
-	Process_DelayedActions(fTimeDelta);
 
-	// 1. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
-
-    // 2. 이전 위치 저장
-    m_pTransformCom->Save_PreviousPosition();
-
-	// 3. 몬스터와 타겟간의 거리 계산하기.
-	Update_TargetDistance();
-
-	// 4. AttackVolume 몬스터에 바인딩.
-	Bind_TargetToVolumes();
-
-	// 5. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
-  
-	// Dissolve 체크.
+	
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-
-	// 6. Dissovle 체크
+	
+	// 1. Dissolve 체크.
 	if (IsDissolve)
 	{
 		if (m_fDissolveTimer <= m_fMaxDissolveTime)
@@ -100,6 +78,29 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
+
+	if (!IsDissolve)
+	{
+		// 0. Delayed Action 수행.
+		Process_DelayedActions(fTimeDelta);
+
+		// 2. 이전 위치 저장
+		m_pTransformCom->Save_PreviousPosition();
+
+		// 3. 몬스터와 타겟간의 거리 계산하기.
+		Update_TargetDistance();
+
+		// 4. AttackVolume 몬스터에 바인딩.
+		Bind_TargetToVolumes();
+	}
+	
+	// 5. Parts 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+	
 }
 
 void CGalbrena::Update(_float fTimeDelta)
@@ -122,7 +123,7 @@ void CGalbrena::Update(_float fTimeDelta)
 		Update_Camera(fTimeDelta);
 	}
 
-	// 2. 파츠 갱신.?
+	// 4. 파츠 갱신.?
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
@@ -140,26 +141,29 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-   
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-	// 2. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
-
-	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) || 
-		Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
+	if (!IsDissolve)
 	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else
-	{
-		// 2. QTE인 경우 Collider 갱신하지 않음.
-		if (!m_IsQTE)
-			m_pColliderCom->Sync_Position(m_pTransformCom);
+		// 2. MainAttackVolume 설정
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->Late_Update(fTimeDelta);
+
+		// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+
+		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) ||
+			Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
 		else
-			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		{
+			// 2. QTE인 경우 Collider 갱신하지 않음.
+			if (!m_IsQTE)
+				m_pColliderCom->Sync_Position(m_pTransformCom);
+			else
+				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		}
 	}
 
 	if (m_IsQTEend)

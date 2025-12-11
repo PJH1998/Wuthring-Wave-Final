@@ -183,6 +183,8 @@ public:
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
 
+	void Execute_Telport(_vector vPos);
+
 	void Reserve_LandSlide(const SLIDE_DATA& eData);
 
 	void Bind_GrabEscapePossible();
@@ -251,7 +253,7 @@ public:
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) {}; // 전환 시 실행할 함수.
-
+	
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) {};
@@ -260,6 +262,8 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {};
 	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) {};
 	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) {};
+
+
 
 	// Look Vector
 	_vector Get_Position();
