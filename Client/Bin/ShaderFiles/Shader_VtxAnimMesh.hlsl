@@ -16,6 +16,7 @@ float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
+
 float4 g_vBaseColor = 1.f;
 float4 g_vCamPosition;
 float g_fMaxTime = 1.f;
@@ -56,6 +57,7 @@ struct VS_OUT
     float4 vBinormal : BINORMAL;
     float2 vTexcoord : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
 };
 
 VS_OUT VS_MAIN(VS_IN In)
@@ -89,7 +91,8 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
     Out.vTexcoord = In.vTexcoord;
     Out.vProjPos = mul(vPosition, matWVP);  
-
+    Out.vWorldPos = mul(vPosition, g_WorldMatrix);
+    
     return Out;
 }
 
@@ -145,6 +148,7 @@ struct PS_IN
     float4 vBinormal : BINORMAL;
     float2 vTexcoord : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
 };
 
 struct PS_OUT
@@ -209,8 +213,8 @@ PS_OUT PS_NORMALCOLOR(PS_IN In)
     if (g_HasNormal)
     {
         vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-        float3 vNormal = NormalDesc.xyz;
+        float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+        //float3 vNormal = NormalDesc.xyz;
     
         float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
         Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
@@ -250,12 +254,14 @@ PS_OUT2 PS_NORMAL_BEHIT(PS_IN In)
     PS_OUT2 Out = (PS_OUT2) 0;
     // g_vBaseColor : 클래스에서 들고있는 부가적 색상, 필요하면 추가하기
     // need value : g_vCamPosition, g_fMaxTime, g_fCurrentTime
+    
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) /* * g_vBaseColor */;
+    
     if (g_HasNormal)
     {
         vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-        float3 vNormal = NormalDesc.xyz;
+        float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+        //float3 vNormal = NormalDesc.xyz;
     
         float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
         Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
@@ -263,13 +269,31 @@ PS_OUT2 PS_NORMAL_BEHIT(PS_IN In)
     else
         Out.vNormal = In.vNormal * 0.5f + 0.5f;
    
+    float3 vLook = normalize(g_vCamPosition.xyz - In.vWorldPos.xyz);
+    
+    float fRimPower = 0.f;
+    
+    float fNdoV = dot(Out.vNormal.xyz, vLook);
+    
+    fRimPower = abs(fNdoV);
+    
+    
+    
+    float fTimeRatio = saturate(g_fCurrentTime / max(g_fMaxTime, 1e-5));
+    
+    float fMin = max(cos(radians(60.f)) * saturate((1.f - fTimeRatio)), cos(radians(15.f)));
+    
+    fRimPower = smoothstep(fMin, 0.f, fRimPower);
+        
+    Out.vDiffuse += (g_vBaseColor * fRimPower * 3.f) * fTimeRatio;
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
     
-    Out.vPBR.y = 0.2f;
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
     Out.vPBR.z = 1.f;
     
     Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
@@ -822,6 +846,7 @@ struct VS_OUT_OUTLINE
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vViewPos : TEXCOORD2;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -858,6 +883,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     Out.IsDraw = true;
     Out.vProjPos = Out.vPosition;
+    Out.vViewPos = vViewPos;
     
     return Out;
 }
@@ -867,6 +893,7 @@ struct PS_IN_OUTLINE
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vViewPos : TEXCOORD2;
 };
 
 struct PS_OUT_OUTLINE
@@ -875,6 +902,13 @@ struct PS_OUT_OUTLINE
     float4 vDepth : SV_TARGET1;
     float4 vPBR : SV_TARGET2;
 };
+
+struct PS_OUT_OUTLINE_NONDEPTH
+{
+    float4 vColor : SV_TARGET0;
+    float4 vPBR : SV_TARGET1;
+};
+
 
 PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 {
@@ -886,6 +920,25 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
         Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
         Out.vDepth.y = In.vProjPos.w;
         Out.vDepth.z = 1.f;
+    
+        Out.vPBR.z = 1.f;
+    }
+    else
+        discard;
+        
+    return Out;
+}
+
+PS_OUT_OUTLINE_NONDEPTH PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
+{
+    PS_OUT_OUTLINE_NONDEPTH Out = (PS_OUT_OUTLINE_NONDEPTH) 0;
+
+    if (In.IsDraw)
+    {
+        Out.vColor = fmod(In.vViewPos.y, 1.f) > 0.5f ? g_vOutLineColor : 0.f;
+        
+        if(all(Out.vColor == 0.f))
+            discard;
     
         Out.vPBR.z = 1.f;
     }
@@ -1065,4 +1118,14 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_BOSS_BEHIT();
     }
 
+    pass BossOutLine // 15
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_OUTLINE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_BOSS_OUTLINE();
+    }
 }

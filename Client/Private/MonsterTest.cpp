@@ -166,6 +166,9 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 			return;
 
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONDEPTH, this)))
+			return;
+
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
 	}
@@ -232,6 +235,30 @@ void CMonsterTest::Render_Shadow()
 		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
 
 		m_pModelCom->Render(i);
+	}
+}
+
+void CMonsterTest::Render_OutLine()
+{
+	Bind_Resources();
+	
+	_float4 vOutLineColor = _float4(1.f, 1.f, 1.f, 1.f);
+	_float fOutLineRadius = 0.1f;
+
+	m_pShaderCom->Bind_Value("g_vOutLineColor", &vOutLineColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fOutLineRadius", &fOutLineRadius, sizeof(_float));
+
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::BOSS_OUTLINE))))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
 	}
 }
 
