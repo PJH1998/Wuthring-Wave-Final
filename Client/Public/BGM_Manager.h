@@ -17,7 +17,9 @@ public:
 		 
 	void Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel);
 	void Change_BGM(const _wstring& BGMText);
-		 
+	void Change_BattleBGM(BOSSBGM eBoss);
+	_bool IsModinaryBattle() { return m_eLastBattle == BOSSBGM::MODINARY; }
+
 private: 
 	void Ready_BGM();
 
@@ -27,11 +29,13 @@ private:
 	_wstring m_BattleBGM;
 
 	_wstring m_szChangeBGMName;
+	_wstring m_szChangeBattleBGMName;
 	map<BOSSBGM, _wstring> m_BossBGM;
 	BOSSBGM m_eLastBattle = { BOSSBGM::END };
 
 
 	_bool m_IsCurBGMChange = { false };
+	_bool m_IsCurBattleBGMChange = { false };
 	_float m_fBGMRate = {};
 	_bool m_IsBattle = { false };
 

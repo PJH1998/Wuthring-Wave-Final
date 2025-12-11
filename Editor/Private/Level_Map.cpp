@@ -940,97 +940,8 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 								_string Name = Desc.ModelName;
 								ShaderChange(Name, &Desc.iShaderPassIndex);
-								/*if (NameCheck(Name, "SM_Lau_Mou_01AH"))
-									Desc.iShaderPassIndex = 9;
-								else if (NameCheck(Name, "SM_Sev_Roc_21AL") ||
-									NameCheck(Name, "SM_Sev_Roc_31AS") ||
-									NameCheck(Name, "SM_Sev_Roc_41AS") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_13BH") ||
-									NameCheck(Name, "SM_Sev_Roc_27AM") ||
-									NameCheck(Name, "SM_Sev_Roc_23AM") ||
-									NameCheck(Name, "SM_Sev_Roc_37AS") ||
-									NameCheck(Name, "SM_Sev_Roc_28AS") ||
-									NameCheck(Name, "SM_Sev_Roc_04AM") ||
-									NameCheck(Name, "SM_Sev_Roc_19AS") ||
-									NameCheck(Name, "SM_Sev_Roc_15AM") ||
-									NameCheck(Name, "SM_Sev_Roc_20AS") ||
-									NameCheck(Name, "SM_Sev_Roc_38AS") ||
-									NameCheck(Name, "SM_Sev_Roc_16AM") ||
-									NameCheck(Name, "SM_Sev_Roc_08AL") ||
-									NameCheck(Name, "SM_Sev_Roc_14AM") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_15AM") ||
-									NameCheck(Name, "SM_Sev_Roc_12AS") ||
-									NameCheck(Name, "SM_Sev_Roc_09AL") ||
-									NameCheck(Name, "SM_Sev_Roc_51AS") ||
-									NameCheck(Name, "SM_Sev_Roc_34AL") ||
-									NameCheck(Name, "SM_Sev_Roc_41BS") ||
-									NameCheck(Name, "SM_Sev_Roc_10AL") ||
-									NameCheck(Name, "SM_Sev_Roc_05AL") ||
-									NameCheck(Name, "SM_Sev_Roc_07AL") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_07AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_01AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_19AM") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_10AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_04AH") ||
-									NameCheck(Name, "SM_Sev_Roc_11AL") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_08AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_18BL") ||
-									NameCheck(Name, "SM_Sev_Roc_39AS") ||
-									NameCheck(Name, "SM_Sev_Roc_13AM") ||
-									NameCheck(Name, "SM_Sev_Roc_18AL") ||
-									NameCheck(Name, "SM_Sev_Roc_50AS") ||
-									NameCheck(Name, "SM_Sev_Roc_44AS") ||
-									NameCheck(Name, "SM_Sev_Roc_03AL") ||
-									NameCheck(Name, "SM_Sev_Roc_24BS") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_12AL") ||
-									NameCheck(Name, "SM_Sev_Roc_36AL") ||
-									NameCheck(Name, "SM_Sev_Roc_24AS") ||
-									NameCheck(Name, "SM_Sev_Roc_32AL") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_01DH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_03AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_02BH") ||
-									NameCheck(Name, "SM_Sev_Roc_48AS") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_23AL") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_02AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_09AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_01BH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_01CH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_05AH") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_10BH") ||
-									NameCheck(Name, "SM_Sev_Roc_47AS") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_06AH") ||
-									NameCheck(Name, "SM_Sev_Roc_40AS") ||
-									NameCheck(Name, "SM_Sev_Roc_46AS") ||
-									NameCheck(Name, "SM_Sev_Roc_49AS") ||
-									NameCheck(Name, "SM_Tab_APD_Roc_14AM"))
-								{
-									Desc.iShaderPassIndex = 10;
-								}
-								else if (NameCheck(Name, "SM_Com2_Roc_APD_16AM") ||
-									NameCheck(Name, "SM_Com2_Roc_APD_16AM") ||
-									NameCheck(Name, "SM_Com2_Roc_APD_21AM") ||
-									NameCheck(Name, "SM_Com2_Roc_APD_06AL") ||
-									NameCheck(Name, "SM_Com2_Roc_APD_35AS") ||
-									NameCheck(Name, "SM_Sev_Roc_54AS") ||
-									NameCheck(Name, "SM_Sev_Roc_49AS")
-									)
-								{
-									Desc.iShaderPassIndex = 11;
-								}
-								else if (NameCheck(Name, "SM_Com2_Roc_APD_27AM")||
-									NameCheck(Name, "SM_Sev_Roc_58AS"))
-								{
-									Desc.iShaderPassIndex = 12;
-								}
-								else if (NameCheck(Name, "SM_Sev_Roc_02AL"))
-								{
-									Desc.iShaderPassIndex = 13;
-								}
-								else if (NameCheck(Name, "SM_Com2_Roc_APD_10AM")||
-									NameCheck(Name, "SM_Com2_Roc_APD_39AX"))
-								{
-									Desc.iShaderPassIndex = 14;
-								}*/
+								if (Desc.eObjectType == OBJECTTYPE::INTERACTION)
+									int a = 0;
 
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 									, m_iLevel, TEXT("Layer_MapObject"), &Desc);
@@ -1074,10 +985,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";

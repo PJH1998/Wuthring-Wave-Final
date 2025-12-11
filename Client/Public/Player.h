@@ -95,6 +95,8 @@ public:
 	void Lock_Input(_bool IsLock);
 
 	void Bind_Gravity(_bool IsGravity);
+	
+	void Use_Spring(_float fDestination, _float fDuration);
 
 
 #pragma endregion
@@ -136,6 +138,7 @@ private:
 	_bool m_IsChanage = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsEventLock = { false };
+	_bool m_IsBattle = { false };
 
 	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};

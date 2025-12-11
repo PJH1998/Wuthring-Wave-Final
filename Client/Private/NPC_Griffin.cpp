@@ -47,7 +47,10 @@ void CNPC_Griffin::Update(_float fTimeDelta)
 void CNPC_Griffin::Late_Update(_float fTimeDelta)
 {
 	if (m_IsRender)
+	{
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
+	}
 }
 
 void CNPC_Griffin::Render()
@@ -64,11 +67,32 @@ void CNPC_Griffin::Render()
 	}
 }
 
+void CNPC_Griffin::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
 HRESULT CNPC_Griffin::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
 	return S_OK;
 }
 

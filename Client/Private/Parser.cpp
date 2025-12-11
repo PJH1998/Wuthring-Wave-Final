@@ -331,6 +331,9 @@ void CParser::Create_MapEffect()
 		case 2:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
 			break;
+		case 3:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
+			break;
 		}
 	}
 	m_MapEffects.clear();

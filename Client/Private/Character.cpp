@@ -343,6 +343,12 @@ void CCharacter::End_SFX()
 	m_pGameInstance->End_SFX();
 }
 
+void CCharacter::Spawn_SFX(const _wstring& strSFXTag)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(strSFXTag, mat, nullptr);
+}
+
 void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 {
 	PREFAB_INFO EffectDesc{};
@@ -358,7 +364,7 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName)
 {
-	if (nullptr == m_GrappleInfo.pTransform ||
+	if (nullptr == m_GrappleInfo.pTransform||
 		false == m_IsRopeActive)
 		return;
 
@@ -1154,7 +1160,7 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-void CCharacter::Rotate_Target()
+void CCharacter::Rotate_Target(_bool IsReverse)
 {
     // 1. 타겟이 없는 경우 Return
     if (nullptr == m_pTargetTransform)
@@ -1167,6 +1173,9 @@ void CCharacter::Rotate_Target()
 
 
     vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	if (IsReverse)
+		vToTarget *= -1.f;
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
@@ -1431,6 +1440,19 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
 	else if (var2 == TEXT("Action"))
 		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+}
+
+void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	
+
+	_matrix mat = XMMatrixIdentity();
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(var2, mat, nullptr);
 }
 
 void CCharacter::Free()

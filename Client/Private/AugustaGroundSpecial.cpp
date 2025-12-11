@@ -127,7 +127,9 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 
 	// 1. 막타는 이동거리 온전하게 다받기.
 	if (m_iComboCount == COMBO::COMBO_ATTACKOMNI)
-		m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
+		m_fAnimationScale = 1.f;
+		//m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
+		
 
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
@@ -191,6 +193,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK01;
 				m_pAugusta->Rotate_Target(); // 회전 하고, 왼쪽 이동?
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 				return;
 			}
 
@@ -202,6 +205,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
 				m_iComboCount = COMBO::COMBO_ATTACK02;
 				m_pAugusta->Rotate_Target();
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 				return;
 			}
 
@@ -213,6 +217,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
 				m_iComboCount = COMBO::COMBO_ATTACK03;
 				m_pAugusta->Rotate_Target();
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 				return;
 			}
 
@@ -224,6 +229,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK04;
 				m_pAugusta->Rotate_Target();
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 				return;
 			}
 
@@ -235,6 +241,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
 				m_iComboCount = COMBO::COMBO_ATTACK05;
 				m_pAugusta->Rotate_Target();
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 				return;
 			}
 
@@ -246,6 +253,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
 				m_iComboCount = COMBO::COMBO_ATTACK06;
 				m_pAugusta->Rotate_Target();
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 
 				// Bind Condition Burst 궁
 				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
@@ -259,11 +267,12 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttackOmni"))
 					return;
 
-				
+				m_pAugusta->Rotate_Target(true);
 
 				// Remove Condition 마지막 Burst 궁
 				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
-				
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
 				m_iComboCount = COMBO::COMBO_ATTACKOMNI;
 				m_pAugusta->Play_Action(TEXT("Action_Augusta_SpAttackOmni"));
@@ -346,7 +355,7 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.f, 10.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 0.5f, true, false );
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 1.f, true, false );
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);

@@ -462,7 +462,7 @@ void CLevel_GamePlay::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
 
-	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/SpectrumOB", m_eCurLevel, 5);
+	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/GamePlay/SpectrumOB", m_eCurLevel, 5);
 
 	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Effect_Rope"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Effect"), TEXT("Rope"), 3, nullptr)))

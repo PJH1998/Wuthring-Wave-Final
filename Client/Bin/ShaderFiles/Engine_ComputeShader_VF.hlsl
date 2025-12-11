@@ -447,11 +447,13 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
                 float fVisible = Compute_ShadowMap(vWorldPosJitter, g_ShadowMapTexture);
                 fAtt = fVisible;
                 
-                fRayAtt = pow(saturate(1.f - fVisible), 2.f); // Visible Inv
-                if (fRayAtt < 1.f)
+                if(fVisible != 0.f)
                 {
+                    fRayAtt = pow(saturate(1.f - fVisible), 2.f); // Visible Inv
+                    
                     float PhaseRay = HenyeyGreensteinPhasefunction(LightDirection, vOutDir, fRayPhaseFunctionG);
                     vRayLighting = (Light.vDiffuse.xyz * fRayAtt * PhaseRay);
+                    
                 }
                 break;
             case 1: // POINT
