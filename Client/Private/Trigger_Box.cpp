@@ -223,19 +223,18 @@ void CTrigger_Box::Collision_During()
 	{
 		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
+
 			if (!m_pGameSystem->IsSonoro())
 			{
-				if (!m_pGameSystem->IsSonoro())
-				{
-					m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
-				}
-				else
-					m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
-				m_pGameSystem->Hide_InteractUI(true);
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
 			}
 			else
 				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+			m_pGameSystem->Hide_InteractUI(true);
 
+
+			PREFAB_INFO Info;
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Change_Sonora"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		}
 		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 		{
@@ -265,10 +264,10 @@ void CTrigger_Box::Collision_End()
 void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
+		if (m_CamMatrix)
+			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 		switch (m_iTriggerIndex)
 		{
-			if(m_CamMatrix)
-				m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 		case 7:
 			m_pGameSystem->Stop_Action();
 			break;
@@ -277,8 +276,8 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			break;
 		case 34:
-			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.1f, 2.f);
-			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 2.f);
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.05f, 2.f);
 			m_pGameSystem->Play_QTE(_float2(-300.f, 300.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
 			break;
 		}
