@@ -349,28 +349,12 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
     float4 vColor = g_HeavenWaterColor;
 
     // Wolrd ±â¹Ý UV
-    float2 vUV = In.vWorldPos.xz * 10.f;
+    float2 vUV = In.vWorldPos.xz * 0.5f;
     //float2 vUV = In.vTexcoord;
     
-    // Noise
-    float fNoiseTiling = 0.1f;
-    float fNoiseSpeed = 0.01f;
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, vUV);
     
-    float2 vNoiseUV = vUV * fNoiseTiling + g_fTime * fNoiseSpeed;
-    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV * 30.f).b * 2.f - 1.f;
-    float fDistortionStrength = 0.1f;
-    float2 UVDist = vNoiseUV + fNoise * fDistortionStrength;
-    
-    // Mask
-    float fMaskTiling = 1.f;
-    float fWaterMask = g_MaskTexture[0].Sample(DefaultSampler, UVDist * fMaskTiling).g;
-    
-    // Animation
-    float fAnimTiling = 3.f;
-    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.006f, 0.003f);
-    float fAnimated = g_MaskTexture[2].Sample(DefaultSampler, vUVAnimation).r;
-    
-    Out.vDiffuse = float4(vColor.xyz * ((fAnimated * 30.f) * fWaterMask), 1.f);
+    Out.vDiffuse = float4(vColor.xyz * vMask.xyz, 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;

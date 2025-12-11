@@ -61,7 +61,7 @@ void CMapObject_Water::Late_Update(_float fTimeDelta)
 	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
 	else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONLIGHT, this);
 }
 
 void CMapObject_Water::Render()
