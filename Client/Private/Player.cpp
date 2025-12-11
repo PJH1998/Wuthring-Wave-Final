@@ -805,6 +805,13 @@ void CPlayer::Lock_Input(_bool IsLock)
 
 	m_pInputControllerCom->Set_BlockInput(IsLock);
 }
+void CPlayer::Bind_Gravity(_bool IsGravity)
+{
+	if (nullptr == m_pColliderCom)
+		return;
+
+	m_pColliderCom->Set_Gravity(IsGravity);
+}
 #pragma endregion
 
 

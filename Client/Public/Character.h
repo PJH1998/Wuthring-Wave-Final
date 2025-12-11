@@ -183,7 +183,7 @@ public:
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
 
-	void Spwan_RopeEffect(const _wstring& wStrEffectTag);
+	void Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName);
 	void Execute_Telport(_vector vPos);
 
 	void Reserve_LandSlide(const SLIDE_DATA& eData);

@@ -53,7 +53,7 @@ void CRoverRopeDrag::OnEnter(void* pArg)
 	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
 
 	m_pRover->Rope_Active(true);
-	m_pRover->Spwan_RopeEffect(TEXT("Rope"));
+	m_pRover->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp02");
 }
 
 void CRoverRopeDrag::OnUpdate(_float fTimeDelta)

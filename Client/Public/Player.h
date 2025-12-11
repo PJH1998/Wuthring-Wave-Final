@@ -94,6 +94,8 @@ public:
 
 	void Lock_Input(_bool IsLock);
 
+	void Bind_Gravity(_bool IsGravity);
+
 
 #pragma endregion
 

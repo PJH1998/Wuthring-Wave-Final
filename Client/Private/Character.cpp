@@ -356,7 +356,7 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 
 
-void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag)
+void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName)
 {
 	if (nullptr == m_pTargetGrappleTransform ||
 		false == m_IsRopeActive)
@@ -367,7 +367,7 @@ void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag)
 
 	ROPE_INFO RopeInfo{};
 	RopeInfo.pPlayerMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	RopeInfo.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	RopeInfo.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
 	RopeInfo.vRopeObjectPos = vPos;
 	RopeInfo.pIsActive = &m_IsRopeActive;
 
