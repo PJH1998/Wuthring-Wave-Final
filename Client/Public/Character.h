@@ -183,6 +183,7 @@ public:
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
 
+	void Spwan_RopeEffect(const _wstring& wStrEffectTag);
 	void Execute_Telport(_vector vPos);
 
 	void Reserve_LandSlide(const SLIDE_DATA& eData);
@@ -404,6 +405,8 @@ public:
 	virtual void Bind_DissolveShaderPath() {};
 
 	virtual void Activate(_bool IsActivate) {};
+
+	void Rope_Active(_bool IsActive) { m_IsRopeActive = IsActive;  }
 #pragma endregion
 
 
@@ -457,6 +460,7 @@ protected:
 	_bool m_IsQTEend = { false };
 	_bool m_IsVisible = { true };
 	_bool m_IsOutLineVisible = { true };
+	_bool m_IsRopeActive = { false };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 

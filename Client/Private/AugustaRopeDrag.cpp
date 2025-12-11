@@ -51,6 +51,10 @@ void CAugustaRopeDrag::OnEnter(void* pArg)
 
 	// 7. 현재 상태 부여. =>
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+
+	// 8. Rope Efeect 생성
+	m_pAugusta->Rope_Active(true);
+	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"));
 }
 
 void CAugustaRopeDrag::OnUpdate(_float fTimeDelta)
@@ -81,8 +85,9 @@ void CAugustaRopeDrag::OnExit()
 	m_pAugusta->Set_Gravity(false);
 	m_eRopeDir = ROPEDIR::END;
 	m_eRopeStep = ROPESTEP::STEP_NONE;
-	
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+
+	m_pAugusta->Rope_Active(false);
 }
 
 
@@ -158,6 +163,7 @@ void CAugustaRopeDrag::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Execute_RopeDragTrigger(); // 연결된 객체의 Trigger 호출.
 				m_eRopeStep = ROPESTEP::STEP_END;
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeDragType::DRAG_END);
+				m_pAugusta->Rope_Active(false); // Rope Active 종료.
 				return;
 			}
 

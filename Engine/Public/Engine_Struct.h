@@ -462,7 +462,7 @@ namespace Engine
 	{
 		const _float4x4*	pPlayerMatrixPtr = nullptr;			//플레이어의 월드 매트릭스주소
 		const _float4x4*	pBoneMatrixPtr = nullptr;			//붙이고자 하는 뼈의 매트릭스 주소
-		_matrix				RopeObjectMatrix = {};				//로프의 끝 매트릭스 위치 (주소로 넘겨주는게 편하면 변경가능)
+		_float3				vRopeObjectPos = {};				//로프의 위치 값.
 		_bool*				pIsActive = nullptr;				//로프이펙트가 끝났는지 아닌지 확인할 _bool주소 (true면 이펙트 진행중, false면 끝난것)
 	}ROPE_INFO;
 	//////////////////////
