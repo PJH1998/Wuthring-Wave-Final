@@ -790,7 +790,7 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 	if (m_iSelectedCHIndex == CH_AUGUSTA)
 	{
 		isUltGuageFull = (m_isIn_UltMode_Augusta)?
-			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f) :
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST4) == 1.f) :
 			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST5) == 1.f);
 
 	}
