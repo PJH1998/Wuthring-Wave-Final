@@ -421,6 +421,9 @@ void CUI_Ovfl_Palette::Trigger_ClickEvent()
 
 		m_iLeftChance--;
 		static_cast<CUI_Text*>(m_pTextUI_LeftChance)->Change_Text(to_wstring(m_iLeftChance));
+
+
+		// [SOUND] 최초 클릭 시 
 	}
 
 
@@ -806,7 +809,7 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 			case Client::CUI_Ovfl_Palette::PCOLOR_END:		strDebugText = "END";		iDebugIndex = PCOLOR_END;	 	break;
 			}
 
-			std::cout << "[CUI_Ovfl_Palette::Update_ChangeColorBtn] Hovered Color Index : " << strDebugText << "(" << iDebugIndex << ")" << std::endl;
+			//std::cout << "[CUI_Ovfl_Palette::Update_ChangeColorBtn] Hovered Color Index : " << strDebugText << "(" << iDebugIndex << ")" << std::endl;
 #endif // _DEBUG
 
 			break;
@@ -833,10 +836,21 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 			_float2(0.f, 1.f) : _float2(0.f, 0.f);
 	}
 
-	_bool isChanged_HoveredColorIndex = m_iPrevHoveredColorIndex != m_iHoveredColorIndex;
-	if (isChanged_HoveredColorIndex && isEntered)
+	_bool isChanged_HoveredColorIndex = (m_iPrevHoveredColorIndex != PCOLOR_END) ? m_iPrevHoveredColorIndex != m_iHoveredColorIndex : false;
+	if (isChanged_HoveredColorIndex)
+	{
 		m_pGameInstance->Play_Sound(L"UI_OVFL_MouseOver", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+		//std::cout << "[UI_Ovfl_Palette::Update_ChangeColorBtn] Curr HoverColorIndex : " << m_iPrevHoveredColorIndex << " / " << m_iHoveredColorIndex << std::endl;
+
+	}
 	m_iPrevHoveredColorIndex = m_iHoveredColorIndex;
+
+	_bool isChanged_DestColorIndex = (m_iPrevDestColorIndex != PCOLOR_END)? m_iPrevDestColorIndex != m_eDestColorIndex : false;
+	if (isChanged_DestColorIndex)
+		m_pGameInstance->Play_Sound(L"UI_OVFL_ClickColor", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	m_iPrevDestColorIndex = m_eDestColorIndex;
+
+
 }
 
 void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
@@ -888,6 +902,7 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 	if (isChangeEnd)
 	{
 		m_isGoinChange = false;
+		m_arrIsVisited_Sound.fill(false);
 		m_fChangeRadius = 0.f;
 
 		for (auto& targets : m_vecTargetsByDepth)
@@ -899,6 +914,31 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 		std::cout << "[CUI_Ovfl_Palette::Update_ChangeEvent] Change Finally Applied!" << std::endl;
 	}
 	 
+
+	// [SOUND] change
+
+
+	for (auto palettes : m_vecTargetsByDepth)
+		for (auto palette : palettes)
+		{
+			_uint iInstIndex = palette.arrIndex[0] * 10 + palette.arrIndex[1];
+			if (m_arrIsVisited_Sound[iInstIndex])
+				continue;
+			
+			_float2 vInstPos = Calc_InstBlock_ScrnPos(iInstIndex);
+			_float fInstDistance = XMVectorGetX(XMVector2Length(
+				XMLoadFloat2(&vInstPos) - XMLoadFloat2(&m_vChangeStartPos)));
+			
+			if (fInstDistance < m_fChangeRadius)
+			{
+				m_arrIsVisited_Sound[iInstIndex] = true;	// 나중에 싹다 false로 초기화하는거 만들어야.
+				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+			}
+
+			//m_vChangeStartPos;
+			//m_fChangeRadius;
+			//Calc_InstBlock_ScrnPos();
+		}
 
 }
 
@@ -941,6 +981,8 @@ void CUI_Ovfl_Palette::Update_FinishEvent()
 	{
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 		Req_OffPalette();
+
+		m_pGameInstance->Play_Sound(L"UI_OVFL_Close01", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 	}
 
 	// ksta : 여기에 실패 / 성공 이벤트?

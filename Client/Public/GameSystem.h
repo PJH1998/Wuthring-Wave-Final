@@ -226,6 +226,7 @@ public:
 #pragma region PLAYER_INTERACT
 	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
 	void						Lock_Input_ToPlayer(_bool IsLock);
+	void						Bind_Gravity_ToPlayer(_bool IsGravity);
 #pragma endregion
 
 #pragma region PLAYER

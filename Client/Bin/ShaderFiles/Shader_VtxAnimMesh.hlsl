@@ -1,6 +1,8 @@
 #include "Engine_Shader_Defines.hlsli"
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+matrix g_ViewMatrixInv;
+
 float g_fLightFar;
 
 Texture2D g_DiffuseTexture;
@@ -846,7 +848,7 @@ struct VS_OUT_OUTLINE
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
-    float4 vViewPos : TEXCOORD2;
+    float4 vOutlinePos : TEXCOORD2;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -871,9 +873,11 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     
     vector vViewNormal = normalize(mul(vNormal, matWV));
    
+    bool IsDraw = true;
+
     if(vViewNormal.z < 0.f)
     {
-        vViewNormal.z *= -1.f;
+        IsDraw = false;
     }
     
     vViewNormal = normalize(float4(vViewNormal.x, vViewNormal.y, vViewNormal.z * 0.01f, 0.f));
@@ -881,19 +885,73 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vOutLinePos = vViewPos + (vViewNormal * g_fOutLineRadius);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
-    Out.IsDraw = true;
+    Out.IsDraw = IsDraw;
     Out.vProjPos = Out.vPosition;
-    Out.vViewPos = vViewPos;
+    Out.vOutlinePos = vOutLinePos;
     
     return Out;
 }
+
+float Hash21(float2 ID)
+{
+    float2 vInput = ID;
+    vInput = frac(vInput * float2(123.32, 456.21));
+    vInput += dot(vInput, vInput + 45.32);
+    return frac(vInput.x * vInput.y);
+}
+
+
+VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
+{
+    VS_OUT_OUTLINE Out = (VS_OUT_OUTLINE) 0;
+    
+    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
+    matrix matBone =
+    g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
+    g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
+    g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
+    g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
+    
+    matrix matWV;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+   
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    float4 vNormal = mul(float4(In.vNormal, 0.f), matBone);
+    
+    vector vViewPos = mul(vPosition, matWV);
+    
+    vector vViewNormal = normalize(mul(vNormal, matWV));
+   
+    bool IsDraw = true;
+    
+    //float JitterRatio = lerp(1.f, 2.f, Hash21(vViewPos.xy));
+    
+    //float JitterLength = lerp(0.3f, 0.8f, Hash21(vViewPos.xy));
+    
+    //float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
+    
+    //vViewNormal.xy += vNormalJitter;
+    
+    float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
+    
+    vector vOutLinePos = vViewPos + (vViewNormal * (g_fOutLineRadius * fTimeRatio));
+    
+    Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
+    Out.IsDraw = IsDraw;
+    Out.vProjPos = Out.vPosition;
+    Out.vOutlinePos = vOutLinePos;
+    
+    return Out;
+}
+
 
 struct PS_IN_OUTLINE
 {
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
-    float4 vViewPos : TEXCOORD2;
+    float4 vOutlinePos : TEXCOORD2;
 };
 
 struct PS_OUT_OUTLINE
@@ -902,13 +960,6 @@ struct PS_OUT_OUTLINE
     float4 vDepth : SV_TARGET1;
     float4 vPBR : SV_TARGET2;
 };
-
-struct PS_OUT_OUTLINE_NONDEPTH
-{
-    float4 vColor : SV_TARGET0;
-    float4 vPBR : SV_TARGET1;
-};
-
 
 PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 {
@@ -929,17 +980,21 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
     return Out;
 }
 
-PS_OUT_OUTLINE_NONDEPTH PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
+PS_OUT_OUTLINE PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
 {
-    PS_OUT_OUTLINE_NONDEPTH Out = (PS_OUT_OUTLINE_NONDEPTH) 0;
+    PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
 
     if (In.IsDraw)
     {
-        Out.vColor = fmod(In.vViewPos.y, 1.f) > 0.5f ? g_vOutLineColor : 0.f;
+        float4 vOutlineWorldPos = mul(In.vOutlinePos, g_ViewMatrixInv);
+    
+        float IsLine = fmod(abs(vOutlineWorldPos.y), 0.1f) > 0.05f;
+        Out.vColor = IsLine ? g_vOutLineColor : 0.f;;
         
         if(all(Out.vColor == 0.f))
             discard;
-    
+            
+        Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }
     else
@@ -1117,14 +1172,14 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_BOSS_BEHIT();
     }
-
+    
     pass BossOutLine // 15
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Cull_Front);
         SetDepthStencilState(DSS_NoneCompare, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
-        VertexShader = compile vs_5_0 VS_OUTLINE();
+        VertexShader = compile vs_5_0 VS_BOSS_OUTLINE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_BOSS_OUTLINE();
     }

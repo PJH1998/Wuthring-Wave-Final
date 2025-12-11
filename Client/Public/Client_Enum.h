@@ -46,6 +46,7 @@ namespace Client
 	enum class UI_VARIANT_FLAG {			// * UI용 짬통셰이더 플래그 지정용. 필요할때마다 만들고 여기에 추가한다.
 		UIFLAG_ERROR,				// default. outputs magenta
 		UIFLAG_COOLDOWN_CIRCLE,		// 원형 쿨타임 (skill)
+		UIFLAG_COOLDOWN_CIRCLE_ADV,
 		UIFLAG_COOLDOWN_RECT,		// 사각형 쿨타임 (partyframe)
 		UIFLAG_PLAYER_HP,			// 플레이어 체력바용
 		UIFLAG_PLAYER_TRANSMIT,		// 공명 회로 일렁임

@@ -375,7 +375,6 @@ void CPlayer::Player_KeyInput()
 		}
 
 		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
-		
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
 		{
 			m_pGameSystem->Show_TabUtilityUI(ENUM_CLASS(m_eUtilityType));
@@ -401,19 +400,20 @@ void CPlayer::Player_KeyInput()
 
 	}
 
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		
+
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		
+
 	}
 
 
@@ -441,25 +441,12 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
-
-		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
-		// 임시
-		//m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
-		//LEVI_EXECUTE Desc{ true };
-		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
-		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget(); // 던지기 테스트.
-		
-		//m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(false);
-		//Bind_EventLock(false);
-
 		_vector vPos = XMVectorSet(-18.9f, 0.f, 1083.4f, 1.f);
 		Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
-		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
-		// 임시
 		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 		m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
 
@@ -474,6 +461,9 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
+#endif // _DEBUG
+
+	
 
 	
 }
@@ -814,6 +804,13 @@ void CPlayer::Lock_Input(_bool IsLock)
 		return;
 
 	m_pInputControllerCom->Set_BlockInput(IsLock);
+}
+void CPlayer::Bind_Gravity(_bool IsGravity)
+{
+	if (nullptr == m_pColliderCom)
+		return;
+
+	m_pColliderCom->Set_Gravity(IsGravity);
 }
 #pragma endregion
 

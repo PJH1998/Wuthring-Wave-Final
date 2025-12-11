@@ -55,7 +55,7 @@ void CAugustaRopeHook::OnEnter(void* pArg)
 
 	// 7. Rope Efeect 생성
 	m_pAugusta->Rope_Active(true);
-	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"));
+	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp01");
 }
 
 void CAugustaRopeHook::OnUpdate(_float fTimeDelta)
