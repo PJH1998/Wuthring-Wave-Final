@@ -416,6 +416,11 @@ void CGameSystem::Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive)
 
 #pragma region TRIGGER
 
+_uint CGameSystem::Get_CurrentCharacterIndex() const
+{
+	return m_pPlayerStatus->Get_CurrentCharIndex();
+}
+
 // Trigger 등록
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
 {
