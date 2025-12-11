@@ -317,7 +317,11 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	size_t Index = wStrObjectTag.find(TEXT("|"));
 	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
 	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
-	if(wstrTypeTag == TEXT("GGOBUL"))
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
+	else if(wstrTypeTag == TEXT("GGOBUL"))
 	{
 		CGgobul::GGOBUL_RESET Desc{};
 		
@@ -417,9 +421,11 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	}
 }
 
-void CMonsterTest::Sound_Active(const _wstring& wStrObjectTag)
+void CMonsterTest::Sound_Active(const _wstring& wStrSoundTag)
 {
-
+	size_t Index = wStrSoundTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrSoundTag.substr(0, Index);
+	_wstring wstrPartTag = wStrSoundTag.substr(Index + 1);
 }
 
 HRESULT CMonsterTest::Bind_Resources()

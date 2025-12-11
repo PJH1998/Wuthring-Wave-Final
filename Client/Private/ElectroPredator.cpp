@@ -598,7 +598,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #ifdef _DEBUG
@@ -624,7 +627,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #ifdef _DEBUG
@@ -652,7 +658,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 
 		const _wstring& strSoundTag = pDesc->strSoundTag;
 		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #ifdef _DEBUG

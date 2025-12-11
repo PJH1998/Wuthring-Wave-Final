@@ -660,31 +660,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
 		return;
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-		
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-		 * XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
-#pragma endregion
-#ifdef _DEBUG
-		cout << "Be Hit! (Havoc Warrior)" << endl;
-#endif // _DEBUG
-
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
@@ -694,8 +670,6 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-
-
 #pragma endregion
 
 #pragma region HIT_EFFECT
@@ -703,53 +677,45 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #pragma region PHYSICS
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-		_vector vCollisionNormal = XMLoadFloat3(&m_vBeHit_Normal);
-		if (XMVectorGetX(XMVector3Dot(vCollisionNormal, XMVectorSet(0.f, 1.f, 0.f, 0.f))) >= 0.525f)
+		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);
+#pragma endregion
+
+		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
-			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+#ifdef _DEBUG
+			cout << "Be Hit! (Havoc Warrior)" << endl;
+#endif // _DEBUG
 		}
-#pragma endregion
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+		{
+			if (pDesc->eDir == ATTACKVOULME_DIR::UPPER)
+			{
+				m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+			}
 #ifdef _DEBUG
-		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+			cout << "Be Hit! SKILL (Havoc Warrior)" << endl;
 #endif // _DEBUG
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_isPushed = true;
-		//m_isAir = true;
-		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+		{
+			m_isPushed = true;
+			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 
 #ifdef _DEBUG
-		cout << "Knock Back! (Havoc Warrior)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+			cout << "Knock Back! (Havoc Warrior)" << endl;
+			cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 	}
 }
 
