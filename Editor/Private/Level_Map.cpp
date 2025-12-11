@@ -1077,10 +1077,10 @@ void CLevel_Map::Load_Objects()
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Deco/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Heaven/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Interaction/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/Heaven_Foliage/";
 

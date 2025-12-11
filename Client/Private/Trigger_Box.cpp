@@ -110,9 +110,9 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 
 void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
-	if (m_iTriggerIndex > 20)
+	if (m_iTriggerIndex > 20 && m_iTriggerIndex < 30)
 	{
-		if(m_IsTriggered)
+		if (m_IsTriggered)
 		{
 			m_pGameSystem->Change_Sonoro(true);
 			m_IsTriggered = !m_IsTriggered;
@@ -261,9 +261,11 @@ void CTrigger_Box::Register_Trigger()
 		case 25:
 			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
 			break;
-		/*case 34:
-			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ATTACK, 0.f, 0.f);
-			break;*/
+		case 34:
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.2f, 2.f);
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.2f, 2.f);
+			m_pGameSystem->Play_QTE(_float2(-300.f, 200.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
+			break;
 		}
 		m_IsTriggered = true;
 		});
