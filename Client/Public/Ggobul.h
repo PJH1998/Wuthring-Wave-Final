@@ -47,7 +47,8 @@ public:
 	virtual	void				Priority_Update(_float fTimeDelta) override;
 	virtual	void				Update(_float fTimeDelta) override;
 	virtual	void				Late_Update(_float fTimeDelta) override;
-	virtual		void			Render() override;
+	virtual void				Render() override;
+	virtual void				Render_Shadow() override;
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg);
 

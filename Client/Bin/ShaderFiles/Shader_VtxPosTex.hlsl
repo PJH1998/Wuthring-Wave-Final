@@ -17,6 +17,8 @@ float4 vColor = float4(1.f, 1.f, 1.f, 1.f);
 float g_Alpha = 1.f;
 float g_MaskSpeed = 1.f;
 float g_Time;
+float g_ColorGamma = 1.f;
+float g_ColorGain = 1.f;
 
 
 struct VS_IN
@@ -161,6 +163,43 @@ PS_SPECTRUMOUT PS_SPUCTRUM(PS_IN In)
     vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(saturate(In.vTexcoord.x), saturate(In.vTexcoord.y)));
     
     Out.vColor = float4(vColor.rgb, 1.f);
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+
+    float fWeight = Luminance(Out.vColor.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vColor.xyz, 1.f);
+
+    Out.vColor.a *= g_Alpha;
+    
+    Out.vEmissive.xyz *= Out.vColor.a;
+    
+    return Out;
+}
+
+PS_SPECTRUMOUT PS_SPUCTRUM_DG(PS_IN In)
+{
+    PS_SPECTRUMOUT Out = (PS_SPECTRUMOUT) 0;
+    
+    float2 UV = In.vTexcoord;
+    
+    float MaskR = g_MaskTexture.Sample(DefaultSampler, float2(UV.y, UV.x)).r;
+    
+    if (MaskR < 0.25f)
+        discard;
+
+    float4 vColor;
+
+    vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(saturate(In.vTexcoord.x), saturate(In.vTexcoord.y)));
+    
+    Out.vColor = float4(vColor.rgb, 1.f);
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
 
     float fWeight = Luminance(Out.vColor.xyz);
 
@@ -209,7 +248,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_POTAL2();
     }
 
-    pass SpectrumTest
+    pass Spectrum //3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -218,5 +257,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_SPUCTRUM();
+    }
+
+    pass Spectrum_DG //4
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SPUCTRUM_DG();
     }
 }
