@@ -129,8 +129,11 @@ private:
 	_float4x4				m_PreTransform{};
 #pragma endregion
 
-#pragma region SOUND
-	_uint					m_iSoundChannel{};
+#pragma region SHADER_VALUE
+	_float					m_fBehitMaxTime{};
+	_float					m_fBehitAcc{};
+	_float					m_fOutlineRadious{};
+	_float4					m_vOutlineColor{};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
