@@ -144,6 +144,10 @@ private:
 	vector<_wstring>		m_strSequenceTag[ACTION::ACTEND];
 #pragma endregion
 
+#pragma region SHADER
+	_float					m_fNoiseTime = {};
+#pragma endregion 
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(LEVIATAN_DESC* pDesc);

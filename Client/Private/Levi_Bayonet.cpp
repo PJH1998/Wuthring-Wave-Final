@@ -40,6 +40,7 @@ HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
 #endif // _DEBUG
 
 	m_ShaderPaths.resize(SHADERPATH::END);
+	m_ShaderPaths[SHADERPATH::FX] = 1; // Shader_VtxMesh_MonsterProp Pass 1
 	m_vBaseColor = pDesc->vBaseColor;
 	return S_OK;
 }
@@ -74,6 +75,8 @@ void CLevi_Bayonet::Update(_float fTimeDelta)
 
 void CLevi_Bayonet::Late_Update(_float fTimeDelta)
 {
+	m_fRateFX = fmod(m_fRateFX + fTimeDelta, 1.f);
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
@@ -88,6 +91,9 @@ void CLevi_Bayonet::Render()
 	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fFxTime", &m_fRateFX, sizeof(_float))))
+		CRASH("Failed to Bind fFxTime ");
 
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
