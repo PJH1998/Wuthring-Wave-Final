@@ -87,6 +87,7 @@ void CGalbrenaRopeDrag::OnExit()
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 	
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+	m_pGalbrena->Rope_Active(false);
 }
 
 
