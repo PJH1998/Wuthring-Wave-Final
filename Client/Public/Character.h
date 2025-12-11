@@ -207,6 +207,11 @@ public:
 	void Stop_Anim();
 	void Start_Anim();
 
+	void Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency = 1.f);
+	void Stop_Sound(CHANNEL eChannel);
+
+	_float Rand(_float fMin, _float fMax);
+
 	
 #pragma endregion
 

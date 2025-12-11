@@ -496,6 +496,22 @@ void CCharacter::Start_Anim()
 	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
 }
 
+void CCharacter::Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency)
+{
+	m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(eChannel), fVolume, fFrequency);
+}
+
+void CCharacter::Stop_Sound(CHANNEL eChannel)
+{
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(eChannel));
+	
+}
+
+_float CCharacter::Rand(_float fMin, _float fMax)
+{
+	return m_pGameInstance->Rand(fMin, fMax);
+}
+
 
 
 // 내 Velocity 고정.
