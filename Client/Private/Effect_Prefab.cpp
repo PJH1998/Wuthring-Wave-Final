@@ -49,8 +49,15 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
 void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 {
+	if (m_IsLoop)
+		Check_CameraDistance();
+		//여기서 카메라 컬링
+
     if (!m_isActivate)
         return;
+
+	if (m_IsLoop && !m_IsLoopActive)
+		return;
 
     m_fCurrentTime += fTimeDelta;
 
@@ -85,6 +92,9 @@ void CEffect_Prefab::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	if (m_IsLoop && !m_IsLoopActive)
+		return;
+
 	if (!m_IsLoop)
 	{
 		if (m_vLifeTime.x >= m_vLifeTime.y)
@@ -107,6 +117,9 @@ void CEffect_Prefab::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+
+	if (m_IsLoop && !m_IsLoopActive)
+		return;
 
     for (auto& Children : m_EffectChildren)
     {
@@ -170,6 +183,12 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pBoneMatrixPtr = nullptr;
 
 		m_isActivate = true;
+
+		if (m_IsLoop)
+		{
+			m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+			m_IsLoopActive = false;
+		}
 	}
 }
 
@@ -282,6 +301,29 @@ void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix,
 	OutMatrix = OffsetMatrix * SpawnMatrix;
 }
 
+void CEffect_Prefab::Check_CameraDistance()
+{
+	_vector Trans{}, Scale{}, Rot{};
+
+	XMMatrixDecompose(&Scale, &Rot, &Trans, m_pTransformCom->Get_WorldMatrix());
+
+	const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+
+	_vector vDistance = Trans - XMLoadFloat4(vCamPos);
+
+	_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+	if (fDistance > 100.f && m_IsLoopActive)
+	{
+		m_IsLoopActive = false; //이거대신 다른거 비활성화 해줘야함.
+	}
+	else if (fDistance < 100.f && !m_IsLoopActive)
+	{
+		m_IsLoopActive = true;
+		Deactivate_AllChildren();
+	}
+}
+
 CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
 {
     auto iter = m_EffectChildren.find(ChildrenTag);
@@ -312,6 +354,23 @@ void CEffect_Prefab::Reset_Prefab_Info()
     m_fCurrentTime = 0.f;
 
     m_vLifeTime.x = 0.f;
+}
+
+void CEffect_Prefab::Deactivate_AllChildren()
+{
+	for (auto& Frame : m_vFrames)
+	{
+		Frame.bActivated = false;
+
+		EFFECT_INFO Info;
+		Info.IsActive = false;
+
+		_matrix Matrix = XMMatrixIdentity();
+
+		Get_Children(Frame.strChildrenTag)->Reset(Matrix, &Info);
+	}
+	m_fCurrentTime = 0.f;
+	m_vLifeTime.x = 0.f;
 }
 
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
