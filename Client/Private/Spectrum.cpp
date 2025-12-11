@@ -47,13 +47,15 @@ void CSpectrum::Update(_float fTimeDelta)
         return;
 
 	m_fLifeTime = 0.25f;
-  
 }
 
 void CSpectrum::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+
+	if (m_pIsActive == nullptr && m_fDuration <= m_fCurrentTime)
+		m_IsObectActive = false;
 
 	Update_Position();
 
@@ -75,7 +77,7 @@ void CSpectrum::Late_Update(_float fTimeDelta)
 			break;
 	}
 
-	//만약 오브젝트가 비활성화 되면 기록들까진 그리고 꺼지게 처맂 스
+	//만약 오브젝트가 비활성화 되면 기록들까진 그리고 꺼지게 처리
 	if (!m_IsObectActive)
 	{
 		if (m_Samples.size() == 0)
@@ -145,47 +147,96 @@ void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fCurrentTime = 0.f;
 	m_fSpawnTimer = 0.f;
 
-	m_pIsActive = pDesc->pIsActive;
-	m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
-	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+	if (pDesc->pIsActive != nullptr)
+	{
+		m_pIsActive = pDesc->pIsActive;
+		m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 
-	m_isActivate = *m_pIsActive;
-	m_IsObectActive = *m_pIsActive;
+		m_isActivate = *m_pIsActive;
+		m_IsObectActive = *m_pIsActive;
+	}
+	else
+	{
+		m_isActivate = true;
+
+		m_pIsActive = nullptr;
+		m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+
+		m_IsObectActive = m_isActivate;
+		m_fDuration = pDesc->fDuration;
+	}
 }
 
 void CSpectrum::Update_Position()
 {
-	if ((m_pBoneMatrixPtr != nullptr) && (*m_pIsActive))
+	if (m_pIsActive != nullptr)
 	{
+		if ((m_pBoneMatrixPtr != nullptr) && (*m_pIsActive))
+		{
 
-		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
-		_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
+			_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+			_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
 
-		_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
+			_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
 
-		_vector vScale = {};
-		_vector vPos = {};
-		_vector vRot = {};
-		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+			_vector vScale = {};
+			_vector vPos = {};
+			_vector vRot = {};
+			XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
 
-		m_UpdatePosition = vPos;
+			m_UpdatePosition = vPos;
 
+		}
+		else if ((m_pObjectMatrixPtr != nullptr) && (*m_pIsActive))
+		{
+
+			_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+			_matrix SpawnMatrix = XMLoadFloat4x4(&ObjectMatrix);
+
+			_vector vScale = {};
+			_vector vPos = {};
+			_vector vRot = {};
+			XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+			m_UpdatePosition = vPos;
+		}
+		else if (!(*m_pIsActive) && m_IsObectActive)
+			m_IsObectActive = false;
 	}
-	else if ((m_pObjectMatrixPtr != nullptr) && (*m_pIsActive))
+	else
 	{
+		if (m_pBoneMatrixPtr != nullptr)
+		{
 
-		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
-		_matrix SpawnMatrix = XMLoadFloat4x4(&ObjectMatrix);
+			_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+			_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
 
-		_vector vScale = {};
-		_vector vPos = {};
-		_vector vRot = {};
-		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+			_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
 
-		m_UpdatePosition = vPos;
+			_vector vScale = {};
+			_vector vPos = {};
+			_vector vRot = {};
+			XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+			m_UpdatePosition = vPos;
+
+		}
+		else if (m_pObjectMatrixPtr != nullptr)
+		{
+
+			_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+			_matrix SpawnMatrix = XMLoadFloat4x4(&ObjectMatrix);
+
+			_vector vScale = {};
+			_vector vPos = {};
+			_vector vRot = {};
+			XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+			m_UpdatePosition = vPos;
+		}
 	}
-	else if (!(*m_pIsActive) && m_IsObectActive)
-		m_IsObectActive = false;
 }
 
 

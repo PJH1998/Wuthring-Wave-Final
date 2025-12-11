@@ -35,6 +35,9 @@ public:
 #pragma region STATE
 public:
 	void Logo_Input();
+
+public:
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 #pragma endregion
 
 private:
