@@ -37,7 +37,6 @@ cbuffer GlobalConstants
     int g_iNumBlendWeightsToUse = 2; 
     float g_fEmissiveIntensity = 0.5f;
     float4 g_vDissolveColor = float4(1.f, 1.f, 1.f, 1.f);
-    
 }
 
 struct VS_IN
@@ -1183,4 +1182,5 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_BOSS_OUTLINE();
     }
+
 }

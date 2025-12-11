@@ -36,7 +36,7 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
-
+	virtual void Render_Shadow() override;
 
 #ifdef _DEBUG
 	void Debug_Emissive(_float4 vEmissiveColor, _float fIntensity);

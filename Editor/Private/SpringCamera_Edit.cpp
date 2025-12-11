@@ -109,7 +109,7 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	// 2. Ray Cast �̿��Ͽ� ����, ������Ʈ�� �浹
 	//Check_Ray();
 
-	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	//m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	// Test
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::DOWN)

@@ -1253,7 +1253,7 @@ _bool CMonsterTest::DodgeCooldown()
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
 
-	if (iIndex != ATK_PATTERN::ATTACK2)
+	if (iIndex == ATK_PATTERN::ATTACK7)
 		return false;
 
 	//else

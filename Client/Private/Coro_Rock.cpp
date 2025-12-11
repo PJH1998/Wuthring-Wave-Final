@@ -69,6 +69,8 @@ void CCoro_Rock::Late_Update(_float fTimeDelta)
 {
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CCoro_Rock::Render()
@@ -98,7 +100,23 @@ void CCoro_Rock::Render()
 	if (m_pRigidBodyCom)
 		m_pRigidBodyCom->Render();
 #endif // _DEBUG
+}
 
+void CCoro_Rock::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pShaderCom->Begin(2);
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CCoro_Rock::Change_Layer(_uint iLayer)
@@ -134,6 +152,7 @@ HRESULT CCoro_Rock::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
 	return S_OK;
 }
 

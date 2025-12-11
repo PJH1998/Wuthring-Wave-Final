@@ -294,9 +294,6 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
-        //Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
-        //Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
-        
         Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
     }
@@ -324,157 +321,6 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     return Out;
 }
 
-//PS_OUT PS_ROVER(PS_IN In)
-//{
-//    PS_OUT Out = (PS_OUT) 0;
-//
-//    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-//    
-//    // 
-//    float4 vNormal = 0.f;
-//    
-//    if (g_HasNormal)
-//    {
-//        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-//        vNormal = normalize(vNormalDesc * 2.f - 1.f);
-//        
-//        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-//            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-//            
-//        float3 vTangent = In.vTangent.xyz;
-//        float3 vBinormal = In.vBinormal.xyz * -1.f;
-//        float3 vInNormal = In.vNormal.xyz;
-//        
-//        float3x3 WorldMatrix;
-//        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-//        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-//        
-//        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
-//        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
-//    }
-//    else
-//    {
-//        vNormal = In.vNormal;
-//        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
-//        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
-//    }
-//    
-//    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-//    
-//
-//    vNormal.xyz = vNormal * 0.5f + 0.5f;
-//    
-//    Out.vNormal = vNormal;
-//    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-//    Out.vDepth.y = In.vProjPos.w;
-//    Out.vDepth.z = 1.f;
-//    
-//    
-//    return Out;
-//}
-
-//PS_OUT PS_GALBRENA(PS_IN In)
-//{
-//    PS_OUT Out = (PS_OUT) 0;
-//
-//    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-//    
-//    // 
-//    float4 vNormal = 0.f;
-//    
-//    if (g_HasNormal)
-//    {
-//        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-//        vNormal = normalize(vNormalDesc * 2.f - 1.f);
-//        
-//        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-//            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-//            
-//        float3 vTangent = In.vTangent.xyz;
-//        float3 vBinormal = In.vBinormal.xyz * -1.f;
-//        float3 vInNormal = In.vNormal.xyz;
-//        
-//        float3x3 WorldMatrix;
-//        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-//        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-//        
-//        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
-//        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
-//    }
-//    else
-//    {
-//        vNormal = In.vNormal;
-//        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
-//        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
-//    }
-//    
-//    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-//    
-//
-//    vNormal.xyz = vNormal * 0.5f + 0.5f;
-//    
-//    Out.vNormal = vNormal;
-//    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-//    Out.vDepth.y = In.vProjPos.w;
-//    Out.vDepth.z = 1.f;
-//    
-//    
-//    return Out;
-//}
-
-//PS_OUT PS_LOGO_ROVER(PS_IN In)
-//{
-//    PS_OUT Out = (PS_OUT) 0;
-//
-//    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-//    
-//    // 
-//    float4 vNormal = 0.f;
-//    
-//    if (g_HasNormal)
-//    {
-//        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-//        vNormal = normalize(vNormalDesc * 2.f - 1.f);
-//        
-//        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-//            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-//            
-//        float3 vTangent = In.vTangent.xyz;
-//        float3 vBinormal = In.vBinormal.xyz * -1.f;
-//        float3 vInNormal = In.vNormal.xyz;
-//        
-//        float3x3 WorldMatrix;
-//        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-//        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-//        
-//        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
-//        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
-//    }
-//    else
-//    {
-//        vNormal = In.vNormal;
-//        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
-//        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
-//    }
-//    
-//    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
-//    
-//
-//    vNormal.xyz = vNormal * 0.5f + 0.5f;
-//    
-//    Out.vNormal = vNormal;
-//    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-//    Out.vDepth.y = In.vProjPos.w;
-//    Out.vDepth.z = 1.f;
-//    
-//    
-//    return Out;
-//}
-
-
-
-
-
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
 struct VS_OUT_SHADOW
@@ -485,24 +331,67 @@ struct VS_OUT_SHADOW
 VS_OUT_SHADOW VS_SHADOW(VS_IN In)
 {
     VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
+    
     uint ibaseIndex = In.iBaseIndex * g_iNumBones;
+    matrix_rm matBone, matBW, matVP;
     
-    uint iX = max(In.vBlendIndex.x, g_iNumBlendWeightsToUse);
-    uint iY = max(In.vBlendIndex.y, g_iNumBlendWeightsToUse);
-    uint iZ = max(In.vBlendIndex.z, g_iNumBlendWeightsToUse);
-    uint iW = max(In.vBlendIndex.w, g_iNumBlendWeightsToUse);
+    float3 w3 = In.vBlendWeight.xyz;
+    float fWeightW = saturate(1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z));
+
+    float4 vReplaceW = float4(w3, fWeightW);
+    float sumW = vReplaceW.x + vReplaceW.y + vReplaceW.z + vReplaceW.w;
+    vReplaceW /= max(sumW, 1e-6f);
     
-    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
-    matrix matBone =
-   g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.x)] * g_OffsetMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.y)] * g_OffsetMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.z)] * g_OffsetMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
-    g_CombinedBoneMatrices[(ibaseIndex + In.vBlendIndex.w)] * g_OffsetMatrices[In.vBlendIndex.w] * fWeightW;
+    uint4 iMeshLocalBoneIndecies = uint4(
+        g_MeshLocalBoneIndecies[In.vBlendIndex.x],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.y],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.z],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
+    matBone =
+    mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
+    mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
+    mul(g_OffsetMatrices[In.vBlendIndex.z], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.z)]) * vReplaceW.z +
+    mul(g_OffsetMatrices[In.vBlendIndex.w], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.w)]) * vReplaceW.w;
     
     float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    vPosition = mul(vPosition, In.TransformMatrix);
     
-    Out.vPosition = mul(vPosition, g_WorldMatrix);
+    Out.vPosition = vPosition;
+    
+    return Out;
+}
 
+VS_OUT_SHADOW VS_SHADOW_FACE(VS_IN In)
+{
+    VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
+    
+    uint ibaseIndex = In.iBaseIndex * g_iNumBones;
+    matrix_rm matBone, matBW, matVP;
+    
+    float3 w3 = In.vBlendWeight.xyz;
+    float fWeightW = saturate(1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z));
+
+    float4 vReplaceW = float4(w3, fWeightW);
+    float sumW = vReplaceW.x + vReplaceW.y + vReplaceW.z + vReplaceW.w;
+    vReplaceW /= max(sumW, 1e-6f);
+    
+    uint4 iMeshLocalBoneIndecies = uint4(
+        g_MeshLocalBoneIndecies[In.vBlendIndex.x],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.y],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.z],
+        g_MeshLocalBoneIndecies[In.vBlendIndex.w]);
+        
+    matBone =
+    mul(g_OffsetMatrices[In.vBlendIndex.x], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.x)]) * vReplaceW.x +
+    mul(g_OffsetMatrices[In.vBlendIndex.y], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.y)]) * vReplaceW.y +
+    mul(g_OffsetMatrices[In.vBlendIndex.z], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.z)]) * vReplaceW.z +
+    mul(g_OffsetMatrices[In.vBlendIndex.w], g_CombinedBoneMatrices[(ibaseIndex + iMeshLocalBoneIndecies.w)]) * vReplaceW.w;
+    
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    vPosition = mul(vPosition, In.TransformMatrix);
+
+    Out.vPosition = vPosition;
+    
     return Out;
 }
 
@@ -700,49 +589,14 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN();
     }
 
-    //pass Rover // 5
-    //{
-    //    SetRasterizerState(RS_Cull_None);
-    //    SetDepthStencilState(DSS_Default, 0);
-    //    SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-    //
-    //    VertexShader = compile vs_5_0 VS_MAIN();
-    //    GeometryShader = NULL;
-    //    PixelShader = compile ps_5_0 PS_ROVER();
-    //}
-    //
-    //pass Galbrena // 6
-    //{
-    //    SetRasterizerState(RS_Cull_None);
-    //    SetDepthStencilState(DSS_Default, 0);
-    //    SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-    //
-    //    VertexShader = compile vs_5_0 VS_MAIN();
-    //    GeometryShader = NULL;
-    //    PixelShader = compile ps_5_0 PS_GALBRENA();
-    //}
-    //
-    //pass NormalYellow // 7
-    //{
-    //    SetRasterizerState(RS_Cull_None);
-    //    SetDepthStencilState(DSS_Default, 0);
-    //    SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-    //
-    //    VertexShader = compile vs_5_0 VS_MAIN();
-    //    GeometryShader = NULL;
-    //    PixelShader = compile ps_5_0 PS_NORMALTEX();
-    //}
-    //
-    //pass LogoRover // 8
-    //{
-    //    SetRasterizerState(RS_Cull_None);
-    //    SetDepthStencilState(DSS_Default, 0);
-    //    SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
-    //
-    //    VertexShader = compile vs_5_0 VS_MAIN();
-    //    GeometryShader = NULL;
-    //    PixelShader = compile ps_5_0 PS_LOGO_ROVER();
-    //}
+    pass ShadowFace // 6
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
-  
+        VertexShader = compile vs_5_0 VS_SHADOW_FACE();
+        GeometryShader = compile gs_5_0 GS_SHADOW();
+        PixelShader = compile ps_5_0 PS_SHADOW();
+    }
 }

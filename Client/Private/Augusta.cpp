@@ -72,21 +72,11 @@ void CAugusta::Priority_Update(_float fTimeDelta)
         return;
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	Process_Timer(fTimeDelta);
+	
 
 	// 1. Dissolve 체크
-	if (IsDissolve)
-	{
-		if (m_fDissolveTimer <= m_fMaxDissolveTime)
-			m_fDissolveTimer += fTimeDelta;
-		else
-		{
-			m_isActivate = false;
-			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-		}
-	}
-
-	
-	if (!IsDissolve)
+	if (!IsDissolve || m_IsEventDissolve)
 	{
 		// 2. Delayed Action 수행.
 		Process_DelayedActions(fTimeDelta);
@@ -125,7 +115,7 @@ void CAugusta::Update(_float fTimeDelta)
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
     // 2. 상태 머신 갱신
-	if (!IsDissolve)
+	if (!IsDissolve || m_IsEventDissolve)
 	{
 		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
@@ -154,7 +144,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
 
-	if (!IsDissolve)
+	if (!IsDissolve || m_IsEventDissolve)
 	{
 		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 		{
@@ -196,14 +186,17 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+
+
+		//  파츠 갱신 => Render 할 것인지 말것인지?
+		for (auto& pPart : m_PartObjects)
+		{
+			if (pPart.second->IsActivate())
+				pPart.second->Late_Update(fTimeDelta);
+		}
 	}
 
-	//  파츠 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Late_Update(fTimeDelta);
-	}
+	
 	
     
 }
@@ -908,8 +901,11 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag); // Character 함수
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
+
 	else if (var1 == TEXT("SFX"))
 		Process_SpawnSFX(wStrObjectTag);
+	else if (var1 == TEXT("EventDissolve"))
+		Process_EventDissolve(wStrObjectTag);
 
 }
 
@@ -1039,6 +1035,8 @@ void CAugusta::Activate(_bool IsActivate)
 	//m_isActivate = IsActivate; // 임시.
 	if (false == IsActivate)
 	{
+		m_IsEventDissolve = false; // Event Dissolve가 아닌 비활성화 임을 명시.
+		m_IsDissolveReverse = false; // 정 방향 Dissolve (점차 사라짐)
 		Bind_DissolveTimer();
 		Bind_DissolveShaderPath();
 		m_IsOutLineVisible = false;
@@ -1048,7 +1046,9 @@ void CAugusta::Activate(_bool IsActivate)
 	if (true == IsActivate)
 	{
 		m_isActivate = true;
+		m_IsEventDissolve = false; // 초기화
 		m_IsOutLineVisible = true;
+		Set_Visible(true);
 		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
 	}
@@ -1269,6 +1269,84 @@ void CAugusta::Process_CameraSpring(const _wstring& wStrObjectTag)
 		m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 
+void CAugusta::Process_EventDissolve(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+
+	m_fMaxDissolveTime = stof(var3); // Dissolve Time 저장.
+	m_IsEventDissolve = true; // 연출용임을 공지
+
+	if (var2 == L"ON")
+	{
+		m_IsDissolveReverse = false; // 정방향 시작    
+		m_fDissolveTimer = 0.f;
+		Bind_DissolveShaderPath();       // 쉐이더 교체
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	}
+	else if (var2 == L"OFF")
+	{
+		m_IsDissolveReverse = true; // 역방향
+		m_fDissolveTimer = m_fMaxDissolveTime;
+		Set_Visible(true);
+		Bind_DissolveShaderPath();
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	}
+		
+
+	//m_fEventDissolveTime = stof(var3);
+	
+}
+
+void CAugusta::Process_Timer(_float fTimeDelta)
+{
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		// 정방향 연산.
+		if (!m_IsDissolveReverse)
+		{
+			m_fDissolveTimer += fTimeDelta;
+			if (m_fDissolveTimer >= m_fMaxDissolveTime)
+			{
+				m_fDissolveTimer = m_fMaxDissolveTime; 
+				m_IsOutLineVisible = false;
+
+				Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+				Set_Visible(false);
+
+				if (!m_IsEventDissolve)
+				{
+					m_isActivate = false;
+				}
+				else
+				{
+					m_IsEventDissolve = false;
+				}
+			}
+		}
+		else
+		{
+			m_fDissolveTimer -= fTimeDelta;
+			if (m_fDissolveTimer <= 0.f)
+			{
+				m_fDissolveTimer = 0.f; // 값 보정 (Rate = 0.0)
+				Bind_DefaultShaderPath();
+				Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+				// 3. 이벤트 플래그 초기화
+				if (m_IsEventDissolve)
+					m_IsEventDissolve = false;
+			}
+		}
+	}
+
+}
+
 void CAugusta::Render_Default(_uint iMeshIndex)
 {
 	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
@@ -1277,6 +1355,8 @@ void CAugusta::Render_Default(_uint iMeshIndex)
 	_bool HasNormal = { false };
 	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
 		HasNormal = true;
+
+	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK);
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 		CRASH("Ready g_HasNormal Failed");

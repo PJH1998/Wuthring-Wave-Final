@@ -26,6 +26,8 @@ float3 g_vCamPosition;
 float g_fMaxTime = 1.f;
 float g_fCurrentTime = 0.f;
 
+float g_fNoiseTime;
+
 // 렌더링 파이프 라인으로 넘겨질 최종 정점 정보.
 struct OutputVertex
 {
@@ -594,6 +596,42 @@ PS_OUT PS_LEVI_BEHIT(PS_IN In)
     return Out;
 }
 
+
+PS_OUT PS_LEVI_FX(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float2 vNoiseTex = float2(In.vTexcoord.x + g_fNoiseTime, In.vTexcoord.y);
+    
+    float vNoise = g_NormalTexture.Sample(DefaultSampler, vNoiseTex).r;
+    
+    float2 vTexcoord = In.vTexcoord + (vNoise * 0.12f);
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, vTexcoord);
+    
+    float3 vNormal = In.vNormal.xyz;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    
+    Out.vDiffuse = float4(vDiffuse.xyz, 1.f);
+    Out.vNormal = float4(vNormal, 0.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+    Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vEmissive = float4(vDiffuse.xyz * 0.3f, 1.f);
+    
+    return Out;
+}
+
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
 struct VS_OUT_SHADOW
@@ -745,6 +783,7 @@ PS_OUT PS_ROVERMASK(PS_IN In)
     return Out;
 }
 
+// Dissovle 반대로 나오게.
 PS_OUT PS_UNDISSOLVE_CHARACTER(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -1108,8 +1147,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LEVI_BEHIT();
     }
-
-    pass UnDissolveCharacter // 15
+    pass LeviFX // 15
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -1117,7 +1155,17 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_DISSOLVE_CHARACTER();
+        PixelShader = compile ps_5_0 PS_LEVI_FX();
+    }   
+    pass UnDissolveCharacter // 16
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_UNDISSOLVE_CHARACTER();
     }
-  
+
 }
