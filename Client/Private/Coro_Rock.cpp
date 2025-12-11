@@ -111,6 +111,24 @@ void CCoro_Rock::Change_CollisionActive(_bool isActive)
 	m_pRigidBodyCom->IsActivate(isActive);
 }
 
+void CCoro_Rock::Play_SFX(const _wstring& wstrSoundTag, _float fVolume, _float fMin, _float fMax)
+{
+	if(m_iSoundChannel == -1)
+		return;
+	m_pGameInstance->Play_Sound(wstrSoundTag, m_iSoundChannel, fVolume, m_pTransformCom, fMin, fMax);
+}
+
+void CCoro_Rock::Bind_SoundChannel(_bool isBind)
+{
+	if(isBind)
+		m_iSoundChannel = m_pGameInstance->Register_Channel();
+	else
+	{
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
+	}
+}
+
 HRESULT CCoro_Rock::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");

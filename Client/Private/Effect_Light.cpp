@@ -15,7 +15,7 @@ CEffect_Light::CEffect_Light(const CEffect_Light& Prototype)
 HRESULT CEffect_Light::Initialize_Prototype(const LIGHT_DESC* pDesc)
 {
 	m_tDesc = *pDesc;
-
+	
     return S_OK;
 }
 
@@ -47,7 +47,7 @@ void CEffect_Light::Update(_float fTimeDelta)
 	if (m_vLifeTime.x >= m_vLifeTime.y)
 	{
 		m_isActivate = false;
-		m_pGameInstance->Set_Active(m_wstrLightTag, false);
+		m_pGameInstance->Set_LightActive(m_wstrLightTag, false);
 
 		//초기화
 		m_vLifeTime.x = 0.f;
@@ -92,9 +92,11 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_tLightDesc.vDiffuse = m_tDesc.vColor;
 		m_tLightDesc.vPosition = vPos;
 		m_tLightDesc.fRange = m_vRange.x;
+		//Test
+		m_tLightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 
 		m_pGameInstance->Update_LightDesc(m_wstrLightTag, m_tLightDesc);
-		m_pGameInstance->Set_Active(m_wstrLightTag, true);
+		m_pGameInstance->Set_LightActive(m_wstrLightTag, true);
 	}
 }
 

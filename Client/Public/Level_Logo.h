@@ -41,12 +41,12 @@ private:
 	_float m_fMaxStep = { 20.f };
 	_float m_fStart = { 10.f };
 
-
 private:
 	void DEBUG_FUNCTION();
 
 #endif
 
+private:
 	_bool			m_isReqedFinish = false;
 
 	// ========== for Sound.. ==========

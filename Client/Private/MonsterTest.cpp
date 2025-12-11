@@ -317,7 +317,11 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	size_t Index = wStrObjectTag.find(TEXT("|"));
 	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
 	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
-	if(wstrTypeTag == TEXT("GGOBUL"))
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
+	else if(wstrTypeTag == TEXT("GGOBUL"))
 	{
 		CGgobul::GGOBUL_RESET Desc{};
 		
@@ -417,9 +421,11 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	}
 }
 
-void CMonsterTest::Sound_Active(const _wstring& wStrObjectTag)
+void CMonsterTest::Sound_Active(const _wstring& wStrSoundTag)
 {
-
+	size_t Index = wStrSoundTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrSoundTag.substr(0, Index);
+	_wstring wstrPartTag = wStrSoundTag.substr(Index + 1);
 }
 
 HRESULT CMonsterTest::Bind_Resources()
@@ -755,6 +761,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
@@ -780,6 +790,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
@@ -805,6 +819,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;

@@ -290,18 +290,144 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	{
 		Reset_NotifyInteraction();
 	}
-//	else if (wstrTypeTag == TEXT("CallVisible"))
-//	{
-//		m_pGameSystem->Call_PlayerVisible();
-//#ifdef _DEBUG
-//		cout << "플레이어 렌더링 호출!" << endl;
-//#endif // _DEBUG
-//
-//	}
+	else if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
 }
 
 void CCorosaurus::Sound_Active(const _wstring& wStrObjectTag)
 {
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Walk"))
+	{
+		if (wstrPartTag == TEXT("L"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Footstep_Walk_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f, m_pTransformCom, 0.f, 4.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Footstep_Walk_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f, m_pTransformCom, 0.f, 4.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Run"))
+	{
+		if (wstrPartTag == TEXT("L"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Footstep_Run_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f, m_pTransformCom, 0.f, 7.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Footstep_Run_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f, m_pTransformCom, 0.f, 7.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk01"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Attack01_L_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Attack01_R_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f, m_pTransformCom, 0.f, 9.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk02"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Attack02_1_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.7f, m_pTransformCom, 0.f, 11.f);
+	}
+	else if (wstrTypeTag == TEXT("Atk08"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_test_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.55f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_test_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_test_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.7f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("4"))
+		{
+			m_pCoroRock->Play_SFX(TEXT("SFX_Enemy_Shijilong_Battle_test_4 (SFX)"), 0.35f, 0.f, 20.f);
+			//m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_test_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("5"))
+		{
+			m_pCoroRock->Play_SFX(TEXT("SFX_Enemy_Shijilong_Battle_test_5 (SFX)"), 0.7f, 0.f, 20.f);
+			//m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_test_5 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.9f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("V1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_test_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.9f, m_pTransformCom, 0.f, 9.f);
+		}
+		else if (wstrPartTag == TEXT("V2"))
+		{
+			if(m_pGameInstance->Rand_Normal() < 0.5f)
+				m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_test_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.9f, m_pTransformCom, 0.f, 9.f);
+			else
+				m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_test_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.9f, m_pTransformCom, 0.f, 9.f);
+		}
+		else if (wstrPartTag == TEXT("V3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_test_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.9f, m_pTransformCom, 0.f, 9.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk10"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Attack10_1-001 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f, m_pTransformCom, 0.f, 10.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Attack10_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f, m_pTransformCom, 0.f, 10.f);
+		}
+		else if (wstrPartTag == TEXT("3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Burst01_5_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.7f, m_pTransformCom, 0.f, 10.f);
+		}
+		else if (wstrPartTag == TEXT("4"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_Burst01_5_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.7f, m_pTransformCom, 0.f, 15.f);
+		}
+		else if (wstrPartTag == TEXT("V1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_Attack10_1-001 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.7f, m_pTransformCom, 0.f, 10.f);
+		}
+		else if (wstrPartTag == TEXT("V2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_Attack10_2-001 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.9f, m_pTransformCom, 0.f, 30.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Growl"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Hit_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.3f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Hit_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.3f, m_pTransformCom, 0.f, 7.f);
+		}
+		else if (wstrPartTag == TEXT("3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Hit_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.3f, m_pTransformCom, 0.f, 7.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Death"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Misson_Weak (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f, m_pTransformCom, 0.f, 7.f);
+	}
+	else if (wstrTypeTag == TEXT("BeHit"))
+	{
+		m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Shijilong_Battle_Behit_B_L_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f, m_pTransformCom, 0.f, 7.f);
+	}
 }
 
 HRESULT CCorosaurus::Bind_Resources()
@@ -678,6 +804,10 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
@@ -705,6 +835,10 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
@@ -731,6 +865,10 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #ifdef _DEBUG
 		cout << "Knock Back! (Corro)" << endl;

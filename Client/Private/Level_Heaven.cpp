@@ -501,9 +501,9 @@ void CLevel_Heaven::Ready_Skybox()
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 	//	TEXT("Layer_BackGround"), &SkyboxDesc)))
 	//	CRASH("Skybox");
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Protottype_GameObject_Heaven_SkyBox"), ENUM_CLASS(m_eCurLevel),
-	//	TEXT("Layer_BackGround"))))
-	//	CRASH("Skybox");
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_Heaven_SkyBox"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"))))
+		CRASH("Skybox");
 }
 
 void CLevel_Heaven::Ready_UI()
