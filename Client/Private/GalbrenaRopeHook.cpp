@@ -55,6 +55,10 @@ void CGalbrenaRopeHook::OnEnter(void* pArg)
 
 	// 7. Condition 추가. => Condition 체크할때 ROPE_HOOK DRAG에 따라서 판별합니다.
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_HOOK));
+
+	// 8. Rope Efeect 생성
+	m_pGalbrena->Rope_Active(true);
+	m_pGalbrena->Spwan_RopeEffect(TEXT("Rope"));
 }
 
 void CGalbrenaRopeHook::OnUpdate(_float fTimeDelta)
@@ -87,6 +91,7 @@ void CGalbrenaRopeHook::OnExit()
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_HOOK));
+	m_pGalbrena->Rope_Active(false); // Rope Active 종료.
 }
 
 
@@ -194,6 +199,7 @@ void CGalbrenaRopeHook::Check_StateTransition(_float fTimeDelta)
 			{
 				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_END);
 				m_eRopeStep = ROPESTEP::STEP_END;
+				m_pGalbrena->Rope_Active(false);
 				return;
 			}
 
@@ -205,11 +211,18 @@ void CGalbrenaRopeHook::Check_StateTransition(_float fTimeDelta)
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
 					return;
 				}
+				
 
 				if (m_States[JUMP])
 				{
 					m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
 					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
+					return;
+				}
+				else
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
 					return;
 				}
 			}

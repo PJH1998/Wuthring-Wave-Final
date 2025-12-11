@@ -52,6 +52,8 @@ void CRoverRopeHook::OnEnter(void* pArg)
 
 	// 6. 중력 끄기
 	m_pRover->Set_Gravity(false);
+	m_pRover->Rope_Active(true);
+	m_pRover->Spwan_RopeEffect(TEXT("Rope"));
 }
 
 void CRoverRopeHook::OnUpdate(_float fTimeDelta)
@@ -83,6 +85,7 @@ void CRoverRopeHook::OnExit()
 	m_eRopeDir = ROPEDIR::END;
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 
+	m_pRover->Rope_Active(false); // Rope Active 종료.
 }
 
 
@@ -190,6 +193,8 @@ void CRoverRopeHook::Check_StateTransition(_float fTimeDelta)
 			{
 				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_END);
 				m_eRopeStep = ROPESTEP::STEP_END;
+
+				m_pRover->Rope_Active(false); // Rope Active 종료.
 				return;
 			}
 
@@ -206,6 +211,12 @@ void CRoverRopeHook::Check_StateTransition(_float fTimeDelta)
 				{
 					m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_SECOND_F;
 					m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
+					return;
+				}
+				else
+				{
+					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDCHANGE;
+					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 					return;
 				}
 			}

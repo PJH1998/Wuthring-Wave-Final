@@ -28,14 +28,14 @@ public:
 	HRESULT			Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D);
 
 	// 고정 채널 Sound 재생
-	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);	// 2D
-	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency);	// 2D
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency);	// 3D
 	// 동적 채널 Sound 재생
-	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
-	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency);
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency);
 
 	// BGM 재생
-	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
+	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency);
 	// 고정 채널 Sound 멈춤
 	void			Stop_Sound(_uint iChannelID);
 	// 동적 채널 Sound 재생

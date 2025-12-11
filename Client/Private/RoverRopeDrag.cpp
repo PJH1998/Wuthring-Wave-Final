@@ -51,6 +51,9 @@ void CRoverRopeDrag::OnEnter(void* pArg)
 
 	// 7. 현재 상태 부여. =>
 	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+
+	m_pRover->Rope_Active(true);
+	m_pRover->Spwan_RopeEffect(TEXT("Rope"));
 }
 
 void CRoverRopeDrag::OnUpdate(_float fTimeDelta)
@@ -83,6 +86,7 @@ void CRoverRopeDrag::OnExit()
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 	
 	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+	m_pRover->Rope_Active(false); // Rope Active 종료.
 }
 
 
@@ -158,6 +162,7 @@ void CRoverRopeDrag::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Execute_RopeDragTrigger(); // 연결된 객체의 Trigger 호출.
 				m_eRopeStep = ROPESTEP::STEP_END;
 				m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeDragType::DRAG_END);
+				m_pRover->Rope_Active(false); // Rope Active 종료.
 				return;
 			}
 

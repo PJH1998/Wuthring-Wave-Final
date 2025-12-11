@@ -14,7 +14,15 @@ HRESULT CRoverAirFly::Initialize(CCharacter* pCharacter)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
-	// Parts 등록.
+	m_fSoundTimer = {};
+	m_fMaxTime = 8.f; // 초기화 시간.
+
+	// 0 ~ 3 사이 랜덤실행.
+	m_SoundTags.reserve(4);
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_01 (SFX)"));
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_02 (SFX)"));
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_03 (SFX)"));
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_04 (SFX)"));
 
     return S_OK;
 }
@@ -64,11 +72,22 @@ void CRoverAirFly::OnEnter(void* pArg)
 
 	// 10. SFX Motion 시작.
 	m_pRover->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+
+	m_fSoundTimer = 0.f;
+
+
+	_uint iRandIdx = static_cast<_uint>(m_pRover->Rand(0.f, 3.1f));
+	m_pRover->Stop_Sound(CHANNEL::PLAYER_ACTION);
+	if (iRandIdx < m_SoundTags.size())
+		m_pRover->Play_Sound(m_SoundTags[iRandIdx], CHANNEL::PLAYER_ACTION, 0.3f, 1.f);
 }
 
 void CRoverAirFly::OnUpdate(_float fTimeDelta)
 {
     CAirState::OnUpdate(fTimeDelta);
+
+	// 사운드 틀기.
+	Process_Timer(fTimeDelta);
 
     // 0. 입력 확인
     Handle_Input();
@@ -90,6 +109,8 @@ void CRoverAirFly::OnExit()
 {
     CAirState::OnExit();
 
+	m_pRover->Stop_Sound(CHANNEL::PLAYER_ACTION);
+
 	if (m_iPartType != CRover::PARTTYPE::TYPE_END)
 		m_pRover->PartActivate(m_iPartType, false);
 
@@ -105,6 +126,20 @@ void CRoverAirFly::OnExit()
 	m_GpuBlendInfo = {};
 
 	m_pRover->End_SFX();
+}
+
+void CRoverAirFly::Process_Timer(_float fTimeDelta)
+{
+	if (m_fSoundTimer < m_fMaxTime)
+		m_fSoundTimer += fTimeDelta;
+	else if (m_fSoundTimer >= m_fMaxTime)
+	{
+		m_fSoundTimer = 0.f;
+		_uint iRandIdx = static_cast<_uint>(m_pRover->Rand(0.f, 3.1f));
+		m_pRover->Stop_Sound(CHANNEL::PLAYER_ACTION);
+		if (iRandIdx < m_SoundTags.size())
+			m_pRover->Play_Sound(m_SoundTags[iRandIdx], CHANNEL::PLAYER_ACTION, 0.3f, 1.f);
+	}
 }
 
 void CRoverAirFly::Handle_Input()

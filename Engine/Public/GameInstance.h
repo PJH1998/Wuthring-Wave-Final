@@ -48,11 +48,11 @@ public:
 	HRESULT			Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D = false);
 	HRESULT			Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D = false);
 	HRESULT			Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D = false);
-	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
-	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
-	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
-	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);
-	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency = 1.f);
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency = 1.f);	// 3D
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency = 1.f);
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency = 1.f);
+	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency = 1.f);
 	void			Stop_Sound(_uint iChannelID);
 	void			Stop_Sound_Dynamic(_uint iChannelID);
 	void			Stop_All();

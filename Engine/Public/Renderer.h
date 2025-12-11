@@ -116,6 +116,7 @@ private:
 	void						Render_Static();
 	void						Render_Decal();
 	void						Render_SSAO();
+	void						Render_OutLineNonDepth();
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_SSS();
@@ -138,6 +139,7 @@ private:
 	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
+	void						Render_UI_Post();
 	void						Render_Fade();
 	void						Render_NonStatic();
 #ifdef _DEBUG

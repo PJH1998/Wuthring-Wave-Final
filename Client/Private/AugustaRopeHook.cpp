@@ -52,6 +52,10 @@ void CAugustaRopeHook::OnEnter(void* pArg)
 
 	// 6. 중력 끄기
 	m_pAugusta->Set_Gravity(false);
+
+	// 7. Rope Efeect 생성
+	m_pAugusta->Rope_Active(true);
+	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"));
 }
 
 void CAugustaRopeHook::OnUpdate(_float fTimeDelta)
@@ -83,6 +87,7 @@ void CAugustaRopeHook::OnExit()
 	m_eRopeDir = ROPEDIR::END;
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 
+	m_pAugusta->Rope_Active(false); // Rope Active 종료.
 }
 
 
@@ -190,6 +195,8 @@ void CAugustaRopeHook::Check_StateTransition(_float fTimeDelta)
 			{
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_END);
 				m_eRopeStep = ROPESTEP::STEP_END;
+
+				m_pAugusta->Rope_Active(false); // Rope Active 종료.
 				return;
 			}
 
@@ -201,11 +208,18 @@ void CAugustaRopeHook::Check_StateTransition(_float fTimeDelta)
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
 					return;
 				}
+				
 
 				if (m_States[JUMP])
 				{
 					m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+					return;
+				}
+				else
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 					return;
 				}
 			}

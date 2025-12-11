@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "Trigger_Box.h"
 #include"GameSystem.h"
+#include"Event_Level.h"
+
 CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice, pContext),m_pGameSystem(CGameSystem::GetInstance())
 {
@@ -34,36 +36,40 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	switch (m_iTriggerIndex)
 	{
 	case 0:
-		m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Start"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Start"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false)));
 		break;
 
 	case 2:
-		m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Meteo"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Meteo"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false)));
 		break;
 
 	case 4:
-		m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true)));
 		break;
 	case 21:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 
 	case 22:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 	case 23:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(XMConvertToRadians(177.5f)));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false)));
 		break;
 	case 24:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 	case 25:
 		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora_04"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_04"), make_pair(Mat, false)));
+		break;
+	case 30:
+		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Coro_First"), make_pair(Mat, false)));
 		break;
 	}
 
@@ -101,18 +107,51 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	{
 		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
 			m_IsTriggered = true;
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 			});
 	}
 
+	//트리거박스 60번..
+	if (m_iTriggerIndex == 60)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				Collision_During();
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Hide_InteractUI(false);
+			});
+
+		m_pGameInstance->Subscribe< MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", [this](MINIGAMEPALETTE_SUCCESS_UI_EVENT event) {
+			m_iMiniGameClearNum++;
+			if (m_iMiniGameClearNum >= 1)
+			{
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 4.f, [this]() {
+					_float4 vPos = _float4(1.2f, -3.7f, -708.8f, 1.f);
+					m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+					m_pGameInstance->OnFade(FADE::FADE_IN, 4.f, [this]() {
+						m_pGameSystem->Lock_Input_ToPlayer(false);
+						});
+					});
+			}
+			});
+
+	}
 	return S_OK;
 }
 
 void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
-	if (m_iTriggerIndex > 20)
+	if (m_iTriggerIndex > 20 && m_iTriggerIndex < 30)
 	{
-		if(m_IsTriggered)
+		if (m_IsTriggered)
 		{
 			m_pGameSystem->Change_Sonoro(true);
 			m_IsTriggered = !m_IsTriggered;
@@ -180,14 +219,40 @@ void CTrigger_Box::Collision_Enter()
 
 void CTrigger_Box::Collision_During()
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
+	if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN && !m_bOnCoolDown)
 	{
-		if (!m_pGameSystem->IsSonoro())
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+			if (!m_pGameSystem->IsSonoro())
+			{
+				if (!m_pGameSystem->IsSonoro())
+				{
+					m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+				}
+				else
+					m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+				m_pGameSystem->Hide_InteractUI(true);
+			}
+			else
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+
 		}
-		else
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			if (!m_IsDoingPalette)
+			{
+				m_pGameSystem->Open_Game_OverflowPalette();
+				m_pGameSystem->Hide_InteractUI(true);
+				m_pGameSystem->Lock_Input_ToPlayer(true);
+			}
+			else
+			{
+				m_pGameSystem->Close_Game_OverflowPalette();
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+				m_pGameSystem->Lock_Input_ToPlayer(false);
+			}
+			m_IsDoingPalette = !m_IsDoingPalette;
+		}
 
 		m_pGameSystem->Hide_InteractUI(true);
 	}
@@ -200,22 +265,10 @@ void CTrigger_Box::Collision_End()
 void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
-		_float4x4 Mat;
 		switch (m_iTriggerIndex)
 		{
-		case 0:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-
-
-		case 2:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-
-		case 4:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-
+			if(m_CamMatrix)
+				m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 		case 7:
 			m_pGameSystem->Stop_Action();
 			break;
@@ -223,25 +276,11 @@ void CTrigger_Box::Register_Trigger()
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			break;
-
-		case 21:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		case 34:
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.1f, 2.f);
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 2.f);
+			m_pGameSystem->Play_QTE(_float2(-300.f, 300.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
 			break;
-		case 22:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 23:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 24:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 25:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		/*case 34:
-			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ATTACK, 0.f, 0.f);
-			break;*/
 		}
 		m_IsTriggered = true;
 		});
@@ -286,6 +325,7 @@ void CTrigger_Box::Free()
 	__super::Free();
 	m_pTempPtr = nullptr;
 	m_pSecondTempPtr= nullptr;
+	Safe_Delete(m_CamMatrix);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidbodyCom);
 }
