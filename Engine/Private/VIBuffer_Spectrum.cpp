@@ -23,24 +23,24 @@ HRESULT CVIBuffer_Spectrum::Initialize_Prototype(VB_SPECTRUM_DESC* pDesc)
     m_iNumVertexBuffers = 1;
     m_ePrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-    D3D11_BUFFER_DESC   VBDesc = {};
-    VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
-    VBDesc.Usage = D3D11_USAGE_DYNAMIC;
-    VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    VBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    VBDesc.MiscFlags = 0;
-    VBDesc.StructureByteStride = m_iVertexStride;
-
-    //인덱스 없이 버퍼로만 그릴거임.
-    //그릴 때는 VertexCount 를 설정 해줘야함 (바인딩 되어있는 버터가 몇개인지 알려주기)
-    if (FAILED(m_pDevice->CreateBuffer(&VBDesc, nullptr, &m_pVB)))
-        return E_FAIL;
-
 	return S_OK;
 }
 
 HRESULT CVIBuffer_Spectrum::Initialize_Clone(void* pArg)
 {
+	D3D11_BUFFER_DESC   VBDesc = {};
+	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
+	VBDesc.Usage = D3D11_USAGE_DYNAMIC;
+	VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	VBDesc.MiscFlags = 0;
+	VBDesc.StructureByteStride = m_iVertexStride;
+
+	//인덱스 없이 버퍼로만 그릴거임.
+	//그릴 때는 VertexCount 를 설정 해줘야함 (바인딩 되어있는 버터가 몇개인지 알려주기)
+	if (FAILED(m_pDevice->CreateBuffer(&VBDesc, nullptr, &m_pVB)))
+		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -76,7 +76,17 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
     if (SampleCount < 2)
         return;
 
-	m_iVtxCount = 2 * SampleCount;
+	if (SampleCount > m_iMaxSamples)
+	{
+		_uint iExcessCount = SampleCount - m_iMaxSamples;
+
+		for (_int i = 0; i < iExcessCount; ++i)
+		{
+			vSamples.pop_front();
+		}
+	}
+
+	m_iVtxCount = 2 * vSamples.size();
 
     D3D11_MAPPED_SUBRESOURCE	Resource{};
 
@@ -84,7 +94,7 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
 
     VTXPOSTEX* pVertices = static_cast<VTXPOSTEX*>(Resource.pData);
     
-    for (size_t i = 0; i < SampleCount; i++)
+    for (size_t i = 0; i < vSamples.size(); i++)
     {
         SAMPLE_DESC Desc = vSamples[i];
         XMVECTOR Dir = {};
@@ -113,7 +123,7 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
         XMStoreFloat3(&vPosUp, XMLoadFloat3(&vPosUp) - vSide * (m_fSize * 0.5f));
         XMStoreFloat3(&vPosDown, XMLoadFloat3(&vPosDown) + vSide * (m_fSize * 0.5f));
 
-        float fUV_V = (_float)i / (SampleCount - 1);
+        float fUV_V = (_float)i / (vSamples.size() - 1);
 
         pVertices[2 * i].vPosition = vPosUp;
         pVertices[2 * i + 1].vPosition = vPosDown;

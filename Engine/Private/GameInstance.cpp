@@ -278,7 +278,7 @@ void CGameInstance::Return_Channel(_uint iChannelIndex)
 {
 	m_pSound_Manager->Return_Channel(iChannelIndex);
 }
-HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath, _bool is3D)
+HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D)
 {
 	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
 }
@@ -314,6 +314,10 @@ void CGameInstance::Stop_Sound(_uint iChannelID)
 {
 	m_pSound_Manager->Stop_Sound(iChannelID);
 }
+void CGameInstance::Stop_Sound_Dynamic(_uint iChannelID)
+{
+	m_pSound_Manager->Stop_Sound_Dynamic(iChannelID);
+}
 void CGameInstance::Stop_All()
 {
 	m_pSound_Manager->Stop_All();
@@ -321,6 +325,10 @@ void CGameInstance::Stop_All()
 void CGameInstance::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Set_ChannelVolume(iChannelID, fVolume);
+}
+void CGameInstance::Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume)
+{
+	m_pSound_Manager->Set_ChannelVolume_Dynamic(iChannelID, fVolume);
 }
 #pragma endregion
 

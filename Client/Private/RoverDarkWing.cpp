@@ -271,6 +271,7 @@ void CRoverDarkWing::Ready_AttackVolumes()
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
+	TriggerDesc.strSoundTag = TEXT("chun_whip_hit_light_2_0910 (SFX)");
 
 	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
