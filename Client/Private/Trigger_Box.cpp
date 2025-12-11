@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "Trigger_Box.h"
 #include"GameSystem.h"
+#include"Event_Level.h"
+
 CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice, pContext),m_pGameSystem(CGameSystem::GetInstance())
 {
@@ -110,6 +112,38 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	}
 
 	//트리거박스 60번..
+	if (m_iTriggerIndex == 60)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				Collision_During();
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Hide_InteractUI(false);
+			});
+
+		m_pGameInstance->Subscribe< MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", [this](MINIGAMEPALETTE_SUCCESS_UI_EVENT event) {
+			m_iMiniGameClearNum++;
+			if (m_iMiniGameClearNum >= 1)
+			{
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 4.f, [this]() {
+					_float4 vPos = _float4(1.2f, -3.7f, -708.8f, 1.f);
+					m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+					m_pGameInstance->OnFade(FADE::FADE_IN, 4.f, [this]() {
+						m_pGameSystem->Lock_Input_ToPlayer(false);
+						});
+					});
+			}
+			});
+
+	}
 	return S_OK;
 }
 
@@ -185,17 +219,23 @@ void CTrigger_Box::Collision_Enter()
 
 void CTrigger_Box::Collision_During()
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
+	if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN && !m_bOnCoolDown)
 	{
-		if (!m_pGameSystem->IsSonoro())
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
 			if (!m_pGameSystem->IsSonoro())
 			{
-				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+				if (!m_pGameSystem->IsSonoro())
+				{
+					m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+				}
+				else
+					m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+				m_pGameSystem->Hide_InteractUI(true);
 			}
 			else
 				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
-			m_pGameSystem->Hide_InteractUI(true);
+
 		}
 		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 		{
@@ -213,8 +253,6 @@ void CTrigger_Box::Collision_During()
 			}
 			m_IsDoingPalette = !m_IsDoingPalette;
 		}
-		else
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
 
 		m_pGameSystem->Hide_InteractUI(true);
 	}
@@ -243,21 +281,6 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 2.f);
 			m_pGameSystem->Play_QTE(_float2(-300.f, 300.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
 			break;
-		case 60:
-			m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-				if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-					m_pGameSystem->Show_InteractUI(TEXT("다채화"));
-				});
-
-			m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-				if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-					Collision_During();
-				});
-
-			m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-				if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-					m_pGameSystem->Hide_InteractUI(false);
-				});
 		}
 		m_IsTriggered = true;
 		});

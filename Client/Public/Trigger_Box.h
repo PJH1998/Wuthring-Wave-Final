@@ -57,6 +57,8 @@ private:
 	pair<_wstring, pair<_float4x4, bool>>* m_CamMatrix;
 	using CamSet = pair<_wstring, pair<_float4x4, bool>>;
 	_bool m_IsDoingPalette = { false };
+
+	_uint m_iMiniGameClearNum = {};
 public:
 	static CTrigger_Box* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
