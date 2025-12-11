@@ -361,15 +361,15 @@ void CGgobul::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("Small1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_01 (SFX)"), m_iSoundChannel3, 0.2f, m_pTransformCom, 0.01f, 21.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_01 (SFX)"), m_iSoundChannel3, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("Small2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_02 (SFX)"), m_iSoundChannel3, 0.2f, m_pTransformCom, 0.01f, 21.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_02 (SFX)"), m_iSoundChannel3, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("Small3"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_03 (SFX)"), m_iSoundChannel3, 0.2f, m_pTransformCom, 0.01f, 21.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_03 (SFX)"), m_iSoundChannel3, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("Stop"))
 		{
@@ -380,45 +380,45 @@ void CGgobul::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("Up"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Battle_UP_Large_01 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 36.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Battle_UP_Large_01 (SFX)"), m_iSoundChannel, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("DownS"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Down_Small_02 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 36.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Down_Small_02 (SFX)"), m_iSoundChannel, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("DownL"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Down_Large_02 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 36.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Down_Large_02 (SFX)"), m_iSoundChannel, 0.2f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Laser"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Battle_Laser_1 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 120.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Battle_Laser_1 (SFX)"), m_iSoundChannel, 0.2f);
 	}
 	else if (wstrTypeTag == TEXT("Knife"))
 	{
 		if (wstrPartTag == TEXT("Change"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_ChangetoSickle_1 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.01f, 42.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_ChangetoSickle_1 (SFX)"), m_iSoundChannel, 0.15f);
 		}
 		else if (wstrPartTag == TEXT("Atk"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Battle_SickleSweepsAcross_1 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 42.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Battle_SickleSweepsAcross_1 (SFX)"), m_iSoundChannel, 0.2f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Voice"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("VO_Enemy_Weizuoshenwang_Heishe_Skill_1 (SFX)"), m_iSoundChannel2, 0.2f, m_pTransformCom, 0.01f, 50.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("VO_Enemy_Weizuoshenwang_Heishe_Skill_1 (SFX)"), m_iSoundChannel2, 0.15f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("VO_Enemy_Weizuoshenwang_Heishe_Skill_2 (SFX)"), m_iSoundChannel2, 0.2f, m_pTransformCom, 0.01f, 50.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("VO_Enemy_Weizuoshenwang_Heishe_Skill_2 (SFX)"), m_iSoundChannel2, 0.15f);
 		}
 		else if (wstrPartTag == TEXT("3"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("VO_Enemy_Weizuoshenwang_Heishe_Skill_3 (SFX)"), m_iSoundChannel2, 0.2f, m_pTransformCom, 0.01f, 50.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("VO_Enemy_Weizuoshenwang_Heishe_Skill_3 (SFX)"), m_iSoundChannel2, 0.15f);
 		}
 		else if (wstrPartTag == TEXT("Stop"))
 		{
