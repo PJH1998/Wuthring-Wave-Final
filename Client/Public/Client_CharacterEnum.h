@@ -56,7 +56,6 @@ namespace Client
 		COLLIDER_UNACTIVE = 1 << 18, // 콜라이더 끈상태.8
 		ANIMSTOP = 1<< 19, // Animation Stop 상태.
 		CONTORL = 1 << 20,
-		KEYINPUT_LOCK = 1 << 21, // 키인풋 막기.
 		END
 	};
 

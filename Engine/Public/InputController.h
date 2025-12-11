@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
-// ÀÎÇ²°ú °ü·ÃµÈ Ã³¸® 
-// Å°ÀÔ·ÂÀ» µî·ÏÇÕ´Ï´Ù.
+// ì¸í’‹ê³¼ ê´€ë ¨ëœ ì²˜ë¦¬ 
+// í‚¤ì…ë ¥ì„ ë“±ë¡í•©ë‹ˆë‹¤.
 class ENGINE_DLL CInputController final : public CComponent
 {
 public:
@@ -17,6 +17,8 @@ public:
 	virtual void Update();
 
 public:
+	
+	void Set_BlockInput(_bool IsBlock) { m_IsBlock = IsBlock; }
 	void Update_KeyInput();
 	
 
@@ -31,6 +33,7 @@ public:
 private:
 	_uint m_PrevKeyInput = {};
 	_uint m_KeyInput = {};
+	_bool m_IsBlock = {};
 	vector<pair<_uint, _ubyte>> m_KeyboardMappings = {};
 	vector<pair<_uint, MOUSEKEYSTATE>> m_MouseMappings = {};
 
