@@ -252,6 +252,13 @@ public:
 	void						Set_Potal_Active(_bool B);
 #pragma endregion
 
+#pragma region BGM_MANAGER
+	void Change_Level(_uint iLevel);
+	void Stop_BGM();
+	void Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel = BOSSBGM::END);
+	void Change_BGM(const _wstring& BGMText);
+
+#pragma endregion
 private:
 	class	CParser*				m_pParser					= { nullptr };
 	class	CFactory*				m_pFactory					= { nullptr };
@@ -267,13 +274,13 @@ private:
 	class   CSequencePlayer*		m_pSequencePlayer			= { nullptr };
 
 	class	CSonoro_Manager*		m_pSonoro_Manager			= { nullptr };
-
+	class   CBGM_Manager*			m_pBGM_Manager				= { nullptr };
 	class	CMonsterTable*			m_pMonsterTable				= { nullptr };
 	class	CMouseController*		m_pMouseController			= { nullptr };
 
 	class   CPotal*					m_pPotal					= { nullptr };
 	class	CTimeLack*				m_pTimeLack = { nullptr };
-
+	
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
 public:

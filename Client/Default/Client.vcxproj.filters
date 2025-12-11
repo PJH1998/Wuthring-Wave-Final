@@ -175,9 +175,6 @@
     <Filter Include="03. GameObject\UI\_Parents\_SubParents">
       <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\UIHelper">
-      <UniqueIdentifier>{f2a52eca-0c90-49ba-9695-7b431df79306}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\SkyBox">
       <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
     </Filter>
@@ -516,6 +513,12 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Rope">
       <UniqueIdentifier>{05039f09-17df-41a6-b0aa-cae9e9bb610a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Dialog">
+      <UniqueIdentifier>{9caa9903-65f4-4961-84d3-552f153cef6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\UIHelper">
+      <UniqueIdentifier>{f2a52eca-0c90-49ba-9695-7b431df79306}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1348,6 +1351,7 @@
     <ClInclude Include="..\Public\Effect_Rope.h">
       <Filter>03. GameObject\Effect\Rope</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Dialog.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2130,6 +2134,7 @@
     <ClCompile Include="..\Private\Effect_Rope.cpp">
       <Filter>03. GameObject\Effect\Rope</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_Dialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
