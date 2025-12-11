@@ -115,7 +115,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameSystem->Create_MapEffects();
 
 	//TEST
-
+	m_pGameSystem->Change_Level(m_pGameInstance->Get_CurrentLevel());
 	return S_OK;
 }
 
@@ -303,9 +303,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	MobDesc.fHP = 150.f;
-#endif
+//#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);

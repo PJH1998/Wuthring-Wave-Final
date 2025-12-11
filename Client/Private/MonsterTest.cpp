@@ -761,6 +761,7 @@ void CMonsterTest::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManif
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("거짓된 신왕"), "FalseSovereign", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 		m_isRender = true;
+		m_pGameSystem->Engage_Battle(true, BOSSBGM::SOERVERIGN);
 	}
 }
 
@@ -782,6 +783,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
 		}
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};

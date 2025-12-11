@@ -136,8 +136,8 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 				m_pGameInstance->OnFade(FADE::FADE_OUT, 4.f, [this]() {
 					_float4 vPos = _float4(1.2f, -3.7f, -708.8f, 1.f);
 					m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+					m_pGameSystem->Lock_Input_ToPlayer(false);
 					m_pGameInstance->OnFade(FADE::FADE_IN, 4.f, [this]() {
-						m_pGameSystem->Lock_Input_ToPlayer(false);
 						});
 					});
 			}
@@ -197,7 +197,7 @@ void CTrigger_Box::Ready_Components(void* pArg)
 	switch (m_iTriggerIndex)
 	{
 	case 34:
-		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3396.9f, 321.6f, 2016.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3396.9f, 318.6f, 2016.2f), UI_GRAPPLE_TYPE::ANCHOR);
 		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
 		break;
 	}
