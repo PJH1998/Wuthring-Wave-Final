@@ -34,18 +34,7 @@ public:
 		m_eCameraState = CAMERA_STATE::SPRING;
 	}
 	// Lock-On
-	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
-	{
-		if (nullptr == pTargetTransform || false == IsLockOn)
-		{
-			if(CAMERA_STATE::LOCKON == m_eCameraState)
-				m_eCameraState = CAMERA_STATE::TARGET;
-		}
-		else
-			m_eCameraState = CAMERA_STATE::LOCKON;
-
-		m_pTargetTransform = pTargetTransform;
-	}
+	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn);
 
 public:
 	_vector Get_LookVector();
@@ -84,6 +73,7 @@ private:
 	CTransform*				m_pTargetTransform = { nullptr };
 	_float							m_fLockOnOffsetY = {};
 	_float							m_fLockOnDistanceOffset = {};
+	_float							m_fRatio = {};
 
 	// Action
 	vector<CAMERA_FRAME>	m_Frames;
