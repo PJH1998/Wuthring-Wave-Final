@@ -207,6 +207,7 @@ void CRenderer::Render()
 	Render_Decal();
 	Render_SSAO();			
 	Render_NonStatic();
+	Render_OutLineNonDepth();
 	Render_Dynamic();
 
 	Render_Light();
@@ -725,6 +726,24 @@ void CRenderer::Render_SSAO()
 
 }
 
+void CRenderer::Render_OutLineNonDepth()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE_NONDEPTH"), nullptr, false)))
+		CRASH("Failed Begin MRT");
+
+	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONDEPTH)])
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render_OutLine();
+
+		Safe_Release(pRenderObject);
+	}
+
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONDEPTH)].clear();
+
+	m_pGameInstance->End_MRT();
+}
+
 void CRenderer::Render_Dynamic()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
@@ -871,7 +890,7 @@ void CRenderer::Render_Outline()
 
 void CRenderer::Render_NonLight()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_NonLight"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONLIGHT));
@@ -892,7 +911,6 @@ void CRenderer::Render_LUT()
 
 	if (FAILED(m_pShader->Bind_Value("g_fExposure", &m_fExposure, sizeof(_float))))
 		CRASH("Render Fail");
-
 
 	if (FAILED(m_pShader->Bind_Value("g_fLutLerpIntensity", &m_fLutLerpIntensity, sizeof(_float))))
 		CRASH("Failed to Bind LutIntensity");
@@ -1340,6 +1358,13 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 #pragma endregion
 
+#pragma region MRT_OUTLINE_NONDEPTH
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONDEPTH"), TEXT("RT_Diffuse"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONDEPTH"), TEXT("RT_PBR"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
 #pragma region MRT_OUTLINE
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_Combine"))))
 		ASSERT_CRASH(false);
@@ -1361,6 +1386,17 @@ HRESULT CRenderer::Ready_MRT()
 
 #pragma region MRT_COMBINE
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Combine"), TEXT("RT_Combine"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_NONLIGHT
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_Combine"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_Normal"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

@@ -116,6 +116,7 @@ private:
 	void						Render_Static();
 	void						Render_Decal();
 	void						Render_SSAO();
+	void						Render_OutLineNonDepth();
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_SSS();

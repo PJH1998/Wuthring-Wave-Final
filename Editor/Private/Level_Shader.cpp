@@ -58,12 +58,12 @@ void CLevel_Shader::Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Set_Active(TEXT("Test"), false);
+		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
 		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Set_Active(TEXT("Test"), true);
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
 		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
 	}
 
