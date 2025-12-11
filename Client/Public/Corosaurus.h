@@ -108,9 +108,9 @@ private:
 	_float3					m_vUIPosition{};
 #pragma endregion
 
-#pragma region SOUND
-	_uint					m_iSoundChannel{};
-#pragma endregion
+//#pragma region SOUND
+//	_uint					m_iSoundChannel{};
+//#pragma endregion
 
 private:
 	HRESULT						Bind_Resources();
