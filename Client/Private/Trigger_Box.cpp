@@ -275,6 +275,7 @@ void CTrigger_Box::Register_Trigger()
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
+			//m_pGameSystem->Change_BGM(TEXT(""));
 			break;
 		case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);

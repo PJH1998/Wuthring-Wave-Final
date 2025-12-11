@@ -17,7 +17,15 @@ public:
 		 
 	void Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel);
 	void Change_BGM(const _wstring& BGMText);
-		 
+	_bool IsModinaryBattle() { return m_eLastBattle == BOSSBGM::MODINARY; }
+
+
+	//잡몹전투 -> 스포너가 MODEINARY 전달.
+	//MODINARY면 잡몹전투 브금 실행. IsModinaryBattle이 True를 반환.
+	//잡몹이 다 죽음. -> 플레이어가 몬스터 감지 못함.
+	//플레이어가 전투 끝났음을 알림.
+	//브금 END로 변경?
+
 private: 
 	void Ready_BGM();
 
