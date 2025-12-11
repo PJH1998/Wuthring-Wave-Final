@@ -678,6 +678,10 @@ _bool CGameSystem::IsModinaryBattle()
 {
 	return m_pBGM_Manager->IsModinaryBattle();
 }
+void CGameSystem::Change_BattleBGM(BOSSBGM eBoss)
+{
+	m_pBGM_Manager->Change_BattleBGM(eBoss);
+}
 #pragma endregion
 
 void CGameSystem::Release_System()

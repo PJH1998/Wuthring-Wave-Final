@@ -113,6 +113,7 @@ HRESULT CLevel_Heaven::Initialize()
 	m_pGameInstance->Begin_VF();
 
 	m_pGameSystem->Create_MapEffects();
+	m_pGameSystem->Change_Level(m_pGameInstance->Get_CurrentLevel());
 	return S_OK;
 }
 
