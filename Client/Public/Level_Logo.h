@@ -24,9 +24,13 @@ private:
 	void							Ready_SkyBox();
 
 private:
+#ifdef _DEBUG
 	void							Update_SoundOrder(_float fTimeDelta);
 	void							Update_ClickSound();
 	void							Update_GoinFinish(_float fTimeDelta);
+#endif // _DEBUG
+
+	
 
 private:
 	class CGameSystem*				m_pGameSystem = { nullptr };

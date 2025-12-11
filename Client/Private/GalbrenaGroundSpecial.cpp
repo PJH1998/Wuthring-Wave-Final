@@ -272,8 +272,7 @@ void CGalbrenaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK05), "Attack05", 1.5f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK06), "Attack06", 1.5f, 19.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK07), "Attack07", 1.5f, 50.f); // 25.f ~ 50.f 에 콤보 이펙트.
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK08), "Attack08", 1.5f, 20.f); // 
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK11), "Attack11", 1.5f, 50.f); //발차기.
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK08), "Attack08", 1.5f, 26.f); // 
     CState::Add_Animations(ENUM_CLASS(EGalbrenaSpecialType::ATTACK_H_01), "Attack_H_01", 1.5f, 50.f); //발차기.
 
 

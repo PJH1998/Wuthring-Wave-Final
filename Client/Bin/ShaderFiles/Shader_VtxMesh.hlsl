@@ -703,9 +703,9 @@ PS_OUT_LIGHT PS_GRASS_ROCK_MA(PS_IN In)
     //float4 vDiffuse = lerp(vRockDiffuse, (vGrassDiffuse * g_GrassColor), vMask.r);
     float4 vDiffuse = lerp(vRockDiffuse, lerp(vGrassDiffuse, g_GrassColor, g_fGrassColorIntensity), vMask.r);
   
-    float3 vNormalDesc = lerp(vMainNormal.xyz, vGrasNormal.xyz, vMask.r);
+   // float3 vNormalDesc = lerp(vMainNormal.xyz, vGrasNormal.xyz, vMask.r);
   //  float3 vNormalDesc = lerp(lerp(vMainNormal.xyz, vDetailNormal.xyz, vMask.b), vGrasNormal.xyz, vMask.r);
-//    float3 vNormalDesc = lerp(lerp(vDetailNormal.xyz, vMainNormal.xyz, vAlphaMask.a), vGrasNormal.xyz, vMask.r);
+    float3 vNormalDesc = lerp(lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.a), vGrasNormal.xyz, vMask.r);
     
     float3 vNormal;
 	        
@@ -862,8 +862,8 @@ PS_OUT_LIGHT PS_NONGRASS_ROCK_MA(PS_IN In)
     
     float4 vDiffuse = vRockDiffuse;
     
-    float3 vNormalDesc = vMainNormal.xyz;//    lerp(vDetailNormal.xyz, vMainNormal.xyz, vAlphaMask.r);
-    //float3 vNormalDesc = lerp(vDetailNormal.xyz, vMainNormal.xyz, vAlphaMask.a);
+    //float3 vNormalDesc = vMainNormal.xyz;//    lerp(vDetailNormal.xyz, vMainNormal.xyz, vAlphaMask.r);
+    float3 vNormalDesc = lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.a);
     
     float3 vNormal;
 	        

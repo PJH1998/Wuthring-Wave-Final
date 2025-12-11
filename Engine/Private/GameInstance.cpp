@@ -625,7 +625,7 @@ const LIGHT_DESC* CGameInstance::Get_LightDesc(const _wstring& strLightTag)
 {
 	return m_pLight_Manager->Get_LightDesc(strLightTag);
 }
-void CGameInstance::Set_Active(const _wstring& strLightTag, _bool isActive)
+void CGameInstance::Set_LightActive(const _wstring& strLightTag, _bool isActive)
 {
 	m_pLight_Manager->Set_Active(strLightTag, isActive);
 }

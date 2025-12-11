@@ -78,6 +78,8 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	{
 	
 	}
+
+#ifdef _DEBUG
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		!m_isGoinFinish)
 	{
@@ -86,13 +88,16 @@ void CLevel_Logo::Update(_float fTimeDelta)
 			CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 			});
-	
+
 		m_isGoinFinish = true;
 	}
 
 	Update_SoundOrder(fTimeDelta);		// n초 후 재생할 사운드 관리
 	Update_ClickSound();				// 클릭 시 사운드
 	Update_GoinFinish(fTimeDelta);		// 로고 종료 시 사운드 조절
+#endif // _DEBUG
+
+	
 }
 
 void CLevel_Logo::Render()
@@ -188,6 +193,7 @@ void CLevel_Logo::Ready_SkyBox()
 		CRASH("Failed to Add GameObject To Layer SkyBox");
 }
 
+#ifdef _DEBUG
 void CLevel_Logo::Update_SoundOrder(_float fTimeDelta)
 {
 	if (m_iSoundOrder >= 1) return;
@@ -204,6 +210,7 @@ void CLevel_Logo::Update_SoundOrder(_float fTimeDelta)
 	m_fElapsedTime += fTimeDelta;
 }
 
+
 void CLevel_Logo::Update_ClickSound()
 {
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
@@ -212,6 +219,7 @@ void CLevel_Logo::Update_ClickSound()
 
 void CLevel_Logo::Update_GoinFinish(_float fTimeDelta)
 {
+
 	if (!m_isGoinFinish)
 		return;
 
@@ -222,6 +230,9 @@ void CLevel_Logo::Update_GoinFinish(_float fTimeDelta)
 
 	m_fElapsedFinishTime += fTimeDelta;
 }
+
+#endif // _DEBUG
+
 
 #ifdef _DEBUG
 void CLevel_Logo::DEBUG_FUNCTION()
