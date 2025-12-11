@@ -281,10 +281,11 @@ HRESULT CUI_HUD::Ready_Presets()
 	m_arrPlayerSymbolicColors[CLR_GALBRENA]			= _float4(1.000f, 0.416f, 0.416f, 1.0f);
 	m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT]		= _float4(0.992f, 0.749f, 0.341f, 1.0f);
 
-	m_arrPlayerAdvSymbolicColors[CLR_ROVER]			= _float4(0.485f, 0.193f, 0.367f, 1.0f);
-	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA]		= _float4(0.581f, 0.271f, 0.600f, 1.0f);
-	m_arrPlayerAdvSymbolicColors[CLR_GALBRENA]		= _float4(0.600f, 0.250f, 0.250f, 1.0f);
-	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT]	= _float4(0.595f, 0.449f, 0.205f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_ROVER]        = _float4(0.339f, 0.135f, 0.257f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA]      = _float4(0.407f, 0.190f, 0.420f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_GALBRENA]     = _float4(0.420f, 0.175f, 0.175f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT]  = _float4(0.416f, 0.314f, 0.143f, 1.0f);
+
 
 	for (_uint i = 0; i < m_arrKeyGuidePresets.size(); i++)
 	{
@@ -427,19 +428,27 @@ void CUI_HUD::Update_Presets()
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	m_isIn_UltMode_Augusta = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_AUGUSTA) ?
+		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
+
+	m_isIn_StrongAtk_Augusta = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_AUGUSTA) ?
+		static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY : false;
+
+	m_isIn_BurstMode_Galbrena = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
+		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
+
 
 	switch (m_iSelectedCHIndex)
 	{
 	case CH_ROVER:		m_arrPlayerColors[CH_ROVER]			= m_arrPlayerSymbolicColors[CLR_ROVER];
 						m_arrPlayerAdvColors[CH_ROVER]		= m_arrPlayerAdvSymbolicColors[CLR_ROVER];		break;
 	case CH_AUGUSTA:	m_arrPlayerColors[CH_AUGUSTA]		=
-					(	isIn_Augusta_AdvUlt ||													// 궁 사용중이거나
+					(	m_isIn_UltMode_Augusta ||													// 궁 사용중이거나
 						m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
 															  m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT] :
 															  m_arrPlayerSymbolicColors[CLR_AUGUSTA];		
 						m_arrPlayerAdvColors[CH_AUGUSTA]		=
-					(	isIn_Augusta_AdvUlt ||													// 궁 사용중이거나
+					(	m_isIn_UltMode_Augusta ||													// 궁 사용중이거나
 						m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
 															  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT] :
 															  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA];
@@ -729,11 +738,11 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	{	// 기본값 설정
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._11) = 0.f;
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._12) = 0.f;								// ColorMul1
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 1.f;								// ColorMul2
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 0.7f;								// ColorMul2
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._14) = static_cast<_float>(true);		// Is Use CustomColor?
 		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];	// CustomColor
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 0.f;							// CD Start Degree
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = false;	// isUseNoise
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._33) = m_fElapsedTime;							// Elapsed Time
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._34) = 0.2f;							// UV Scroll Speed
 		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
@@ -778,6 +787,13 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 {
 	CCustom_UI* pTargetUI = m_pUI_Skill_ReadyWave;
 	_bool isUltGuageFull = m_pPlayerStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) == 1.f;
+	if (m_iSelectedCHIndex == CH_AUGUSTA)
+	{
+		isUltGuageFull = (m_isIn_UltMode_Augusta)?
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST4) == 1.f) :
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST5) == 1.f);
+
+	}
 
 	if (!isUltGuageFull)
 	{
@@ -915,9 +931,13 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 
 
 
-	_float4 vBGColor = _float4{ .5f, .5f, .5f, .3f };
+	_float4 vBGColor = _float4{ .4f, .4f, .4f, .5f };
 
 	CCustom_UI* pSkillBGUI = m_pUI_Skill_BG;    // �ν��Ͻ� 4����
+	auto& skillBGIinstDesc = pSkillBGUI->Get_UIDesc().vecInstanceDescs;
+
+	skillBGIinstDesc[1].vClipTexcoordX = m_isIn_UltMode_Augusta? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };
+	
 
 	vector<_float4x4> vecBGVariantMat = {};
 	vecBGVariantMat.resize(5);
@@ -927,6 +947,13 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 		*reinterpret_cast<_float4*>(&vecBGVariantMat[i]._11) = vBGColor;
 		*reinterpret_cast<_float*>(&vecBGVariantMat[i]._21) = (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
 	}
+	
+
+
+
+
+
+	//if (m_iSelectedCHIndex == )
 
 	CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
 		vecBGVariantMat,
@@ -1063,9 +1090,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 {
     CCustom_UI* pFeedbackUI = m_pUI_Feedback;
-    const _float2 fDestScale = { 1.2f, 1.2f };
+    const _float2 fDestScale = { 1.3f, 1.3f };
     const _float fStartAlpha = 0.f;     // 0�� ����, 1�� �Ⱥ������� ����.
-    const _float fLifeTime = .5f;
+    const _float fLifeTime = .4f;
     _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
 
     auto& uiDesc = pFeedbackUI->Get_UIDesc();
@@ -1454,6 +1481,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 {
+	// 오른쪽에서부터 왼쪽 ( <- ) 순서
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
 
@@ -1480,8 +1508,106 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
         break;
     }
 
-	// Sector Bottom
+	// Sector Bottom.. On/Off
+	switch (m_iSelectedCHIndex)
+	{
+	case Client::CUI_HUD::CH_AUGUSTA:
+		if (m_isIn_UltMode_Augusta)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		}
+		else if (m_isIn_StrongAtk_Augusta)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 1.0f };
+		}
+		else
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		}
+		break;
+	case Client::CUI_HUD::CH_GALBRENA:
+		if (m_isIn_BurstMode_Galbrena)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 1.0f };
+		}
+		else
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		}
+		break;
+	case Client::CUI_HUD::CH_ROVER:
+	default:
+		keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+		keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+		keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+		keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+		keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		break;
+	}
 
+	// Sector Bottom.. Key Index
+		// Sector Bottom
+	switch (m_iSelectedCHIndex)
+	{
+	case Client::CUI_HUD::CH_AUGUSTA:
+		if (m_isIn_UltMode_Augusta)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_R][0];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_LB][0];
+
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_R][1];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_LB][1];
+		}
+		else
+		{
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_R][0];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_Q][0];
+			keyButtonDesc.vecInstanceDescs[5].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_E][0];
+			keyButtonDesc.vecInstanceDescs[6].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_T][0];
+			keyButtonDesc.vecInstanceDescs[7].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_LB][0];
+
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_R][1];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_Q][1];
+			keyButtonDesc.vecInstanceDescs[5].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_E][1];
+			keyButtonDesc.vecInstanceDescs[6].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_T][1];
+			keyButtonDesc.vecInstanceDescs[7].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_LB][1];
+		} break;
+	case Client::CUI_HUD::CH_GALBRENA:
+	case Client::CUI_HUD::CH_ROVER:
+	default:
+		keyButtonDesc.vecInstanceDescs[3].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_R][0];
+		keyButtonDesc.vecInstanceDescs[4].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_Q][0];
+		keyButtonDesc.vecInstanceDescs[5].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_E][0];
+		keyButtonDesc.vecInstanceDescs[6].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_T][0];
+		keyButtonDesc.vecInstanceDescs[7].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_LB][0];
+
+		keyButtonDesc.vecInstanceDescs[3].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_R][1];
+		keyButtonDesc.vecInstanceDescs[4].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_Q][1];
+		keyButtonDesc.vecInstanceDescs[5].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_E][1];
+		keyButtonDesc.vecInstanceDescs[6].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_T][1];
+		keyButtonDesc.vecInstanceDescs[7].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_LB][1];
+		break;
+	}
 
 }
 

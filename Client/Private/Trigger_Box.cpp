@@ -102,6 +102,14 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 			});
 	}
 
+	if (m_iTriggerIndex == 34)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Bind_Gravity_ToPlayer(true);
+			});
+	}
+
 
 	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 25)
 	{
@@ -280,6 +288,7 @@ void CTrigger_Box::Register_Trigger()
 		case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.05f, 2.f);
+			m_pGameSystem->Bind_Gravity_ToPlayer(false);
 			m_pGameSystem->Play_QTE(_float2(-300.f, 300.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
 			break;
 		}

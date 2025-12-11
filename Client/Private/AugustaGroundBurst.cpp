@@ -51,13 +51,12 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.0f);
 
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
+	
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
-
-
 }
 
 void CAugustaGroundBurst::OnUpdate(_float fTimeDelta)
