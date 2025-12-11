@@ -39,6 +39,7 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 	m_MeshEnables.resize(m_pModelCom->Get_NumMesh(), true);
 	//풀링 오브젝트 자체적으로 activate 끄기
 	m_isActivate = false;
+	m_iSoundChannel = -1;
 	m_ShaderIndices[GGOBUL_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
     return S_OK;
 }
@@ -60,6 +61,8 @@ void CGgobul::Update(_float fTimeDelta)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 		if (nullptr != m_pAttackVolumes[m_eType])
 			m_pAttackVolumes[m_eType]->TriggerActivate(false);
 		m_pRootMatrix = nullptr;
@@ -113,6 +116,7 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_strAnimKey = pDesc->strPatternKey;
 	m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 	//for (_uint i = 0; i < GGOBULTYPE::END; ++i)
 	//{
 	//	m_pAttackVolume[i]->TriggerActivate(false);
@@ -251,6 +255,10 @@ void CGgobul::Effect_Active(const _wstring& wStrEffectTag)
 
 void CGgobul::Object_Func(const _wstring& wStrObjectTag)
 {
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
 	if (wStrObjectTag == TEXT("Knife"))
 	{
 		m_MeshEnables[GGOBUL_SHADER::HEAD0] = false;
@@ -275,6 +283,61 @@ void CGgobul::Object_Func(const _wstring& wStrObjectTag)
 		m_pAttackVolumes[m_eType]->TriggerActivate(false);
 		m_eType = GGOBULTYPE::HEAD;
 		m_pAttackVolumes[m_eType]->TriggerActivate(true);
+	}
+	else if (wstrTypeTag == TEXT("Sound"))
+		Sound_Active(wstrPartTag);
+}
+
+void CGgobul::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Move"))
+	{
+		if (wstrPartTag == TEXT("Small1"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("Small2"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("Small3"))
+		{
+
+		}
+	}
+	else if (wstrTypeTag == TEXT("Trackle"))
+	{
+		if (wstrPartTag == TEXT("Up"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("DownS"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("DownL"))
+		{
+
+		}
+	}
+	else if (wstrTypeTag == TEXT("Laser"))
+	{
+
+	}
+	else if (wstrTypeTag == TEXT("Knife"))
+	{
+		if (wstrPartTag == TEXT("Change"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("Atk"))
+		{
+
+		}
 	}
 }
 

@@ -54,6 +54,7 @@ public:
 	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 private:
 	CAttackVolume*			m_pAttackVolumes[GGOBULTYPE::END] = {nullptr,};
 	CAnimMachine*			m_pAnimMachineCom = { nullptr };
@@ -72,7 +73,7 @@ private:
 	_float		m_fAttackDmg{};
 
 #pragma region SOUND
-	_uint					m_iSoundChannel{};
+	_int					m_iSoundChannel{};
 #pragma endregion
 
 private:

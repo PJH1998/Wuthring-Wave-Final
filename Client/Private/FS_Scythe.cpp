@@ -29,7 +29,7 @@ HRESULT CFS_Scythe::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	Register_AllNotifies(pDesc->strFolderPath);
-
+	m_iSoundChannel = -1;
 	//for (size_t i = 0; i < 5; ++i)
 	//{
 	//	m_pAttackVolume[i]->IsActivate(false);
@@ -54,6 +54,8 @@ void CFS_Scythe::Update(_float fTimeDelta)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 		for (_uint i = 0; i < 5; ++i)
 		{
 			if (nullptr != m_pAttackVolumes[i])
@@ -126,6 +128,8 @@ void CFS_Scythe::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	SCYTHE_RESET* pDesc = static_cast<SCYTHE_RESET*>(pArg);
 	m_strAnimKey = pDesc->strPatternKey;
 	m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
+	//_float temp{};
+	//m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, 0.f, &temp, false);
 	for (_uint i = 0; i < 5; ++i)
 	{
 		//if (nullptr != m_pAttackVolumes[i])
@@ -147,6 +151,7 @@ void CFS_Scythe::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	}
 	m_fLifeTime = 5.f;
 	m_isActivate = true;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CFS_Scythe::Bind_Resources()
@@ -260,6 +265,43 @@ void CFS_Scythe::Effect_Active(const _wstring& wStrEffectTag)
 
 void CFS_Scythe::Object_Func(const _wstring& wStrObjectTag)
 {
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if(wstrTypeTag == TEXT("Sound"))
+		Sound_Active(wstrPartTag);
+}
+
+void CFS_Scythe::Sound_Active(const _wstring& wStrObjectTag)
+{
+	if (m_iSoundChannel == -1)
+		return;
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Appear"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_Apper_1 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.01f, 2.f);
+	}
+	else if (wstrTypeTag == TEXT("Loop"))
+	{
+		if (false == m_isPlay)
+		{
+			m_isPlay = true;
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_Loop (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.01f, 2.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Seperate"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_SickleSweepsAcross1 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 2.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_SickleSweepsAcross2 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 2.f);
+		}
+	}
 }
 
 void CFS_Scythe::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer)
@@ -268,33 +310,33 @@ void CFS_Scythe::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& 
 		return;
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
-		CAMERA_SHAKE ShakeDesc{};
-		if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
-		{
-			ShakeDesc.fAmplitude = 2.f;
-			ShakeDesc.fDuration = 0.15f;
-			ShakeDesc.fFovKick = 0.f;
-			ShakeDesc.fFrequency = 60.f;
-			ShakeDesc.vRotation = _float3(0.05f, 0.13f, 0.f);
-			ShakeDesc.vTranslation;
-			ShakeDesc.vTranslation;
-#ifdef _DEBUG
-			cout << "Hard" << endl;
-#endif // _DEBUG
-		}
-		else if (eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
-		{
-			ShakeDesc.fAmplitude = 1.f;
-			ShakeDesc.fDuration = 0.1f;
-			ShakeDesc.fFovKick = 0.f;
-			ShakeDesc.fFrequency = 60.f;
-			ShakeDesc.vRotation = _float3(0.075f, 0.075f, 0.f);
-			ShakeDesc.vTranslation;
-#ifdef _DEBUG
-			cout << "Common" << endl;
-#endif // _DEBUG
-		}
-		m_pGameInstance->OnShake(ShakeDesc);
+//		CAMERA_SHAKE ShakeDesc{};
+//		if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
+//		{
+//			ShakeDesc.fAmplitude = 2.f;
+//			ShakeDesc.fDuration = 0.15f;
+//			ShakeDesc.fFovKick = 0.f;
+//			ShakeDesc.fFrequency = 60.f;
+//			ShakeDesc.vRotation = _float3(0.05f, 0.13f, 0.f);
+//			ShakeDesc.vTranslation;
+//			ShakeDesc.vTranslation;
+//#ifdef _DEBUG
+//			cout << "Hard" << endl;
+//#endif // _DEBUG
+//		}
+//		else if (eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
+//		{
+//			ShakeDesc.fAmplitude = 1.f;
+//			ShakeDesc.fDuration = 0.1f;
+//			ShakeDesc.fFovKick = 0.f;
+//			ShakeDesc.fFrequency = 60.f;
+//			ShakeDesc.vRotation = _float3(0.075f, 0.075f, 0.f);
+//			ShakeDesc.vTranslation;
+//#ifdef _DEBUG
+//			cout << "Common" << endl;
+//#endif // _DEBUG
+//		}
+//		m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 		cout << "On Hit! scythe)" << endl;
 #endif // _DEBUG
