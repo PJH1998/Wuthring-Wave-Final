@@ -138,6 +138,7 @@ private:
 	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
+	void						Render_UI_Post();
 	void						Render_Fade();
 	void						Render_NonStatic();
 #ifdef _DEBUG
