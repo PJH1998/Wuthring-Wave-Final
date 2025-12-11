@@ -940,11 +940,9 @@ void CPlayer::Toggle_LockOn()
 
 
 	// 6. 카메라 업데이트.
-	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
+	m_pSpringCamera->Lock_On(pFinalTarget, m_TargetInfo.pSocketMatrix, m_IsLockOn);
 
-	
-
-	// 7. LockOn 초기화?
+	// 7. Target 정보 초기화.
 	m_TargetInfo.Reset();
 }
 
