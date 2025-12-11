@@ -59,8 +59,9 @@ void CCoroProduction::Priority_Update(_float fTimeDelta)
 
 void CCoroProduction::Update(_float fTimeDelta)
 {
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	_float fTrackPosition{};
-	m_IsPlayAnimation = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &fTrackPosition, m_IsRootMotion, m_IsRootMotionRotate, m_IsRootMotionTranslate, 1.f);
+	m_IsPlayAnimation = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * fTimeRatio, &fTrackPosition, m_IsRootMotion, m_IsRootMotionRotate, m_IsRootMotionTranslate, 1.f);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPosition > m_Tracks[m_strCurrentAnimation].second)
 	{
