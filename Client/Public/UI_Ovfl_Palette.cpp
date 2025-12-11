@@ -931,8 +931,10 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 			
 			if (fInstDistance < m_fChangeRadius)
 			{
-				m_arrIsVisited_Sound[iInstIndex] = true;	// 나중에 싹다 false로 초기화하는거 만들어야.
-				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+				m_arrIsVisited_Sound[iInstIndex] = true;
+
+				_float fSpeedMultiply = m_fChangeRadius / 1000.f + 1.25f;
+				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f, fSpeedMultiply);
 			}
 
 			//m_vChangeStartPos;

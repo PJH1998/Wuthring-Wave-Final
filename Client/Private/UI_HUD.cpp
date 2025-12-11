@@ -931,7 +931,7 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 
 
 
-	_float4 vBGColor = _float4{ .5f, .5f, .5f, .3f };
+	_float4 vBGColor = _float4{ .4f, .4f, .4f, .5f };
 
 	CCustom_UI* pSkillBGUI = m_pUI_Skill_BG;    // �ν��Ͻ� 4����
 	auto& skillBGIinstDesc = pSkillBGUI->Get_UIDesc().vecInstanceDescs;
