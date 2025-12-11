@@ -562,6 +562,14 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	
 }
 
+void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Lock_Input(IsLock);
+}
+
 #pragma endregion
 
 #pragma region PLAYER

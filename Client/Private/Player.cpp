@@ -807,6 +807,14 @@ void CPlayer::Bind_EventLock(_bool IsLock)
 {
 	m_IsEventLock = IsLock;
 }
+
+void CPlayer::Lock_Input(_bool IsLock)
+{
+	if (nullptr == m_pInputControllerCom)
+		return;
+
+	m_pInputControllerCom->Set_BlockInput(IsLock);
+}
 #pragma endregion
 
 

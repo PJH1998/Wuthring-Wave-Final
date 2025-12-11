@@ -522,7 +522,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         vTexcoord.y = vPrevProjPos.y * -0.5f + 0.5f;
         vTexcoord.z = fNdcZ;
     
-        if (all(vTexcoord.xy <= 0.997f) && all(vTexcoord.xy >= 0.003f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
+        if (all(vTexcoord.xy <= 0.995f) && all(vTexcoord.xy >= 0.005f) && fPrevViewZ > fFogNear && fPrevViewZ < fFogFar)
         {
             float4 vPrevScattering = PrevVFLightTexture.SampleLevel(DefaultSampler, vTexcoord, 0.f);
         
