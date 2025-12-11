@@ -92,14 +92,10 @@ public:
 
 	void Bind_EventLock(_bool IsLock);
 
-
-
-
+	void Lock_Input(_bool IsLock);
 
 
 #pragma endregion
-
-
 
 
 

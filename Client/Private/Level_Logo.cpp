@@ -55,7 +55,7 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Begin_VF();
 
-	m_pGameInstance->Play_BGM(L"BGM_Logo", ENUM_CLASS(CHANNEL::BGM), 0.5f);
+	m_pGameInstance->Play_BGM(L"BGM_Logo", ENUM_CLASS(CHANNEL::BGM), 0.5f, 1.f);
 
 	return S_OK;
 }

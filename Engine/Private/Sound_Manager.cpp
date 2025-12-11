@@ -129,7 +129,7 @@ HRESULT CSound_Manager::Load_Sound_FromFolderRecursive(const _char* pFolderPath,
 	return S_OK;
 }
 
-void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
     if (nullptr == pSound)
@@ -139,9 +139,10 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_2D);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
+	FMOD_Channel_SetPitch(m_pFixedChannels[iChannelID], fFrequency);
 }
 
-void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency)
 {
 	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
 	if (nullptr == pSound)
@@ -167,9 +168,10 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDst * 10000.f, fMaxDistance * 10000.f);
 	FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
+	FMOD_Channel_SetPitch(m_pFixedChannels[iChannelID], fFrequency);
 }
 
-void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
 	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
 	if (nullptr == pSound)
@@ -179,9 +181,10 @@ void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChan
 	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelID], FMOD_2D);
 	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelID], false);
+	FMOD_Channel_SetPitch(m_pPoolingChannels[iChannelID], fFrequency);
 }
 
-void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency)
 {
 	FMOD_SOUND* pSound = Find_Sound(strSoundTag);
 	if (nullptr == pSound)
@@ -207,9 +210,10 @@ void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChan
 	FMOD_Channel_Set3DMinMaxDistance(m_pPoolingChannels[iChannelID], fMinDst * 10000.f, fMaxDistance * 10000.f);
 	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelID], false);
+	FMOD_Channel_SetPitch(m_pPoolingChannels[iChannelID], fFrequency);
 }
 
-void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
     if (nullptr == pSound)
@@ -219,6 +223,7 @@ void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _fl
     FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_LOOP_NORMAL);
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
+	FMOD_Channel_SetPitch(m_pFixedChannels[iChannelID], fFrequency);
 }
 
 void CSound_Manager::Stop_Sound(_uint iChannelID)

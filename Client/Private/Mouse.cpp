@@ -64,7 +64,7 @@ void CMouse::Update(_float fTimeDelta)
 		m_iCursorPosY = ptMouse.y;
 	}
 	Compute_XY();
-	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixScaling(50.f, 50.f, 1.f) * XMMatrixTranslation(m_iCursorPosX, m_iCursorPosY, 0.1f));
+	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixScaling(50.f, 50.f, 1.f) * XMMatrixTranslation(m_iCursorPosX, m_iCursorPosY, 0.f));
 }
 
 void CMouse::Late_Update(_float fTimeDelta)
@@ -72,7 +72,7 @@ void CMouse::Late_Update(_float fTimeDelta)
 	if (true == m_isMouseFix)
 		return;
 
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::UI_POST, this);
 }
 
 void CMouse::Render()

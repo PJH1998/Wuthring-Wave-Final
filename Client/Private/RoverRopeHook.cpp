@@ -208,6 +208,12 @@ void CRoverRopeHook::Check_StateTransition(_float fTimeDelta)
 					m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
 					return;
 				}
+				else
+				{
+					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDCHANGE;
+					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+					return;
+				}
 			}
 
 			if (!m_States[LAND])
