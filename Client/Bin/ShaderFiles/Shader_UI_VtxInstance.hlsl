@@ -956,7 +956,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 // 이미 지난 부분은 원래의 색으로
                 Out.vColor.rgba *= fColorMul1;
                 if (isUseCustomColor)
-                    Out.vColor *= vCustomColor;
+                    Out.vColor *= vCustomColor * fColorMul1;
                 
                 Out.vColor.a *= (1 - g_AlphaStrength);
             }
@@ -966,7 +966,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 if (fCooldown != 0.f)
                     Out.vColor.rgba *= fColorMul2;
                 if (isUseCustomColor)
-                    Out.vColor *= vCustomColor;
+                    Out.vColor *= vCustomColor *  fColorMul2;
                 
                 Out.vColor.a *= (1 - g_AlphaStrength);
             }
@@ -983,19 +983,17 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             }
             
             
-            static const float fMinRad = 30.f;
-            //static const float fMidRad = 25.f;
-            static const float fMaxRad = 38.f;
-            static const float fClipRad = 42.f;
+                float fDistUV = length(localUV - float2(0.5f, 0.5f));
             
-            float2 vInstPosToScreen = float2(In.vSInstPos.x + g_ScreenSize.x / 2.f, -In.vSInstPos.y + g_ScreenSize.y / 2.f);
-            float fLengthFromCenter = length(In.vPosition.xy - vInstPosToScreen);
-            float fAlphaMultiplier_byDist = smoothstep(fMinRad, fMaxRad, fLengthFromCenter);
-            Out.vColor.a *= (fAlphaMultiplier_byDist);
-            
-            if (fLengthFromCenter > fClipRad)
-                Out.vColor.a *= 0;
-                
+                static const float fMinDistUV = 0.29f;
+                static const float fMaxDistUV = 0.37f;
+                static const float fClipDistUV = 0.43f;
+
+                float fAlphaMultiplier_byDist = smoothstep(fMinDistUV, fMaxDistUV, fDistUV);
+                Out.vColor.a *= fAlphaMultiplier_byDist;
+
+                if (fDistUV > fClipDistUV)
+                    Out.vColor.a *= 1.f - clamp((fDistUV - fClipDistUV) / 0.01f, 0.f, 1.f);
             
             
             
