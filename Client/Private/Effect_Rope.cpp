@@ -1,56 +1,55 @@
 ﻿#include "ClientPch.h"
-#include "Spectrum.h"
+#include "Effect_Rope.h"
 
-CSpectrum::CSpectrum(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEffect_Rope::CEffect_Rope(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
 {
 }
 
-CSpectrum::CSpectrum(const CSpectrum& Prototype)
+CEffect_Rope::CEffect_Rope(const CEffect_Rope& Prototype)
     : CGameObject{ Prototype }
 {
 }
 
-HRESULT CSpectrum::Initialize_Prototype()
+HRESULT CEffect_Rope::Initialize_Prototype()
 {
 
     return S_OK;
 }
 
-HRESULT CSpectrum::Initialize_Clone(void* pArg)
+HRESULT CEffect_Rope::Initialize_Clone(void* pArg)
 {
-    SPECTRUM_DESC* pDesc = static_cast<SPECTRUM_DESC*>(pArg);
-	m_tDesc = *pDesc;
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
 
-    if (FAILED(Ready_Components(*pDesc)))
+    if (FAILED(Ready_Components()))
         return E_FAIL;
 
-    m_iShaderPass = m_tDesc.iShaderPass;
-    m_fLifeTime = m_tDesc.fLifeTime;
-    m_fGeneration = m_tDesc.fGeneration;
-    
+	//로프 이펙트는 굳이 툴로 만들 필요없을듯
+	//그냥 내가 쓰고싶은 설정값들 설정해주면 됨.
+
+	m_fLifeTime = 0.25f;
+	m_iShaderPass = 3;
+
+
 	m_isActivate = false;
 
     return S_OK;
 }
 
-void CSpectrum::Priority_Update(_float fTimeDelta)
+void CEffect_Rope::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CSpectrum::Update(_float fTimeDelta)
+void CEffect_Rope::Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
-	m_fLifeTime = 0.25f;
-  
+ 
 }
 
-void CSpectrum::Late_Update(_float fTimeDelta)
+void CEffect_Rope::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -95,27 +94,18 @@ void CSpectrum::Late_Update(_float fTimeDelta)
 		return;
 	}
 
-	if (m_fSpawnTimer >= m_fGeneration)
-	{
-		_vector vPrevPos = XMLoadFloat3(&m_vPreviousPos);
+	m_Samples.clear();
 
-		_vector vCurrentPos = m_UpdatePosition;
-		_vector vDistance = vPrevPos - vCurrentPos;
+	//플레이어 위치로 갱신
+	SAMPLE_DESC P1Desc = {};
+	P1Desc.vPos, m_vPlayerPos;
+	P1Desc.fSpawnTime = m_fCurrentTime;
+	m_Samples.push_back(P1Desc);
 
-		_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
-
-		if (fDistance > m_fMinDistance)
-		{
-			SAMPLE_DESC Desc = {};
-			XMStoreFloat3(&Desc.vPos, m_UpdatePosition);
-			Desc.fSpawnTime = m_fCurrentTime;
-
-			m_Samples.push_back(Desc);
-
-			XMStoreFloat3(&m_vPreviousPos, m_UpdatePosition);
-			m_fSpawnTimer = 0.f;
-		}
-	}
+	SAMPLE_DESC P2Desc = {};
+	P2Desc.vPos = m_vRopeObjectPos;
+	P2Desc.fSpawnTime = m_fCurrentTime;
+	m_Samples.push_back(P2Desc);
 
 	if (m_Samples.size() >= 2)
 	{
@@ -126,7 +116,7 @@ void CSpectrum::Late_Update(_float fTimeDelta)
     m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
-void CSpectrum::Render()
+void CEffect_Rope::Render()
 {
     if (FAILED(Bind_ShaderResources()))
         return;
@@ -138,27 +128,28 @@ void CSpectrum::Render()
     m_pVIBufferCom->Render();
 }
 
-void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
+void CEffect_Rope::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	SPECTRUM_INFO* pDesc = static_cast<SPECTRUM_INFO*>(pArg);
+	ROPE_INFO* pDesc = static_cast<ROPE_INFO*>(pArg);
 
 	m_fCurrentTime = 0.f;
 	m_fSpawnTimer = 0.f;
 
 	m_pIsActive = pDesc->pIsActive;
-	m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
+	m_pPlayerMatrixPtr = pDesc->pPlayerMatrixPtr;
 	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+
+	m_vRopeObjectPos = pDesc->vRopeObjectPos;
 
 	m_isActivate = *m_pIsActive;
 	m_IsObectActive = *m_pIsActive;
 }
 
-void CSpectrum::Update_Position()
+void CEffect_Rope::Update_Position()
 {
 	if ((m_pBoneMatrixPtr != nullptr) && (*m_pIsActive))
 	{
-
-		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+		_float4x4 ObjectMatrix = *m_pPlayerMatrixPtr;
 		_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
 
 		_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
@@ -168,55 +159,40 @@ void CSpectrum::Update_Position()
 		_vector vRot = {};
 		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
 
-		m_UpdatePosition = vPos;
+		//여기서 Pos가 플레이어의 손 뼈 위치
+		XMStoreFloat3(&m_vPlayerPos, vPos);
 
-	}
-	else if ((m_pObjectMatrixPtr != nullptr) && (*m_pIsActive))
-	{
-
-		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
-		_matrix SpawnMatrix = XMLoadFloat4x4(&ObjectMatrix);
-
-		_vector vScale = {};
-		_vector vPos = {};
-		_vector vRot = {};
-		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
-
-		m_UpdatePosition = vPos;
 	}
 	else if (!(*m_pIsActive) && m_IsObectActive)
 		m_IsObectActive = false;
 }
 
 
-HRESULT CSpectrum::Ready_Components(SPECTRUM_DESC& Desc)
+HRESULT CEffect_Rope::Ready_Components()
 {
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_Spectrum"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(m_tDesc.CurrentLevel, Desc.strVIBufferTag,
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(),TEXT("Prototype_Componenet_VIBuffer_Spectrum_tat"),
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //텍스처 여러개 써야하는데 어떻게 할지 고민해보자
-    if (FAILED(CGameObject::Add_Component(m_tDesc.CurrentLevel, Desc.strTextureTag,
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_SpectrumTexture_T_Trail_10018"),
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(m_tDesc.CurrentLevel, Desc.strColorTextureTag,
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_SpectrumTexture_T_Color_003"),
         TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
         return E_FAIL;
 
     return S_OK;
 }
 
-HRESULT CSpectrum::Bind_ShaderResources()
+HRESULT CEffect_Rope::Bind_ShaderResources()
 {
-  
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
             return E_FAIL;
- 
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
@@ -239,33 +215,33 @@ HRESULT CSpectrum::Bind_ShaderResources()
     return S_OK;
 }
 
-CSpectrum* CSpectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEffect_Rope* CEffect_Rope::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CSpectrum* pInstance = new CSpectrum(pDevice, pContext);
+    CEffect_Rope* pInstance = new CEffect_Rope(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Created : CSpectrum");
+        MSG_BOX("Failed to Created : CEffect_Rope");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CSpectrum::Clone(void* pArg)
+CGameObject* CEffect_Rope::Clone(void* pArg)
 {
-    CSpectrum* pInstance = new CSpectrum(*this);
+    CEffect_Rope* pInstance = new CEffect_Rope(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Failed to Created : CSpectrum");
+        MSG_BOX("Failed to Created : CEffect_Rope");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CSpectrum::Free()
+void CEffect_Rope::Free()
 {
     __super::Free();
 
