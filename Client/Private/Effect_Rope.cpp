@@ -98,7 +98,7 @@ void CEffect_Rope::Late_Update(_float fTimeDelta)
 
 	//플레이어 위치로 갱신
 	SAMPLE_DESC P1Desc = {};
-	P1Desc.vPos, m_vPlayerPos;
+	P1Desc.vPos = m_vPlayerPos;
 	P1Desc.fSpawnTime = m_fCurrentTime;
 	m_Samples.push_back(P1Desc);
 
@@ -137,7 +137,7 @@ void CEffect_Rope::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	m_pIsActive = pDesc->pIsActive;
 	m_pPlayerMatrixPtr = pDesc->pPlayerMatrixPtr;
-	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+ 	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 
 	m_vRopeObjectPos = pDesc->vRopeObjectPos;
 
