@@ -1074,6 +1074,10 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
 #pragma region UI_UNBIND
 		if (m_fHP <= 0.f)
@@ -1203,6 +1207,7 @@ void CLeviatan::Reset_NotifyInteraction()
 
 void CLeviatan::Event1()
 {
+	m_pGameInstance->Set_CurrentCamera_Far(1000.f);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
 	m_pTransformCom->Save_PreviousPosition();
@@ -1213,8 +1218,9 @@ void CLeviatan::Event1()
 void CLeviatan::Event2()
 {
 	//2페이즈 맵으로 이동하기
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 1092.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_pTransformCom->Save_PreviousPosition();
+	m_pGameInstance->Set_CurrentCamera_Far(200.f);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 }
 

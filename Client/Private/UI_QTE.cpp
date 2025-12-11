@@ -127,7 +127,6 @@ void CUI_QTE::Update(_float fTimeDelta)
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
-
 void CUI_QTE::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
@@ -140,7 +139,6 @@ void CUI_QTE::Late_Update(_float fTimeDelta)
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
-
 
 void CUI_QTE::Render()
 {
@@ -187,8 +185,8 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pUI_SectorA_FG_Trigger->SetActivate(false);		// off
 
 		m_fQTEDropRate		= 0.25f;	// 초당 떨어지는 정도.
-		m_fQTEFillAmount	= 0.1f;		// 조작 1회 당 차는 정도
-		m_fQTEMaxTime		= 3.f;		// QTE 제한시간.
+		m_fQTEFillAmount	= 0.15f;		// 조작 1회 당 차는 정도
+		m_fQTEMaxTime		= 5.f;		// QTE 제한시간.
 	}break;
 	case Client::UI_QTE_TYPE::TRIGGER_ROPE:
 	{
@@ -202,7 +200,7 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		m_fQTEDropRate		= 0.0f;
 		m_fQTEFillAmount	= 1.0f;		// 사실상 한번만 누르면 바로 차게끔.	
-		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
+		m_fQTEMaxTime		= 5.f;		// 필요 시 변경
 	}break;
 	case Client::UI_QTE_TYPE::TRIGGER_EXECUTE:
 	{
@@ -216,7 +214,7 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		m_fQTEDropRate		= 0.0f;
 		m_fQTEFillAmount	= 1.0f;		// 사실상 한번만 누르면 바로 차게끔.	
-		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
+		m_fQTEMaxTime		= FLT_MAX;		// 필요 시 변경
 	}break;
 	}
 

@@ -22,8 +22,16 @@ private:
 	void							Ready_UI();
 	void							Ready_Mouse();
 	void							Ready_SkyBox();
+
 private:
-	class CGameSystem*		m_pGameSystem = { nullptr };
+	void							Update_SoundOrder(_float fTimeDelta);
+	void							Update_ClickSound();
+	void							Update_GoinFinish(_float fTimeDelta);
+
+	
+
+private:
+	class CGameSystem*				m_pGameSystem = { nullptr };
 	LEVEL							m_eCurLevel = { LEVEL::LOGO };
 
 #ifdef _DEBUG
@@ -37,6 +45,19 @@ private:
 	void DEBUG_FUNCTION();
 
 #endif
+
+private:
+	_bool			m_isReqedFinish = false;
+
+	// ========== for Sound.. ==========
+	_float			m_fElapsedTime = 0.f;
+	const _float	m_fLoginStartTime = 7.f;
+	_uint			m_iSoundOrder = 0;
+
+	_float			m_fElapsedFinishTime = 0.f;
+	const _float	m_fFinishTime = 2.5f;
+	_bool			m_isGoinFinish = false;
+	// ==============================
 
 public:
 	static		CLevel_Logo*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

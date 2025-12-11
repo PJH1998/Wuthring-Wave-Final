@@ -159,6 +159,21 @@ void CGameSystem::Load_EffectLightData_FromFolder(const string& strFolderPath)
 	return m_pParser->Load_FXLight_Data_FromFolder(strFolderPath);
 }
 
+void CGameSystem::Load_EffectSpecturmTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectSpectrumTexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectSpectrumVB_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_Spectrum_VB_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Create_Spertrum(const string& strFolderPath, LEVEL eLevel, _uint PoolingNum)
+{
+	return m_pParser->Create_Spectrum(strFolderPath, eLevel, PoolingNum);
+}
+
 
 #pragma region FACTORY
 
@@ -400,6 +415,11 @@ void CGameSystem::Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive)
 
 
 #pragma region TRIGGER
+
+_uint CGameSystem::Get_CurrentCharacterIndex() const
+{
+	return m_pPlayerStatus->Get_CurrentCharIndex();
+}
 
 // Trigger 등록
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)

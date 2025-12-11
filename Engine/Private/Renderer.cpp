@@ -195,7 +195,6 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
-	Render_NonStatic();
 	//if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 	//	CRASH("Render Fail");
 	//m_pGameInstance->RenderBufferPool(0);
@@ -207,6 +206,7 @@ void CRenderer::Render()
 	//m_pGameInstance->End_MRT();
 	Render_Decal();
 	Render_SSAO();			
+	Render_NonStatic();
 	Render_Dynamic();
 
 	Render_Light();

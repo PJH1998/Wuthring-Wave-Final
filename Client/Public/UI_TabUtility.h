@@ -27,7 +27,9 @@ public: // 생성/복제
 	
 public:
 	// 종료 애니메이션 재생 + 현재 선택한 종류의 인덱스 반환
-	_uint			Req_OffTabUI()	{ m_IsGoinDisabled = true; return m_iSelectedIndex; }
+	_uint			Req_OffTabUI()	{	m_IsGoinDisabled = true; 
+										m_pGameInstance->Play_Sound(L"UI_TabUtility_Close", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+										return m_iSelectedIndex; }
 
 private:
 	void			Update_InitialCheck_SelectedUtility();			// 여기서 캐릭터 현재 선택중인 게 뭔지 받아옴

@@ -32,6 +32,9 @@ public:
 	void							Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectLightData_FromFolder(const string& strFolderPath) ;
+	void							Load_EffectSpecturmTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectSpectrumVB_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Create_Spertrum(const string& strFolderPath, LEVEL eLevel, _uint PoolingNum);
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
@@ -181,6 +184,7 @@ public:
 
 #pragma region PLAYER STATUS
 	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
+	_uint Get_CurrentCharacterIndex() const;
 #pragma endregion
 
 

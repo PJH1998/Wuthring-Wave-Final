@@ -17,7 +17,7 @@ CLevel_Shader::CLevel_Shader(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Shader::Initialize()
 {
-	m_pGameInstance->Load_Resource("../../Client/Bin/Resource/Map/The_False_Sovereign/");
+	m_pGameInstance->Load_Resource("../../Client/Bin/Resource/Map/Asphodel_Barrens/");
 
 	if (FAILED(Ready_Light()))
         CRASH("Failed Light");
@@ -134,23 +134,23 @@ HRESULT CLevel_Shader::Ready_TestObjects()
     _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.0001f, 0.0001f, 0.0001f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
     AuguDesc.PreTransformMatrix = PreTransformationMatrix;
 
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
-                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
-        CRASH("Failed Clone Dummy Wolf");
+    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
+    //                                                   ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
+    //    CRASH("Failed Clone Dummy Wolf");
 
     //AuguDesc.vPosition = XMVectorSet(0.f, -120.f, 0.f, 1.f);
     //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
     //                                                   ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
     //    CRASH("Failed Clone Dummy Wolf");
 
-    //CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
-    //PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
-    //    * XMMatrixTranslationFromVector(XMVectorSet(0.f, -10.f, 0.f, 1.f));
-    //MapDesc.PreTransformMatrix = PreTransformationMatrix;
+    CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
+    PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
+        * XMMatrixTranslationFromVector(XMVectorSet(0.f, -10.f, 0.f, 1.f));
+    MapDesc.PreTransformMatrix = PreTransformationMatrix;
 
-    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
-    //                                                   ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
-    //    CRASH("Failed Clone Dummy Wolf");
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
+                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
+        CRASH("Failed Clone Dummy Wolf");
 
     return S_OK;
 }
