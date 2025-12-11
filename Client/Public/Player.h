@@ -138,6 +138,7 @@ private:
 	_bool m_IsChanage = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsEventLock = { false };
+	_bool m_IsBattle = { false };
 
 	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};

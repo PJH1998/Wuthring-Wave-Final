@@ -200,6 +200,9 @@ void CPlayer::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
 
+	
+		
+
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
@@ -842,8 +845,21 @@ void CPlayer::Sorting_Target()
         //m_pTargetTransform = m_TargetTransforms[0];
 		m_TargetInfo = m_TargetCandidates[0];
 		m_TargetInfo.IsActive = true;
-    }
 
+		// 몬스터가 탐지되었고, 전투 BGM이 진행 중이라면.
+		if (m_pGameSystem->IsModinaryBattle())
+			m_IsBattle = true;
+    }
+	else
+	{
+		// 몬스터가 탐지되어 있지 않은데 전투 상태라면?
+		if (m_IsBattle)
+		{
+			m_pGameSystem->Engage_Battle(false);
+			m_IsBattle = false;
+		}
+			
+	}
 
 }
 
