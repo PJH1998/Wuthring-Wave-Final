@@ -135,23 +135,6 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CParticle::Default_Transform(_fmatrix WorldMatrix)
 {
-	/*if (!m_IsRoot)
-	{
-		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
-
-		m_pTransformCom->Set_State(STATE::POSITION, vPos);
-	}
-	else if(m_IsPivot)
-	{
-		_vector vLook = XMVectorSetW(WorldMatrix.r[2], 0.f);
-		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
-
-		m_pTransformCom->Set_State(STATE::POSITION, vPos);
-
-		PARTICLE_DefaultCB Desc = {};
-		XMStoreFloat3(&Desc.vPivot, vLook);
-		m_pVIBufferCom->Bind_CS_Option(&Desc);
-	}*/
 	if (m_IsPivot)
 	{
 		_matrix ObjectMatrix = XMLoadFloat4x4(m_pObjectMatrixPtr);
@@ -187,8 +170,6 @@ void CParticle::Default_Transform(_fmatrix WorldMatrix)
 
 		m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * OffsetSpawnMatrix);
 	}
-
-	//계속 붙으면서 Pivot 갱신도 필요하다면..?허허
 }
 
 void CParticle::Bind_CS_SpriteInfo()
