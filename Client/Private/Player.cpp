@@ -406,7 +406,7 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-
+		m_pSpringCamera->Use_Spring(2.5f, 0.1f);
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
@@ -812,6 +812,13 @@ void CPlayer::Bind_Gravity(_bool IsGravity)
 
 	m_pColliderCom->Set_Gravity(IsGravity);
 }
+void CPlayer::Use_Spring(_float fDestination, _float fDuration)
+{
+	if (nullptr == m_pSpringCamera)
+		return;
+
+	m_pSpringCamera->Use_Spring(fDestination, fDuration);
+}
 #pragma endregion
 
 
@@ -836,6 +843,7 @@ void CPlayer::Sorting_Target()
 		m_TargetInfo = m_TargetCandidates[0];
 		m_TargetInfo.IsActive = true;
     }
+
 
 }
 
@@ -1230,7 +1238,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
     RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-    RigidbodyDesc.vExtent = _float3(30.f, 15.f, 30.f);
+    RigidbodyDesc.vExtent = _float3(30.f, 30.f, 30.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
     if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

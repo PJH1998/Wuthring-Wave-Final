@@ -95,6 +95,8 @@ public:
 	void Lock_Input(_bool IsLock);
 
 	void Bind_Gravity(_bool IsGravity);
+	
+	void Use_Spring(_float fDestination, _float fDuration);
 
 
 #pragma endregion
