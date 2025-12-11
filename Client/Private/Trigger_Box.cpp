@@ -34,37 +34,40 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	switch (m_iTriggerIndex)
 	{
 	case 0:
-		m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Start"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false));
+		m_CamMatrix =new CamSet( make_pair(TEXT("Action_Asphodel_Barrens_Start"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false)));
 		break;
 
 	case 2:
-		m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Meteo"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Meteo"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false)));
 		break;
 
 	case 4:
-		m_CamMatrix = make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true)));
 		break;
 	case 21:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 
 	case 22:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 	case 23:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(XMConvertToRadians(177.5f)));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false)));
 		break;
 	case 24:
 		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)));
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 	case 25:
 		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
-		m_CamMatrix = make_pair(TEXT("Action_False_Sonora_04"), make_pair(Mat, false));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_04"), make_pair(Mat, false)));
 		break;
+	case 30:
+		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Coro_First"), make_pair(Mat, false)));
 	}
 
 
@@ -101,7 +104,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	{
 		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
 			m_IsTriggered = true;
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 			});
 	}
 
@@ -110,9 +113,9 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 
 void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
-	if (m_iTriggerIndex > 20)
+	if (m_iTriggerIndex > 20 && m_iTriggerIndex < 30)
 	{
-		if(m_IsTriggered)
+		if (m_IsTriggered)
 		{
 			m_pGameSystem->Change_Sonoro(true);
 			m_IsTriggered = !m_IsTriggered;
@@ -200,21 +203,19 @@ void CTrigger_Box::Collision_End()
 void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
-		_float4x4 Mat;
+		if(m_CamMatrix)
+			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 		switch (m_iTriggerIndex)
 		{
-		case 0:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-
-
-		case 2:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-
-		case 4:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
+		//case 0:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;		
+		//case 2:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
+		//case 4:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
 
 		case 7:
 			m_pGameSystem->Stop_Action();
@@ -224,21 +225,21 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			break;
 
-		case 21:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 22:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 23:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 24:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
-		case 25:
-			m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-			break;
+		//case 21:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
+		//case 22:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
+		//case 23:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
+		//case 24:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
+		//case 25:
+		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
+		//	break;
 		/*case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ATTACK, 0.f, 0.f);
 			break;*/
@@ -286,6 +287,7 @@ void CTrigger_Box::Free()
 	__super::Free();
 	m_pTempPtr = nullptr;
 	m_pSecondTempPtr= nullptr;
+	Safe_Delete(m_CamMatrix);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidbodyCom);
 }
