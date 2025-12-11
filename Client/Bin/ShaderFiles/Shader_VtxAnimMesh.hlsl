@@ -17,7 +17,7 @@ float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
 float4 g_vBaseColor = 1.f;
-float3 g_vCamPosition;
+float4 g_vCamPosition;
 float g_fMaxTime = 1.f;
 float g_fCurrentTime = 0.f;
 

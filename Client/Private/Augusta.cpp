@@ -71,26 +71,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 1. Delayed Action 수행.
-	Process_DelayedActions(fTimeDelta);
-
-	// 2. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
-
-    // 3. 이전 위치 저장
-	m_pTransformCom->Save_PreviousPosition();
-
-	// 4. 몬스터가 있다면?
-	Update_TargetDistance();
-	
-	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-	// 5. Dissovle 체크
+	// 1. Dissolve 체크
 	if (IsDissolve)
 	{
 		if (m_fDissolveTimer <= m_fMaxDissolveTime)
@@ -101,6 +84,27 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
+
+	
+	if (!IsDissolve)
+	{
+		// 2. Delayed Action 수행.
+		Process_DelayedActions(fTimeDelta);
+
+		// 3. 이전 위치 저장
+		m_pTransformCom->Save_PreviousPosition();
+
+		// 4. 몬스터가 있다면?
+		Update_TargetDistance();
+	}
+		
+	// 5. Parts 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+	
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -146,23 +150,29 @@ void CAugusta::Update(_float fTimeDelta)
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+
+	if (!IsDissolve)
 	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
-	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else
-	{
-		// 2. QTE인 경우 Collider 갱신하지 않음.
-		if (!m_IsQTE)
-			m_pColliderCom->Sync_Position(m_pTransformCom);
+		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
+		else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
 		else
-			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		{
+			// 2. QTE인 경우 Collider 갱신하지 않음.
+			if (!m_IsQTE)
+				m_pColliderCom->Sync_Position(m_pTransformCom);
+			else
+				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		}
+		
 	}
-	
 
 	if (m_IsQTEend)
 	{
@@ -170,6 +180,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
+	
 
 	if (m_IsVisible)
 	{

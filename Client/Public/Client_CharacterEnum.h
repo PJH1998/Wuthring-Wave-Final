@@ -6,6 +6,7 @@ namespace Client
 		LEVIATAN_QTE, // Leviatan QTE
 		LEVIATAN_GRAB,
 		LEVIATAN_QTE_SUCCESS,
+		TELEPORT,
 
 		END
 	};
@@ -52,9 +53,10 @@ namespace Client
 		LANDSLIDE_READY = 1 << 15, // Player에서 LandSlide 이벤트.
 		LANDSLIDE = 1 << 16, // Player에서 LandSlide 이벤트.
 		FPS = 1 << 17, // 1인칭 시점 상태.
-		COLLIDER_UNACTIVE = 1 << 18, // 콜라이더 끈상태.
+		COLLIDER_UNACTIVE = 1 << 18, // 콜라이더 끈상태.8
 		ANIMSTOP = 1<< 19, // Animation Stop 상태.
 		CONTORL = 1 << 20,
+		KEYINPUT_LOCK = 1 << 21, // 키인풋 막기.
 		END
 	};
 
