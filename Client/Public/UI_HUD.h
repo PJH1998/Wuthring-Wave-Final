@@ -18,6 +18,10 @@ private:
 	enum HUD_BOSS_SABAR			{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
 	enum HUD_PLAYER_SYMBOLCOLOR { CLR_ROVER, CLR_AUGUSTA, CLR_GALBRENA, CLR_AUGUSTA_ULT, CLR_END };
 	enum HUD_BTN_INDEX			{ BTN_E, BTN_R, BTN_LB /* 아우구스타, 갈브만 존재 */, BTN_END };
+	enum HUD_KEY_INDEX			{ KEY_2, KEY_3, KEY_F, KEY_E, 
+								  KEY_4, KEY_5, KEY_0, KEY_Q, 
+								  KEY_8, KEY_6, KEY_7, KEY_R, 
+								  KEY_9, KEY_1, KEY_T, KEY_LB };
 
 private:
 	explicit				CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -155,6 +159,8 @@ private:
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
 	array<array<_float2, 2>, 5>						m_arrUtilCoordPresets = {};
+	array<array<_float2, 2>, 16>					m_arrKeyGuidePresets = {};
+
 	array<_float4, 4>								m_arrPlayerSymbolicColors = {};
 	array<_float4, 4>								m_arrPlayerAdvSymbolicColors = {};
 	_uint m_iSelectedCHIndex = 0;
