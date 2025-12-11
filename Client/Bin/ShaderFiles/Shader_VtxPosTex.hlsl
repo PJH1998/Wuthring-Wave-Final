@@ -197,9 +197,9 @@ PS_SPECTRUMOUT PS_SPUCTRUM_DG(PS_IN In)
     
     Out.vColor = float4(vColor.rgb, 1.f);
     
-    vColor.rgb = saturate(vColor.rgb);
-    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
-    vColor.rgb *= g_ColorGain;
+    Out.vColor.rgb = saturate(vColor.rgb);
+    Out.vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    Out.vColor.rgb *= g_ColorGain;
 
     float fWeight = Luminance(Out.vColor.xyz);
 
