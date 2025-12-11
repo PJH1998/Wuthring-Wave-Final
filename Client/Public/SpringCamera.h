@@ -34,7 +34,7 @@ public:
 		m_eCameraState = CAMERA_STATE::SPRING;
 	}
 	// Lock-On
-	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
+	void							Lock_On(class CTransform* pTargetTransform, const _float4x4* pBoneMatrix, _bool IsLockOn)
 	{
 		if (nullptr == pTargetTransform || false == IsLockOn)
 		{

@@ -102,13 +102,13 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 			});
 	}
 
-	if (m_iTriggerIndex == 34)
+	/*if (m_iTriggerIndex == 34)
 	{
 		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
 				m_pGameSystem->Bind_Gravity_ToPlayer(true);
 			});
-	}
+	}*/
 
 
 	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 25)
@@ -283,6 +283,7 @@ void CTrigger_Box::Register_Trigger()
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
+			//m_pGameSystem->Change_BGM(TEXT(""));
 			break;
 		case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);

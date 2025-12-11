@@ -554,11 +554,6 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
 	else if (strTransition == "Teleport")
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::TELEPORT, pArg);
-	
-	
-	
-	
-	
 }
 
 void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)
@@ -575,6 +570,14 @@ void CGameSystem::Bind_Gravity_ToPlayer(_bool IsGravity)
 		return;
 
 	m_pPlayer->Bind_Gravity(IsGravity);
+}
+
+void CGameSystem::Use_Spring(_float fDestination, _float fDuration)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Use_Spring(fDestination, fDuration);
 }
 
 #pragma endregion
@@ -673,6 +676,10 @@ void CGameSystem::Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel)
 void CGameSystem::Change_BGM(const _wstring& BGMText)
 {
 	m_pBGM_Manager->Change_BGM(BGMText);
+}
+_bool CGameSystem::IsModinaryBattle()
+{
+	return m_pBGM_Manager->IsModinaryBattle();
 }
 #pragma endregion
 

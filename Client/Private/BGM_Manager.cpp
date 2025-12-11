@@ -99,14 +99,22 @@ void CBGM_Manager::Stop_BGM()
 void CBGM_Manager::Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel)
 {
 	//잡몹 전투가 아니면 플레이어가 끌 수 있게. -> 최근 전투 판정 나온 게 잡몹이냐 판정. 소리 꺼달라는 채널이 최근 전투와 같냐 판정
+
+	//잡몹전투일 때 
 	if (m_eLastBattle != BOSSBGM::END)
 	{
+		if (m_eLastBattle == BOSSBGM::MODINARY && eBossLevel == BOSSBGM::END)
+		{
+			m_IsBattle = IsBattle;
+			m_eLastBattle = eBossLevel;
+			return;
+		}
 		if (m_eLastBattle != eBossLevel)
 			return;
 	}
 	m_IsBattle = IsBattle;
 	m_eLastBattle = eBossLevel;
-	if (eBossLevel == BOSSBGM::END)
+	if (eBossLevel == BOSSBGM::MODINARY)
 		m_pGameInstance->Play_BGM(m_BattleBGM, ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
 	else
 		m_pGameInstance->Play_BGM(m_BossBGM[eBossLevel], ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);

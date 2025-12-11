@@ -227,6 +227,7 @@ public:
 	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
 	void						Lock_Input_ToPlayer(_bool IsLock);
 	void						Bind_Gravity_ToPlayer(_bool IsGravity);
+	void						Use_Spring(_float fDestination, _float fDuration);
 #pragma endregion
 
 #pragma region PLAYER
@@ -257,7 +258,7 @@ public:
 	void Stop_BGM();
 	void Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel = BOSSBGM::END);
 	void Change_BGM(const _wstring& BGMText);
-
+	_bool IsModinaryBattle();
 #pragma endregion
 private:
 	class	CParser*				m_pParser					= { nullptr };
