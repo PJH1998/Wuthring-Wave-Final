@@ -364,7 +364,7 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName)
 {
-	if (nullptr == m_GrappleInfo.pTransform ||
+	if (nullptr == m_GrappleInfo.pTransform||
 		false == m_IsRopeActive)
 		return;
 

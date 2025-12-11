@@ -41,13 +41,11 @@ private:
 	//CComputeShader*			m_pComputeShaderCom = { nullptr };
 
 	_float						m_fCurrentTime = 0.f;
-	_float						m_fSpawnTimer = 0.f;
 	_float						m_fMaskSpeed = 1.f;
-	_float						m_fGeneration = 0.f;
+	_float						m_fColorGamma = 1.2f;
+	_float						m_fColorGain = 0.7f;
 
 	_int						m_iShaderPass = 0;
-	_float						m_fLifeTime = {};
-	_float						m_fMinDistance = 0.1f;
 
 	_float3						m_vPlayerPos = {};
 	_float3						m_vRopeObjectPos = {};

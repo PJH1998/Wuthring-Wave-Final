@@ -38,8 +38,11 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 	m_pAttackTransform = m_pModelCom->Get_BoneMatrixPtr("HitCase");
 	m_MeshEnables.resize(m_pModelCom->Get_NumMesh(), true);
 	//풀링 오브젝트 자체적으로 activate 끄기
+	
 	m_isActivate = false;
+	
 	m_ShaderIndices[GGOBUL_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
+
     return S_OK;
 }
 
@@ -77,6 +80,9 @@ void CGgobul::Late_Update(_float fTimeDelta)
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CGgobul::Render()
@@ -93,7 +99,10 @@ void CGgobul::Render()
 	{
 		if (false == m_MeshEnables[i])
 			continue;
+
+
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		m_pShaderCom->Begin(0);
 
@@ -103,6 +112,29 @@ void CGgobul::Render()
 	if (nullptr != m_pAttackVolumes[m_eType])
 		m_pAttackVolumes[m_eType]->Render();
 #endif
+}
+
+void CGgobul::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (false == m_MeshEnables[i])
+			continue;
+
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
