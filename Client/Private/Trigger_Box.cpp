@@ -56,7 +56,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
 		break;
 	case 23:
-		XMStoreFloat4x4(&Mat, XMMatrixRotationY(XMConvertToRadians(177.5f)));
+		XMStoreFloat4x4(&Mat, XMMatrixRotationY(XMConvertToRadians(177.5f + 180.f)));
 		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false)));
 		break;
 	case 24:
