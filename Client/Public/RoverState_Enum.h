@@ -78,10 +78,6 @@ enum class ERoverCaptureState : _uint
 enum class ERoverIdleType : _uint
 {
 	STAND1_ACTION01 = 0,
-	STAND1_ACTION02,
-	STAND1_ACTION03,
-	STAND1_TURN_L90D,
-	STAND1_TURN_R90D,
 	STAND1,
 	STAND2,
 	STAND_CONTROL,
