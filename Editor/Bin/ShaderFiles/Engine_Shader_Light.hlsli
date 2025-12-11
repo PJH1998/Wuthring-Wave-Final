@@ -201,7 +201,6 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
         
         Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
         Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
-
     }
 
     //float4 vAmbientColor = vDiffuse * g_LightDatas[iLightIndex].vDiffuse; //Ambient ���� ������ �ӽ�
