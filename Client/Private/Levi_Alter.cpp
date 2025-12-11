@@ -238,12 +238,36 @@ void CLevi_Alter::Effect_Active(const _wstring& wStrEffectTag)
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
-	PREFAB_INFO EffectDesc{};
-	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	EffectDesc.pModelPtr = m_pModelCom;
+	size_t Index = wStrEffectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrEffectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrEffectTag.substr(Index + 1);
 
-	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	if (wstrTypeTag == TEXT("SPECTRUM"))
+	{
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrSpectrumTag = wstrPartTag.substr(0, Index);
+		wstrPartTag = wstrPartTag.substr(Index + 1);
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrBoneName = wstrPartTag.substr(0, Index);
+		_wstring wstrDuration = wstrPartTag.substr(Index + 1);
+
+		SPECTRUM_INFO Spectrum{};
+		Spectrum.pModelMarixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		Spectrum.pIsActive = nullptr;
+		Spectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(WStringToString(wstrBoneName).c_str());
+		Spectrum.fDuration = stof(wstrDuration);
+
+		m_pGameInstance->Spawn_PoolingObject(wstrSpectrumTag, XMMatrixIdentity(), &Spectrum);
+	}
+	else
+	{
+		PREFAB_INFO EffectDesc{};
+		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		EffectDesc.pModelPtr = m_pModelCom;
+		_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+
+		m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	}
 }
 
 void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
