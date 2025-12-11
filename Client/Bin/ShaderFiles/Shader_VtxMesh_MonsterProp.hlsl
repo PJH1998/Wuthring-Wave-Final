@@ -12,6 +12,9 @@ float4 g_vBaseColor = 1.f;
 
 float g_fFxTime;
 
+matrix g_ShadowViewMatrix[4];
+matrix g_ShadowProjMatrix[4];
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -132,6 +135,64 @@ PS_OUT PS_SHUI(PS_IN In)
 }
 
 
+struct VS_OUT_SHADOW
+{
+    float4 vPosition : POSITION;
+};
+
+VS_OUT_SHADOW VS_SHADOW(VS_IN In)
+{
+    VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
+    
+    Out.vPosition = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+
+    return Out;
+}
+
+struct GS_IN
+{
+    float4 vPosition : POSITION;
+};
+
+struct GS_OUT
+{
+    float4 vPosition : SV_POSITION;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+[maxvertexcount(12)]
+void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
+{
+    for (int Face = 0; Face < 4; Face++)
+    {
+        GS_OUT Out = (GS_OUT) 0;
+        Out.iIndex = Face;
+        
+        matrix matVP;
+        matVP = mul(g_ShadowViewMatrix[Face], g_ShadowProjMatrix[Face]);
+
+        for (int i = 0; i < 3; i++)
+        {
+            Out.vPosition = mul(In[i].vPosition, matVP);
+            Vertices.Append(Out);
+        }
+        Vertices.RestartStrip();
+    }
+}
+
+struct PS_IN_SHADOW
+{
+    float4 vPosition : SV_POSITION;
+};
+
+void PS_SHADOW(PS_IN_SHADOW In)
+{
+    if (In.vPosition.z >= 1.f)
+        discard;
+}
+
+
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -145,7 +206,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN();
     }
 
-    pass ShuiPass
+    pass ShuiPass // 1
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -156,6 +217,16 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_SHUI();
     }
     
+    pass Shadow // 2
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_SHADOW();
+        GeometryShader = compile gs_5_0 GS_SHADOW();
+        PixelShader = compile ps_5_0 PS_SHADOW();
+    }
     //pass NormalTex // 1
     //{
     //    SetRasterizerState(RS_Default);
