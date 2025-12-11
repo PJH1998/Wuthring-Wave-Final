@@ -1044,6 +1044,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
 		m_isAggro = true;
+		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
 	}
 }
 
@@ -1083,6 +1084,7 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_TWO);
 		}
 #pragma endregion
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
@@ -1213,6 +1215,12 @@ void CLeviatan::Event1()
 	m_pTransformCom->Save_PreviousPosition();
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
+	m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_ONE);
+	m_pGameSystem->Change_BGM(TEXT("Null"));
+
+	//떠오를 때 노티파이로 이거 실행
+	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_CHNAGE);
+
 }
 
 void CLeviatan::Event2()
@@ -1222,6 +1230,8 @@ void CLeviatan::Event2()
 	m_pTransformCom->Save_PreviousPosition();
 	m_pGameInstance->Set_CurrentCamera_Far(200.f);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
+	m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 }
 
 _bool CLeviatan::isKnockDown()

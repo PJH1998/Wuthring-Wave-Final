@@ -908,11 +908,9 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag); // Character 함수
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
-		
-	
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
 
-
-	return;
 }
 
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)

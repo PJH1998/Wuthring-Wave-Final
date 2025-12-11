@@ -25,7 +25,7 @@ void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 	XMStoreFloat4(&m_vTargetPosition, TargetPos);
 }
 
-void CSpringCamera::Lock_On(CTransform* pTargetTransform, _bool IsLockOn)
+void CSpringCamera::Lock_On(CTransform* pTargetTransform, const _float4x4* pBoneMatrix, _bool IsLockOn)
 {
 	m_pTargetTransform = pTargetTransform;
 
@@ -36,10 +36,17 @@ void CSpringCamera::Lock_On(CTransform* pTargetTransform, _bool IsLockOn)
 	}
 	else
 	{
+		// LockOn Position 계산
+		_matrix LockOnMatrix = XMLoadFloat4x4(pBoneMatrix) * pTargetTransform->Get_WorldMatrix();
+		_vector vScale{}, vQuat{}, vPos{};
+		XMMatrixDecompose(&vScale, &vQuat, &vPos, LockOnMatrix);
+		XMStoreFloat4(&m_LockOnPosition, vPos);
+
 		// LockOn 처음에 초기 셋팅
 		if (CAMERA_STATE::LOCKON != m_eCameraState)
 		{
-			XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
+			//XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
+			XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + XMLoadFloat4(&m_LockOnPosition) * m_fRatio);
 			_vector vLook = XMLoadFloat4(&m_vLookPosition) - m_pTransformCom->Get_State(STATE::POSITION);
 			m_pTransformCom->LookDir(XMVector3Normalize(vLook));
 		}
@@ -253,7 +260,8 @@ void CSpringCamera::Dual_Targeting(_float fTimeDelta)
 	//
 	//fRatio = fRatio - max(0.f, min(fDot, fRatio - 0.05f));
 
-	XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
+	//XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
+	XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + XMLoadFloat4(&m_LockOnPosition) * m_fRatio);
 	// Dynamic Distance
 	Dynamic_Distance();
 	// Moving Lerp
@@ -264,8 +272,9 @@ void CSpringCamera::Dynamic_Distance()
 {
 	if (nullptr == m_pTargetTransform)
 		return;
-	//_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition)));
-	_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	
+	//_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vLockOnPos = XMLoadFloat4(&m_LockOnPosition);
 	_vector vTargetPos = XMLoadFloat4(&m_vTargetPosition);
 	vLockOnPos.m128_f32[1] = 0.f;
 	vTargetPos.m128_f32[1] = 0.f;
@@ -296,7 +305,8 @@ void CSpringCamera::Dynamic_Fov(_float fTimeDelta)
 		return;
 
 	_vector vTargetPos = XMLoadFloat4(&m_vTargetPosition);
-	_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	//_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vLockOnPos = XMLoadFloat4(&m_LockOnPosition);
 
 	_float fGapY = fabsf(vLockOnPos.m128_f32[1] - vTargetPos.m128_f32[1]);
 

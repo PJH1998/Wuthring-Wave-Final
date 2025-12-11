@@ -87,9 +87,7 @@ void CGalbrenaGroundQTE::OnExit()
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-
-	//m_pGalbrena->Reset_QTECamera();
-
+	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 	
 }
 

@@ -347,7 +347,6 @@ _float CAbility::Get_Cost(COST_TYPE eType) const
 // 사용 전에 무조건 Check_SkillState호출?
 SKILL_STATE CAbility::TryUseSkill(const _string& strSkillName)
 {
-	
 	// 1. 먼저 스킬 사용이 가능한지 상태를 체크
 	const SKILL_STATE eState = Check_SkillState(strSkillName);
 
