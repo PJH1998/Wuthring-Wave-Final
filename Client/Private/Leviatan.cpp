@@ -1055,6 +1055,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
 		m_isAggro = true;
 		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_INTRO);
+		m_pGameSystem->Change_BGM(TEXT("Null"));
 	}
 }
 

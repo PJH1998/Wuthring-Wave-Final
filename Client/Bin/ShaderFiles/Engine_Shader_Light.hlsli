@@ -138,7 +138,6 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
     
     Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient), 1.f);
     
-    
     return Out;
 }
 
