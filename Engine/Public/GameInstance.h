@@ -35,9 +35,9 @@ public:
 
 #pragma region INPUT_DEVICE
 public:
-	KEYSTATE Get_DIKeyState(_ubyte byKeyID);
-	KEYSTATE Get_DIMouseState(MOUSEKEYSTATE eState);
-	_long Get_DIMouseMove(MOUSEMOVESTATE eState);
+	KEYSTATE		Get_DIKeyState(_ubyte byKeyID);
+	KEYSTATE		Get_DIMouseState(MOUSEKEYSTATE eState);
+	_long			Get_DIMouseMove(MOUSEMOVESTATE eState);
 #pragma endregion
 
 #pragma region SOUND_MANAGER
@@ -45,9 +45,9 @@ public:
 	_uint			Register_Channel();
 	void			Return_Channel(_uint iChannelIndex);
 
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D = false);
-	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D = false);
-	HRESULT		Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D = false);
+	HRESULT			Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D = false);
+	HRESULT			Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D = false);
+	HRESULT			Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D = false);
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance);	// 3D
 	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume);

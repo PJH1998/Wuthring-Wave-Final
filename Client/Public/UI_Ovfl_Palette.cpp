@@ -157,6 +157,8 @@ void CUI_Ovfl_Palette::Render()
 
 void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	m_pGameInstance->Play_Sound(L"UI_OVFL_Open", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+
 	UI_OVFLPALETTE_DESC* pDesc = static_cast<UI_OVFLPALETTE_DESC*>(pArg);
 	_uint iTargetLevel = pDesc->iTargetLevel;
 
@@ -458,14 +460,14 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 	_uint iNumInstHovers = static_cast<_uint>(pTargetUI->Get_UIDesc().vecInstanceDescs.size());
 
 	_bool isHovered = false;
-	_uint iHoveredIndex = UINT_MAX;
+	m_iHoveredIndex = UINT_MAX;
 
 	for (_uint i = 0; i < iNumInstHovers; i++)
 	{
 		isHovered = pHoverCheckTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), i);
 		if (isHovered)
 		{
-			iHoveredIndex = i;
+			m_iHoveredIndex = i;
 			break;
 		}
 	}
@@ -478,10 +480,15 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 	{
 		auto& instDesc = targetInstDesc[i];
 
-		instDesc.vClipTexcoordX = (iHoveredIndex == i) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f }; // 마우스를 올린 게 있으면 {0.f, 1.f} 가 들어가야 함
+		instDesc.vClipTexcoordX = (m_iHoveredIndex == i) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f }; // 마우스를 올린 게 있으면 {0.f, 1.f} 가 들어가야 함
 	}
 
 	//pTargetUI->Set_UIDesc(targetDesc);
+
+	_bool isChanged_HoveredIndex = (m_iHoveredIndex == UINT_MAX)? false : m_iPrevHoveredIndex != m_iHoveredIndex;
+	if (isChanged_HoveredIndex)
+		m_pGameInstance->Play_Sound(L"UI_OVFL_MouseOver", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+	m_iPrevHoveredIndex = m_iHoveredIndex;
 }
 
 HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
@@ -775,22 +782,22 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 
 	
 	_bool isHovering = false;
-	static _uint iHoveredIndex = Client::CUI_Ovfl_Palette::PCOLOR_END;
+	m_iHoveredColorIndex;
 	_bool isEntered = false;
 	_bool isExited = false;
 
 	for (_uint i = 0; i < iNumTargetInst; i++)
 		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), i))
 		{
-			if (iHoveredIndex == PCOLOR_END)						isEntered = true;// 선택 Enter
+			if (m_iHoveredColorIndex == PCOLOR_END)						isEntered = true;// 선택 Enter
 
-			iHoveredIndex = static_cast<PALETTE_COLOR>(i);
+			m_iHoveredColorIndex = static_cast<PALETTE_COLOR>(i);
 			isHovering = true;
 
 #ifdef _DEBUG
 			_string strDebugText = {};
 			_uint iDebugIndex = UINT_MAX;
-			switch (iHoveredIndex)
+			switch (m_iHoveredColorIndex)
 			{
 			case Client::CUI_Ovfl_Palette::PCOLOR_RED:		strDebugText = "RED";		iDebugIndex = PCOLOR_RED;	 	break;
 			case Client::CUI_Ovfl_Palette::PCOLOR_GREEN:	strDebugText = "GREEN";		iDebugIndex = PCOLOR_GREEN;	 	break;
@@ -806,10 +813,10 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 		}
 	
 	if (!isHovering &&
-		iHoveredIndex != PCOLOR_END)
+		m_iHoveredColorIndex != PCOLOR_END)
 	{
 		isExited = true;
-		iHoveredIndex = PCOLOR_END;
+		m_iHoveredColorIndex = PCOLOR_END;
 	}
 
 	if (isEntered)
@@ -822,13 +829,14 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 		selectedInstDesc[i].vClipTexcoordX = (m_eDestColorIndex == i) ?
 			_float2(0.f, 1.f) : _float2(0.f, 0.f);
 
-		hoveredInstDesc[i].vClipTexcoordX = (iHoveredIndex == i) ?
+		hoveredInstDesc[i].vClipTexcoordX = (m_iHoveredColorIndex == i) ?
 			_float2(0.f, 1.f) : _float2(0.f, 0.f);
 	}
 
-
-	//pSelectedRing->Set_UIDesc(selectedDesc);
-	//pHoveredRing->Set_UIDesc(hoveredDesc);
+	_bool isChanged_HoveredColorIndex = m_iPrevHoveredColorIndex != m_iHoveredColorIndex;
+	if (isChanged_HoveredColorIndex && isEntered)
+		m_pGameInstance->Play_Sound(L"UI_OVFL_MouseOver", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+	m_iPrevHoveredColorIndex = m_iHoveredColorIndex;
 }
 
 void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)

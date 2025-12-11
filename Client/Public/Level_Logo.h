@@ -22,8 +22,18 @@ private:
 	void							Ready_UI();
 	void							Ready_Mouse();
 	void							Ready_SkyBox();
+
 private:
-	class CGameSystem*		m_pGameSystem = { nullptr };
+#ifdef _DEBUG
+	void							Update_SoundOrder(_float fTimeDelta);
+	void							Update_ClickSound();
+	void							Update_GoinFinish(_float fTimeDelta);
+#endif // _DEBUG
+
+	
+
+private:
+	class CGameSystem*				m_pGameSystem = { nullptr };
 	LEVEL							m_eCurLevel = { LEVEL::LOGO };
 
 #ifdef _DEBUG
@@ -32,6 +42,18 @@ private:
 	_float m_fMinStep = { 5.f };
 	_float m_fMaxStep = { 20.f };
 	_float m_fStart = { 10.f };
+
+	_bool			m_isReqedFinish = false;
+
+	// ========== for Sound.. ==========
+	_float			m_fElapsedTime = 0.f;
+	const _float	m_fLoginStartTime = 7.f;
+	_uint			m_iSoundOrder = 0;
+
+	_float			m_fElapsedFinishTime = 0.f;
+	const _float	m_fFinishTime = 2.5f;
+	_bool			m_isGoinFinish = false;
+	// ==============================
 
 private:
 	void DEBUG_FUNCTION();
