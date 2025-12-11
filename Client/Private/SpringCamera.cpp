@@ -25,6 +25,35 @@ void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 	XMStoreFloat4(&m_vTargetPosition, TargetPos);
 }
 
+void CSpringCamera::Lock_On(CTransform* pTargetTransform, const _float4x4* pBoneMatrix, _bool IsLockOn)
+{
+	m_pTargetTransform = pTargetTransform;
+
+	if (nullptr == pTargetTransform || false == IsLockOn)
+	{
+		if (CAMERA_STATE::LOCKON == m_eCameraState)
+			m_eCameraState = CAMERA_STATE::TARGET;
+	}
+	else
+	{
+		// LockOn Position 계산
+		_matrix LockOnMatrix = XMLoadFloat4x4(pBoneMatrix) * pTargetTransform->Get_WorldMatrix();
+		_vector vScale{}, vQuat{}, vPos{};
+		XMMatrixDecompose(&vScale, &vQuat, &vPos, LockOnMatrix);
+		XMStoreFloat4(&m_LockOnPosition, vPos);
+
+		// LockOn 처음에 초기 셋팅
+		if (CAMERA_STATE::LOCKON != m_eCameraState)
+		{
+			//XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
+			XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + XMLoadFloat4(&m_LockOnPosition) * m_fRatio);
+			_vector vLook = XMLoadFloat4(&m_vLookPosition) - m_pTransformCom->Get_State(STATE::POSITION);
+			m_pTransformCom->LookDir(XMVector3Normalize(vLook));
+		}
+		m_eCameraState = CAMERA_STATE::LOCKON;
+	}
+}
+
 _vector CSpringCamera::Get_LookVector()
 {
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
@@ -60,9 +89,10 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 	m_fFixedDistance = 3.f;
 	m_fLerpSpeed = 1.5f;
 	m_fMinDistance = 1.f;
-	m_fMaxDistance = 8.f;
+	m_fMaxDistance = 4.f;
 
-	m_fLockOnMinDistance = 6.f;
+	m_fLockOnMinDistance = 4.f;
+	m_fRatio = 0.4f;
 
 	m_fStiffness = 0.3f;
 
@@ -198,8 +228,8 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	_vector vCamPos = XMLoadFloat4(&m_vLookPosition) - vDestinationDir * m_fDistance;
 
 	// LockOnOffsetY 조정
-	m_fLockOnOffsetY += fTimeDelta * 1.5f;
-	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, 3.f));
+	m_fLockOnOffsetY += fTimeDelta * 1.f;
+	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, m_fOffsetY + 0.3f));
 
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
@@ -223,8 +253,15 @@ void CSpringCamera::Dual_Targeting(_float fTimeDelta)
 	if (nullptr == m_pTargetTransform)
 		return;
 
-	_float fRatio = 0.4f;
-	XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * fRatio);
+	//_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+	//_vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	//
+	//_float fDot = XMVectorGetX(XMVector3Dot(XMVector3Normalize(vLook), vUp));
+	//
+	//fRatio = fRatio - max(0.f, min(fDot, fRatio - 0.05f));
+
+	//XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
+	XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + XMLoadFloat4(&m_LockOnPosition) * m_fRatio);
 	// Dynamic Distance
 	Dynamic_Distance();
 	// Moving Lerp
@@ -235,8 +272,9 @@ void CSpringCamera::Dynamic_Distance()
 {
 	if (nullptr == m_pTargetTransform)
 		return;
-	//_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition)));
-	_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	
+	//_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vLockOnPos = XMLoadFloat4(&m_LockOnPosition);
 	_vector vTargetPos = XMLoadFloat4(&m_vTargetPosition);
 	vLockOnPos.m128_f32[1] = 0.f;
 	vTargetPos.m128_f32[1] = 0.f;
@@ -267,7 +305,8 @@ void CSpringCamera::Dynamic_Fov(_float fTimeDelta)
 		return;
 
 	_vector vTargetPos = XMLoadFloat4(&m_vTargetPosition);
-	_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	//_vector vLockOnPos = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vLockOnPos = XMLoadFloat4(&m_LockOnPosition);
 
 	_float fGapY = fabsf(vLockOnPos.m128_f32[1] - vTargetPos.m128_f32[1]);
 
