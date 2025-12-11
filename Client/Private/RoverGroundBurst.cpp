@@ -59,6 +59,7 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 	}
 	else
 	{
+		m_pRover->Play_Action(TEXT("Action_Rover_Ex_Skill_01_01"));
 		m_iCurrentAnimIdx = ENUM_CLASS(ERoverBurstType::EX_SKILL01_01);
 	}
 	

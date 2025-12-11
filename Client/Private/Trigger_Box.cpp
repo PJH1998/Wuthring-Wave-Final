@@ -194,7 +194,7 @@ void CTrigger_Box::Collision_During()
 		}
 		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 		{
-			if (!m_IsDoingPalette)
+			/*if (!m_IsDoingPalette)
 			{
 				m_pGameSystem->Open_Game_OverflowPalette();
 				m_pGameSystem->Hide_InteractUI(true);
@@ -206,7 +206,7 @@ void CTrigger_Box::Collision_During()
 				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
 				m_pGameSystem->Lock_Input_ToPlayer(false);
 			}
-			m_IsDoingPalette = !m_IsDoingPalette;
+			m_IsDoingPalette = !m_IsDoingPalette;*/
 		}
 		else
 			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
