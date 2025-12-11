@@ -122,7 +122,7 @@ void CGalbrena::Update(_float fTimeDelta)
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 		// 4. Physcics, Camera 업데이트
-		Update_Physics(fTimeDelta * fTimeLack);
+		Update_Physics(fTimeDelta);
 		Update_Camera(fTimeDelta);
 	}
 

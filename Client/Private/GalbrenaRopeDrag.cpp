@@ -54,7 +54,7 @@ void CGalbrenaRopeDrag::OnEnter(void* pArg)
 
 	// 8. Rope Efeect 생성
 	m_pGalbrena->Rope_Active(true);
-	m_pGalbrena->Spwan_RopeEffect(TEXT("Rope"));
+	m_pGalbrena->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp02");
 }
 
 void CGalbrenaRopeDrag::OnUpdate(_float fTimeDelta)

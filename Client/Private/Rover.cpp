@@ -122,7 +122,7 @@ void CRover::Update(_float fTimeDelta)
 		// 2. 상태 머신 갱신
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
-		Update_Physics(fTimeDelta * fTimeLack);
+		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
 		Update_Camera(fTimeDelta);
 	}
