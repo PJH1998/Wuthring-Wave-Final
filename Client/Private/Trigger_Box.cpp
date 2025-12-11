@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "Trigger_Box.h"
 #include"GameSystem.h"
+#include"Event_Level.h"
+
 CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice, pContext),m_pGameSystem(CGameSystem::GetInstance())
 {
@@ -108,6 +110,36 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 			});
 	}
 
+	if (m_iTriggerIndex == 60)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				Collision_During();
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Hide_InteractUI(false);
+			});
+
+		m_pGameInstance->Subscribe<MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", [this](MINIGAMEPALETTE_SUCCESS_UI_EVENT Event) {
+			m_iMiniGameClearIndex++;
+
+			if (m_iMiniGameClearIndex >= 1)
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 4.f, [this]() {
+				//여기에 플레이어 이동시키는 거 넣기.
+				m_pGameInstance->OnFade(FADE::FADE_IN, 4.f, [this]() {
+					m_pGameSystem->HUD_FadeOut(true);
+					});
+					});
+			});
+	}
+
 	return S_OK;
 }
 
@@ -183,16 +215,36 @@ void CTrigger_Box::Collision_Enter()
 
 void CTrigger_Box::Collision_During()
 {
+	// UI 띄우고. F 누르면 들어가게 하고. 한 번 더 누르면 나가게?
+	
+	// i가 3에서 5 정도 되면 페이드 아웃, 페이드 인 활용해서 플레이어 좌표 옮기기?
 	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
 	{
-		if (!m_pGameSystem->IsSonoro())
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+			if (!m_pGameSystem->IsSonoro())
+			{
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+			}
+			else
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+			m_pGameSystem->Hide_InteractUI(true);
 		}
-		else
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			if (!m_IsDoingPalette)
+			{
+				m_pGameSystem->Open_Game_OverflowPalette();
+				m_pGameSystem->Hide_InteractUI(true);
+			}
+			else
+			{
+				m_pGameSystem->Close_Game_OverflowPalette();
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+			}
+			m_IsDoingPalette = !m_IsDoingPalette;
+		}
 
-		m_pGameSystem->Hide_InteractUI(true);
 	}
 }
 
@@ -224,25 +276,9 @@ void CTrigger_Box::Register_Trigger()
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			break;
-
-		//case 21:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-		//case 22:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-		//case 23:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-		//case 24:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-		//case 25:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-		/*case 34:
-			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ATTACK, 0.f, 0.f);
-			break;*/
+		case 60:
+			m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+			break;
 		}
 		m_IsTriggered = true;
 		});

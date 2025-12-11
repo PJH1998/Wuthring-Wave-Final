@@ -56,6 +56,9 @@ private:
 	void* m_pSecondTempPtr = { nullptr };
 	pair<_wstring, pair<_float4x4, bool>>* m_CamMatrix = { nullptr };
 	using  CamSet = pair<_wstring, pair<_float4x4, bool>>;
+
+	_uint m_iMiniGameClearIndex = {};
+	_bool m_IsDoingPalette = { false };
 public:
 	static CTrigger_Box* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

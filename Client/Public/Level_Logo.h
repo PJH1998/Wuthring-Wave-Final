@@ -24,11 +24,9 @@ private:
 	void							Ready_SkyBox();
 
 private:
-#ifdef _DEBUG
 	void							Update_SoundOrder(_float fTimeDelta);
 	void							Update_ClickSound();
 	void							Update_GoinFinish(_float fTimeDelta);
-#endif // _DEBUG
 
 	
 
@@ -43,6 +41,12 @@ private:
 	_float m_fMaxStep = { 20.f };
 	_float m_fStart = { 10.f };
 
+
+private:
+	void DEBUG_FUNCTION();
+
+#endif
+
 	_bool			m_isReqedFinish = false;
 
 	// ========== for Sound.. ==========
@@ -54,11 +58,6 @@ private:
 	const _float	m_fFinishTime = 2.5f;
 	_bool			m_isGoinFinish = false;
 	// ==============================
-
-private:
-	void DEBUG_FUNCTION();
-
-#endif
 
 public:
 	static		CLevel_Logo*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
