@@ -259,22 +259,16 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
 		switch (m_iTriggerIndex)
 		{
-		//case 0:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;		
-		//case 2:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-		//case 4:
-		//	m_pGameSystem->Play_Action(m_CamMatrix.first, XMLoadFloat4x4(&m_CamMatrix.second.first), m_CamMatrix.second.second);
-		//	break;
-
 		case 7:
 			m_pGameSystem->Stop_Action();
 			break;
 
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
+			break;
+		case 34:
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.2f, 2.f);
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.2f, 2.f);
 			break;
 		case 60:
 			m_pGameSystem->Show_InteractUI(TEXT("다채화"));
