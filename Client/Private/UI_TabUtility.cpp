@@ -108,6 +108,8 @@ void CUI_TabUtility::Render()
 
 void CUI_TabUtility::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	m_pGameInstance->Play_Sound(L"UI_TabUtility_Open", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+
 	static_cast<CAnimator_UI*>(m_pUI_Hover->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Hover_Initialize", true);
 	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"TabUtil_Show", true);
 
@@ -297,6 +299,14 @@ void CUI_TabUtility::Update_MouseSelection()
 			m_pTextUI_IsUsing->SetActivate(false);
 	}
 		
+
+	// [Sound] 선택 중인 게 변경될 시 사운드 재생. 단, nothing으로 바뀌는 경우 제외 / 끌 때에 끄는 사운드, 켤 때에 켜는 사운드
+	if (isIndexChanged &&
+		m_iSelectedIndex != ENUM_CLASS(UI_TAB_UTILITY::NOTHING))
+		m_pGameInstance->Play_Sound(L"UI_TabUtility_Tick", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+
+	
+
 
 
 

@@ -759,6 +759,8 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 		Throw_AttachTarget(); // 던지기.
 	else if (var1 == TEXT("MotionTrail"))
 		Process_MotionTrail(wStrObjectTag);
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 
 
 	// GalbrenaWing|Bone
@@ -1435,6 +1437,7 @@ void CGalbrena::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f); // x, z 크게 y작게
 	TriggerDesc.fAttackDmg = 250.f;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root"); // 기본은 Root?
+	TriggerDesc.strSoundTag = TEXT("Jiabeilina_Short_Hit_03 (SFX)");
 	m_AttackVolumes[VOLUME_TARGET] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -1447,6 +1450,7 @@ void CGalbrena::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(8.f, 8.f, 5.f); // 궁극기 => 타겟 주위 강력한 범위형 장판 데미지
 	TriggerDesc.fAttackDmg = 1570.f;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root"); // 기본은 Root?
+	TriggerDesc.strSoundTag = TEXT("Jiabeilina_Burst_Hit_L1_03 (SFX)");
 	m_AttackVolumes[VOLUME_TARGET_BURST] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

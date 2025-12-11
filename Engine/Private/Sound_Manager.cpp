@@ -226,6 +226,11 @@ void CSound_Manager::Stop_Sound(_uint iChannelID)
     FMOD_Channel_Stop(m_pFixedChannels[iChannelID]);
 }
 
+void CSound_Manager::Stop_Sound_Dynamic(_uint iChannelID)
+{
+	FMOD_Channel_Stop(m_pPoolingChannels[iChannelID]);
+}
+
 void CSound_Manager::Stop_All()
 {
     for (size_t i = 0; i < m_iNumChannels; ++i)
@@ -244,6 +249,11 @@ void CSound_Manager::Stop_All()
 void CSound_Manager::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 {
     FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
+}
+
+void CSound_Manager::Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume)
+{
+	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
 }
 
 HRESULT CSound_Manager::Initialize(_uint iNumChannel)

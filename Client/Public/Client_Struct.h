@@ -178,7 +178,6 @@ namespace Client
 		const _float4x4** ppRefBoneMatrix = { nullptr };
 		const _float4x4** ppRefWorldMatrix = { nullptr };
 
-
 		_wstring strSoundTag = {};
 	}CALLBACK_CLIENT;
 

@@ -155,6 +155,13 @@ private:
 
 	class CGameSystem*			m_pGameSystem		= { nullptr };
 
+private:
+	_uint						m_iHoveredIndex = CUI_Ovfl_Palette::PCOLOR_END;
+	_uint						m_iHoveredColorIndex = CUI_Ovfl_Palette::PCOLOR_END;
+
+	_uint						m_iPrevHoveredIndex = UINT_MAX;
+	_uint						m_iPrevHoveredColorIndex = UINT_MAX;
+
 public:
 	static CUI_Ovfl_Palette*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject*		Clone(void* pArg) override;

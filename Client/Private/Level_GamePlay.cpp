@@ -461,6 +461,8 @@ void CLevel_GamePlay::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 200);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
+
+	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/SpectrumOB", m_eCurLevel, 5);
 }
 
 void CLevel_GamePlay::Ready_Skybox()
