@@ -22,7 +22,7 @@ int g_MaskFlag; // 0이면 R로, 1이면 알파로
 
 float g_DistortionWeight;
 
-//밝기 죽이기?
+//
 float g_ColorGain; // 밝기 스케일 0~1
 float g_ColorGamma; // 톤 커버, (1 == 그대로, >1 어두워지게)
 
