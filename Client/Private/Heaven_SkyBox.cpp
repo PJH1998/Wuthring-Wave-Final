@@ -30,7 +30,8 @@ HRESULT CHeaven_SkyBox::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	if(FAILED(Ready_Component()))
+	if (FAILED(Ready_Component()))
+		return E_FAIL;
 
     return S_OK;
 }

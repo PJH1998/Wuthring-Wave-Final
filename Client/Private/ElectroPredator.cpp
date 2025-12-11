@@ -252,7 +252,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 
 	if (wstrTypeTag == TEXT("Sound"))
 	{
-		//Sound_Active(wstrPartTag);
+		Sound_Active(wstrPartTag);
 	}
 	else if (wstrTypeTag == TEXT("Shoot"))
 	{
@@ -298,46 +298,46 @@ void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_leilie_atk01_1_02 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk02"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk03"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Aggro"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 16.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 16.f);
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 8.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 8.f);
 	}
 	else if (wstrTypeTag == TEXT("Stand"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("mon_leilie_stand2_action01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 18.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_stand2_action01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 18.f);
 	}
 }
 
@@ -595,6 +595,13 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		PREFAB_INFO EffectDesc{};
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.5f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #ifdef _DEBUG
@@ -617,6 +624,13 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #ifdef _DEBUG
@@ -641,6 +655,13 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #ifdef _DEBUG

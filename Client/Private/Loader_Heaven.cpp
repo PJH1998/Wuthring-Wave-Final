@@ -124,7 +124,7 @@ CLoader_Heaven::CLoader_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CLoader_Heaven::Initialize()
 {
-	m_iNumLoadingThread = 16;
+	m_iNumLoadingThread = 17;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -268,7 +268,7 @@ HRESULT CLoader_Heaven::Load_Object()
 
 #pragma region SKYBOX
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Protottype_GameObject_Heaven_SkyBox"),
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_Heaven_SkyBox"),
 		CHeaven_SkyBox::Create(m_pDevice, m_pContext))))
 		CRASH("Failed to Add Prototype Heaven_SkyBox");
 
