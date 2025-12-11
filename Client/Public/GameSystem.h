@@ -259,6 +259,7 @@ public:
 	void Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel = BOSSBGM::END);
 	void Change_BGM(const _wstring& BGMText);
 	_bool IsModinaryBattle();
+	void Change_BattleBGM(BOSSBGM eBoss);
 #pragma endregion
 private:
 	class	CParser*				m_pParser					= { nullptr };
