@@ -26,6 +26,8 @@ float3 g_vCamPosition;
 float g_fMaxTime = 1.f;
 float g_fCurrentTime = 0.f;
 
+float g_fNoiseTime;
+
 // 렌더링 파이프 라인으로 넘겨질 최종 정점 정보.
 struct OutputVertex
 {
@@ -594,6 +596,42 @@ PS_OUT PS_LEVI_BEHIT(PS_IN In)
     return Out;
 }
 
+
+PS_OUT PS_LEVI_FX(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float2 vNoiseTex = float2(In.vTexcoord.x + g_fNoiseTime, In.vTexcoord.y);
+    
+    float vNoise = g_NormalTexture.Sample(DefaultSampler, vNoiseTex).r;
+    
+    float2 vTexcoord = In.vTexcoord + (vNoise * 0.12f);
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, vTexcoord);
+    
+    float3 vNormal = In.vNormal.xyz;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    
+    Out.vDiffuse = float4(vDiffuse.xyz, 1.f);
+    Out.vNormal = float4(vNormal, 0.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+    Out.vPBR.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vEmissive = float4(vDiffuse.xyz * 0.3f, 1.f);
+    
+    return Out;
+}
+
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
 struct VS_OUT_SHADOW
@@ -745,7 +783,76 @@ PS_OUT PS_ROVERMASK(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_UNDISSOLVE_CHARACTER(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
 
+    // 1. 디졸브 텍스처(g_MaskTexture[0])에서 마스크 값을 샘플링.
+    float fDissolveMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (fDissolveMask.r - g_fDissolveRate < 0.f) // 0.f 면 Discard;
+        discard;
+    
+    
+    float4 vNormal = 0.f;
+    
+    if (g_HasNormal)
+    {
+        float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+            
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        
+        Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    else
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    //if (g_HasSkinMask)
+    //{
+    //    Out.vSSS = g_MaskTexture[1].Sample(DefaultSampler, In.vTexcoord);
+    //}
+    
+    
+    // Dissolve 진행도가 0.3f 보다 초과인 얘들은 Emissive가 기본으로 들어가고 0.3f 이하인 얘들은 Emissive가 지정한 색상에 더 크게 작용.
+    float3 vColor = g_vDissolveColor.rgb;
+    if (fDissolveMask.r - g_fDissolveRate < 0.3f) // 0.3f 보다 작은 (사라지기 직전)
+        Out.vDiffuse.rgb = vColor * g_fEmissiveIntensity; // 이러면 쨍하게 들어간다. 
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    Out.vEmissive.xyz *= Out.vDiffuse.a;
+    
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    //Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    //Out.vSSS.w = In.vProjPos.w;
+    return Out;
+}
 
 struct GS_IN
 {
@@ -1039,5 +1146,25 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LEVI_BEHIT();
     }
-  
+    pass LeviFX // 15
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_LEVI_FX();
+    }   
+    pass UnDissolveCharacter // 16
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_DISSOLVE_CHARACTER();
+    }
+
 }

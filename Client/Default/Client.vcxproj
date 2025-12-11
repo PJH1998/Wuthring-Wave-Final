@@ -405,6 +405,7 @@
     <ClInclude Include="..\public\UI_Button_Interact.h" />
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_CurveTrace.h" />
+    <ClInclude Include="..\public\UI_Dialog.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
     <ClInclude Include="..\public\UI_GrappleController.h" />
     <ClInclude Include="..\public\UI_GrapplePoint.h" />
@@ -690,6 +691,7 @@
     <ClCompile Include="..\private\UI_Button_Interact.cpp" />
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_CurveTrace.cpp" />
+    <ClCompile Include="..\private\UI_Dialog.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
     <ClCompile Include="..\private\UI_GrappleController.cpp" />
     <ClCompile Include="..\private\UI_GrapplePoint.cpp" />

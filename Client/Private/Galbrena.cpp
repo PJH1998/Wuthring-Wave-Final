@@ -259,7 +259,7 @@ void CGalbrena::Render()
 
 	m_pMainAttackVolume->Render();
 	Print_LookRay();
-	Debug_ImGui();
+	//Debug_ImGui();
 
 
 #endif // _DEBUG
@@ -768,6 +768,8 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag);
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
 
 
 	// GalbrenaWing|Bone

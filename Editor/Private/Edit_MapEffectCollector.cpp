@@ -40,7 +40,7 @@ void CEdit_MapEffectCollector::Set_ImGuiOption()
 
 	ImGui::Checkbox("Render Gizmo", &m_IsRenderGizmo);
 
-	const _char* pEffectTag[] = { "Hearth_Fire","Hearth_Fire_2","CampFire" };
+	const _char* pEffectTag[] = { "Hearth_Fire","Hearth_Fire_2","CampFire" ,"Sonoro Statue"};
 
 	if (ImGui::BeginCombo("Object_Type", pEffectTag[m_eTempTag]))
 	{

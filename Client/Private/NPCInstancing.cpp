@@ -49,6 +49,8 @@ void CNPCInstancing::Late_Update(_float fTimeDelta)
 	m_pModelInstanceCom->Update_WorldInstances();
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CNPCInstancing::Render()
@@ -87,6 +89,35 @@ void CNPCInstancing::Render()
 	}
 }
 
+void CNPCInstancing::Render_Shadow()
+{
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	m_pShaderCom->Bind_Value("g_fFaceSize", &m_fFaceSize, sizeof(_float));
+	m_pShaderCom->Bind_Value("g_iTexPaddingCount", &m_iFacePaddingCount, sizeof(_uint));
+
+	_uint iNumMesh = m_pModelInstanceCom->Get_NumMesh();
+	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	m_pModelInstanceCom->Bind_ConstantBuffers(m_pShaderCom);
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (i >= m_MeshTypePadding[MESHTYPE::FACE] && i < m_MeshTypePadding[MESHTYPE::HAIR])
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::SHADOW_FACE));
+		else
+		{
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMINST::SHADOW));
+		}
+
+		m_pModelInstanceCom->Render(i);
+
+		m_pShaderCom->UndBind_All_VS_SRV();
+	}
+}
+
 void CNPCInstancing::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
 }
@@ -105,6 +136,7 @@ HRESULT CNPCInstancing::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	m_pShaderCom->Bind_Value("g_fFaceSize", &m_fFaceSize, sizeof(_float));
 	m_pShaderCom->Bind_Value("g_iTexPaddingCount", &m_iFacePaddingCount, sizeof(_uint));
+
 	return S_OK;
 }
 

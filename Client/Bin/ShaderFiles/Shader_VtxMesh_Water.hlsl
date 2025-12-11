@@ -5,12 +5,14 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
 float4 g_LogoWaterColor = float4(0.2627f, 0.3373f, 0.3725f, 1.f);
 //float4 g_HeavenWaterColor = float4(0.1922f, 0.0235f, 0.2902, 1.f);
-float4 g_HeavenWaterColor = float4(0.0961f, 0.0117f, 0.1451f, 1.f);
+//float4 g_HeavenWaterColor = float4(0.0961f, 0.0117f, 0.1451f, 1.f);
+float4 g_HeavenWaterColor = float4(0.1020f, 0.0235f, 0.1725f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
 Texture2D   g_MaskDiffuseTexture;
 Texture2D g_MaskTexture[4];
+Texture2D g_MaskSprite;
 
 bool g_HasNormal = false;
 bool g_HasMask = false;
@@ -346,31 +348,20 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
  
-    float4 vColor = g_HeavenWaterColor;
-
     // Wolrd ±â¹Ý UV
-    float2 vUV = In.vWorldPos.xz * 10.f;
-    //float2 vUV = In.vTexcoord;
+    float2 vUV = In.vWorldPos.xz * 0.02f;
     
-    // Noise
-    float fNoiseTiling = 0.1f;
-    float fNoiseSpeed = 0.01f;
+    vector vMask = g_MaskSprite.Sample(DefaultSampler, vUV);
+    float fAlpha = max(vMask.r, max(vMask.g, vMask.b));
     
-    float2 vNoiseUV = vUV * fNoiseTiling + g_fTime * fNoiseSpeed;
-    float fNoise = g_MaskTexture[1].Sample(DefaultSampler, vNoiseUV * 30.f).b * 2.f - 1.f;
-    float fDistortionStrength = 0.1f;
-    float2 UVDist = vNoiseUV + fNoise * fDistortionStrength;
+    vector vHeavenWaterColor = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord) * 0.5f;
+    vHeavenWaterColor.xyz = lerp(float3(0.f, 0.f, 0.8f), vHeavenWaterColor.xyz, 0.4f);
     
-    // Mask
-    float fMaskTiling = 1.f;
-    float fWaterMask = g_MaskTexture[0].Sample(DefaultSampler, UVDist * fMaskTiling).g;
+    float3 vMaskColor = lerp(vHeavenWaterColor.xyz, vMask.xyz, 0.2f);
+    float3 vColor = lerp(g_HeavenWaterColor.xyz, vMaskColor, fAlpha);
+    //vColor = lerp(float3(0.f, 0.f, 0.2f), vColor, 0.35f);
     
-    // Animation
-    float fAnimTiling = 3.f;
-    float2 vUVAnimation = UVDist * fAnimTiling + g_fTime * float2(0.006f, 0.003f);
-    float fAnimated = g_MaskTexture[2].Sample(DefaultSampler, vUVAnimation).r;
-    
-    Out.vDiffuse = float4(vColor.xyz * ((fAnimated * 30.f) * fWaterMask), 1.f);
+    Out.vDiffuse = float4(vColor, 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
