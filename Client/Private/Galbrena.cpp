@@ -1245,7 +1245,7 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fEmissiveIntensity = 3.f;
 
 	//m_vMotionTrailColor = { 0.235f, 0.1f, 0.31f, 1.f }; // 기본
-	m_vMotionTrailColor = { 0.261, 0.341, 0.618, 1.f }; // 기본
+	m_vMotionTrailColor = { 0.261f, 0.341f, 0.618f, 1.f }; // 기본
 
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);
