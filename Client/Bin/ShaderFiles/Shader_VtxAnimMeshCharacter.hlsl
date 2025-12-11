@@ -745,6 +745,7 @@ PS_OUT PS_ROVERMASK(PS_IN In)
     return Out;
 }
 
+// Dissovle 반대로 나오게.
 PS_OUT PS_UNDISSOLVE_CHARACTER(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -1117,7 +1118,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_DISSOLVE_CHARACTER();
+        PixelShader = compile ps_5_0 PS_UNDISSOLVE_CHARACTER();
     }
   
 }

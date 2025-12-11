@@ -1160,7 +1160,7 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-void CCharacter::Rotate_Target()
+void CCharacter::Rotate_Target(_bool IsReverse)
 {
     // 1. 타겟이 없는 경우 Return
     if (nullptr == m_pTargetTransform)
@@ -1173,6 +1173,9 @@ void CCharacter::Rotate_Target()
 
 
     vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	if (IsReverse)
+		vToTarget *= -1.f;
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;

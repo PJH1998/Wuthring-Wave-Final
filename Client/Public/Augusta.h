@@ -270,12 +270,17 @@ private:
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
 	void Process_FxObject(const _wstring& wStrObjectTag);
 	void Process_CameraSpring(const _wstring& wStrObjectTag);
+	void Process_EventDissolve(const _wstring& wStrObjectTag);
+
+	void Process_Timer(_float fTimeDelta);
 	
 	void Render_Default(_uint iMeshIndex);
 	void Render_Skin(_uint iMeshIndex);
 	void Render_Eye(_uint iMeshIndex);
 	_bool IsSkin(_uint iMeshIndex);
 	_bool IsEye(_uint iMeshIndex);
+
+	
 
 
 #pragma endregion
