@@ -70,8 +70,13 @@ void CProjectile::Late_Update(_float fTimeDelta)
 		{
 			m_isActivate = false;
 			m_CallBack.pTransform = nullptr;
-			m_pRigidBodyCom->Set_Desc(&m_CallBack);
+			//m_pRigidBodyCom->Set_Desc(&m_CallBack);
 			m_pRigidBodyCom->IsActivate(false);
+			if (m_iSoundChannel != -1)
+			{
+				m_pGameInstance->Return_Channel(m_iSoundChannel);
+				m_iSoundChannel = -1;
+			}
 			return;
 		}
 	}
@@ -121,6 +126,12 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
 	m_fDelay = 0.f;
+
+	if (false == pDesc->wstrSoundTag.empty())
+	{
+		m_iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(pDesc->wstrSoundTag, m_iSoundChannel, 0.2f, m_pTransformCom, 0.001f, 1.f);
+	}
 
 	m_CallBack.pTransform = pDesc->pOwnerTransform;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
