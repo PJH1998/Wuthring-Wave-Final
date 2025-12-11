@@ -358,12 +358,12 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag)
 {
-	if (nullptr == m_GrappleInfo.pTransform ||
+	if (nullptr == m_pTargetGrappleTransform ||
 		false == m_IsRopeActive)
 		return;
 
 	_float3 vPos = {};
-	XMStoreFloat3(&vPos, m_GrappleInfo.pTransform->Get_State(STATE::POSITION));
+	XMStoreFloat3(&vPos, m_pTargetGrappleTransform->Get_State(STATE::POSITION));
 
 	ROPE_INFO RopeInfo{};
 	RopeInfo.pPlayerMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();

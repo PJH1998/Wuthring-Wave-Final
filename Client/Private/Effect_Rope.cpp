@@ -178,11 +178,11 @@ HRESULT CEffect_Rope::Ready_Components()
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_SpectrumTexture_T_Trail_10018"),
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_Texture_T_Trail_30064"),
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_SpectrumTexture_T_Color_003"),
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_Texture_T_Color_140013"),
         TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
         return E_FAIL;
 
