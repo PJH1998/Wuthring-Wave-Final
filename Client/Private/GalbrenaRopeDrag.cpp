@@ -51,6 +51,10 @@ void CGalbrenaRopeDrag::OnEnter(void* pArg)
 
 	// 7. 현재 상태 부여. =>
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+
+	// 8. Rope Efeect 생성
+	m_pGalbrena->Rope_Active(true);
+	m_pGalbrena->Spwan_RopeEffect(TEXT("Rope"));
 }
 
 void CGalbrenaRopeDrag::OnUpdate(_float fTimeDelta)
@@ -158,6 +162,7 @@ void CGalbrenaRopeDrag::Check_StateTransition(_float fTimeDelta)
 				m_pGalbrena->Execute_RopeDragTrigger(); // 연결된 객체의 Trigger 호출.
 				m_eRopeStep = ROPESTEP::STEP_END;
 				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeDragType::DRAG_END);
+				m_pGalbrena->Rope_Active(false); // Rope Active 종료.
 				return;
 			}
 

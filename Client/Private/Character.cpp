@@ -354,6 +354,27 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 }
 
 
+
+
+void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag)
+{
+	if (nullptr == m_pTargetGrappleTransform ||
+		false == m_IsRopeActive)
+		return;
+
+	_float3 vPos = {};
+	XMStoreFloat3(&vPos, m_pTargetGrappleTransform->Get_State(STATE::POSITION));
+
+	ROPE_INFO RopeInfo{};
+	RopeInfo.pPlayerMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	RopeInfo.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	RopeInfo.vRopeObjectPos = vPos;
+	RopeInfo.pIsActive = &m_IsRopeActive;
+
+	_matrix mat = XMMatrixIdentity();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &RopeInfo);
+}
+
 void CCharacter::Execute_Telport(_vector vPos)
 {
 	if (nullptr == m_pTransformCom ||
@@ -494,6 +515,22 @@ void CCharacter::Start_Anim()
 		return;
 	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
 	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
+}
+
+void CCharacter::Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency)
+{
+	m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(eChannel), fVolume, fFrequency);
+}
+
+void CCharacter::Stop_Sound(CHANNEL eChannel)
+{
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(eChannel));
+	
+}
+
+_float CCharacter::Rand(_float fMin, _float fMax)
+{
+	return m_pGameInstance->Rand(fMin, fMax);
 }
 
 

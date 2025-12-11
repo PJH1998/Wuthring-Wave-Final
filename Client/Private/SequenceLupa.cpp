@@ -406,6 +406,8 @@ void CSequenceLupa::Object_Func(const _wstring& wStrObjectTag)
 		m_fStateDelayTimer = stof(var3);
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 
 }
 void CSequenceLupa::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)

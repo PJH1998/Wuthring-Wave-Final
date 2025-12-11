@@ -14,9 +14,6 @@ float4 vColor = float4(1.f, 1.f, 1.f, 1.f);
 
 
 //TEST
-float g_Sweep = 2.f;
-float g_SweepWitdh = 1.f;
-float g_Soft = 0.3f;
 float g_Alpha = 1.f;
 float g_MaskSpeed = 1.f;
 float g_Time;

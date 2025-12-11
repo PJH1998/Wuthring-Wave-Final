@@ -48,7 +48,7 @@ void CEffect_Light::Update(_float fTimeDelta)
 	if (m_vLifeTime.x >= m_vLifeTime.y)
 	{
 		m_isActivate = false;
-		m_pGameInstance->Set_Active(m_wstrLightTag, false);
+		m_pGameInstance->Set_LightActive(m_wstrLightTag, false);
 
 		//초기화
 		m_vLifeTime.x = 0.f;
@@ -95,7 +95,7 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_tLightDesc.fRange = m_vRange.x;
 
 		m_pGameInstance->Update_LightDesc(m_wstrLightTag, m_tLightDesc);
-		m_pGameInstance->Set_Active(m_wstrLightTag, true);
+		m_pGameInstance->Set_LightActive(m_wstrLightTag, true);
 	}
 }
 

@@ -46,7 +46,7 @@ void CSpectrum::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-
+	m_fLifeTime = 0.25f;
   
 }
 
@@ -59,7 +59,6 @@ void CSpectrum::Late_Update(_float fTimeDelta)
 
 	m_fCurrentTime += fTimeDelta;
 	m_fSpawnTimer += fTimeDelta;
-	m_fSweep += fTimeDelta;
 
 	//라이프타임 체크.
 	while (!m_Samples.empty())
@@ -74,6 +73,26 @@ void CSpectrum::Late_Update(_float fTimeDelta)
 		}
 		else
 			break;
+	}
+
+	//만약 오브젝트가 비활성화 되면 기록들까진 그리고 꺼지게 처맂 스
+	if (!m_IsObectActive)
+	{
+		if (m_Samples.size() == 0)
+		{
+			m_isActivate = false;
+			return;
+		}
+
+		if (m_Samples.size() >= 2)
+		{
+			const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+			m_pVIBufferCom->Update_Spectrum(m_Samples, m_Samples.size(), vCamPos);
+
+			m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
+		}
+		
+		return;
 	}
 
 	if (m_fSpawnTimer >= m_fGeneration)
@@ -124,18 +143,19 @@ void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	SPECTRUM_INFO* pDesc = static_cast<SPECTRUM_INFO*>(pArg);
 
 	m_fCurrentTime = 0.f;
-	m_fSweep = 0.f;
+	m_fSpawnTimer = 0.f;
 
 	m_pIsActive = pDesc->pIsActive;
 	m_pObjectMatrixPtr = pDesc->pModelMarixPtr;
 	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 
 	m_isActivate = *m_pIsActive;
+	m_IsObectActive = *m_pIsActive;
 }
 
 void CSpectrum::Update_Position()
 {
-	if (m_pBoneMatrixPtr != nullptr)
+	if ((m_pBoneMatrixPtr != nullptr) && (*m_pIsActive))
 	{
 
 		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
@@ -151,7 +171,7 @@ void CSpectrum::Update_Position()
 		m_UpdatePosition = vPos;
 
 	}
-	else if (m_pObjectMatrixPtr != nullptr)
+	else if ((m_pObjectMatrixPtr != nullptr) && (*m_pIsActive))
 	{
 
 		_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
@@ -164,6 +184,8 @@ void CSpectrum::Update_Position()
 
 		m_UpdatePosition = vPos;
 	}
+	else if (!(*m_pIsActive) && m_IsObectActive)
+		m_IsObectActive = false;
 }
 
 
@@ -211,7 +233,7 @@ HRESULT CSpectrum::Bind_ShaderResources()
 	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fCurrentTime, sizeof(_float))))
 		return E_FAIL;
 
-	if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSpeed", &m_fMaskSpeed, sizeof(_float))))
 		return E_FAIL;
 
     return S_OK;
