@@ -463,6 +463,13 @@ void CLevel_GamePlay::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
 
 	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/SpectrumOB", m_eCurLevel, 5);
+
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Effect_Rope"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Effect"), TEXT("Rope"), 3, nullptr)))
+	{
+		MSG_BOX("Rope Load Fail");
+		return;
+	}
 }
 
 void CLevel_GamePlay::Ready_Skybox()
