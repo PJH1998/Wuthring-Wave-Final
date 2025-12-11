@@ -5,12 +5,14 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
 float4 g_LogoWaterColor = float4(0.2627f, 0.3373f, 0.3725f, 1.f);
 //float4 g_HeavenWaterColor = float4(0.1922f, 0.0235f, 0.2902, 1.f);
-float4 g_HeavenWaterColor = float4(0.0961f, 0.0117f, 0.1451f, 1.f);
+//float4 g_HeavenWaterColor = float4(0.0961f, 0.0117f, 0.1451f, 1.f);
+float4 g_HeavenWaterColor = float4(0.1020f, 0.0235f, 0.1725f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
 Texture2D   g_MaskDiffuseTexture;
 Texture2D g_MaskTexture[4];
+Texture2D g_MaskSprite;
 
 bool g_HasNormal = false;
 bool g_HasMask = false;
@@ -346,15 +348,20 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
  
-    float4 vColor = g_HeavenWaterColor;
-
     // Wolrd ±â¹Ý UV
-    float2 vUV = In.vWorldPos.xz * 0.5f;
-    //float2 vUV = In.vTexcoord;
+    float2 vUV = In.vWorldPos.xz * 0.02f;
     
-    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, vUV);
+    vector vMask = g_MaskSprite.Sample(DefaultSampler, vUV);
+    float fAlpha = max(vMask.r, max(vMask.g, vMask.b));
     
-    Out.vDiffuse = float4(vColor.xyz * vMask.xyz, 1.f);
+    vector vHeavenWaterColor = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord) * 0.5f;
+    vHeavenWaterColor.xyz = lerp(float3(0.f, 0.f, 0.8f), vHeavenWaterColor.xyz, 0.4f);
+    
+    float3 vMaskColor = lerp(vHeavenWaterColor.xyz, vMask.xyz, 0.2f);
+    float3 vColor = lerp(g_HeavenWaterColor.xyz, vMaskColor, fAlpha);
+    //vColor = lerp(float3(0.f, 0.f, 0.2f), vColor, 0.35f);
+    
+    Out.vDiffuse = float4(vColor, 1.f);
     Out.vNormal = In.vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;

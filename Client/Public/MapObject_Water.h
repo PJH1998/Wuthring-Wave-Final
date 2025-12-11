@@ -48,8 +48,10 @@ private:
 	_uint					m_iShaderPassIndex = {};
 	_bool					m_IsRender = { true };
 
-	_float					m_fInverse = {};
 	_float					m_fTime = {};
+	_float					m_fAnimTime = {};
+
+	_int					m_iTextureIndex = {};
 
 private:
 	virtual		void						Ready_Component(void* pArg);
