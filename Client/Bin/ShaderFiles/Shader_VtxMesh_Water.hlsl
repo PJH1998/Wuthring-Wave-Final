@@ -349,7 +349,7 @@ PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
     float4 vColor = g_HeavenWaterColor;
 
     // Wolrd ±â¹Ý UV
-    float2 vUV = In.vWorldPos.xz * 0.02f;
+    float2 vUV = In.vWorldPos.xz * 10.f;
     //float2 vUV = In.vTexcoord;
     
     // Noise
