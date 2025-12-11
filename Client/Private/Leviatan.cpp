@@ -77,7 +77,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
-	m_ShaderIndices[LEVIATAN_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
+	m_ShaderIndices[LEVIATAN_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::LEVI_FX);
 	XMStoreFloat4x4(&m_PreTransform, XMMatrixIdentity());
 	m_isRender = true;
 
@@ -194,6 +194,8 @@ void CLeviatan::Late_Update(_float fTimeDelta)
 	}
 	if(m_isRender)
 	{
+		m_fNoiseTime = fmod(m_fNoiseTime + (fTimeDelta * 0.2f), 1.f);
+
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) 
 			return;
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
@@ -217,6 +219,8 @@ void CLeviatan::Render()
 	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	m_pShaderCom->Bind_Value("g_fNoiseTime", &m_fNoiseTime, sizeof(_float));
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{

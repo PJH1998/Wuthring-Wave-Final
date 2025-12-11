@@ -45,7 +45,7 @@ void CSFX_Prefab::Update(_float fTimeDelta)
 	
 	while (m_Children[m_iCurrentChild].fStartTime <= m_fCurrentTime)
 	{
-		m_pGameInstance->Spawn_PoolingObject(m_Children[m_iCurrentChild].strSfxTag, XMMatrixIdentity(), nullptr);
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(m_Children[m_iCurrentChild].strSfxTag, XMMatrixIdentity(), nullptr);
 		m_iCurrentChild++;
 
 		if (m_iCurrentChild >= m_iNumChildren)

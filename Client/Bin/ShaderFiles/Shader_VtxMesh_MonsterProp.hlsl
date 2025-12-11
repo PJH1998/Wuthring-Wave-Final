@@ -4,10 +4,13 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
+Texture2D g_NoiseTexture;
 
 bool g_HasNormal = false;
 float g_fRatio = 0.f;
 float4 g_vBaseColor = 1.f;
+
+float g_fFxTime;
 
 struct VS_IN
 {
@@ -76,12 +79,10 @@ PS_OUT PS_MAIN(PS_IN In)
     
     if (g_HasNormal)
     {
-            vector vDefaultNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-		
-	        
-            vNormal = normalize(vDefaultNormal * 2.f - 1.f);
-            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
-                vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+        vector vDefaultNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = normalize(vDefaultNormal * 2.f - 1.f);
+        if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
         
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -108,6 +109,29 @@ PS_OUT PS_MAIN(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_SHUI(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y + g_fFxTime);
+
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, vTexcoord);
+    
+    Out.vDiffuse = vDiffuse;
+   
+    float4 vNormal = In.vNormal;
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    
+    return Out;
+}
+
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -121,6 +145,17 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN();
     }
 
+    pass ShuiPass
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SHUI();
+    }
+    
     //pass NormalTex // 1
     //{
     //    SetRasterizerState(RS_Default);
