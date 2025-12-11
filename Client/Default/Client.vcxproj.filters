@@ -514,6 +514,9 @@
     <Filter Include="03. GameObject\SkyBox\Heaven">
       <UniqueIdentifier>{a01c38c3-a063-4195-a39b-cb1a7e3b8613}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Rope">
+      <UniqueIdentifier>{05039f09-17df-41a6-b0aa-cae9e9bb610a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1342,6 +1345,9 @@
       <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\BGM_Manager.h" />
+    <ClInclude Include="..\Public\Effect_Rope.h">
+      <Filter>03. GameObject\Effect\Rope</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2121,6 +2127,9 @@
       <Filter>03. GameObject\SkyBox\Heaven</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\BGM_Manager.cpp" />
+    <ClCompile Include="..\Private\Effect_Rope.cpp">
+      <Filter>03. GameObject\Effect\Rope</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

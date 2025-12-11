@@ -398,6 +398,8 @@ void CSequenceAugusta::Object_Func(const _wstring& wStrObjectTag)
 		m_fStateDelayTimer = stof(var3);
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 
 }
 void CSequenceAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -559,6 +561,8 @@ void CSequenceAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
 
+	m_vMotionTrailColor = { 1.f, 0.5f, 0.1f, 1.f }; // 기본
+
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
@@ -569,6 +573,8 @@ void CSequenceAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	
 
 }
 
