@@ -33,6 +33,7 @@ HRESULT CUI_Text::Initialize_Clone(void* pArg)
 
 	TEXT_UI_DESC* tDesc = static_cast<TEXT_UI_DESC*>(pArg);
 	m_eTextAlignmentType = tDesc->eTextAlignmentType;
+	m_fLineSpace = tDesc->fLineSpace;
 	Update_Alignment();
 
 	m_tTextDesc = *static_cast<TEXT_UI_DESC*>(pArg);
@@ -194,7 +195,6 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_tUIDesc.isInstance	= pDesc->isInstance;
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
-
 	
 
 	m_vOriginScreenPos		= pDesc->vScreenPos;
@@ -253,7 +253,7 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 		if (ch == L'\n')
 		{
 			penX = 0.f;
-			penY += pFont->iPixelHeight * m_tTextDesc.fScale;
+			penY += pFont->iPixelHeight * m_tTextDesc.fScale * m_tTextDesc.fLineSpace;
 			prevCode = 0;
 			continue;
 		}

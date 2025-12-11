@@ -819,41 +819,41 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 #pragma region [TAB] KSTA_UITEST_TABUTILITY
-	static _bool isTabUtilityActive = false;
-	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
-
-	//_uint iTabUtilitySelectedIndex = UINT_MAX;
-	_bool isTabUtilityHided = false;
-
-	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
-		isTabUtilityActive = true;
-	}
-	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
-	{
-		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
-		isTabUtilityActive = false;
-		isTabUtilityHided = true;
-	}
-
-
-	_string strSelectedUtilityName = {};
-	if (isTabUtilityHided)
-	{
-		switch (iTmpSelectedUtility)
-		{
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
-		}
-
-		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
-	}
+	//static _bool isTabUtilityActive = false;
+	//static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+	//
+	////_uint iTabUtilitySelectedIndex = UINT_MAX;
+	//_bool isTabUtilityHided = false;
+	//
+	//if (!isTabUtilityActive &&
+	//	m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+	//{
+	//	m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
+	//	isTabUtilityActive = true;
+	//}
+	//else if (isTabUtilityActive &&
+	//	m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
+	//{
+	//	iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
+	//	isTabUtilityActive = false;
+	//	isTabUtilityHided = true;
+	//}
+	//
+	//
+	//_string strSelectedUtilityName = {};
+	//if (isTabUtilityHided)
+	//{
+	//	switch (iTmpSelectedUtility)
+	//	{
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
+	//	}
+	//
+	//	std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
+	//}
 
 #pragma endregion
 
