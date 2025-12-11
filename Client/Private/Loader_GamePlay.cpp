@@ -96,6 +96,11 @@
 #pragma endregion
 
 
+#pragma region EFFECT
+
+#include "Effect_Rope.h"
+
+#pragma endregion
 
 
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -842,6 +847,10 @@ HRESULT CLoader_GamePlay::Load_Effect()
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Effect_Rope"),
+		CEffect_Rope::Create(m_pDevice, m_pContext))))
+		CRASH("Effect_Rope Create Failed");
 
 	return S_OK;
 }

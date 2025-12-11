@@ -7,7 +7,6 @@ namespace Client
 		LEVIATAN_GRAB,
 		LEVIATAN_QTE_SUCCESS,
 		TELEPORT,
-
 		END
 	};
 

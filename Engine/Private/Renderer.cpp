@@ -205,9 +205,9 @@ void CRenderer::Render()
 	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 	//m_pGameInstance->End_MRT();
 	Render_Decal();
-	Render_SSAO();			
 	Render_NonStatic();
-	Render_OutLineNonDepth();
+	Render_SSAO();			
+	Render_Outline_NonCompare();
 	Render_Dynamic();
 
 	Render_Light();
@@ -727,12 +727,12 @@ void CRenderer::Render_SSAO()
 
 }
 
-void CRenderer::Render_OutLineNonDepth()
+void CRenderer::Render_Outline_NonCompare()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE_NONDEPTH"), nullptr, false)))
-		CRASH("Failed Begin MRT");
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), nullptr, false)))
+		CRASH("Render Fail");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONDEPTH)])
+	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONCOMPARE)])
 	{
 		if (nullptr != pRenderObject)
 			pRenderObject->Render_OutLine();
@@ -740,7 +740,7 @@ void CRenderer::Render_OutLineNonDepth()
 		Safe_Release(pRenderObject);
 	}
 
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONDEPTH)].clear();
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONCOMPARE)].clear();
 
 	m_pGameInstance->End_MRT();
 }
@@ -929,14 +929,11 @@ void CRenderer::Render_LUT()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Lut"));
 }
 
-
 void CRenderer::Render_Fog()
-{
-	
+{	
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Failed Begin MRT_BackBuffer");
 
-	
 	if (false == m_IsFog)
 	{
 		if(FAILED(m_pShader->Bind_Texture("g_Texture", m_pCurrentSceneSRV)))
@@ -1351,7 +1348,6 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 
 #pragma region MRT_EFFECT
-
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_BackBuffer"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Emissive"))))
@@ -1364,10 +1360,12 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 #pragma endregion
 
-#pragma region MRT_OUTLINE_NONDEPTH
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONDEPTH"), TEXT("RT_Diffuse"))))
+#pragma region MRT_OUTLINE_NONCOMPARE
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), TEXT("RT_BackBuffer"))))
 		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONDEPTH"), TEXT("RT_PBR"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

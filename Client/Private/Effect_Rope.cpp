@@ -98,7 +98,7 @@ void CEffect_Rope::Late_Update(_float fTimeDelta)
 
 	//플레이어 위치로 갱신
 	SAMPLE_DESC P1Desc = {};
-	P1Desc.vPos, m_vPlayerPos;
+	P1Desc.vPos = m_vPlayerPos;
 	P1Desc.fSpawnTime = m_fCurrentTime;
 	m_Samples.push_back(P1Desc);
 
@@ -137,7 +137,7 @@ void CEffect_Rope::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	m_pIsActive = pDesc->pIsActive;
 	m_pPlayerMatrixPtr = pDesc->pPlayerMatrixPtr;
-	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+ 	m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
 
 	m_vRopeObjectPos = pDesc->vRopeObjectPos;
 
@@ -174,7 +174,7 @@ HRESULT CEffect_Rope::Ready_Components()
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(),TEXT("Prototype_Componenet_VIBuffer_Spectrum_tat"),
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(),TEXT("Prototype_Componenet_VIBuffer_Spectrum_Wing_Test"),
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 

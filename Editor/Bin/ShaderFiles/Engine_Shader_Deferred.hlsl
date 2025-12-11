@@ -202,11 +202,14 @@ PS_OUT_LIGHT PS_LIGHT(PS_IN In)
     if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
         discard;
     
+    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    
+    if(all(vViewPos == 0.f))
+        discard;
+        
     float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
     float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     

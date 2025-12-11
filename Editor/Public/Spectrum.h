@@ -82,7 +82,7 @@ private:
 
 	//Test
 	_float						m_fTestCurrentTime = 0.f;
-	_float						m_fTestTime = 1.f;
+	_float						m_fTestTime = 0.5f;
 	_float						m_fTestCallTime = 0.f;
 	_float3						m_vTestPos = {};
 

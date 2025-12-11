@@ -153,12 +153,12 @@ PS_SPECTRUMOUT PS_SPUCTRUM(PS_IN In)
     
     float MaskR = g_MaskTexture.Sample(DefaultSampler, float2(FlowUV.y, FlowUV.x)).r;
     
-    if (MaskR < 0.2f)
+    if (MaskR < 0.25f)
         discard;
 
     float4 vColor;
 
-    vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(saturate(In.vTexcoord.x), saturate(In.vTexcoord.y)));
     
     Out.vColor = float4(vColor.rgb, 1.f);
 

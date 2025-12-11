@@ -563,6 +563,14 @@ void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)
 	m_pPlayer->Lock_Input(IsLock);
 }
 
+void CGameSystem::Bind_Gravity_ToPlayer(_bool IsGravity)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Bind_Gravity(IsGravity);
+}
+
 #pragma endregion
 
 #pragma region PLAYER
