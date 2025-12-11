@@ -110,8 +110,11 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	if (false == m_isActivate)
 	{
-		//소멸 트리거, 포탈 생성
-		m_pGameSystem->Set_Potal_Active(true);
+		if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
+		{
+			//소멸 트리거, 포탈 생성
+			m_pGameSystem->Set_Potal_Active(true);
+		}
 	}
 
 	After_Condition(fTimeDelta);
@@ -337,12 +340,36 @@ void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 	
-	PREFAB_INFO EffectDesc{};
-	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	EffectDesc.pModelPtr = m_pModelCom;
+	//size_t Index = wStrEffectTag.find(TEXT("|"));
+	//_wstring wstrTypeTag = wStrEffectTag.substr(0, Index);
+	//_wstring wstrPartTag = wStrEffectTag.substr(Index + 1);
+	//
+	//if (wstrTypeTag == TEXT("SPECTRUM"))
+	//{
+	//	Index = wstrPartTag.find(TEXT("|"));
+	//	_wstring wstrSpectrumTag = wstrPartTag.substr(0, Index);
+	//	wstrPartTag = wstrPartTag.substr(Index + 1);
+	//	Index = wstrPartTag.find(TEXT("|"));
+	//	_wstring wstrBoneName = wstrPartTag.substr(0, Index);
+	//	_wstring wstrDuration = wstrPartTag.substr(Index + 1);
+	//
+	//	SPECTRUM_INFO Spectrum{};
+	//	Spectrum.pModelMarixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	//	Spectrum.pIsActive = nullptr;
+	//	Spectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(WStringToString(wstrBoneName).c_str());
+	//	//Spectrum.Duration = stof(wstrDuration);
+	//
+	//	m_pGameInstance->Spawn_PoolingObject(wstrSpectrumTag, XMMatrixIdentity(), &Spectrum);
+	//}
+	//else
+	{
+		PREFAB_INFO EffectDesc{};
+		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		EffectDesc.pModelPtr = m_pModelCom;
+		_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
 
-	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+		m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	}
 }
 
 void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
@@ -463,80 +490,80 @@ void CMonsterTest::Sound_Active(const _wstring& wStrSoundTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.1f, m_pTransformCom, 0.01f, 4.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.05f, m_pTransformCom, 0.01f, 6.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_05 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.1f, m_pTransformCom, 0.01f, 4.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_05 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.05f, m_pTransformCom, 0.01f, 6.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Dodge"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.01f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.12f, m_pTransformCom, 0.01f, 11.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.01f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.12f, m_pTransformCom, 0.01f, 11.f);
 		}
 		else if (wstrPartTag == TEXT("Around"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_TurnAround (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.01f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_TurnAround (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.01f, 17.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Sweep"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("4"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("7"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("8"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_8 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_SickleSweepsAcross_8 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Crude"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("4"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("5"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_5 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_5 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("6"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_6 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_CrudeSwing_6 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f, m_pTransformCom, 0.1f, 30.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Impact"))
@@ -562,27 +589,27 @@ void CMonsterTest::Sound_Active(const _wstring& wStrSoundTag)
 	{
 		if (wstrPartTag == TEXT("Up1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Buildup_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.55f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Buildup_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.25f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Up2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Buildup_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.55f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Buildup_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.25f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Up4"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Buildup_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.4f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Buildup_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.2f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Fly"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Flyup_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.4f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Flyup_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.2f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Small"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.4f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.f, 14.f);
 		}
 		else if (wstrPartTag == TEXT("Small1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.4f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Heishe_Bodymove_Small_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.f, 14.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Voice"))
@@ -593,83 +620,83 @@ void CMonsterTest::Sound_Active(const _wstring& wStrSoundTag)
 		}
 		else if (wstrPartTag == TEXT("Charge"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Charge_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.35f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Charge_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 9.f);
 		}
 		else if (wstrPartTag == TEXT("Start1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Start_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 5.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Start_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.2f, m_pTransformCom, 0.f, 10.f);
 		}
 		else if (wstrPartTag == TEXT("Start2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Start_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 5.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Start_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.2f, m_pTransformCom, 0.f, 10.f);
 		}
 		else if (wstrPartTag == TEXT("End1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_End_1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 5.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_End_1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.2f, m_pTransformCom, 0.f, 10.f);
 		}
 		else if (wstrPartTag == TEXT("Edn3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_WeizuoshenwangBattle__End_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 5.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_WeizuoshenwangBattle__End_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.2f, m_pTransformCom, 0.f, 10.f);
 		}
 		else if (wstrPartTag == TEXT("Jump1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Jump_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.2f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Jump_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Jump2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Jump_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.2f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Jump_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Dive"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Diving_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Diving_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Block")) // Sound|Voice|Block
 		{
-			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Block_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.3f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Block_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f, m_pTransformCom, 0.f, 18.f);
 		}
 		else if (wstrPartTag == TEXT("Paralysis"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_weizuoshenwang_paralysis_start (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.3f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_weizuoshenwang_paralysis_start (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f, m_pTransformCom, 0.f, 18.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Pre"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_PrepareForAnAttack_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_PrepareForAnAttack_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f, m_pTransformCom, 0.f, 15.f);
 		}
 		else if (wstrPartTag == TEXT("3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_PrepareForAnAttack_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_PrepareForAnAttack_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f, m_pTransformCom, 0.f, 15.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Side"))
 	{
 		if (wstrPartTag == TEXT("Scrape"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("plot_scrape_loop_9_23 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.f, 6.f);
+			m_pGameInstance->Play_Sound(TEXT("plot_scrape_loop_9_23 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.f, 20.f);
 		}
 		else if (wstrPartTag == TEXT("FlyKnife"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Flyingknife (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 21.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Flyingknife (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 36.f);
 		}
 		else if (wstrPartTag == TEXT("PutawayKnife"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_PutawaytheSickle._1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 21.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_PutawaytheSickle._1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 36.f);
 		}
 		else if (wstrPartTag == TEXT("Shake"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_ShaketheSickle._1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 9.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_ShaketheSickle._1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 16.f);
 		}
 		else if (wstrPartTag == TEXT("Paralysis"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Paralysis_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 21.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Paralysis_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f, m_pTransformCom, 0.f, 31.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Death_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f, m_pTransformCom, 0.f, 7.f);
-		m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Death_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.35f, m_pTransformCom, 0.f, 12.f);
+		m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Death_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.14f, m_pTransformCom, 0.f, 15.f);
+		m_pGameInstance->Play_Sound(TEXT("VO_Enemy_Weizuoshenwang_Battle_Death_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f, m_pTransformCom, 0.f, 17.f);
 	}
 }
 
@@ -1226,7 +1253,7 @@ _bool CMonsterTest::DodgeCooldown()
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
 
-	if (iIndex == ATK_PATTERN::ATTACK7)
+	if (iIndex != ATK_PATTERN::ATTACK2)
 		return false;
 
 	//else

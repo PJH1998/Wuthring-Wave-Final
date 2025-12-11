@@ -281,25 +281,25 @@ void CFS_Scythe::Sound_Active(const _wstring& wStrObjectTag)
 	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
 	if (wstrTypeTag == TEXT("Appear"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_Apper_1 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.01f, 2.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_Apper_1 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.01f, 16.f);
 	}
 	else if (wstrTypeTag == TEXT("Loop"))
 	{
 		if (false == m_isPlay)
 		{
 			m_isPlay = true;
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_Loop (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.01f, 2.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_Loop (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.01f, 16.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Seperate"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_SickleSweepsAcross1 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 2.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_SickleSweepsAcross1 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.01f, 16.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_SickleSweepsAcross2 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.01f, 2.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("SFX_Enemy_Weizuoshenwang_Longche_Battle_SickleSweepsAcross2 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.01f, 16.f);
 		}
 	}
 }
