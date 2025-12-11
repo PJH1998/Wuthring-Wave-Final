@@ -336,16 +336,13 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 		switch (static_cast<ERoverIdleType>(m_iCurrentAnimIdx))
 		{
 		case ERoverIdleType::STANDCHANGE:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
-		case ERoverIdleType::STAND1_ACTION02:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION03; // 애니메이션 상태 => 블랙보드에 기입.      
-			break;
-		case ERoverIdleType::STAND1_ACTION03:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+		case ERoverIdleType::STAND1_ACTION01:
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
 		default:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
 		}
 
@@ -359,8 +356,6 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 void CRoverGroundIdle::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1_ACTION01), "Stand1_Action01", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1_ACTION02), "Stand1_Action02", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1_ACTION03), "Stand1_Action03", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1), "Stand1", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND2), "Stand2", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);
