@@ -24,7 +24,7 @@ public:
 		_float				fAttackDamage;
 		_float				fLifeTime{ 10.f };
 		_float				fMaxDelay{ 1.f };
-		_bool				isCollisionDestroy;
+		_bool				isCollisionDestroy{ true };
 		TEXT_COLOR_TYPE		eType;
 	}PROJECTILEDESC;
 
@@ -32,6 +32,7 @@ public:
 	{
 		_float3				vTargetPos;
 		CTransform*			pOwnerTransform;
+		_wstring			wstrSoundTag;
 	}PROJECTILERESET;
 private:
 	explicit CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -64,6 +65,8 @@ private:
 	// Effect?
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT		m_CallBack{};
+
+	_int				m_iSoundChannel{ -1 };
 
 private:
 	HRESULT		Bind_Resources();

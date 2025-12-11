@@ -416,6 +416,11 @@ void CGameSystem::Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive)
 
 #pragma region TRIGGER
 
+_uint CGameSystem::Get_CurrentCharacterIndex() const
+{
+	return m_pPlayerStatus->Get_CurrentCharIndex();
+}
+
 // Trigger 등록
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
 {
@@ -529,34 +534,40 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	{
 		m_pPlayer->Bind_EventLock(true);
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
-		return;
 	}
 	else if (strTransition == "LeviatanQTEStart")
 	{
 		_float2 vPos = { 500.f, -200.f };
 		Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
-		return;
 	}
 	else if (strTransition == "LeviatanQTESuccess")
 	{
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
-		return;
 	}
-
-	if (strTransition == "GrabRelease")
+	else if (strTransition == "GrabRelease")
 	{
 		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
-		return;
 	}
 	else if (strTransition == "GrabUnbined")
 	{
 		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
-		return;
+	}
+	else if (strTransition == "Teleport")
+	{
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::TELEPORT, pArg);
 	}
 	
 	
 	
 	
+}
+
+void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Lock_Input(IsLock);
 }
 
 #pragma endregion

@@ -132,6 +132,14 @@ void CLevel_Test::Update(_float fTimeDelta)
     
 #ifdef _DEBUG
 	Shader_Gui();
+	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+	}
 #endif
 
 	Toggle_HUD();
@@ -608,6 +616,7 @@ void CLevel_Test::Ready_Leviatan()
 	Projectile.fSpeedPerSec = 15.f;
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_Projectile");
 	Projectile.eType = TEXT_COLOR_TYPE::DARK;
+	Projectile.isCollisionDestroy = false;
 	Projectile.wstrEffectTag = TEXT("Leviatan_Dg2");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviSword"), 4, &Projectile)))

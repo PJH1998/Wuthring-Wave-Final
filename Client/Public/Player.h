@@ -90,15 +90,12 @@ public:
 	void Notify_EscapeGrabExecute();
 	void Notify_Event(CHARACTER_EVENT eEvent, void* pArg = nullptr);
 
-	
 	void Bind_EventLock(_bool IsLock);
 
-
+	void Lock_Input(_bool IsLock);
 
 
 #pragma endregion
-
-
 
 
 

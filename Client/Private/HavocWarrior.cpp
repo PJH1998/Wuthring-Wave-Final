@@ -57,6 +57,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 	return S_OK;
@@ -229,7 +230,10 @@ void CHavocWarrior::Render()
 			CRASH("Ready g_HasNormal Failed");
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		if(m_fBehitAcc < m_fBehitMaxTime)
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
+		else
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 		m_pModelCom->Render(i);
 	}
@@ -261,6 +265,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
+	m_fBehitAcc = m_fBehitMaxTime;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
@@ -311,22 +316,22 @@ void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Run"))
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.f, 7.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.f, 7.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk01"))
@@ -373,6 +378,12 @@ HRESULT CHavocWarrior::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+	if (m_fBehitAcc < m_fBehitMaxTime)
+	{
+		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+	}
 
 	return S_OK;
 }
@@ -555,6 +566,8 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 	//m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(vMobPos, UI_MINIMAP_OBJTYPE::MONSTER);
 #pragma endregion
 
+	if (m_fBehitAcc < m_fBehitMaxTime)
+		m_fBehitAcc += fTimeDelta;
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
@@ -660,42 +673,17 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
 		return;
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-		
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-		 * XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
-#ifdef _DEBUG
-		cout << "Be Hit! (Havoc Warrior)" << endl;
-#endif // _DEBUG
-
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		m_fBehitAcc = 0.f;
 #pragma region UI_BIND
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-
-
 #pragma endregion
 
 #pragma region HIT_EFFECT
@@ -703,53 +691,45 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
 			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		const _wstring& strSoundTag = pDesc->strSoundTag;
+		if (!strSoundTag.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
+		}
 #pragma endregion
 
 #pragma region PHYSICS
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-		_vector vCollisionNormal = XMLoadFloat3(&m_vBeHit_Normal);
-		if (XMVectorGetX(XMVector3Dot(vCollisionNormal, XMVectorSet(0.f, 1.f, 0.f, 0.f))) >= 0.525f)
+		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);
+#pragma endregion
+
+		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
-			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+#ifdef _DEBUG
+			cout << "Be Hit! (Havoc Warrior)" << endl;
+#endif // _DEBUG
 		}
-#pragma endregion
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+		{
+			if (pDesc->eDir == ATTACKVOULME_DIR::UPPER)
+			{
+				m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+			}
 #ifdef _DEBUG
-		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+			cout << "Be Hit! SKILL (Havoc Warrior)" << endl;
 #endif // _DEBUG
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_isPushed = true;
-		//m_isAir = true;
-		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+		{
+			m_isPushed = true;
+			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 
 #ifdef _DEBUG
-		cout << "Knock Back! (Havoc Warrior)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+			cout << "Knock Back! (Havoc Warrior)" << endl;
+			cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+		}
 	}
 }
 

@@ -290,25 +290,25 @@ HRESULT CGameInstance::Load_Sound_FromFolderRecursive(const _char* pFolderPath, 
 {
 	return m_pSound_Manager->Load_Sound_FromFolderRecursive(pFolderPath, is3D);
 }
-void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
-	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume);
+	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, fFrequency);
 }
-void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency)
 {
-	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
+	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance, fFrequency);
 }
-void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
-	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume);
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, fFrequency);
 }
-void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance)
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency)
 {
-	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance);
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance, fFrequency);
 }
-void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume)
+void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
-	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume);
+	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume, fFrequency);
 }
 void CGameInstance::Stop_Sound(_uint iChannelID)
 {
@@ -625,7 +625,7 @@ const LIGHT_DESC* CGameInstance::Get_LightDesc(const _wstring& strLightTag)
 {
 	return m_pLight_Manager->Get_LightDesc(strLightTag);
 }
-void CGameInstance::Set_Active(const _wstring& strLightTag, _bool isActive)
+void CGameInstance::Set_LightActive(const _wstring& strLightTag, _bool isActive)
 {
 	m_pLight_Manager->Set_Active(strLightTag, isActive);
 }

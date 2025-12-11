@@ -55,7 +55,7 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Begin_VF();
 
-	m_pGameInstance->Play_BGM(L"BGM_Logo", ENUM_CLASS(CHANNEL::BGM), 0.5f);
+	m_pGameInstance->Play_BGM(L"BGM_Logo", ENUM_CLASS(CHANNEL::BGM), 0.5f, 1.f);
 
 	return S_OK;
 }
@@ -64,11 +64,6 @@ void CLevel_Logo::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Logo"));
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
-	{
-		CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
@@ -76,16 +71,16 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
 	{
-	
+		CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
 
-#ifdef _DEBUG
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		!m_isGoinFinish)
 	{
 		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
 		m_pGameInstance->OnFade(FADE::FADE_OUT, 3.f, [&]() {
-			CHANGE_LEVEL_EVENT event{ LEVEL::HEAVEN, true };
+			CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 			});
 
@@ -95,9 +90,6 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	Update_SoundOrder(fTimeDelta);		// n초 후 재생할 사운드 관리
 	Update_ClickSound();				// 클릭 시 사운드
 	Update_GoinFinish(fTimeDelta);		// 로고 종료 시 사운드 조절
-#endif // _DEBUG
-
-	
 }
 
 void CLevel_Logo::Render()
@@ -193,7 +185,6 @@ void CLevel_Logo::Ready_SkyBox()
 		CRASH("Failed to Add GameObject To Layer SkyBox");
 }
 
-#ifdef _DEBUG
 void CLevel_Logo::Update_SoundOrder(_float fTimeDelta)
 {
 	if (m_iSoundOrder >= 1) return;
@@ -230,8 +221,6 @@ void CLevel_Logo::Update_GoinFinish(_float fTimeDelta)
 
 	m_fElapsedFinishTime += fTimeDelta;
 }
-
-#endif // _DEBUG
 
 
 #ifdef _DEBUG

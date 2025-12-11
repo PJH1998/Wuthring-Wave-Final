@@ -195,7 +195,6 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
-	Render_NonStatic();
 	//if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 	//	CRASH("Render Fail");
 	//m_pGameInstance->RenderBufferPool(0);
@@ -207,6 +206,7 @@ void CRenderer::Render()
 	//m_pGameInstance->End_MRT();
 	Render_Decal();
 	Render_SSAO();			
+	Render_NonStatic();
 	Render_Dynamic();
 
 	Render_Light();
@@ -232,6 +232,7 @@ void CRenderer::Render()
 	Render_Distortion();
 	Render_ScreenEffect();
 	Render_UI();
+	Render_UI_Post();
 	Render_Fade();
 
 #ifdef _DEBUG
@@ -1098,6 +1099,11 @@ void CRenderer::Render_ScreenEffect()
 void CRenderer::Render_UI()
 {
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::UI));
+}
+
+void CRenderer::Render_UI_Post()
+{
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::UI_POST));
 }
 
 void CRenderer::Render_Fade()

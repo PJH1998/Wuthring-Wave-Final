@@ -64,26 +64,9 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 0. Delayed Action 수행.
-	Process_DelayedActions(fTimeDelta);
-
-	// 1. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
-
-    // 2. 이전 위치 저장
-    m_pTransformCom->Save_PreviousPosition();
-
-	// 3. 몬스터가 있다면?
-	Update_TargetDistance(fTimeDelta);
-
-	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-	// 5. Dissovle 체크
+	// 1. Dissovle 체크
 	if (IsDissolve)
 	{
 		if (m_fDissolveTimer <= m_fMaxDissolveTime)
@@ -94,6 +77,29 @@ void CRover::Priority_Update(_float fTimeDelta)
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
+
+	if (!IsDissolve)
+	{
+		// 2. Delayed Action 수행.
+		Process_DelayedActions(fTimeDelta);
+
+		// 3. 이전 위치 저장
+		m_pTransformCom->Save_PreviousPosition();
+
+		// 4. 몬스터가 있다면?
+		Update_TargetDistance(fTimeDelta);
+	}
+	
+
+	// 5. Parts 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+
+   
+	
 }
 
 void CRover::Update(_float fTimeDelta)
@@ -106,15 +112,17 @@ void CRover::Update(_float fTimeDelta)
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
 
-	// 특정 상황일 때 TimeLack 감소.
-	_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+	
 
 	if (!IsDissolve)
 	{
+		// 특정 상황일 때 TimeLack 감소.
+		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+
 		// 2. 상태 머신 갱신
 		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
-		Update_Physics(fTimeDelta);
+		Update_Physics(fTimeDelta * fTimeLack);
 		// 4. 카메라 업데이트
 		Update_Camera(fTimeDelta);
 	}
@@ -134,30 +142,29 @@ void CRover::Update(_float fTimeDelta)
 }
 void CRover::Late_Update(_float fTimeDelta)
 {
-    // 1. 파츠 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Late_Update(fTimeDelta);
-    }
+   
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-	// 2. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
-
-	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	if (!IsDissolve)
 	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else
-	{
-		// 2. QTE인 경우 Collider 갱신하지 않음.
-		if (!m_IsQTE)
-			m_pColliderCom->Sync_Position(m_pTransformCom);
+		// 2. MainAttackVolume 설정
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->Late_Update(fTimeDelta);
+
+		// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+
+		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
 		else
-			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		{
+			// 2. QTE인 경우 Collider 갱신하지 않음.
+			if (!m_IsQTE)
+				m_pColliderCom->Sync_Position(m_pTransformCom);
+			else
+				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		}
 	}
 
 	if (m_IsQTEend)
@@ -166,6 +173,7 @@ void CRover::Late_Update(_float fTimeDelta)
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
+	
 
 
 	if (m_IsVisible)
@@ -182,6 +190,13 @@ void CRover::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+	}
+
+	// 1. 파츠 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
 	}
 }
 

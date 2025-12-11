@@ -354,6 +354,19 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 }
 
 
+void CCharacter::Execute_Telport(_vector vPos)
+{
+	if (nullptr == m_pTransformCom ||
+		nullptr == m_pColliderCom)
+		return;
+
+	vPos = XMVectorSetW(vPos, 1.f);
+
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Save_PreviousPosition();
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+}
+
 void CCharacter::Reserve_LandSlide(const SLIDE_DATA& eData)
 {
 	// 1. 데이터 복사.
@@ -1364,13 +1377,14 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 {
 	// return; 추가하면 캐릭터 사운드 안들림.
 	
-	_wstring var1, var2, var3, var4;
+	_wstring var1, var2, var3, var4, var5;
 	wstringstream wss(wStrObjectTag);
 
 	getline(wss, var1, L'|');
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|');
 	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
 
 	_wstring strSoundType = var2; // Sound Type
 	_wstring strSoundTag = var3; // Sound Tag

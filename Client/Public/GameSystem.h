@@ -184,6 +184,7 @@ public:
 
 #pragma region PLAYER STATUS
 	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
+	_uint Get_CurrentCharacterIndex() const;
 #pragma endregion
 
 
@@ -224,6 +225,7 @@ public:
 
 #pragma region PLAYER_INTERACT
 	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
+	void						Lock_Input_ToPlayer(_bool IsLock);
 #pragma endregion
 
 #pragma region PLAYER

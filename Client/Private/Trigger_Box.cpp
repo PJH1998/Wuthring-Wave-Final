@@ -184,7 +184,29 @@ void CTrigger_Box::Collision_During()
 	{
 		if (!m_pGameSystem->IsSonoro())
 		{
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+			if (!m_pGameSystem->IsSonoro())
+			{
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+			}
+			else
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+			m_pGameSystem->Hide_InteractUI(true);
+		}
+		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			/*if (!m_IsDoingPalette)
+			{
+				m_pGameSystem->Open_Game_OverflowPalette();
+				m_pGameSystem->Hide_InteractUI(true);
+				m_pGameSystem->Lock_Input_ToPlayer(true);
+			}
+			else
+			{
+				m_pGameSystem->Close_Game_OverflowPalette();
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+				m_pGameSystem->Lock_Input_ToPlayer(false);
+			}
+			m_IsDoingPalette = !m_IsDoingPalette;*/
 		}
 		else
 			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);

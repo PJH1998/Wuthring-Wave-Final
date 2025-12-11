@@ -449,8 +449,11 @@ void CPlayer::Player_KeyInput()
 		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
 		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget(); // 던지기 테스트.
 		
-		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(false);
-		Bind_EventLock(false);
+		//m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(false);
+		//Bind_EventLock(false);
+
+		_vector vPos = XMVectorSet(-18.9f, 0.f, 1083.4f, 1.f);
+		Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
@@ -751,14 +754,11 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_IsLockOn = false;
 }
 
-// 이게이상하다?
 void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 {
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
-		//CTransform* pTransform = static_cast<CTransform*>(pArg); // Leviatan Transform
-
 		// 2. Rover로 변경.
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			Change_Character(CHARACTERTYPE::ROVER, 0.f);
@@ -792,13 +792,28 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 		// 1, 2, 3번 도 못누르게 막아야함. QTE도 안되게 하기.?
 		//m_Characters[m_iCurrentCharacterIdx]->Stop_Anim(); // Animation Stop
 	}
-	
+	else if (CHARACTER_EVENT::TELEPORT == eEvent)
+	{
+		// TELEPORT
+		if (nullptr == pArg)
+			return;
 
+		_float4 vPos = *static_cast<_float4*>(pArg);
+		m_Characters[m_iCurrentCharacterIdx]->Execute_Telport(XMLoadFloat4(&vPos));
+	}
 	
 }
 void CPlayer::Bind_EventLock(_bool IsLock)
 {
 	m_IsEventLock = IsLock;
+}
+
+void CPlayer::Lock_Input(_bool IsLock)
+{
+	if (nullptr == m_pInputControllerCom)
+		return;
+
+	m_pInputControllerCom->Set_BlockInput(IsLock);
 }
 #pragma endregion
 
