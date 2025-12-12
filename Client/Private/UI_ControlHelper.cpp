@@ -21,6 +21,7 @@
 #include "UI_QTE.h"
 #include "UI_HUD_Sector_Minimap.h"
 #include "UI_CurveTrace.h"
+#include "UI_Dialog.h"
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -68,6 +69,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
 	m_pRootUI_GrapplePoint			= Find_RootUI (L"UI_GrapplePoint");
 	//m_pRootUI_QTE					= Find_RootUI (L"UI_QTE");
+	m_pRootUI_Dialog				= Find_RootUI (L"UI_Dialog");
 
 	// MiniGames
 	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
@@ -486,6 +488,31 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 										vHeadColor,
 										vTailColor);
 	}
+}
+
+void CUI_ControlHelper::Open_DialogUI(const _char* pFilePath)
+{
+	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
+
+	if (!pRootUI)
+		return;
+	if (pRootUI->IsActivate())
+		return;
+
+	CUI_Dialog::UI_DIALOG_DESC tDesc = {};
+	tDesc.strFilePath = pFilePath;
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Dialog", _matrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Close_DialogUI()
+{
+	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Req_Close_Dialog();
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

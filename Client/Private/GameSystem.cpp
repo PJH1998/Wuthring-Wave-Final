@@ -393,6 +393,16 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vTailColor);
 }
 
+void CGameSystem::Open_DialogUI(const _char* pFilePath)
+{
+	m_pUI_ControlHelper->Open_DialogUI(pFilePath);
+}
+
+void CGameSystem::Close_DialogUI()
+{
+	m_pUI_ControlHelper->Close_DialogUI();
+}
+
 void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
 	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);

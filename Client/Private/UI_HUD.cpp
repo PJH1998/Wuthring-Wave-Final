@@ -176,6 +176,7 @@ void CUI_HUD::PreAssign_ChildUIs()
 	m_pUI_Group_Augusta = Find_ChildObject(L"Group_Augusta");
 	m_pUI_Group_Galbrena = Find_ChildObject(L"Group_Galbrena");
 
+	m_pUI_Frame_Rover = Find_ChildObject(L"Frame_Rover");
 	m_pUI_Frame_Rover_Dark = Find_ChildObject(L"Frame_Rover_Dark");
 	m_pUI_Frame_Augusta = Find_ChildObject(L"Frame_Augusta");
 	m_pUI_FrameGroup_Augusta_OtherEnergy = Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy");
@@ -1667,11 +1668,13 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 		if (!isIn_Rover_BurstMode)
 		{
+			m_pUI_Frame_Rover->Set_Active(true);
 			m_pUI_Frame_Rover_Dark->Set_Active(false);
 			// Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
 		}
 		else if (isIn_Rover_BurstMode)
 		{
+			m_pUI_Frame_Rover->Set_Active(false);
 			m_pUI_Frame_Rover_Dark->Set_Active(true);
 			// Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
 		}
