@@ -198,6 +198,7 @@ void CAugustaGroundLandSlide::Check_StateTransition(_float fTimeDelta)
 			
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP);
 			m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
+			m_pAugusta->Stop_Sound(CHANNEL::PLAYER_ACTION);
 			m_pAugusta->Play_Sound(m_strSoundTag, CHANNEL::PLAYER_ACTION, 0.4f);
 			//m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
 			//m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
