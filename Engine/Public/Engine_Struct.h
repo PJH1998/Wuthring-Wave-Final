@@ -427,6 +427,7 @@ namespace Engine
 		_bool isTargetExist = false;
 		_float4 vTargetWorldPos;
 
+		_float fLineSpace = 1.0f;
 
 		//..
 	}FONT_SINGLEDESC;
@@ -441,6 +442,7 @@ namespace Engine
 	{
 		class CModel*		 pModelPtr = nullptr;
 		const _float4x4*	 pMatrixPtr = nullptr;
+		_bool*				 pActive = nullptr;
 	}PREFAB_INFO;
 
 	typedef struct tagEffectInfo
@@ -456,7 +458,7 @@ namespace Engine
 		const _float4x4*	pModelMarixPtr = nullptr;
 		const _float4x4*	pBoneMatrixPtr = nullptr;
 		_bool*				pIsActive = nullptr;
-		_float				fDuration;
+		_float					fDuration = {};
 	}SPECTRUM_INFO;
 
 	typedef struct tagRopeInfo

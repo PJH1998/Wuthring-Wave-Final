@@ -1,4 +1,5 @@
-﻿#include "ClientPch.h"
+﻿
+#include "ClientPch.h"
 #include "UI_Text_Damage.h"
 
 CUI_Text_Damage::CUI_Text_Damage(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

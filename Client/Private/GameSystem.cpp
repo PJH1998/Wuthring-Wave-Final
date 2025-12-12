@@ -22,6 +22,7 @@
 #include "SequencePlayer.h"
 #include"Potal.h"
 #include "TimeLack.h"
+#include"MapObject_Dome.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -93,6 +94,8 @@ void CGameSystem::Clear_Resource()
 	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
 	Safe_Release(m_pPotal);
+	Safe_Release(m_pLeviDome);
+	m_pLeviDome = nullptr;
 	m_pPotal = nullptr;
 }
 #pragma region PARSER
@@ -393,6 +396,16 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vTailColor);
 }
 
+void CGameSystem::Open_DialogUI(const _char* pFilePath)
+{
+	m_pUI_ControlHelper->Open_DialogUI(pFilePath);
+}
+
+void CGameSystem::Close_DialogUI()
+{
+	m_pUI_ControlHelper->Close_DialogUI();
+}
+
 void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
 	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);
@@ -685,12 +698,22 @@ void CGameSystem::Change_BattleBGM(BOSSBGM eBoss)
 {
 	m_pBGM_Manager->Change_BattleBGM(eBoss);
 }
+void CGameSystem::Register_Dome(CMapObject_Dome* pDome)
+{
+	m_pLeviDome = pDome;
+	Safe_AddRef(m_pLeviDome);
+}
+void CGameSystem::Change_Leviathan_Phaze(_uint iPhaze)
+{
+	m_pLeviDome->Change_MaxAlpha(iPhaze);
+}
 #pragma endregion
 
 void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
+	Safe_Release(m_pLeviDome);
 	if (m_pPotal)
 		Safe_Release(m_pPotal);
 

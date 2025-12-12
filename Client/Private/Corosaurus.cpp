@@ -53,8 +53,8 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	//조우 애니메이션 고정하기
 
 	_float temp{51.f};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
-	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 51.f);
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp, false);
+	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 52.f);
 	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;
 }
@@ -722,6 +722,9 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 			m_isDeadTrigger = true;
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::ASPHODEL);
+			m_pGameSystem->Change_BGM(TEXT("music_scene_septimont_aitongyuan_poi-after_cm_75bpm_4_4 (SFX)"));
+
 		}
 		return;
 	}
@@ -780,6 +783,7 @@ void CCorosaurus::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifo
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("코로사우로스"), "CoroSaurus", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
 	}
 }
 

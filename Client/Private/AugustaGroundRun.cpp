@@ -136,7 +136,6 @@ void CAugustaGroundRun::Handle_Input()
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    //m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
     m_fSpeed = 0.6f;
 
 	m_States[LOCKON] = m_pAugusta->Is_LockOn();

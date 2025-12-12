@@ -141,7 +141,7 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 void CMapObject_Collaps::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 1. Detect 감지되면?
-	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer || m_IsTriggerd)
 		return;
 
 	// 2. CallBack 정보 가져오기
@@ -220,7 +220,6 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 		_float3 vPointPos;
 		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-		vPointPos.y += 1.5f;
 		m_pPullUI = m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
 		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
 		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;

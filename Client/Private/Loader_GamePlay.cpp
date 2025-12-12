@@ -166,10 +166,10 @@ HRESULT CLoader_GamePlay::Load_Model()
 
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1211_third/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1212_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1211_third/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1212_second/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -843,7 +843,7 @@ HRESULT CLoader_GamePlay::Load_Effect()
 
 	m_pGameSystem->Load_EffectSpecturmTexture_FromFolder("../../Client/Bin/Resource/Effect/Spectrum/Color", m_eCurLevel);
 	m_pGameSystem->Load_EffectSpecturmTexture_FromFolder("../../Client/Bin/Resource/Effect/Spectrum/Mask", m_eCurLevel);
-	m_pGameSystem->Load_EffectSpectrumVB_FromFolder("../../Client/Bin/Resource/Effect/Spectrums/SpectrumVB", m_eCurLevel);
+	m_pGameSystem->Load_EffectSpectrumVB_FromFolder("../../Client/Bin/Resource/Effect/Spectrums/GamePlay/SpectrumVB", m_eCurLevel);
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);

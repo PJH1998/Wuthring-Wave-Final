@@ -110,6 +110,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
+			m_fGravity = 0.f;
             break;
         }
 		case EAugustaAirAttackType::AIRATTACK_LOOP:
@@ -128,6 +129,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
+			m_fGravity = 0.f;
 
             break;
         }
@@ -137,6 +139,8 @@ void CAugustaAirAttack::OnEnter(void* pArg)
     m_pAugusta->PartActivate(m_iPartType, true);
 	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+
+	//m_fGravity = 0.f;
 }
 
 void CAugustaAirAttack::OnUpdate(_float fTimeDelta)
@@ -173,6 +177,18 @@ void CAugustaAirAttack::OnExit()
 	}
     m_pAugusta->Set_Gravity(true);
     m_fSpeed = 0.f;
+
+	EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
+
+	if (eAirAttackType != EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP &&
+		eAirAttackType != EAugustaAirAttackType::AIRATTACK_LOOP)
+	{
+		m_fGravity = 0.f;
+	}
+		
+
+
+	//m_fGravity = 0.f;
     
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
@@ -219,7 +235,9 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
     if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP || eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP)
     {
-        m_pAugusta->Move_Fall(fTimeDelta, m_fSpeed);
+		m_fGravity += fTimeDelta * GRAVITY * 0.1f; // 초에 9.8f 가속도?
+        m_pAugusta->Move_Fall(fTimeDelta, m_fGravity);
+        //m_pAugusta->Move_Fall(fTimeDelta, m_fSpeed);
     }
 
     // Attack State에 해당하는 경우 모두 Animation이 존재.

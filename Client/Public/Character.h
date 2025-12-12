@@ -112,6 +112,8 @@ public:
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
 	void Set_Collider(class CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius);
 	void Set_Ability(class CAbility* pAbilityCom);
+
+	_float4 Get_MotionTrailColor() { return m_vMotionTrailColor; }
 #pragma endregion
 
 
@@ -338,7 +340,8 @@ public:
 	void Rotate_Direction(_fvector vDir);
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
-	void Rotate_Target();
+	void Rotate_Target(_bool IsReverse = false);
+	
 	void Rotate_Target(class CTransform* pTransform);
 	void Rotate_TargetPosition();
 	void Rotate_Target_Lerp(_float fTimeDelta);
@@ -446,11 +449,14 @@ protected:
 	// Shader 변수.
 	_float m_fMaxDissolveTime = { 0.5f };
 	_float m_fDissolveTimer = {};
-	_float4 m_vDissolveColor = { };
+	_float4 m_vDissolveColor = {};
 	_float4 m_vEmissiveColor = {};
 	_float  m_fEmissiveIntensity = {};
-
 	_float4 m_vMotionTrailColor = {};
+
+	// Event Shader 변수.
+	_float m_fEventDissolveTime = {};
+	_float m_fEventDissolveTimer = {};
 
 	_float4x4 m_DissolveWorldMatrix = {};
 	_float4x4 m_MatrixIdentity = {}; // SocketMatrix 전달 시 아무것도 없으면 Identity 행렬 전달.
@@ -463,6 +469,8 @@ protected:
 	_bool m_IsVisible = { true };
 	_bool m_IsOutLineVisible = { true };
 	_bool m_IsRopeActive = { false };
+	_bool m_IsEventDissolve = { false }; // Dissolve가 연출용인지? 아닌지.
+	_bool m_IsDissolveReverse = { false }; // Dissolve가 반대로 적용되는가?
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 

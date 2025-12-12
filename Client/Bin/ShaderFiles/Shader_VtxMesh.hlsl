@@ -36,7 +36,8 @@ int g_iIndex = 0;
 int g_iShadowMapLayer = 0;
 
 float g_DissolveTime = -1.f;
-
+float g_DistortionTime = 0.f;
+float g_fAlpha = 0.f;
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -1552,66 +1553,36 @@ PS_OUT_LIGHT PS_MAIN_TREE_BURN_EMISSIVE(PS_IN In)
     return Out;
 }
 
-PS_OUT_LIGHT PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
+struct PS_OUT_DOME
 {
-    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    vector vBackBuffer : SV_TARGET0;
+    vector vEmissive : SV_TARGET1;
+    vector vDistortion : SV_TARGET2;
+    vector AccumColor : SV_TARGET3;
+    vector AccumAlpha : SV_TARGET4;
+};
+
+
+PS_OUT_DOME PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
+{
+    PS_OUT_DOME Out = (PS_OUT_DOME) 0;
     
     vector vDistored = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
-    vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
-    Out.vDiffuse = vDiffuse * vDiffuse2;
-    
+    float2 vTempTexcoord = In.vTexcoord + float2(g_DistortionTime * 0.01f, g_DistortionTime * 0.05f);
+
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
+    //vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
+    vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, frac(vTempTexcoord));
+    Out.vBackBuffer = vDiffuse2;
+    Out.vBackBuffer.a = 0.1f;
+    Out.vBackBuffer.a = g_fAlpha;
     if (length(vDiffuse) == 0.f)
         vDiffuse = 1.f;
-    //Out.vDistortion = vDistored;
+    if (g_fAlpha != 0.f)
+        Out.vDistortion = vDistored.r;
  
     vector vEmissive = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
-    
-    Out.vEmissive = float4(Out.vDiffuse.rgb * vEmissive.xyz, 1.f);
-        
-    Out.vDiffuse.w = 1.f;
-    
-    Out.vPBR.y = g_fGlobalStaticRoughness;
-    Out.vPBR.x = g_fGlobalStaticMetallic;
-    
-    float4 vNormal;
-    
-    if (g_HasNormal)
-    {
-
-        vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
-		
-	        
-        vNormal = normalize(vDefaultNormal * 2.f - 1.f);
-        if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
-
-        float3 vTangent = In.vTangent.xyz;
-        float3 vBinormal = In.vBinormal.xyz * -1.f;
-        float3 vInNormal = In.vNormal.xyz;
-
-        float3x3 WorldMatrix;
-        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
-        
-        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
-        vNormal.xyz = vNormal * 0.5f + 0.5f;
-    }
-    else
-    {
-        vNormal = In.vNormal;
-        vNormal = vNormal * 0.5f + 0.5f;
-    }
-    
-    Out.vNormal = float4(vNormal.xyz, 1.f);
-    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-    Out.vDepth.y = In.vProjPos.w;
-    
-    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
-    Out.vSSS.w = In.vProjPos.w;
-    
-    Out.vDepth.w = 1.f;
-
     return Out;
 }
 
@@ -1942,7 +1913,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;

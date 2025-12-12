@@ -398,12 +398,36 @@ void CLeviatan::Effect_Active(const _wstring& wStrEffectTag)
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
-	PREFAB_INFO EffectDesc{};
-	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	EffectDesc.pModelPtr = m_pModelCom;
+	size_t Index = wStrEffectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrEffectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrEffectTag.substr(Index + 1);
 
-	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	if (wstrTypeTag == TEXT("SPECTRUM"))
+	{
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrSpectrumTag = wstrPartTag.substr(0, Index);
+		wstrPartTag = wstrPartTag.substr(Index + 1);
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrBoneName = wstrPartTag.substr(0, Index);
+		_wstring wstrDuration = wstrPartTag.substr(Index + 1);
+
+		SPECTRUM_INFO Spectrum{};
+		Spectrum.pModelMarixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		Spectrum.pIsActive = nullptr;
+		Spectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(WStringToString(wstrBoneName).c_str());
+		Spectrum.fDuration = stof(wstrDuration);
+
+		m_pGameInstance->Spawn_PoolingObject(wstrSpectrumTag, XMMatrixIdentity(), &Spectrum);
+	}
+	else
+	{
+		PREFAB_INFO EffectDesc{};
+		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		EffectDesc.pModelPtr = m_pModelCom;
+		_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+
+		m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	}
 }
 
 void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
@@ -936,6 +960,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 				if (m_iActionIndex == ACTION::ENCOUNTER)
 				{
 					m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
+					m_pGameSystem->Change_Leviathan_Phaze(1);
 					//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
 				}
 				else if(m_iActionIndex == ACTION::PHASE1_DOWN)
@@ -1055,6 +1080,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
 		m_isAggro = true;
 		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_INTRO);
+		m_pGameSystem->Change_BGM(TEXT("Null"));
 	}
 }
 
@@ -1225,8 +1251,11 @@ void CLeviatan::Event1()
 	m_pTransformCom->Save_PreviousPosition();
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
-	m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_ONE);
+	//m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHNAGE);
+	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_ONE);
+	//m_pGameSystem->Engage_Battle(true, BOSSBGM::END);
 	m_pGameSystem->Change_BGM(TEXT("Null"));
+	m_pGameSystem->Change_Leviathan_Phaze(0);
 
 	//떠오를 때 노티파이로 이거 실행
 	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기
@@ -1241,7 +1270,9 @@ void CLeviatan::Event2()
 	m_pTransformCom->Save_PreviousPosition();
 	m_pGameInstance->Set_CurrentCamera_Far(200.f);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 	m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_TWO);
+	m_pGameSystem->Change_Leviathan_Phaze(2);
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 }

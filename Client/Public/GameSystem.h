@@ -20,6 +20,7 @@ public:
 
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV_MultiLine(const _char* pFilePath);
 	void							Load_Sequence(const _char* pFolderPath);
 
 	//============================Effect
@@ -132,24 +133,24 @@ public:
 	// 카메라 거리에 따른 크기 변화 기준 등 내부에서 상수로 변경 가능. 너무 멀면 렌더콜X
 	//void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
 
-	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
+	// QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
 	// eQTEType : QTE 종류 (연타로 게이지채우기, 단발성 중 선택), eIconIndex : 사용 버튼 종류.
 	void		Play_QTE(
 		_float2 vSpawnPos = _float2{ 0.f, 0.f },
 		UI_QTE_TYPE eQTEType = UI_QTE_TYPE::FILLGUAGE,
 		UI_QTE_BTN eIconIndex = UI_QTE_BTN::F,
 		_float2 vScale = _float2{ 1.f, 1.f }
-	);		// 여기에 정보 받기용으로 out 포인터 인자라도 만들거나, status 같은 곳에 호출? 
+	);
 
 
-	// [WIP] 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
+	// 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
 	//      임의로 색상/타입 추가 시, [UI_MINIMAP_OBJTYPE] 및 [UI_HUD_Sector_Minimap::PreAssign_Presets] 에서 추가 후 사용하시면 됩니다.
 	void		Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);			// 몬스터 등과 같이 실시간 갱신이 필요한 경우. Update_MobStatus 에 내장됨.
 	void		Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우. 실시간 갱신 X
 	void		Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
 
 
-	// [WIP] 날아갈 궤적 및 충돌 예상 지점에의 구체를 표시합니다. 계산에 필요한 정보들의 매 프레임 갱신 필요.
+	// 날아갈 궤적 및 충돌 예상 지점에의 구체를 표시합니다. 계산에 필요한 정보들의 매 프레임 갱신 필요.
 	// - vStartPos : 시작 위치. 즉 오브젝트의 위치 + 오프셋 등
 	// - vStartVelocity : 시작 속도. 즉, 던지려는 방향과 그 세기(power)
 	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
@@ -173,6 +174,12 @@ public:
 		_float4 vHeadColor = _float4(1.f, 0.f, 0.f, 1.f),
 		_float4 vTailColor = _float4(.8f, 0.f, 0.f, 1.f)
 	);
+
+	// [WIP] 대화 스크립트 UI를 생성 및 해제합니다. / pFilePath : 대화 내용이 담긴 csv 파일의 경로.
+	// Dialog용 csv 파일은, [1열 발화자], [2열 대사]를 담을 것을 상정합니다.
+	void		Open_DialogUI(const _char* pFilePath);
+	void		Close_DialogUI();
+
 #pragma endregion
 
 #pragma region [UI] GRAPPLE
@@ -261,6 +268,12 @@ public:
 	_bool IsModinaryBattle();
 	void Change_BattleBGM(BOSSBGM eBoss);
 #pragma endregion
+
+#pragma region DOME
+	void	Register_Dome(class CMapObject_Dome* pDome);
+	void    Change_Leviathan_Phaze(_uint iPhaze);
+#pragma endregion
+
 private:
 	class	CParser*				m_pParser					= { nullptr };
 	class	CFactory*				m_pFactory					= { nullptr };
@@ -281,8 +294,8 @@ private:
 	class	CMouseController*		m_pMouseController			= { nullptr };
 
 	class   CPotal*					m_pPotal					= { nullptr };
-	class	CTimeLack*				m_pTimeLack = { nullptr };
-	
+	class	CTimeLack*				m_pTimeLack					= { nullptr };
+	class   CMapObject_Dome*		m_pLeviDome					= { nullptr };
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
 public:

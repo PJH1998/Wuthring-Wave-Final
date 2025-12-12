@@ -179,41 +179,41 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 
 #pragma region [TAB] KSTA_UITEST_TABUTILITY
-	static _bool isTabUtilityActive = false;
-	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
-
-	//_uint iTabUtilitySelectedIndex = UINT_MAX;
-	_bool isTabUtilityHided = false;
-
-	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
-		isTabUtilityActive = true;
-	}
-	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
-	{
-		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
-		isTabUtilityActive = false;
-		isTabUtilityHided = true;
-	}
-
-
-	_string strSelectedUtilityName = {};
-	if (isTabUtilityHided)
-	{
-		switch (iTmpSelectedUtility)
-		{
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
-		}
-
-		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
-	}
+	//static _bool isTabUtilityActive = false;
+	//static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
+	//
+	////_uint iTabUtilitySelectedIndex = UINT_MAX;
+	//_bool isTabUtilityHided = false;
+	//
+	//if (!isTabUtilityActive &&
+	//	m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+	//{
+	//	m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
+	//	isTabUtilityActive = true;
+	//}
+	//else if (isTabUtilityActive &&
+	//	m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
+	//{
+	//	iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
+	//	isTabUtilityActive = false;
+	//	isTabUtilityHided = true;
+	//}
+	//
+	//
+	//_string strSelectedUtilityName = {};
+	//if (isTabUtilityHided)
+	//{
+	//	switch (iTmpSelectedUtility)
+	//	{
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
+	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
+	//	}
+	//
+	//	std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
+	//}
 #pragma endregion
 
 #pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
@@ -304,9 +304,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
-//#ifdef _DEBUG
+#ifdef _DEBUG
 	MobDesc.fHP = 150.f;
-//#endif
+#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
@@ -463,7 +463,7 @@ void CLevel_GamePlay::Ready_Effect()
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
 
-	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/SpectrumOB", m_eCurLevel, 5);
+	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/GamePlay/SpectrumOB", m_eCurLevel, 5);
 
 	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Effect_Rope"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Effect"), TEXT("Rope"), 3, nullptr)))

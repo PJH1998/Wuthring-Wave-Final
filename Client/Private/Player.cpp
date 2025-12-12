@@ -111,7 +111,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
     CGameObject::Priority_Update(fTimeDelta);
 	
     m_pInputControllerCom->Update();
-    
+
+	// . PlayerStatus 갱신
+	m_pPlayerStatus->Set_CurrentCharIndex(m_iCurrentCharacterIdx);
+
 	// 2. 현재 활성화 캐릭터 이후에 키 입력 확인하기
 	Player_KeyInput();
 
@@ -336,6 +339,7 @@ void CPlayer::Player_KeyInput()
 
 		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
 
+		m_pGameInstance->Play_Sound(TEXT("ae_ui_but_scan_v3 (SFX)"), ENUM_CLASS(CHANNEL::EFFECT), 1.f);
 		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_Scan"), WorldPosMatrix, nullptr);
 	}
 
@@ -559,8 +563,8 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
 	}
 	
-	// 8. PlayerStatus 갱신
-	m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
+	
+	//m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
 
 }
 
@@ -752,6 +756,7 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
+		Bind_EventLock(true);
 		// 2. Rover로 변경.
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			Change_Character(CHARACTERTYPE::ROVER, 0.f);
@@ -1051,8 +1056,9 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 		_bool IsinWorldSpace = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 0.f);
 		_float fLength = XMVectorGetX(XMVector3Length(vPos - vTargetPos));
 
+		
 		// Camera View Space 안에 있으면 넣기.
-		if (IsinWorldSpace)
+		if (IsinWorldSpace && !(pcallDesc->eObjectType == OBJECTTYPE::ROPE_UI))
 			m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
 
 		

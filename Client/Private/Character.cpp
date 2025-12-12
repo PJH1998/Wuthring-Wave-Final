@@ -364,7 +364,7 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 
 void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName)
 {
-	if (nullptr == m_GrappleInfo.pTransform ||
+	if (nullptr == m_GrappleInfo.pTransform||
 		false == m_IsRopeActive)
 		return;
 
@@ -1160,7 +1160,7 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-void CCharacter::Rotate_Target()
+void CCharacter::Rotate_Target(_bool IsReverse)
 {
     // 1. 타겟이 없는 경우 Return
     if (nullptr == m_pTargetTransform)
@@ -1173,6 +1173,9 @@ void CCharacter::Rotate_Target()
 
 
     vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	if (IsReverse)
+		vToTarget *= -1.f;
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
@@ -1433,10 +1436,37 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 	_wstring strSoundTag = var3; // Sound Tag
 	_float fVolume = stof(var4); // Volume 크기.
 
+	_float fFrequency = {};
+	
+
+
 	if (var2 == TEXT("Voice"))
-		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume, fFrequency);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+		}
+	}
+		
 	else if (var2 == TEXT("Action"))
-		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			//m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume, fFrequency);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), 1.f, 1.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		}
+	}
+		
 }
 
 void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)

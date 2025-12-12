@@ -48,11 +48,7 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		if (!m_IsDestroy)
-		{
 			Spawn_Particles();
-			if (m_pPullUI)
-				m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
-		}
 		});
 	m_IsDestroy = false;
 
@@ -188,8 +184,7 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 		_float3 vPointPos;
 		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-		vPointPos.y += 1.5f;
-		m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
+		m_pPullUI = m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
 		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
 		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
 		RigidbodyBoxDesc.eShape = SHAPE::BOX;
@@ -257,6 +252,7 @@ void CMapObject_Destruction::Spawn_Particles()
 		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
 		m_pPullUI = nullptr;
 	}
+
 	m_IsDestroy = true;
 	for(_uint i=2; i<m_pBoneModel->Get_BoneSize();++i)
 	{

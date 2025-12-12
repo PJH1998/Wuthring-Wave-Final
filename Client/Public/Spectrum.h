@@ -63,6 +63,7 @@ private:
 	_float						m_fSpawnTimer = 0.f;
 	_float						m_fMaskSpeed = 1.f;
 	_float						m_fGeneration = 0.f;
+	_float						m_fDuration = {};
 
 	_int						m_iShaderPass = 0;
 	_float						m_fLifeTime = {};
