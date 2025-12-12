@@ -285,11 +285,17 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
 			//m_pGameSystem->Change_BGM(TEXT(""));
 			break;
+		case 30:
+			m_pGameSystem->Lock_Input_ToPlayer(true);
+			break;
 		case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.05f, 2.f);
 			m_pGameSystem->Bind_Gravity_ToPlayer(false);
 			m_pGameSystem->Play_QTE(_float2(-300.f, 300.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
+			break;
+		case 50:
+			m_pGameSystem->Lock_Input_ToPlayer(false);
 			break;
 		}
 		m_IsTriggered = true;

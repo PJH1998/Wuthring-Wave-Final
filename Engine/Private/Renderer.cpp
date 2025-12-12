@@ -801,8 +801,6 @@ void CRenderer::Render_Light()
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
 
-	/*m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);*/
-
 	m_pGameInstance->End_MRT();
 }
 

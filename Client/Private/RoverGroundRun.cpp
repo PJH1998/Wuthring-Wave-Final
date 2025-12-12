@@ -132,7 +132,7 @@ void CRoverGroundRun::Handle_Input()
 		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
 
 	// 궁 상태 확인하기.
-	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST2) >= m_pRover->Get_MaxCost());
+	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
 }
 
 

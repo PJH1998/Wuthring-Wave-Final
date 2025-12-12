@@ -119,10 +119,10 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
     
         if (g_HasShadowMap)
         {
-            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.5f, 1.f);
+            fShadowMap = Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap);
         }
    
-        float fShadow = clamp(Compute_Cascade(fViewZ, fShadowNdotL, vWorldPos, g_Cascade), 0.5f, 1.f);
+        float fShadow = Compute_Cascade(fViewZ, fShadowNdotL, vWorldPos, g_Cascade);
     
         float fFinalShadow = min(fShadowMap, fShadow);
     
@@ -132,8 +132,8 @@ LIGHT_RESULT Compute_Directional(float4 vDiffuse, float4 vNormal, float4 vWorldP
         Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
         Out.vLightSpecular = float4(vLightSpecular, 1.f);
         
-        vAmbientColor = vDiffuse;
-        vAmbient = g_vStaticMtrlAmbient * fFinalShadow;
+        vAmbientColor = float4(lerp(vDiffuse.xyz, vResultDiffuse, 0.4f), 1.f);
+        vAmbient = g_vStaticMtrlAmbient.xyz;
     }
     
     Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient), 1.f);
