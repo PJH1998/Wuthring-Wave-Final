@@ -30,6 +30,8 @@ HRESULT CEffect_Rope::Initialize_Clone(void* pArg)
 	//그냥 내가 쓰고싶은 설정값들 설정해주면 됨.
 
 	m_iShaderPass = 3;
+	m_fColorGamma = 1.5f;
+	m_fColorGain = 0.4f;
 
 	m_isActivate = false;
 

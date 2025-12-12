@@ -188,7 +188,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
-
+	m_fDistortionTime += fTimeDelta;
 	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
 	{
 
@@ -378,7 +378,8 @@ void CEdit_MapObject::Render()
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-
+		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fDistortionTime, sizeof(_float));
+		
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}

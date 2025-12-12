@@ -50,6 +50,8 @@ float ShadowPCF(float3 UVDepth, int iIndex, int iNumWeight, Texture2DArray<float
             vUV.y = clamp(vUV.y, vMinUV.y, vMaxUV.y);
             
             fShadow += ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vUV, iIndex), UVDepth.z);
+            //fShadow = min(ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vUV, iIndex), UVDepth.z), fShadow);
+
         }
     }
     
@@ -236,6 +238,10 @@ float Compute_NeighborShadow(int2 vNeighborSector, float4 vWorldPos, Texture2DAr
 
     float4x4 matVP = mul(g_SectorViewMatrix[iIndex], g_SectorProjMatrix[iIndex]);
     float4 vProjPos = mul(vWorldPos, matVP);
+    
+    if (false == IsInNDC(vProjPos))
+        return 1.f;
+        
     vProjPos.xyz /= vProjPos.w;
         
     float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
@@ -307,11 +313,13 @@ float Compute_ShadowMap(float fViewZ, float NdotL, float4 vWorldPos, Texture2DAr
     
     float2 vTexelSize = 1.f / vShadowMapSize;
     
-    float fBias = g_fShadowMapBais;//max(g_fShadowMapBais, g_DebugSlopeScale * fSlopeFactor * Gradiant);
+    //float Gradiant = RPB_Gradiant(fViewZ);
+    //float fSlopeFactor = sqrt(1.f - pow(NdotL, 2));
+    float fBias = g_fShadowMapBais; //max(g_fShadowMapBais, fSlopeFactor * Gradiant); // 
     
     float fDepth = vProjPos.z - fBias;
    
     fShadow = min(ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vTexelSize, vStartTex, vEndTex), fShadow);
-    
+//    fShadow = min(ShadowMapTexture.SampleCmpLevelZero(ShadowSampler, float3(vTexcoord, vSector.y), fDepth), fShadow);
     return fShadow;
 }

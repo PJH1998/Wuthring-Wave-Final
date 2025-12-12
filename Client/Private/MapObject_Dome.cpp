@@ -32,11 +32,12 @@ void CMapObject_Dome::Priority_Update(_float fTimeDelta)
 
 void CMapObject_Dome::Update(_float fTimeDelta)
 {
+	m_fTotalTime += fTimeDelta;
 }
 
 void CMapObject_Dome::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
@@ -143,6 +144,7 @@ void CMapObject_Dome::Render()
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fTotalTime, sizeof(_float));
 
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);

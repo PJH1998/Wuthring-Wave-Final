@@ -161,6 +161,7 @@ protected:
 	_float m_fDlayTime = {};
 	_bool m_fMode = { false };
 	_float m_fTotalTime = {};
+	_float m_fDistortionTime = {};
 protected:
 	static _uint g_iNumObjects;
 
