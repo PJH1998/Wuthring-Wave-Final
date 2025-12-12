@@ -7,10 +7,11 @@ NS_BEGIN(Client)
 class CSonoro_Manager final: public CBase
 {
 private:
-
-private:
 	explicit CSonoro_Manager();
 	virtual ~CSonoro_Manager() = default;
+
+public:
+	void	Set_Sonora_LightDesc(SONORA eType, const LIGHT_DESC& Desc) { m_LightDesc[ENUM_CLASS(eType)] = Desc; }
 
 public:
 	HRESULT Initialize();
@@ -39,6 +40,8 @@ private:
 
 	_wstring m_EnterSonoro;
 	_wstring m_ExitSonoro;
+	LIGHT_DESC		m_LightDesc[ENUM_CLASS(SONORA::END)] = {};
+
 public:
 	static CSonoro_Manager* Create();
 	virtual void Free()override;

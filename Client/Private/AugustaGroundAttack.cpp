@@ -222,6 +222,11 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위 => 어떤 상황에도 변경 가능.
 	if (m_States[DASH])
 	{
+		// 누른 방향으로 회전 하고 변경.
+		m_eDir = m_pAugusta->Calculate_Direction();
+		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
+
 		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
 		return;

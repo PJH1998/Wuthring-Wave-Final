@@ -200,6 +200,13 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{
+
+		m_eDir = m_pAugusta->Calculate_Direction();
+
+		// 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
+		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
+
 		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
 		return;

@@ -34,7 +34,7 @@ void CSpringCamera::Lock_On(CTransform* pTargetTransform, const _float4x4* pBone
 		if (CAMERA_STATE::LOCKON == m_eCameraState)
 			m_eCameraState = CAMERA_STATE::TARGET;
 	}
-	else
+	else if(CAMERA_STATE::ACTION != m_eCameraState)
 	{
 		// LockOn Position 계산
 		_matrix LockOnMatrix = XMLoadFloat4x4(pBoneMatrix) * pTargetTransform->Get_WorldMatrix();
@@ -211,9 +211,18 @@ void CSpringCamera::Check_Ray()
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 	_vector vStartPos = XMLoadFloat4(&m_vLookPosition);
+	vStartPos.m128_f32[1] += m_fOffsetY;
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
-		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
+	{
+		if (m_vTargetPosition.y < vOut.y)
+		{
+			_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&vOut)));
+			if (fLength < 1.f)
+				return;
+			m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
+		}
+	}
 }
 
 
@@ -233,9 +242,11 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
+	_float fLength = XMVectorGetX(XMVector3Length(vLookDir));
 
-	// ��ǥ Dir
-	m_pTransformCom->LookDir(vLookDir);
+	// Position 겹칠 때 예외 처리
+	if(0.f < fLength)
+		m_pTransformCom->LookDir(vLookDir);
 	_vector vCurrentQuat = m_pTransformCom->Get_Quaternion();
 
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
@@ -245,6 +256,8 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 2.5f);
 	else
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 1.25f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
+
+	fLerp = max(0.f, min(1.f, fLerp));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
 }
 
