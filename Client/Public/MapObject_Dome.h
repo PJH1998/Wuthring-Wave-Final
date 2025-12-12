@@ -45,14 +45,21 @@ public:
 
 	virtual		BoundingBox* Get_BoundingBox()override;
 
+
+	void Change_MaxAlpha(_uint iPhaze) { m_iPhaze = iPhaze; }
+
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
-	class CModel_Streaming* m_pModelCom;
-
+	class CModel_Streaming* m_pModelCom = { nullptr };
+	class CGameSystem* m_pGameSystem = { nullptr };
 	_uint					m_iShaderPassIndex = {};
 	_bool					m_IsRender = { true };
 	_float					m_fTotalTime = {};
+	_uint					m_iPhaze = {};
+	_float					m_fAlpha = {};
+	_float					m_fMaxAlpha = {};
+
 private:
 	virtual		void						Ready_Component(void* pArg);
 

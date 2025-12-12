@@ -41,6 +41,8 @@ void CAugustaCapture::OnEnter(void* pArg)
 
 	// 7. Capture 스테이트 변경.
 	m_eCaptureStep = CAPTURESTEP::STEP_START;
+
+
 }
 
 void CAugustaCapture::OnUpdate(_float fTimeDelta)
@@ -70,7 +72,6 @@ void CAugustaCapture::OnExit()
 	m_pAugusta->Set_Visible(true);
 	m_pAugusta->ClearCaptureState();
 	m_eCaptureStep = CAPTURESTEP::STEP_NONE;
-	//m_pAugusta->ResetPose();
 }
 
 void CAugustaCapture::Handle_Input()
