@@ -717,6 +717,8 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
 		else if (var2 == TEXT("SKILL"))
 			iVolumeIdx = VOLUME::VOLUME_SKILL;
+		else if (var2 == TEXT("QTE"))
+			iVolumeIdx = VOLUME::VOLUME_QTE;
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
 		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
@@ -1349,6 +1351,7 @@ void CRover::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 700.f;
 	m_AttackVolumes[VOLUME_SKILL] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -1356,6 +1359,18 @@ void CRover::Ready_AttackVolumes()
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SKILL]);
 	m_AttackVolumes[VOLUME_SKILL]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(5.f, 5.f, 5.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 550.f;
+	m_AttackVolumes[VOLUME_QTE] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_QTE]);
+	m_AttackVolumes[VOLUME_QTE]->TriggerActivate(false);
 
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_KNOCKBACK];
 	m_pMainAttackVolume->TriggerActivate(false);

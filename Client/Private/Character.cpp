@@ -1466,6 +1466,19 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
 		}
 	}
+	else if (var2 == TEXT("QTE"))
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			//m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume, fFrequency);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_QTE), 1.f, 1.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_QTE), fVolume);
+		}
+	}
 		
 }
 

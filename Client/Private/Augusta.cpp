@@ -1795,7 +1795,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 8.f); // 
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 700.f;
+	TriggerDesc.fAttackDmg = 500.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::UPPER;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
@@ -1812,6 +1812,7 @@ void CAugusta::Ready_AttackVolumes()
 	m_AttackVolumes[VOULME_RISE_ZERO]->TriggerActivate(false);
 
 
+	TriggerDesc.fAttackDmg = 700.f;
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(7.f, 7.f, 10.f); // 
