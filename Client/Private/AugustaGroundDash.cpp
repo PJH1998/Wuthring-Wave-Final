@@ -119,16 +119,22 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 		if (nullptr == pDesc)
 			return;
 
-		if (pDesc->IsBack)
-			m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-		else 
-			m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_B;
+		//if (pDesc->IsBack)
+		//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		//else 
+		//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_B;
+
+		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
 		
+		// 맞은 방향으로 한번 회전.
+		//m_pAugusta->Rotate_Target(); 
+
 		// Dodge 이전에 누른 방향으로 회전.
 		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
 		m_pAugusta->Rotate_Direction(vMoveDir);
 
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		
 		return;
 	}
 

@@ -36,40 +36,29 @@ void CRoverGroundDodge::OnEnter(void* pArg)
     State_Reset();
 
 	// 4. 락온 중이였다면? => 한번만 입력방향에 따른 회전.
-	if (m_pRover->Is_LockOn())
-	{
-		// 5. 누른 키에 따른 입력 방향 받아오기.
-		m_eDir = m_pRover->Calculate_Direction();
-		_vector vMoveDir = m_pRover->Calculate_Move_Direction(m_eDir);
-		m_pRover->Rotate_Direction(vMoveDir);
-	}
+	//if (m_pRover->Is_LockOn())
+	//{
+	//	// 5. 누른 키에 따른 입력 방향 받아오기.
+	//	m_eDir = m_pRover->Calculate_Direction();
+	//	_vector vMoveDir = m_pRover->Calculate_Move_Direction(m_eDir);
+	//	m_pRover->Rotate_Direction(vMoveDir);
+	//}
 
 	m_pRover->Set_Gravity(true);
 
 	// 6. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
 	// 회피 가능 창을 닫습니다. => Timer 실행 방지.
+
+	m_pRover->Resolve_PerfectDodge();
+
 	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); 
-	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
 	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
+	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+
 	// 7. Hit Stop
-	CGameInstance* pGameInstance = CGameInstance::GetInstance();
-	pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.5f);
-
-	CAMERA_SHAKE Desc{};
-	Desc.fDuration = 0.15f;
-	Desc.fFrequency = 20.f;
-	Desc.fAmplitude = 0.5f;
-	Desc.vRotation = { 0.f, 0.1f, 0.f};
-	Desc.fFovKick = 0.f; // 
 	
-	pGameInstance->OnShake(Desc);
-
-	// 8. Effect
-	m_pRover->Spawn_Effect(TEXT("Common_Limit"));
-
-	// 9. Change_TimeRate.
-	m_pRover->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
 }
 
 void CRoverGroundDodge::OnUpdate(_float fTimeDelta)
@@ -93,6 +82,7 @@ void CRoverGroundDodge::OnExit()
 {
     CGroundState::OnExit();
 	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CRoverGroundDodge::Handle_Input()
@@ -112,9 +102,6 @@ void CRoverGroundDodge::Update_DodgeAnimation(_float fTimeDelta)
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pRover->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
-
-    // 1. 누른키에 따른 방향 계산
-    m_eDir = m_pRover->Calculate_Direction();
 
 	// 2. Animation 실행.
     CCharacterState::Play_Animation(m_pRover, fTimeDelta, 1.f);
@@ -164,8 +151,8 @@ void CRoverGroundDodge::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundDodge::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(ERoverDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 20.f, 1.5f);
-    CState::Add_Animations(ENUM_CLASS(ERoverDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 20.f, 1.5f);
+	CState::Add_Animations(ENUM_CLASS(ERoverDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 20.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 20.f, 2.f);
 }
 
 void CRoverGroundDodge::State_Reset()

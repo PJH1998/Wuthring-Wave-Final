@@ -107,6 +107,10 @@ void CGalbrenaGroundSpecialDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
+		// Dodge 이전에 누른 방향으로 회전.
+		_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
+		m_pGalbrena->Rotate_Direction(vMoveDir);
+
 		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
 		return;

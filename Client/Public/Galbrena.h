@@ -194,6 +194,7 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	virtual void Grab_Judge(void* pArg = nullptr) override;
+	virtual void Resolve_PerfectDodge() override;
 	void Sync_Position();
 
 	virtual void Bind_QTE(_bool IsQTE) override;
