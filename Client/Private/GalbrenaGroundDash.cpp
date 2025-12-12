@@ -93,6 +93,7 @@ void CGalbrenaGroundDash::Update_DodgeAnimation(_float fTimeDelta)
         _vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
         m_pGalbrena->Rotate_Direction(vMoveDir);
     }
+
     CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta);
 }
 

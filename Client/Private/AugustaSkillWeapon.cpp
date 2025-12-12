@@ -193,6 +193,10 @@ void CAugustaSkillWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactMa
 
 	if (nullptr == pAbility)
 		return;
+
+	pAbility->Add_Cost(COST_TYPE::COST1, 8.f);
+	pAbility->Add_Cost(COST_TYPE::COST2, 20.f);
+	pAbility->Add_HarmonyGauge(10.f);
 }
 
 void CAugustaSkillWeapon::Ready_Components(const PROP_DESC* pDesc)

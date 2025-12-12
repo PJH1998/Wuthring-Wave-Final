@@ -196,6 +196,11 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DASH])
 	{
+		// 누른 방향으로 회전.
+		m_eDir = m_pRover->Calculate_Direction();
+		_vector vMoveDir = m_pRover->Calculate_Move_Direction(m_eDir);
+		m_pRover->Rotate_Direction(vMoveDir);
+
 		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
 		return;

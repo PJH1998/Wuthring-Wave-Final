@@ -33,6 +33,10 @@ private:
     _float3 m_vMoveDirection = {};
     _bool m_States[LANDSTATE::END] = {};
 
+	_float m_fSoundTimer = {};
+	_float m_fMaxTime = {};
+	_wstring m_strSoundTag = {};
+
 	SLIDE_DATA m_SlideData = {};
 	_uint m_iWayPoint = {};
 
@@ -40,6 +44,7 @@ private:
 
 private:
     virtual void Handle_Input() override;
+	void Process_Timer(_float fTimeDelta);
     void Update_LandAnimation(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void Setup_Animations();

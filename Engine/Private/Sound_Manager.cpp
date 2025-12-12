@@ -229,6 +229,7 @@ void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _fl
 void CSound_Manager::Stop_Sound(_uint iChannelID)
 {
     FMOD_Channel_Stop(m_pFixedChannels[iChannelID]);
+	FMOD_System_Update(m_pSystem);
 }
 
 void CSound_Manager::Stop_Sound_Dynamic(_uint iChannelID)
