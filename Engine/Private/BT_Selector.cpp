@@ -65,10 +65,10 @@ CBT_Node* CBT_Selector::Clone(void* pArg)
 
 void CBT_Selector::Free()
 {
-    __super::Free();
     for (auto& child : m_Children)
         Safe_Release(child);
     m_Children.clear();
+    __super::Free();
 }
 
 
