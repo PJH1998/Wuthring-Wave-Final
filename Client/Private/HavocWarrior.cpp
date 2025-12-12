@@ -280,7 +280,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
-	m_pAnimMachineCom->Reset(m_pModelCom, "Stand1");
+	m_pAnimMachineCom->Reset(m_pModelCom, "PatrolToFight");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
@@ -656,7 +656,8 @@ void CHavocWarrior::Calculate_PosAndDir()
 
 void CHavocWarrior::TurnFix()
 {
-	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	if(m_isAggro)
+		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 }
 
 void CHavocWarrior::TurnLerp(_bool isActive)

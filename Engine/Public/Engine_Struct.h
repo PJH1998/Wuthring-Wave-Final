@@ -442,7 +442,7 @@ namespace Engine
 	{
 		class CModel*		 pModelPtr = nullptr;
 		const _float4x4*	 pMatrixPtr = nullptr;
-		_bool*				 pActive = nullptr;
+		_bool*				 pActive = nullptr;										//직접 On, Off 하고싶으면 이렇게 컨트롤 해줘야함.
 	}PREFAB_INFO;
 
 	typedef struct tagEffectInfo

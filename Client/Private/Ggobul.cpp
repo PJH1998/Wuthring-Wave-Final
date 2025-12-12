@@ -185,7 +185,7 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	else if (m_strAnimKey == "SAttack02_2")
 	{
 		m_pRootMatrix = pDesc->pRootMatrix;
-		m_MeshEnables = { true, false, false, true, false, true };
+		m_MeshEnables = { true, false, false, true, false, false };
 	}
 	else
 		m_MeshEnables = { true, false, false, true, false, false };

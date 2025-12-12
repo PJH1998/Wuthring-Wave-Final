@@ -240,14 +240,20 @@ void CSound_Manager::Stop_All()
 {
     for (size_t i = 0; i < m_iNumChannels; ++i)
     {
-        if (nullptr != m_pFixedChannels[i])
+		if (nullptr != m_pFixedChannels[i])
+		{
             FMOD_Channel_Stop(m_pFixedChannels[i]);
+			m_pFixedChannels[i] = nullptr;
+		}
     }
 
 	for (auto& pChannel : m_pPoolingChannels)
 	{
-		if(nullptr != pChannel)
+		if (nullptr != pChannel)
+		{
 			FMOD_Channel_Stop(pChannel);
+			pChannel = nullptr;
+		}
 	}
 }
 

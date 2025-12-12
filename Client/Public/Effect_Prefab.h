@@ -50,6 +50,7 @@ private:
 	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info);
 
 	void Check_CameraDistance();
+	_bool UpdateActiveFromFlag();
 
 public:
 	_wstring	Get_MyTag() {
@@ -75,6 +76,7 @@ private:
 	//이펙트 소환했을 때 뼈에 붙여줄때 사용할 정보.
 	const _float4x4*					 m_pBoneMatrixPtr = nullptr;
 	const _float4x4*					 m_pObjectMatrixPtr = nullptr;
+	_bool*								 m_pActiveFlag = nullptr;
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
