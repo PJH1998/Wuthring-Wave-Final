@@ -180,8 +180,6 @@ HRESULT CLoader_Logo::Load_UI()
 	_string strFilePath_UI_Logo = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Logo.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_Logo));
 
-	//_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
-	//vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
 
 	for (auto& treeDesc : vecDescs)

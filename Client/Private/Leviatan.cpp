@@ -39,14 +39,14 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	m_fHP = pDesc->fHP * 0.7f;
-	//m_fHP = 5100.f;
+	//m_fHP = pDesc->fHP * 0.7f;
+	m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
 
 #pragma region ATTACK_STATE
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 22.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 16.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
@@ -532,12 +532,14 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			WorldMatrix = XMLoadFloat4x4(m_pSwordSocket) * m_pTransformCom->Get_WorldMatrix();
 			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviAura"), WorldMatrix, &Desc);
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.07f);
 		}
 		else if (wstrAnimTag == TEXT("Proj"))
 		{
 			WorldMatrix = XMLoadFloat4x4(m_pBowSocket) * m_pTransformCom->Get_WorldMatrix();
 			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviSword"), WorldMatrix, &Desc);
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.07f);
 		}
 		else if (wstrAnimTag == TEXT("Wave"))
 		{
@@ -622,6 +624,7 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		}
 		m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+		m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-001 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
 	}
 
 	else if (wstrTypeTag == TEXT("Grab"))
@@ -641,7 +644,310 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 
 void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
 {
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
 
+	if (wstrTypeTag == TEXT("Move"))
+	{
+		if (wstrPartTag == TEXT("WalkL"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-003 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.03f);
+		}
+		else if (wstrPartTag == TEXT("WalkR"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-004 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.03f);
+		}
+		else if (wstrPartTag == TEXT("Dodge1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge4"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_04 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Stop"))
+		{
+			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP));
+		}
+	}
+	else if (wstrTypeTag == TEXT("AttackS"))
+	{
+		if (wstrPartTag == TEXT("0301"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack3_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.08f);
+		}
+		else if (wstrPartTag == TEXT("0302"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack3_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.08f);
+		}
+		else if (wstrPartTag == TEXT("0303"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack3_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.08f);
+		}
+		else if (wstrPartTag == TEXT("0102"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.08f);
+		}
+		else if (wstrPartTag == TEXT("0108"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p8 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.08f);
+		}
+		else if (wstrPartTag == TEXT("0501")) // 찌르기
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack5_p1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.08f);
+		}
+		else if (wstrPartTag == TEXT("0503")) // 땅 찍기
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack5_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("1803"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("2203"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack22_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("AttackL"))
+	{
+		if (wstrPartTag == TEXT("1702"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack17_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("0102"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("1402"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("1802"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("0201"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("1507"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Attack15_1Montage_7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Bow"))
+	{
+		if (wstrPartTag == TEXT("Build1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowbuildup_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("Build2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowbuildup_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("Shoot1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("Shoot2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("Shoot3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Impact"))
+	{
+		if (wstrPartTag == TEXT("1702"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack17_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("Arrow1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowimpact_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("Arrow2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowimpact_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		if (wstrPartTag == TEXT("1201")) // 찍어서 터뜨리는 사운드 22패턴 찍기에 사용 중
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack12_p1_impact (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("Grab15"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack15_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Born"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_born (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		
+	}
+	else if (wstrTypeTag == TEXT("Attack14"))
+	{
+		if (wstrPartTag == TEXT("01"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_1"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("02"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d2"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("03"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d3"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.12f);
+		}
+		else if (wstrPartTag == TEXT("04"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.12f);
+		}
+		else if (wstrPartTag == TEXT("05"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("06"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.13f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("SFX"))
+	{
+		if (wstrPartTag == TEXT("Ding")) // 14패턴 마지막 검 효과용
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_ding (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("Pi14"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_pi (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Death")) // 사망시 환경 효과음
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_DeathMain_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.13f);
+		}
+		else if (wstrPartTag == TEXT("2202")) // 늑대 아우라
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack22_p2_d1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("5102")) // 칼날 뽑는 소리
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack51_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("14_1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_pi_pre (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("14Last"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Attack15_1Montage_7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("Telpo"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack21_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("Stop"))
+		{
+			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_SFX));
+		}
+	}
+	else if (wstrTypeTag == TEXT("Pre"))
+	{
+		if (wstrPartTag == TEXT("12_1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack12_p1_pre (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Whooshi"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_sword_whoosh (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Aug"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack51_p1_pre (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Block"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.13f);
+		}
+		else if (wstrPartTag == TEXT("ParalysisStart"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Paralysis_Start (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.13f);
+		}
+		else if (wstrPartTag == TEXT("ParalysisEnd"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Paralysis_End (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.13f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("VoiceS"))
+	{
+		if (wstrPartTag == TEXT("A1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_a_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("A3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_a_03 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("B1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_b_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("B2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_b_02 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("C1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_c_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("C2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_c_02 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Block"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_behit_block_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.07f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("VoiceL"))
+	{
+		if (wstrPartTag == TEXT("SK5"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_skill05 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("SK4"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_skill04 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Ult"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_ult (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.17f);
+		}
+		else if (wstrPartTag == TEXT("Paralysis"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_paralysis_start_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Fake"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_fakedeath (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Death"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_death_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.15f);
+		}
+	}
+	
 }
 
 HRESULT CLeviatan::Bind_Resources()
@@ -959,9 +1265,12 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 
 				if (m_iActionIndex == ACTION::ENCOUNTER)
 				{
-					m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
-					m_pGameSystem->Change_Leviathan_Phaze(1);
-					//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+					{
+						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
+						m_pGameSystem->Change_Leviathan_Phaze(1);
+						//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
+					}
 				}
 				else if(m_iActionIndex == ACTION::PHASE1_DOWN)
 				{

@@ -139,104 +139,6 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 	DEBUG_FUNCTION();
 #endif
 	// 임시 Mouse 고정
-	
-
-	// UI Test. Delete it.
-#pragma region [NUMPAD .] KSTA_UITEST_LOCKON
-	CCustom_UI* pRootUILockOn = m_pGameSystem->Find_RootUI(L"UI_LockOn");
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-		!pRootUILockOn->IsActivate())
-		m_pGameSystem->Attach_LockOnUI(nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-		pRootUILockOn->IsActivate())
-		m_pGameSystem->Detach_LockOnUI();
-#pragma endregion
-
-
-#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
-	{
-		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
-			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
-
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
-	}
-#pragma endregion
-
-
-#pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR
-	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
-	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
-		!isTargetAlive)
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
-		isTargetAlive)
-		pTargetMobHPBarUI->SetActivate(false);
-#pragma endregion
-
-
-#pragma region [TAB] KSTA_UITEST_TABUTILITY
-	//static _bool isTabUtilityActive = false;
-	//static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
-	//
-	////_uint iTabUtilitySelectedIndex = UINT_MAX;
-	//_bool isTabUtilityHided = false;
-	//
-	//if (!isTabUtilityActive &&
-	//	m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-	//{
-	//	m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
-	//	isTabUtilityActive = true;
-	//}
-	//else if (isTabUtilityActive &&
-	//	m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
-	//{
-	//	iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
-	//	isTabUtilityActive = false;
-	//	isTabUtilityHided = true;
-	//}
-	//
-	//
-	//_string strSelectedUtilityName = {};
-	//if (isTabUtilityHided)
-	//{
-	//	switch (iTmpSelectedUtility)
-	//	{
-	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
-	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
-	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
-	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
-	//	case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
-	//	}
-	//
-	//	std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
-	//}
-#pragma endregion
-
-#pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
-
-	static _bool isOpenOverflowingPalette = false;
-
-	if (!isOpenOverflowingPalette &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Open_Game_OverflowPalette();
-		isOpenOverflowingPalette = true;
-	}
-	else if (isOpenOverflowingPalette &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Close_Game_OverflowPalette();
-		isOpenOverflowingPalette = false;
-	}
-
-#pragma endregion
-
-
-
 }
 
 void CLevel_GamePlay::Render()
@@ -541,6 +443,9 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
 		CRASH("Failed Ready QTE");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Dialog"),
+		iDestLevel, TEXT("Layer_Custom_UI_Dialog"), TEXT("Pool_Custom_Dialog"), 1)))
+		CRASH("Failed Ready Dialog");
 
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_UI_CurveTrace"),

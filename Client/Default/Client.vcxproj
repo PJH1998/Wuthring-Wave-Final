@@ -430,6 +430,7 @@
     <ClInclude Include="..\public\UI_Ovfl_Palette.h" />
     <ClInclude Include="..\public\UI_Parry.h" />
     <ClInclude Include="..\public\UI_QTE.h" />
+    <ClInclude Include="..\public\UI_QuestIndicator.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_TabUtility.h" />
     <ClInclude Include="..\public\UI_Text.h">
@@ -715,6 +716,7 @@
     <ClCompile Include="..\private\UI_MobHPBar.cpp" />
     <ClCompile Include="..\private\UI_Parry.cpp" />
     <ClCompile Include="..\private\UI_QTE.cpp" />
+    <ClCompile Include="..\private\UI_QuestIndicator.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_TabUtility.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
