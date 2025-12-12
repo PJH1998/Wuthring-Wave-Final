@@ -141,7 +141,7 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 void CMapObject_Collaps::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 1. Detect 감지되면?
-	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer || m_IsTriggerd)
 		return;
 
 	// 2. CallBack 정보 가져오기
