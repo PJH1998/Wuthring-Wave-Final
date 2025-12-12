@@ -465,6 +465,10 @@ const _tchar* CGameSystem::Get_SonoroText()
 
 
 #pragma region SONORO_MANAGER
+void CGameSystem::Set_Sonora_LightDesc(SONORA eType, const LIGHT_DESC& Desc)
+{
+	m_pSonoro_Manager->Set_Sonora_LightDesc(eType, Desc);
+}
 _bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects, _bool** SonoroMode)
 {
 	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);

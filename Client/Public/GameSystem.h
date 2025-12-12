@@ -197,6 +197,7 @@ public:
 #pragma endregion
 
 #pragma region SONORO_MANAGER
+	void	Set_Sonora_LightDesc(SONORA eType, const LIGHT_DESC& Desc);
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(INSTANCETYPE eType, class CMapObject_Instance* pObjects, _bool** SonoroMode);
