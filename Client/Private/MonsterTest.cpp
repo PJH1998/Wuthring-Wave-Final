@@ -1255,7 +1255,7 @@ _bool CMonsterTest::DodgeCooldown()
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
 
-	if (iIndex == ATK_PATTERN::ATTACK7)
+	if (iIndex != ATK_PATTERN::ATTACK4)
 		return false;
 
 	//else
@@ -1272,7 +1272,7 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 void CMonsterTest::Attack_Arrange()
 {
 	_float fRand = m_pGameInstance->Rand_Normal();
-	if (fRand < 0.5f)
+	//if (fRand < 0.5f)
 		m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
 }
 

@@ -156,8 +156,14 @@ void CGalbrenaGroundAttack::Handle_Input()
 	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
 	// Cost 계속
-	m_States[BURST] = (m_pGalbrena->Get_Cost(COST_TYPE::COST1) >= m_pGalbrena->Get_MaxCost());
-	
+	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)); // Burst 상태 인지 체크
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
+
+	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.
+	m_States[BURST_E] = m_States[SKILL_E] && (m_pGalbrena->Get_Cost(COST_TYPE::COST1) >= m_pGalbrena->Get_MaxCost())
+		&& (!m_States[BURST]); // 이미 Burst 상태인데 사용할 수는 없음.
+
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Burst01")); // 기본 궁극기
 
     if (eAttackType >= EGalbrenaAttackType::ATTACK01 && eAttackType < EGalbrenaAttackType::ATTACK04)
     {
@@ -236,6 +242,33 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	{
 		m_pGalbrena->GetStateContextForWrite().m_eSpecialDashType = EGalbrenaSpecialDashType::ATTACK_CHARGE;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SPECIALDASH));
+		return;
+	}
+
+	if (m_States[ULTI])
+	{
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Burst01"))
+			return;
+
+		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::BURST01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL)); // 상위, 하위 상태
+		return;
+	}
+
+	if (m_States[BURST_E])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eBurstType = EGalbrenaBurstType::SKILL01;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::BURST)); // 상위, 하위 상태
+		return;
+	}
+
+	if (m_States[DEFAULT_E])
+	{
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+			return;
+
+		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL)); // 상위, 하위 상태
 		return;
 	}
 
