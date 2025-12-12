@@ -95,7 +95,7 @@ struct PS_OUT
 
 struct PS_DISTORTION_OUT
 {
-    float4 vColor : SV_TRAGET0;
+    float4 vColor : SV_TARGET0;
     float4 vDistortion : SV_TARGET1;
 };
 
