@@ -39,6 +39,8 @@ private:
 	_float m_fBGMRate = {};
 	_bool m_IsBattle = { false };
 
+	_float m_fMaxVolume = {};
+
 public:
 	static CBGM_Manager* Create();
 	virtual void Free()override;
