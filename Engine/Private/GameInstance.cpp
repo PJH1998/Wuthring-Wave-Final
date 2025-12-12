@@ -1294,6 +1294,8 @@ HRESULT CGameInstance::SetUp_CameraNF()
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
+	m_pSound_Manager->Stop_All();
+
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
 		return E_FAIL;
 
@@ -1315,7 +1317,6 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pResource_Manager->Clear_Resource();
 	m_pRenderer->Clear_Resource();
 	m_pOctoTree->Clear_OctoTree();
-	m_pSound_Manager->Stop_All();
 	m_pEventBus->Unscribe();
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();

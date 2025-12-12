@@ -211,9 +211,18 @@ void CSpringCamera::Check_Ray()
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 	_vector vStartPos = XMLoadFloat4(&m_vLookPosition);
+	vStartPos.m128_f32[1] += m_fOffsetY;
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
-		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
+	{
+		if (m_vTargetPosition.y < vOut.y)
+		{
+			_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&vOut)));
+			if (fLength < 1.f)
+				return;
+			m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
+		}
+	}
 }
 
 

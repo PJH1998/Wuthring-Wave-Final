@@ -315,7 +315,9 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameSystem->Lock_Input_ToPlayer(false);
 			break;
 		}
+#ifndef _DEBUG
 		m_IsTriggered = true;
+#endif
 		});
 }
 

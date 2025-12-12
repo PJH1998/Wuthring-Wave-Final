@@ -53,6 +53,11 @@ HRESULT CLevel_Loading::Initialize(LEVEL eNextLevel)
 
 void CLevel_Loading::Update(_float fTimeDelta)
 {
+	if (false == m_isBGM)
+	{
+		m_pGameInstance->Play_BGM(TEXT("BGM_Loading"), ENUM_CLASS(CHANNEL::BGM), 0.3f);
+		m_isBGM = true;
+	}
 	Update_LoadingScreen(fTimeDelta);
 	if (false == m_isFinished)
 	{
