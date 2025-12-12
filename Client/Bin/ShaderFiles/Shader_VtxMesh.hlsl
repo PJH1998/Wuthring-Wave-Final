@@ -37,7 +37,7 @@ int g_iShadowMapLayer = 0;
 
 float g_DissolveTime = -1.f;
 float g_DistortionTime = 0.f;
-float g_fAlpha = 0.2f;
+float g_fAlpha = 0.f;
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -1570,8 +1570,8 @@ PS_OUT_DOME PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
     Out.vBackBuffer.a = g_fAlpha;
     if (length(vDiffuse) == 0.f)
         vDiffuse = 1.f;
-    
-    Out.vDistortion = vDistored.r;
+    if (g_fAlpha != 0.f)
+        Out.vDistortion = vDistored.r;
  
     vector vEmissive = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
     return Out;

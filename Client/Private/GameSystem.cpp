@@ -22,6 +22,7 @@
 #include "SequencePlayer.h"
 #include"Potal.h"
 #include "TimeLack.h"
+#include"MapObject_Dome.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -93,6 +94,8 @@ void CGameSystem::Clear_Resource()
 	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
 	Safe_Release(m_pPotal);
+	Safe_Release(m_pLeviDome);
+	m_pLeviDome = nullptr;
 	m_pPotal = nullptr;
 }
 #pragma region PARSER
@@ -685,12 +688,22 @@ void CGameSystem::Change_BattleBGM(BOSSBGM eBoss)
 {
 	m_pBGM_Manager->Change_BattleBGM(eBoss);
 }
+void CGameSystem::Register_Dome(CMapObject_Dome* pDome)
+{
+	m_pLeviDome = pDome;
+	Safe_AddRef(m_pLeviDome);
+}
+void CGameSystem::Change_Leviathan_Phaze(_uint iPhaze)
+{
+	m_pLeviDome->Change_MaxAlpha(iPhaze);
+}
 #pragma endregion
 
 void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
+	Safe_Release(m_pLeviDome);
 	if (m_pPotal)
 		Safe_Release(m_pPotal);
 
