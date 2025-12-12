@@ -69,7 +69,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 		break;
 	case 30:
 		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Coro_First"), make_pair(Mat, true)));
+		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Coro_First"), make_pair(Mat, false)));
 		break;
 	}
 
