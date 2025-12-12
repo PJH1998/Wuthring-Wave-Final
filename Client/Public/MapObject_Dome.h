@@ -52,7 +52,7 @@ private:
 
 	_uint					m_iShaderPassIndex = {};
 	_bool					m_IsRender = { true };
-
+	_float					m_fTotalTime = {};
 private:
 	virtual		void						Ready_Component(void* pArg);
 
