@@ -261,6 +261,12 @@ public:
 	_bool IsModinaryBattle();
 	void Change_BattleBGM(BOSSBGM eBoss);
 #pragma endregion
+
+#pragma region DOME
+	void	Register_Dome(class CMapObject_Dome* pDome);
+	void    Change_Leviathan_Phaze(_uint iPhaze);
+#pragma endregion
+
 private:
 	class	CParser*				m_pParser					= { nullptr };
 	class	CFactory*				m_pFactory					= { nullptr };
@@ -281,8 +287,8 @@ private:
 	class	CMouseController*		m_pMouseController			= { nullptr };
 
 	class   CPotal*					m_pPotal					= { nullptr };
-	class	CTimeLack*				m_pTimeLack = { nullptr };
-	
+	class	CTimeLack*				m_pTimeLack					= { nullptr };
+	class   CMapObject_Dome*		m_pLeviDome					= { nullptr };
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
 public:
