@@ -30,8 +30,9 @@ HRESULT CEffect_Rope::Initialize_Clone(void* pArg)
 	//그냥 내가 쓰고싶은 설정값들 설정해주면 됨.
 
 	m_iShaderPass = 3;
-	m_fColorGamma = 1.5f;
-	m_fColorGain = 0.4f;
+	m_fColorGamma = 2.f;
+	m_fColorGain = 1.f;
+	m_fMaskSpeed = -1.f;
 
 	m_isActivate = false;
 
@@ -152,7 +153,7 @@ HRESULT CEffect_Rope::Ready_Components()
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_SpectrumTexture_T_Color_140013"),
+    if (FAILED(CGameObject::Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_SpectrumTexture_T_Color_140010"),
         TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
         return E_FAIL;
 
