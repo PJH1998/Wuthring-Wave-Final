@@ -1,5 +1,6 @@
 ﻿#include"ClientPch.h"
 #include "MapObject_Dome.h"
+#include"GameSystem.h"
 
 CMapObject_Dome::CMapObject_Dome(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice,pContext)
@@ -7,8 +8,9 @@ CMapObject_Dome::CMapObject_Dome(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 }
 
 CMapObject_Dome::CMapObject_Dome(const CMapObject_Dome& Prototype)
-	:CStaticObject(Prototype)
+	:CStaticObject(Prototype),m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMapObject_Dome::Initialize_Prototype()
@@ -22,7 +24,7 @@ HRESULT CMapObject_Dome::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	Ready_Component(pArg);
-
+	m_pGameSystem->Register_Dome(this);
     return S_OK;
 }
 
@@ -32,70 +34,32 @@ void CMapObject_Dome::Priority_Update(_float fTimeDelta)
 
 void CMapObject_Dome::Update(_float fTimeDelta)
 {
+	m_fTotalTime += fTimeDelta;
+	m_fAlpha += 0.001f;
+	if (m_fAlpha >= m_fMaxAlpha)
+		m_fAlpha = m_fMaxAlpha;
+
+	switch (m_iPhaze) 
+	{
+	case 0:
+		m_fMaxAlpha = 0.f;
+		break;
+	case 1:
+		m_fMaxAlpha = 0.3f;
+		break;
+	case 2:
+		m_fMaxAlpha = 1.f;
+		break;
+	}
 }
 
 void CMapObject_Dome::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
-	//if (!m_IsRender)
-	//	return;
-
-	//if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
-	//	return;
-
-	//if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
-	//{
-	//	if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
-	//		m_pModelCom->Request_LOD(m_iLODIndex);
-
-	//	m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
-	//	return;
-	//}
-	//_bool HasNormal = { true };
-	//_bool HasMask = { true };
-	//_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
-
-	//ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
-
-	//m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
-	//m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
-	//m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
-
-	//for (_uint i = 0; i < iNumMesh; ++i)
-	//{
-	//	if (m_pModelCom->Is_Overed(m_iLODIndex, i))
-	//		return;
-	//	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
-	//	{
-	//		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
-	//		HasMask = false;
-	//	}
-
-	//	if (HasMask)
-	//	{
-	//		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
-
-	//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
-	//			HasNormal = false;
-	//	}
-	//	else
-	//	{
-	//		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
-
-	//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
-	//			HasNormal = false;
-	//	}
-	//	m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
-	//	m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
-
-	//	m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
-
-	//	m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
-	//}
 }
 
 void CMapObject_Dome::Render()
@@ -143,7 +107,9 @@ void CMapObject_Dome::Render()
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-
+		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fTotalTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fAlpha", &m_fAlpha, sizeof(_float));
+		
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
@@ -242,4 +208,5 @@ void CMapObject_Dome::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pModelCom);
+	Safe_Release(m_pGameSystem);
 }

@@ -53,7 +53,11 @@ void CAugustaGroundQTE::OnEnter(void* pArg)
 	// 6. 카메라
 	_bool IsSelect = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 	if (IsSelect) // 선택된 캐릭터일때만?
-		m_pAugusta->Bind_QTECamera();
+	{
+		//m_pAugusta->Bind_QTECamera();
+		m_pAugusta->Play_Action(TEXT("Action_Augusta_SkillQTE"), false);
+	}
+		
 }
 
 void CAugustaGroundQTE::OnUpdate(_float fTimeDelta)

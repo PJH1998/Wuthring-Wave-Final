@@ -139,9 +139,6 @@ void CLevi_Bayonet::Render_Shadow()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
-			CRASH("Ready Bone Matrices Failed");
-
 		m_pShaderCom->Begin(2);
 
 		m_pModelCom->Render(i);

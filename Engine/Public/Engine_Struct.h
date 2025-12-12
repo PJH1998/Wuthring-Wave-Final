@@ -457,7 +457,7 @@ namespace Engine
 		const _float4x4*	pModelMarixPtr = nullptr;
 		const _float4x4*	pBoneMatrixPtr = nullptr;
 		_bool*				pIsActive = nullptr;
-		_float				fDuration;
+		_float					fDuration = {};
 	}SPECTRUM_INFO;
 
 	typedef struct tagRopeInfo

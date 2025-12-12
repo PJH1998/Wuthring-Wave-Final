@@ -108,10 +108,12 @@ void CGalbrenaGroundDash::Check_StateTransition(_float fTimeDelta)
 		if (nullptr == pDesc)
 			return;
 
-		if (pDesc->IsBack)
+		/*if (pDesc->IsBack)
 			m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
 		else
-			m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_B;
+			m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_B;*/
+
+		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
 
 		// Dodge 이전에 누른 방향으로 회전.
 		_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);

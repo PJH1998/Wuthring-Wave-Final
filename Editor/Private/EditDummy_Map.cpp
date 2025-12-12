@@ -102,7 +102,7 @@ HRESULT CEditDummy_Map::Ready_Component(_fmatrix PreTransformMatrix)
 {
 	//m_pModelCom = CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock/Common_QiQue/SM_Sev_Roc_54AS/");
 	//m_pModelCom = CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock/Common/1024/SM_Com2_Roc_14AM/");
-	m_pModelCom = CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Rock/Common_QiQue/SM_Sev_Roc_32AL/");
+	m_pModelCom = CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Rock/1026/SM_Tab_APD_Roc_11AH/");
 	//m_pModelCom = CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock/Common/1025/SM_Com2_Roc_39AX/");
 //	m_pModelCom = CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Rock/1026/SM_Tab_APD_Roc_02AH/");
 	ASSERT_CRASH(m_pModelCom);	

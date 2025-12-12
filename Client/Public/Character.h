@@ -112,6 +112,8 @@ public:
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
 	void Set_Collider(class CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius);
 	void Set_Ability(class CAbility* pAbilityCom);
+
+	_float4 Get_MotionTrailColor() { return m_vMotionTrailColor; }
 #pragma endregion
 
 

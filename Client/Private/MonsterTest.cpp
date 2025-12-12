@@ -110,6 +110,9 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	if (false == m_isActivate)
 	{
+		//소멸 트리거, 포탈 생성
+		m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
+		//m_pGameSystem->Change_BattleBGM(BOSSBGM::END);
 		if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
 			//소멸 트리거, 포탈 생성
@@ -1053,7 +1056,6 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
 		}
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};

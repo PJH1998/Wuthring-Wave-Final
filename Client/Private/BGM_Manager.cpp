@@ -41,7 +41,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 
 	m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BGM), m_fBGMRate);
 
-	if (m_fBGMRate < 1.f)
+	//if (m_fBGMRate < 1.f)
 		m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BATTLE_BGM), 1.f - m_fBGMRate);
 
 
@@ -135,10 +135,18 @@ void CBGM_Manager::Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel)
 	}
 	m_IsBattle = IsBattle;
 	m_eLastBattle = eBossLevel;
-	if (eBossLevel == BOSSBGM::MODINARY)
-		m_pGameInstance->Play_BGM(m_BattleBGM, ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
-	else
-		m_pGameInstance->Play_BGM(m_BGMs[eBossLevel], ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
+	if(m_IsBattle)
+	{
+		if (eBossLevel == BOSSBGM::MODINARY)
+			m_pGameInstance->Play_BGM(m_BattleBGM, ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
+		else
+			m_pGameInstance->Play_BGM(m_BGMs[eBossLevel], ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
+
+
+		if (eBossLevel == BOSSBGM::END)
+			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BATTLE_BGM));
+
+	}
 
 	if (!IsBattle)
 		m_eLastBattle = BOSSBGM::END;
@@ -154,6 +162,7 @@ void CBGM_Manager::Change_BattleBGM(BOSSBGM eBoss)
 {
 	m_szChangeBattleBGMName = m_BGMs[eBoss];
 	m_IsCurBattleBGMChange = true;
+	m_eLastBattle = eBoss;
 }
 
 CBGM_Manager* CBGM_Manager::Create()
