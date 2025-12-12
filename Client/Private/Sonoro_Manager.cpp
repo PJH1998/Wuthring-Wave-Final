@@ -78,8 +78,10 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 
 	if (m_SonoroRigidActive)
 	{
+		// None -> Sonora
 		if (m_fTriggerdTime >= 5.f)
 		{
+			m_pGameInstance->Update_LightDesc(TEXT("Test"), m_LightDesc[ENUM_CLASS(SONORA::SONORA)]);
 			m_SonoroRender = !m_SonoroRender;
 			m_IsUpdate = !m_IsUpdate;
 			m_fTriggerdTime = 0.f;
@@ -104,9 +106,11 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 	}
 	else
 	{
+		// Sonora -> None
 
 		if (m_fTriggerdTime >= 4.f)
 		{
+			m_pGameInstance->Update_LightDesc(TEXT("Test"), m_LightDesc[ENUM_CLASS(SONORA::NONE)]);
 			for (auto& pObject : m_NonSonoroObjects)
 				pObject->Change_Collision_Layer(m_SonoroRigidActive);
 
