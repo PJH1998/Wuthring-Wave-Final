@@ -237,6 +237,10 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{
+		m_eDir = m_pAugusta->Calculate_Direction();
+		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
+
 		if (m_States[MOVE_D])
 		{
 			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_B;
