@@ -705,11 +705,13 @@ PS_OUT_LIGHT PS_GRASS_ROCK_MA(PS_IN In)
   
    // float3 vNormalDesc = lerp(vMainNormal.xyz, vGrasNormal.xyz, vMask.r);
   //  float3 vNormalDesc = lerp(lerp(vMainNormal.xyz, vDetailNormal.xyz, vMask.b), vGrasNormal.xyz, vMask.r);
-    float3 vNormalDesc = lerp(lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.a), vGrasNormal.xyz, vMask.r);
+    float3 vNormalDesc = lerp(lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.b), vGrasNormal.xyz, vMask.r);
     
     float3 vNormal;
 	        
-    vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    vNormal = vNormalDesc * 2.f - 1.f;
+    
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     
@@ -762,7 +764,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_GREEN(PS_IN In)
 
     float3 vNormal;
 	        
-    vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    vNormal = vNormalDesc * 2.f - 1.f;
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     
@@ -815,7 +818,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_BLUE(PS_IN In)
     
     float3 vNormal;
 	        
-    vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    vNormal = vNormalDesc * 2.f - 1.f;
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     
@@ -863,10 +867,11 @@ PS_OUT_LIGHT PS_NONGRASS_ROCK_MA(PS_IN In)
     float4 vDiffuse = vRockDiffuse;
     
     //float3 vNormalDesc = vMainNormal.xyz;//    lerp(vDetailNormal.xyz, vMainNormal.xyz, vAlphaMask.r);
-    float3 vNormalDesc = lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.a);
+    float3 vNormalDesc = lerp(vDetailNormal.xyz, vMainNormal.xyz, vMask.b);
     
     float3 vNormal;
 	        
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
     vNormal = vNormalDesc * 2.f - 1.f;
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
@@ -919,7 +924,8 @@ PS_OUT_LIGHT PS_GRASS_ROCK_M_NONDETAIL(PS_IN In)
     
     float3 vNormal;
 	        
-    vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    vNormal = vNormalDesc * 2.f - 1.f;
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     
@@ -971,7 +977,8 @@ PS_OUT_LIGHT PS_ROCK_SONORO(PS_IN In)
     
     float3 vNormal;
 	        
-    vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    vNormal = vNormalDesc * 2.f - 1.f;
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     
@@ -1023,7 +1030,8 @@ PS_OUT_LIGHT PS_ROCK_SONORO_BIG(PS_IN In)
     
     float3 vNormal;
 	        
-    vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+    vNormal = vNormalDesc * 2.f - 1.f;
     
     vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
     

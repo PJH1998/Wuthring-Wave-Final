@@ -37,7 +37,7 @@ private:
 	_float m_fBias[4] = {0.01f, 0.01f , 0.01f , 0.01f };
 	_float m_fMinBias[4] = { 0.005f , 0.005f , 0.005f , 0.005f };
 	_float m_fSlopeScale = { 2.f};
-	_float m_fMapBias = {0.01f};
+	_float m_fMapBias = {0.001f};
 	_int m_iLUT_Index = { 0 };
 	_float m_fLUT_Intensity = {};
 
