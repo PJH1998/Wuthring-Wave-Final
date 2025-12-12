@@ -228,12 +228,16 @@ void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _fl
 
 void CSound_Manager::Stop_Sound(_uint iChannelID)
 {
+	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], true);
     FMOD_Channel_Stop(m_pFixedChannels[iChannelID]);
+	m_pFixedChannels[iChannelID] = nullptr;
 }
 
 void CSound_Manager::Stop_Sound_Dynamic(_uint iChannelID)
 {
+	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelID], true);
 	FMOD_Channel_Stop(m_pPoolingChannels[iChannelID]);
+	m_pPoolingChannels[iChannelID] = nullptr;
 }
 
 void CSound_Manager::Stop_All()
@@ -242,6 +246,7 @@ void CSound_Manager::Stop_All()
     {
 		if (nullptr != m_pFixedChannels[i])
 		{
+			FMOD_Channel_SetPaused(m_pFixedChannels[i], true);
             FMOD_Channel_Stop(m_pFixedChannels[i]);
 			m_pFixedChannels[i] = nullptr;
 		}
@@ -251,6 +256,7 @@ void CSound_Manager::Stop_All()
 	{
 		if (nullptr != pChannel)
 		{
+			FMOD_Channel_SetPaused(pChannel, true);
 			FMOD_Channel_Stop(pChannel);
 			pChannel = nullptr;
 		}
