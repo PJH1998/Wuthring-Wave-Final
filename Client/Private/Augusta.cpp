@@ -973,7 +973,6 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 				//m_IsHit = true;
 				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-				m_pAbillityCom->Add_Hp(-10.f); // 최소감소?
 				break;
 			}
 			case DELAYED_ACTION::TYPE::GRAB:
