@@ -1348,7 +1348,7 @@ void CRover::Ready_AttackVolumes()
 
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f); // x, z 크게 y작게
+	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f); // x, z 크게 y작게
 	m_AttackVolumes[VOLUME_SKILL] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
