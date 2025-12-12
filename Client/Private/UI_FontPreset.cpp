@@ -64,7 +64,13 @@ HRESULT CUI_FontPreset::Initialize()
 	// - Text (설명용 색상)
 	tDesc.vColor			= { 0.718f, 0.729f, 0.757f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
+	tDesc.fLineSpace		= 1.3f;
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_NORMAL)] = tDesc;
+	
+
+	tDesc.fLineSpace		= 1.0f;
+
+
 	// - Progress (로딩 창 진행률 숫자용 색상)
 	tDesc.vColor			= { 0.961f, 0.957f, 0.937f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };

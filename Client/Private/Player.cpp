@@ -339,6 +339,7 @@ void CPlayer::Player_KeyInput()
 
 		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
 
+		m_pGameInstance->Play_Sound(TEXT("ae_ui_but_scan_v3 (SFX)"), ENUM_CLASS(CHANNEL::EFFECT), 1.f);
 		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_Scan"), WorldPosMatrix, nullptr);
 	}
 

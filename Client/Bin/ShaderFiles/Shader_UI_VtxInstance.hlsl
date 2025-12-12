@@ -883,7 +883,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             else
             {
                 // 지나지 않은 부분은 좀 더 하얀 색으로
-                if (fCooldown != 0.f)
+                //if (fCooldown != 0.f)
                     Out.vColor.rgba *= fColorMul2;
                 if (isUseCustomColor)
                     Out.vColor *= vCustomColor;

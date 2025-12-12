@@ -134,8 +134,8 @@ HRESULT CUI_Loading::Ready_Texts()
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pDescriptionText);
 
 	m_isClone = true;
-	m_pGameInstance->Add_RootUI(L"UI_Text_TitleTest", pTitleText);
-	m_pGameInstance->Add_RootUI(L"UI_Text_DescriptionTest", pDescriptionText);
+	m_pGameInstance->Add_RootUI(L"UI_Text_LoadingTitle", pTitleText);
+	m_pGameInstance->Add_RootUI(L"UI_Text_LoadingDescription", pDescriptionText);
 
 	return S_OK;
 }
@@ -175,8 +175,8 @@ void CUI_Loading::Free()
 
 	if (m_isClone)
 	{
-		m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
-		m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+		m_pGameInstance->Remove_RootUI(L"UI_Text_LoadingTitle");
+		m_pGameInstance->Remove_RootUI(L"UI_Text_LoadingDescription");
 	}
 
 	__super::Free();

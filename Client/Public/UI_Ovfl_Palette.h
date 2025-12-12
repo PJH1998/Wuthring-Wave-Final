@@ -144,9 +144,9 @@ private:
 	_bool						m_isGoinChange		= false;
 	_bool						m_isGoinOpen		= false;	// 아직 미사용.
 
-	_bool						m_isGoinSuccess		= false;	// 아직 미사용.?	// 남은 횟수가 0이 된다면, 결과를 바탕으로 success 와 fail 중 하나 진행. 그에 따른 분기 진행
-	_bool						m_isGoinFail		= false;	// 아직 미사용.?	// 분기는 m_isGoinChange 가 끝난 뒤(전환 애니메이션이 다 끝난 뒤) 실질 실행되게끔 만들어야 함.
-																					// 리셋할 시에 이 변수 또한 리셋 필요.
+	_bool						m_isGoinSuccess		= false;
+	_bool						m_isGoinFail		= false;
+															
 	_bool						m_isFinishedEvent	= false;
 	 
 	// local variables for fade-out

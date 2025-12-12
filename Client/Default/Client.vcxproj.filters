@@ -1351,7 +1351,9 @@
     <ClInclude Include="..\Public\Effect_Rope.h">
       <Filter>03. GameObject\Effect\Rope</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\UI_Dialog.h" />
+    <ClInclude Include="..\public\UI_Dialog.h">
+      <Filter>03. GameObject\UI\Containers_Prop\Dialog</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2134,7 +2136,9 @@
     <ClCompile Include="..\Private\Effect_Rope.cpp">
       <Filter>03. GameObject\Effect\Rope</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\UI_Dialog.cpp" />
+    <ClCompile Include="..\private\UI_Dialog.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\Dialog</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

@@ -427,6 +427,7 @@ namespace Engine
 		_bool isTargetExist = false;
 		_float4 vTargetWorldPos;
 
+		_float fLineSpace = 1.0f;
 
 		//..
 	}FONT_SINGLEDESC;

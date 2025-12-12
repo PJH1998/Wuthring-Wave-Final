@@ -723,6 +723,7 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 			m_pGameSystem->Engage_Battle(false, BOSSBGM::ASPHODEL);
+			m_pGameSystem->Change_BGM(TEXT("music_scene_septimont_aitongyuan_poi-after_cm_75bpm_4_4 (SFX)"));
 
 		}
 		return;
