@@ -48,7 +48,7 @@ void CMapObject_Dome::Update(_float fTimeDelta)
 		m_fMaxAlpha = 0.3f;
 		break;
 	case 2:
-		m_fMaxAlpha = 1.f;
+		m_fMaxAlpha = 0.7f;
 		break;
 	}
 }
