@@ -1265,9 +1265,12 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 
 				if (m_iActionIndex == ACTION::ENCOUNTER)
 				{
-					m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
-					m_pGameSystem->Change_Leviathan_Phaze(1);
-					//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+					{
+						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
+						m_pGameSystem->Change_Leviathan_Phaze(1);
+						//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
+					}
 				}
 				else if(m_iActionIndex == ACTION::PHASE1_DOWN)
 				{
