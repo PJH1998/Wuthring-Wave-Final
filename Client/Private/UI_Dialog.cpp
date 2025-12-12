@@ -97,9 +97,6 @@ void CUI_Dialog::Render()
 
 void CUI_Dialog::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	if (!pArg)
-		nullptr;
-
 	UI_DIALOG_DESC* pDesc = static_cast<UI_DIALOG_DESC*>(pArg);
 
 	m_iDialogOrder = 0.f;
@@ -110,7 +107,8 @@ void CUI_Dialog::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_vecDialogs.clear();
 	m_isCurDialogFinished = false;
 
-	Load_Dialog(pDesc->strFilePath.c_str());
+	if (pArg)
+		Load_Dialog(pDesc->strFilePath.c_str());
 
 	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Dialog_FadeIn"); //확인
 	m_isActivate = true;
