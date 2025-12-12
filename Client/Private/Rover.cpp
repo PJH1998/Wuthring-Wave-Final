@@ -30,6 +30,8 @@ HRESULT CRover::Initialize_Prototype()
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
 
+	m_vOutlineColor = _float4(0.0745f, 0.0039f, 0.1098f, 1.f);
+
     return S_OK;
 }
 
@@ -231,7 +233,6 @@ void CRover::Render()
 		else
 			Render_Default(i);
 
-
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
@@ -263,6 +264,9 @@ void CRover::Render()
 void CRover::Render_OutLine()
 {
 	Bind_Resources();
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
+		CRASH("Failed to Bind OutLineColor");
 
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMeshes; i++)
@@ -1054,7 +1058,11 @@ void CRover::Render_Eye(_uint iMeshIndex)
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
 	}
 	else
-		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::CHARACTER_EYE);
+		
+	//	m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+	}
 }
 
 void CRover::Render_Mask(_uint iMeshIndex)

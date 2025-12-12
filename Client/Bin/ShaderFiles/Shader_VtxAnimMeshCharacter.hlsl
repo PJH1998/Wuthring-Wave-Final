@@ -12,7 +12,7 @@ matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
 
 float g_fOutLineRadius = 0.001f;
-float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
+float4 g_vOutLineColor;
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
@@ -855,6 +855,38 @@ PS_OUT PS_UNDISSOLVE_CHARACTER(PS_IN In)
     return Out;
 }
 
+
+PS_OUT PS_CHARACTER_EYE(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+
+    Out.vDiffuse.xyz *= 1.5f;
+    
+    float4 vNormal = 0.f;
+    
+    {
+        vNormal = In.vNormal;
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+    }
+    
+    Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f
+    
+    vNormal.xyz = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
 struct GS_IN
 {
     float4 vPosition : POSITION;
@@ -1168,4 +1200,14 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_UNDISSOLVE_CHARACTER();
     }
 
+    pass CharacterEye
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_CHARACTER_EYE();
+    }
 }

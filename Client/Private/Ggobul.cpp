@@ -43,8 +43,7 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 	m_iSoundChannel = -1;
 	m_iSoundChannel2 = -1;
 	m_iSoundChannel3 = -1;
-	m_ShaderIndices[GGOBUL_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
-
+	
     return S_OK;
 }
 
@@ -86,6 +85,8 @@ void CGgobul::Late_Update(_float fTimeDelta)
 	//뼈 공격 볼륨 동기화 설정, 뼈에다가 맞추려면 sync 사용 X
 	//m_pRigidBodyCom[m_eType]->Sync_Rigidbody(m_pTransformCom);
 
+	m_fFxTime = fmod(m_fFxTime + fTimeDelta * 0.5f, 1.f);
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 
@@ -108,11 +109,19 @@ void CGgobul::Render()
 		if (false == m_MeshEnables[i])
 			continue;
 
-
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		
+		if(FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			CRASH("Failed to Bind NormalTexture");
+
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			CRASH("Failed to Bind MaskTexture");
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fFxTime", &m_fFxTime, sizeof(_float))))
+			CRASH("Failed to Bind FxTime");
+
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -204,7 +213,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
-	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::GGOBUL));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = "SAttack01_2";

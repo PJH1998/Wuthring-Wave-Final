@@ -1411,6 +1411,8 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 	// RENDERGROUP::DISTORTION
 #pragma region MRT_DISTORTION
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_Distortion"))))
 		ASSERT_CRASH(false);
 #pragma endregion

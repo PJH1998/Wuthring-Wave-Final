@@ -1556,10 +1556,7 @@ PS_OUT_LIGHT PS_MAIN_TREE_BURN_EMISSIVE(PS_IN In)
 struct PS_OUT_DOME
 {
     vector vBackBuffer : SV_TARGET0;
-    vector vEmissive : SV_TARGET1;
-    vector vDistortion : SV_TARGET2;
-    vector AccumColor : SV_TARGET3;
-    vector AccumAlpha : SV_TARGET4;
+    vector vDistortion : SV_TARGET1;
 };
 
 
