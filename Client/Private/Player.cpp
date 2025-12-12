@@ -414,13 +414,14 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
 		m_pSpringCamera->Use_Spring(2.5f, 0.1f);
+		m_pGameInstance->Play_Sound(TEXT("role_slide_loop (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_ACTION), 0.3f);
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::PLAYER_ACTION));
 	}
 
 

@@ -12,6 +12,10 @@ HRESULT CAugustaGroundLandSlide::Initialize(CCharacter* pCharacter)
     m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
     ASSERT_CRASH(m_pAugusta);
 
+	m_fSoundTimer = {};
+	m_fMaxTime = 4.5f; // 초기화 시간.
+	m_strSoundTag = TEXT("role_slide_loop (SFX)");
+
     Setup_Animations();
     return S_OK;
 }
@@ -55,7 +59,10 @@ void CAugustaGroundLandSlide::OnEnter(void* pArg)
 
 	// 8. Collider 끄기.
 
-	
+	if (eLandSlideType == EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP)
+		m_pAugusta->Play_Sound(m_strSoundTag, CHANNEL::PLAYER_ACTION, 0.4f);
+
+	m_fSoundTimer = 0.f;
 
 }
 
@@ -87,6 +94,10 @@ void CAugustaGroundLandSlide::OnExit()
 	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 	m_iWayPoint = 0;
 	m_SlideData.Reset();
+
+	m_pAugusta->Stop_Sound(CHANNEL::PLAYER_ACTION);
+
+	m_fSoundTimer = 0.f;
 }
 
 
@@ -98,6 +109,17 @@ void CAugustaGroundLandSlide::Handle_Input()
 	m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+}
+
+void CAugustaGroundLandSlide::Process_Timer(_float fTimeDelta)
+{
+	if (m_fSoundTimer < m_fMaxTime)
+		m_fSoundTimer += fTimeDelta;
+	else if (m_fSoundTimer >= m_fMaxTime)
+	{
+		m_fSoundTimer = 0.f;
+		m_pAugusta->Play_Sound(m_strSoundTag, CHANNEL::PLAYER_ACTION, 0.4f);
+	}
 }
 
 void CAugustaGroundLandSlide::Update_LandAnimation(_float fTimeDelta)
@@ -173,8 +195,11 @@ void CAugustaGroundLandSlide::Check_StateTransition(_float fTimeDelta)
 	{
 		if (EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP == eLandSlideType)
 		{
+			
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP);
 			m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
+			m_pAugusta->Stop_Sound(CHANNEL::PLAYER_ACTION);
+			m_pAugusta->Play_Sound(m_strSoundTag, CHANNEL::PLAYER_ACTION, 0.4f);
 			//m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
 			//m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
 			return;
@@ -183,6 +208,7 @@ void CAugustaGroundLandSlide::Check_StateTransition(_float fTimeDelta)
 		if (EAugustaLandSlideType::LANDSLIDE_SPRINT_START == eLandSlideType) // Loop로 이동.
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP);
+			m_pAugusta->Play_Sound(m_strSoundTag, CHANNEL::PLAYER_ACTION, 0.4f);
 			//m_pAugusta->GetStateContextForWrite().m_eLandSlideType = EAugustaLandSlideType::LANDSLIDE_SPRINT_LOOP;
 			//m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LANDSLIDE));
 			return;
