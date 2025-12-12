@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "MapObject_Collaps.h"
 #include"GameSystem.h"
+
+
 CMapObject_Collaps::CMapObject_Collaps(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
 {
@@ -117,6 +119,13 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 		m_pPullUI = nullptr;
 	}
 
+	if (!m_IsSound)
+	{
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Broken0"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
+		m_IsSound = !m_IsSound;
+	}
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 
@@ -134,6 +143,10 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DestMat));
 		m_pSourRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pDestRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Broken0"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
 
 		PREFAB_INFO Info;
 		if (m_iTriggerIndex == 33)

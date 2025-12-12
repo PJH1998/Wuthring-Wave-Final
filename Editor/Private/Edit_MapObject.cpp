@@ -27,6 +27,9 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
 
 HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 {
+
+	Load_SoundTag("/Client/Bin/Resource/Sound/2D/BGM/rock/sound/");
+
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
     if (FAILED(__super::Initialize_Clone(pArg)))
@@ -448,6 +451,25 @@ void CEdit_MapObject::Set_ImGuiOption()
 	}
 
 	About_Texture();
+
+	if (ImGui::BeginCombo("Sound Tag", m_SoundTags[m_iPickedSoundTag].c_str()))
+	{
+		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
+		{
+			if (ImGui::Selectable(m_SoundTags[i].c_str()))
+			{
+				m_iPickedSoundTag = i;
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::InputFloat("Sound Volume", &m_fDynamicVolume);
+
+	if (ImGui::Button("Play Sound"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(ENUM_CLASS(CHANNEL::ENEMY_VOICE));
+		m_pGameInstance->Play_Sound_Dynamic(StringToWString(m_SoundTags[m_iPickedSoundTag]), ENUM_CLASS(CHANNEL::ENEMY_VOICE), m_fDynamicVolume, m_pTransformCom, 0.f, 100.f, 1.f);
+	}
 #endif
 }
 
@@ -586,6 +608,28 @@ void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
 	m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
 }
 
+
+void CEdit_MapObject::Load_SoundTag(_string FilePath)
+{
+	_char ModelPath[MAX_PATH] = {};
+
+	strcat_s(ModelPath, filesystem::current_path().parent_path().parent_path().string().c_str());
+
+
+	strcat_s(ModelPath, FilePath.c_str());
+
+	for (const auto& entry : filesystem::recursive_directory_iterator(ModelPath))
+	{
+		if (!entry.is_regular_file())
+			continue;
+
+		if (entry.path().extension() != ".wav")
+			continue;
+
+		_string Name = entry.path().filename().replace_extension().string();
+		m_SoundTags.push_back(Name);
+	}
+}
 
 void CEdit_MapObject::Export_MaterialData()
 {

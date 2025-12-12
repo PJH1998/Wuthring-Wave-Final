@@ -79,6 +79,8 @@ private:
 	_float4x4 m_SmokePoint;
 	_float4x4 m_SmokePoint2;
 	void* m_pPullUI = { nullptr };
+
+	_bool m_IsSound = { false };
 public:
 	static CMapObject_Collaps* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

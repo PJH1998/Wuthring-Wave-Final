@@ -37,6 +37,8 @@ private:
 	_bool m_SonoroRigidActive = { false };
 	mutex m_Mutex;
 
+	_wstring m_EnterSonoro;
+	_wstring m_ExitSonoro;
 public:
 	static CSonoro_Manager* Create();
 	virtual void Free()override;

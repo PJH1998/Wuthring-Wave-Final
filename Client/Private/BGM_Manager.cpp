@@ -42,8 +42,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 
 	m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BGM), m_fBGMRate);
 
-	//if (m_fBGMRate < m_fMaxVolume)
-		m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BATTLE_BGM), m_fMaxVolume - m_fBGMRate);
+	m_pGameInstance->Set_ChannelVolume(ENUM_CLASS(CHANNEL::BATTLE_BGM), m_fMaxVolume - m_fBGMRate);
 
 
 	if (m_IsCurBGMChange)
