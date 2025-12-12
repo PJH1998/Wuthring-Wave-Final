@@ -73,7 +73,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	Process_Timer(fTimeDelta);
-	
 
 	// 1. Dissolve 체크
 	if (!IsDissolve || m_IsEventDissolve)
