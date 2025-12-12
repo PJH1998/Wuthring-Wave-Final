@@ -441,6 +441,7 @@ namespace Engine
 	{
 		class CModel*		 pModelPtr = nullptr;
 		const _float4x4*	 pMatrixPtr = nullptr;
+		_bool*				 pActive = nullptr;
 	}PREFAB_INFO;
 
 	typedef struct tagEffectInfo
