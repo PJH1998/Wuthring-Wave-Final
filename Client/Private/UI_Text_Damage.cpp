@@ -104,9 +104,9 @@ void CUI_Text_Damage::Update_LifeTime(_float fTimeDelta)
 	{
 		m_isActivate = false;
 		// if needs trigger when its deactive, declare here.
-		static _uint iDmgIndex = 0;
-		iDmgIndex++;
-		std::cout << "[CUI_Text_Damage::Update_LifeTime] Damage Destroyed! : " << iDmgIndex << std::endl;
+		//static _uint iDmgIndex = 0;
+		//iDmgIndex++;
+		//std::cout << "[CUI_Text_Damage::Update_LifeTime] Damage Destroyed! : " << iDmgIndex << std::endl;
 	}
 }
 
