@@ -110,9 +110,6 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	if (false == m_isActivate)
 	{
-		//소멸 트리거, 포탈 생성
-		m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
-		//m_pGameSystem->Change_BattleBGM(BOSSBGM::END);
 		if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
 			//소멸 트리거, 포탈 생성
@@ -493,26 +490,26 @@ void CMonsterTest::Sound_Active(const _wstring& wStrSoundTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.05f, m_pTransformCom, 0.01f, 6.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.01f, m_pTransformCom, 0.01f, 6.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_05 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.05f, m_pTransformCom, 0.01f, 6.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Footstep_Walk_05 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.01f, m_pTransformCom, 0.01f, 6.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Dodge"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.12f, m_pTransformCom, 0.01f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.12f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.12f, m_pTransformCom, 0.01f, 11.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_Dodge_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.12f);
 		}
 		else if (wstrPartTag == TEXT("Around"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_TurnAround (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f, m_pTransformCom, 0.01f, 17.f);
+			m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Weizuoshenwang_Battle_TurnAround (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.15f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Sweep"))
@@ -1056,6 +1053,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
 		}
 #pragma region HIT_EFFECT
 		PREFAB_INFO EffectDesc{};
@@ -1254,7 +1252,8 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK2)
+
+	if (iIndex == ATK_PATTERN::ATTACK7)
 		return false;
 
 	//else
@@ -1271,7 +1270,7 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 void CMonsterTest::Attack_Arrange()
 {
 	_float fRand = m_pGameInstance->Rand_Normal();
-	//if (fRand < 0.5f)
+	if (fRand < 0.5f)
 		m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
 }
 
