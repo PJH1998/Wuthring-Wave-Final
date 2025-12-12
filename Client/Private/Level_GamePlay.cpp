@@ -68,20 +68,25 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
-
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
 	LightDesc.vDiffuse = _float4(0.5f, 0.55f, 0.85f, 1.f);
-//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
-
 	m_pGameInstance->SettingFog(true);
+
+	m_pGameSystem->Set_Sonora_LightDesc(SONORA::NONE, LightDesc);
+
+	LIGHT_DESC SonoraLightDesc = {};
+	SonoraLightDesc.eType = LIGHT_DESC::DIRECTION;
+	SonoraLightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+	SonoraLightDesc.vDiffuse = _float4(0.85f, 0.55f, 0.4f, 1.f);
+	SonoraLightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	SonoraLightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	m_pGameSystem->Set_Sonora_LightDesc(SONORA::SONORA, SonoraLightDesc);
 
 	Ready_Potal();
 	Ready_UI();
