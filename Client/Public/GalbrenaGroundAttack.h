@@ -24,7 +24,11 @@ private:
 		HIT,
 		HIT_PENDING,
         JUMP,
+
+		DEFAULT_E,
+		BURST_E,
 		BURST,
+		ULTI,
         END
     };
 
