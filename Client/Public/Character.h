@@ -505,6 +505,8 @@ protected:
 	_float m_fCameraOriginDistance = {};
 	_float m_fCaemraDistance = {};
 
+	_float4 m_vOutlineColor = {};
+
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	_float4x4 m_GrabComibinedMatrix = {};
