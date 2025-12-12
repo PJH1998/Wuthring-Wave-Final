@@ -47,7 +47,7 @@ private:
 	CGameSystem*			m_pGameSystem = { nullptr };
 
 	_bool					m_isRender{};
-	_bool					m_isDesolve{};
+	_bool					m_isDissolve{};
 	_bool					m_isScaned{};
 	_bool					m_isFind{};
 	_bool					m_isReturn{};
@@ -66,6 +66,10 @@ private:
 	void		OnDetect_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 	void		OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
+	void		Render_Default();
+	void		Render_Scan();
+	void		Render_Dissolve();
 
 public:
 	static CNPC_Hiding* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
