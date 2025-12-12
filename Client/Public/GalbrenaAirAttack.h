@@ -33,6 +33,7 @@ private:
     class CGalbrena* m_pGalbrena = { nullptr };
     _bool m_States[AIRATTACKSTATE::END] = {};
     _float m_fSpeed = {};
+	_float m_fGravity = {};
 
 	map<_string, _string> m_PartsAnimations = {}; // Parts의 애니메이션이 서로 달라서?
     
