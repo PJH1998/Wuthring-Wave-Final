@@ -1436,10 +1436,37 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 	_wstring strSoundTag = var3; // Sound Tag
 	_float fVolume = stof(var4); // Volume 크기.
 
+	_float fFrequency = {};
+	
+
+
 	if (var2 == TEXT("Voice"))
-		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume, fFrequency);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+		}
+	}
+		
 	else if (var2 == TEXT("Action"))
-		m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			//m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume, fFrequency);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), 1.f, 1.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		}
+	}
+		
 }
 
 void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)

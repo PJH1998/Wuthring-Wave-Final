@@ -84,8 +84,6 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
 		m_CamMatrix->IsMaintain = false;
 		m_CamMatrix->isEscape = true;
-		//XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
-		//m_CamMatrix = new CamSet(make_pair(TEXT("Action_Coro_First"), make_pair(Mat, true)));
 		break;
 	default:
 		Safe_Delete(m_CamMatrix);

@@ -36,46 +36,25 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
     State_Reset();
 
 	// 4. 락온 중이였다면? => 한번만 입력방향에 따른 회전.
-	if (m_pGalbrena->Is_LockOn())
-	{
-		// 5. 누른 키에 따른 입력 방향 받아오기.
-		m_eDir = m_pGalbrena->Calculate_Direction();
-		_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
-		m_pGalbrena->Rotate_Direction(vMoveDir);
-	}
+	//if (m_pGalbrena->Is_LockOn())
+	//{
+	//	// 5. 누른 키에 따른 입력 방향 받아오기.
+	//	m_eDir = m_pGalbrena->Calculate_Direction();
+	//	_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
+	//	m_pGalbrena->Rotate_Direction(vMoveDir);
+	//}
 
 	m_pGalbrena->Set_Gravity(true);
 
-	// 6. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
-	// 회피 가능 창을 닫습니다. => Timer 실행 방지.
 	
+
+	m_pGalbrena->Resolve_PerfectDodge();
+
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
-	
-
-	// 7. Hit Stop
-	CGameInstance* pGameInstance = CGameInstance::GetInstance();
-	pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
-	pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
-
-	CAMERA_SHAKE Desc{};
-	Desc.fDuration = 0.15f;
-	Desc.fFrequency = 20.f;
-	Desc.fAmplitude = 0.5f;
-	Desc.vRotation = { 0.f, 0.1f, 0.f};
-	Desc.fFovKick = 0.f; // 
-	
-	pGameInstance->OnShake(Desc);
-
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
-	// 8. Effect
-	m_pGalbrena->Spawn_Effect(TEXT("Common_Limit"));
-
-	// 9. Change_TimeRate.
-	m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
-
 }
 
 void CGalbrenaGroundDodge::OnUpdate(_float fTimeDelta)
@@ -172,8 +151,8 @@ void CGalbrenaGroundDodge::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundDodge::Setup_Animations()
 {
-	CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 20.f, 1.5f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 20.f, 1.5f);
+	CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_F), "Move_Limit_F", 1.5f, 20.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaDodgeType::MOVE_LIMIT_B), "Move_Limit_B", 1.5f, 20.f, 2.f);
 }
 
 void CGalbrenaGroundDodge::State_Reset()

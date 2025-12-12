@@ -676,69 +676,11 @@ void CLevel_GamePlay::Ready_Potal()
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-	//	m_pGameInstance->End_SFX();
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
-	{
-		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-		//Desc.fEffectTime = 3.f;
-		//Desc.fRadialTime = 1.f;
-		//Desc.fFadeTime = 1.f;
-		  
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
 
 	ImGui::Begin("SHADER");
-	if (ImGui::CollapsingHeader("SSR"))
-	{
-		ImGui::InputFloat("MIN_STEP", &m_fMinStep, 1.f, 2.f);
-		ImGui::InputFloat("MAX_STEP", &m_fMaxStep, 1.f, 2.f);
-		ImGui::InputFloat("STARTOFFSET", &m_fStart, 1.f, 2.f);
+	ImGui::InputFloat("BIAS", &m_fMapBias);
 
-		m_pGameInstance->Set_SSR(m_fMinStep, m_fMaxStep, m_fStart);
-	}
-	//if (ImGui::CollapsingHeader("HDR"))
-	//{
-
-	//	ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
-	//	
-	//	m_pGameInstance->SettingHDR(m_fExposure);
-	//
-	//}
-	if (ImGui::CollapsingHeader("LUT"))
-	{
-		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
-		{
-			for (_uint i = 0; i < 7; ++i)
-			{
-
-				if (ImGui::Selectable(to_string(i).c_str()))
-				{
-					m_iLUT_Index = i;
-				}
-			}
-
-			ImGui::EndCombo();
-		}
-	
-		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
-		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
-	}
+	m_pGameInstance->Bind_RawValue_Renderer("g_fShadowMapBais", &m_fMapBias, sizeof(_float));
 
 	ImGui::End();
 	//if (ImGui::CollapsingHeader("MOTION_BLUR"))
