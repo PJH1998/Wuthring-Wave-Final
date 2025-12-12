@@ -75,7 +75,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	Process_Timer(fTimeDelta);
-	
 
 	// 1. Dissolve 체크
 	if (!IsDissolve || m_IsEventDissolve)
@@ -914,11 +913,12 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag); // Character 함수
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
-
 	else if (var1 == TEXT("SFX"))
 		Process_SpawnSFX(wStrObjectTag);
 	else if (var1 == TEXT("EventDissolve"))
 		Process_EventDissolve(wStrObjectTag);
+	else if (var1 == TEXT("RotateTarget"))
+		Process_RotateTarget(wStrObjectTag);
 
 }
 
@@ -1313,8 +1313,29 @@ void CAugusta::Process_EventDissolve(const _wstring& wStrObjectTag)
 	
 }
 
+void CAugusta::Process_RotateTarget(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+
+	if (var2 == TEXT("Lerp"))
+		m_fRotateTargetTimer = stof(var3); // Lerp회전 예약
+	else
+		Rotate_Target(); // 즉시 회전
+
+}
+
 void CAugusta::Process_Timer(_float fTimeDelta)
 {
+	if (m_fRotateTargetTimer > 0.f)
+	{
+		m_fRotateTargetTimer -= fTimeDelta;
+		Rotate_Target_Lerp(fTimeDelta);
+	}
+
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	if (IsDissolve)

@@ -201,11 +201,14 @@ void CLogoMaleRover::Object_Func(const _wstring& wStrObjectTag)
 	_float fDuration = stof(var2);
 	if (var1 == TEXT("FADEOUT"))
 	{
-		
+#ifndef _DEBUG
 		m_pGameInstance->OnFade(FADE::FADE_OUT, fDuration, [&]() {
 			CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-		});
+			});
+#endif // !_DEBUG
+
+
 	}
 		
 		

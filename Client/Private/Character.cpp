@@ -1182,6 +1182,30 @@ void CCharacter::Rotate_Target(_bool IsReverse)
     return;
 }
 
+void CCharacter::Rotate_To_Diagonal_Target(_float fAngleDegree, _bool IsRight)
+{
+	if (nullptr == m_pTargetTransform)
+		return;
+
+	_vector vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION); // Getter 필요 없으면 Transform에서 직접 계산
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVectorSetY(XMVector3Normalize(vTargetPos - vMyPos), 0.f);
+
+	_float fRadians = XMConvertToRadians(fAngleDegree);
+
+	if (!IsRight)
+		fRadians *= -1.f;
+
+	// 3. 회전 행렬 생성.
+	_matrix matRot = XMMatrixRotationY(fRadians);
+
+	// 4. 벡터를 회전 행렬로 회전 시킴.
+	_vector vDiagonalDir = XMVector3TransformNormal(vToTarget, matRot);
+
+	// 5. 캐릭터 즉시 회전 적용.
+	Rotate_Direction(vDiagonalDir);
+}
+
 void CCharacter::Rotate_Target(CTransform* pTransform)
 {
 	if (nullptr == pTransform)
