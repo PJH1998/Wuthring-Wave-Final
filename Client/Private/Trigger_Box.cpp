@@ -320,7 +320,9 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_elite_loop_strong (SFX)"));
 			break;
 		}
+#ifndef _DEBUG
 		m_IsTriggered = true;
+#endif // !_DEBUG
 		});
 }
 

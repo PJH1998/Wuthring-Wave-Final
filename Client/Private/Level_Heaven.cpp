@@ -143,7 +143,7 @@ void CLevel_Heaven::Ready_Layer_Player()
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
 	//vPosition = { 0.f, 2.f, -40.f };
-	vPosition = { -9.f, 0.f, -680.f };
+	vPosition = { 0.1f, -7.2f, -1135.1f };
 	
 	CPlayer::PLAYER_DESC Desc{};
 	Desc.eCurLevel = m_eCurLevel;

@@ -76,7 +76,8 @@ private:
 	_bool m_IsTriggerd = { false };
 	CALLBACK_CLIENT m_CallBack = {};
 	Mutex m_Mutex;
-	
+	_float4x4 m_SmokePoint;
+	_float4x4 m_SmokePoint2;
 	void* m_pPullUI = { nullptr };
 public:
 	static CMapObject_Collaps* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
