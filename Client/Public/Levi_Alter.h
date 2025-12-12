@@ -53,9 +53,10 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg);
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CGameSystem*			m_pGameSystem = { nullptr };
@@ -78,6 +79,7 @@ private:
 
 #pragma region SOUND
 	_uint					m_iSoundChannel{};
+	_uint					m_iSoundChannel2{};
 #pragma endregion
 
 private:

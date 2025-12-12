@@ -181,14 +181,14 @@ HRESULT CLoader_Heaven::Load_Model()
 	//	CRASH("SkyFX");
 
 		// SkyBox
-	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);;
+	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(115.f), 0.f);;
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Dome"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Dome.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Dome");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Cloud"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Cloud.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Cloud");
-	PreTransformMatrix = XMMatrixScaling(0.07f, 0.07f, 0.07f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);
+	PreTransformMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, -20.f, -120.f, 1.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_FX.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Fx");

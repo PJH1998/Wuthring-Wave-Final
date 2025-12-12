@@ -1129,6 +1129,10 @@ void CGameInstance::Set_FogRayIntensity(_float fRayIntensity)
 {
 	m_pVF->Set_FogRayIntensity(fRayIntensity);
 }
+void CGameInstance::Set_FogMaxDistance(_float fFogMaxDistance)
+{
+	m_pVF->Set_FogMaxDistance(fFogMaxDistance);
+}
 void CGameInstance::Begin_VF()
 {
 	m_pVF->Begin_VF();

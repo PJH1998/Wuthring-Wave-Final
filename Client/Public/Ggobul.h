@@ -69,6 +69,8 @@ private:
 	vector<_bool>			m_MeshEnables;
 	vector<_uint>			m_ShaderIndices;
 
+	_float					m_fFxTime = {};
+
 	_string		m_strAnimKey;
 	_uint		m_iState{};
 

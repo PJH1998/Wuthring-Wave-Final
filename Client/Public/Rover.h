@@ -19,6 +19,7 @@ public:
 	{
 		VOLUME_KNOCKBACK = 0,
 		VOLUME_SKILL = 1,
+		VOLUME_QTE = 2,
 		VOLUME_END
 	};
 
