@@ -65,6 +65,11 @@ void CLevel_Logo::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Logo"));
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
