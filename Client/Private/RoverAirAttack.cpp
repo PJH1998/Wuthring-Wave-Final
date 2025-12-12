@@ -45,6 +45,10 @@ void CRoverAirAttack::OnEnter(void* pArg)
   
 	m_fSpeed = 2.f;
 
+	if (eAirAttackType != ERoverAirAttackType::AIRATTACK_LOOP)
+		m_fGravity = 0.f;
+	
+
 	m_pRover->Set_Gravity(true);
 }
 
@@ -84,6 +88,10 @@ void CRoverAirAttack::OnExit()
     m_pRover->Set_Gravity(true);
     m_fSpeed = 0.f;
 
+	ERoverAirAttackType eAirAttackType = static_cast<ERoverAirAttackType>(m_iCurrentAnimIdx);
+	if (eAirAttackType != ERoverAirAttackType::AIRATTACK_LOOP)
+		m_fGravity = 0.f;
+
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 }
@@ -118,7 +126,9 @@ void CRoverAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
     if (eAirAttackType == ERoverAirAttackType::AIRATTACK_LOOP)
     {
-        m_pRover->Move_Fall(fTimeDelta, m_fSpeed);
+		m_fGravity += fTimeDelta * GRAVITY * 0.1f;
+        m_pRover->Move_Fall(fTimeDelta, m_fGravity);
+        //m_pRover->Move_Fall(fTimeDelta, m_fSpeed);
     }
     
 }

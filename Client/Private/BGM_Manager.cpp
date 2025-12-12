@@ -141,6 +141,11 @@ void CBGM_Manager::Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel)
 			m_pGameInstance->Play_BGM(m_BattleBGM, ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
 		else
 			m_pGameInstance->Play_BGM(m_BGMs[eBossLevel], ENUM_CLASS(CHANNEL::BATTLE_BGM), 0.f);
+
+
+		if (eBossLevel == BOSSBGM::END)
+			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BATTLE_BGM));
+
 	}
 
 	if (!IsBattle)

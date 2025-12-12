@@ -96,6 +96,8 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 			//이펙트 호출.		
 			m_pCollideRigidbodyCom->IsActivate(true);
 			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+			PREFAB_INFO Info;
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		}
 
 	}

@@ -35,45 +35,24 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 
     State_Reset();
 
-	// 4. 락온 중이였다면? => 한번만 입력방향에 따른 회전.
-	//if (m_pAugusta->Is_LockOn())
-	//{
-	//	// 5. 누른 키에 따른 입력 방향 받아오기.
-	//	m_eDir = m_pAugusta->Calculate_Direction();
-	//	_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-	//	m_pAugusta->Rotate_Direction(vMoveDir);
-	//}
-
 	m_pAugusta->Set_Gravity(true);
-
-	// 6. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
-	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
-	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-
-	// 7. Hit Stop
-	CGameInstance* pGameInstance = CGameInstance::GetInstance();
 
 	// 8. Resolve Perfect Dodge?
 	m_pAugusta->Resolve_PerfectDodge();
 
-	// 퍼펙트 닷지가 성공했을 경우에만.
-	CAMERA_SHAKE Desc{};
-	Desc.fDuration = 0.15f;
-	Desc.fFrequency = 20.f;
-	Desc.fAmplitude = 0.5f;
-	Desc.vRotation = { 0.f, 0.1f, 0.f};
-	Desc.fFovKick = 0.f; // 
-	
-	pGameInstance->OnShake(Desc);
+
+	// 9. 플레이어 상태 제어 => 무적 추가 및 Hit 상태 제거
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
-	// 8. Effect
-	m_pAugusta->Spawn_Effect(TEXT("Common_Limit"));
+	// 10. Effect
+	
 
 	// 9. 효과 추가?
-	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f);
+	//m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.01f);
 	
 }
 
@@ -124,9 +103,9 @@ void CAugustaGroundDodge::Update_DodgeAnimation(_float fTimeDelta)
 	CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, 1.f);
 
 	// 1. 누른키에 따른 방향 계산
-	//  m_eDir = m_pAugusta->Calculate_Direction();
-	//_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-	//m_pAugusta->Rotate_Direction(vMoveDir);
+	/*m_eDir = m_pAugusta->Calculate_Direction();
+	_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+	m_pAugusta->Rotate_Direction(vMoveDir);*/
     
 }
 

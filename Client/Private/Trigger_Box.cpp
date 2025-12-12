@@ -33,43 +33,60 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	Ready_Components(pArg);
 
 	_float4x4 Mat;
+	m_CamMatrix = new CAM_INFO;
 	switch (m_iTriggerIndex)
 	{
 	case 0:
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Start"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false)));
+		m_CamMatrix->szCamTag = TEXT("Action_Asphodel_Barrens_Start");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
 		break;
 
 	case 2:
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Meteo"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), false)));
+		m_CamMatrix->szCamTag = TEXT("Action_Asphodel_Barrens_Meteo");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
 		break;
 
 	case 4:
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true)));
+		m_CamMatrix->szCamTag = TEXT("Action_Asphodel_Barrens_Horizon");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = true;
 		break;
 	case 21:
-		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+		m_CamMatrix->IsMaintain = false;
 		break;
 
 	case 22:
-		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+		m_CamMatrix->IsMaintain = false;
 		break;
 	case 23:
-		XMStoreFloat4x4(&Mat, XMMatrixRotationY(XMConvertToRadians(177.5f + 180.f)));
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_03"), make_pair(Mat, false)));
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora_03");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(XMConvertToRadians(177.5f + 180.f)));
+		m_CamMatrix->IsMaintain = false;
 		break;
 	case 24:
-		XMStoreFloat4x4(&Mat, XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)));
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora"), make_pair(Mat, false)));
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)));
+		m_CamMatrix->IsMaintain = false;
 		break;
 	case 25:
-		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_False_Sonora_04"), make_pair(Mat, false)));
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora_04");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
 		break;
 	case 30:
-		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
-		m_CamMatrix = new CamSet(make_pair(TEXT("Action_Coro_First"), make_pair(Mat, true)));
+		m_CamMatrix->szCamTag = TEXT("Action_Coro_First");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
+		m_CamMatrix->isEscape = true;
+		break;
+	default:
+		Safe_Delete(m_CamMatrix);
 		break;
 	}
 
@@ -115,7 +132,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	{
 		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
 			m_IsTriggered = true;
-			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
+			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
 			});
 	}
 
@@ -273,7 +290,7 @@ void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		if (m_CamMatrix)
-			m_pGameSystem->Play_Action(m_CamMatrix->first, XMLoadFloat4x4(&m_CamMatrix->second.first), m_CamMatrix->second.second);
+			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
 		switch (m_iTriggerIndex)
 		{
 		case 7:

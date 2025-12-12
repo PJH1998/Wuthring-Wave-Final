@@ -226,8 +226,10 @@ HRESULT CUI_GrapplePoint::Ready_Components(void* pArg)
 	// Transform과 Rope_Anchor 타입임을 알립니다.
 	m_CallBack.pTransform = m_pWorldTransformCom;
 	if		(pDesc->eType == UI_GRAPPLE_TYPE::ANCHOR)	m_CallBack.eObjectType = OBJECTTYPE::ROPE_ANCHOR;
-	else if (pDesc->eType == UI_GRAPPLE_TYPE::PULL)		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+	else if (pDesc->eType == UI_GRAPPLE_TYPE::PULL)		m_CallBack.eObjectType = OBJECTTYPE::ROPE_UI;
+	//m_CallBack.eObjectType = OBJECTTYPE::ROPE_ANCHOR;
 	m_CallBack.pCondition = &m_iCondition;
+	
 
 	m_pRigidbodyCom->Set_Desc(&m_CallBack);
 	return S_OK;
