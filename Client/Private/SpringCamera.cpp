@@ -242,9 +242,11 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
+	_float fLength = XMVectorGetX(XMVector3Length(vLookDir));
 
-	// ��ǥ Dir
-	m_pTransformCom->LookDir(vLookDir);
+	// Position 겹칠 때 예외 처리
+	if(0.f < fLength)
+		m_pTransformCom->LookDir(vLookDir);
 	_vector vCurrentQuat = m_pTransformCom->Get_Quaternion();
 
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
@@ -254,6 +256,8 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 2.5f);
 	else
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 1.25f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
+
+	fLerp = max(0.f, min(1.f, fLerp));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
 }
 
