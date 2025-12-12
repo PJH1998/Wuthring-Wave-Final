@@ -740,6 +740,8 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     if (TrailMeshJson.contains("Root"))
         Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
 
+	if (TrailMeshJson.contains("Loop"))
+		Desc.IsLoop = TrailMeshJson["Loop"].get<_bool>();
 
     if (TrailMeshJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());

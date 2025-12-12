@@ -854,7 +854,7 @@ void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int Pool
             _string extension = entry.path().extension().string();
 
             if (extension == ".json")
-            {
+            {	
                 _string strPrefabTag = entry.path().stem().string();
 
                 Load_Prefab_FromJson(filePath, strPrefabTag, eLevel, PoolingNum);
@@ -1249,6 +1249,9 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 
 	if (TrailMeshJson.contains("Root"))
 		Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
+
+	if (TrailMeshJson.contains("Loop"))
+		Desc.IsLoop = TrailMeshJson["Loop"].get<_bool>();
 
 	if (TrailMeshJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());

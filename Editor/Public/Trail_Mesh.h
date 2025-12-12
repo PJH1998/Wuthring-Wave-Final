@@ -35,6 +35,8 @@ public:
 
 		_bool	IsDistortion = false;
 		_float	fDistortionWeight = 0.1f;
+
+		_bool	IsLoop = false;
 		
 		_float	fColorSpeed = 1.f;
 		_float	fMaskSpeed = 1.f;
@@ -110,9 +112,12 @@ private:
 
 	_float						m_fTime = 0.f;
 
+	_bool						m_IsLoop = false;
+	_bool						m_IsEnd = false;
 	_bool						m_IsRoot = false;
 	_float4x4					m_ComBindMatrix = {  };
 
+	const _bool*				m_pActiveFlag = nullptr;
 	const _float4x4*			m_pBoneMatrixPtr = nullptr;
 	const _float4x4*			m_pObjectMatrixPtr = nullptr;
 	_matrix						m_OffsetMatrix = {};
