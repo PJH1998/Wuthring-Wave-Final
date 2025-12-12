@@ -73,12 +73,14 @@ HRESULT CLevel_Heaven::Initialize()
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
 
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
-//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
+	LightDesc.vDiffuse = _float4(0.9137f, 0.7686f, 0.9882f, 1.f);
+	//LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, -0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+
+#ifdef _DEBUG
+	m_tLightDesc = LightDesc;
+#endif
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
@@ -103,12 +105,13 @@ HRESULT CLevel_Heaven::Initialize()
 	//Ready_SFX();
 
 //	m_pGameInstance->Set_Fog
-	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
-	m_pGameInstance->Set_FogMaxHeight(50.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.5f);
-	m_pGameInstance->Set_FogScatterWeight(0.5f);
+	m_pGameInstance->Set_FogDistanceFallOff(0.1f);
+	m_pGameInstance->Set_FogMaxHeight(0.f);
+	m_pGameInstance->Set_FogMaxDistance(100.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+	m_pGameInstance->Set_FogScatterWeight(0.4f);
 	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
-	m_pGameInstance->Set_FogRayIntensity(1.5f);
+	m_pGameInstance->Set_FogRayIntensity(2.f);
 
 	m_pGameInstance->Begin_VF();
 
@@ -613,70 +616,33 @@ void CLevel_Heaven::Ready_Scene()
 #ifdef _DEBUG
 void CLevel_Heaven::DEBUG_FUNCTION()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_pGameInstance->End_SFX();
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
-	{
-		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-		//Desc.fEffectTime = 3.f;
-		//Desc.fRadialTime = 1.f;
-		//Desc.fFadeTime = 1.f;
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_IsSSS = !m_IsSSS;
-		m_pGameInstance->SettingSSS(m_IsSSS);
-	}
-
-
 	ImGui::Begin("SHADER");
 
-	if (ImGui::CollapsingHeader("HDR"))
-	{
-
-		ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
-
-		m_pGameInstance->SettingHDR(m_fExposure);
-
-	}
 	if (ImGui::CollapsingHeader("LUT"))
 	{
 		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
 		{
 			for (_uint i = 0; i < 7; ++i)
 			{
-
-#ifdef _DEBUG
 				if (ImGui::Selectable(to_string(i).c_str()))
 				{
 					m_iLUT_Index = i;
 				}
-#endif // _DEBUG
 			}
 
 			ImGui::EndCombo();
 		}
 
-		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
 		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, false);
+	}
+
+
+	if (ImGui::CollapsingHeader("LIGHT"))
+	{
+		ImGui::ColorPicker4("LightColor", reinterpret_cast<_float*>(&m_tLightDesc.vDiffuse.x));
+
+		m_pGameInstance->Update_LightDesc(TEXT("Test"), m_tLightDesc);
 	}
 
 	ImGui::End();

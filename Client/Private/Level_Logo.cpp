@@ -49,6 +49,7 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Set_FogDistanceFallOff(0.01f);
 	m_pGameInstance->Set_FogMaxHeight(0.f);
+	m_pGameInstance->Set_FogMaxDistance(100.f);
 	m_pGameInstance->Set_FogRayDensityScale(0.f);
 	m_pGameInstance->Set_FogScatterWeight(0.3f);
 	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
