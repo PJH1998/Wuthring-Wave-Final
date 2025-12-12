@@ -167,7 +167,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1212_third/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1213_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1212_second/", m_eCurLevel, "The_False_Sovereign");
@@ -1045,7 +1045,7 @@ HRESULT CLoader_GamePlay::Load_NPC()
 	//CGameSystem::GetInstance()->LoadNPCDataTable("../Bin/Resource/Data/NPCFemaleS.csv", 2);
 
 	vector<_string> TypeName = { "Body", "Hair", "Face" };
-	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	_matrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleM"),
 		CModelAnim_Instance::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, m_pGameSystem->Get_NumNPCInstance(0),
 			"../../Client/Bin/Resource/Model/NPC/FemaleM", &TypeName))))
@@ -1084,6 +1084,7 @@ HRESULT CLoader_GamePlay::Load_NPC()
 		CNPC_Griffin::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
+	PreTransformMatrix = XMMatrixScaling(0.0003f, 0.0003, 0.0003) * XMMatrixRotationY(XMConvertToRadians(180.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_NPCGriffin"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
 			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))

@@ -129,8 +129,8 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 	{
 #ifdef _DEBUG
 		m_fFall = 0.f;
-		m_IsTriggerd = false;
 #endif
+		m_IsTriggerd = false;
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DestMat));
 		m_pSourRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pDestRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));

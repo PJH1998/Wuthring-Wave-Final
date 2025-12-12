@@ -253,6 +253,8 @@ void CMapObject_Destruction::Spawn_Particles()
 		m_pPullUI = nullptr;
 	}
 
+	PREFAB_INFO Info{};
+
 	m_IsDestroy = true;
 	for(_uint i=2; i<m_pBoneModel->Get_BoneSize();++i)
 	{
@@ -269,13 +271,13 @@ void CMapObject_Destruction::Spawn_Particles()
 			XMMatrixTranslationFromVector(vTrans) *
 			m_pTransformCom->Get_WorldMatrix());
 
-
+		
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Small_Smoke"), XMLoadFloat4x4(&Mat), &Info);
 
 		_vector Pos = XMVectorSetW(XMLoadFloat3(&m_vImpulsePos), 1.f);
 		_vector Power = XMVectorSetW(XMLoadFloat3(&m_vImpulsePower), 0.f);
 
 		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
-
 		
 		XMStoreFloat3(&ResetDesc.vImpulse, vDeltaPos * Power);
 		

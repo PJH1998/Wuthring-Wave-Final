@@ -518,7 +518,7 @@ void CLevel_GamePlay::Ready_NPC()
 	
 	vRotDegree = _float3(-180.f, -17.102f, 180.f);
 	vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
-	vTrans = XMVectorSet(3405.010f, 379.317f, 1623.268f, 1.f);
+	vTrans = XMVectorSet(3405.010f, 379.317f, 1625.268f, 1.f);
 	XMStoreFloat4x4(&Desc.pTransformMatrix, XMMatrixRotationRollPitchYawFromVector(vRot) * XMMatrixTranslationFromVector(vTrans));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);

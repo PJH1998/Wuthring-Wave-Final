@@ -76,7 +76,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 		break;
 	case 25:
 		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora_04");
-		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(XMConvertToRadians(-30.f)));
 		m_CamMatrix->IsMaintain = false;
 		break;
 	case 30:
