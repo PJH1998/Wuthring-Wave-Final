@@ -382,6 +382,8 @@ void CAnimationActor::Object_Func(const _wstring& tag)
 			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
 		else if (var2 == TEXT("Action"))
 			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		else if (var2 == TEXT("QTE"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
 	}
 
 }

@@ -176,6 +176,7 @@ void CUI_HUD::PreAssign_ChildUIs()
 	m_pUI_Group_Augusta = Find_ChildObject(L"Group_Augusta");
 	m_pUI_Group_Galbrena = Find_ChildObject(L"Group_Galbrena");
 
+	m_pUI_Frame_Rover = Find_ChildObject(L"Frame_Rover");
 	m_pUI_Frame_Rover_Dark = Find_ChildObject(L"Frame_Rover_Dark");
 	m_pUI_Frame_Augusta = Find_ChildObject(L"Frame_Augusta");
 	m_pUI_FrameGroup_Augusta_OtherEnergy = Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy");
@@ -504,6 +505,19 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// * [Skill Icon Updates] Apply CD Value.
 	// ==============================
 	auto& vecUISlots = m_pAbility->Get_UISkillSlots();
+	_bool isUltReady = {};
+	switch (m_iSelectedCHIndex)
+	{
+	case CH_ROVER:
+	case CH_GALBRENA:
+		isUltReady = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) == 1.f;		break;
+	case CH_AUGUSTA:
+		isUltReady = (m_isIn_UltMode_Augusta) ?
+			pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST4) == 1.f :
+			pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) == 1.f;				break;
+	}
+
+
 
 	for (_uint i = 0; i < CH_END; i++)
 	{
@@ -515,9 +529,15 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		_uint iTargetNumInstance = static_cast<_uint>(targetUI->Get_UIDesc().vecInstanceDescs.size());
 		vecVariantMat.resize(iTargetNumInstance);
 
-		_float fLeftColorMul		= 0.4f;
-		_float fPassedColorMul		= 0.8f;
-		_float fFilledColorMul		= 0.95f;
+		const _float fLeftColorMul			= 0.4f;
+		const _float fPassedColorMul		= 0.8f;
+		const _float fFilledColorMul		= 1.f;
+
+		// 궁 준비상태에 따른 색상. 궁 준비 + 잔여 쿨 0초면 제대로 보임.또 쿨 진행중이면 쿨 표시. 이것까진 기존대로, 이외엔 흐린 색
+		_float fUltColor = {};
+		if (isUltReady && fBasicSkillCD[i][SK_R] <= 0.f)	fUltColor = fFilledColorMul;
+		else if (fBasicSkillCD[i][SK_R] > 0.f)				fUltColor = fPassedColorMul;
+		else												fUltColor = fPassedColorMul;
 
         vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
         vecVariantMat[0].m[0][1] = fLeftColorMul;
@@ -525,13 +545,13 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
         vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
         vecVariantMat[1].m[0][1] = fLeftColorMul;
-		vecVariantMat[1].m[0][2] = (fBasicSkillCD[i][SK_R] != 0.f) ? fPassedColorMul : fFilledColorMul;;
+		vecVariantMat[1].m[0][2] = fUltColor;
 
 		if (vecVariantMat.size() >= 3)
 		{
 			vecVariantMat[2].m[0][0] = 0.0f;	// for LB Btn
 			vecVariantMat[2].m[0][1] = fLeftColorMul;
-			vecVariantMat[2].m[0][2] = fPassedColorMul;
+			vecVariantMat[2].m[0][2] = fFilledColorMul;
 		}
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -859,7 +879,8 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (m_iSelectedCHIndex == CH_AUGUSTA)?
+		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
 
 
 
@@ -989,7 +1010,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	_uint iIndex_EBtn =	 2;
 	_uint iIndex_RBtn =  0;
 	_uint iIndex_LBBtn = 4;
-	//_uint iIndex_TBtn = ..
+	_uint iIndex_TBtn = 3;
 
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
 	{
@@ -1074,6 +1095,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	_bool isChar_RuttonFeedbackAble = true;
 
 
+	// T Btn
+	_bool isChar_TRuttonFeedbackAble = (m_isIn_UltMode_Augusta) ? false : true;
+
 	
 	// 클릭마다 해당 위치에 피드백 생성
 	if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN &&
@@ -1082,6 +1106,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN &&
 		isChar_RuttonFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_RBtn);
+	if (m_pGameInstance->Get_DIKeyState(DIK_T) == KEYSTATE::DOWN &&
+		isChar_TRuttonFeedbackAble)
+		Add_UI_SkillSection_OnFeedback(iIndex_TBtn);
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		isChar_LBBtnFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_LBBtn);
@@ -1642,11 +1669,13 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 		if (!isIn_Rover_BurstMode)
 		{
+			m_pUI_Frame_Rover->Set_Active(true);
 			m_pUI_Frame_Rover_Dark->Set_Active(false);
 			// Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
 		}
 		else if (isIn_Rover_BurstMode)
 		{
+			m_pUI_Frame_Rover->Set_Active(false);
 			m_pUI_Frame_Rover_Dark->Set_Active(true);
 			// Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
 		}

@@ -80,13 +80,13 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
     Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
-	Ready_MonsterTest();
+	//Ready_MonsterTest();
 	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
 	//Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	Ready_Leviatan();
 	//Ready_NPC();
 
     Ready_Effect();
@@ -727,6 +727,10 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
 		CRASH("Failed Ready QTE");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Dialog"),
+		iDestLevel, TEXT("Layer_Custom_UI_Dialog"), TEXT("Pool_Custom_Dialog"), 1)))
+		CRASH("Failed Ready Dialog");
+
 
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_UI_CurveTrace"),
@@ -818,46 +822,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion
 
 
-#pragma region [TAB] KSTA_UITEST_TABUTILITY
-	static _bool isTabUtilityActive = false;
-	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
-
-	//_uint iTabUtilitySelectedIndex = UINT_MAX;
-	_bool isTabUtilityHided = false;
-
-	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
-		isTabUtilityActive = true;
-	}
-	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
-	{
-		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
-		isTabUtilityActive = false;
-		isTabUtilityHided = true;
-	}
-
-
-	_string strSelectedUtilityName = {};
-	if (isTabUtilityHided)
-	{
-		switch (iTmpSelectedUtility)
-		{
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
-		}
-
-		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
-	}
-
-#pragma endregion
-
-
 #pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
 
 	static _bool isOpenOverflowingPalette = false;
@@ -931,28 +895,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	//std::cout << "[CLevel_Test::Testing_UI] Nearest Pull    UI Distance : " << fPullDistance << std::endl;
 	//std::cout << "==================================================================" << std::endl;
 
-
-
-
-	// graffle control test
-	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
-	{
-		_float3 vPlayerPos = {}; XMStoreFloat3(&vPlayerPos, m_pGameSystem->Get_PlayerPosition());
-
-		void* pTargetUIPtr = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, nullptr, true);
-
-		m_pGameSystem->Toggle_GrapplePoint(pTargetUIPtr, false);
-	}
-	else if (m_pGameInstance->Get_DIKeyState(DIK_B) == KEYSTATE::DOWN)
-	{
-		_float3 vPlayerPos = {}; XMStoreFloat3(&vPlayerPos, m_pGameSystem->Get_PlayerPosition());
-
-		void* pTargetUIPtr = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, nullptr, true);
-
-		m_pGameSystem->Toggle_GrapplePoint(pTargetUIPtr, true);
-	}
-	
-
 #pragma endregion	
 
 
@@ -991,49 +933,26 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		std::cout << "[Level_Test::Testing_UI] CurveTrace Off" << std::endl;
 	}
 
+#pragma endregion
 
-	if (isCurveTraceOn)
+#pragma region [LCTRL + I] KSTA_UITEST_DIALOG
+	static _bool isUITestDialogOn = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
 	{
-//#define KSTA_UITEST_BASEDONPLAYER	// 디버그용 매크로
+		isUITestDialogOn = !isUITestDialogOn;
+		std::cout << "[Level_Test::Testing_UI] Dialog Toggled to" << (_bool)isUITestDialogOn << std::endl;
 
-
-#ifndef KSTA_UITEST_BASEDONPLAYER
-		// 사용 예시..
-		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
-
-		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
-		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
-
-		_float fDEBUG_Radius = 10.f;
-		_float fDEBUG_RotateX = sinf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
-		_float fDEBUG_RotateZ = cosf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
-
-		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
-		_float3 vStartVel		= _float3(fDEBUG_RotateX, fDEBUG_Radius, fDEBUG_RotateZ);
-		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
-		
-		
-		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
-#endif // !KSTA_UITEST_BASEDONPLAYER
-
-
-
-#ifdef KSTA_UITEST_BASEDONPLAYER
-		// 임시로 플레이어 정면 바라보도록
-		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
-
-		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
-		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
-
-		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
-		_float3 vStartVel		= _float3(0.f, 10.f, 10.f);
-		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
-
-		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
-#endif // KSTA_UITEST_BASEDONPLAYER
+		if (isUITestDialogOn)
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/testdialog.csv");
+		else
+			m_pGameSystem->Close_DialogUI();
 	}
 
+
 #pragma endregion
+
 
 }
 

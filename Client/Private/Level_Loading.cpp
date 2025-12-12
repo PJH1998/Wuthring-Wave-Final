@@ -220,7 +220,10 @@ void CLevel_Loading::Ready_LoadingScreen()
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
-		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		CUI_Loading::UI_LOADING_DESC tLoadingUIDesc;
+		tLoadingUIDesc.eDestLevel = m_eNextLevel;
+
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT, &tLoadingUIDesc));
 		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_Loading", pTargetUI)))
 			CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))

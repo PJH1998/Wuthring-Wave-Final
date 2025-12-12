@@ -56,6 +56,7 @@
 #include "UI_TabUtility.h"
 #include "UI_GrapplePoint.h"
 #include "UI_QTE.h"
+#include "UI_Dialog.h"
 
 #include "UI_CurveTrace.h"
 
@@ -180,14 +181,14 @@ HRESULT CLoader_Heaven::Load_Model()
 	//	CRASH("SkyFX");
 
 		// SkyBox
-	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);;
+	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(115.f), 0.f);;
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Dome"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Dome.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Dome");
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Cloud"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Cloud.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Cloud");
-	PreTransformMatrix = XMMatrixScaling(0.07f, 0.07f, 0.07f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);
+	PreTransformMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, -20.f, -120.f, 1.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_FX.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Fx");
@@ -819,6 +820,9 @@ HRESULT CLoader_Heaven::Load_UI()
 	_string strFilePath_UI_QTE = "../../Client/Bin/Resource/UI/FJson/UITree/Root_QTE1.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_QTE));
 
+	_string strFilePath_UI_Dialog = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Dialog.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Dialog));
+
 
 
 
@@ -952,6 +956,10 @@ HRESULT CLoader_Heaven::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_QTE",
 		CUI_QTE::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Dialog",
+		CUI_Dialog::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Dialog Load Failed. The UI_Dialog may have already been loaded.\n");
+
 
 	// Custom UI (but not UI)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_CurveTrace",

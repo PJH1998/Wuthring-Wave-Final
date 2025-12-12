@@ -98,7 +98,7 @@ cbuffer VF_Data : register(b0)
     float fPhaseFunctionG; 
     float fDensityScale;        // --
     float fFogMaxHeight; 
-    float fFogMinHeight; 
+    float fFogMaxDistance; 
     float fHegihtFallOff; 
     float fDistanceFallOff;     // --
     float fGroundFallOff; 
@@ -307,9 +307,9 @@ float Compute_NeighborShadow(int2 vNeighborSector, float4 vWorldPos, Texture2DAr
     
     float2 vTexelSize = 1.f / vShadowMapSize;
     
-    float fBias = 0.01f;
+//    float fBias = 0.01f;
     
-    float fDepth = vProjPos.z - fBias;
+    float fDepth = vProjPos.z;//    -fBias;
     
     float fShadow = 0.f;
     
@@ -362,9 +362,7 @@ float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture
     
     float2 vTexelSize = 1.f / vShadowMapSize;
     
-    float fBias = 0.01f;
-    
-    float fDepth = vProjPos.z - fBias;
+    float fDepth = vProjPos.z;
    
     fShadow = min(ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vTexelSize, vStartTex, vEndTex), fShadow);
     //ShadowMapTexture.SampleCmpLevelZero(ShadowSampler, float3(vTexcoord, vSector.y), fDepth);
@@ -453,7 +451,6 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
                     
                     float PhaseRay = HenyeyGreensteinPhasefunction(LightDirection, vOutDir, fRayPhaseFunctionG);
                     vRayLighting = (Light.vDiffuse.xyz * fRayAtt * PhaseRay);
-                    
                 }
                 break;
             case 1: // POINT
@@ -477,16 +474,16 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
     
     float fDistance = length(vCamPos.xyz - vWorldPosJitter.xyz);
     
-    float fDistanceWeight = saturate(1.f - exp(-fDistance * fDistanceFallOff));
-
-    float fHeightWeight = saturate(exp(-fHegihtFallOff * (vWorldPosJitter.y - fFogMaxHeight)));
+//    float fDistanceWeight = saturate(1.f - exp(fDistance * fDistanceFallOff));
+    float fDistanceWeight = saturate(exp(-fDistanceFallOff * (fFogMaxDistance - fDistance)));
+    float fHeightWeight = vWorldPosJitter.y < fFogMaxHeight ?  1.f : saturate(exp(-fHegihtFallOff * (vWorldPosJitter.y - fFogMaxHeight)));;
     
     float fLightWeight = saturate(fDistanceWeight * fHeightWeight);// * fLightAtt);
     float fRayWeight = saturate(1.f - fLightWeight) * fRayAtt; // LightWieght 가 충분하다면 굳이 추가 X, LightWieght ( Fog가 보이지 않는곳 -> Ray는 살리기 )
     
     float fNoise = 1.f;
     
-    //if (fHeightWeight < 1.f)
+    if (fHeightWeight < 1.f)
     {
         float3 vNoiseUV = (vWorldPos.xyz) * fNoiseScale;
         vNoiseUV.x += fNoiseTimeDelta;

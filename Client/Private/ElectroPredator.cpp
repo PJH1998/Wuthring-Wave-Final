@@ -87,7 +87,9 @@ void CElectroPredator::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	if (false == m_isActivate)
 	{
+		m_pGameInstance->Stop_Sound(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 	}
 	After_Condition(fTimeDelta);
 

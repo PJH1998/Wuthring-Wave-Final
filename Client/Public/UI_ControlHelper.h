@@ -72,6 +72,9 @@ public:
 												_float4 vHeadColor,
 												_float4 vTailColor);
 
+	void				Open_DialogUI(const _char* pFilePath);
+	void				Close_DialogUI();
+
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
 	CCustom_UI*			m_pUI_HUD_Main_All					= { nullptr };
@@ -99,6 +102,7 @@ private:
 	CCustom_UI*			m_pRootUI_TabUtility				= { nullptr };
 	CCustom_UI*			m_pRootUI_GrapplePoint				= { nullptr };
 	//CCustom_UI*			m_pRootUI_QTE						= { nullptr };
+	CCustom_UI*			m_pRootUI_Dialog					= { nullptr };
 
 	CCustom_UI*			m_pRootUI_Ovfl_Palette				= { nullptr };
 

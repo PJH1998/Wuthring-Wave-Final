@@ -118,6 +118,7 @@ private:
 	CCustom_UI* m_pUI_Group_Augusta							= nullptr;
 	CCustom_UI* m_pUI_Group_Galbrena						= nullptr;
 
+	CCustom_UI* m_pUI_Frame_Rover							= nullptr;
 	CCustom_UI* m_pUI_Frame_Rover_Dark						= nullptr;
 	CCustom_UI* m_pUI_Frame_Augusta							= nullptr;
 	CCustom_UI* m_pUI_FrameGroup_Augusta_OtherEnergy		= nullptr;

@@ -293,6 +293,9 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
 		switch (m_iTriggerIndex)
 		{
+		case 0:
+			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_small_loop (SFX)"));
+			break;
 		case 7:
 			m_pGameSystem->Stop_Action();
 			break;
@@ -304,6 +307,7 @@ void CTrigger_Box::Register_Trigger()
 			break;
 		case 30:
 			m_pGameSystem->Lock_Input_ToPlayer(true);
+			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_elite_intro_strong (SFX)"));
 			break;
 		case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);
@@ -313,6 +317,7 @@ void CTrigger_Box::Register_Trigger()
 			break;
 		case 50:
 			m_pGameSystem->Lock_Input_ToPlayer(false);
+			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_elite_loop_strong (SFX)"));
 			break;
 		}
 #ifndef _DEBUG

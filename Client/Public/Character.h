@@ -341,8 +341,10 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target(_bool IsReverse = false);
+	void Rotate_To_Diagonal_Target(_float fAngleDegree, _bool IsRight = false);
 	
 	void Rotate_Target(class CTransform* pTransform);
+
 	void Rotate_TargetPosition();
 	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);
@@ -488,6 +490,8 @@ protected:
 	_float m_fChangeDuration = { 1.f }; // 변환시간.
 	_float m_fChangeTimer = { };
 
+	_float m_fRotateTargetTimer = { };
+
 	_float m_fCameraOffset = {};
 	_float m_fCameraOriginOffset = {};
 
@@ -504,6 +508,8 @@ protected:
 
 	_float m_fCameraOriginDistance = {};
 	_float m_fCaemraDistance = {};
+
+	_float4 m_vOutlineColor = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

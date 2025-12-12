@@ -356,6 +356,7 @@ public:
 	void						Set_FogScatterWeight(_float fFogScatterWeight);
 	void						Set_FogFarRatioToCameraFar(_float fFogFarRatio);
 	void						Set_FogRayIntensity(_float fRayIntensity);
+	void						Set_FogMaxDistance(_float fFogMaxDistance);
 	void						Begin_VF();
 #pragma endregion
 

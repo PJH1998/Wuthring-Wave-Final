@@ -27,6 +27,8 @@ HRESULT CGalbrena::Initialize_Prototype()
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
 
+	m_vOutlineColor = _float4(0.0549f, 0.f, 0.1588f, 1.f);
+
     return S_OK;
 }
 
@@ -271,6 +273,10 @@ void CGalbrena::Render_OutLine()
 	Bind_Resources();
 
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
+		CRASH("Failed to Bind OutLineColor");
+
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
 		if (i == 5)	//Cloths
@@ -1124,7 +1130,10 @@ void CGalbrena::Render_Eye(_uint iMeshIndex)
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
 	}
 	else
-		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::CHARACTER_EYE);
+//		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+	}
 }
 
 
