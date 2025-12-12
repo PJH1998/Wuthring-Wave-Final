@@ -285,6 +285,10 @@ void CUI_Dialog::Update_DialogInstance(_float fTimeDelta)
 		pDialogInsts[i].matExtraData._11 = (pDialogInsts[i].matExtraData._11 >= fInstAlpha)?		// 계산값보다 지금이 더 투명함?
 			pDialogInsts[i].matExtraData._11 : fInstAlpha;
 	}
+
+	if (fDialogFinishTime <= m_fTickElapsedTime &&
+		!m_isCurDialogFinished)
+		m_isCurDialogFinished = true;
 }
 
 void CUI_Dialog::Update_DialogOrder(_float fTimeDelta)
