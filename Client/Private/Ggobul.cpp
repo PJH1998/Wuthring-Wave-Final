@@ -65,10 +65,13 @@ void CGgobul::Update(_float fTimeDelta)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
 		m_iSoundChannel = -1;
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
 		m_pGameInstance->Return_Channel(m_iSoundChannel2);
 		m_iSoundChannel2 = -1;
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel3);
 		m_pGameInstance->Return_Channel(m_iSoundChannel3);
 		m_iSoundChannel3 = -1;
 		if (nullptr != m_pAttackVolumes[m_eType])
