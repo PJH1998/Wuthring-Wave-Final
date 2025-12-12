@@ -30,6 +30,8 @@ HRESULT CRover::Initialize_Prototype()
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
 
+	m_vOutlineColor = _float4(0.0745f, 0.0039f, 0.1098f, 1.f);
+
     return S_OK;
 }
 
@@ -231,7 +233,6 @@ void CRover::Render()
 		else
 			Render_Default(i);
 
-
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
@@ -263,6 +264,9 @@ void CRover::Render()
 void CRover::Render_OutLine()
 {
 	Bind_Resources();
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
+		CRASH("Failed to Bind OutLineColor");
 
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMeshes; i++)
@@ -717,6 +721,8 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
 		else if (var2 == TEXT("SKILL"))
 			iVolumeIdx = VOLUME::VOLUME_SKILL;
+		else if (var2 == TEXT("QTE"))
+			iVolumeIdx = VOLUME::VOLUME_QTE;
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
 		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
@@ -1054,7 +1060,11 @@ void CRover::Render_Eye(_uint iMeshIndex)
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
 	}
 	else
-		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::CHARACTER_EYE);
+		
+	//	m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+	}
 }
 
 void CRover::Render_Mask(_uint iMeshIndex)
@@ -1349,6 +1359,7 @@ void CRover::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 700.f;
 	m_AttackVolumes[VOLUME_SKILL] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -1356,6 +1367,18 @@ void CRover::Ready_AttackVolumes()
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SKILL]);
 	m_AttackVolumes[VOLUME_SKILL]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(5.f, 5.f, 5.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 550.f;
+	m_AttackVolumes[VOLUME_QTE] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_QTE]);
+	m_AttackVolumes[VOLUME_QTE]->TriggerActivate(false);
 
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_KNOCKBACK];
 	m_pMainAttackVolume->TriggerActivate(false);

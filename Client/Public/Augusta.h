@@ -271,6 +271,7 @@ private:
 	void Process_FxObject(const _wstring& wStrObjectTag);
 	void Process_CameraSpring(const _wstring& wStrObjectTag);
 	void Process_EventDissolve(const _wstring& wStrObjectTag);
+	void Process_RotateTarget(const _wstring& wStrObjectTag);
 
 	void Process_Timer(_float fTimeDelta);
 	

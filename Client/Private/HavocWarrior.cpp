@@ -85,7 +85,9 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	if (false == m_isActivate)
 	{
+		m_pGameInstance->Stop_Sound(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 	}
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
@@ -278,7 +280,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
-	m_pAnimMachineCom->Reset(m_pModelCom, "Stand1");
+	m_pAnimMachineCom->Reset(m_pModelCom, "PatrolToFight");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
@@ -338,11 +340,11 @@ void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.05f, m_pTransformCom, 0.04f, 4.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.05f, m_pTransformCom, 0.04f, 4.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Run"))
@@ -654,7 +656,8 @@ void CHavocWarrior::Calculate_PosAndDir()
 
 void CHavocWarrior::TurnFix()
 {
-	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	if(m_isAggro)
+		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 }
 
 void CHavocWarrior::TurnLerp(_bool isActive)

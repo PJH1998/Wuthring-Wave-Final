@@ -87,7 +87,9 @@ void CElectroPredator::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	if (false == m_isActivate)
 	{
+		m_pGameInstance->Stop_Sound(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 	}
 	After_Condition(fTimeDelta);
 
@@ -321,42 +323,42 @@ void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_leilie_atk01_1_02 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_leilie_atk01_1_02 (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk02"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk03"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 15.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Aggro"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 16.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.f, 32.f);
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 8.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 10.f);
 	}
 	else if (wstrTypeTag == TEXT("Stand"))
 	{

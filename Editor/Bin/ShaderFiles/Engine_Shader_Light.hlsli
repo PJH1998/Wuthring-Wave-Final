@@ -150,11 +150,6 @@ LIGHT_RESULT Compute_Point(float4 vDiffuse, float4 vNormal, float4 vWorldPos, fl
     
     float3 vLightDir = g_LightDatas[iLightIndex].vPosition.xyz - vWorldPos.xyz;
     
-    //bool IsLight = dot(normalize(vLightDir), vNormal.xyz) > 0.f;
-    
-    //if (false == IsLight)
-    //    discard;
-    
     float fDistance = length(vLightDir);
     
     vLightDir = normalize(vLightDir);

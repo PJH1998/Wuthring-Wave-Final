@@ -72,8 +72,6 @@ void CAnimationDummy::Update(_float fTimeDelta)
 {
     CContainerObject::Update(fTimeDelta);
 
-	
-
     m_fTimeDelta = fTimeDelta;
   
     m_strPreAnimation = m_strCurrentAnimation;

@@ -520,6 +520,9 @@
     <Filter Include="03. GameObject\UI\UIHelper">
       <UniqueIdentifier>{f2a52eca-0c90-49ba-9695-7b431df79306}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\Quest">
+      <UniqueIdentifier>{c55f54da-927d-40d3-b5e5-da19eb5471aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1354,6 +1357,9 @@
     <ClInclude Include="..\public\UI_Dialog.h">
       <Filter>03. GameObject\UI\Containers_Prop\Dialog</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_QuestIndicator.h">
+      <Filter>03. GameObject\UI\Containers_Prop\Quest</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2138,6 +2144,9 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_Dialog.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\Dialog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_QuestIndicator.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\Quest</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

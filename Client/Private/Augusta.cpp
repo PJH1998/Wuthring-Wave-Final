@@ -34,6 +34,8 @@ HRESULT CAugusta::Initialize_Prototype()
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
 
+	m_vOutlineColor = _float4(0.3f, 0.15f, 0.f, 1.f);
+
     return S_OK;
 }
 
@@ -287,6 +289,10 @@ void CAugusta::Render_OutLine()
 	Bind_Resources();
 	
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
+		CRASH("Failed to Bind OutLineColor");
+
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
 		if (i == 5)	//Cloths
@@ -907,11 +913,12 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag); // Character 함수
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
-
 	else if (var1 == TEXT("SFX"))
 		Process_SpawnSFX(wStrObjectTag);
 	else if (var1 == TEXT("EventDissolve"))
 		Process_EventDissolve(wStrObjectTag);
+	else if (var1 == TEXT("RotateTarget"))
+		Process_RotateTarget(wStrObjectTag);
 
 }
 
@@ -1306,8 +1313,29 @@ void CAugusta::Process_EventDissolve(const _wstring& wStrObjectTag)
 	
 }
 
+void CAugusta::Process_RotateTarget(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+
+	if (var2 == TEXT("Lerp"))
+		m_fRotateTargetTimer = stof(var3); // Lerp회전 예약
+	else
+		Rotate_Target(); // 즉시 회전
+
+}
+
 void CAugusta::Process_Timer(_float fTimeDelta)
 {
+	if (m_fRotateTargetTimer > 0.f)
+	{
+		m_fRotateTargetTimer -= fTimeDelta;
+		Rotate_Target_Lerp(fTimeDelta);
+	}
+
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	if (IsDissolve)
@@ -1416,7 +1444,10 @@ void CAugusta::Render_Eye(_uint iMeshIndex)
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
 	}
 	else
-		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::AUGUSTA);
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::CHARACTER_EYE);
+		//		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+	}
 }
 
 _bool CAugusta::IsSkin(_uint iMeshIndex)
@@ -1794,7 +1825,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 8.f); // 
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 700.f;
+	TriggerDesc.fAttackDmg = 500.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::UPPER;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
@@ -1811,6 +1842,7 @@ void CAugusta::Ready_AttackVolumes()
 	m_AttackVolumes[VOULME_RISE_ZERO]->TriggerActivate(false);
 
 
+	TriggerDesc.fAttackDmg = 700.f;
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(7.f, 7.f, 10.f); // 

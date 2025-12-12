@@ -41,6 +41,7 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_vBaseColor = _float4(0.25f, 0.2f, 0.25f, 1.f);
 	m_fRootMotionRate = 1.f;
+	m_iSoundChannel = m_iSoundChannel2 = -1;
 	return S_OK;
 }
 
@@ -179,7 +180,6 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	_string wstrAnimTag = pDesc->strPatternKey.substr(0, Index);
 	_string wstrTypeTag = pDesc->strPatternKey.substr(Index + 1);
 	m_strAnimKey = wstrAnimTag;
-	//m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
 	m_eType = pDesc->eType;
 	m_fRootMotionRate = 1.f;
@@ -200,10 +200,11 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_PartObjects[TEXT("Part_Bow")]->SetActivate(true);
 		m_isTurnLerp = true;
 	}
-	//m_pColliderCom->IsActivate(true);
+
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
+	m_iSoundChannel2 = m_pGameInstance->Register_Channel();
+
 	m_pRigidBodyCom->IsActivate(true);
-	//m_pColliderCom->Set_Gravity(false);
-	//m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_isActivate = true;
 }
 
@@ -276,6 +277,10 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
 	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
 
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
 	if (wstrTypeTag == TEXT("Look"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
@@ -293,6 +298,66 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
 		Reset_NotifyInteraction();
+	}
+}
+
+void CLevi_Alter::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Move"))
+	{
+		if (wstrPartTag == TEXT("Dodge1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge4"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_04 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Sword"))
+	{
+		if (wstrPartTag == TEXT("0102"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("1802"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("1803"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		else if (wstrPartTag == TEXT("1402"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Bow"))
+	{
+		if (wstrPartTag == TEXT("Shoot1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Shoot2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Shoot3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+		}
 	}
 }
 
@@ -411,6 +476,13 @@ void CLevi_Alter::UnActive_Resources()
 	//m_pColliderCom->IsActivate(false);
 	m_pRigidBodyCom->IsActivate(false);
 	m_isActivate = false;
+
+	m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+	m_pGameInstance->Return_Channel(m_iSoundChannel);
+	m_iSoundChannel = -1;
+	m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
+	m_pGameInstance->Return_Channel(m_iSoundChannel2);
+	m_iSoundChannel2 = -1;
 }
 
 void CLevi_Alter::Reset_NotifyInteraction()

@@ -19,6 +19,8 @@ float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
 
+float g_fFxTime;
+
 float4 g_vBaseColor = 1.f;
 float4 g_vCamPosition;
 float g_fMaxTime = 1.f;
@@ -824,6 +826,44 @@ PS_OUT PS_BOSS_BEHIT(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_GGOBUL(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float3 vNormal = 0.f;
+
+    float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = vNormalDesc.xyz * 2.f - 1.f;
+    
+    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+    float3 vTangent = In.vTangent.xyz;
+    float3 vBinormal = In.vBinormal.xyz * -1.f;
+    float3 vInNormal = In.vNormal.xyz;
+    
+    float3x3 WorldMatrix;
+    WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+    vNormal = normalize(mul(vNormal, WorldMatrix));
+
+    Out.vPBR.x = vNormalDesc.b;
+    Out.vPBR.y = vNormalDesc.a;
+
+    Out.vPBR.z = 1.f;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
 
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
@@ -1253,4 +1293,14 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LOGO_ROVERMASK();
     }
 
+    pass Ggobul // 17
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_GGOBUL();
+    }
 }

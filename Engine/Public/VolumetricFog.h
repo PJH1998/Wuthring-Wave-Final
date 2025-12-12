@@ -34,7 +34,7 @@ private:
 		_float fPhaseFunctionG;		
 		_float fDensityScale;		// --
 		_float fFogMaxHeight;		
-		_float fFogMinHeight;		
+		_float fFogMaxDistance;
 		_float fHegihtFallOff;		
 		_float fDistanceFallOff;	// --
 		_float fGroundFallOff;		
@@ -64,6 +64,7 @@ public:
 	void						Set_FogFarRatioToCameraFar(_float fFogFarRatio);
 	void						Set_FogRayIntensity(_float fRayIntensity) { m_VF_Data.fRayIntensity = fRayIntensity; }
 	void						Set_FogMaxHeight(_float fFogMaxHeight) { m_VF_Data.fFogMaxHeight = fFogMaxHeight; }
+	void						Set_FogMaxDistance(_float fFogMaxDistance) { m_VF_Data.fFogMaxDistance = fFogMaxDistance; }
 	void						Set_FogDistanceFallOff(_float fDistanceFallOf) { m_VF_Data.fDistanceFallOff = fDistanceFallOf; }
 	void						Set_FogRayDensityScale(_float fFogRayDensityScale) { m_VF_Data.fRayDensityScale = fFogRayDensityScale; }
 	void						Set_FogScatterWeight(_float fFogScatterWeight) { m_VF_Data.fScatterWeight = fFogScatterWeight; }
