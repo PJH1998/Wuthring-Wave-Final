@@ -85,7 +85,9 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	if (false == m_isActivate)
 	{
+		m_pGameInstance->Stop_Sound(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 	}
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
@@ -338,11 +340,11 @@ void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.05f, m_pTransformCom, 0.04f, 4.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.05f, m_pTransformCom, 0.04f, 4.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Run"))

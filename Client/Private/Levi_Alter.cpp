@@ -41,6 +41,7 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_vBaseColor = _float4(0.25f, 0.2f, 0.25f, 1.f);
 	m_fRootMotionRate = 1.f;
+	m_iSoundChannel = m_iSoundChannel2 = -1;
 	return S_OK;
 }
 
@@ -179,7 +180,6 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	_string wstrAnimTag = pDesc->strPatternKey.substr(0, Index);
 	_string wstrTypeTag = pDesc->strPatternKey.substr(Index + 1);
 	m_strAnimKey = wstrAnimTag;
-	//m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
 	m_eType = pDesc->eType;
 	m_fRootMotionRate = 1.f;
@@ -200,10 +200,11 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_PartObjects[TEXT("Part_Bow")]->SetActivate(true);
 		m_isTurnLerp = true;
 	}
-	//m_pColliderCom->IsActivate(true);
+
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
+	m_iSoundChannel2 = m_pGameInstance->Register_Channel();
+
 	m_pRigidBodyCom->IsActivate(true);
-	//m_pColliderCom->Set_Gravity(false);
-	//m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_isActivate = true;
 }
 
@@ -276,6 +277,10 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
 	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
 
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
 	if (wstrTypeTag == TEXT("Look"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
@@ -293,6 +298,32 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
 		Reset_NotifyInteraction();
+	}
+}
+
+void CLevi_Alter::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Move"))
+	{
+		if (wstrPartTag == TEXT("Dodge1"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("Dodge2"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("Dodge3"))
+		{
+
+		}
+		else if (wstrPartTag == TEXT("Dodge4"))
+		{
+
+		}
 	}
 }
 
@@ -411,6 +442,13 @@ void CLevi_Alter::UnActive_Resources()
 	//m_pColliderCom->IsActivate(false);
 	m_pRigidBodyCom->IsActivate(false);
 	m_isActivate = false;
+
+	m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+	m_pGameInstance->Return_Channel(m_iSoundChannel);
+	m_iSoundChannel = -1;
+	m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
+	m_pGameInstance->Return_Channel(m_iSoundChannel2);
+	m_iSoundChannel2 = -1;
 }
 
 void CLevi_Alter::Reset_NotifyInteraction()

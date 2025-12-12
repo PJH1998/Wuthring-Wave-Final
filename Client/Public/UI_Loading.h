@@ -9,6 +9,11 @@ NS_BEGIN(Client)
 
 class CUI_Loading final : public CCustom_UI
 {
+public:
+	typedef struct tUILoadingDesc {
+		LEVEL eDestLevel = LEVEL::END;
+	} UI_LOADING_DESC;
+
 private:
 	explicit				CUI_Loading(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit				CUI_Loading(const CUI_Loading& Prototype);
@@ -27,7 +32,8 @@ private:
 	HRESULT					Ready_Texts();
 
 private:
-	_uint					m_iRandomBGIndex = 0;
+	//_uint					m_iBGIndex = 0;
+	_wstring				m_strBGName = {};
 
 	class CGameSystem*		m_pGameSystem =  { nullptr };
 

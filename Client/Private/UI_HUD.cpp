@@ -879,7 +879,8 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (m_iSelectedCHIndex == CH_AUGUSTA)?
+		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
 
 
 

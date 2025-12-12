@@ -47,7 +47,7 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fPhaseFunctionG = 0.5f;
 	m_VF_Data.fDensityScale = 0.01f;
 
-	m_VF_Data.fFogMinHeight = 100.f;
+	m_VF_Data.fFogMaxDistance = 100.f;
 	m_VF_Data.fFogMaxHeight = 300.f;
 
 	//m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);

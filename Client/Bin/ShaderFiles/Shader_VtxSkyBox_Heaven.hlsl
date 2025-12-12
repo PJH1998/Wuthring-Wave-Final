@@ -2,7 +2,8 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-float4 vCloudColor = float4(0.7647f, 0.4745f, 0.2549f, 1.f);
+float4 vCloudColor = float4(0.9137f, 0.7686f, 0.9882f, 1.f);
+//float4 vCloudColor = float4(0.7647f, 0.4745f, 0.2549f, 1.f);
 
 float g_fTime;
 
@@ -65,7 +66,8 @@ PS_OUT_SKYBOX PS_DOME(PS_IN In)
 {
     PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
 
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * 0.5f;
+    //Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord) * 0.5f;
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     return Out;
 }
@@ -78,8 +80,8 @@ PS_OUT_SKYBOX PS_CLOUD(PS_IN In)
     
     fMask = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord).r;
     
-    Out.vDiffuse = (vCloudColor * fMask) * 1.5f;
-    
+//    Out.vDiffuse = ((vCloudColor) * fMask) * 1.5f;
+    Out.vDiffuse = ((vCloudColor * 0.2f) * fMask);
     return Out;
 }
 

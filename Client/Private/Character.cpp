@@ -18,6 +18,7 @@ CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CCharacter::CCharacter(const CCharacter& Prototype)
     : CActor(Prototype)
 	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vOutlineColor { Prototype.m_vOutlineColor }
 {
 	Safe_AddRef(m_pGameSystem);
 }
@@ -1464,6 +1465,19 @@ void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
 		else
 		{
 			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		}
+	}
+	else if (var2 == TEXT("QTE"))
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			//m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume, fFrequency);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_QTE), 1.f, 1.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_QTE), fVolume);
 		}
 	}
 		
