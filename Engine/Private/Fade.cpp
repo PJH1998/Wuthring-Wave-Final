@@ -13,11 +13,11 @@ CFade::CFade(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 void CFade::OnFade(FADE eFade, _float fDuration, function<void()> func)
 {
-	m_eFade = eFade;
-	m_fTimeAcc = 0.f;
-	m_fDuration = fDuration;
-	m_Func = func;
-	m_isFade = true;
+	FADE_DESC FadeDesc = {};
+	FadeDesc.eFade = eFade;
+	FadeDesc.fDuration = fDuration;
+	FadeDesc.Func = func;
+	m_Fades.push(FadeDesc);
 }
 
 HRESULT CFade::Initialize(_uint iWinSizeX, _uint iWinSizeY)
@@ -45,7 +45,18 @@ void CFade::Update(_float fTimeDelta)
 {
 	if (m_fTimeAcc >= m_fDuration)
 	{
-		m_isFade = false;
+		if (false == m_Fades.empty())
+		{
+			FADE_DESC FadeDesc = m_Fades.front();
+			m_eFade = FadeDesc.eFade;
+			m_fDuration = FadeDesc.fDuration;
+			m_Func = FadeDesc.Func;
+			m_isFade = true;
+		}
+		else
+			m_isFade = false;
+
+		m_fTimeAcc = 0.f;
 		return;
 	}
 
@@ -57,6 +68,7 @@ void CFade::Update(_float fTimeDelta)
 		if(nullptr != m_Func)
 			m_Func();
 		m_fDuration = 0.f;
+		m_Fades.pop();
 	}
 }
 
