@@ -29,7 +29,7 @@ HRESULT CUI_Dialog::Initialize_Clone(void* pArg)
 	PreAssign_Presets();
 
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
-	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Dialog.json"; //확인
+	_wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Dialog.json";
 	Load_ChildObjects(strFilePath);
 	PreAssign_ChildUIs();
 
@@ -110,7 +110,7 @@ void CUI_Dialog::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	if (pArg)
 		Load_Dialog(pDesc->strFilePath.c_str());
 
-	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Dialog_FadeIn"); //확인
+	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Dialog_FadeIn");
 	m_isActivate = true;
 	m_isGoinDisable = false;
 }
