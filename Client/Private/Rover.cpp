@@ -547,6 +547,37 @@ void CRover::Grab_Judge(void* pArg)
 	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
 }
 
+void CRover::Resolve_PerfectDodge()
+{
+	// 1. 회피 가능 상태인지 확인.
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+		return;
+
+	// 2. 조건 플래그 제거.
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	// 3. (데미지 무효화)
+	while (!m_DelayedActions.empty())
+		m_DelayedActions.pop();
+
+	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
+	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
+
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.02f); // Time Lack
+
+	// 퍼펙트 닷지가 성공했을 경우에만.
+	CAMERA_SHAKE Desc{};
+	Desc.fDuration = 0.15f;
+	Desc.fFrequency = 20.f;
+	Desc.fAmplitude = 0.5f;
+	Desc.vRotation = { 0.f, 0.1f, 0.f };
+	Desc.fFovKick = 0.f; // 
+
+	m_pGameInstance->OnShake(Desc);
+
+	Spawn_Effect(TEXT("Common_Limit"));
+}
+
 void CRover::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -758,6 +789,9 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 		Throw_AttachTarget(); // 던지기.
 	else if (var1 == TEXT("Sound"))
 		Process_PlaySound(wStrObjectTag); // Character 함수.
+	else if (var1 == TEXT("MotionTrail"))
+		Process_MotionTrail(wStrObjectTag);
+
 	
 
 }
@@ -1059,6 +1093,26 @@ _bool CRover::IsMask(_uint iMeshIndex)
 	return false;
 }
 
+void CRover::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
+
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
+}
+
 void CRover::Bind_Resources()
 {
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
@@ -1143,6 +1197,7 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fEmissiveIntensity = 1.5f;
 
 	m_ShaderPaths[MESH_MASK] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVERMASK);
+	m_vMotionTrailColor = {0.1f, 0.1f, 0.1f, 0.7f};
 
 
 	// 비활성화. 

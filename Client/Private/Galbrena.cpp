@@ -550,6 +550,35 @@ void CGalbrena::Grab_Judge(void* pArg)
 	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
 }
 
+void CGalbrena::Resolve_PerfectDodge()
+{
+	// 1. 회피 가능 상태인지 확인.
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+		return;
+
+	// 2. 조건 플래그 제거.
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	// 3. (데미지 무효화)
+	while (!m_DelayedActions.empty())
+		m_DelayedActions.pop();
+
+	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
+	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
+
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.02f); // Time Lack
+
+	CAMERA_SHAKE Desc{};
+	Desc.fDuration = 0.15f;
+	Desc.fFrequency = 20.f;
+	Desc.fAmplitude = 0.5f;
+	Desc.vRotation = { 0.f, 0.1f, 0.f };
+	Desc.fFovKick = 0.f; // 
+
+	m_pGameInstance->OnShake(Desc);
+	Spawn_Effect(TEXT("Common_Limit"));
+}
+
 void CGalbrena::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -1247,7 +1276,7 @@ void CGalbrena::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fEmissiveIntensity = 3.f;
 
 	//m_vMotionTrailColor = { 0.235f, 0.1f, 0.31f, 1.f }; // 기본
-	m_vMotionTrailColor = { 0.261f, 0.341f, 0.618f, 1.f }; // 기본
+	m_vMotionTrailColor = { 0.261f, 0.341f, 0.618f, 0.7f }; // 기본
 
 	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);

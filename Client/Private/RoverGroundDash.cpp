@@ -108,10 +108,13 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 		if (nullptr == pDesc)
 			return;
 
-		if (pDesc->IsBack)
+		/*if (pDesc->IsBack)
 			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
 		else
-			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_B;
+			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_B;*/
+
+
+		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
 
 		// Dodge 이전에 누른 방향으로 회전.
 		_vector vMoveDir = m_pRover->Calculate_Move_Direction(m_eDir);
