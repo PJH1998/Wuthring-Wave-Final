@@ -34,7 +34,7 @@ void CSpringCamera::Lock_On(CTransform* pTargetTransform, const _float4x4* pBone
 		if (CAMERA_STATE::LOCKON == m_eCameraState)
 			m_eCameraState = CAMERA_STATE::TARGET;
 	}
-	else
+	else if(CAMERA_STATE::ACTION != m_eCameraState)
 	{
 		// LockOn Position 계산
 		_matrix LockOnMatrix = XMLoadFloat4x4(pBoneMatrix) * pTargetTransform->Get_WorldMatrix();
