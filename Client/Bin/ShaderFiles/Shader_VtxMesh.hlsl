@@ -1569,11 +1569,12 @@ PS_OUT_DOME PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
     
     vector vDistored = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    float2 vTempTexcoord = In.vTexcoord + float2(g_DistortionTime * 0.02f, g_DistortionTime * 0.1f);
+    float2 vTempTexcoord = In.vTexcoord + float2(g_DistortionTime * 0.01f, g_DistortionTime * 0.05f);
 
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
-    vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
-    Out.vBackBuffer = vDiffuse; //* vDiffuse2;
+    //vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
+    vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, frac(vTempTexcoord));
+    Out.vBackBuffer = vDiffuse2;
     Out.vBackBuffer.a = 0.1f;
     Out.vBackBuffer.a = g_fAlpha;
     if (length(vDiffuse) == 0.f)
