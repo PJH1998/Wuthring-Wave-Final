@@ -132,6 +132,12 @@ private:
 	_float4					m_vOutlineColor{};
 #pragma endregion
 
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
