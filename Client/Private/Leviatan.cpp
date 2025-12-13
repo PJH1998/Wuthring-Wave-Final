@@ -1271,6 +1271,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 						m_pGameSystem->Change_Leviathan_Phaze(1);
 						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
 						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+						m_pGameSystem->Lock_Input_ToPlayer(false);
 
 					}
 				}
@@ -1396,6 +1397,7 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		m_isAggro = true;
 		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_INTRO);
 		m_pGameSystem->Change_BGM(TEXT("Null"));
+		m_pGameSystem->Lock_Input_ToPlayer(true);
 	}
 }
 
@@ -1571,6 +1573,7 @@ void CLeviatan::Event1()
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::END);
 	m_pGameSystem->Change_BGM(TEXT("Null"));
 	m_pGameSystem->Change_Leviathan_Phaze(0);
+	m_pGameSystem->Lock_Input_ToPlayer(true);
 
 	//떠오를 때 노티파이로 이거 실행
 	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기
@@ -1588,6 +1591,8 @@ void CLeviatan::Event2()
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 	m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_TWO);
 	m_pGameSystem->Change_Leviathan_Phaze(2);
+	m_pGameSystem->Lock_Input_ToPlayer(false);
+
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 }

@@ -2,6 +2,7 @@
 #include "Spawner.h"
 #include "GameSystem.h"
 
+
 CSpawner::CSpawner(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject{ pDevice, pContext }
 {
@@ -142,7 +143,8 @@ void CSpawner::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold
 			//{
 			//	m_pGameInstance->Spawn_PoolingObject(m_wstrPoolTags[i], XMLoadFloat4x4(&m_SpawnMatrix[i]), nullptr);
 			//}
-			m_pGameSystem->Engage_Battle(true, BOSSBGM::MODINARY);
+			if (!m_pGameSystem->IsModinaryBattle())
+				m_pGameSystem->Engage_Battle(true, BOSSBGM::MODINARY);
 			m_SpawnTrigger = true;
 		}
 	}

@@ -95,8 +95,12 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), m_pTransformCom->Get_WorldMatrix(), &Info);
 
 			_uint iSoundChannel = m_pGameInstance->Register_Channel();
-
 			m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire0"), iSoundChannel, 0.1f);
+			m_pGameInstance->Return_Channel(iSoundChannel);
+		
+			iSoundChannel = m_pGameInstance->Register_Channel();
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("StoneBroken"), iSoundChannel, 1.f);
+			m_pGameInstance->Return_Channel(iSoundChannel);
 		}
 
 	}
