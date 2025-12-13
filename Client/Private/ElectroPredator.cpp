@@ -59,6 +59,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_vMonsterDissolveColor = _float4(0.5f, 0.3f, 0.5f, 1.f);
 	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
@@ -144,12 +145,12 @@ void CElectroPredator::Late_Update(_float fTimeDelta)
 			return;
 		}
 	}
-	if (m_isDeadTrigger)
+	if (m_isDissolve)
 	{
-		if (m_fDesolveRate < 1.f)
-			m_fDesolveRate += fTimeDelta;
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
 		else
-			m_fDesolveRate = 1.f;
+			m_fDissolveRate = 1.f;
 	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -199,7 +200,17 @@ void CElectroPredator::Render()
 		if (m_fBehitAcc < m_fBehitMaxTime)
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
 		else
-			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		{
+			//if (m_isDissolve)
+			//{
+			//	if(m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+			//		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+			//	else
+			//		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			//}
+			//else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		}
 
 		m_pModelCom->Render(i);
 	}
@@ -245,7 +256,8 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
-	m_fDesolveRate = 0.f;
+	m_fDissolveRate = 0.f;
+	m_isDissolve = true;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 5.f;
 	m_fAttackAcc[2] = 20.f;
@@ -258,6 +270,11 @@ void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Is
 	if (wStrColliderTag == TEXT("Lerp"))
 	{
 		TurnLerp(Isactive);
+	}
+	else if (wStrColliderTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = Isactive;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -382,6 +399,11 @@ HRESULT CElectroPredator::Bind_Resources()
 	{
 		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+	}
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
 	}
 	return S_OK;
 }

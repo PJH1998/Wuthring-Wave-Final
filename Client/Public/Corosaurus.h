@@ -112,7 +112,9 @@ private:
 #pragma region SHADER_VALUE
 	_float					m_fBehitMaxTime{};
 	_float					m_fBehitAcc{};
-	_float					m_fDesolveRate{};
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
 #pragma endregion
 
 #pragma region BEHIT_INTERACT
