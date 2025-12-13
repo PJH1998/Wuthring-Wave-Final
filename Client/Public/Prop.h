@@ -53,6 +53,7 @@ public:
 	void Change_ShaderPath(_uint iShaderPath) { m_iShaderPath = iShaderPath; }
 	void Clear_Animation(const _string& strAnimName);
 
+	void Spawn_EffectTag(const _wstring& strEffecTag);
 #pragma region NOTIFY
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) ;

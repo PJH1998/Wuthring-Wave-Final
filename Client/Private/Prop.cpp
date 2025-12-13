@@ -113,6 +113,16 @@ void CProp::Clear_Animation(const _string& strAnimName)
 	m_strCurrentAnimName.clear();  // 추가
 }
 
+void CProp::Spawn_EffectTag(const _wstring& strEffecTag)
+{
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = &m_CombinedMatrix;
+	EffectDesc.pModelPtr = m_pModelCom;
+
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(strEffecTag, mat, &EffectDesc);
+}
+
 #pragma region NOTIFY
 void CProp::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
