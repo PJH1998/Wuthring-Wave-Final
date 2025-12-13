@@ -149,10 +149,6 @@ private:
 
 #pragma region SHADER
 	_float					m_fNoiseTime = {};
-	_float					m_fBehitMaxTime{};
-	_float					m_fBehitAcc{};
-	_float					m_fOutlineRadious{};
-	_float4					m_vOutlineColor{};
 #pragma endregion 
 
 private:

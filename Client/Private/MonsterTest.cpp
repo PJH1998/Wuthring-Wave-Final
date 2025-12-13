@@ -1132,58 +1132,58 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 
 void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer)
 {
-	CAMERA_SHAKE ShakeDesc{};
-	
-	if(eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
-	{
-		ShakeDesc.fAmplitude = 1.f;
-		ShakeDesc.fDuration = 0.8f;
-		ShakeDesc.fFovKick = 0.f;
-		ShakeDesc.fFrequency = 2.f;
-		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
-		ShakeDesc.vTranslation;
-#ifdef _DEBUG
-		cout << "Common" << endl;
-#endif // _DEBUG
-	}
-	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
-	{
-		ShakeDesc.fAmplitude = 2.f;
-		ShakeDesc.fDuration = 0.15f;
-		ShakeDesc.fFovKick = 0.f;
-		ShakeDesc.fFrequency = 60.f;
-		ShakeDesc.vRotation = _float3(0.13f, 0.0f, 0.f);
-		ShakeDesc.vTranslation;
-#ifdef _DEBUG
-		cout << "Hard" << endl;
-#endif // _DEBUG
-	}
-	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_SKILL)
-	{
-		ShakeDesc.fAmplitude = 1.f;
-		ShakeDesc.fDuration = 0.15f;
-		ShakeDesc.fFovKick = 0.f;
-		ShakeDesc.fFrequency = 45.f;
-		ShakeDesc.vRotation = _float3(0.05f, 0.075f, 0.05f);
-		ShakeDesc.vTranslation;
-
-	}
-
-	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_1))
-	{
-		ShakeDesc.vRotation.y *= 1.2f;
-	}
-	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
-	{
-		ShakeDesc.vRotation.x *= 0.75f;
-		ShakeDesc.vRotation.y *= 0.75f;
-	}
-	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_4))
-	{
-		ShakeDesc.vRotation.x *= 1.2f;
-	}
-
-	m_pGameInstance->OnShake(ShakeDesc);
+//	CAMERA_SHAKE ShakeDesc{};
+//	
+//	if(eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
+//	{
+//		ShakeDesc.fAmplitude = 1.f;
+//		ShakeDesc.fDuration = 0.8f;
+//		ShakeDesc.fFovKick = 0.f;
+//		ShakeDesc.fFrequency = 2.f;
+//		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+//		ShakeDesc.vTranslation;
+//#ifdef _DEBUG
+//		cout << "Common" << endl;
+//#endif // _DEBUG
+//	}
+//	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
+//	{
+//		ShakeDesc.fAmplitude = 2.f;
+//		ShakeDesc.fDuration = 0.15f;
+//		ShakeDesc.fFovKick = 0.f;
+//		ShakeDesc.fFrequency = 60.f;
+//		ShakeDesc.vRotation = _float3(0.13f, 0.0f, 0.f);
+//		ShakeDesc.vTranslation;
+//#ifdef _DEBUG
+//		cout << "Hard" << endl;
+//#endif // _DEBUG
+//	}
+//	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_SKILL)
+//	{
+//		ShakeDesc.fAmplitude = 1.f;
+//		ShakeDesc.fDuration = 0.15f;
+//		ShakeDesc.fFovKick = 0.f;
+//		ShakeDesc.fFrequency = 45.f;
+//		ShakeDesc.vRotation = _float3(0.05f, 0.075f, 0.05f);
+//		ShakeDesc.vTranslation;
+//
+//	}
+//
+//	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_1))
+//	{
+//		ShakeDesc.vRotation.y *= 1.2f;
+//	}
+//	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
+//	{
+//		ShakeDesc.vRotation.x *= 0.75f;
+//		ShakeDesc.vRotation.y *= 0.75f;
+//	}
+//	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_4))
+//	{
+//		ShakeDesc.vRotation.x *= 1.2f;
+//	}
+//
+//	m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 	cout << "On Hit! Shim Wang)" << endl;
 #endif // _DEBUG
