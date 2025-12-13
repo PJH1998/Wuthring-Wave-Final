@@ -32,6 +32,8 @@ HRESULT CMonsterTable::LoadDataTable(const _char* pFilePath)
 		m_MonsterKey.emplace(MobInfo.strName, MobInfo.iMonsterID);
 		m_MonsterTable.emplace(MobInfo.iMonsterID, MobInfo);
 	}
+	m_fBossHPRemind = m_MonsterTable[5].fMaxHp;
+	m_MonsterTable[5].fMaxHp = m_fBossHPRemind * 0.7f;
     return S_OK;
 }
 
@@ -92,6 +94,11 @@ void CMonsterTable::Clear_NPCData()
 		m_NPCTable[i].clear();
 		m_NPCTable[i].shrink_to_fit();
 	}
+}
+
+void CMonsterTable::Phase_Change()
+{
+	m_MonsterTable[5].fMaxHp = m_fBossHPRemind;
 }
 
 CMonsterTable* CMonsterTable::Create()
