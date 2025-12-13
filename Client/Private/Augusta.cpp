@@ -931,6 +931,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		else if(var2 == TEXT("true"))
 			m_pGriffon->Activate(true);
 	}
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
 
 }
 

@@ -524,6 +524,7 @@ protected: // 헬퍼 함수 상속
 	void Process_MotionTrail(const _wstring& wStrObjectTag);
 	void Process_PlaySound(const _wstring& wStrObjectTag);
 	void Process_SpawnSFX(const _wstring& wStrobjectTag);
+	void Process_LightActive(const _wstring& wStrObjectTag);
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

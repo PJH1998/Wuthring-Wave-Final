@@ -1548,6 +1548,21 @@ void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)
 	m_pGameInstance->Spawn_PoolingObject_ForStatic(var2, mat, nullptr);
 }
 
+void CCharacter::Process_LightActive(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2;
+	wstringstream wss(wStrObjectTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+
+	if (var2 == L"false")
+		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+	else if (var2 == L"true")
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+
+	
+}
+
 void CCharacter::Free()
 {
     CActor::Free();

@@ -50,6 +50,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	CGalbrenaFactory::Register_States(m_pStateMachineCom, this);    // 기본 StateMachineCom
 	CGalbrenaFactory::Register_States(m_pFpsStateMachineCom, this); // FPS StateMachineCom
 	
+	
 	Ready_Variables(pDesc);
 	// 비활성화. 
 	//PartActivate(PART_FIRSTGUN, false);
@@ -813,6 +814,8 @@ void CGalbrena::Object_Func(const _wstring& wStrObjectTag)
 		Process_PlaySound(wStrObjectTag); // Character 함수.
 	else if (var1 == TEXT("SFX"))
 		Process_SpawnSFX(wStrObjectTag);
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
 
 
 	// GalbrenaWing|Bone
