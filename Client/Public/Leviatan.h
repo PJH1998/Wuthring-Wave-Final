@@ -46,6 +46,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
+	virtual		void			Render_OutLine() override;
 
 	//virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	void			OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
@@ -135,7 +136,9 @@ private:
 	_float					m_fOutLineRadius{};
 	_float4					m_vOutLineColor{};
 	_float					m_fNoiseTime = {};
-
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율

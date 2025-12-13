@@ -99,7 +99,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_End"));
 	//m_strSequenceTag[ACTION::PHASE2_DEAD].push_back(TEXT(""));
 
-
+	m_fBehitAcc = m_fBehitMaxTime = 0.15f;
+	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 	return S_OK;
 }
 
@@ -210,6 +211,11 @@ void CLeviatan::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) 
 			return;
+		if (m_fBehitAcc < m_fBehitMaxTime)
+		{
+			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
+				return;
+		}
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
 	}
@@ -255,8 +261,15 @@ void CLeviatan::Render()
 
 		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
 			CRASH("Bind Morph Result Failed");
-
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+			if (m_isDeadTrigger)
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::DISSOLVE_CHARACTER));
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::UNDISSOLVE_CHARACTER));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 
@@ -297,6 +310,28 @@ void CLeviatan::Render_Shadow()
 		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
 
 		m_pModelCom->Render(i);
+	}
+}
+
+void CLeviatan::Render_OutLine()
+{
+	Bind_Resources();
+	m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutLineColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutLineRadius, sizeof(_float));
+
+	m_pShaderCom->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW));
+
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::OUNTLINE))))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
 	}
 }
 
@@ -1014,8 +1049,19 @@ HRESULT CLeviatan::Bind_Resources()
 
 	if (m_fBehitAcc < m_fBehitMaxTime)
 	{
-		m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutLineColor, sizeof(_float4));
-		m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutLineRadius, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+
+		//for (auto& Index : m_ShaderIndices)
+		//{
+		//	Index = ENUM_CLASS(SHADER_ANIMMESH::BOSS_BEHIT);
+		//}
+	}
+
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
 	}
 
 	return S_OK;
