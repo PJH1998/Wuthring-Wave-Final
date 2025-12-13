@@ -777,6 +777,10 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
 			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
 		);
+		
+		// 4. Levi Cap
+		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Capture")
+			,true, false);
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
 	{
@@ -789,6 +793,8 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 			//m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
 			Bind_EventLock(false);
+
+			m_Characters[m_iCurrentCharacterIdx]->Stop_Action();
 		}
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)

@@ -138,8 +138,11 @@ void CGalbrena::Update(_float fTimeDelta)
 	
 
 	// 5. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVoulme : m_AttackVolumes)
+		pAttackVoulme->Update(fTimeDelta);
+
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Update(fTimeDelta);
 
 }
 void CGalbrena::Late_Update(_float fTimeDelta)
@@ -832,6 +835,9 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 
 	if (nullptr == pAbility)
 		return;
+
+	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pOther);
+	CTransform* pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 
 	// 2. Burst 상태인지 확인.
 	_bool IsBurst = Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));

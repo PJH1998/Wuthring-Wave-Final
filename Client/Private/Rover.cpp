@@ -138,8 +138,13 @@ void CRover::Update(_float fTimeDelta)
 
 
 	// 6. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
 
 }
 void CRover::Late_Update(_float fTimeDelta)
