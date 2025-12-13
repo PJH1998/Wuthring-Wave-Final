@@ -155,7 +155,7 @@ void CNapal::Object_Func(const _wstring& wStrObjectTag)
 {
 	if (wStrObjectTag == TEXT("Sound"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_horn_01 (SFX)"), m_iSoundChannel, 0.4f ,m_pTransformCom, 10.f, 50.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_horn_01 (SFX)"), m_iSoundChannel, 0.4f ,m_pTransformCom, 1.f, 250.f);
 	}
 }
 

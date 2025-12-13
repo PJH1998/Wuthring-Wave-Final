@@ -92,23 +92,27 @@ void CNPC_Griffin::Render_Shadow()
 
 void CNPC_Griffin::Object_Func(const _wstring& wStrObjectTag)
 {
+	_float fMinDistance = 2.f;
+	_float fMaxDistance = 25.f;
+	_float fVolume = 0.3f;
+
 	if (wStrObjectTag == TEXT("Idle_02"))
 	{
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_roar_02 (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_roar_01 (SFX)"), m_iSoundChannel2, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_roar_02 (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_roar_01 (SFX)"), m_iSoundChannel2, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 	}
 	else if (wStrObjectTag == TEXT("Idle_End"))
 	{
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_end (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_end (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 
 	}
 	else if (wStrObjectTag == TEXT("Idle_Start"))
 	{
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_sit_start (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_sit_start (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 
 	}
 	else if (wStrObjectTag == TEXT("Interact"))
@@ -116,26 +120,26 @@ void CNPC_Griffin::Object_Func(const _wstring& wStrObjectTag)
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
 
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_bow_salute_02 (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_bow_salute_01 (SFX)"), m_iSoundChannel2, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_bow_salute_02 (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_bow_salute_01 (SFX)"), m_iSoundChannel2, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 
 	}
 	else if (wStrObjectTag == TEXT("Land"))
 	{
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_land (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_land (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 
 	}
 	else if (wStrObjectTag == TEXT("Stand_Fly"))
 	{
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_fly (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_fly (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 
 	}
 	else if (wStrObjectTag == TEXT("Takeoff"))
 	{
 		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_takeoff (SFX)"), m_iSoundChannel1, 1.f, m_pTransformCom, 0.f, 200.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_takeoff (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
 
 	}
 

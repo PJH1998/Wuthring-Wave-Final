@@ -163,9 +163,9 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	if (fMinDst <= 0.01f)
 		fMinDst = 0.01f;
 
-	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_3D);
+	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_3D | FMOD_3D_LINEARROLLOFF);
 	FMOD_Channel_Set3DAttributes(m_pFixedChannels[iChannelID], &vPosition, &vVelocity);
-	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDst * 10000.f, fMaxDistance * 10000.f);
+	FMOD_Channel_Set3DMinMaxDistance(m_pFixedChannels[iChannelID], fMinDst * m_fDistanceBias, fMaxDistance * m_fDistanceBias);
 	FMOD_Channel_SetVolume(m_pFixedChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pFixedChannels[iChannelID], false);
 	FMOD_Channel_SetPitch(m_pFixedChannels[iChannelID], fFrequency);
@@ -205,9 +205,9 @@ void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChan
 	if (fMinDistance <= 0.01f)
 		fMinDst = 0.01f;
 
-	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelID], FMOD_3D);
+	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelID], FMOD_3D | FMOD_3D_LINEARROLLOFF);
 	FMOD_Channel_Set3DAttributes(m_pPoolingChannels[iChannelID], &vPosition, &vVelocity);
-	FMOD_Channel_Set3DMinMaxDistance(m_pPoolingChannels[iChannelID], fMinDst * 10000.f, fMaxDistance * 10000.f);
+	FMOD_Channel_Set3DMinMaxDistance(m_pPoolingChannels[iChannelID], fMinDst * m_fDistanceBias, fMaxDistance * m_fDistanceBias);
 	FMOD_Channel_SetVolume(m_pPoolingChannels[iChannelID], fVolume);
 	FMOD_Channel_SetPaused(m_pPoolingChannels[iChannelID], false);
 	FMOD_Channel_SetPitch(m_pPoolingChannels[iChannelID], fFrequency);
@@ -293,6 +293,8 @@ HRESULT CSound_Manager::Initialize(_uint iNumChannel)
     FMOD_System_Init(m_pSystem, m_iNumChannels, FMOD_INIT_NORMAL, nullptr);
 
 	FMOD_System_Set3DSettings(m_pSystem, 1.f, 0.01f, 1.f);
+
+	m_fDistanceBias = 1.f;
 
     return S_OK;
 }
