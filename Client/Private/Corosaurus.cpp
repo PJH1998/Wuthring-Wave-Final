@@ -877,7 +877,7 @@ void CCorosaurus::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifo
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("코로사우로스"), "CoroSaurus", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
-		m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
+		//m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
 	}
 }
 

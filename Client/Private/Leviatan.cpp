@@ -1632,7 +1632,7 @@ void CLeviatan::Event1()
 	m_pTransformCom->Save_PreviousPosition();
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
-	//m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHNAGE);
+	m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_ONE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::END);
 	m_pGameSystem->Change_BGM(TEXT("Null"));
