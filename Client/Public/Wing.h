@@ -9,7 +9,7 @@ public:
 
 	} WING_DESC;
 
-protected:
+private:
 	explicit CWing(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CWing(const CPartObject& Prototype);
 	virtual ~CWing() = default;

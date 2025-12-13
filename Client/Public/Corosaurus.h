@@ -61,10 +61,11 @@ private:
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;
 	_float4					m_vBaseColor{};
-
+	_float					m_fFxTime = {};
 	const _float4x4*		m_pGrabSocket = { nullptr };
 	const _float4x4*		m_pCameraSocket = { nullptr };
 	_float4x4				m_GrabCombinedMat = {};
+
 
 #pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
@@ -112,6 +113,15 @@ private:
 #pragma region SHADER_VALUE
 	_float					m_fBehitMaxTime{};
 	_float					m_fBehitAcc{};
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
+
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
 #pragma endregion
 
 private:

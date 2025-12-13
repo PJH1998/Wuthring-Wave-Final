@@ -10,8 +10,8 @@ CBGM_Manager::CBGM_Manager()
 HRESULT CBGM_Manager::Initialize()
 {
 	Ready_BGM();
-	m_fBGMRate = 1.f;
-	m_fMaxVolume = 0.5f;
+	m_fBGMRate = 0.3f;
+	m_fMaxVolume = 0.3f;
 	return S_OK;
 }
 
@@ -22,7 +22,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 		if(!m_IsCurBattleBGMChange)
 		{
 			if (m_fBGMRate > 0.f)
-				m_fBGMRate -= fTimeDelta * 0.7f;
+				m_fBGMRate -= fTimeDelta * 0.3f;
 		}
 	}
 	else
@@ -48,7 +48,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 	if (m_IsCurBGMChange)
 	{
 		if (m_fBGMRate > 0.f)
-			m_fBGMRate -= fTimeDelta * 0.7f;
+			m_fBGMRate -= fTimeDelta * 0.3f;
 		else if (m_fBGMRate <= 0.f)
 		{
 			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BGM));
@@ -60,7 +60,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 	else if (m_IsCurBattleBGMChange)
 	{
 		if (m_fBGMRate < m_fMaxVolume)
-			m_fBGMRate += fTimeDelta * 0.7f;
+			m_fBGMRate += fTimeDelta * 0.3f;
 		else if (m_fBGMRate >= m_fMaxVolume)
 		{
 			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BATTLE_BGM));
@@ -90,14 +90,16 @@ void CBGM_Manager::Ready_BGM()
 {
 	//BGM 폴더 뒤지면서 이름 수집. 걍 하드로 할까요
 #pragma region LEVIATHAN
-	m_BGMs[BOSSBGM::HEAVEN_INTRO] = TEXT("battle_music_boss_wuguanzhe_intro (SFX)");
-	m_BGMs[BOSSBGM::HEAVEN_ONE] = TEXT("battle_music_boss_wuguidemiuwu_stage1 (SFX)");
-	m_BGMs[BOSSBGM::HEAVEN_CHNAGE] = TEXT("battle_music_boss_wuguidemiuwu_transition (SFX)");
-	m_BGMs[BOSSBGM::HEAVEN_TWO] = TEXT("battle_music_boss_wuguidemiuwu_stage2 (SFX)");
+	m_BGMs[BOSSBGM::HEAVEN_INTRO] = TEXT("story_music_battle_final_boss_2_7_intro (ko)");
+	m_BGMs[BOSSBGM::HEAVEN_ONE] = TEXT("music_battle_final_boss_2_7 (ko)");
+	m_BGMs[BOSSBGM::HEAVEN_CHNAGE] = TEXT("story_music_battle_final_boss_2_7_stage1to2_bpm83 (ko)_[cut_27sec]");
+	m_BGMs[BOSSBGM::HEAVEN_TWO] = TEXT("story_music_battle_final_boss_2_7_stage2_bpm83 (ko)");
 #pragma endregion
 
 #pragma region ASPHODEL_BARRENS	
-	m_BGMs[BOSSBGM::ASPHODEL] = TEXT("battle_outside_monster_small_loop_strong_v2 (SFX)");
+	//m_BGMs[BOSSBGM::ASPHODEL] = TEXT("battle_outside_monster_small_loop_strong_v2 (SFX)");
+	m_BGMs[BOSSBGM::ASPHODEL] = TEXT("music_story_2_6_plot_moretense(SFX)");
+	
 #pragma endregion
 
 #pragma region SOERVERIGN

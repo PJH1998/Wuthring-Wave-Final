@@ -36,10 +36,7 @@ void CMapObject_Dome::Update(_float fTimeDelta)
 {
 	m_fTotalTime += fTimeDelta;
 	m_fAlpha += 0.001f;
-	if (m_fAlpha >= m_fMaxAlpha)
-		m_fAlpha = m_fMaxAlpha;
-
-	switch (m_iPhaze) 
+	switch (m_iPhaze)
 	{
 	case 0:
 		m_fMaxAlpha = 0.f;
@@ -48,17 +45,24 @@ void CMapObject_Dome::Update(_float fTimeDelta)
 		m_fMaxAlpha = 0.3f;
 		break;
 	case 2:
-		m_fMaxAlpha = 0.7f;
+		m_fAlpha += 0.003f;
+		m_fMaxAlpha = 1.f;
 		break;
 	}
+	if (m_fAlpha >= m_fMaxAlpha)
+		m_fAlpha = m_fMaxAlpha;
+
 }
 
 void CMapObject_Dome::Late_Update(_float fTimeDelta)
 {
 	if (m_iPhaze == 2 && m_fAlpha >= m_fMaxAlpha)
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	{
+		m_iShaderPassIndex = 27;
+	}
 	else
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+		m_iShaderPassIndex = 24;
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
@@ -110,8 +114,8 @@ void CMapObject_Dome::Render()
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fTotalTime, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fAlpha", &m_fAlpha, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fTotalTime, sizeof(_float));
 		
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);

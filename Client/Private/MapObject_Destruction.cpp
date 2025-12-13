@@ -264,6 +264,15 @@ void CMapObject_Destruction::Spawn_Particles()
 	{
 		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
 		m_pPullUI = nullptr;
+
+		CAMERA_SHAKE ShakeDesc{};
+		ShakeDesc.fAmplitude = 1.f;
+		ShakeDesc.fDuration = 0.8f;
+		ShakeDesc.fFovKick = 0.f;
+		ShakeDesc.fFrequency = 2.f;
+		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+		ShakeDesc.vTranslation;
+		m_pGameInstance->OnShake(ShakeDesc);
 	}
 
 	PREFAB_INFO Info{};

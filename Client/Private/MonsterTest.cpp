@@ -61,7 +61,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
-	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2"); // Bip001Spine2, CameraPosition
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
@@ -80,6 +80,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_ShaderIndices[SHINWANG_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 	m_isRender = false;
 	m_pTransformCom->Save_PreviousPosition();
 	m_fBehitMaxTime = 0.15f;
@@ -126,7 +127,14 @@ void CMonsterTest::Update(_float fTimeDelta)
 	//_float temp{};
 	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+	{
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
+#pragma region PARRY_UI
+		m_pGameSystem->Enable_Parried();
+#pragma endregion
+		PREFAB_INFO Effect{};
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+	}
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 	{
@@ -175,9 +183,11 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	{
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 			return;
-
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
-			return;
+		if (m_fBehitAcc < m_fBehitMaxTime)
+		{
+			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
+				return;
+		}
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
@@ -205,9 +215,16 @@ void CMonsterTest::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+			if(m_isDeadTrigger)
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -313,6 +330,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 			m_pAtkVolumes[ATK_SOCKET::WEAPON_GL]->TriggerActivate(Isactive);
 		}
 	}
+	else if (wstrTypeTag == TEXT("Collide"))
+	{
+		m_pColliderCom->IsActivate(Isactive);
+	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{
 		m_pParryVolume->TriggerActivate(Isactive);
@@ -332,6 +353,11 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 	else if (wstrTypeTag == TEXT("Render"))
 	{
 		m_isRender = Isactive;
+	}
+	else if (wStrColliderTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = Isactive;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -478,6 +504,10 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(30.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
+	}
+	else if (wstrTypeTag == TEXT("Desolve"))
+	{
+		m_isDesolve = true;
 	}
 }
 
@@ -729,6 +759,12 @@ HRESULT CMonsterTest::Bind_Resources()
 	m_ShaderIndices[SHINWANG_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
+
 	return S_OK;
 }
 
@@ -935,6 +971,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	if (m_fHP <= 0.f)
 	{
 		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
 		return;
 	}
 	if(m_isAnimationFinished)
@@ -998,7 +1035,7 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
@@ -1006,6 +1043,27 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 		m_beHit = false;
+#pragma region UI_BIND
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 0.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG),m_eBehitColor, 0.4f);
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
+		}
+#pragma endregion
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma endregion
 	}
 	//그로기 특수상황
 	if (m_isParalysis)
@@ -1040,93 +1098,42 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
 		return;
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
+		m_fBehitAcc = 0.f;
 		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+		m_fBehitDMG = pDesc->fAttack;
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma region PHYSICS
+		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);
 #pragma endregion
-#ifdef _DEBUG
-		cout << "Be Hit! (False Sovereign)" << endl;
-#endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
-	{
-		m_beHit = true;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
+
+		if(iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
 #ifdef _DEBUG
-		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+			cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		m_beHit = true;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
 #ifdef _DEBUG
-		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
+			cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
+		}
+		else
+		{
+#ifdef _DEBUG
+			cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
+#endif // _DEBUG
+		}
 	}
 }
 
@@ -1192,11 +1199,7 @@ void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold&
 void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
-	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region PARRY_UI
-	m_pGameSystem->Enable_Parried();
-#pragma endregion
+	//memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 
 #ifdef _DEBUG
 	cout << "Parry! Shim Wang)" << endl;

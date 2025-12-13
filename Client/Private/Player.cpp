@@ -218,7 +218,7 @@ void CPlayer::Late_Update(_float fTimeDelta)
 		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
 	// 채널에서 위치 갱신
-	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
+	//m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
 	
 
 #ifdef _DEBUG
@@ -269,6 +269,8 @@ _bool CPlayer::IsQTEPossible(CHARACTERTYPE eCharacterType)
 
 	return fHarmony >= pAbility->Get_MaxHarmony();
 }
+
+// 이전 캐릭터에 대한 QTE 실행.
 void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 {
 	if (NONE == eCharacterType)
@@ -761,6 +763,13 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
 		Bind_EventLock(true);
+
+		// 협주 중이였다면?
+		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
+			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+
+		m_IsQTE = false;
+
 		// 2. Rover로 변경.
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			Change_Character(CHARACTERTYPE::ROVER, 0.f);
@@ -856,7 +865,8 @@ void CPlayer::Sorting_Target()
 		m_TargetInfo = m_TargetCandidates[0];
 		m_TargetInfo.IsActive = true;
 
-		// 몬스터가 탐지되었고, 전투 BGM이 진행 중이라면.
+		// 몬스터가 탐지되었고, 전투 
+		// 이 진행 중이라면.
 		if (m_pGameSystem->IsModinaryBattle())
 			m_IsBattle = true;
     }

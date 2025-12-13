@@ -329,8 +329,8 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			// 내 앞에서 생성. (안 곂치게)
 			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
 			
-			vPos += vLook * 5.f;
-			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
+			vPos += vLook * 1.f;
+			vPos += XMVectorSet(0.f, 2.f, 0.f, 0.f); // 약간 띄우기.
 			m_pColliderCom->Set_Position(vPos);
 			m_pColliderCom->IsActivate(true);
 
@@ -658,6 +658,14 @@ void CRover::Throw_AttachTarget()
 
 	*m_ThrowInfo.pGrabbed = false;
 	*m_ThrowInfo.pThrow = true;
+}
+
+void CRover::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
 }
 
 

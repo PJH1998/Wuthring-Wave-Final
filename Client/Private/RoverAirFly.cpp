@@ -153,13 +153,16 @@ void CRoverAirFly::Handle_Input()
 	m_States[INPUT_L] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
 	m_States[INPUT_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
 	m_States[INPUT_ACCEL] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) || m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
-
+	m_States[INPUT_ACCEL_KEYDOWN] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT), KEYSTATE::DOWN);
 	
 	// 상태 변화
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DOUBLE_JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+
+	//if (m_States[INPUT_ACCEL_KEYDOWN])
+	//	m_pRover->Spawn_WingEffect(TEXT("Common_Fly_Start3"));
 }
 
 

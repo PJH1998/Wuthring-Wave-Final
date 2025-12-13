@@ -655,6 +655,14 @@ void CGalbrena::Throw_AttachTarget()
 	*m_ThrowInfo.pThrow = true;
 }
 
+void CGalbrena::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
+}
+
 
 
 #pragma region NOTIFY

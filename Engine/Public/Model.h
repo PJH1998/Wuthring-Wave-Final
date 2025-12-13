@@ -149,27 +149,23 @@ private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 
 	_uint									m_iNumMeshes = {};
-	vector<class CMesh*>				m_Meshes;
-
-	
+	vector<class CMesh*>					m_Meshes;
 
 	_uint									m_iNumMaterials = {};
-	vector<class CMeshMaterial*>	m_Materials;
+	vector<class CMeshMaterial*>			m_Materials;
 
 	_float4x4								m_PreTransformMatrix = {};
 
-	_float4								m_vPreRootRotation = {};
-	_float4								m_vPreRootPosition = {};
-	_matrix								m_RootMatrix = {};
+	_float4									m_vPreRootRotation = {};
+	_float4									m_vPreRootPosition = {};
+	_matrix									m_RootMatrix = {};
 	_uint									m_iRootBoneIndex = {};
-	vector<class CBone*>			m_Bones;
+	vector<class CBone*>					m_Bones;
 
 	_uint									m_iNumAnimations = {};
-	_string								m_strPreAnimation;
-	map<_string, class CAnimation*>		m_Animations;
-	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
-
-
+	_string									m_strPreAnimation;
+	map<_string, class CAnimation*>			m_Animations;
+	map<_string, _uint>						m_AnimationNameToIndex; // Compute Shader
 
 
 	_bool									m_isBlend = { false };

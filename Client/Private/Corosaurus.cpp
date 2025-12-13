@@ -48,7 +48,9 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fHitStopRatio = 1.f;
 	m_fParalysisAcc = 5.f;
 
-	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_vBaseColor = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	m_vMonsterDissolveColor = _float4(0.1f, 0.2f, 0.5f, 1.f);
+	
 	m_fBehitAcc = m_fBehitMaxTime = 0.15f;
 	//조우 애니메이션 고정하기
 
@@ -122,6 +124,17 @@ void CCorosaurus::Late_Update(_float fTimeDelta)
 		Reset_NotifyInteraction();
 	}
 
+	m_fFxTime = fmod(m_fFxTime + (fTimeDelta * 0.5f), 1.f);
+
+	if (m_isDissolve)
+	{
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
+		else
+		{
+			m_fDissolveRate = 1.f;
+		}
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 
@@ -146,21 +159,37 @@ void CCorosaurus::Render()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_fFxTime", &m_fFxTime, sizeof(_float))))
+		CRASH("Failed to Bind FxTime");
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		_bool HasNormal = { false };
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
+
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			CRASH("Failed to Bind MaskTexture");
+
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 		
 		if (m_fBehitAcc < m_fBehitMaxTime)
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
 		else
-			m_pShaderCom->Begin(m_ShaderIndices[i]);
+		{
+			if (m_isDissolve)
+			{
+				if(m_isDeadTrigger)
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+				else
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			}
+			else
+				m_pShaderCom->Begin(m_ShaderIndices[i]);
+		}
 
 		m_pModelCom->Render(i);
 	}
@@ -245,6 +274,11 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	{
 		m_pCoroRock->Bind_SoundChannel(isActive);
 		m_pCoroRock->SetActivate(isActive);
+	}
+	else if (wstrTypeTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = true;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -480,6 +514,11 @@ HRESULT CCorosaurus::Bind_Resources()
 		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
 	}
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 	return S_OK;
 }
 
@@ -539,6 +578,11 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Corrosaurus/Com_Model");
 	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+
+	m_ShaderIndices[ENUM_CLASS(CORO_SHADER::TAIL2)] = ENUM_CLASS(SHADER_ANIMMESH::CORO);
+	m_ShaderIndices[ENUM_CLASS(CORO_SHADER::TAIL1)] = ENUM_CLASS(SHADER_ANIMMESH::CORO);
+	m_ShaderIndices[ENUM_CLASS(CORO_SHADER::HEAD)] = ENUM_CLASS(SHADER_ANIMMESH::CORO);
+
 	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("Bip001");
 
 	m_CallBack.pTransform = m_pTransformCom;
@@ -655,6 +699,7 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 	if (m_fHP <= 0.f)
 	{
 		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
 		return;
 	}
 	if (m_isAnimationFinished)
@@ -694,6 +739,11 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 		m_isBlocked = false;
+#pragma region PARRY_UI
+		m_pGameSystem->Enable_Parried();
+#pragma endregion
+		PREFAB_INFO Effect{};
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
 	}
 	if (m_isTrigger == true)
 	{
@@ -748,12 +798,34 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 			m_pGameSystem->Change_BGM(TEXT("music_scene_septimont_aitongyuan_poi-after_cm_75bpm_4_4 (SFX)"));
 
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
 	if (m_beHit)
+	{
 		m_beHit = false;
+#pragma region UI_BIND
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 0.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG), m_eBehitColor, 0.4f);
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
+#pragma endregion
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma endregion
+	}
 	if (m_isParalysis)
 	{
 		if (m_isKnockDown)
@@ -805,7 +877,7 @@ void CCorosaurus::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifo
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		m_pGameSystem->HUD_Bind_BossStatus(TEXT("코로사우로스"), "CoroSaurus", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
-		m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
+		//m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
 	}
 }
 
@@ -842,27 +914,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 			m_fStamina -= 1.f;
 		m_beHit = true;
 		m_fBehitAcc = 0.f;
-#pragma region UI_BIND
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma endregion
 
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
+		m_fBehitDMG = pDesc->fAttack;
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
 #ifdef _DEBUG
@@ -885,73 +942,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 		}
 
 	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
-	{
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_beHit = true;
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
-
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_beHit = true;
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
-
-	}
 }
 
 void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	m_isBlocked = true;
-
-#pragma region PARRY_UI
-	m_pGameSystem->Enable_Parried();
-	PREFAB_INFO Effect{};
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry "), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
-#pragma endregion
 
 #ifdef _DEBUG
 	cout << "Parry! (Corro)" << endl;
