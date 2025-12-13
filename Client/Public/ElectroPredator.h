@@ -78,6 +78,8 @@ private:
 	_bool					m_isAnimationFinished{};
 	_bool					m_isDeadTrigger{};
 	_float					m_fDesolveRate{};
+
+	_float4					m_vDissovleColor{};
 #pragma endregion
 
 #pragma region STATUS
