@@ -130,6 +130,9 @@ private:
 	_float					m_fBehitAcc{};
 	_float					m_fOutlineRadious{};
 	_float4					m_vOutlineColor{};
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
 #pragma endregion
 
 #pragma region BEHIT_INTERACT

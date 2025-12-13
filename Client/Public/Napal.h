@@ -31,9 +31,10 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override; // 임시
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override; // 임시
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	_string					m_strAnimationTag[2];
@@ -42,6 +43,10 @@ private:
 	_uint					m_iIndex{};
 	_bool					m_isRender{};
 	_float4					m_vBaseColor{};
+
+#pragma region SOUND
+	_int					m_iSoundChannel{};
+#pragma endregion
 
 private:
 	HRESULT		Bind_Resources();

@@ -1407,7 +1407,7 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	else if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 	{
