@@ -150,6 +150,8 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
 
+	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
+
 	Shaking(fTimeDelta);
 }
 
