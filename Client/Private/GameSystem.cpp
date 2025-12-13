@@ -593,6 +593,7 @@ void CGameSystem::Bind_Gravity_ToPlayer(_bool IsGravity)
 	m_pPlayer->Bind_Gravity(IsGravity);
 }
 
+// Destination은 1.f 이상 ~ 3.f 이하, Duration은 Zoom In Zoom Out 시간을 길게 주고 싶으면 길게, 짧게 주고 싶으면 짧게.
 void CGameSystem::Use_Spring(_float fDestination, _float fDuration)
 {
 	if (nullptr == m_pPlayer)

@@ -759,6 +759,14 @@ void CAugusta::Throw_AttachTarget()
 	*m_ThrowInfo.pThrow = true;
 }
 
+void CAugusta::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
+}
+
 
 
 
