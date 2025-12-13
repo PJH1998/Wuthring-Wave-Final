@@ -19,6 +19,7 @@ CCharacter::CCharacter(const CCharacter& Prototype)
     : CActor(Prototype)
 	, m_pGameSystem{ CGameSystem::GetInstance() }
 	, m_vOutlineColor { Prototype.m_vOutlineColor }
+	, m_fOutlineRadius { Prototype.m_fOutlineRadius }
 {
 	Safe_AddRef(m_pGameSystem);
 }
@@ -27,6 +28,8 @@ HRESULT CCharacter::Initialize_Prototype()
 {
     if (FAILED(CActor::Initialize_Prototype()))
         return E_FAIL;
+
+	m_fOutlineRadius = 0.001f;
 
     return S_OK;
 }
