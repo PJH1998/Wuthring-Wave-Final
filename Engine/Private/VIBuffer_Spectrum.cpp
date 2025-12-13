@@ -135,6 +135,124 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
     m_pContext->Unmap(m_pVB, 0);
 }
 
+void CVIBuffer_Spectrum::Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _int SampleCount, const _float4* vCamPos)
+{
+	if (SampleCount > m_iMaxSamples)
+	{
+		_uint iExcessCount = SampleCount - m_iMaxSamples;
+
+		for (_int i = 0; i < iExcessCount; ++i)
+		{
+			vSamples.pop_front();
+		}
+	}
+
+	_int N = (_int)vSamples.size();
+	_int iTargetCount = N;
+
+	vector<_float3> vSmoothPoints;
+	vSmoothPoints.resize(iTargetCount);
+
+	auto GetPos = [&](_int iIndex) -> _vector
+	{
+		if (iIndex < 0)
+			iIndex = 0;
+
+		if (iIndex >= (_int)vSamples.size()) 
+			iIndex = (_int)vSamples.size() - 1;
+
+		return XMLoadFloat3(&vSamples[iIndex].vPos);
+	};
+
+
+	for (_int i = 0; i < iTargetCount; ++i)
+	{
+		_float U = 0.f;
+
+		if (iTargetCount > 1)
+			U = (float)i * (float)(N - 1) / (float)(iTargetCount - 1);
+
+		_int iSeg = (_int)U;
+		_float T = U - (_float)iSeg;
+
+		_vector p0 = GetPos(iSeg - 1);
+		_vector p1 = GetPos(iSeg);
+		_vector p2 = GetPos(iSeg + 1);
+		_vector p3 = GetPos(iSeg + 2);
+
+		_vector vPos = XMVectorCatmullRom(p0, p1, p2, p3, T);
+
+		XMStoreFloat3(&vSmoothPoints[i], vPos);
+	}
+
+	m_iVtxCount = 2 * (int)vSmoothPoints.size();
+
+	D3D11_MAPPED_SUBRESOURCE Resource{};
+	m_pContext->Map(m_pVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &Resource);
+
+	VTXPOSTEX* pVertices = static_cast<VTXPOSTEX*>(Resource.pData);
+
+	_vector vPrevSide = {};
+	bool bPrevSide = false;
+
+	for (size_t i = 0; i < vSmoothPoints.size(); ++i)
+	{
+		const _float3& Pos = vSmoothPoints[i];
+		_vector p = XMLoadFloat3(&Pos);
+
+		// Dir 
+		_vector vDirPrev = {};
+		_vector vDirNext = {};
+
+		if (i > 0)
+			vDirPrev = p - XMLoadFloat3(&vSmoothPoints[i - 1]);
+		if (i + 1 < vSmoothPoints.size())
+			vDirNext = XMLoadFloat3(&vSmoothPoints[i + 1]) - p;
+
+		_vector vDir;
+		if (i == 0)
+			vDir = vDirNext;
+		else if (i == vSmoothPoints.size() - 1) 
+			vDir = vDirPrev;
+		else 
+			vDir = vDirPrev + vDirNext;
+
+		vDir = XMVector3Normalize(vDir);
+
+		_vector vViewDir = XMLoadFloat4(vCamPos) - XMVectorSet(Pos.x, Pos.y, Pos.z, 1.f);
+		vViewDir = XMVector3Normalize(vViewDir);
+
+		_vector vSide = XMVector3Cross(vViewDir, vDir);
+		vSide = XMVector3Normalize(vSide);
+
+		if (bPrevSide)
+		{
+			if (XMVectorGetX(XMVector3Dot(vPrevSide, vSide)) < 0.f)
+				vSide = -vSide;
+		}
+
+		vPrevSide = vSide;
+		bPrevSide = true;
+
+		_float3 vPosUp = Pos;
+		_float3 vPosDown = Pos;
+
+		XMStoreFloat3(&vPosUp, XMLoadFloat3(&vPosUp) - vSide * (m_fSize * 0.5f));
+		XMStoreFloat3(&vPosDown, XMLoadFloat3(&vPosDown) + vSide * (m_fSize * 0.5f));
+
+		float fUV_V = (_float)i / (vSmoothPoints.size() - 1);
+
+		pVertices[2 * i].vPosition = vPosUp;
+		pVertices[2 * i + 1].vPosition = vPosDown;
+
+		pVertices[2 * i].vTexcoord = _float2(0.f, fUV_V);
+		pVertices[2 * i + 1].vTexcoord = _float2(1.f, fUV_V);
+	}
+
+	m_pContext->Unmap(m_pVB, 0);
+	
+}
+
 CVIBuffer_Spectrum* CVIBuffer_Spectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, VB_SPECTRUM_DESC* pDesc)
 {
     CVIBuffer_Spectrum* pInstance = new CVIBuffer_Spectrum(pDevice, pContext);

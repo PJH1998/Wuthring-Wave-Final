@@ -60,10 +60,8 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 		return;
 
 	if (m_pActiveFlag != nullptr)
-	{
-		if (UpdateActiveFromFlag() == false)
-			return;
-	}
+		UpdateActiveFromFlag(fTimeDelta);
+
 
     m_fCurrentTime += fTimeDelta;
 
@@ -76,6 +74,7 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 			InfoDesc.pBoneMatrixPtr = m_pBoneMatrixPtr;
 			InfoDesc.pObjectMatrixPtr = m_pObjectMatrixPtr;
 			InfoDesc.IsActive = true;
+			InfoDesc.pIsActiveFlag = m_pActiveFlag;
 
 			_matrix OffsetMatrix = {};
 
@@ -378,20 +377,19 @@ void CEffect_Prefab::Check_CameraDistance()
 	}
 }
 
-_bool CEffect_Prefab::UpdateActiveFromFlag()
+void CEffect_Prefab::UpdateActiveFromFlag(_float fTimeDelta)
 {
 	if (!(*m_pActiveFlag))
 	{
-		m_isActivate = false;
-		
-		m_pActiveFlag = nullptr;
-
-		Deactivate_AllChildren();
-
-		return false;
+		if (m_vLifeTime.x >= m_vLifeTime.y)
+		{
+			m_isActivate = false;
+			Reset_Prefab_Info();
+			Deactivate_AllChildren();
+		}
+		else
+			m_vLifeTime.x += fTimeDelta;
 	}
-
-	return true;
 }
 
 CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)

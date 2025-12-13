@@ -122,7 +122,7 @@ void CSpectrum::Late_Update(_float fTimeDelta)
 	if (m_Samples.size() >= 2)
 	{
 		const _float4* vCamPos = m_pGameInstance->Get_CamPos();
-		m_pVIBufferCom->Update_Spectrum(m_Samples, m_Samples.size(), vCamPos);
+		m_pVIBufferCom->Update_SmoothSpectrum(m_Samples, m_Samples.size(), vCamPos);
 	}
 
     m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);

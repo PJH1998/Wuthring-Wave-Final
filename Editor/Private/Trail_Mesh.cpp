@@ -54,6 +54,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_fColorGamma = pDesc->fColorGamma;
 	m_iDirFalg = pDesc->iDirFlag;
 	m_iMaskFlag = pDesc->iMaskFlag;
+	m_IsLoop = pDesc->IsLoop;
 
 	m_fDistortionWeight = pDesc->fDistortionWeight;
 
@@ -80,7 +81,16 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
 	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
-    m_vLifeTime.x += fTimeDelta;
+	m_fCurrentTime += fTimeDelta;
+
+	if (m_pActiveFlag != nullptr)
+	{
+		if (!(*m_pActiveFlag))
+			m_IsEnd = true;
+	}
+
+	if (!m_IsLoop || m_IsEnd)
+		m_vLifeTime.x += fTimeDelta;
 
 	if (m_IsRoot)
 		Update_Transform();
@@ -92,16 +102,10 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_fColorSweep = 0.f;
         m_vLifeTime.x = 0.f;
 		m_fMaskSweep = 0.f;
+		m_fCurrentTime = 0.f;
+		m_IsEnd = false;
+		m_pActiveFlag = nullptr;
     }
-
- /*   if (m_fSweep >= 1.f + m_fSweepWitdh)
-    {
-        m_fSweep = 0.f;
-        m_isActivate = false;
-        m_fColorSweep = 0.f;
-		m_fMaskSweep = 0.f;
-		m_vLifeTime.x = 0.f;
-    }*/
 }
 
 void CTrail_Mesh::Late_Update(_float fTimeDelta)
@@ -129,44 +133,6 @@ void CTrail_Mesh::Render()
 
 void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    /*if (_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
-
-    m_fSweep = 0.f;
-    m_fColorSweep = 0.f;
-    m_vLifeTime.x = 0.f;
-    Root_Transform(WorldMatrix);*/
-
-	//EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
-
-	//m_isActivate = pDesc->IsActive;
-
-	//if (m_isActivate)
-	//{
-	//	if (pDesc->pBoneMatrixPtr != nullptr)
-	//	{
-	//		//뼈에 붙여야한다는 것. 근데 파티클은 뼈에 안붙여도 될듯?
-	//		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
-	//		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
-	//		m_IsRoot = true;
-	//		m_OffsetMatrix = WorldMatrix;
-	//		m_fSweep = 0.f;
-	//		m_fColorSweep = 0.f;
-	//		m_vLifeTime.x = 0.f;
-	//		m_fMaskSweep = 0.f;
-	//	}
-	//	else if (pDesc->pBoneMatrixPtr == nullptr)
-	//	{
-	//		//기존처리
-	//		m_vLifeTime.x = 0.f;
-	//		Root_Transform(WorldMatrix);
-	//		m_IsRoot = false;
-	//		m_fSweep = 0.f;
-	//		m_fColorSweep = 0.f;
-	//		m_vLifeTime.x = 0.f;
-	//		m_fMaskSweep = 0.f;
-	//	}
-	//}
 
 	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
 
@@ -177,6 +143,12 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fColorSweep = 0.f;
 	m_fMaskSweep = 0.f;
 	m_vLifeTime.x = 0.f;
+	m_fCurrentTime = 0.f;
+	m_IsEnd = false;
+	m_pActiveFlag = nullptr;
+
+	if (pDesc->pIsActiveFlag != nullptr)
+		m_pActiveFlag = pDesc->pIsActiveFlag;
 
 	if (m_isActivate && !m_IsRoot)
 	{
@@ -345,7 +317,7 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
 		return E_FAIL;
 
-	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_vLifeTime.x, sizeof(_float))))
+	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fCurrentTime, sizeof(_float))))
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_vLifeTime, sizeof(_float2))))

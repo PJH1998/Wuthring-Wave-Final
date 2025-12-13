@@ -450,7 +450,8 @@ namespace Engine
 		const _float4x4* pBoneMatrixPtr = nullptr;
 		const _float4x4* pObjectMatrixPtr = nullptr;
 		_bool			 IsActive = false;
-		_matrix			OffsetMatrix = {};
+		_matrix			 OffsetMatrix = {};
+		_bool*			 pIsActiveFlag = nullptr;
 	}EFFECT_INFO;
 
 	typedef struct tagSpectrumInfo
@@ -458,7 +459,7 @@ namespace Engine
 		const _float4x4*	pModelMarixPtr = nullptr;
 		const _float4x4*	pBoneMatrixPtr = nullptr;
 		_bool*				pIsActive = nullptr;
-		_float					fDuration = {};
+		_float				fDuration = {};
 	}SPECTRUM_INFO;
 
 	typedef struct tagRopeInfo

@@ -525,6 +525,10 @@ const vector<NPCINFO>& CGameSystem::Get_NpcData(_uint iType) const
 {
 	return m_pMonsterTable->Get_NpcData(iType);
 }
+void CGameSystem::Levi_Phase_Change()
+{
+	m_pMonsterTable->Phase_Change();
+}
 #pragma endregion
 
 #pragma region SFX_PREFAB

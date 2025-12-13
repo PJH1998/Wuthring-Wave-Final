@@ -69,7 +69,13 @@ void CParticle::Update(_float fTimeDelta)
    if (m_IsRoot)
 	   Update_Root_Transform();
 
-   if (!m_IsLoop)
+   if (m_pActiveFlag != nullptr)
+   {
+	   if (!(*m_pActiveFlag))
+		   m_IsEnd = true;
+   }
+
+   if (!m_IsLoop || m_IsEnd)
    {
 	   m_vLifeTime.x += fTimeDelta;
 
@@ -109,8 +115,14 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	//기본 초기화
 	m_vLifeTime.x = 0.f;
+	m_IsEnd = false;
+	m_pActiveFlag = nullptr;
+
 	if (m_IsPivot)
 		m_pVIBufferCom->Reset_CS_Option();
+
+	if (pDesc->pIsActiveFlag != nullptr)
+		m_pActiveFlag = pDesc->pIsActiveFlag;
 
 	m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 	m_pTransformCom->Set_WorldMatrix(XMMatrixIdentity());

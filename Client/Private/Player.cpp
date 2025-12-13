@@ -218,7 +218,7 @@ void CPlayer::Late_Update(_float fTimeDelta)
 		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
 	// 채널에서 위치 갱신
-	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
+	//m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
 	
 
 #ifdef _DEBUG
@@ -439,7 +439,10 @@ void CPlayer::Player_KeyInput()
 		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
 
+		m_Characters[m_iCurrentCharacterIdx]->Set_LeviatanQTE(false);
 		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		
+		//m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
 		LEVI_GRAB Desc{ true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
 		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
@@ -450,7 +453,7 @@ void CPlayer::Player_KeyInput()
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
 		_vector vPos = XMVectorSet(-18.9f, 0.f, 1083.4f, 1.f);
-		Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
+		//Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
@@ -780,6 +783,7 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			LEVI_GRAB Desc{ true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
 			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+			//m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
 			Bind_EventLock(false);
 		}
 	}
