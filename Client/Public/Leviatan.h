@@ -150,6 +150,9 @@ private:
 
 #pragma region	SEQUENCE
 	vector<_wstring>		m_strSequenceTag[ACTION::ACTEND];
+	_bool					m_isEncounter{};
+	_bool					m_isBattle{};
+	_string					m_strSequenceAnim{};
 #pragma endregion
 
 #pragma region BEHIT_INTERACT
