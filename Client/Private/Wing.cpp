@@ -115,7 +115,8 @@ void CWing::Activate(_bool IsActivate)
 
 		SPECTRUM_INFO RightSpectrum{};
 		RightSpectrum.pModelMarixPtr = &m_CombinedMatrix;
-		RightSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_R");
+		//RightSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_R");
+		RightSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop017_R");
 		RightSpectrum.pIsActive = &m_isActivate;
 
 		_matrix mat = XMMatrixIdentity();
@@ -123,7 +124,8 @@ void CWing::Activate(_bool IsActivate)
 
 		SPECTRUM_INFO LeftSpectrum{};
 		LeftSpectrum.pModelMarixPtr = &m_CombinedMatrix;
-		LeftSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_L");
+		//LeftSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_L");
+		LeftSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop017_L");
 		LeftSpectrum.pIsActive = &m_isActivate;
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Wing_Test"), mat, &LeftSpectrum);
