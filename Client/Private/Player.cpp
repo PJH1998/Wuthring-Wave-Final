@@ -218,7 +218,7 @@ void CPlayer::Late_Update(_float fTimeDelta)
 		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
 	// 채널에서 위치 갱신
-	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
+	//m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
 	
 
 #ifdef _DEBUG
@@ -856,7 +856,8 @@ void CPlayer::Sorting_Target()
 		m_TargetInfo = m_TargetCandidates[0];
 		m_TargetInfo.IsActive = true;
 
-		// 몬스터가 탐지되었고, 전투 BGM이 진행 중이라면.
+		// 몬스터가 탐지되었고, 전투 
+		// 이 진행 중이라면.
 		if (m_pGameSystem->IsModinaryBattle())
 			m_IsBattle = true;
     }

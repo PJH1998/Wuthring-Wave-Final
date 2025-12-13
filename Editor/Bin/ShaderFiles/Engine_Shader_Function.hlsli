@@ -133,12 +133,12 @@ float Compute_RimPower(float3 vNormal, float3 vLook, float NdotL)
     
     float fNdoV = dot(vNormal, vLook);
     
-    fRimPower = 1.f - abs(fNdoV);
+    fRimPower = abs(fNdoV);
     
-    fRimPower = smoothstep(cos(radians(20.f)), 1.f, fRimPower);
+    fRimPower = smoothstep(cos(radians(45.f)), cos(radians(90.f)), fRimPower);
     
     fRimPower *= saturate(NdotL);
-    fRimPower *= 0.5f;
+    fRimPower *= 0.3f;
     
     return fRimPower;
 }

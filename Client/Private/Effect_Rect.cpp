@@ -75,7 +75,13 @@ void CEffect_Rect::Update(_float fTimeDelta)
    if (m_IsRoot)
 	   Update_Root_Transform();
 
-   if (!m_IsLoop)
+   if (m_pActiveFlag != nullptr)
+   {
+	   if (!(*m_pActiveFlag))
+		   m_IsEnd = true;
+   }
+
+   if (!m_IsLoop || m_IsEnd)
    {
 	   m_vLifeTime.x += fTimeDelta;
 
@@ -85,6 +91,8 @@ void CEffect_Rect::Update(_float fTimeDelta)
 		   m_vLifeTime.x = 0.f;
 		   m_fSweep = 0.f;
 		   m_fPhase = 0.f;
+		   m_IsEnd = false;
+		   m_pActiveFlag = nullptr;
 	   }
    }
 }
@@ -119,6 +127,11 @@ void CEffect_Rect::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_vLifeTime.x = 0.f;
 	m_fSweep = 0.f;
 	m_fPhase = 0.f;
+	m_IsEnd = false;
+	m_pActiveFlag = nullptr;
+
+	if (pDesc->pIsActiveFlag != nullptr)
+		m_pActiveFlag = pDesc->pIsActiveFlag;
 
 	if (m_isActivate && !m_IsRoot)
 	{
@@ -145,7 +158,6 @@ void CEffect_Rect::Default_Transform(_fmatrix WorldMatrix)
 void CEffect_Rect::Sprite_Update(_float fTimeDelta)
 {
 	m_fPhase += fTimeDelta * m_fSweepSpeed;
-
 }
 
 void CEffect_Rect::Update_Root_Transform()

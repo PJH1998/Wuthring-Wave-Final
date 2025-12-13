@@ -10,8 +10,8 @@ CBGM_Manager::CBGM_Manager()
 HRESULT CBGM_Manager::Initialize()
 {
 	Ready_BGM();
-	m_fBGMRate = 1.f;
-	m_fMaxVolume = 0.5f;
+	m_fBGMRate = 0.3f;
+	m_fMaxVolume = 0.3f;
 	return S_OK;
 }
 
@@ -22,7 +22,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 		if(!m_IsCurBattleBGMChange)
 		{
 			if (m_fBGMRate > 0.f)
-				m_fBGMRate -= fTimeDelta * 0.7f;
+				m_fBGMRate -= fTimeDelta * 0.3f;
 		}
 	}
 	else
@@ -48,7 +48,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 	if (m_IsCurBGMChange)
 	{
 		if (m_fBGMRate > 0.f)
-			m_fBGMRate -= fTimeDelta * 0.7f;
+			m_fBGMRate -= fTimeDelta * 0.3f;
 		else if (m_fBGMRate <= 0.f)
 		{
 			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BGM));
@@ -60,7 +60,7 @@ void CBGM_Manager::Update(_float fTimeDelta)
 	else if (m_IsCurBattleBGMChange)
 	{
 		if (m_fBGMRate < m_fMaxVolume)
-			m_fBGMRate += fTimeDelta * 0.7f;
+			m_fBGMRate += fTimeDelta * 0.3f;
 		else if (m_fBGMRate >= m_fMaxVolume)
 		{
 			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::BATTLE_BGM));

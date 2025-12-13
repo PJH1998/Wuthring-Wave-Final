@@ -170,14 +170,14 @@ void CCorosaurus::Render()
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
 		else
 		{
-			//if (m_isDissolve)
-			//{
-			//	if(m_iState & ENUM_CLASS(TEST_STATE::DEAD))
-			//		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
-			//	else
-			//		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
-			//}
-			//else
+			if (m_isDissolve)
+			{
+				if(m_isDeadTrigger)
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+				else
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			}
+			else
 				m_pShaderCom->Begin(m_ShaderIndices[i]);
 		}
 
@@ -782,7 +782,7 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 			m_pGameSystem->Change_BGM(TEXT("music_scene_septimont_aitongyuan_poi-after_cm_75bpm_4_4 (SFX)"));
 
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
