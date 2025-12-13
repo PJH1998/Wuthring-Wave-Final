@@ -5,6 +5,7 @@
 #include "AttackVolume.h"
 #include "Projectile.h"
 #include "GameSystem.h"
+#include "MotionTrail.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -490,6 +491,18 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 			for (auto& pATKVolume : m_pAtkVolumes)
 				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_SKILL);
 		}
+	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.4f, 0.05f, 0.45f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.05f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 2.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
 	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{
