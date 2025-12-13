@@ -974,7 +974,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 	if(m_isParalysis)
 	{
-		m_fParalysisAcc -= fTimeDelta;
+		_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+		m_fParalysisAcc -= fTimeDelta * fTimeRatio;
 		if(m_fParalysisAcc <= 0.f)
 		{
 			//그로기 유지시간 정의하기
