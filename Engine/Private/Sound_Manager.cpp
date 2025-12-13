@@ -19,12 +19,12 @@ void CSound_Manager::Update_Listener(class CTransform* pTransform, _float fTimeD
 	FMOD_VECTOR vPosition = {};
 	FMOD_VECTOR vVelocity = {};
 	FMOD_VECTOR vForward = {};
-	FMOD_VECTOR vUp = {};
+	FMOD_VECTOR vUp = { 0.f, 1.f, 0.f };
 
 	memcpy(&vPosition, &vListenerPosition, sizeof(_float) * 3);
 	//memcpy(&vVelocity, &vListenerVelocity, sizeof(_float) * 3);
 	memcpy(&vForward, &vListenerForward, sizeof(_float) * 3);
-	memcpy(&vUp, &vListenerUp, sizeof(_float) * 3);
+	//memcpy(&vUp, &vListenerUp, sizeof(_float) * 3);
 
 	FMOD_System_Set3DListenerAttributes(m_pSystem, 0, &vPosition, &vVelocity, &vForward, &vUp);
 }
@@ -160,7 +160,7 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
 
 	_float fMinDst = fMinDistance;
-	if (fMinDst <= 0.f)
+	if (fMinDst <= 0.01f)
 		fMinDst = 0.01f;
 
 	FMOD_Channel_SetMode(m_pFixedChannels[iChannelID], FMOD_3D);
@@ -202,7 +202,7 @@ void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChan
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelID]);
 
 	_float fMinDst = fMinDistance;
-	if (fMinDistance <= 0.f)
+	if (fMinDistance <= 0.01f)
 		fMinDst = 0.01f;
 
 	FMOD_Channel_SetMode(m_pPoolingChannels[iChannelID], FMOD_3D);

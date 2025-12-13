@@ -203,13 +203,8 @@ void CPlayer::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
 
-	
-		
-
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
-
-	
 
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
