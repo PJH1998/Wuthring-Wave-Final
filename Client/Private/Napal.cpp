@@ -32,6 +32,7 @@ HRESULT CNapal::Initialize_Clone(void* pArg)
 	m_strAnimationTag[1] = "SK_Tab_Mon_01AL_Stand";
 	//m_isActivate = false;
 	m_isRender = true;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
     return S_OK;
 }
 
@@ -150,6 +151,14 @@ void CNapal::Effect_Active(const _wstring& wStrEffectTag)
 }
 
 void CNapal::Object_Func(const _wstring& wStrObjectTag)
+{
+	if (wStrObjectTag == TEXT("Sound"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_horn_01 (SFX)"), m_iSoundChannel, 0.4f,m_pTransformCom,0.001f, 90.f);
+	}
+}
+
+void CNapal::Sound_Active(const _wstring& wStrObjectTag)
 {
 }
 

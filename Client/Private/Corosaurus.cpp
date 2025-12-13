@@ -49,6 +49,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fParalysisAcc = 5.f;
 
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_vMonsterDissolveColor = _float4(0.1f, 0.2f, 0.5f, 1.f);
 	m_fBehitAcc = m_fBehitMaxTime = 0.15f;
 	//조우 애니메이션 고정하기
 
@@ -121,7 +122,15 @@ void CCorosaurus::Late_Update(_float fTimeDelta)
 		m_isParalysis = true;
 		Reset_NotifyInteraction();
 	}
-
+	if (m_isDissolve)
+	{
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
+		else
+		{
+			m_fDissolveRate = 1.f;
+		}
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 
@@ -160,7 +169,17 @@ void CCorosaurus::Render()
 		if (m_fBehitAcc < m_fBehitMaxTime)
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
 		else
-			m_pShaderCom->Begin(m_ShaderIndices[i]);
+		{
+			if (m_isDissolve)
+			{
+				if(m_isDeadTrigger)
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+				else
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			}
+			else
+				m_pShaderCom->Begin(m_ShaderIndices[i]);
+		}
 
 		m_pModelCom->Render(i);
 	}
@@ -245,6 +264,11 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	{
 		m_pCoroRock->Bind_SoundChannel(isActive);
 		m_pCoroRock->SetActivate(isActive);
+	}
+	else if (wstrTypeTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = true;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -479,6 +503,11 @@ HRESULT CCorosaurus::Bind_Resources()
 	{
 		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+	}
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
 	}
 	return S_OK;
 }
@@ -753,7 +782,7 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 			m_pGameSystem->Change_BGM(TEXT("music_scene_septimont_aitongyuan_poi-after_cm_75bpm_4_4 (SFX)"));
 
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
