@@ -971,6 +971,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	if (m_fHP <= 0.f)
 	{
 		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
 		return;
 	}
 	if(m_isAnimationFinished)

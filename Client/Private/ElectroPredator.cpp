@@ -278,7 +278,7 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
 	m_fDissolveRate = 0.f;
-	m_isDissolve = true;
+	m_isDissolve = false;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 5.f;
 	m_fAttackAcc[2] = 20.f;
@@ -524,6 +524,7 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 	if (m_fHP <= 0.f)
 	{
 		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
 		return;
 	}
 	if (m_isAnimationFinished)

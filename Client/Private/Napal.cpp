@@ -33,6 +33,7 @@ HRESULT CNapal::Initialize_Clone(void* pArg)
 	//m_isActivate = false;
 	m_isRender = true;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
+	Register_AllNotifies(pDesc->strFolderPath);
     return S_OK;
 }
 
