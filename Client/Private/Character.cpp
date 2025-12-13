@@ -560,12 +560,28 @@ void CCharacter::Camera_Shake(_float fIntensity)
 
 }
 
-void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
+//void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
+//{
+//	if (nullptr == m_pTransformCom)
+//		return;
+//
+//	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
+//}
+
+void CCharacter::Play_Action(const _wstring& strActionTag, _bool isMaintain, _bool isEscape)
 {
-	if (nullptr == m_pTransformCom)
+	if (nullptr == m_pGameSystem)
 		return;
 
-	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
+	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), isMaintain, isEscape);
+}
+
+void CCharacter::Stop_Action()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	m_pGameSystem->Stop_Action();
 }
 
 _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)

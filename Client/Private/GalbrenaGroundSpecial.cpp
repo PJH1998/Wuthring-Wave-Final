@@ -60,7 +60,7 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_SECONDGUN);
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		m_pGalbrena->Set_Gravity(false);
-		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), true);
+		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), false, true);
 		m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 		break;
 	case EGalbrenaSpecialType::ATTACK08:

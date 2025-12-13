@@ -57,9 +57,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
-
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
-	
 	Ready_Variables(pDesc);
 	
 
