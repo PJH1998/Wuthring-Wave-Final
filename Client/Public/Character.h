@@ -166,8 +166,13 @@ public:
 #pragma region EVENT 
 public:
 	virtual void Bind_QTE(_bool IsQTE) {};
+	virtual void Bind_Event(_bool IsEvent) {};
 	_bool IsQTEend() { return m_IsQTEend; }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
+
+	_bool IsEventEnd() { return m_IsEventEnd; }
+	void Set_EventEnd(_bool IsEventEnd) { m_IsEventEnd = IsEventEnd; }
+
 
 	_bool IsVisible() { return m_IsVisible; }
 	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
@@ -472,6 +477,8 @@ protected:
 	_bool m_IsLand = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
+	_bool m_IsEvent = { false };
+	_bool m_IsEventEnd = { false };
 	_bool m_IsVisible = { true };
 	_bool m_IsOutLineVisible = { true };
 	_bool m_IsRopeActive = { false };

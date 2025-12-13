@@ -112,8 +112,6 @@ void CGalbrena::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	
-
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
 	// 3. 상태 머신 갱신

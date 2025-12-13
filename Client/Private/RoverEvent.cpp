@@ -45,7 +45,7 @@ void CRoverEvent::OnEnter(void* pArg)
 			m_pRover->Rotate_Target(pBossTransform);
 			break;
 		}
-		case ERoverEventType::BURST01:
+		case ERoverEventType::BURST02:
 		{
 			// 1. BossTransform의 반대 방향으로 이동.
 			_vector vTargetPos = pBossTransform->Get_State(STATE::POSITION);
@@ -55,6 +55,10 @@ void CRoverEvent::OnEnter(void* pArg)
 			m_pRover->Set_Position(vTargetPos);
 
 			m_pRover->Rotate_Target(pBossTransform);
+
+			m_iPartType = CRover::PARTTYPE::PART_SWORD;
+			m_pRover->PartActivate(m_iPartType, true);
+			m_pRover->Set_SocketMatrixToParts(m_iPartType, "WeaponProp01");
 			break;
 		}
 
@@ -86,13 +90,16 @@ void CRoverEvent::OnExit()
 {
 	CInteractionState::OnExit();
 	m_IsStopOnce = false;
+
+	if (m_iPartType != CRover::PARTTYPE::TYPE_END);
+		m_pRover->PartActivate(m_iPartType, false);
 }
 
 
 
 void CRoverEvent::Handle_Input()
 {
-	m_States[EXIT] = !m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP)) && m_IsStopOnce;
+	m_States[QTE_EXIT] = !m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP)) && m_IsStopOnce;
 }
 
 void CRoverEvent::Update_EventAnimation(_float fTimeDelta)
@@ -107,34 +114,60 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
 	// Hit는 무조건 전환
 
+	ERoverEventType eEventType = static_cast<ERoverEventType>(m_iCurrentAnimIdx);
+
 	// Stop 된 적이 없다면? => 애니메이션 탈출 시점에 Stop
-	if (!m_IsStopOnce)
+
+
+	if (eEventType == ERoverEventType::BEHIT_FLY_FALL)
 	{
-		if (IsEscapePossible)
+		if (!m_IsStopOnce)
 		{
-			m_IsStopOnce = true;
-			m_pRover->Stop_Anim();
-			m_pRover->Set_LeviatanQTE(true);
-			m_pRover->Spawn_LeviatanAnchorEffect(TEXT("Common_Bondage"));
-			m_pRover->Stop_Action();
-			//m_pRover->Play_Action(TEXT("Camera_Action"), true, false);
-			return;
+			if (IsEscapePossible)
+			{
+				m_IsStopOnce = true;
+				m_pRover->Stop_Anim();
+				m_pRover->Set_LeviatanQTE(true);
+				m_pRover->Spawn_LeviatanAnchorEffect(TEXT("Common_Bondage"));
+				m_pRover->Stop_Action();
+				//m_pRover->Play_Action(TEXT("Camera_Action"), true, false);
+				return;
+			}
+		}
+
+		// 1. 탈출 가능 조건이라면?
+		if (m_States[QTE_EXIT])
+		{
+			if (IsEscapePossible)
+			{
+				m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+				m_pRover->Start_Anim();
+				m_pRover->Set_LeviatanQTE(false);
+				//m_pRover->Stop_Action();
+				return;
+			}
 		}
 	}
 
-	// 1. 탈출 가능 조건이라면?
-	if (m_States[EXIT]) 
+	if (eEventType == ERoverEventType::BURST02)
 	{
-		if (IsEscapePossible)
+		// 특정 지점에서 Stop Anim
+		if (!m_IsStopOnce)
 		{
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
-			m_pRover->Start_Anim();
-			m_pRover->Set_LeviatanQTE(false);
-			//m_pRover->Stop_Action();
-			return;
+			//if (IsEscapePossible)
+			if (m_fTrackPosition > 50.f)
+			{
+				m_IsStopOnce = true;
+				m_pRover->Stop_Anim();
+				m_pRover->Play_Action(TEXT("Action_Levi_Execute"),true, false);
+				return;
+			}
 		}
 	}
+
+
+	
 
 	
 
@@ -145,7 +178,7 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 void CRoverEvent::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverEventType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 20.f, 2.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST01), "Burst01", 1.f, 50.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST02), "Burst02", 1.f, 60.f);
 }
 
 void CRoverEvent::State_Reset()

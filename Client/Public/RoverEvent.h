@@ -10,7 +10,8 @@ private:
     enum EventSTATE
     {
         RUN = 0,
-		EXIT,
+		QTE_EXIT,
+		EXECUTE_EXIT,
         END
     };
 

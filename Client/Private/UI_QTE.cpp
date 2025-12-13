@@ -463,8 +463,11 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
 		else if (m_eQTEType == UI_QTE_TYPE::TRIGGER_EXECUTE)
 		{
+			//m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess");
 			LEVI_EXECUTE Desc{ true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+			//LEVI_EXECUTE Desc{ true };
+			//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_PrevExecute"), Desc);
 		}
 		
 		//m_isGoinSuccess = false;

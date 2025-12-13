@@ -114,6 +114,7 @@ private:
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iPrevCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iHarmonyCharacterIdx = { CHARACTERTYPE::NONE };
+	_int m_iEventCharacterIdx = { CHARACTERTYPE::NONE };
 
 
 private:

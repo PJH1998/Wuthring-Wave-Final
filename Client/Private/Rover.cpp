@@ -113,9 +113,6 @@ void CRover::Update(_float fTimeDelta)
 	
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-
-	
-
 	if (!IsDissolve)
 	{
 		// 특정 상황일 때 TimeLack 감소.
@@ -363,6 +360,10 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS:
 			m_IsLeviatanQTE = false;
 			Start_Anim();
+			break;
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS:
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BURST02;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
 			break;
 		default:
 			break;

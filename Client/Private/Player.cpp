@@ -449,7 +449,9 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
-		_vector vPos = XMVectorSet(-18.9f, 0.f, 1083.4f, 1.f);
+		_float2 vPos = { 500.f, -200.f };
+		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
+
 		//Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
@@ -797,6 +799,27 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			m_Characters[m_iCurrentCharacterIdx]->Stop_Action();
 		}
 	}
+	else if (CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS == eEvent)
+	{
+		// 1. Rover가 아니면 Rover로변경 (얘가 메인 캐릭터로)
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+		// 2. Rover의 상태를 변경.
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS, pArg
+		);
+
+
+		// 3. Galbrena 활성화. => 보스의
+		//m_iEventCharacterIdx = CHARACTERTYPE::GALBRENA;
+		//m_Characters[m_iEventCharacterIdx]->TransitionState_FromPlayer(
+		//	CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS, pArg
+		//);
+
+
+	}
+
 	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
 	{
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)

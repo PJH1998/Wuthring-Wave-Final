@@ -582,6 +582,8 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	}
 	else if (strTransition == "LeviatanQTESuccess")
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
+	else if (strTransition == "LeviatanExecuteSuccess")
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS, pArg);
 	else if (strTransition == "GrabRelease")
 		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
 	else if (strTransition == "GrabUnbined")

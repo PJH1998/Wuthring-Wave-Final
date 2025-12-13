@@ -1308,6 +1308,13 @@ void CLeviatan::Ready_Events()
 		}
 		});
 
+	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_PrevExecute"), [this](const LEVI_EXECUTE event) {
+		if (event.isSuccess)
+		{
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess", m_pTransformCom);
+		}
+	});
+
 	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), [this](const LEVI_EXECUTE event) {
 		if (m_iPhase == PHASE::ONE && event.isSuccess)
 		{
