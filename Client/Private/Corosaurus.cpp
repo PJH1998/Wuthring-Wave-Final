@@ -48,7 +48,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fHitStopRatio = 1.f;
 	m_fParalysisAcc = 5.f;
 
-	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_vBaseColor = _float4(0.2f, 0.2f, 0.2f, 1.f);
 	m_fBehitAcc = m_fBehitMaxTime = 0.15f;
 	//조우 애니메이션 고정하기
 
@@ -122,6 +122,8 @@ void CCorosaurus::Late_Update(_float fTimeDelta)
 		Reset_NotifyInteraction();
 	}
 
+	m_fFxTime = fmod(m_fFxTime + (fTimeDelta * 0.5f), 1.f);
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 
@@ -146,16 +148,22 @@ void CCorosaurus::Render()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_fFxTime", &m_fFxTime, sizeof(_float))))
+		CRASH("Failed to Bind FxTime");
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		_bool HasNormal = { false };
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 			HasNormal = true;
+
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			CRASH("Failed to Bind MaskTexture");
+
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 		
 		if (m_fBehitAcc < m_fBehitMaxTime)
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
@@ -539,6 +547,11 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Corrosaurus/Com_Model");
 	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+
+	m_ShaderIndices[ENUM_CLASS(CORO_SHADER::TAIL2)] = ENUM_CLASS(SHADER_ANIMMESH::CORO);
+	m_ShaderIndices[ENUM_CLASS(CORO_SHADER::TAIL1)] = ENUM_CLASS(SHADER_ANIMMESH::CORO);
+	m_ShaderIndices[ENUM_CLASS(CORO_SHADER::HEAD)] = ENUM_CLASS(SHADER_ANIMMESH::CORO);
+
 	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("Bip001");
 
 	m_CallBack.pTransform = m_pTransformCom;

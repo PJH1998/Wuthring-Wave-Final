@@ -290,11 +290,9 @@ PS_OUT2 PS_NORMAL_BEHIT(PS_IN In)
     
     float fRimPower = 0.f;
     
-    float fNdotV = dot(Out.vNormal.xyz, vLook);
+    float fNdotV = dot(In.vNormal.xyz, vLook);
     
     fRimPower = abs(fNdotV);
-    
-    
     
     float fTimeRatio = saturate(g_fCurrentTime / max(g_fMaxTime, 1e-5));
     
@@ -998,6 +996,8 @@ PS_OUT_NONLIGHT PS_NPC_FIND(PS_IN In)
     
     float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    vDiffuse.a = 1.f;
+    
     vDiffuse.a *= (1.f - g_fDissolveRate);
     
     Out.vDiffuse = vDiffuse;
@@ -1067,7 +1067,6 @@ PS_OUT PS_MONSTER_SPAWN(PS_IN In)
 }
 
 
-
 PS_OUT PS_MONSTER_DEAD(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -1104,6 +1103,50 @@ PS_OUT PS_MONSTER_DEAD(PS_IN In)
     vNormal = vNormal * 0.5f + 0.5f;
     
     Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+
+PS_OUT PS_CORO(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+      
+    float2 vFxCoord = float2(In.vTexcoord.x, In.vTexcoord.y + g_fFxTime);
+      
+    float4 vMask = g_MaskTexture[2].Sample(DefaultSampler, In.vTexcoord);
+
+    float4 vFxColor = g_MaskTexture[1].Sample(DefaultSampler, vFxCoord);
+    
+    vFxColor.xyz *= vMask.a;
+    
+    vFxColor *= vMask;
+    vFxColor *= 5.f;
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vDiffuse = float4((vDiffuse.xyz + vFxColor.xyz), 1.f);
+    
+    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    vNormal.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
+    
+    vNormal = normalize(vNormal);
+    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    
+    Out.vPBR.x = NormalDesc.b;
+    Out.vPBR.y = NormalDesc.a;
+
+    Out.vPBR.z = 1.f;
+    
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
@@ -1629,5 +1672,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MONSTER_DEAD();
+    }
+    
+    pass Corrosaurus    // 25
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_CORO();
     }
 }

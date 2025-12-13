@@ -142,7 +142,7 @@ void CNPC_Hiding::Render()
 	if (FAILED(Bind_Resources()))
 		return;
 
-	if (m_isScaned)
+	if (m_isScaned && false == m_isFind)
 		Render_Scan();
 	else if (m_isDissolve)
 		Render_Dissolve();

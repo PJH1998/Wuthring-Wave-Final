@@ -61,10 +61,11 @@ private:
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;
 	_float4					m_vBaseColor{};
-
+	_float					m_fFxTime = {};
 	const _float4x4*		m_pGrabSocket = { nullptr };
 	const _float4x4*		m_pCameraSocket = { nullptr };
 	_float4x4				m_GrabCombinedMat = {};
+
 
 #pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
