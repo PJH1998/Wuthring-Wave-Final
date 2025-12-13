@@ -75,6 +75,13 @@ public:
 	void				Open_DialogUI(const _char* pFilePath);
 	void				Close_DialogUI();
 
+	void				Trigger_PlayEndImage();
+#ifdef _DEBUG
+	void				Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+
+
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
 	CCustom_UI*			m_pUI_HUD_Main_All					= { nullptr };

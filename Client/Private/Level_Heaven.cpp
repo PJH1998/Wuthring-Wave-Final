@@ -520,6 +520,7 @@ void CLevel_Heaven::Ready_UI()
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{

@@ -22,6 +22,8 @@
 #include "UI_HUD_Sector_Minimap.h"
 #include "UI_CurveTrace.h"
 #include "UI_Dialog.h"
+#include "UI_FinalEnd.h"
+
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -514,6 +516,28 @@ void CUI_ControlHelper::Close_DialogUI()
 
 	pRootUI->Req_Close_Dialog();
 }
+
+void CUI_ControlHelper::Trigger_PlayEndImage()
+{
+	CUI_FinalEnd* pRootUI = dynamic_cast<CUI_FinalEnd*>(Find_RootUI(L"UI_FinalEnd"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_PlayEndImage(true);
+}
+
+#ifdef _DEBUG
+void CUI_ControlHelper::Trigger_StopEndImageForcely()
+{
+	CUI_FinalEnd* pRootUI = dynamic_cast<CUI_FinalEnd*>(Find_RootUI(L"UI_FinalEnd"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_PlayEndImage(false);
+}
+#endif // _DEBUG
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
 {
