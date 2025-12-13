@@ -949,9 +949,9 @@ void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& 
 
 #pragma region PARRY_UI
 	m_pGameSystem->Enable_Parried();
-	PREFAB_INFO Effect{};
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry "), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
 #pragma endregion
+	PREFAB_INFO Effect{};
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
 
 #ifdef _DEBUG
 	cout << "Parry! (Corro)" << endl;

@@ -61,7 +61,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
-	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2"); // Bip001Spine2, CameraPosition
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
@@ -1197,6 +1197,8 @@ void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold&
 #pragma region PARRY_UI
 	m_pGameSystem->Enable_Parried();
 #pragma endregion
+	PREFAB_INFO Effect{};
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix(), &Effect);
 
 #ifdef _DEBUG
 	cout << "Parry! Shim Wang)" << endl;
