@@ -968,12 +968,6 @@ void CMonsterTest::Calculate_PosAndDir()
 
 void CMonsterTest::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		m_fBehitAcc = m_fBehitMaxTime;
-		return;
-	}
 	if(m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -1023,6 +1017,13 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
+
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		return;
+	}
 }
 
 void CMonsterTest::After_Condition(_float fTimeDelta)
