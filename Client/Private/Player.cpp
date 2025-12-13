@@ -269,6 +269,8 @@ _bool CPlayer::IsQTEPossible(CHARACTERTYPE eCharacterType)
 
 	return fHarmony >= pAbility->Get_MaxHarmony();
 }
+
+// 이전 캐릭터에 대한 QTE 실행.
 void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 {
 	if (NONE == eCharacterType)
@@ -761,6 +763,13 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
 		Bind_EventLock(true);
+
+		// 협주 중이였다면?
+		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
+			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+
+		m_IsQTE = false;
+
 		// 2. Rover로 변경.
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			Change_Character(CHARACTERTYPE::ROVER, 0.f);
