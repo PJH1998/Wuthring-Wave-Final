@@ -104,6 +104,11 @@ const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 	return m_pParser->Load_CSV(pFilePath);
 }
 
+const vector<vector<_string>>& CGameSystem::Load_CSV_ADV(const _char* pFilePath)
+{
+	return m_pParser->Load_CSV_ADV(pFilePath);
+}
+
 void CGameSystem::Load_Sequence(const _char* pFolderPath)
 {
 	m_pParser->Load_Sequence(pFolderPath);

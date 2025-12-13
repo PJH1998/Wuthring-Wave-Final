@@ -23,11 +23,9 @@ public: // 생성/복제
 	//virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
 public:
-	void			Trigger_ActivateQuest()			{ m_isActivate = true; }
-	void			Trigger_AddQuestProgress()		{ 
-		m_iProgress++; 
-		std::cout << "[UI_QuestIndicator] Filled to " << m_iProgress << std::endl;
-	}
+	void			Trigger_ActivateQuest()			{ m_isQuestActive = true; }
+	void			Trigger_AddQuestProgress();
+
 #ifdef _DEBUG
 	void			Trigger_AllReset() {
 		m_isStarted = false;			m_isEnded = false;				m_isGoinDisable = false;
@@ -35,6 +33,8 @@ public:
 		m_fStartTimer = 0.f;			m_fEndTimer = 0.f;				m_iProgress = 0;
 		m_iStartEventOrder = 0.f;		m_iEndEventOrder = 0;			m_iAnimOrder = 0;
 
+		m_isActivate = true;
+		m_isQuestActive = true;
 	}
 #endif
 
@@ -57,6 +57,8 @@ private:
 
 private:
 	// 매 프레임 돌릴만한 건 캐싱..
+	_bool				m_isQuestActive			= false;
+
 	CCustom_UI*			m_pRUI_All				= { nullptr };
 	CCustom_UI*			m_UI_BG					= { nullptr };
 	CCustom_UI*			m_UI_Noti				= { nullptr };
@@ -70,6 +72,7 @@ private:
 
 	CCustom_UI*			m_pTextUI_SideTitle		= { nullptr };
 	CCustom_UI*			m_pTextUI_SideDesc		= { nullptr };
+	CCustom_UI*			m_pTextUI_SideDesc2		= { nullptr };
 
 	CCustom_UI*			m_pTextUI_NotiTitle		= { nullptr };
 	CCustom_UI*			m_pTextUI_NotiDesc		= { nullptr };

@@ -20,7 +20,7 @@ public:
 
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
-	const vector<vector<_string>>& Load_CSV_MultiLine(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV_ADV(const _char* pFilePath);		// 큰따옴표와 쉼표를 데이터로써 갖는 csv 파싱용
 	void							Load_Sequence(const _char* pFolderPath);
 
 	//============================Effect
@@ -190,10 +190,7 @@ public:
 	void		Trigger_ActivateQuest();
 	void		Trigger_AddQuestProgress();
 #ifdef _DEBUG
-	void		Trigger_ForceCompleteQuestProgress()	{ 
-		for (_uint i = 0; i < 7; i++)
-			Trigger_AddQuestProgress();
-	};
+	void		Trigger_ForceCompleteQuestProgress()	{ for (_uint i = 0; i < 7; i++)	Trigger_AddQuestProgress();};
 	void		Trigger_AllReset();
 #endif // _DEBUG
 

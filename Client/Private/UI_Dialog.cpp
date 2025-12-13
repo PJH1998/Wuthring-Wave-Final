@@ -117,7 +117,7 @@ void CUI_Dialog::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CUI_Dialog::Load_Dialog(const _char* pFilePath)
 {
-	vector<vector<_string>> vecParsedData = m_pGameSystem->Load_CSV(pFilePath);
+	vector<vector<_string>> vecParsedData = m_pGameSystem->Load_CSV_ADV(pFilePath);
 
 	for (auto& datas : vecParsedData)
 	{
@@ -138,9 +138,9 @@ void CUI_Dialog::Load_Dialog(const _char* pFilePath)
 					const char n = data[i + 1];
 
 					if (n == 'n') { out.push_back('\n'); ++i; continue; }
-					else if (n == 't') { out.push_back('\t'); ++i; continue; }
-					else if (n == '\\') { out.push_back('\\'); ++i; continue; }
-					else if (n == '"') { out.push_back('"');  ++i; continue; }
+					// else if (n == 't') { out.push_back('\t'); ++i; continue; }
+					// else if (n == '\\') { out.push_back('\\'); ++i; continue; }
+					// else if (n == '"') { out.push_back('"');  ++i; continue; }
 					// else if (n == 'r') { out.push_back('\r'); ++i; continue; }
 				}
 				out.push_back(c);

@@ -760,6 +760,7 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
 	_matrix WorldForeHead = XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix();
 	XMStoreFloat3(&m_vUIPosition, WorldForeHead.r[3]);
+	m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(m_vUIPosition, UI_MINIMAP_OBJTYPE::BOSS);
 #pragma endregion
 	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	if (m_isParalysis)

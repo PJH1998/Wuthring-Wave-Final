@@ -998,6 +998,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
 	_matrix WorldSpine = XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix();
 	XMStoreFloat3(&m_vUIPosition, WorldSpine.r[3]);
+	m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(m_vUIPosition, UI_MINIMAP_OBJTYPE::BOSS);
 #pragma endregion
 
 	if (m_fBehitAcc < m_fBehitMaxTime)

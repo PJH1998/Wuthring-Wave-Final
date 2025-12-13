@@ -64,7 +64,7 @@ HRESULT CUI_QuestIndicator::Initialize_Clone(void* pArg)
 
 
 
-	m_isActivate = false;
+	//m_isActivate = false;
 
 	m_isClone = true;
 	m_pGameInstance->Add_RootUI(L"UI_QuestIndicator", this);
@@ -85,14 +85,18 @@ void CUI_QuestIndicator::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
+
 	//Update_DialogOrder(fTimeDelta);
+	if (m_isQuestActive)
+	{
+		Update_AnimOrder(fTimeDelta);
 
-	Update_AnimOrder(fTimeDelta);
+		Update_StartEvent(fTimeDelta);
+		Update_EndEvent(fTimeDelta);
 
-	Update_StartEvent(fTimeDelta);
-	Update_EndEvent(fTimeDelta);
+		Update_GoinDisable(fTimeDelta);		// 실질적 Inactive
+	}
 	
-	Update_GoinDisable(fTimeDelta);		// 실질적 Inactive
 
 
 	__super::Update(fTimeDelta);
@@ -114,6 +118,20 @@ void CUI_QuestIndicator::Render()
 {
 	if (!m_isActivate)
 		return;
+	if (!m_isQuestActive)
+		return;
+}
+
+void CUI_QuestIndicator::Trigger_AddQuestProgress()
+{
+	m_iProgress++;
+
+#ifdef _DEBUG
+	std::cout << "[UI_QuestIndicator] Filled to " << m_iProgress << std::endl;
+#endif // _DEBUG
+	
+	_wstring str = L"찾은 아이 : " + to_wstring(m_iProgress) + L" / " + to_wstring(m_iMaxProgress);
+	static_cast<CUI_Text*>(m_pTextUI_SideDesc2)->Change_Text(str);
 }
 
 void CUI_QuestIndicator::Update_AnimOrder(_float fTimeDelta)
@@ -139,7 +157,10 @@ void CUI_QuestIndicator::Update_GoinDisable(_float fTimeDelta)
 
 	
 	if (m_fDisableTimer >= m_fDisableTime)
+	{
 		m_isActivate = false;
+		m_isQuestActive = false;
+	}
 
 	m_fDisableTimer += fTimeDelta;
 }
@@ -161,6 +182,7 @@ void CUI_QuestIndicator::Update_StartEvent(_float fTimeDelta)
 	else if(m_fStartTimer >= arrKeyTimes[1] &&			m_iStartEventOrder == 1)
 	{
 		m_AnimUI_Noti->Change_Animation(L"Quest_Noti_FadeIn");
+		m_pGameInstance->Play_Sound(L"UI_QuestAccepted", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.35f);
 
 		m_iStartEventOrder++;
 	}
@@ -189,7 +211,7 @@ void CUI_QuestIndicator::Update_EndEvent(_float fTimeDelta)
 		return;
 
 	
-	const array<_float, 4> arrKeyTimes = { 0.f, 1.5f, 2.0, 5.0f };
+	const array<_float, 4> arrKeyTimes = { 0.f, 1.5f, 2.0f, 5.0f };
 
 
 	if		(m_fEndTimer >= arrKeyTimes[0] &&			m_iEndEventOrder == 0)
@@ -207,6 +229,8 @@ void CUI_QuestIndicator::Update_EndEvent(_float fTimeDelta)
 	else if(m_fEndTimer >= arrKeyTimes[2] &&			m_iEndEventOrder == 2)
 	{
 		m_AnimUI_Comp->Change_Animation(L"Quest_Comp_FadeIn");
+		m_pGameInstance->Play_Sound(L"UI_QuestCompleted", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.35f);
+
 
 		m_iEndEventOrder++;
 	}
@@ -256,12 +280,12 @@ void CUI_QuestIndicator::Create_ChildText()
 	CCustom_UI* pAttacher;
 
 	// 1-1. 진입 시 알림용 (제목)
-	vTextPos = { 0.f, -280.f };
+	vTextPos = { 0.f, -275.f };
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
-		L"퀘스트 알림 제목",
-		TEXT_COLOR_TYPE::TT_NORMAL,
-		0.4f,
+		L"숨은 아이 찾기",
+		TEXT_COLOR_TYPE::TT_QUESTTITLE,
+		0.6f,
 		L"UI_Text_NotiTitle"
 	);
 	pAttacher = m_UI_Noti;
@@ -271,11 +295,11 @@ void CUI_QuestIndicator::Create_ChildText()
 	m_pTextUI_NotiTitle = pFont;
 
 	// 1-2. 진입 시 알림용 (설명)
-	vTextPos = { 0.f, -220.f };
+	vTextPos = { 0.f, -225.f };
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
-		L"퀘스트 알림 설명",
-		TEXT_COLOR_TYPE::TT_NORMAL,
+		L"퀘스트 발생",
+		TEXT_COLOR_TYPE::TT_QUESTNORMAL,
 		0.4f,
 		L"UI_Text_NotiDesc"
 	);
@@ -286,12 +310,12 @@ void CUI_QuestIndicator::Create_ChildText()
 	m_pTextUI_NotiDesc = pFont;
 
 	// 2-1. 완료 시 알림용 (제목)
-	vTextPos = { 0.f, -230.f };
+	vTextPos = { 0.f, -220.f };
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
-		L"퀘스트 완료 제목",
-		TEXT_COLOR_TYPE::TT_NORMAL,
-		0.4f,
+		L"퀘스트 완료",
+		TEXT_COLOR_TYPE::TT_QUESTTITLE,
+		0.6f,
 		L"UI_Text_CompTitle"
 	);
 	pAttacher = m_UI_Comp;
@@ -301,11 +325,11 @@ void CUI_QuestIndicator::Create_ChildText()
 	m_pTextUI_CompTitle = pFont;
 
 	// 3-1. 사이드 바 퀘스트 목록 (제목)
-	vTextPos = { -930.f, -120.f };
+	vTextPos = { -862.f, -170.f };	//
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
-		L"퀘스트 사이드바 제목",
-		TEXT_COLOR_TYPE::TT_NORMAL,
+		L"숨은 아이 찾기",
+		TEXT_COLOR_TYPE::TT_QUESTTITLE,
 		0.4f,
 		L"UI_Text_SideTitle"
 	);
@@ -316,12 +340,12 @@ void CUI_QuestIndicator::Create_ChildText()
 	m_pTextUI_SideTitle = pFont;
 
 	// 3-2. 사이드 바 퀘스트 목록 (설명)
-	vTextPos = { -930.f, -100.f };
+	vTextPos = { -862.f, -121.f };	//
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
-		L"퀘스트 사이드바 설명. 나중에 갱신 필요",
-		TEXT_COLOR_TYPE::TT_NORMAL,
-		0.4f,
+		L"마을에 숨어있는 아이들 찾기",
+		TEXT_COLOR_TYPE::TT_QUESTTITLE,
+		0.35f,
 		L"UI_Text_SideDesc"
 	);
 	pAttacher = m_UI_Side;
@@ -329,6 +353,21 @@ void CUI_QuestIndicator::Create_ChildText()
 	pFont->Update_Alignment(TEXT_ALIGN_TYPE::LEFT);
 
 	m_pTextUI_SideDesc = pFont;
+
+	// 3-2. 사이드 바 퀘스트 목록 (상세 진행상황)
+	vTextPos = { -862.f, -96.f };	//
+	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
+		L"찾은 아이 : 0 / 7",
+		TEXT_COLOR_TYPE::TT_QUESTPROGRESS,
+		0.35f,
+		L"UI_Text_SideDesc"
+	);
+	pAttacher = m_UI_Side;
+	pFont->Attach_AsChildToUI(pAttacher);
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::LEFT);
+
+	m_pTextUI_SideDesc2 = pFont;
 }
 
 CUI_QuestIndicator* CUI_QuestIndicator::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
