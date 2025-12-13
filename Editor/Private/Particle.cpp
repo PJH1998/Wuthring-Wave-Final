@@ -142,7 +142,12 @@ void CParticle::Default_Transform(_fmatrix WorldMatrix)
 {
 	if (m_IsPivot)
 	{
-		_matrix ObjectMatrix = XMLoadFloat4x4(m_pObjectMatrixPtr);
+		_matrix ObjectMatrix = {};
+
+		if (m_pObjectMatrixPtr == nullptr)
+			ObjectMatrix = WorldMatrix;
+		else
+			ObjectMatrix = XMLoadFloat4x4(m_pObjectMatrixPtr);
 
 		_vector vRight = XMVector3Normalize(ObjectMatrix.r[0]);
 		_vector vUp = XMVector3Normalize(ObjectMatrix.r[1]);

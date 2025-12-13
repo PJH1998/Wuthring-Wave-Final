@@ -42,8 +42,8 @@ private:
 
 	_float						m_fCurrentTime = 0.f;
 	_float						m_fMaskSpeed = 1.f;
-	_float						m_fColorGamma = 1.2f;
-	_float						m_fColorGain = 0.7f;
+	_float						m_fColorGamma = 3.f;
+	_float						m_fColorGain = 2.f;
 
 	_int						m_iShaderPass = 0;
 

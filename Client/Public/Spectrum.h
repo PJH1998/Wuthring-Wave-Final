@@ -65,6 +65,9 @@ private:
 	_float						m_fGeneration = 0.f;
 	_float						m_fDuration = {};
 
+	_float						m_fColorGamma = 1.f;
+	_float						m_fColorGain = 1.f;
+
 	_int						m_iShaderPass = 0;
 	_float						m_fLifeTime = {};
 	_float						m_fMinDistance = 0.1f;

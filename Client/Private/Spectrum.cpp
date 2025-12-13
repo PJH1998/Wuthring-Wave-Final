@@ -32,6 +32,9 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
     m_fLifeTime = m_tDesc.fLifeTime;
     m_fGeneration = m_tDesc.fGeneration;
     
+	m_fColorGamma = 1.f;
+	m_fColorGain = 1.f;
+
 	m_isActivate = false;
 
     return S_OK;
@@ -285,6 +288,12 @@ HRESULT CSpectrum::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSpeed", &m_fMaskSpeed, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorGamma", &m_fColorGamma, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorGain", &m_fColorGain, sizeof(_float))))
 		return E_FAIL;
 
     return S_OK;
