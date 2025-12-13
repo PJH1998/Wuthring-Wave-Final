@@ -53,6 +53,8 @@
 #include "UI_HUD_Sector_Minimap.h"
 #include "UI_Text_Damage.h"
 #include "UI_Button_Interact.h"
+#include "UI_FinalEnd.h"
+
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"

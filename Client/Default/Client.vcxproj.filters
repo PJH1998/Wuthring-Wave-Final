@@ -328,12 +328,6 @@
     <Filter Include="03. GameObject\Actor\Monster\CoroSaurus\Weapon">
       <UniqueIdentifier>{323146fd-c508-439b-bc38-b85f0b22e928}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\Containers_Event">
-      <UniqueIdentifier>{d78242e4-c98e-436d-9a31-712442b24925}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. GameObject\UI\Containers_Event\OverflowingPalette">
-      <UniqueIdentifier>{c86a7080-740e-403c-a1c3-779d7538a329}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\SkyBox\Logo">
       <UniqueIdentifier>{a025b515-ba1a-4b41-8a1a-3e1f744cd632}</UniqueIdentifier>
     </Filter>
@@ -522,6 +516,15 @@
     </Filter>
     <Filter Include="03. GameObject\UI\Containers_Prop\Quest">
       <UniqueIdentifier>{c55f54da-927d-40d3-b5e5-da19eb5471aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Event">
+      <UniqueIdentifier>{d78242e4-c98e-436d-9a31-712442b24925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Event\OverflowingPalette">
+      <UniqueIdentifier>{c86a7080-740e-403c-a1c3-779d7538a329}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Containers_Prop\_FinalEnd">
+      <UniqueIdentifier>{182387ed-22d4-4767-afd1-e93e00b558fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1360,6 +1363,9 @@
     <ClInclude Include="..\public\UI_QuestIndicator.h">
       <Filter>03. GameObject\UI\Containers_Prop\Quest</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_FinalEnd.h">
+      <Filter>03. GameObject\UI\Containers_Prop\_FinalEnd</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2147,6 +2153,9 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_QuestIndicator.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\Quest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_FinalEnd.cpp">
+      <Filter>03. GameObject\UI\Containers_Prop\_FinalEnd</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -94,6 +94,8 @@
 #include "UI_HUD.h"
 #include "UI_HUD_Sector_FuncIcons.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_FinalEnd.h"
+
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
@@ -1140,6 +1142,9 @@ HRESULT CLoader_Test::Load_UI()
 
 	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
+	
+	_string strFilePath_UI_FinalEnd = "../../Client/Bin/Resource/UI/FJson/UITree/Root_FinalEnd.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_FinalEnd));
 
 
 
@@ -1333,6 +1338,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
+		CUI_FinalEnd::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_Container_FinalEnd Load Failed. The UI_Container_FinalEnd may have already been loaded.\n");
 
 	return S_OK;
 }

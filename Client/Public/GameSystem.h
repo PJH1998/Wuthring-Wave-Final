@@ -180,6 +180,13 @@ public:
 	void		Open_DialogUI(const _char* pFilePath);
 	void		Close_DialogUI();
 
+	// [WIP] 종료 이미지를 실행합니다.
+	void		Trigger_PlayEndImage();
+#ifdef _DEBUG
+	void		Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+
 #pragma endregion
 
 #pragma region [UI] GRAPPLE

@@ -88,8 +88,7 @@ void CAugustaGroundDash::Handle_Input()
 
 void CAugustaGroundDash::Update_DashAnimation(_float fTimeDelta)
 {
-    // 1. 누른키에 따른 방향 계산
-  //  m_eDir = m_pAugusta->Calculate_Direction();
+    
 
   //  // 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
   //  if (m_pAugusta->Is_LockOn())
@@ -98,7 +97,9 @@ void CAugustaGroundDash::Update_DashAnimation(_float fTimeDelta)
 		//m_pAugusta->Rotate_Direction(vMoveDir);
   //  }
 
-	// 3. Animation 실행
+	// 1. 누른키에 따른 방향 계산
+	m_eDir = m_pAugusta->Calculate_Direction();
+	// 2. Animation 실행
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
 	

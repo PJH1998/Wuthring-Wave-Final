@@ -34,8 +34,8 @@ private:
 
 	_uint m_iAnimState = {};
 	_bool m_IsRender = {};
-	_uint m_iSoundChannel1 = {};
-	_uint m_iSoundChannel2 = {};
+	_int m_iSoundChannel1 = {-1};
+	_int m_iSoundChannel2 = {-1};
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(GRIFFIN_DESC* pDesc);
