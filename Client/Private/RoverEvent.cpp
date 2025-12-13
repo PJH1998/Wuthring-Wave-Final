@@ -194,7 +194,7 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 void CRoverEvent::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverEventType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 20.f, 2.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST02), "Burst02", 1.2f, 60.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST02), "Burst02", 1.f, 60.f);
 }
 
 void CRoverEvent::State_Reset()

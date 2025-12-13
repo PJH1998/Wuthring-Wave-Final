@@ -851,7 +851,7 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			m_iEventCharacterIdx = CHARACTERTYPE::NONE; // Event 캐릭 해제.
 		}; 
 
-		m_fEventMaxTime = { 3.5f };
+		m_fEventMaxTime = { 2.5f };
 
 		m_IsEvent = true;
 		

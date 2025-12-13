@@ -96,8 +96,6 @@ void CGalbrenaEvent::Check_StateTransition(_float fTimeDelta)
 		if (IsEscapePossible)
 		{
 			m_IsStopOnce = true;
-			m_pGalbrena->Start_Anim_ToEvent();
-			m_pGalbrena->Bind_Condition_ToPlayer("LeviatanExecuteExit"); // Exit 호출.
 			return;
 		}
 	}
