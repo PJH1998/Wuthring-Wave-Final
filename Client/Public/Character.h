@@ -230,8 +230,9 @@ public:
 public:
 	// Caemra
 	void Camera_Shake(_float fIntensity);
-	void Play_Action(const _wstring& strActionTag, _bool isEscape = false); // Action Camera (Cut Scene)
-
+//	void Play_Action(const _wstring& strActionTag, _bool isEscape = false); // Action Camera (Cut Scene)
+	void Play_Action(const _wstring& strActionTag, _bool isMaintain = false, _bool isEscape = false);
+	void Stop_Action();
 	// Ability에서 확인 받기 => 상태 판별?
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
 
@@ -523,6 +524,7 @@ protected: // 헬퍼 함수 상속
 	void Process_MotionTrail(const _wstring& wStrObjectTag);
 	void Process_PlaySound(const _wstring& wStrObjectTag);
 	void Process_SpawnSFX(const _wstring& wStrobjectTag);
+	void Process_LightActive(const _wstring& wStrObjectTag);
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

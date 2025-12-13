@@ -814,6 +814,8 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 		Process_PlaySound(wStrObjectTag); // Character 함수.
 	else if (var1 == TEXT("MotionTrail"))
 		Process_MotionTrail(wStrObjectTag);
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
 
 	
 

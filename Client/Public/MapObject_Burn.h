@@ -44,8 +44,9 @@ public:
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
-	class CModel_Streaming* m_pModelCom;
+	class CModel_Streaming* m_pModelCom = { nullptr };
 	CRigidbody* m_pDetectRigidbodyCom = { nullptr };
+	class CGameSystem* m_pGameSystem = { nullptr };
 	_uint					m_iShaderPassIndex = {};
 	_bool					m_IsBurn = { false };
 
@@ -54,6 +55,8 @@ private:
 private:
 	virtual		void						Ready_Component(void* pArg);
 
+public:
+	static _bool m_IsSound;
 public:
 	static		CMapObject_Burn* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
