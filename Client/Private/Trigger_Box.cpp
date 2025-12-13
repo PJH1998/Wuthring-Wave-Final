@@ -32,7 +32,6 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 
 	Ready_Components(pArg);
 
-	_float4x4 Mat;
 	m_CamMatrix = new CAM_INFO;
 	switch (m_iTriggerIndex)
 	{
@@ -289,6 +288,7 @@ void CTrigger_Box::Collision_End()
 void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
+		CAMERA_SHAKE ShakeDesc{};
 		if (m_CamMatrix)
 			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
 		switch (m_iTriggerIndex)
@@ -303,12 +303,21 @@ void CTrigger_Box::Register_Trigger()
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
-			//m_pGameSystem->Change_BGM(TEXT(""));
 			break;
 		case 30:
 			m_pGameSystem->Lock_Input_ToPlayer(true);
 			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_elite_intro_strong (SFX)"));
 			break;
+		case 31:
+			ShakeDesc.fAmplitude = 1.f;
+			ShakeDesc.fDuration = 0.8f;
+			ShakeDesc.fFovKick = 0.f;
+			ShakeDesc.fFrequency = 2.f;
+			ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+			ShakeDesc.vTranslation;
+			m_pGameInstance->OnShake(ShakeDesc);
+			break;
+
 		case 34:
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);
 			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.05f, 2.f);
@@ -317,7 +326,6 @@ void CTrigger_Box::Register_Trigger()
 			break;
 		case 50:
 			m_pGameSystem->Lock_Input_ToPlayer(false);
-			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_elite_loop_strong (SFX)"));
 			break;
 		}
 #ifndef _DEBUG
