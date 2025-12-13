@@ -42,7 +42,7 @@ HRESULT CLevel_Heaven::Initialize()
 	m_pGameInstance->SetUp_OctoTree(_float3(-830.1f, 506.82f, -216.83f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
-	m_pGameInstance->Setting_LUT(0, 0.25f, false);
+	m_pGameInstance->Setting_LUT(0, 0.17f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -73,7 +73,9 @@ HRESULT CLevel_Heaven::Initialize()
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
 
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-	LightDesc.vDiffuse = _float4(0.9137f, 0.7686f, 0.7686f, 1.f);
+	
+	LightDesc.vDiffuse = _float4(0.8078f, 0.6901f, 0.4431f, 1.f);
+	//	LightDesc.vDiffuse = _float4(0.9137f, 0.7686f, 0.7686f, 1.f);
 	//LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, -0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
