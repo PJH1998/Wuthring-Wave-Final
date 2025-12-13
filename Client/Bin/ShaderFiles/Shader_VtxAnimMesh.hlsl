@@ -1240,6 +1240,7 @@ struct VS_OUT_OUTLINE
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
     float4 vOutlinePos : TEXCOORD2;
+    float4 vViewPos : TEXCOORD3;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -1279,6 +1280,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     Out.IsDraw = IsDraw;
     Out.vProjPos = Out.vPosition;
     Out.vOutlinePos = vOutLinePos;
+    Out.vViewPos = vViewPos;
     
     return Out;
 }
@@ -1290,7 +1292,6 @@ float Hash21(float2 ID)
     vInput += dot(vInput, vInput + 45.32);
     return frac(vInput.x * vInput.y);
 }
-
 
 VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
 {
@@ -1316,22 +1317,24 @@ VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
    
     bool IsDraw = true;
     
-    //float JitterRatio = lerp(1.f, 2.f, Hash21(vViewPos.xy));
+    float JitterRatio = lerp(1.f, 2.f, Hash21(vNormal.xy));
     
-    //float JitterLength = lerp(0.3f, 0.8f, Hash21(vViewPos.xy));
+    float JitterLength = lerp(0.3f, 0.8f, Hash21(vNormal.xy));
     
-    //float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
+    float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
     
-    //vViewNormal.xy += vNormalJitter;
+    vViewNormal.xy += vNormalJitter;
+    vViewNormal.xy *= JitterRatio; 
     
     float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
     
-    vector vOutLinePos = vViewPos + (vViewNormal * (g_fOutLineRadius * fTimeRatio));
+    vector vOutLinePos = vViewPos + ((vViewNormal * g_fOutLineRadius) * fTimeRatio);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     Out.IsDraw = IsDraw;
     Out.vProjPos = Out.vPosition;
     Out.vOutlinePos = vOutLinePos;
+    Out.vViewPos = vViewPos;
     
     return Out;
 }
@@ -1343,6 +1346,7 @@ struct PS_IN_OUTLINE
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
     float4 vOutlinePos : TEXCOORD2;
+    float4 vViewPos : TEXCOORD3;
 };
 
 struct PS_OUT_OUTLINE
@@ -1378,13 +1382,20 @@ PS_OUT_OUTLINE PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
     if (In.IsDraw)
     {
         float4 vOutlineWorldPos = mul(In.vOutlinePos, g_ViewMatrixInv);
-    
+        
+        float fViewLength = length(In.vOutlinePos.xyz - In.vViewPos.xyz);
+        
+        float fGradiant = pow(saturate(fViewLength / (5.2f * g_fOutLineRadius)), 2.f);
+        
         float IsLine = fmod(abs(vOutlineWorldPos.y), 0.1f) > 0.05f;
-        Out.vColor = IsLine ? g_vOutLineColor : 0.f;;
+        Out.vColor = IsLine ? g_vOutLineColor : 0.f;
         
         if(all(Out.vColor == 0.f))
             discard;
-            
+        
+        Out.vColor.xyz *= fGradiant;
+        Out.vColor.xyz *= 3.f;
+        
         Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }

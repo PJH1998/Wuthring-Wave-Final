@@ -190,7 +190,7 @@ HRESULT CLoader_Heaven::Load_Model()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Cloud"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Cloud.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Cloud");
-	PreTransformMatrix = XMMatrixScaling(1.f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.f, 0.f, 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	PreTransformMatrix = XMMatrixScaling(25.f, 25.f, 1.f) * XMMatrixRotationRollPitchYaw(0.f, 0.f, 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, -10.f, 1.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_FX.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Fx");

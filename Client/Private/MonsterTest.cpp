@@ -23,7 +23,7 @@ CMonsterTest::CMonsterTest(const CMonsterTest& Prototype)
 HRESULT CMonsterTest::Initialize_Prototype()
 {
 	m_vOutLineColor = _float4(0.9535f, 0.9015f, 0.3218f, 1.f);
-	m_fOutLineRadius = 0.05f;
+	m_fOutLineRadius = 0.03f;
 
 	return S_OK;
 }
@@ -83,7 +83,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 	m_isRender = false;
 	m_pTransformCom->Save_PreviousPosition();
-	m_fBehitMaxTime = 0.15f;
+	m_fBehitMaxTime = 0.3f;
 	m_fBehitAcc = m_fBehitMaxTime;
 	return S_OK;
 }

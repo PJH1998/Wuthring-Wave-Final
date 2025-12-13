@@ -514,6 +514,7 @@ protected:
 	_float m_fCaemraDistance = {};
 
 	_float4 m_vOutlineColor = {};
+	_float	m_fOutlineRadius = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

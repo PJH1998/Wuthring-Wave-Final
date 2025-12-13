@@ -291,6 +291,9 @@ void CAugusta::Render_OutLine()
 	
 	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
 		CRASH("Failed to Bind OutLineColor");
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutlineRadius, sizeof(_float))))
+		CRASH("Failed to Bind OutLineRadius");
 
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
