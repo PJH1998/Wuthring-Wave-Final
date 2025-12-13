@@ -506,7 +506,8 @@ void CLevel_GamePlay::Ready_NPC()
 	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
 	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
 	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
-
+	Desc.strFolderPath = "../Bin/Resource/Model/NPC/Animals/Griffin/Notify";
+	
 	_float3 vRotDegree = _float3(-180.0f, 88.149f, -180.f);
 	_vector vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
 	_vector vTrans = XMVectorSet(3214.813f, 324.34f, 1727.473f, 1.f);

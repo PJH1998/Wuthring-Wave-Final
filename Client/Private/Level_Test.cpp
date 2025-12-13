@@ -83,10 +83,10 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_MonsterTest();
 	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
-	Ready_ElectroPredator();
-	Ready_Spawner();
+	//Ready_ElectroPredator();
+	//Ready_Spawner();
 	//Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	Ready_Leviatan();
 	//Ready_NPC();
 
     Ready_Effect();
@@ -684,6 +684,7 @@ void CLevel_Test::Ready_UI()
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_FinalEnd"
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
@@ -898,22 +899,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion	
 
 
-#pragma region  [NUMPAD 0] KSTA_UITEST_QTE
-	static _bool isQTETrigger = false;
-
-	if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::Q);
-		isQTETrigger = !isQTETrigger;
-	}
-	else if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::F);
-		isQTETrigger = !isQTETrigger;
-	}
-#pragma endregion
-
-
 #pragma region [LCTRL + NUMPAD3] KSTA_UITEST_CURVETRACE
 
 	static _bool isCurveTraceOn = false;
@@ -935,6 +920,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion
 
+	
 #pragma region [LCTRL + I] KSTA_UITEST_DIALOG
 	static _bool isUITestDialogOn = false;
 
@@ -952,6 +938,25 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 #pragma endregion
+
+
+#pragma region  [NUMPAD 0] KSTA_UITEST_FINAL
+	static _bool isFinalImageOn = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		isFinalImageOn = !isFinalImageOn;
+
+		if (isFinalImageOn)
+			m_pGameSystem->Trigger_PlayEndImage();
+#ifdef _DEBUG
+		else
+			m_pGameSystem->Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+	}
+#pragma endregion
+
 
 
 }

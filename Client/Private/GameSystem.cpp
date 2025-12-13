@@ -406,6 +406,19 @@ void CGameSystem::Close_DialogUI()
 	m_pUI_ControlHelper->Close_DialogUI();
 }
 
+void CGameSystem::Trigger_PlayEndImage()
+{
+	m_pUI_ControlHelper->Trigger_PlayEndImage();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_StopEndImageForcely()
+{
+	m_pUI_ControlHelper->Trigger_StopEndImageForcely();
+}
+#endif // _DEBUG
+
+
 void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
 	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);

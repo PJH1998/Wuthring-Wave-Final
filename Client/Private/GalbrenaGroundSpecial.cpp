@@ -66,6 +66,7 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 	case EGalbrenaSpecialType::ATTACK08:
 		break;
 	case EGalbrenaSpecialType::ATTACK_H_01:
+		m_pGalbrena->Rotate_Target();
 		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack_H_01"), true);
 		break;
 	}

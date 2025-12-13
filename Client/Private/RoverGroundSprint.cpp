@@ -275,9 +275,18 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
 	// Run => Attack
 	if (m_States[ATTACK])
 	{
-		m_pRover->GetStateContextForWrite().m_eAttackType = ERoverAttackType::ATTACK01;
-		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK)); // 상위, 하위 상태
-		return;
+		if (m_States[BURST])
+		{
+			m_pRover->GetStateContextForWrite().m_eSpecialType = ERoverSpecialType::EX_ATTACK01;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SPECIAL)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eAttackType = ERoverAttackType::ATTACK01;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK)); // 상위, 하위 상태
+			return;
+		}
 	}
 
 
