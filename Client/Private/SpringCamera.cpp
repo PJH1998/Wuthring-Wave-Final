@@ -209,17 +209,14 @@ void CSpringCamera::Check_Ray()
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 	_vector vStartPos = XMLoadFloat4(&m_vLookPosition);
-	vStartPos.m128_f32[1] += m_fOffsetY;
+	//vStartPos.m128_f32[1] += m_fOffsetY;
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
 	{
-		if (m_vTargetPosition.y < vOut.y)
-		{
-			_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&vOut)));
-			if (fLength < 1.f)
-				return;
-			m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
-		}
+		_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&vOut)));
+		if (fLength < 0.4f)
+			return;
+		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
 	}
 }
 
@@ -236,7 +233,7 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 
 	// LockOnOffsetY 조정
 	m_fLockOnOffsetY += fTimeDelta * 1.f;
-	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, m_fOffsetY + 0.3f));
+	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, 0.5f));
 
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
@@ -313,7 +310,7 @@ void CSpringCamera::Dynamic_Fov(_float fTimeDelta)
 
 	_float fGapY = fabsf(vLockOnPos.m128_f32[1] - vTargetPos.m128_f32[1]);
 
-	m_fFovy = XMConvertToRadians(min(60.f + fGapY, 75.f));
+	m_fFovy = XMConvertToRadians(min(60.f + fGapY, 85.f));
 }
 
 void CSpringCamera::Action(_float fTimeDelta)
