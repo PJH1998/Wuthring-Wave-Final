@@ -99,6 +99,11 @@ private:
 	_uint					m_iSoundChannel{};
 #pragma endregion
 
+#pragma region SHADER_VALUE
+	_float					m_fBehitMaxTime{};
+	_float					m_fBehitAcc{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(ELECTROPREDATOR_DESC* pDesc);
