@@ -29,6 +29,7 @@ HRESULT CLevi_Anchor::Initialize_Clone(void* pArg)
 	//m_wstrEffectTag = pDesc->wstrEffectTag;
 	m_fMaxLifeTime = 1.f;
 	m_isActivate = false;
+	m_iSoundChannel = -1;
     return S_OK;
 }
 
@@ -63,6 +64,7 @@ void CLevi_Anchor::Update(_float fTimeDelta)
 			XMMatrixDecompose(&Scale, &Rot, &Trans, Matrix);
 
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), XMMatrixTranslationFromVector(Trans), &Info);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack51_p2 (SFX)"), m_iSoundChannel, 0.4f);
 		}
 	}
 	
@@ -74,6 +76,9 @@ void CLevi_Anchor::Late_Update(_float fTimeDelta)
 {
 	if(m_fLifeTime >= m_fMaxLifeTime)
 	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 		m_isActivate = false;
 		return;
 	}
@@ -104,7 +109,7 @@ void CLevi_Anchor::Render()
 			if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 				CRASH("Ready g_HasNormal Failed");
 			//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
-			m_pShaderCom->Begin(0);
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_MONSTERPROP::DEFAULTPASS));
 
 			m_pModelCom->Render(i);
 		}
@@ -124,7 +129,7 @@ void CLevi_Anchor::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDisolve = false;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
-
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 	//데칼 스폰 vTargetPos 기준으로 호출하면 될듯.
 }
 

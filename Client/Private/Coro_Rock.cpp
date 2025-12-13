@@ -92,7 +92,7 @@ void CCoro_Rock::Render()
 		if (SUCCEEDED(hr))
 			HasNormal = true;
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_MONSTERPROP::DEFAULTPASS));
 
 		m_pModelCom->Render(i);
 	}
