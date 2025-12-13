@@ -155,12 +155,18 @@ void CAugustaAirFly::Handle_Input()
 	m_States[INPUT_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
 	m_States[INPUT_ACCEL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) || m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
+	m_States[INPUT_ACCEL_KEYDOWN] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT), KEYSTATE::DOWN);
+
 	
 	// 상태 변화
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DOUBLE_JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+
+	//if (m_States[INPUT_ACCEL_KEYDOWN])
+	//	m_pAugusta->Spawn_WingEffect(TEXT("Common_Fly_Start3"));
+
 }
 
 

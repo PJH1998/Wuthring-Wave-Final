@@ -14,6 +14,7 @@ private:
 		INPUT_L,
 		INPUT_R,
 		INPUT_ACCEL,
+		INPUT_ACCEL_KEYDOWN,
 		FLY_U,
 		FLY_D,
 		FLY_L,

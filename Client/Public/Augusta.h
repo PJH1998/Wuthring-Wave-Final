@@ -205,6 +205,9 @@ public:
 	virtual void Attach_ThrowTarget(_bool isAttach) override;
 	virtual void Throw_AttachTarget() override;
 
+	void Spawn_WingEffect(const _wstring& strEffectTag);
+	
+
 #pragma region 2. NOTIFY
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;

@@ -660,6 +660,14 @@ void CRover::Throw_AttachTarget()
 	*m_ThrowInfo.pThrow = true;
 }
 
+void CRover::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
+}
+
 
 
 #pragma region NOTIFY
