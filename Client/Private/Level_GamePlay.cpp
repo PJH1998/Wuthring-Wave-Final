@@ -496,6 +496,7 @@ void CLevel_GamePlay::Ready_NPC()
 	Napal.eCurLevel = m_eCurLevel;
 	Napal.vInitPos = _float3(3206.12f, 350.9f, 1680.1f);
 	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	Napal.strFolderPath = "../Bin/Resource/Model/NPC/Napal/Notify";
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
 

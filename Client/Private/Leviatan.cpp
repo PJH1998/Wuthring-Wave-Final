@@ -1291,6 +1291,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 		else
 		{
 			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+			m_fBehitAcc = m_fBehitMaxTime;
 		}
 		return;
 	}

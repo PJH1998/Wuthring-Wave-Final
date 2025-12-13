@@ -303,7 +303,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
 	m_fBehitAcc = m_fBehitMaxTime;
-	m_isDissolve = true;
+	m_isDissolve = false;
 	m_fDissolveRate = 0.f;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
@@ -554,6 +554,7 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 	if (m_fHP <= 0.f)
 	{
 		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
 		return;
 	}
 	if (m_isAnimationFinished)
