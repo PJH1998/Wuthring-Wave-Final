@@ -36,7 +36,32 @@ void CRoverEvent::OnEnter(void* pArg)
 
 	// 5. 몬스터 타겟으로 회전
 	CTransform* pBossTransform = static_cast<CTransform*>(pArg);
-	m_pRover->Rotate_Target(pBossTransform);
+
+
+	switch (eEventType)
+	{
+		case ERoverEventType::BEHIT_FLY_FALL:
+		{
+			m_pRover->Rotate_Target(pBossTransform);
+			break;
+		}
+		case ERoverEventType::BURST01:
+		{
+			// 1. BossTransform의 반대 방향으로 이동.
+			_vector vTargetPos = pBossTransform->Get_State(STATE::POSITION);
+			_vector vTargetLook = XMVectorSetY(XMVector3Normalize(pBossTransform->Get_State(STATE::LOOK)), 0.f);
+			
+			vTargetPos += (vTargetLook * -1.f) * 2.f; // 2.f 후방 이동.
+			m_pRover->Set_Position(vTargetPos);
+
+			m_pRover->Rotate_Target(pBossTransform);
+			break;
+		}
+
+	}
+
+
+	
 }
 
 void CRoverEvent::OnUpdate(_float fTimeDelta)
@@ -120,6 +145,7 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 void CRoverEvent::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverEventType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 20.f, 2.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST01), "Burst01", 1.f, 50.f);
 }
 
 void CRoverEvent::State_Reset()
