@@ -79,11 +79,14 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
 		{
 			m_isActivate = false;
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+			m_IsEvent = false;
 		}
 	}
 
+	
 	if (!IsDissolve)
 	{
+		
 		// 0. Delayed Action 수행.
 		Process_DelayedActions(fTimeDelta);
 
@@ -120,9 +123,10 @@ void CGalbrena::Update(_float fTimeDelta)
 		// 특정 상황일 때 TimeLack 감소.
 		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
 
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack * m_fEventTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
 		// 4. Physcics, Camera 업데이트
+		
 		Update_Physics(fTimeDelta);
 		Update_Camera(fTimeDelta);
 	}
@@ -157,11 +161,14 @@ void CGalbrena::Late_Update(_float fTimeDelta)
 			m_pMainAttackVolume->Late_Update(fTimeDelta);
 
 		// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-
 		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) ||
 			Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
 		{
 			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
+		else if (m_IsEvent)
+		{
+			// Collider 비 갱신.
 		}
 		else
 		{
@@ -339,12 +346,26 @@ void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionT
 		case CHARACTER_TRANSITIONTYPE::QTE:
 		{
 			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
+			
 			// 애니메이션 변경할 값.
 			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
+		{
+			// 1. State 변경하고 => 위치 이동.
+			Set_Event(true);
+			Activate(true);
+			GetStateContextForWrite().m_eEventType = EGalbrenaEventType::ATTACK07;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::EVENT), pArg);
+			break;
+		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS:
+		{
 
+			break;
+		}
 	}
 
 	// 상태 변수 초기화
@@ -982,6 +1003,7 @@ void CGalbrena::Activate(_bool IsActivate)
 	{
 		m_isActivate = true;
 		m_IsOutLineVisible = true;
+		
 		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
 	}
@@ -1027,6 +1049,9 @@ void CGalbrena::Update_TargetDistance()
 
 void CGalbrena::Update_Physics(_float fTimeDelta)
 {
+	if (m_IsEvent)
+		return;
+
 	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 	{
 		if (nullptr != m_PendingCaptureDesc.pSocketMatrix &&
@@ -1055,6 +1080,9 @@ void CGalbrena::Update_Physics(_float fTimeDelta)
 
 void CGalbrena::Update_Camera(_float fTimeDelta)
 {
+	if (m_IsEvent)
+		return;
+
 	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 	{
 		_vector vCameraLook = m_pSpringCamera->Get_LookVector_NoPitch(); // Camera Look을 

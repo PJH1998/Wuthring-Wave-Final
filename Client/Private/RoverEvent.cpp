@@ -51,14 +51,17 @@ void CRoverEvent::OnEnter(void* pArg)
 			_vector vTargetPos = pBossTransform->Get_State(STATE::POSITION);
 			_vector vTargetLook = XMVectorSetY(XMVector3Normalize(pBossTransform->Get_State(STATE::LOOK)), 0.f);
 			
-			vTargetPos += (vTargetLook * -1.f) * 2.f; // 2.f 후방 이동.
+			vTargetPos += (vTargetLook * -1.f) * 3.f; // 2.f 후방 이동.
+			
 			m_pRover->Set_Position(vTargetPos);
+			m_pRover->Set_ColliderPosition(vTargetPos);
 
 			m_pRover->Rotate_Target(pBossTransform);
 
 			m_iPartType = CRover::PARTTYPE::PART_SWORD;
 			m_pRover->PartActivate(m_iPartType, true);
 			m_pRover->Set_SocketMatrixToParts(m_iPartType, "WeaponProp01");
+			
 			break;
 		}
 
@@ -91,7 +94,7 @@ void CRoverEvent::OnExit()
 	CInteractionState::OnExit();
 	m_IsStopOnce = false;
 
-	if (m_iPartType != CRover::PARTTYPE::TYPE_END);
+	if (m_iPartType != CRover::PARTTYPE::TYPE_END)
 		m_pRover->PartActivate(m_iPartType, false);
 }
 
@@ -100,6 +103,7 @@ void CRoverEvent::OnExit()
 void CRoverEvent::Handle_Input()
 {
 	m_States[QTE_EXIT] = !m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP)) && m_IsStopOnce;
+	m_States[EXECUTE_EXIT] = !m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP)) && m_IsStopOnce;
 }
 
 void CRoverEvent::Update_EventAnimation(_float fTimeDelta)
@@ -155,12 +159,24 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 		// 특정 지점에서 Stop Anim
 		if (!m_IsStopOnce)
 		{
-			//if (IsEscapePossible)
-			if (m_fTrackPosition > 50.f)
+			//if (m_fTrackPosition > 50.f)
+			if (IsEscapePossible)
 			{
 				m_IsStopOnce = true;
-				m_pRover->Stop_Anim();
-				m_pRover->Play_Action(TEXT("Action_Levi_Execute"),true, false);
+				m_pRover->Stop_Anim(); // Stop Anim 하고.
+				m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f); // 몬스터 TimeRatio 0.f;
+				m_pRover->Bind_Condition_ToPlayer("LeviatanExecuteSuccess");
+				return;
+			}
+		}
+
+		if (m_States[EXECUTE_EXIT])
+		{
+			if (IsEscapePossible)
+			{
+				//m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f); // 몬스터 TimeRatio 정상화.
+				m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDUP;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 				return;
 			}
 		}
@@ -178,7 +194,7 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 void CRoverEvent::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverEventType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.5f, 20.f, 2.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST02), "Burst02", 1.f, 60.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverEventType::BURST02), "Burst02", 1.2f, 60.f);
 }
 
 void CRoverEvent::State_Reset()

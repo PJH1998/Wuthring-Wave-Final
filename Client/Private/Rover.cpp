@@ -119,7 +119,7 @@ void CRover::Update(_float fTimeDelta)
 		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
 		
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack * m_fEventTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
@@ -361,7 +361,11 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			m_IsLeviatanQTE = false;
 			Start_Anim();
 			break;
-		case CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS:
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
+			// 1. SFX 호출 하면서
+			Process_SpawnSFX(TEXT("SFX|Pooling_Galbrena_Ulti_Prefab"));
+
+			// 2. State 변경하고 => 위치 이동.
 			GetStateContextForWrite().m_eEventType = ERoverEventType::BURST02;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
 			break;
@@ -604,6 +608,7 @@ void CRover::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
+
 
 void CRover::Bind_QTE(_bool IsQTE)
 {

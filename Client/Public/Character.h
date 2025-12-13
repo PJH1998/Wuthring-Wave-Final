@@ -152,6 +152,7 @@ public:
 	// WorldMatrix
 	_matrix Get_WorldMatrix();
 	void Set_Position(_fvector vPos);
+	void Set_ColliderPosition(_fvector vPos);
 
 	void ColliderActive(_bool IsActive);
 
@@ -166,12 +167,13 @@ public:
 #pragma region EVENT 
 public:
 	virtual void Bind_QTE(_bool IsQTE) {};
-	virtual void Bind_Event(_bool IsEvent) {};
 	_bool IsQTEend() { return m_IsQTEend; }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
-	_bool IsEventEnd() { return m_IsEventEnd; }
-	void Set_EventEnd(_bool IsEventEnd) { m_IsEventEnd = IsEventEnd; }
+	void Set_Event(_bool IsEvent) { m_IsEvent = IsEvent; }
+	_bool IsEvent() { return m_IsEvent; }
+
+	void Bind_Condition_ToPlayer(const _string& strCondition, void* pArg = nullptr);
 
 
 	_bool IsVisible() { return m_IsVisible; }
@@ -219,6 +221,10 @@ public:
 
 	void Stop_Anim();
 	void Start_Anim();
+
+	void Stop_Anim_ToEvent();
+	void Start_Anim_ToEvent();
+
 
 	void Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency = 1.f);
 	void Stop_Sound(CHANNEL eChannel);
@@ -477,8 +483,7 @@ protected:
 	_bool m_IsLand = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
-	_bool m_IsEvent = { false };
-	_bool m_IsEventEnd = { false };
+	_bool m_IsEvent = { false }; // Collider 비 갱신.
 	_bool m_IsVisible = { true };
 	_bool m_IsOutLineVisible = { true };
 	_bool m_IsRopeActive = { false };
@@ -495,6 +500,8 @@ protected:
 	PARRY_DESC m_PendingParryDesc = {};
 	CAPTURE_DESC m_PendingCaptureDesc = {};
 	SLIDE_DATA  m_PendingSlideData = {};
+
+	_float m_fEventTimeRate = 1.f;
 
 	_float m_fDodgeableDuration = 0.2f;
 	_float m_fDodgeableHitTimer = {};

@@ -1367,7 +1367,13 @@ void CLeviatan::Ready_Events()
 	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_PrevExecute"), [this](const LEVI_EXECUTE event) {
 		if (event.isSuccess)
 		{
-			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess", m_pTransformCom);
+			// 1. 자신의 위치를 중점에 고정 필요. => 그래야 정확한 카메라 앵글 잡기가 편함.
+
+
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanPrevExecute", m_pTransformCom);
+			m_isBattle = false;
+			m_strSequenceAnim = "Paralysis_Start";
+			//Event1();
 		}
 	});
 
@@ -1378,8 +1384,11 @@ void CLeviatan::Ready_Events()
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 			m_pExecuteCom->IsActivate(false);
 			m_isBattle = false;
+
+			//m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess", m_pTransformCom); // 무력화 이후에 => 연출 추가.
 			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 			{
+				
 				//Event1();
 				m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
 					m_isBattle = true;

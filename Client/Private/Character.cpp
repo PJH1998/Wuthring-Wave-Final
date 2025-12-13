@@ -295,6 +295,13 @@ void CCharacter::Set_Position(_fvector vPos)
 {
 	ASSERT_CRASH(m_pTransformCom);
 	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Save_PreviousPosition();
+}
+
+void CCharacter::Set_ColliderPosition(_fvector vPos)
+{
+	ASSERT_CRASH(m_pColliderCom);
+	m_pColliderCom->Set_Position(vPos);
 }
 
 void CCharacter::ColliderActive(_bool IsActive)
@@ -329,7 +336,17 @@ void CCharacter::Debug_ImGui()
 	ImGui::End();
 }
 
+
+
 #endif // _DEBUG
+
+void CCharacter::Bind_Condition_ToPlayer(const _string& strCondition, void* pArg)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	m_pGameSystem->Bind_Condition_ToPlayer(strCondition, pArg);
+}
 
 #pragma region STATE
 
@@ -537,6 +554,21 @@ void CCharacter::Start_Anim()
 		return;
 	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
 	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
+}
+
+void CCharacter::Stop_Anim_ToEvent()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_fEventTimeRate = 0.f;
+}
+
+void CCharacter::Start_Anim_ToEvent()
+{
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_fEventTimeRate = 1.f;
 }
 
 void CCharacter::Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency)
