@@ -1,5 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "MapObject_Burn.h"
+#include"GameSystem.h"
+
+_bool CMapObject_Burn::m_IsSound = { false };
 
 CMapObject_Burn::CMapObject_Burn(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice,pContext)
@@ -7,8 +10,10 @@ CMapObject_Burn::CMapObject_Burn(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 }
 
 CMapObject_Burn::CMapObject_Burn(const CMapObject_Burn& Prototype)
-	:CStaticObject(Prototype)
+	:CStaticObject(Prototype),
+	m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMapObject_Burn::Initialize_Prototype()
@@ -35,7 +40,17 @@ void CMapObject_Burn::Priority_Update(_float fTimeDelta)
 void CMapObject_Burn::Update(_float fTimeDelta)
 {
 	if (m_IsBurn)
+	{
 		m_fTime += fTimeDelta / 2.f;
+		if (!m_IsSound)
+		{
+			_uint iSoundChannel = m_pGameInstance->Register_Channel();
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire0"), iSoundChannel, 0.2f);
+			m_pGameInstance->Return_Channel(iSoundChannel);
+			m_pGameSystem->OnTriggerActivate(61);
+			m_IsSound = !m_IsSound;
+		}
+	}
 	else
 		m_fTime = 0.f;
 }
@@ -159,7 +174,7 @@ void CMapObject_Burn::Ready_Component(void* pArg)
 	XMStoreFloat3(&DetectRigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	DetectRigidbodyDesc.eType = EMotionType::Kinematic;
 	DetectRigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	DetectRigidbodyDesc.vExtent = _float3(20.f, 20.f, 20.f);
+	DetectRigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
 	//플레이어 감지용 1개
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_DetectRigidbody"), reinterpret_cast<CComponent**>(&m_pDetectRigidbodyCom), &DetectRigidbodyDesc);
@@ -167,6 +182,7 @@ void CMapObject_Burn::Ready_Component(void* pArg)
 	m_pDetectRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::THROW))
 			m_IsBurn = true;
+
 		});
 }
 
@@ -205,5 +221,5 @@ void CMapObject_Burn::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pDetectRigidbodyCom);
 	
-	//Safe_Release(m_pGameSystem);
+	Safe_Release(m_pGameSystem);
 }

@@ -39,12 +39,13 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Meteor_Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		});
-
+	m_vRadians = _float3(m_pGameInstance->Rand(0.f, 0.3f), m_pGameInstance->Rand(0.f, 0.3f), m_pGameInstance->Rand(0.f, 0.3f));
     return S_OK;
 }
 
 void CMapObject_Meteo::Priority_Update(_float fTimeDelta)
 {
+	m_pTransformCom->Turn_Quaternion(m_vRadians, fTimeDelta);
 }
 
 void CMapObject_Meteo::Update(_float fTimeDelta)
@@ -101,7 +102,7 @@ void CMapObject_Meteo::Render()
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
-		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pShaderCom->Begin(28);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
