@@ -40,8 +40,8 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	{
 		_float3 vOffset = {};
 		vOffset.x = (i & 1) ? 0.5f : -0.5f;
-		vOffset.y = (i & 4) ? -0.5f : 0.5f;
-		vOffset.z = (i & 2) ? 0.5f : -0.5f;
+		vOffset.y = (i & 2) ? 0.5f : -0.5f;
+		vOffset.z = (i & 4) ? -0.5f : 0.5f;
 
 		_float3 vChildCenter = _float3(
 			vCenter.x + vOffset.x * vExtent.x,
