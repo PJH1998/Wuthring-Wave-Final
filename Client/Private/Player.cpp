@@ -779,7 +779,8 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 
 			LEVI_GRAB Desc{ true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
-			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+			//m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+			m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
 			Bind_EventLock(false);
 		}
 	}

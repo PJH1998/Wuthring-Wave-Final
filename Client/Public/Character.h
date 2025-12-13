@@ -188,6 +188,8 @@ public:
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
 
 	void Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName);
+	void Spawn_LeviatanAnchorEffect(const _wstring& wStrEffectTag);
+	
 	void Execute_Telport(_vector vPos);
 
 	void Reserve_LandSlide(const SLIDE_DATA& eData);
@@ -473,6 +475,7 @@ protected:
 	_bool m_IsRopeActive = { false };
 	_bool m_IsEventDissolve = { false }; // Dissolve가 연출용인지? 아닌지.
 	_bool m_IsDissolveReverse = { false }; // Dissolve가 반대로 적용되는가?
+	_bool m_IsLeviatanQTE = { false };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 
