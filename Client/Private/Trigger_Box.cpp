@@ -328,6 +328,13 @@ void CTrigger_Box::Register_Trigger()
 		case 50:
 			m_pGameSystem->Lock_Input_ToPlayer(false);
 			break;
+
+		case 61:
+			PREFAB_INFO Info;
+			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), XMMatrixTranslationFromVector(XMVectorSet(0.7f, -3.6f, -648.6f, 1.f)), &Info);
+
+			break;
 		}
 #ifndef _DEBUG
 		m_IsTriggered = true;
