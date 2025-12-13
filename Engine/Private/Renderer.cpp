@@ -78,43 +78,6 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 	return S_OK;
 }
 
-//HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
-//{
-//	if (8 == m_iCullStack.load(memory_order_acquire))
-//	{
-//		cout << "Cut!" << endl;
-//		return S_OK;
-//	}
-//
-//	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
-//	{
-//		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-//		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
-//	}
-//
-//	return S_OK;
-//}
-//
-//HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
-//{
-//	if (8 == m_iCullStack.load(memory_order_acquire))
-//		return S_OK;
-//
-//	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
-//	{
-//		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-//		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
-//		m_iCullStack.fetch_add(1, memory_order_release);
-//	}
-//
-//	if (8 <= m_iCullStack.load(memory_order_acquire))
-//	{
-//		m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
-//		m_isCompleteFrustumCull.exchange(true, memory_order_release);
-//	}
-//	
-//	return S_OK;
-//}
 HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
 	if (8 == m_iCullStack.load(memory_order_acquire))
@@ -195,15 +158,6 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
-	//if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
-	//	CRASH("Render Fail");
-	//m_pGameInstance->RenderBufferPool(0);
-	//m_pGameInstance->RenderBufferPool(1);
-	//m_pGameInstance->RenderBufferPool(2);
-	//m_pGameInstance->RenderBufferPool(3);
-	////모델 내부에서 LOD단계가 없을 때 다시 바인딩해야하기 때문에 Real_Late_Render같은 거로 내보낸 뒤 해당 LOD단계 렌더에서 다시 렌더시킬것.
-	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
-	//m_pGameInstance->End_MRT();
 	Render_Decal();
 	Render_NonStatic();
 	Render_SSAO();			
@@ -345,44 +299,6 @@ void CRenderer::Render_ShadowMap()
 
 void CRenderer::Render_LOD(_uint iLODIndex)
 {
-	/*size_t iNumObjects = max(1, m_StaticObjects[iReadIndex][iLODIndex].size() / m_iNumThread);
-		for (_uint i = 0; i < m_iNumThread; ++i)
-		{
-			_uint iStartIndex = i * iNumObjects;
-			_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex][iLODIndex].size());
-			if (i == m_iNumThread - 1)
-				//iEndIndex = m_pGameInstance->Render_ObjectsNum(iLODIndex);
-				iEndIndex = m_StaticObjects[iReadIndex][iLODIndex].size();
-
-			m_pGameInstance->Add_Render_Work([this, iLODIndex, iStartIndex, iEndIndex, iReadIndex, i]() {
-				//쓰레드 개수로 분할해서 해야한다ㅇㅇ
-				if (iStartIndex < iEndIndex)
-				{
-					m_pDeferredContext[i]->ClearState();
-					Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
-					m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
-					m_pGameInstance->Bind_SharedBuffer(iLODIndex, m_pDeferredContext[i]);
-					for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
-					{
-						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Set_LOD(iLODIndex);
-						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Render(m_pDeferredContext[i], i);
-						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Set_RenderTime(iLODIndex, m_pGameInstance->Get_PlayTime());
-					}
-
-					ID3D11CommandList* pCL = { nullptr };
-					m_pDeferredContext[i]->FinishCommandList(false, &pCL);
-					Merge_CommandList(pCL, i);
-				}
-
-				{
-					lock_guard<mutex> lock(m_RenderAddMutex);
-					m_iNumEndThread.fetch_add(1, memory_order_relaxed);
-				}
-				m_CV.notify_one();
-				});
-		}
-		*/
-
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
 	// Static Object Render
@@ -617,43 +533,6 @@ void CRenderer::Render_Static()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 		CRASH("Render Fail");
-	{
-
-		//// Buffer Index
-		//_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
-
-		//// Static Object Render
-		//size_t iNumObjects = max(1, m_StaticObjects[iReadIndex].size() / m_iNumThread);
-		//for (_uint i = 0; i < m_iNumThread; ++i)
-		//{
-		//	_uint iStartIndex = i * iNumObjects;
-		//	_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex].size());
-		//	if (i == m_iNumThread - 1)
-		//		iEndIndex = m_pGameInstance->Render_ObjectsNum(0);
-		//	//iEndIndex = m_StaticObjects[iReadIndex].size();
-
-		//	m_pGameInstance->Add_Render_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
-		//		//쓰레드 개수로 분할해서 해야한다ㅇㅇ
-		//		if (iStartIndex < iEndIndex)
-		//		{
-		//			m_pDeferredContext[i]->ClearState();
-		//			Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
-		//			m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
-		//			//for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
-		//			//	m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
-
-		//			ID3D11CommandList* pCL = { nullptr };
-		//			m_pDeferredContext[i]->FinishCommandList(false, &pCL);
-		//			Merge_CommandList(pCL, i);
-		//		}
-		//		{
-		//			lock_guard<mutex> lock(m_RenderAddMutex);
-		//			m_iNumEndThread.fetch_add(1, memory_order_relaxed);
-		//		}
-		//		m_CV.notify_one();
-		//		});
-		//}
-	}
 
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;

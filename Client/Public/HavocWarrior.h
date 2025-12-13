@@ -91,6 +91,12 @@ private:
 	_bool					m_isSonoro{};
 #pragma endregion
 
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
+#pragma endregion
+
 #pragma region PHYSICS
 	_float3					m_vBeHit_Normal{};
 	_float					m_fTimeDelta{};
