@@ -113,7 +113,7 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 {
 	if (m_isFind)
 	{
-		m_isFind = false;
+		//m_isFind = false;
 		m_pRigidBodyCom->IsActivate(false);
 	}
 
@@ -371,8 +371,8 @@ void CNPC_Hiding::Render_Default()
 			m_pShaderCom->Bind_Value("g_iFaceIndex", &m_iFaceIndex, sizeof(_uint));
 			ePath = SHADER_ANIMMESH::NPC_FACE;
 		}
-		else
-			ePath = SHADER_ANIMMESH::NORMAL_N_COLOR;
+		//else
+		//	ePath = SHADER_ANIMMESH::DEFAULT_NORMAL;
 
 		m_pShaderCom->Begin(ENUM_CLASS(ePath));
 		m_pModelCom->Render(i);

@@ -1517,7 +1517,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_FACE();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_NORMALCOLOR();
+        PixelShader = compile ps_5_0 PS_MAIN();
     }
 
     pass NormalAndColor // 11
