@@ -22,7 +22,7 @@ void CSound_Manager::Update_Listener(class CTransform* pTransform, _float fTimeD
 	FMOD_VECTOR vUp = {};
 
 	memcpy(&vPosition, &vListenerPosition, sizeof(_float) * 3);
-	memcpy(&vVelocity, &vListenerVelocity, sizeof(_float) * 3);
+	//memcpy(&vVelocity, &vListenerVelocity, sizeof(_float) * 3);
 	memcpy(&vForward, &vListenerForward, sizeof(_float) * 3);
 	memcpy(&vUp, &vListenerUp, sizeof(_float) * 3);
 
@@ -155,7 +155,7 @@ void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _
 	FMOD_VECTOR vVelocity = {};
 
 	memcpy(&vPosition, &vObjectPosition, sizeof(_float) * 3);
-	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
+	//memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pFixedChannels[iChannelID]);
 
@@ -197,7 +197,7 @@ void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChan
 	FMOD_VECTOR vVelocity = {};
 
 	memcpy(&vPosition, &vObjectPosition, sizeof(_float) * 3);
-	memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
+	//memcpy(&vVelocity, &vObjectVelocity, sizeof(_float) * 3);
 
 	FMOD_System_PlaySound(m_pSystem, pSound, nullptr, true, &m_pPoolingChannels[iChannelID]);
 
