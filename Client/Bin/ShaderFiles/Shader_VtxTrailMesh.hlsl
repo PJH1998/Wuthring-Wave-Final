@@ -1121,13 +1121,15 @@ PS_OUT PS_SkyTrailMask_X(PS_IN In)
     
     float fVisibleY;
 
-    fVisibleY = step(1.f - g_Sweep, UV.y);
+    float Sweep = min(1.f, g_Sweep);
+    
+    fVisibleY = step(1.f - Sweep, UV.y);
 
     float fVisibleX;
 
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.x);
+    float fTailFad = smoothstep(Sweep - g_SweepWitdh, Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.x);
 
-    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, 1.f - FlowUV.x);
+    float fHeadFad = 1.f - smoothstep(Sweep - g_Soft, Sweep, 1.f - FlowUV.x);
 
     fVisibleX = fTailFad * fHeadFad;
 
@@ -1193,13 +1195,15 @@ PS_OUT PS_SkyTrailMask_Y(PS_IN In)
     
     float fVisible;
 
-    fVisible = step(1.f - g_Sweep, UV.y);
+    float Sweep = min(1.f, g_Sweep);
+    
+    fVisible = step(1.f - Sweep, UV.y);
 
     float fVisibleY;
 
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.y);
+    float fTailFad = smoothstep(Sweep - g_SweepWitdh, Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.y);
 
-    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, 1.f - FlowUV.y);
+    float fHeadFad = 1.f - smoothstep(Sweep - g_Soft, Sweep, 1.f - FlowUV.y);
 
     fVisibleY = fTailFad * fHeadFad;
 

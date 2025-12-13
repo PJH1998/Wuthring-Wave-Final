@@ -108,7 +108,6 @@ void CAugusta::Update(_float fTimeDelta)
 		m_pGameInstance->Setting_DOF(vCenterPos, 50.f);
 	}
 #endif
-
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;

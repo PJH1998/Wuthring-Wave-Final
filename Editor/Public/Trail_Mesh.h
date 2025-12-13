@@ -88,6 +88,7 @@ private:
 	_float						m_fSweep = 0.f;
 	_float						m_fSweepWitdh = 0.f;
 	_float						m_fSoft = 0.f;
+	_float						m_fCurrentTime = 0.f;
 
 	_float						m_fColorSpeed = 0.f;
 	_float						m_fColorSweep = 0.f;
