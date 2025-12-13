@@ -279,6 +279,8 @@ void CTrailMesh_Controller::TrailMesh_Tab()
 
 				ImGui::Checkbox("Distortion", &(m_pSelectedTrailMeshDesc->IsDistortion));
 
+				ImGui::Checkbox("Loop", &(m_pSelectedTrailMeshDesc->IsLoop));
+
 				if (m_pSelectedTrailMeshDesc->IsDistortion)
 				{
 					ImGui::Text("DistortionWeight");

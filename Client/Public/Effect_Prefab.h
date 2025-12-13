@@ -50,7 +50,7 @@ private:
 	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info);
 
 	void Check_CameraDistance();
-	_bool UpdateActiveFromFlag();
+	void UpdateActiveFromFlag(_float fTimeDelta);
 
 public:
 	_wstring	Get_MyTag() {
