@@ -12,6 +12,7 @@
 #include "Levi_Augusta.h"
 #include "GameSystem.h"
 #include "Event_Leviatan.h"
+#include "MotionTrail.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -101,6 +102,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 
 	m_fBehitAcc = m_fBehitMaxTime = 0.15f;
 	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
+
+	m_strSequenceAnim = "Stand2";
 	return S_OK;
 }
 
@@ -118,13 +121,31 @@ void CLeviatan::Priority_Update(_float fTimeDelta)
 		if (Pair.second->IsActivate())
 			Pair.second->Priority_Update(fTimeDelta);
 	}
+	if (m_isAggro && !m_isEncounter)
+	{
+		m_isEncounter = true;
+
+		m_pGameInstance->OnFade(FADE::FADE_OUT, 0.4f, [this]() {
+			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			{
+				m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
+				m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
+				m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
+				m_isAnimationFinished = false;
+				m_isBattle = true;
+			}
+			m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, []() {
+				
+				});
+			});
+	}
 }
 
 void CLeviatan::Update(_float fTimeDelta)
 {
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	if(m_pBehaviorTreeCom[m_iPhase])
+	if(m_isBattle && m_pBehaviorTreeCom[m_iPhase])
 	{
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
@@ -138,7 +159,7 @@ void CLeviatan::Update(_float fTimeDelta)
 	if (m_isAreaAttack)
 		AreaAttack(fTimeDelta * fTimeRatio);
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	if(m_pAnimMachineCom[m_iPhase])
+	if(m_isBattle && m_pAnimMachineCom[m_iPhase])
 	{
 		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
 			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
@@ -149,7 +170,7 @@ void CLeviatan::Update(_float fTimeDelta)
 	else
 	{
 		_float temp{};
-		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta * fTimeRatio, &temp);
+		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, m_strSequenceAnim, fTimeDelta * fTimeRatio, &temp);
 	}
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 	{
@@ -562,6 +583,18 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviAlter"), WorldMatrix, &Desc);
 		}
 	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.25f, 0.01f, 0.4f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.05f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 1.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
+	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{
 		m_pGameSystem->Attach_Parry(&m_vUIPosition);
@@ -660,8 +693,9 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 		if (wstrAnimTag == TEXT("Front"))
 		{
-			if(m_fDistanceNonY > 10.f)
-				vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.4f), 1.f);
+			vPos = XMLoadFloat3(&m_vTargetPosition) - XMLoadFloat3(&m_vTargetDir) * 4.f;
+			//vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.4f), 1.f);
+			
 			m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		}
 		else
@@ -686,6 +720,28 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	{
 		Reset_NotifyInteraction();
 		dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
+	}
+	else if (wstrTypeTag == TEXT("FadeOut"))
+	{
+		m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+
+			});
+	}
+	else if (wstrTypeTag == TEXT("Ending"))
+	{
+		m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+			//UI 호출
+			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			{
+
+			}
+			m_pGameInstance->OnFade(FADE::FADE_IN, 2.f, [this]() {
+				if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+				{
+					
+				}
+				});
+			});
 	}
 }
 
@@ -1321,8 +1377,21 @@ void CLeviatan::Ready_Events()
 			m_fHP = 0.f;
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
 			m_pExecuteCom->IsActivate(false);
+			m_isBattle = false;
 			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
-				Event1();
+			{
+				//Event1();
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+					m_isBattle = true;
+					Event1();
+
+					m_pGameInstance->OnFade(FADE::FADE_IN, 0.7f, [this]() {
+						
+						});
+					});
+				m_strSequenceAnim = "Paralysis_Start";
+
+			}
 		}
 		});
 }
@@ -1383,8 +1452,10 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 					{
 						Event2();
-						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
-						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+						m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, [this]() {
+							
+							});
+						
 					}
 				}
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
@@ -1534,13 +1605,10 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		//m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		//m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		
 		//조우 연출 시작
-		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
-		m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
-		m_isAnimationFinished = false;
-		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
-			m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
 		m_isAggro = true;
+		//m_isEncounter = true;
 		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_INTRO);
 		m_pGameSystem->Change_BGM(TEXT("Null"));
 		if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
@@ -1709,7 +1777,8 @@ void CLeviatan::Event1()
 		m_pGameSystem->Lock_Input_ToPlayer(true);
 	//레비아탄 채력 데이터 변경 함수
 	m_pGameSystem->Levi_Phase_Change();
-
+	_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
+	m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
 	//떠오를 때 노티파이로 이거 실행
 	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기
 	//m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHANGE);
@@ -1728,7 +1797,7 @@ void CLeviatan::Event2()
 	m_pGameSystem->Change_Leviathan_Phaze(2);
 	if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 		m_pGameSystem->Lock_Input_ToPlayer(false);
-
+	m_isBattle = true;
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 }
