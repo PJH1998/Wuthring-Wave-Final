@@ -38,6 +38,8 @@ private:
 	_bool m_SonoroRigidActive = { false };
 	mutex m_Mutex;
 
+	_wstring m_EnterSonoro;
+	_wstring m_ExitSonoro;
 	LIGHT_DESC		m_LightDesc[ENUM_CLASS(SONORA::END)] = {};
 
 public:

@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "MapObject_Collaps.h"
 #include"GameSystem.h"
+
+
 CMapObject_Collaps::CMapObject_Collaps(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
 {
@@ -117,6 +119,13 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 		m_pPullUI = nullptr;
 	}
 
+	if (!m_IsSound)
+	{
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Broken0"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
+		m_IsSound = !m_IsSound;
+	}
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 
@@ -129,11 +138,26 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 	{
 #ifdef _DEBUG
 		m_fFall = 0.f;
-		m_IsTriggerd = false;
 #endif
+		m_IsTriggerd = false;
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DestMat));
 		m_pSourRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pDestRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Broken0"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
+
+		PREFAB_INFO Info;
+		if (m_iTriggerIndex == 33)
+		{
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), XMLoadFloat4x4(&m_DestMat), &Info);
+		}
+		else
+		{
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), XMLoadFloat4x4(&m_SmokePoint), &Info);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), XMLoadFloat4x4(&m_SmokePoint2), &Info);
+		}
 		return;
 	}
 }
@@ -236,6 +260,16 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
 		m_CallBack.pCondition = &m_iTriggerIndex;
 		m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+	}
+	else if(m_iTriggerIndex == 31)
+	{
+		XMStoreFloat4x4(&m_SmokePoint, XMMatrixTranslationFromVector(XMVectorSet(3395.6f, 307.8f, 1966.6f, 1.f)));
+		XMStoreFloat4x4(&m_SmokePoint2, XMMatrixTranslationFromVector(XMVectorSet(3391.5f, 307.7f, 1971.3f, 1.f)));
+	}
+	else if (m_iTriggerIndex == 32)
+	{
+		XMStoreFloat4x4(&m_SmokePoint, XMMatrixTranslationFromVector(XMVectorSet(3367.2f, 307.9f, 1976.8f, 1.f)));
+		XMStoreFloat4x4(&m_SmokePoint2, XMMatrixTranslationFromVector(XMVectorSet(3368.9f, 307.9f, 1980.4f, 1.f)));
 	}
 }
 

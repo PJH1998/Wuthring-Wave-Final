@@ -86,18 +86,17 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		}
 		else
 		{
-//#ifdef _DEBUG
 			m_IsThrow = false;
-//#endif
-//
-//#ifndef _DEBUG
-//			m_isActivate = false;
-//#endif
+
 			//이펙트 호출.		
 			m_pCollideRigidbodyCom->IsActivate(true);
 			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 			PREFAB_INFO Info;
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), m_pTransformCom->Get_WorldMatrix(), &Info);
+
+			_uint iSoundChannel = m_pGameInstance->Register_Channel();
+
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire0"), iSoundChannel, 0.1f);
 		}
 
 	}

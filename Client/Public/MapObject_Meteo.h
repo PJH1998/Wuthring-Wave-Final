@@ -65,6 +65,10 @@ private:
 	void* m_pTempPtr = { nullptr };
 	void* m_pSecondTempPtr = { nullptr };
 	void* m_pThirdTempPtr = { nullptr };
+	_bool m_ISTrailEffect = { false };
+	_bool m_IsSound = { false };
+public:
+	static vector<_wstring> m_SoundTags;
 public:
 	static CMapObject_Meteo* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

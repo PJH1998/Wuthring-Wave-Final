@@ -55,7 +55,10 @@ void CMapObject_Dome::Update(_float fTimeDelta)
 
 void CMapObject_Dome::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+	if (m_iPhaze == 2 && m_fAlpha >= m_fMaxAlpha)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	else
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)

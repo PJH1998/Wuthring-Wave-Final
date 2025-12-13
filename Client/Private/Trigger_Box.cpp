@@ -76,7 +76,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 		break;
 	case 25:
 		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora_04");
-		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(XMConvertToRadians(-30.f)));
 		m_CamMatrix->IsMaintain = false;
 		break;
 	case 30:
@@ -158,11 +158,11 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 			m_iMiniGameClearNum++;
 			if (m_iMiniGameClearNum >= 1)
 			{
-				m_pGameInstance->OnFade(FADE::FADE_OUT, 4.f, [this]() {
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 3.f, [this]() {
 					_float4 vPos = _float4(1.2f, -3.7f, -708.8f, 1.f);
 					m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
 					m_pGameSystem->Lock_Input_ToPlayer(false);
-					m_pGameInstance->OnFade(FADE::FADE_IN, 4.f, [this]() {
+					m_pGameInstance->OnFade(FADE::FADE_IN, 1.5f, [this]() {
 						});
 					});
 			}
@@ -257,9 +257,9 @@ void CTrigger_Box::Collision_During()
 				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
 			m_pGameSystem->Hide_InteractUI(true);
 
-
 			PREFAB_INFO Info;
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Change_Sonora"), m_pTransformCom->Get_WorldMatrix(), &Info);
+
 		}
 		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 		{
@@ -322,7 +322,7 @@ void CTrigger_Box::Register_Trigger()
 		}
 #ifndef _DEBUG
 		m_IsTriggered = true;
-#endif
+#endif // !_DEBUG
 		});
 }
 

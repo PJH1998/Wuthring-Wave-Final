@@ -3,6 +3,8 @@
 #include"GameSystem.h"
 #include"MapObject_Destruction_Debris.h"
 
+vector<_wstring> CMapObject_Destruction::m_SoundTags;
+
 CMapObject_Destruction::CMapObject_Destruction(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice, pContext)
 {
@@ -16,6 +18,17 @@ CMapObject_Destruction::CMapObject_Destruction(const CMapObject_Destruction& Pro
 
 HRESULT CMapObject_Destruction::Initialize_Prototype()
 {
+	m_SoundTags.push_back(TEXT("Rock_Broken0"));
+	m_SoundTags.push_back(TEXT("Rock_Broken1"));
+	m_SoundTags.push_back(TEXT("Rock_Broken2"));
+	m_SoundTags.push_back(TEXT("Rock_Broken3"));
+	m_SoundTags.push_back(TEXT("Rock_Broken4"));
+	m_SoundTags.push_back(TEXT("Rock_Broken5"));
+	m_SoundTags.push_back(TEXT("Rock_Broken6"));
+	m_SoundTags.push_back(TEXT("Rock_Broken7"));
+	m_SoundTags.push_back(TEXT("Rock_Broken8"));
+	m_SoundTags.push_back(TEXT("Rock_Broken9"));
+	m_SoundTags.shrink_to_fit();
 	return S_OK;
 }
 
@@ -253,6 +266,16 @@ void CMapObject_Destruction::Spawn_Particles()
 		m_pPullUI = nullptr;
 	}
 
+	PREFAB_INFO Info{};
+
+	_uint SoundChannel = m_pGameInstance->Register_Channel();
+
+	_uint i = static_cast<_uint>(m_pGameInstance->Rand(0.f, 9.f));
+
+	m_pGameInstance->Play_Sound_Dynamic(CMapObject_Destruction::m_SoundTags[i], SoundChannel, 0.3f);
+	m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Down0"), SoundChannel, 0.3f);
+	m_pGameInstance->Return_Channel(SoundChannel);
+
 	m_IsDestroy = true;
 	for(_uint i=2; i<m_pBoneModel->Get_BoneSize();++i)
 	{
@@ -269,13 +292,13 @@ void CMapObject_Destruction::Spawn_Particles()
 			XMMatrixTranslationFromVector(vTrans) *
 			m_pTransformCom->Get_WorldMatrix());
 
-
+		
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Small_Smoke"), XMLoadFloat4x4(&Mat), &Info);
 
 		_vector Pos = XMVectorSetW(XMLoadFloat3(&m_vImpulsePos), 1.f);
 		_vector Power = XMVectorSetW(XMLoadFloat3(&m_vImpulsePower), 0.f);
 
 		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
-
 		
 		XMStoreFloat3(&ResetDesc.vImpulse, vDeltaPos * Power);
 		

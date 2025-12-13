@@ -34,6 +34,11 @@ matrix g_BoneMatrices[512];
 bool g_HasNormal = false;
 bool g_HasSkinMask = false;
 
+//NPC
+float4 g_fScanColor = float4(0.87f, 0.95f, 0.02f, 1.f);
+
+float g_fScanTime;
+
 cbuffer GlobalConstants
 {
     int g_iNumBlendWeightsToUse = 2; 
@@ -865,6 +870,144 @@ PS_OUT PS_GGOBUL(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_NAPAL(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float fRatio = 1.f;
+    
+    if (vDiffuse.a > 0.9f)
+        fRatio = 3.f;
+    
+    Out.vDiffuse.xyz = vDiffuse.xyz * fRatio;
+    
+    float3 vNormal = 0.f;
+
+    float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = vNormalDesc.xyz * 2.f - 1.f;
+    
+    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+    float3 vTangent = In.vTangent.xyz;
+    float3 vBinormal = In.vBinormal.xyz * -1.f;
+    float3 vInNormal = In.vNormal.xyz;
+    
+    float3x3 WorldMatrix;
+    WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+    vNormal = normalize(mul(vNormal, WorldMatrix));
+
+    float fRimPower = 0.f;
+    
+    float3 vLook = normalize(g_vCamPosition.xyz - In.vWorldPos.xyz);
+    
+    float fNdoV = dot(vNormal, vLook);
+    
+    fRimPower = abs(fNdoV) < cos(radians(75.f)) ? 1.f : 0.f;
+    
+    Out.vDiffuse.xyz += (vDiffuse.xyz * fRimPower);
+    
+    Out.vPBR.x = vNormalDesc.b;
+    Out.vPBR.y = vNormalDesc.a;
+
+    Out.vPBR.z = 1.f;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+PS_OUT PS_NPC_SCAN(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vDiffuse *= g_fScanColor;
+    
+    float fRimPower = 1.f;
+    
+    //float3 vLook = normalize(g_vCamPosition.xyz - In.vWorldPos.xyz);
+    
+    float3 vNormal = normalize(In.vNormal.xyz);
+    
+    //float fNdoV = dot(vNormal, vLook);
+    
+    //fRimPower = abs(fNdoV) < cos(radians(75.f)) ? 1.f : 0.f;
+    
+    float fScanRatio = (abs(fmod(g_fScanTime, 1.f) - 0.5f)) * 2.f;
+    
+    fRimPower *= fScanRatio;
+    
+    float3 vRimColor = vDiffuse.xyz * (fRimPower * 0.5f);
+    
+    Out.vEmissive = float4(vDiffuse.xyz, 1.f) * fScanRatio;
+    
+    Out.vDiffuse.xyz = vDiffuse.xyz + vRimColor;
+    Out.vDiffuse.a = 1.f;
+    
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+
+    Out.vPBR.z = 1.f;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+struct PS_OUT_NONLIGHT
+{
+    float4 vDiffuse : SV_TARGET0;
+    float4 vNormal : SV_TARGET1;
+    float4 vDepth : SV_TARGET2;
+    float4 vPBR : SV_TARGET3;
+};
+
+PS_OUT_NONLIGHT PS_NPC_FIND(PS_IN In)
+{
+    PS_OUT_NONLIGHT Out = (PS_OUT_NONLIGHT) 0;
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vDiffuse.a *= (1.f - g_fDissolveRate);
+    
+    Out.vDiffuse = vDiffuse;
+    
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+
+    Out.vPBR.z = 1.f;
+    
+    float3 vNormal = In.vNormal;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    return Out;
+}
+
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
 struct VS_OUT_SHADOW
@@ -1302,5 +1445,60 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_GGOBUL();
+    }
+    
+    pass Napal  // 18
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NAPAL();
+    }
+    
+    pass NPC_SCAN   // 19
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NPC_SCAN();
+    }
+
+    pass NPC_SCAN_FACE // 20
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_FACE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NPC_SCAN();
+    }
+    
+    pass NPC_FIND // 21
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NPC_FIND();
+    }
+    
+    pass NPC_FIND_FACE // 22
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_FACE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NPC_FIND();
     }
 }
