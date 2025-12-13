@@ -38,6 +38,7 @@ void CProp::Priority_Update(_float fTimeDelta)
         return;
     CPartObject::Priority_Update(fTimeDelta);
 
+	Process_CameraShake();
 }
 
 void CProp::Update(_float fTimeDelta)
@@ -186,6 +187,15 @@ void CProp::Register_AllNotifies(const _string& strFolderPath)
 		};
 
 	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
+}
+
+void CProp::Process_CameraShake()
+{
+	if (m_IsShake)
+	{
+		m_IsShake = false;
+		m_pGameInstance->OnShake(m_PendingShakeDesc);
+	}
 }
 
 void CProp::Free()

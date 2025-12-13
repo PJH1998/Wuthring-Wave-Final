@@ -348,9 +348,6 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			// 1. Leiviantan QTE bool 활성화
 			m_IsLeviatanQTE = true;
 			// 2. Leviatan 고정 이펙트 설정. (플레이어 몸체에)
-			Spawn_LeviatanAnchorEffect(TEXT("Common_Bondage"));
-
-
 			GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
 			break;
