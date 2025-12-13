@@ -303,10 +303,11 @@ void CTrigger_Box::Register_Trigger()
 		case 20:
 			m_pGameInstance->Set_CurrentCamera_Far(600.f);
 			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
+			m_pGameSystem->Change_BGM(TEXT("music_story_2_6_plot_purified_loop (SFX)"));
 			break;
 		case 30:
 			m_pGameSystem->Lock_Input_ToPlayer(true);
-			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_elite_intro_strong (SFX)"));
+			m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
 			break;
 		case 31:
 			ShakeDesc.fAmplitude = 1.f;
