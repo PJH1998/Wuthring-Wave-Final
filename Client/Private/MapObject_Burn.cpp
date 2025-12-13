@@ -38,7 +38,7 @@ void CMapObject_Burn::Priority_Update(_float fTimeDelta)
 void CMapObject_Burn::Update(_float fTimeDelta)
 {
 	if (m_IsBurn)
-		m_fTime += fTimeDelta / 5.f;
+		m_fTime += fTimeDelta / 2.f;
 	else
 		m_fTime = 0.f;
 }

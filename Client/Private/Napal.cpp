@@ -88,6 +88,8 @@ void CNapal::Render()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
@@ -100,7 +102,7 @@ void CNapal::Render()
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NAPAL));
 		
 		m_pModelCom->Render(i);
 
@@ -177,7 +179,6 @@ void CNapal::Ready_Component(NAPALDESC* pDesc)
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("NPC_Hiding/Com_Model");
 	//m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
-
 }
 
 CNapal* CNapal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -67,6 +67,8 @@ private:
 	_wstring m_szDebrisName;
 	CALLBACK_CLIENT m_CallBack = {};
 	void* m_pPullUI;
+public:
+	static vector<_wstring> m_SoundTags;
 	
 public:
 	static CMapObject_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

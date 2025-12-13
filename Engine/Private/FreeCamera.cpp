@@ -59,6 +59,7 @@ void CFreeCamera::Update(_float fTimeDelta)
 
 	ImGui::End();
 
+	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
 #endif
 }
 

@@ -66,8 +66,8 @@ CBT_Node* CBT_Sequence::Clone(void* pArg)
 
 void CBT_Sequence::Free()
 {
-    __super::Free();
     for (auto& child : m_Children)
         Safe_Release(child);
     m_Children.clear();
+    __super::Free();
 }

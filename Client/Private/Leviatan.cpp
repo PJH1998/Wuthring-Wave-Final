@@ -1269,7 +1269,9 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 					{
 						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
 						m_pGameSystem->Change_Leviathan_Phaze(1);
-						//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_ONE);
+						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
+						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+
 					}
 				}
 				else if(m_iActionIndex == ACTION::PHASE1_DOWN)
@@ -1277,7 +1279,11 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 					m_iPhase = PHASE::TWO;
 					Reset(XMMatrixIdentity(), nullptr);
 					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+					{
 						Event2();
+						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
+						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+					}
 				}
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
 				{

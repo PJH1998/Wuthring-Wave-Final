@@ -2,6 +2,8 @@
 #include "MapObject_Meteo.h"
 #include"GameSystem.h"
 
+vector<_wstring> CMapObject_Meteo::m_SoundTags;
+
 CMapObject_Meteo::CMapObject_Meteo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
 {
@@ -15,6 +17,10 @@ CMapObject_Meteo::CMapObject_Meteo(const CMapObject_Meteo& Prototype)
 
 HRESULT CMapObject_Meteo::Initialize_Prototype()
 {
+	m_SoundTags.push_back(TEXT("Explosion0"));
+	m_SoundTags.push_back(TEXT("Explosion1"));
+	m_SoundTags.push_back(TEXT("Explosion2"));
+
     return S_OK;
 }
 
@@ -26,7 +32,14 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 	Ready_Components(pArg);
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex,[this](void* pArg) {
 		m_IsTriggerd = true;
-	});
+		m_ISTrailEffect = true;
+		PREFAB_INFO Info{};
+		Info.pActive = &m_ISTrailEffect;
+		Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Meteor_Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
+		});
+
     return S_OK;
 }
 
@@ -95,14 +108,13 @@ void CMapObject_Meteo::Render()
 
 void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 {
-	PREFAB_INFO Info{};
-	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	if (m_iEffectFrame >= 3)
+	if (!m_IsSound)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
-		m_iEffectFrame = 0;
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire_Long"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
+		m_IsSound = !m_IsSound;
 	}
-	m_iEffectFrame++;
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 	_vector current_xz = XMVectorLerp(XMLoadFloat4(&m_vSourPos), XMLoadFloat4(&m_vDestPos), Time);
@@ -113,12 +125,34 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 	m_pTransformCom->Set_State(STATE::POSITION, CurrentPos);
 	if (Time >= 1.f)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix(), &Info);
-		//이펙트들 터트리기.
+		m_ISTrailEffect = false;
 		m_IsTriggerd = false;
+		m_isActivate = false;
+
+		PREFAB_INFO Info{};
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix(), &Info);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Big_Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
+		//이펙트들 터트리기.
+		_uint SoundChannel = m_pGameInstance->Register_Channel();
+		switch (static_cast<_uint>(m_pGameInstance->Rand(0.f, 3.f)))
+		{
+		case 0:
+			m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[0], SoundChannel, 0.2f);
+			break;
+
+		case 1:
+			m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[1], SoundChannel, 0.2f);
+			break;
+
+		case 2:
+			m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[2], SoundChannel, 0.2f);
+			break;
+		}
+
+		m_pGameInstance->Return_Channel(SoundChannel);
+
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));
 		m_fFall = 0.f;
-		m_isActivate = false;
 
 		if (m_iTriggerActiveIndex != -1)
 		{
@@ -132,7 +166,7 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 
 			if (m_pThirdTempPtr)
 				m_pGameSystem->Toggle_GrapplePoint(m_pThirdTempPtr, true);
-			
+
 		}
 	}
 }
