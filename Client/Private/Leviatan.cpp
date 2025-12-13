@@ -146,7 +146,14 @@ void CLeviatan::Update(_float fTimeDelta)
 		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta * fTimeRatio, &temp);
 	}
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+	{
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
+#pragma region PARRY_UI
+		m_pGameSystem->Enable_Parried();
+#pragma endregion
+		PREFAB_INFO Effect{};
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+	}
 
 	//3. 거리 보간
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -1423,7 +1430,31 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		m_isKnockDownTrig = m_isParalysis;
 
 	if (m_beHit)
+	{
 		m_beHit = false;
+
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG), m_eBehitColor, 0.4f);
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma endregion
+#pragma region UI_UNBIND
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_TWO);
+		}
+#pragma endregion
+	}
 }
 
 void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -1454,10 +1485,6 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		if (m_iPhase == PHASE::ONE && m_fHP > 5000.f && ((m_fHP - pDesc->fAttack) < 5000.f))
 			m_isExecuteEnable = true;
 		m_fHP -= pDesc->fAttack;
@@ -1469,23 +1496,12 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 
 		if(m_fStamina > 0.f)
 			m_fStamina -= 1.f;
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+		m_fBehitDMG = pDesc->fAttack;
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
-#pragma region UI_UNBIND
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-			m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_TWO);
-		}
-#pragma endregion
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
 #ifdef _DEBUG
@@ -1515,12 +1531,6 @@ void CLeviatan::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region PARRY_UI
-	m_pGameSystem->Enable_Parried();
-#pragma endregion
-	PREFAB_INFO Effect{};
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
 
 #ifdef _DEBUG
 	cout << "Parry! Leviatan)" << endl;
@@ -1624,6 +1634,8 @@ void CLeviatan::Event1()
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::END);
 	m_pGameSystem->Change_BGM(TEXT("Null"));
 	m_pGameSystem->Change_Leviathan_Phaze(0);
+	//레비아탄 채력 데이터 변경 함수
+	m_pGameSystem->Levi_Phase_Change();
 
 	//떠오를 때 노티파이로 이거 실행
 	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기

@@ -85,7 +85,7 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	if (false == m_isActivate)
 	{
-		m_pGameInstance->Stop_Sound(m_iSoundChannel);
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
 		m_iSoundChannel = -1;
 	}
@@ -634,6 +634,26 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 		m_beHit = false;
+
+#pragma region UI_BIND
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.35f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG), m_eBehitColor, 0.4f);
+#pragma endregion
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(m_strBehitSound, m_iSoundChannel, 0.4f);
+		}
+#pragma endregion
 	}
 	else
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
@@ -704,26 +724,10 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
 		m_fBehitAcc = 0.f;
-#pragma region UI_BIND
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-#pragma endregion
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-		{
-			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
-			m_pGameInstance->Play_Sound_Dynamic(strSoundTag, m_iSoundChannel, 0.4f);
-		}
-#pragma endregion
+		m_fBehitDMG = pDesc->fAttack;
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
 #pragma region PHYSICS
 		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);

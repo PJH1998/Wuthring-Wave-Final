@@ -219,6 +219,7 @@ public:
 	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
 	_uint Get_NumNPCInstance(_uint iType) const;
 	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
+	void	Levi_Phase_Change();
 #pragma endregion
 
 #pragma region SFX_PREFAB

@@ -22,10 +22,12 @@ public:
 	_uint						Get_NumNPCInstance(_uint iType) const { return m_NPCTable[iType].size(); }
 	const vector<NPCINFO>&		Get_NpcData(_uint iType) const;
 	void						Clear_NPCData();
+	void						Phase_Change();
 private:
 	map<const _string, _uint> m_MonsterKey;
 	map<_uint, MONSTER_INFO> m_MonsterTable;
 	vector<NPCINFO> m_NPCTable[NPCTYPE::END];
+	_float				m_fBossHPRemind{};
 public:
 	static CMonsterTable* Create();
 	virtual void Free() override;

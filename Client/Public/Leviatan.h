@@ -134,6 +134,7 @@ private:
 	_float					m_fBehitAcc{};
 	_float					m_fOutlineRadious{};
 	_float4					m_vOutlineColor{};
+	_float					m_fNoiseTime = {};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
@@ -147,9 +148,11 @@ private:
 	vector<_wstring>		m_strSequenceTag[ACTION::ACTEND];
 #pragma endregion
 
-#pragma region SHADER
-	_float					m_fNoiseTime = {};
-#pragma endregion 
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
+#pragma endregion
 
 private:
 	HRESULT						Bind_Resources();
