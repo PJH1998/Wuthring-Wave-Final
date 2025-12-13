@@ -418,6 +418,23 @@ void CGameSystem::Trigger_StopEndImageForcely()
 }
 #endif // _DEBUG
 
+void CGameSystem::Trigger_ActivateQuest()
+{
+	m_pUI_ControlHelper->Trigger_ActivateQuest();
+}
+
+void CGameSystem::Trigger_AddQuestProgress()
+{
+	m_pUI_ControlHelper->Trigger_AddQuestProgress();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_AllReset()
+{
+	m_pUI_ControlHelper->Trigger_AllReset();
+}
+#endif // _DEBUG
+
 
 void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {

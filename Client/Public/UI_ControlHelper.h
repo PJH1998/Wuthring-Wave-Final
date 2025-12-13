@@ -80,6 +80,13 @@ public:
 	void				Trigger_StopEndImageForcely();
 #endif // _DEBUG
 
+	void				Trigger_ActivateQuest();
+	void				Trigger_AddQuestProgress();
+
+#ifdef _DEBUG
+	void				Trigger_AllReset();
+#endif // _DEBUG
+
 
 
 private:
