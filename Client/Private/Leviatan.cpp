@@ -1377,11 +1377,13 @@ void CLeviatan::Ready_Events()
 				m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
 					m_isBattle = true;
 					Event1();
+
 					m_pGameInstance->OnFade(FADE::FADE_IN, 0.7f, [this]() {
 						
 						});
 					});
 				m_strSequenceAnim = "Paralysis_Start";
+
 			}
 		}
 		});
@@ -1446,8 +1448,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 						m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, [this]() {
 							
 							});
-						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
-						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+						
 					}
 				}
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
@@ -1769,7 +1770,8 @@ void CLeviatan::Event1()
 		m_pGameSystem->Lock_Input_ToPlayer(true);
 	//레비아탄 채력 데이터 변경 함수
 	m_pGameSystem->Levi_Phase_Change();
-
+	_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
+	m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
 	//떠오를 때 노티파이로 이거 실행
 	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기
 	//m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHANGE);
