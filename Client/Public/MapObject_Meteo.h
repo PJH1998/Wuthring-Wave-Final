@@ -67,6 +67,8 @@ private:
 	void* m_pThirdTempPtr = { nullptr };
 	_bool m_ISTrailEffect = { false };
 	_bool m_IsSound = { false };
+
+	_float3 m_vRadians = {};
 public:
 	static vector<_wstring> m_SoundTags;
 public:

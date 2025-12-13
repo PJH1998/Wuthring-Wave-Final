@@ -222,7 +222,9 @@ CGameObject* CNPC_Griffin::Clone(void* pArg)
 void CNPC_Griffin::Free()
 {
 	__super::Free();
-	m_pGameInstance->Return_Channel(m_iSoundChannel1);
-	m_pGameInstance->Return_Channel(m_iSoundChannel2);
+	if(m_iSoundChannel1 != -1)
+		m_pGameInstance->Return_Channel(m_iSoundChannel1);
+	if (m_iSoundChannel2 != -1)
+		m_pGameInstance->Return_Channel(m_iSoundChannel2);
 	Safe_Release(m_pAnimMachine);
 }

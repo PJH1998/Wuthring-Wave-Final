@@ -551,12 +551,6 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		m_fBehitAcc = m_fBehitMaxTime;
-		return;
-	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -618,6 +612,13 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 
 	if (m_fBehitAcc < m_fBehitMaxTime)
 		m_fBehitAcc += fTimeDelta;
+
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		//return;
+	}
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
@@ -630,7 +631,7 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);

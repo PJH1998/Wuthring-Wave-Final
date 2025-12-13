@@ -120,6 +120,7 @@ void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
 	//m_CallBack.strEffectTag = ;
 	m_CallBack.eType =pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
+	m_pRigidBodyCom->IsActivate(false);
 }
 
 void CAoEDoT::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
