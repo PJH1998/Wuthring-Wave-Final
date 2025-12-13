@@ -179,7 +179,11 @@ void CLeviatan::Update(_float fTimeDelta)
 		m_pGameSystem->Enable_Parried();
 #pragma endregion
 		PREFAB_INFO Effect{};
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+		Effect.pModelPtr = m_pModelCom;
+		Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), m_pTransformCom->Get_WorldMatrix(), &Effect);
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
 	}
 
 	//3. 거리 보간
@@ -1092,6 +1096,14 @@ void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
 		else if (wstrPartTag == TEXT("Death"))
 		{
 			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_death_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Story1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_1"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+		}
+		else if (wstrPartTag == TEXT("Story2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_2"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
 		}
 	}
 	
