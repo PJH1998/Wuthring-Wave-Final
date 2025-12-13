@@ -974,6 +974,8 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     
     bool IsDraw = true;
     
+    float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
+    
     vector vOutLinePos = vViewPos + (vViewNormal * (g_fOutLineRadius * fTimeRatio));
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
