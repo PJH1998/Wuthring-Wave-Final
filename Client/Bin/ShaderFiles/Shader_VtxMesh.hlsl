@@ -1734,6 +1734,39 @@ PS_OUT_LIGHT PS_MAIN_DOME_PHAZE2(PS_IN In)
     return Out;
 }
 
+PS_OUT_LIGHT PS_MAIN_METEOR(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    if (vMask.a == 0)
+        Out.vDiffuse = float4(0.3388785421848297f,
+   0.44620344042778015f,
+   0.6740331649780273f,
+   1.0);
+    else
+    {
+        Out.vDiffuse = float4(0.33625346422195435f, 0.5338311195373535f, 0.8950276374816895f, 1.f);
+
+        Out.vEmissive = Out.vDiffuse;
+    }
+    
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -2038,5 +2071,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_DOME_DISTORTION_EMISSIVE();
+    }
+
+    pass Meteor_Color// 28
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_METEOR();
     }
 }
