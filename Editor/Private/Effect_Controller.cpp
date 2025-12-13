@@ -1526,6 +1526,7 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
     TrailMesh["MyTag"] = WStringToString(pTrailDesc->strMyTag);
     TrailMesh["MyType"] = pTrailDesc->eMyType;
     TrailMesh["Root"] = pTrailDesc->IsRootOn;
+	TrailMesh["Loop"] = pTrailDesc->IsLoop;
 
     TrailMesh["TextureTag"] = WStringToString(pTrailDesc->strTextureTag);
     TrailMesh["ColorTextureTag"] = WStringToString(pTrailDesc->strColorTextureTag);

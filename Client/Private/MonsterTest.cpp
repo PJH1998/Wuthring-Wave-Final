@@ -61,7 +61,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
-	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2"); // Bip001Spine2, CameraPosition
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
@@ -126,7 +126,14 @@ void CMonsterTest::Update(_float fTimeDelta)
 	//_float temp{};
 	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+	{
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
+#pragma region PARRY_UI
+		m_pGameSystem->Enable_Parried();
+#pragma endregion
+		PREFAB_INFO Effect{};
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+	}
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 	{
@@ -974,7 +981,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 	if(m_isParalysis)
 	{
-		m_fParalysisAcc -= fTimeDelta;
+		_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+		m_fParalysisAcc -= fTimeDelta * fTimeRatio;
 		if(m_fParalysisAcc <= 0.f)
 		{
 			//그로기 유지시간 정의하기
@@ -1005,6 +1013,27 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 		m_beHit = false;
+#pragma region UI_BIND
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 0.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG),m_eBehitColor, 0.4f);
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
+		}
+#pragma endregion
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma endregion
 	}
 	//그로기 특수상황
 	if (m_isParalysis)
@@ -1039,150 +1068,98 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
 		return;
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
 		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-			m_pGameSystem->Engage_Battle(false, BOSSBGM::SOERVERIGN);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+		m_fBehitDMG = pDesc->fAttack;
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma region PHYSICS
+		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);
 #pragma endregion
-#ifdef _DEBUG
-		cout << "Be Hit! (False Sovereign)" << endl;
-#endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
-	{
-		m_beHit = true;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
+
+		if(iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
 #ifdef _DEBUG
-		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+			cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		m_beHit = true;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		if (m_fHP <= 0.f)
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-
-		const _wstring& strSoundTag = pDesc->strSoundTag;
-		if (!strSoundTag.empty())
-			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
-#pragma endregion
 #ifdef _DEBUG
-		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
+			cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
+		}
+		else
+		{
+#ifdef _DEBUG
+			cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
+#endif // _DEBUG
+		}
 	}
 }
 
 void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer)
 {
-	CAMERA_SHAKE ShakeDesc{};
-	
-	if(eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
-	{
-		ShakeDesc.fAmplitude = 1.f;
-		ShakeDesc.fDuration = 0.8f;
-		ShakeDesc.fFovKick = 0.f;
-		ShakeDesc.fFrequency = 2.f;
-		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
-		ShakeDesc.vTranslation;
-#ifdef _DEBUG
-		cout << "Common" << endl;
-#endif // _DEBUG
-	}
-	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
-	{
-		ShakeDesc.fAmplitude = 2.f;
-		ShakeDesc.fDuration = 0.15f;
-		ShakeDesc.fFovKick = 0.f;
-		ShakeDesc.fFrequency = 60.f;
-		ShakeDesc.vRotation = _float3(0.13f, 0.0f, 0.f);
-		ShakeDesc.vTranslation;
-#ifdef _DEBUG
-		cout << "Hard" << endl;
-#endif // _DEBUG
-	}
-	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_SKILL)
-	{
-		ShakeDesc.fAmplitude = 1.f;
-		ShakeDesc.fDuration = 0.15f;
-		ShakeDesc.fFovKick = 0.f;
-		ShakeDesc.fFrequency = 45.f;
-		ShakeDesc.vRotation = _float3(0.05f, 0.075f, 0.05f);
-		ShakeDesc.vTranslation;
-
-	}
-
-	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_1))
-	{
-		ShakeDesc.vRotation.y *= 1.2f;
-	}
-	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
-	{
-		ShakeDesc.vRotation.x *= 0.75f;
-		ShakeDesc.vRotation.y *= 0.75f;
-	}
-	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_4))
-	{
-		ShakeDesc.vRotation.x *= 1.2f;
-	}
-
-	m_pGameInstance->OnShake(ShakeDesc);
+//	CAMERA_SHAKE ShakeDesc{};
+//	
+//	if(eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
+//	{
+//		ShakeDesc.fAmplitude = 1.f;
+//		ShakeDesc.fDuration = 0.8f;
+//		ShakeDesc.fFovKick = 0.f;
+//		ShakeDesc.fFrequency = 2.f;
+//		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+//		ShakeDesc.vTranslation;
+//#ifdef _DEBUG
+//		cout << "Common" << endl;
+//#endif // _DEBUG
+//	}
+//	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
+//	{
+//		ShakeDesc.fAmplitude = 2.f;
+//		ShakeDesc.fDuration = 0.15f;
+//		ShakeDesc.fFovKick = 0.f;
+//		ShakeDesc.fFrequency = 60.f;
+//		ShakeDesc.vRotation = _float3(0.13f, 0.0f, 0.f);
+//		ShakeDesc.vTranslation;
+//#ifdef _DEBUG
+//		cout << "Hard" << endl;
+//#endif // _DEBUG
+//	}
+//	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_SKILL)
+//	{
+//		ShakeDesc.fAmplitude = 1.f;
+//		ShakeDesc.fDuration = 0.15f;
+//		ShakeDesc.fFovKick = 0.f;
+//		ShakeDesc.fFrequency = 45.f;
+//		ShakeDesc.vRotation = _float3(0.05f, 0.075f, 0.05f);
+//		ShakeDesc.vTranslation;
+//
+//	}
+//
+//	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_1))
+//	{
+//		ShakeDesc.vRotation.y *= 1.2f;
+//	}
+//	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
+//	{
+//		ShakeDesc.vRotation.x *= 0.75f;
+//		ShakeDesc.vRotation.y *= 0.75f;
+//	}
+//	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_4))
+//	{
+//		ShakeDesc.vRotation.x *= 1.2f;
+//	}
+//
+//	m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 	cout << "On Hit! Shim Wang)" << endl;
 #endif // _DEBUG
@@ -1191,11 +1168,7 @@ void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold&
 void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
-	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region PARRY_UI
-	m_pGameSystem->Enable_Parried();
-#pragma endregion
+	//memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 
 #ifdef _DEBUG
 	cout << "Parry! Shim Wang)" << endl;

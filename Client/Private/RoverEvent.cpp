@@ -89,6 +89,8 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 		{
 			m_IsStopOnce = true;
 			m_pRover->Stop_Anim();
+			m_pRover->Set_LeviatanQTE(true);
+			m_pRover->Spawn_LeviatanAnchorEffect(TEXT("Common_Bondage"));
 			return;
 		}
 	}
@@ -101,6 +103,7 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01;
 			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 			m_pRover->Start_Anim();
+			m_pRover->Set_LeviatanQTE(false);
 			return;
 		}
 	}

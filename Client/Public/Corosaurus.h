@@ -109,9 +109,17 @@ private:
 	_float3					m_vUIPosition{};
 #pragma endregion
 
-//#pragma region SOUND
-//	_uint					m_iSoundChannel{};
-//#pragma endregion
+#pragma region SHADER_VALUE
+	_float					m_fBehitMaxTime{};
+	_float					m_fBehitAcc{};
+	_float					m_fDesolveRate{};
+#pragma endregion
+
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
+#pragma endregion
 
 private:
 	HRESULT						Bind_Resources();

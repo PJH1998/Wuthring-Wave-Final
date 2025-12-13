@@ -308,55 +308,62 @@ void CLevi_Alter::Sound_Active(const _wstring& wStrObjectTag)
 	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
 	if (wstrTypeTag == TEXT("Move"))
 	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
 		if (wstrPartTag == TEXT("Dodge1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_01 (SFX)"), m_iSoundChannel2, 0.07f);
 		}
 		else if (wstrPartTag == TEXT("Dodge2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_02 (SFX)"), m_iSoundChannel2, 0.07f);
 		}
 		else if (wstrPartTag == TEXT("Dodge3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_03 (SFX)"), m_iSoundChannel2, 0.07f);
 		}
 		else if (wstrPartTag == TEXT("Dodge4"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_04 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_04 (SFX)"), m_iSoundChannel2, 0.07f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Sword"))
 	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 		if (wstrPartTag == TEXT("0102"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), m_iSoundChannel, 0.25f);
 		}
 		else if (wstrPartTag == TEXT("1802"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack18_p2 (SFX)"), m_iSoundChannel, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("1803"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack18_p3 (SFX)"), m_iSoundChannel, 0.2f);
 		}
 		else if (wstrPartTag == TEXT("1402"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), m_iSoundChannel, 0.25f);
+		}
+		else if (wstrPartTag == TEXT("0501"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack5_p1_01 (SFX)"), m_iSoundChannel, 0.15f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Bow"))
 	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 		if (wstrPartTag == TEXT("Shoot1"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_arrowshot_01 (SFX)"), m_iSoundChannel, 0.15f);
 		}
 		else if (wstrPartTag == TEXT("Shoot2"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_arrowshot_02 (SFX)"), m_iSoundChannel, 0.15f);
 		}
 		else if (wstrPartTag == TEXT("Shoot3"))
 		{
-			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.15f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_arrowshot_03 (SFX)"), m_iSoundChannel, 0.15f);
 		}
 	}
 }

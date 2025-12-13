@@ -382,6 +382,17 @@ void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& 
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &RopeInfo);
 }
 
+void CCharacter::Spawn_LeviatanAnchorEffect(const _wstring& wStrEffectTag)
+{
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+	EffectDesc.pActive = &m_IsLeviatanQTE;
+
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
+}
+
 void CCharacter::Execute_Telport(_vector vPos)
 {
 	if (nullptr == m_pTransformCom ||

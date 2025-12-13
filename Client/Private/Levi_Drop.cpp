@@ -26,6 +26,7 @@ HRESULT CLevi_Drop::Initialize_Clone(void* pArg)
 	m_wstrEffectTag = pDesc->wstrEffectTag;
 	m_fMaxLifeTime = 1.f;
 	m_isActivate = false;
+	m_iSoundChannel = -1;
     return S_OK;
 }
 
@@ -47,7 +48,8 @@ void CLevi_Drop::Update(_float fTimeDelta)
 			m_isDisolve = true;
 			m_pRigidBodyCom->IsActivate(false);
 
-			//바닦에 떨어졌을때 이펙트 호출
+			//바닥에 떨어졌을때 이펙트 호출
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack14_p2_impact1 (SFX)"), m_iSoundChannel, 0.05f,m_pTransformCom, 0.001f, 5.f);
 		}
 	}
 	
@@ -60,9 +62,10 @@ void CLevi_Drop::Late_Update(_float fTimeDelta)
 	if(m_fLifeTime >= m_fMaxLifeTime)
 	{
 		m_isActivate = false;
-		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-		vPosition = XMVectorSetY(vPosition, 1000.f);
-		m_pTransformCom->Set_State(STATE::POSITION, vPosition);
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
+
 		m_pRigidBodyCom->IsActivate(false);
 		return;
 	}
@@ -91,6 +94,7 @@ void CLevi_Drop::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDisolve = false;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 
 	// 메테오 스폰
 	PREFAB_INFO Info = {};

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "VIBuffer.h"
 
 NS_BEGIN(Engine)
@@ -25,6 +25,8 @@ public:
 
 public:
 	void Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int SampleCount, const _float4* vCamPos);
+
+	void Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _int SampleCount, const _float4* vCamPos);
 
 private:
 	_int			m_iMaxSamples = {};
