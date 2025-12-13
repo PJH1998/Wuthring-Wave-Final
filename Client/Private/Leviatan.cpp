@@ -327,7 +327,7 @@ void CLeviatan::Render_OutLine()
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
-		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::OUNTLINE))))
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::BOSS_OUTLINE))))
 			CRASH("Ready Shader Begin Failed");
 
 		if (FAILED(m_pModelCom->Render(i)))
@@ -1552,7 +1552,7 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		if (m_iPhase == PHASE::ONE && m_fHP > 5000.f && ((m_fHP - pDesc->fAttack) < 5000.f))
 			m_isExecuteEnable = true;
 		m_fHP -= pDesc->fAttack;
-
+		m_fBehitAcc = 0.f;
 #pragma region PHASE_1
 		if (m_iPhase == PHASE::ONE && m_fHP <= 0.f)
 			m_fHP = 1.f;
