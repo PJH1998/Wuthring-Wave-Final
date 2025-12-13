@@ -26,10 +26,7 @@ HRESULT CMapObject_Burn::Initialize_Clone(void* pArg)
 
 void CMapObject_Burn::Priority_Update(_float fTimeDelta)
 {
-	//if (m_IsBurn)
-		m_iShaderPassIndex = 23;
-	//else
-		//m_iShaderPassIndex = 13;
+	m_iShaderPassIndex = 23;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
 		m_IsBurn = !m_IsBurn;
