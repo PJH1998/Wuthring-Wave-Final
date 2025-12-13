@@ -109,6 +109,8 @@ void CSpringCamera::Priority_Update(_float fTimeDelta)
 
 void CSpringCamera::Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
+
 	// Look Position Init
 	m_vLookPosition = m_vTargetPosition;
 	m_vLookPosition.y += m_fOffsetY;
