@@ -1228,9 +1228,41 @@ void CUI_HUD::Update_Text_PlayerCD()
 	_float fCurCHCD_E = UISlots[CAbility::KEY_E].fCurrentCoolTime;
 	_float fCurCHCD_T = 0.f;		// 나중에 쓸 것 같으면 그떄가서 넣기
 
+
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_ROVER:
+	{
+		m_pTextUI_SkillCD_R->SetActivate(true);
+		m_pTextUI_SkillCD_E->SetActivate(true);
+	}break;
+	case CH_AUGUSTA:
+	{
+		if (m_isIn_UltMode_Augusta)
+		{
+			m_pTextUI_SkillCD_R->SetActivate(true);
+			m_pTextUI_SkillCD_E->SetActivate(false);
+		}
+		else
+		{
+			m_pTextUI_SkillCD_R->SetActivate(true);
+			m_pTextUI_SkillCD_E->SetActivate(true);
+		}
+	}break;
+	case CH_GALBRENA:
+	default:
+	{
+		m_pTextUI_SkillCD_R->SetActivate(true);
+		m_pTextUI_SkillCD_E->SetActivate(true);
+	}
+		break;
+	}
+
+
+
 	// 0초면 안보이게.
-	if (fCurCHCD_R == 0.f) m_pTextUI_SkillCD_R->SetActivate(false);			else m_pTextUI_SkillCD_R->SetActivate(true); 
-	if (fCurCHCD_E == 0.f) m_pTextUI_SkillCD_E->SetActivate(false);			else m_pTextUI_SkillCD_E->SetActivate(true); 
+	if (fCurCHCD_R == 0.f) m_pTextUI_SkillCD_R->SetActivate(false);
+	if (fCurCHCD_E == 0.f) m_pTextUI_SkillCD_E->SetActivate(false);
 	if (fCurCHCD_T == 0.f) m_pTextUI_SkillCD_T->SetActivate(false);			else m_pTextUI_SkillCD_T->SetActivate(true);
 
 	// 쿨타임 소숫점 잘라내기
