@@ -21,12 +21,16 @@ CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CLeviatan::CLeviatan(const CLeviatan& Prototype)
 	: CActor { Prototype }
 	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vOutLineColor{ Prototype.m_vOutLineColor }
+	, m_fOutLineRadius{ Prototype.m_fOutLineRadius }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLeviatan::Initialize_Prototype()
 {
+	m_vOutLineColor = _float4(0.9535f, 0.9015f, 0.3218f, 1.f);
+	m_fOutLineRadius = 0.05f;
 	return S_OK;
 }
 
@@ -94,6 +98,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_Start"));
 	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_End"));
 	//m_strSequenceTag[ACTION::PHASE2_DEAD].push_back(TEXT(""));
+
 
 	return S_OK;
 }
@@ -1007,6 +1012,12 @@ HRESULT CLeviatan::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
+	if (m_fBehitAcc < m_fBehitMaxTime)
+	{
+		m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutLineColor, sizeof(_float4));
+		m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutLineRadius, sizeof(_float));
+	}
+
 	return S_OK;
 }
 
@@ -1323,7 +1334,8 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 						m_pGameSystem->Change_Leviathan_Phaze(1);
 						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
 						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
-						m_pGameSystem->Lock_Input_ToPlayer(false);
+						if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+							m_pGameSystem->Lock_Input_ToPlayer(false);
 
 					}
 				}
@@ -1477,7 +1489,8 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		m_isAggro = true;
 		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_INTRO);
 		m_pGameSystem->Change_BGM(TEXT("Null"));
-		m_pGameSystem->Lock_Input_ToPlayer(true);
+		if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			m_pGameSystem->Lock_Input_ToPlayer(true);
 	}
 }
 
@@ -1488,6 +1501,7 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_beHit = true;
 		if (m_iPhase == PHASE::ONE && m_fHP > 5000.f && ((m_fHP - pDesc->fAttack) < 5000.f))
 			m_isExecuteEnable = true;
 		m_fHP -= pDesc->fAttack;
@@ -1637,7 +1651,8 @@ void CLeviatan::Event1()
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::END);
 	m_pGameSystem->Change_BGM(TEXT("Null"));
 	m_pGameSystem->Change_Leviathan_Phaze(0);
-	m_pGameSystem->Lock_Input_ToPlayer(true);
+	if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		m_pGameSystem->Lock_Input_ToPlayer(true);
 	//레비아탄 채력 데이터 변경 함수
 	m_pGameSystem->Levi_Phase_Change();
 
@@ -1657,7 +1672,8 @@ void CLeviatan::Event2()
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
 	m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_TWO);
 	m_pGameSystem->Change_Leviathan_Phaze(2);
-	m_pGameSystem->Lock_Input_ToPlayer(false);
+	if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		m_pGameSystem->Lock_Input_ToPlayer(false);
 
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
@@ -1726,14 +1742,14 @@ _bool CLeviatan::Attack_Arrange()
 
 _bool CLeviatan::CheckHit()
 {
-	if (m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-
-		m_beHit = false;
-		return true;
-	}
-	return false;
+	//if (m_beHit)
+	//{
+	//	m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+	//
+	//	m_beHit = false;
+	//	return true;
+	//}
+	return m_beHit;
 }
 
 _bool CLeviatan::Back()

@@ -118,7 +118,7 @@ private:
 	_float					m_fStamina{};
 	_float					m_fMaxStamina{};
 	_float					m_fHitStopRatio{};
-	_bool					m_fHitAcc{};
+	//_bool					m_fHitAcc{};
 	_float					m_fFenceAcc{};
 	_float					m_fDropAcc{};
 #pragma endregion
@@ -132,9 +132,10 @@ private:
 #pragma region SHADER_VALUE
 	_float					m_fBehitMaxTime{};
 	_float					m_fBehitAcc{};
-	_float					m_fOutlineRadious{};
-	_float4					m_vOutlineColor{};
+	_float					m_fOutLineRadius{};
+	_float4					m_vOutLineColor{};
 	_float					m_fNoiseTime = {};
+
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
