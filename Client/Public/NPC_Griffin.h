@@ -26,7 +26,7 @@ public:
 public:
 	//virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
 	//virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	//virtual void Object_Func(const _wstring& wStrObjectTag) override; // 임시
+	virtual void Object_Func(const _wstring& wStrObjectTag) override; // 임시
 	//virtual void Hit_Judge(void* pArg = nullptr) {};// 임시
 
 private:
@@ -34,6 +34,8 @@ private:
 
 	_uint m_iAnimState = {};
 	_bool m_IsRender = {};
+	_uint m_iSoundChannel1 = {};
+	_uint m_iSoundChannel2 = {};
 private:
 	HRESULT		Bind_Resources();
 	void		Ready_Component(GRIFFIN_DESC* pDesc);

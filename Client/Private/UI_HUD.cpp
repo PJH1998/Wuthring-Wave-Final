@@ -530,7 +530,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		vecVariantMat.resize(iTargetNumInstance);
 
 		const _float fLeftColorMul			= 0.4f;
-		const _float fPassedColorMul		= 0.8f;
+		const _float fPassedColorMul		= 0.7f;
 		const _float fFilledColorMul		= 1.f;
 
 		// 궁 준비상태에 따른 색상. 궁 준비 + 잔여 쿨 0초면 제대로 보임.또 쿨 진행중이면 쿨 표시. 이것까진 기존대로, 이외엔 흐린 색
@@ -538,6 +538,10 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		if (isUltReady && fBasicSkillCD[i][SK_R] <= 0.f)	fUltColor = fFilledColorMul;
 		else if (fBasicSkillCD[i][SK_R] > 0.f)				fUltColor = fPassedColorMul;
 		else												fUltColor = fPassedColorMul;
+
+		if (static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_READY &&
+			m_iSelectedCHIndex == CH_AUGUSTA)
+			fUltColor = fFilledColorMul;
 
         vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
         vecVariantMat[0].m[0][1] = fLeftColorMul;
@@ -713,6 +717,11 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
 	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
+	if ((static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY ||
+		static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_READY) &&
+		m_iSelectedCHIndex == CH_AUGUSTA)
+		fUltGuage = 1.f;
+
 	vector<_float4> vecCustomColor		= { };		vecCustomColor.resize(CH_END);
 	vector<_float4> vecAdvCustomColor	= { };		vecAdvCustomColor.resize(CH_END);
 	
@@ -811,6 +820,7 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 	{
 		isUltGuageFull = (m_isIn_UltMode_Augusta)?
 			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST4) == 1.f) :
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f) || 
 			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST5) == 1.f);
 
 	}
@@ -922,6 +932,7 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
 
 
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
