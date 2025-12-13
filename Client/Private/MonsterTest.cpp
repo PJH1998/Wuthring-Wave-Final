@@ -134,7 +134,11 @@ void CMonsterTest::Update(_float fTimeDelta)
 		m_pGameSystem->Enable_Parried();
 #pragma endregion
 		PREFAB_INFO Effect{};
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+		Effect.pModelPtr = m_pModelCom;
+		Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), m_pTransformCom->Get_WorldMatrix(), &Effect);
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
 	}
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
