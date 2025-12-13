@@ -176,13 +176,13 @@ void CRenderer::Render()
 	Render_NonLight();
 	Render_LUT();
 	Render_Fog();
+	Render_DistortionObject();
 	Render_Effect();
 	Render_EffectResolve();
 	Render_SFX();
 	Render_Emissive();	
 	Render_Bloom();		
 	Render_BloomCombined();
-	Render_DistortionObject();
 	Render_Blend(); 
 	Render_Distortion();
 	Render_ScreenEffect();
@@ -836,6 +836,17 @@ void CRenderer::Render_Fog()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
+void CRenderer::Render_DistortionObject()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Distortion"), nullptr, false)))
+		CRASH("Render Fail");
+
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::DISTORTION));
+
+	m_pGameInstance->End_MRT();
+}
+
+
 void CRenderer::Render_Effect()
 {
 	m_pGameInstance->Clear_RT(TEXT("RT_AccumColor"));
@@ -918,16 +929,6 @@ void CRenderer::Render_BloomCombined()
 	m_pGameInstance->End_MRT();
 
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
-}
-
-void CRenderer::Render_DistortionObject()
-{
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Distortion"), nullptr, false)))
-		CRASH("Render Fail");
-
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::DISTORTION));
-
-	m_pGameInstance->End_MRT();
 }
 
 void CRenderer::Render_Blend()
