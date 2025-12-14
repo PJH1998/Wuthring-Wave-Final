@@ -126,7 +126,7 @@ PS_OUT_POTAL PS_POTAL2(PS_IN In)
     vector vMask = g_MaskTexture.Sample(DefaultSampler, NewTexcoord);
     
     Out.vDistortion = float4(vMask.rgb, 0.6f);
-    float Alpha = g_TotalTime / 15.f;
+    float Alpha = g_TotalTime / 5.f;
     if (Alpha >= 1.f)
         Alpha = 1.f;
     Out.vBackBuffer = float4(0.5f, 0.5f, 0.f, Alpha);

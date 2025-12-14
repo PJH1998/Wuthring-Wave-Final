@@ -15,7 +15,7 @@ CMapObject_DynamicSound::CMapObject_DynamicSound(const CMapObject_DynamicSound& 
 
 HRESULT CMapObject_DynamicSound::Initialize_Prototype()
 {
-	m_SoundTags.push_back(TEXT("Fire_Long"));
+	m_SoundTags.push_back(TEXT("Fire_Long0"));
 	m_SoundTags.push_back(TEXT("Fire_Long0"));
 	m_SoundTags.push_back(TEXT("Fire_Long01"));
 	return S_OK;
@@ -35,17 +35,17 @@ HRESULT CMapObject_DynamicSound::Initialize_Clone(void* pArg)
 	{
 	case 0:
 		//불
-		m_fSoundCoolDown = 7.5f;
-		m_fSoundVolume = 0.25f;
+		m_fSoundCoolDown = 8.f;
+		m_fSoundVolume = 0.35f;
 		break;
 	case 1:
 		//불
-		m_fSoundCoolDown = 11.5f;
+		m_fSoundCoolDown = 8.f;
 		m_fSoundVolume = 0.35f;
 		break;
 	case 2:
 		//모닥불
-		m_fSoundCoolDown = 8.5f;
+		m_fSoundCoolDown = 7.f;
 		m_fSoundVolume = 0.35f;
 		break;
 	}
@@ -59,8 +59,8 @@ void CMapObject_DynamicSound::Update(_float fTimeDelta)
 		if (m_fTotalTime >= m_fSoundCoolDown)
 		{
 			m_fTotalTime = 0.f;
-			if (XMVectorGetX(XMVector3Length(XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION) - XMLoadFloat4(m_pGameInstance->Get_CamPos()), 0.f))) < 500.f)
-				m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[m_iSoundIndex], m_iSoundChannel, m_fSoundVolume, m_pTransformCom, 0.3f, 10.f);
+			//if (XMVectorGetX(XMVector3Length(XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION) - XMLoadFloat4(m_pGameInstance->Get_CamPos()), 0.f))) < 500.f)
+				m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[m_iSoundIndex], m_iSoundChannel, m_fSoundVolume, m_pTransformCom, 0.1f, 20.f);
 		}
 }
 
