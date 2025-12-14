@@ -1582,6 +1582,7 @@ PS_OUT_NONLIGHT PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
         Out.vBackBuffer.a *= saturate(fDissolveAlpha);
 
     }
+    
     if (Out.vBackBuffer.a <= 0.f)
         discard;
     
