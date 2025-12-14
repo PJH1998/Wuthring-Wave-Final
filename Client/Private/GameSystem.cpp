@@ -104,6 +104,11 @@ const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 	return m_pParser->Load_CSV(pFilePath);
 }
 
+const vector<vector<_string>>& CGameSystem::Load_CSV_ADV(const _char* pFilePath)
+{
+	return m_pParser->Load_CSV_ADV(pFilePath);
+}
+
 void CGameSystem::Load_Sequence(const _char* pFolderPath)
 {
 	m_pParser->Load_Sequence(pFolderPath);
@@ -415,6 +420,23 @@ void CGameSystem::Trigger_PlayEndImage()
 void CGameSystem::Trigger_StopEndImageForcely()
 {
 	m_pUI_ControlHelper->Trigger_StopEndImageForcely();
+}
+#endif // _DEBUG
+
+void CGameSystem::Trigger_ActivateQuest()
+{
+	m_pUI_ControlHelper->Trigger_ActivateQuest();
+}
+
+void CGameSystem::Trigger_AddQuestProgress()
+{
+	m_pUI_ControlHelper->Trigger_AddQuestProgress();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_AllReset()
+{
+	m_pUI_ControlHelper->Trigger_AllReset();
 }
 #endif // _DEBUG
 

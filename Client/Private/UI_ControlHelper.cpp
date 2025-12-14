@@ -23,6 +23,7 @@
 #include "UI_CurveTrace.h"
 #include "UI_Dialog.h"
 #include "UI_FinalEnd.h"
+#include "UI_QuestIndicator.h"
 
 
 CUI_ControlHelper::CUI_ControlHelper()
@@ -538,6 +539,40 @@ void CUI_ControlHelper::Trigger_StopEndImageForcely()
 	pRootUI->Trigger_PlayEndImage(false);
 }
 #endif // _DEBUG
+
+void CUI_ControlHelper::Trigger_ActivateQuest()
+{
+	CUI_QuestIndicator* pRootUI = dynamic_cast<CUI_QuestIndicator*>(Find_RootUI(L"UI_QuestIndicator"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_ActivateQuest();
+}
+
+void CUI_ControlHelper::Trigger_AddQuestProgress()
+{
+	CUI_QuestIndicator* pRootUI = dynamic_cast<CUI_QuestIndicator*>(Find_RootUI(L"UI_QuestIndicator"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_AddQuestProgress();
+}
+
+#ifdef _DEBUG
+void CUI_ControlHelper::Trigger_AllReset()
+{
+	CUI_QuestIndicator* pRootUI = dynamic_cast<CUI_QuestIndicator*>(Find_RootUI(L"UI_QuestIndicator"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_AllReset();
+}
+#endif // _DEBUG
+
+
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
 {

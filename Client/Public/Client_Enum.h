@@ -138,6 +138,11 @@ namespace Client
 		// 텍스트용 색상
 		TT_TITLE,
 		TT_NORMAL,
+
+		TT_QUESTTITLE,
+		TT_QUESTNORMAL,
+		TT_QUESTPROGRESS,
+
 		TT_PROGRESS,
 
 		TT_BOSSNAME,
