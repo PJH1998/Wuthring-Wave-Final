@@ -70,8 +70,6 @@ void CUI_Dialog::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	Update_DialogOrder(fTimeDelta);
-	Update_DialogInstance(fTimeDelta);
 	Update_GoinDisable(fTimeDelta);
 
 	__super::Update(fTimeDelta);
@@ -81,6 +79,9 @@ void CUI_Dialog::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+
+	Update_DialogOrder(fTimeDelta);
+	Update_DialogInstance(fTimeDelta);
 
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
@@ -230,7 +231,7 @@ void CUI_Dialog::PreAssign_Presets()
 HRESULT CUI_Dialog::Create_ChildText_Speaker()
 {
 	// 생성
-	_float2 vTextPos = { 0.f, 150.f };
+	_float2 vTextPos = { 0.f, 300.f };
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
 		L"이친구가말을해요",
@@ -252,7 +253,7 @@ HRESULT CUI_Dialog::Create_ChildText_Speaker()
 HRESULT CUI_Dialog::Create_ChildText_Dialog()
 {
 	// 생성
-	_float2 vTextPos = { 0.f, 250.f };
+	_float2 vTextPos = { 0.f, 390.f };
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
 		L"이친구가한말이에요",
