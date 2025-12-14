@@ -8,6 +8,7 @@ class CUI_Dialog final : public CCustom_UI
 public:
 	typedef struct tUIDialogDesc {
 		_string strFilePath = {};
+		_bool	isInteractable = true;
 	} UI_DIALOG_DESC;
 
 	typedef struct tLocalDialogDesc {
@@ -74,7 +75,7 @@ private:
 	_uint				m_iAnimOrder = 0;
 
 	_float				m_fTickElapsedTime = 0.f;
-	const _float		m_fInstIntervalTime = 0.2f;		// 글자간 출력 시간간격 (낮은 값일수록 글자들이 빠르게 이어 나옴)
+	const _float		m_fInstIntervalTime = 0.1f;		// 글자간 출력 시간간격 (낮은 값일수록 글자들이 빠르게 이어 나옴)
 	const _float		m_fInstFadeInTime = 0.5f;		// 각 글자 당 알파 변화 시간 (낮을수록 각 글자 하나하나가 빠르게 나타남)
 	
 	vector<DIALOG_DESC>	m_vecDialogs = {};
@@ -85,6 +86,8 @@ private:
 
 	_bool				m_isInteracted = false;
 	_bool				m_isInteracted_Externally = false;
+
+	_bool				m_isInteractable = true;
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };

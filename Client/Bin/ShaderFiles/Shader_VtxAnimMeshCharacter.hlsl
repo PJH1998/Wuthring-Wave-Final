@@ -970,14 +970,15 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     
     vector vViewNormal = normalize(mul(vNormal, matWV));
    
+    bool IsDraw = true;
+    
     if(vViewNormal.z < 0.f)
     {
-        vViewNormal.z *= -1.f;
+        IsDraw = false;
     }
     
     vViewNormal = normalize(float4(vViewNormal.x, vViewNormal.y, vViewNormal.z * 0.01f, 0.f));
     
-    bool IsDraw = true;
     
     float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
     

@@ -75,6 +75,9 @@ void CLogoMaleRover::Update(_float fTimeDelta)
 		effectInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 		_matrix mat = m_pTransformCom->Get_WorldMatrix();
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Logo_Effect"), mat, &effectInfo);
+		
+		// Sound 한번만 실행
+
 	}
 
 	//m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
@@ -203,23 +206,36 @@ void CLogoMaleRover::Logo_Input()
 
 void CLogoMaleRover::Object_Func(const _wstring& wStrObjectTag)
 {
-	_wstring var1, var2, var3;
+	_wstring var1, var2, var3, var4;
 	wstringstream wss(wStrObjectTag);
 
 	getline(wss, var1, L'|'); 
 	getline(wss, var2, L'|'); 
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
 
-	_float fDuration = stof(var2);
 	if (var1 == TEXT("FADEOUT"))
 	{
+		_float fDuration = stof(var2);
 #ifndef _DEBUG
 		m_pGameInstance->OnFade(FADE::FADE_OUT, fDuration, [&]() {
 			CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 			});
 #endif // !_DEBUG
+	}
+	else if (var1 == TEXT("Sound"))
+	{
+		_wstring strSoundType = var2; // Sound Type
+		_wstring strSoundTag = var3; // Sound Tag
+		_float fVolume = stof(var4); // Volume 크기.
 
-
+		if (var2 == TEXT("Voice"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+		else if (var2 == TEXT("Action"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		else if (var2 == TEXT("QTE"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
 	}
 		
 		
