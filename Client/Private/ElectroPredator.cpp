@@ -401,7 +401,7 @@ void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 10.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 25.f);
 	}
 	else if (wstrTypeTag == TEXT("Stand"))
 	{

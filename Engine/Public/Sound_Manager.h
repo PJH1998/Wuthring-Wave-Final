@@ -65,6 +65,7 @@ private:
 	// 유동 채널
 	vector<FMOD_CHANNEL*>						m_pPoolingChannels;
 
+	_float													m_fDistanceBias = {};
 
 private:
 	FMOD_SOUND* Find_Sound(const _wstring& strSoundTag);

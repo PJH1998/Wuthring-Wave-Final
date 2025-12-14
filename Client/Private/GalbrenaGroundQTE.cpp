@@ -44,7 +44,7 @@ void CGalbrenaGroundQTE::OnEnter(void* pArg)
 	_bool IsSelect = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 	if (IsSelect) // 선택된 캐릭터일때만?
 	{
-		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), true);
+		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), false, true);
 		m_pGalbrena->Bind_QTECamera();
 		m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 	}

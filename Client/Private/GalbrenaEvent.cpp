@@ -34,8 +34,15 @@ void CGalbrenaEvent::OnEnter(void* pArg)
     // 4. 상태 초기화
     State_Reset();
 
-	// 5. 몬스터 타겟으로 회전
+	// 5. 몬스터 타겟으로 위치 및 타겟 회전
 	CTransform* pBossTransform = static_cast<CTransform*>(pArg);
+	_vector vTargetPos = pBossTransform->Get_State(STATE::POSITION);
+	_vector vTargetLook = XMVectorSetY(XMVector3Normalize(pBossTransform->Get_State(STATE::LOOK)), 0.f);
+	vTargetPos += vTargetLook * 1.f; // 10.f 전방 이동.
+
+	m_pGalbrena->Set_Position(vTargetPos);
+	//mm_pGalbrena->Set_ColliderPosition(vTargetPos);
+
 	m_pGalbrena->Rotate_Target(pBossTransform);
 }
 
@@ -67,14 +74,15 @@ void CGalbrenaEvent::OnExit()
 
 void CGalbrenaEvent::Handle_Input()
 {
-	m_States[EXIT] = !m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP)) && m_IsStopOnce;
+	m_States[EXIT] = !m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP)) 
+		&& m_IsStopOnce;
 }
 
 void CGalbrenaEvent::Update_EventAnimation(_float fTimeDelta)
 {
     // 0. 애니메이션 실행부터
     CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta);
-
+	
 }
 
 void CGalbrenaEvent::Check_StateTransition(_float fTimeDelta)
@@ -88,7 +96,6 @@ void CGalbrenaEvent::Check_StateTransition(_float fTimeDelta)
 		if (IsEscapePossible)
 		{
 			m_IsStopOnce = true;
-			m_pGalbrena->Stop_Anim();
 			return;
 		}
 	}
@@ -98,22 +105,16 @@ void CGalbrenaEvent::Check_StateTransition(_float fTimeDelta)
 	{
 		if (IsEscapePossible)
 		{
-			m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1_ACTION01;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-			m_pGalbrena->Start_Anim();
+			m_pGalbrena->Activate(false); // 활성화 종료.
 			return;
 		}
 	}
-
-	
-
-    
 }
 
 
 void CGalbrenaEvent::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaEventType::ATTACK07), "Attack07", 1.5f, 20.f, 2.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaEventType::ATTACK07), "Attack07", 1.2f, 60.f, 1.f);
 }
 
 void CGalbrenaEvent::State_Reset()

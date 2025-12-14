@@ -57,9 +57,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
-
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
-	
 	Ready_Variables(pDesc);
 	
 
@@ -291,6 +289,9 @@ void CAugusta::Render_OutLine()
 	
 	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
 		CRASH("Failed to Bind OutLineColor");
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutlineRadius, sizeof(_float))))
+		CRASH("Failed to Bind OutLineRadius");
 
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
@@ -926,6 +927,15 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_EventDissolve(wStrObjectTag);
 	else if (var1 == TEXT("RotateTarget"))
 		Process_RotateTarget(wStrObjectTag);
+	else if (var1 == TEXT("Griffon"))
+	{
+		if (var2 == TEXT("false"))
+			m_pGriffon->Activate(false);
+		else if(var2 == TEXT("true"))
+			m_pGriffon->Activate(true);
+	}
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
 
 }
 

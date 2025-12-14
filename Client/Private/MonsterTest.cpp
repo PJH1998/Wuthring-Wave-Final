@@ -5,6 +5,7 @@
 #include "AttackVolume.h"
 #include "Projectile.h"
 #include "GameSystem.h"
+#include "MotionTrail.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -23,7 +24,7 @@ CMonsterTest::CMonsterTest(const CMonsterTest& Prototype)
 HRESULT CMonsterTest::Initialize_Prototype()
 {
 	m_vOutLineColor = _float4(0.9535f, 0.9015f, 0.3218f, 1.f);
-	m_fOutLineRadius = 0.05f;
+	m_fOutLineRadius = 0.03f;
 
 	return S_OK;
 }
@@ -83,7 +84,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 	m_isRender = false;
 	m_pTransformCom->Save_PreviousPosition();
-	m_fBehitMaxTime = 0.15f;
+	m_fBehitMaxTime = 0.3f;
 	m_fBehitAcc = m_fBehitMaxTime;
 	return S_OK;
 }
@@ -133,7 +134,11 @@ void CMonsterTest::Update(_float fTimeDelta)
 		m_pGameSystem->Enable_Parried();
 #pragma endregion
 		PREFAB_INFO Effect{};
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+		Effect.pModelPtr = m_pModelCom;
+		Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), m_pTransformCom->Get_WorldMatrix(), &Effect);
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
 	}
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
@@ -490,6 +495,18 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 			for (auto& pATKVolume : m_pAtkVolumes)
 				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_SKILL);
 		}
+	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.4f, 0.05f, 0.45f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.05f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 2.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
 	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{

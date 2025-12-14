@@ -109,7 +109,9 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
-	
+
+	Process_Timer(fTimeDelta);
+
     m_pInputControllerCom->Update();
 
 	// . PlayerStatus 갱신
@@ -134,6 +136,8 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
 		m_Characters[m_iHarmonyCharacterIdx]->Priority_Update(fTimeDelta);
+	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
+		m_Characters[m_iEventCharacterIdx]->Priority_Update(fTimeDelta);
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Priority_Update(fTimeDelta);
 
@@ -172,6 +176,8 @@ void CPlayer::Update(_float fTimeDelta)
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
+	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
+		m_Characters[m_iEventCharacterIdx]->Update(fTimeDelta);
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Update(fTimeDelta);
 
@@ -203,17 +209,14 @@ void CPlayer::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
 
-	
-		
-
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
-
-	
 
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Late_Update(fTimeDelta);
+	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
+		m_Characters[m_iEventCharacterIdx]->Late_Update(fTimeDelta);
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
@@ -409,6 +412,8 @@ void CPlayer::Player_KeyInput()
 
 	}
 
+	
+
 #ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
@@ -450,18 +455,26 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
 		// Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 
-	}
+		m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f);
+		m_pGameSystem->Stop_Action();
 
+	}
+	
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
-		_vector vPos = XMVectorSet(-18.9f, 0.f, 1083.4f, 1.f);
+		_float2 vPos = { 500.f, -200.f };
+		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
+
+
 		//Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
-		m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
+		_float2 vPos = { 500.f, -200.f };
+		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
+		//m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
 
 	}
 
@@ -782,6 +795,10 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
 			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
 		);
+		
+		// 4. Levi Cap
+		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Capture")
+			,true, false);
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
 	{
@@ -794,7 +811,50 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 			//m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
 			Bind_EventLock(false);
+
+			m_Characters[m_iCurrentCharacterIdx]->Stop_Action();
 		}
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE == eEvent) // 레비아탄 위치도 고정시켜야할 것 같은데?..
+	{
+		// 1. Rover가 아니면 Rover로변경 (얘가 메인 캐릭터로)
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+		// 2. Rover의 상태를 변경.
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
+		);
+
+
+		// 3. Galbrena 활성화. => 보스의
+		m_iEventCharacterIdx = CHARACTERTYPE::GALBRENA;
+
+		m_Characters[m_iEventCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
+		);
+
+		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Execute"), true, false);
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS == eEvent)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		m_Characters[m_iEventCharacterIdx]->Start_Anim();
+		
+		m_pGameSystem->Stop_Action();
+
+		// 이벤트 예약? => 1.5f 뒤에 Leviatan 죽음 이벤트를 실행하라.
+		m_Event = [this]() {
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f); // 몬스터 TimeRatio 정상화.
+			LEVI_EXECUTE Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+			m_iEventCharacterIdx = CHARACTERTYPE::NONE; // Event 캐릭 해제.
+		}; 
+
+		m_fEventMaxTime = { 2.5f };
+
+		m_IsEvent = true;
+		
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
 	{
@@ -1107,6 +1167,26 @@ void CPlayer::Process_CollideThrow(const CALLBACK_CLIENT* pcallDesc)
 
 void CPlayer::Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg)
 {
+}
+
+void CPlayer::Process_Timer(_float fTimeDelta)
+{
+	if (m_IsEvent)
+	{
+		if (m_fEventTimer <= m_fEventMaxTime)
+		{
+			m_fEventTimer += fTimeDelta;
+		}
+		else
+		{
+			m_fEventTimer = 0.f;
+			m_IsEvent = false;
+
+			if (nullptr != m_Event)
+				m_Event();
+		}
+	}
+
 }
 
 void CPlayer::Manage_Condition()
