@@ -1576,7 +1576,12 @@ PS_OUT_NONLIGHT PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
     Out.vBackBuffer = vDiffuse;
     Out.vBackBuffer.a = g_fAlpha;
     
-    Out.vBackBuffer.a -= vDissolve.r * g_DissolveTime;
+    if (g_DissolveStart)
+    {
+        float fDissolveAlpha = (vDissolve.r + 1.0f) - (g_DissolveTime * 0.2f);
+        Out.vBackBuffer.a *= saturate(fDissolveAlpha);
+
+    }
     if (Out.vBackBuffer.a <= 0.f)
         discard;
     

@@ -31,7 +31,6 @@ HRESULT CEffect_Light::Initialize_Clone(void* pArg)
 	m_vRange = m_tDesc.vRange;
 	m_fAmbient = m_tDesc.fAmbient;
 
-
     m_isActivate = false;
 
     return S_OK;
@@ -78,7 +77,6 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	//초기화
 	m_vLifeTime.x = 0.f;
-	m_vRange.x = 0.f;
 
 	if (m_isActivate = pDesc->IsActive)
 	{
@@ -104,12 +102,9 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CEffect_Light::Update_LightDesc(_float fTimeDelta)
 {
-	if (m_vRange.x < m_vRange.y)
+	if (m_tLightDesc.fRange < m_vRange.y)
 	{
-		//일단은 늘어나게만 나중에 늘거나 줄거나로 바꿔주자.
-		//빛 갑자기 팍 꺼지는거 조금 어색한듯
-		m_vRange.x += fTimeDelta * m_fSpeed;
-		m_tLightDesc.fRange = m_vRange.x;
+		m_tLightDesc.fRange = fTimeDelta * m_fSpeed;
 	}
 }
 

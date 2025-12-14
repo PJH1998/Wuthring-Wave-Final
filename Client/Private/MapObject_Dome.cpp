@@ -61,7 +61,6 @@ void CMapObject_Dome::Late_Update(_float fTimeDelta)
 	if (m_iPhaze == 2 && m_fAlpha >= m_fMaxAlpha)
 	{
 		m_iShaderPassIndex = 27;
-		//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 	}
 	else
 	{
@@ -122,6 +121,7 @@ void CMapObject_Dome::Render()
 		m_pShaderCom->Bind_Value("g_fAlpha", &m_fAlpha, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fTotalTime, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_DissolveTime", &m_fDissolveTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_DissolveStart", &m_IsDissolveStart, sizeof(_bool));
 		
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
