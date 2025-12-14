@@ -178,7 +178,7 @@ public:
 
 	// [WIP] 대화 스크립트 UI를 생성 및 해제합니다. / pFilePath : 대화 내용이 담긴 csv 파일의 경로.
 	// Dialog용 csv 파일은, [1열 발화자], [2열 대사]를 담을 것을 상정합니다.
-	void		Open_DialogUI(const _char* pFilePath);
+	void		Open_DialogUI(const _char* pFilePath, _bool isInteractable);
 	void		Req_Interact_DialogUI(_bool isChangeNext_Forcely);
 	void		Close_DialogUI();
 
