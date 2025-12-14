@@ -232,7 +232,11 @@ void CLeviatan::Late_Update(_float fTimeDelta)
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
+	{
 		m_isParalysis = true;
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
+	}
 	if (m_isExecuteEnable)
 	{
 		m_isExecuteEnable = false;
@@ -1617,7 +1621,7 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 
-			//사망시 타임슬로우 효과
+			//사망 시 타임슬로우 효과
 			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.7f);
 		}
 		//return;

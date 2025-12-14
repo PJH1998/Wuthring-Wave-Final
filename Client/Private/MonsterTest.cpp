@@ -172,7 +172,11 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	if (!m_isAggro)
 		return;
 	if(m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
+	{
 		m_isParalysis = true;
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
+	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 

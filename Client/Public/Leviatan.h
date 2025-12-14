@@ -163,6 +163,12 @@ private:
 	_wstring				m_strBehitSound{};
 #pragma endregion
 
+#pragma region LUT
+	_uint						m_iLUTIndex{}; //원래 사용되는 LUT 인덱스
+	_float					m_fLUTIntensity{}; //LUT 강도
+	_float					m_fLUTAcc{}; //LUT 강도
+	_bool					m_isLUTDynamic{}; //LUT 동적 변화 여부
+#pragma endregion
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(LEVIATAN_DESC* pDesc);
