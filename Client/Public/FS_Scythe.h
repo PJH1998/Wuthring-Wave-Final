@@ -65,6 +65,12 @@ private:
 	_bool					m_isPlay{};
 #pragma endregion
 
+#pragma region SHADER_VALUE
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
+
 private:
 	void			Bind_Resources();
 	void			Ready_Component(SCYTHE_DESC* pDesc);
