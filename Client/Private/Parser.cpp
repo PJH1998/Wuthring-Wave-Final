@@ -2193,14 +2193,15 @@ const vector<vector<_string>>& CParser::Load_CSV_ADV(const _char* pFilePath)
 			if (c == '"')
 			{	// 따옴표를 만나면 상태를 반전.
 				isInQuote = !isInQuote;
+				continue;
 			}
 			else if (c == ',' && !isInQuote)
 			{	// 따옴표 밖에서 쉼표를 만났을 때만 셀을 구분
 				row.push_back(strCell);
 				strCell.clear();
-				strCell += c;
 				continue; // 쉼표는 데이터에 넣지 않음
 			}
+			strCell += c;
 
 		}
 		row.push_back(strCell);

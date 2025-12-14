@@ -32,6 +32,14 @@ public: // 생성/복제
 
 public:
 	void			Req_Close_Dialog()		{ m_isGoinDisable = true; }
+	void			Req_Next_Dialog();
+	void			Req_Finish_CurDialog();
+
+	void			Req_InteractExternally()	{ m_isInteracted_Externally = true; }
+
+	_bool			Get_isFinished_CurDialog()	{ return m_isCurDialogFinished; }
+	_bool			Get_isLast_CurDialog()		{ return m_iDialogOrder == m_vecDialogs.size() - 1; }
+
 
 private:
 	HRESULT			Ready_Components(void* pArg);
@@ -49,6 +57,7 @@ private:
 
 	void			Load_Dialog(const _char* pFilePath);
 	void			Change_Dialog(_uint iDialogIndex);
+	
 
 private:
 	// 매 프레임 돌릴만한 건 캐싱..
@@ -65,13 +74,17 @@ private:
 	_uint				m_iAnimOrder = 0;
 
 	_float				m_fTickElapsedTime = 0.f;
-	const _float		m_fInstIntervalTime = 0.2f;		// 글자간 출력 시간간격 (낮은 값일수록 글자들이 빠르게 이어 나옴)
+	const _float		m_fInstIntervalTime = 0.1f;		// 글자간 출력 시간간격 (낮은 값일수록 글자들이 빠르게 이어 나옴)
 	const _float		m_fInstFadeInTime = 0.5f;		// 각 글자 당 알파 변화 시간 (낮을수록 각 글자 하나하나가 빠르게 나타남)
 	
 	vector<DIALOG_DESC>	m_vecDialogs = {};
 	_uint				m_iDialogOrder = 0;
 
 	_bool				m_isCurDialogFinished = false;
+
+
+	_bool				m_isInteracted = false;
+	_bool				m_isInteracted_Externally = false;
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };

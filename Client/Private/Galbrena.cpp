@@ -55,7 +55,11 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	// 비활성화. 
 	//PartActivate(PART_FIRSTGUN, false);
 	
-
+	if (LEVEL::GAMEPLAY == m_eCurLevel)
+	{
+		// 1. Look 변경.
+		m_pTransformCom->LookDir(XMVectorSet(1.0f, 0.0f, -0.5f, 0.f));
+	}
 
 
 	m_pMainAttackVolume->TriggerActivate(false);

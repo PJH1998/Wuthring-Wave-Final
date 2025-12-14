@@ -166,30 +166,30 @@ HRESULT CVolumetricFog::Bind_VF_Resource(CShader* pShader, const _char* pTexture
 //#ifdef _DEBUG
 void CVolumetricFog::Setting_VF()
 {
-	ImGui::Begin("VolumetricFog");
+	//ImGui::Begin("VolumetricFog");
 
-	ImGui::InputFloat("Fog_Near", &m_VF_Data.fNear, 1.f, 10.f);
-	ImGui::InputFloat("Fog_Far", &m_VF_Data.fFar, 1.f, 10.f);
-	ImGui::InputFloat("LightIntensity", &m_VF_Data.fLightIntensity, 1.f, 10.f);
-	ImGui::DragFloat("Density", &m_VF_Data.fDensity, 0.01f, 0.f, 1.f, "%.2f");
-	ImGui::DragFloat("DENSITY_SCALE", &m_VF_Data.fDensityScale, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("PHASE_FUNCTION", &m_VF_Data.fPhaseFunctionG, 0.01f, -0.5f, 0.5f, "%.2f");
+	//ImGui::InputFloat("Fog_Near", &m_VF_Data.fNear, 1.f, 10.f);
+	//ImGui::InputFloat("Fog_Far", &m_VF_Data.fFar, 1.f, 10.f);
+	//ImGui::InputFloat("LightIntensity", &m_VF_Data.fLightIntensity, 1.f, 10.f);
+	//ImGui::DragFloat("Density", &m_VF_Data.fDensity, 0.01f, 0.f, 1.f, "%.2f");
+	//ImGui::DragFloat("DENSITY_SCALE", &m_VF_Data.fDensityScale, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("PHASE_FUNCTION", &m_VF_Data.fPhaseFunctionG, 0.01f, -0.5f, 0.5f, "%.2f");
 
-	ImGui::DragFloat("DISTANCE_FALLOFF", &m_VF_Data.fDistanceFallOff, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("HEIGHT_FALLOFF", &m_VF_Data.fHegihtFallOff, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("GROUND_FALLOFF", &m_VF_Data.fGroundFallOff, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("NOISE_SCALE", &m_VF_Data.fNoiseScale, 0.0001f, 0.00001f, 0.001f, "%.5f");
+	//ImGui::DragFloat("DISTANCE_FALLOFF", &m_VF_Data.fDistanceFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("HEIGHT_FALLOFF", &m_VF_Data.fHegihtFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("GROUND_FALLOFF", &m_VF_Data.fGroundFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("NOISE_SCALE", &m_VF_Data.fNoiseScale, 0.0001f, 0.00001f, 0.001f, "%.5f");
 
-	ImGui::DragFloat("RAY_PHASE_FUNCTION", &m_VF_Data.fRayPhaseFunctionG, 0.01f, 0.5f, 1.f, "%.2f");
-	ImGui::DragFloat("RAY_INTENSITY", &m_VF_Data.fRayIntensity, 0.1f, 2.f, 10.f, "%.5f");
+	//ImGui::DragFloat("RAY_PHASE_FUNCTION", &m_VF_Data.fRayPhaseFunctionG, 0.01f, 0.5f, 1.f, "%.2f");
+	//ImGui::DragFloat("RAY_INTENSITY", &m_VF_Data.fRayIntensity, 0.1f, 2.f, 10.f, "%.5f");
 
-	ImGui::DragFloat("SCATTER_WEIGHT", &m_VF_Data.fScatterWeight, 0.01f, 0.1f, 1.f, "%.5f");
+	//ImGui::DragFloat("SCATTER_WEIGHT", &m_VF_Data.fScatterWeight, 0.01f, 0.1f, 1.f, "%.5f");
 
-	ImGui::DragFloat("RAY_DENSITY", &m_VF_Data.fRayDensity, 0.01f, 0.1f, 1.f, "%.5f");
+	//ImGui::DragFloat("RAY_DENSITY", &m_VF_Data.fRayDensity, 0.01f, 0.1f, 1.f, "%.5f");
 
-	ImGui::DragFloat("RAY_DENSITY_SCALE", &m_VF_Data.fRayDensityScale, 0.01f, 0.05f, 0.5f, "%.5f");
+	//ImGui::DragFloat("RAY_DENSITY_SCALE", &m_VF_Data.fRayDensityScale, 0.01f, 0.05f, 0.5f, "%.5f");
 
-	ImGui::End();
+	//ImGui::End();
 }
 //#endif
 
