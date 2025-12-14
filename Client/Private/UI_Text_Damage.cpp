@@ -100,14 +100,14 @@ void CUI_Text_Damage::Update_LifeTime(_float fTimeDelta)
 
 	m_fLifeElapsed += max(0.f, fTimeDelta);
 
-	//if (m_isAutoDeactivate && (m_fLifeElapsed >= m_fLifeTime))
-	//{
-	//	m_isActivate = false;
+	if (m_isAutoDeactivate && (m_fLifeElapsed >= m_fLifeTime))
+	{
+		m_isActivate = false;
 	//	// if needs trigger when its deactive, declare here.
 	//	static _uint iDmgIndex = 0;
 	//	iDmgIndex++;
 	//	std::cout << "[CUI_Text_Damage::Update_LifeTime] Damage Destroyed! : " << iDmgIndex << std::endl;
-	//}
+	}
 }
 
 void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
