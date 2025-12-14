@@ -98,26 +98,27 @@ HRESULT CLevel_Shader::Ready_Light()
 	m_TestLight.vPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	m_TestLight.vDiffuse = _float4(1.f, 0.f, 0.f, 1.f);
 	m_TestLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
-	m_TestLight.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	m_TestLight.vAmbient = _float4(0.1f, 0.1f, 0.1f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test1"), m_TestLight);
 
-	//LIGHT_DESC PointLight = {};
-	//PointLight.eType = LIGHT_DESC::POINT;
-	//PointLight.vAmbient = _float4(0.8f, 0.8f, 0.8f, 1.f);
-	//PointLight.vDiffuse = _float4(0.f, 0.f, 0.7f, 1.f);
-	//PointLight.fRange = 1500.f;
-	//PointLight.vPosition = _float4(340.f, 230.f, 500.f, 1.f);
+	/*LIGHT_DESC PointLight = {};
+	PointLight.eType = LIGHT_DESC::POINT;
+	PointLight.vAmbient = _float4(0.8f, 0.8f, 0.8f, 1.f);
+	PointLight.vDiffuse = _float4(0.f, 0.f, 0.7f, 1.f);
+	PointLight.fRange = 1500.f;
+	PointLight.vPosition = _float4(340.f, 230.f, 500.f, 1.f);
 
-	//LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
-	//PointLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	PointLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	//m_pGameInstance->Add_Light(TEXT("Test1"), PointLight);
+	m_pGameInstance->Add_Light(TEXT("Test1"), PointLight);*/
 
 	//PointLight.vDiffuse = _float4(0.f, 0.7f, 0.f, 1.f);
 	//PointLight.vPosition = _float4(-340.f, 230.f, 500.f, 1.f);
 	//m_pGameInstance->Add_Light(TEXT("Test2"), PointLight);
-    return S_OK;
+
+	return S_OK;
 }
 
 HRESULT CLevel_Shader::Ready_Interface()
@@ -134,23 +135,23 @@ HRESULT CLevel_Shader::Ready_TestObjects()
     _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.0001f, 0.0001f, 0.0001f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
     AuguDesc.PreTransformMatrix = PreTransformationMatrix;
 
-    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
-    //                                                   ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
-    //    CRASH("Failed Clone Dummy Wolf");
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
+                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
+        CRASH("Failed Clone Dummy Wolf");
 
     //AuguDesc.vPosition = XMVectorSet(0.f, -120.f, 0.f, 1.f);
     //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
     //                                                   ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
     //    CRASH("Failed Clone Dummy Wolf");
 
-    CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
-    PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
-        * XMMatrixTranslationFromVector(XMVectorSet(0.f, -10.f, 0.f, 1.f));
-    MapDesc.PreTransformMatrix = PreTransformationMatrix;
+    //CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
+    //PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
+    //    * XMMatrixTranslationFromVector(XMVectorSet(0.f, -10.f, 0.f, 1.f));
+    //MapDesc.PreTransformMatrix = PreTransformationMatrix;
 
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
-                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
-        CRASH("Failed Clone Dummy Wolf");
+    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
+    //                                                   ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
+    //    CRASH("Failed Clone Dummy Wolf");
 
     return S_OK;
 }

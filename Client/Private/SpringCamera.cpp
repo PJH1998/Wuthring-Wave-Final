@@ -109,6 +109,8 @@ void CSpringCamera::Priority_Update(_float fTimeDelta)
 
 void CSpringCamera::Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
+
 	// Look Position Init
 	m_vLookPosition = m_vTargetPosition;
 	m_vLookPosition.y += m_fOffsetY;
@@ -150,13 +152,13 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
 
+	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
+
 	Shaking(fTimeDelta);
 }
 
 void CSpringCamera::Late_Update(_float fTimeDelta)
 {
-	//if (CAMERA_STATE::LOCKON == m_eCameraState && 0 == m_TargetTransforms.size())
-	//	m_eCameraState = CAMERA_STATE::TARGET;
 }
 
 void CSpringCamera::Render()
@@ -211,17 +213,14 @@ void CSpringCamera::Check_Ray()
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 	_vector vStartPos = XMLoadFloat4(&m_vLookPosition);
-	vStartPos.m128_f32[1] += m_fOffsetY;
+	//vStartPos.m128_f32[1] += m_fOffsetY;
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
 	{
-		if (m_vTargetPosition.y < vOut.y)
-		{
-			_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&vOut)));
-			if (fLength < 1.f)
-				return;
-			m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
-		}
+		_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&vOut)));
+		if (fLength < 0.4f)
+			return;
+		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
 	}
 }
 
@@ -238,7 +237,7 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 
 	// LockOnOffsetY 조정
 	m_fLockOnOffsetY += fTimeDelta * 1.f;
-	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, m_fOffsetY + 0.3f));
+	m_fLockOnOffsetY = max(m_fOffsetY, min(m_fLockOnOffsetY, 0.5f));
 
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
@@ -266,14 +265,6 @@ void CSpringCamera::Dual_Targeting(_float fTimeDelta)
 	if (nullptr == m_pTargetTransform)
 		return;
 
-	//_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
-	//_vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-	//
-	//_float fDot = XMVectorGetX(XMVector3Dot(XMVector3Normalize(vLook), vUp));
-	//
-	//fRatio = fRatio - max(0.f, min(fDot, fRatio - 0.05f));
-
-	//XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * m_fRatio);
 	XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - m_fRatio) + XMLoadFloat4(&m_LockOnPosition) * m_fRatio);
 	// Dynamic Distance
 	Dynamic_Distance();
@@ -323,7 +314,7 @@ void CSpringCamera::Dynamic_Fov(_float fTimeDelta)
 
 	_float fGapY = fabsf(vLockOnPos.m128_f32[1] - vTargetPos.m128_f32[1]);
 
-	m_fFovy = XMConvertToRadians(min(60.f + fGapY, 75.f));
+	m_fFovy = XMConvertToRadians(min(60.f + fGapY, 85.f));
 }
 
 void CSpringCamera::Action(_float fTimeDelta)
@@ -382,13 +373,11 @@ void CSpringCamera::Action(_float fTimeDelta)
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
 		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
-		//vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
 		// Distance
-		//m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
 		_float fDestDistance = m_Frames[m_iFrameIndex + 1].fDistance;
 		m_fDistance = lerp(fPreDistance, fDestDistance, fRatio);
 
@@ -404,12 +393,9 @@ void CSpringCamera::Action(_float fTimeDelta)
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
 		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
-		//vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
-		//m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
-		//m_fDistance = m_fFixedDistance;
 		m_fDistance = m_Frames[m_iFrameIndex + 1].fDistance;
 
 		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy);

@@ -20,7 +20,7 @@ public:
 
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
-	const vector<vector<_string>>& Load_CSV_MultiLine(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV_ADV(const _char* pFilePath);		// 큰따옴표와 쉼표를 데이터로써 갖는 csv 파싱용
 	void							Load_Sequence(const _char* pFolderPath);
 
 	//============================Effect
@@ -59,6 +59,7 @@ public:
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
+	// 중앙 0,0 / 우하단이 양수 / 범위는 -+ 스크린사이즈 * 0.5
 	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
 	void			Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
 	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
@@ -179,6 +180,21 @@ public:
 	// Dialog용 csv 파일은, [1열 발화자], [2열 대사]를 담을 것을 상정합니다.
 	void		Open_DialogUI(const _char* pFilePath);
 	void		Close_DialogUI();
+
+	// [WIP] 종료 이미지를 실행합니다.
+	void		Trigger_PlayEndImage();
+#ifdef _DEBUG
+	void		Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+	void		Trigger_ActivateQuest();
+	void		Trigger_AddQuestProgress();
+#ifdef _DEBUG
+	void		Trigger_ForceCompleteQuestProgress()	{ for (_uint i = 0; i < 7; i++)	Trigger_AddQuestProgress();};
+	void		Trigger_AllReset();
+#endif // _DEBUG
+
+
 
 #pragma endregion
 

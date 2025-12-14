@@ -8,7 +8,7 @@ float g_fLightFar;
 Texture2D g_DiffuseTexture;
 Texture2D g_SecondDiffuseTexture;
 Texture2D g_NormalTexture;
-Texture2D g_MaskTexture[4] : register(t8);
+Texture2D g_MaskTexture[5] : register(t8);
 
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
@@ -18,6 +18,8 @@ float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
+
+float4 g_vMonsterDissolveColor = float4(0.0745f, 0.0039f, 0.1098f, 1.f);
 
 float g_fFxTime;
 
@@ -133,6 +135,7 @@ VS_OUT VS_FACE(VS_IN In)
     Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
     Out.vTangent = normalize(mul(vTangent, g_WorldMatrix));
     Out.vBinormal = normalize(mul(vBinormal, g_WorldMatrix));
+    Out.vWorldPos = mul(vPosition, g_WorldMatrix);
     
     int iIndexX = g_iFaceIndex % g_iTexPaddingCount;
     int iIndexY = g_iFaceIndex / g_iTexPaddingCount;
@@ -193,8 +196,11 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    //float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
-    float3 vNormal = NormalDesc.xyz;
+    float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    //float3 vNormal = NormalDesc.xyz;
+    vNormal.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
+    
+    vNormal = normalize(vNormal);
     
     float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
     Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
@@ -203,8 +209,11 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 1.f;
     
+    Out.vPBR.x = NormalDesc.b;
+    Out.vPBR.y = NormalDesc.a;
     
-    Out.vPBR.y = 0.2f;
+//    Out.vPBR.y = 0.2f;
+  
     Out.vPBR.z = 1.f;
     
     Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
@@ -281,11 +290,9 @@ PS_OUT2 PS_NORMAL_BEHIT(PS_IN In)
     
     float fRimPower = 0.f;
     
-    float fNdoV = dot(Out.vNormal.xyz, vLook);
+    float fNdotV = dot(In.vNormal.xyz, vLook);
     
-    fRimPower = abs(fNdoV);
-    
-    
+    fRimPower = abs(fNdotV);
     
     float fTimeRatio = saturate(g_fCurrentTime / max(g_fMaxTime, 1e-5));
     
@@ -902,9 +909,9 @@ PS_OUT PS_NAPAL(PS_IN In)
     
     float3 vLook = normalize(g_vCamPosition.xyz - In.vWorldPos.xyz);
     
-    float fNdoV = dot(vNormal, vLook);
+    float fNdotV = dot(vNormal, vLook);
     
-    fRimPower = abs(fNdoV) < cos(radians(75.f)) ? 1.f : 0.f;
+    fRimPower = abs(fNdotV) < cos(radians(75.f)) ? 1.f : 0.f;
     
     Out.vDiffuse.xyz += (vDiffuse.xyz * fRimPower);
     
@@ -932,25 +939,27 @@ PS_OUT PS_NPC_SCAN(PS_IN In)
     
     float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    vDiffuse *= g_fScanColor;
-    
     float fRimPower = 1.f;
     
-    //float3 vLook = normalize(g_vCamPosition.xyz - In.vWorldPos.xyz);
+    float3 vLook = normalize(g_vCamPosition.xyz - In.vWorldPos.xyz);
     
     float3 vNormal = normalize(In.vNormal.xyz);
     
-    //float fNdoV = dot(vNormal, vLook);
+    float fNdotV = dot(vNormal, vLook);
     
-    //fRimPower = abs(fNdoV) < cos(radians(75.f)) ? 1.f : 0.f;
+    float4 vScanColor = lerp(1.f , g_fScanColor, (1.f - fNdotV));
+    
+    vDiffuse *= vScanColor;
+    
+    fRimPower = abs(fNdotV) < cos(radians(60.f)) ? 1.f : 0.f;
     
     float fScanRatio = (abs(fmod(g_fScanTime, 1.f) - 0.5f)) * 2.f;
     
     fRimPower *= fScanRatio;
     
-    float3 vRimColor = vDiffuse.xyz * (fRimPower * 0.5f);
+    float3 vRimColor = g_fScanColor.xyz * (fRimPower);
     
-    Out.vEmissive = float4(vDiffuse.xyz, 1.f) * fScanRatio;
+    Out.vEmissive = float4(vRimColor, 1.f) * fScanRatio;
     
     Out.vDiffuse.xyz = vDiffuse.xyz + vRimColor;
     Out.vDiffuse.a = 1.f;
@@ -987,6 +996,8 @@ PS_OUT_NONLIGHT PS_NPC_FIND(PS_IN In)
     
     float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    vDiffuse.a = 1.f;
+    
     vDiffuse.a *= (1.f - g_fDissolveRate);
     
     Out.vDiffuse = vDiffuse;
@@ -1007,6 +1018,145 @@ PS_OUT_NONLIGHT PS_NPC_FIND(PS_IN In)
     
     return Out;
 }
+
+
+PS_OUT PS_MONSTER_SPAWN(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+      
+    float fMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
+    
+    if(fMask >= g_fDissolveRate)
+        discard;
+    
+    float fMin = saturate(g_fDissolveRate - 0.05f);
+    
+    float fDissolveLine = smoothstep(fMin, g_fDissolveRate, fMask);
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float4 vLineColor = fDissolveLine == 0.f ? vDiffuse : lerp(0.f, (g_vMonsterDissolveColor), fDissolveLine);
+    
+    Out.vDiffuse = vLineColor;
+    
+    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    vNormal.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
+    
+    vNormal = normalize(vNormal);
+    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+
+    Out.vPBR.z = 1.f;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+
+PS_OUT PS_MONSTER_DEAD(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+      
+    float fMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
+    
+    if (fMask <= g_fDissolveRate)
+        discard;
+    
+    float fMax = saturate(g_fDissolveRate + 0.05f);
+    
+    float fDissolveLine = smoothstep(g_fDissolveRate, fMax, fMask);
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float4 vLineColor = fDissolveLine == 1.f ? vDiffuse : lerp(0.f, (g_vMonsterDissolveColor), fDissolveLine);
+    
+    Out.vDiffuse = vLineColor;
+    
+    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    vNormal.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
+    
+    vNormal = normalize(vNormal);
+    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    
+    Out.vPBR.x = g_fGlobalDynamicMetallic;
+    Out.vPBR.y = g_fGlobalDynamicRoughness;
+
+    Out.vPBR.z = 1.f;
+    
+    vNormal = vNormal * 0.5f + 0.5f;
+    
+    Out.vNormal = float4(vNormal, 1.f);
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
+
+PS_OUT PS_CORO(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+      
+    float2 vFxCoord = float2(In.vTexcoord.x, In.vTexcoord.y + g_fFxTime);
+      
+    float4 vMask = g_MaskTexture[2].Sample(DefaultSampler, In.vTexcoord);
+
+    float4 vFxColor = g_MaskTexture[1].Sample(DefaultSampler, vFxCoord);
+    
+    vFxColor.xyz *= vMask.a;
+    
+    vFxColor *= vMask;
+    vFxColor *= 5.f;
+    
+    float4 vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vDiffuse = float4((vDiffuse.xyz + vFxColor.xyz), 1.f);
+    
+    vector NormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    float3 vNormal = NormalDesc.xyz * 2.f - 1.f;
+    vNormal.z = sqrt(1.f - saturate(dot(NormalDesc.xy, NormalDesc.xy)));
+    
+    vNormal = normalize(vNormal);
+    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+    Out.vNormal = vector(mul(vNormal, WorldMatrix) * 0.5f + 0.5f, 0.f);
+    
+    Out.vPBR.x = NormalDesc.b;
+    Out.vPBR.y = NormalDesc.a;
+
+    Out.vPBR.z = 1.f;
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    return Out;
+}
+
 
 /*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
 
@@ -1090,6 +1240,7 @@ struct VS_OUT_OUTLINE
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
     float4 vOutlinePos : TEXCOORD2;
+    float4 vViewPos : TEXCOORD3;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -1129,6 +1280,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     Out.IsDraw = IsDraw;
     Out.vProjPos = Out.vPosition;
     Out.vOutlinePos = vOutLinePos;
+    Out.vViewPos = vViewPos;
     
     return Out;
 }
@@ -1140,7 +1292,6 @@ float Hash21(float2 ID)
     vInput += dot(vInput, vInput + 45.32);
     return frac(vInput.x * vInput.y);
 }
-
 
 VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
 {
@@ -1166,22 +1317,24 @@ VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
    
     bool IsDraw = true;
     
-    //float JitterRatio = lerp(1.f, 2.f, Hash21(vViewPos.xy));
+    float JitterRatio = lerp(1.f, 2.f, Hash21(vNormal.xy));
     
-    //float JitterLength = lerp(0.3f, 0.8f, Hash21(vViewPos.xy));
+    float JitterLength = lerp(0.3f, 0.8f, Hash21(vNormal.xy));
     
-    //float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
+    float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
     
-    //vViewNormal.xy += vNormalJitter;
+    vViewNormal.xy += vNormalJitter;
+    vViewNormal.xy *= JitterRatio; 
     
     float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
     
-    vector vOutLinePos = vViewPos + (vViewNormal * (g_fOutLineRadius * fTimeRatio));
+    vector vOutLinePos = vViewPos + ((vViewNormal * g_fOutLineRadius) * fTimeRatio);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     Out.IsDraw = IsDraw;
     Out.vProjPos = Out.vPosition;
     Out.vOutlinePos = vOutLinePos;
+    Out.vViewPos = vViewPos;
     
     return Out;
 }
@@ -1193,6 +1346,7 @@ struct PS_IN_OUTLINE
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
     float4 vOutlinePos : TEXCOORD2;
+    float4 vViewPos : TEXCOORD3;
 };
 
 struct PS_OUT_OUTLINE
@@ -1228,13 +1382,20 @@ PS_OUT_OUTLINE PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
     if (In.IsDraw)
     {
         float4 vOutlineWorldPos = mul(In.vOutlinePos, g_ViewMatrixInv);
-    
+        
+        float fViewLength = length(In.vOutlinePos.xyz - In.vViewPos.xyz);
+        
+        float fGradiant = pow(saturate(fViewLength / (5.2f * g_fOutLineRadius)), 2.f);
+        
         float IsLine = fmod(abs(vOutlineWorldPos.y), 0.1f) > 0.05f;
-        Out.vColor = IsLine ? g_vOutLineColor : 0.f;;
+        Out.vColor = IsLine ? g_vOutLineColor : 0.f;
         
         if(all(Out.vColor == 0.f))
             discard;
-            
+        
+        Out.vColor.xyz *= fGradiant;
+        Out.vColor.xyz *= 3.f;
+        
         Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }
@@ -1367,7 +1528,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_FACE();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_NORMALCOLOR();
+        PixelShader = compile ps_5_0 PS_MAIN();
     }
 
     pass NormalAndColor // 11
@@ -1500,5 +1661,38 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_FACE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_NPC_FIND();
+    }
+    
+    pass MONSTER_SPAWN // 23
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MONSTER_SPAWN();
+    }
+    
+    pass MONSTER_DEAD // 24
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MONSTER_DEAD();
+    }
+    
+    pass Corrosaurus    // 25
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_CORO();
     }
 }

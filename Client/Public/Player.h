@@ -114,6 +114,7 @@ private:
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iPrevCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iHarmonyCharacterIdx = { CHARACTERTYPE::NONE };
+	_int m_iEventCharacterIdx = { CHARACTERTYPE::NONE };
 
 
 private:
@@ -147,6 +148,8 @@ private:
 	_float m_fColliderHeight = {};
 	_float m_fColliderRadius = {};
 
+	
+
 	// Mutex
 	mutex m_Mutex;
 
@@ -158,9 +161,16 @@ private:
 	_float m_ChangeTimers[CHARACTERTYPE::TYPE_END] = {};
 	_float m_fChangeCoolTime = {};
 
+	_float m_fEventTimer = {};
+	_float m_fEventMaxTime = {};
+	_bool m_IsEvent = { false };
+	
+
 	_float3 m_vLockOnPos = {};
 
 	_bool m_IsThrowReserve = { false };
+
+	function<void()> m_Event = { nullptr };
 
 
 private:
@@ -188,6 +198,7 @@ private:
 
 	// 몬스터 QTE Event 처리.
 	void Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg);
+	void Process_Timer(_float fTimeDelta);
 
 	void Manage_Condition();
 	void Sync_UtilityType();

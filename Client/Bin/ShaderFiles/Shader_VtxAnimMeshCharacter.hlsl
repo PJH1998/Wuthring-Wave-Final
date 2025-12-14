@@ -1,6 +1,8 @@
 #include "Engine_Shader_Defines.hlsli"
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+matrix g_ViewMatrixInv;
+
 float g_fLightFar;
 
 Texture2D g_DiffuseTexture;
@@ -211,10 +213,13 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        vNormal.xyz = vNormalDesc.xyz * 2.f - 1.f;
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
         
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -270,10 +275,8 @@ PS_OUT PS_ROVER(PS_IN In)
     if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
-        
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+        vNormal.xyz = vNormalDesc.xyz * 2.f - 1.f;
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
             
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
@@ -324,11 +327,14 @@ PS_OUT PS_GALBRENA(PS_IN In)
     if (g_HasNormal)
     {
         float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        vNormal.xyz = vNormalDesc.xyz * 2.f - 1.f;
+        vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
         
-        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
-            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
-            
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy))); // 그대로 사용
+        
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
         float3 vInNormal = In.vNormal.xyz;
@@ -938,6 +944,8 @@ struct VS_OUT_OUTLINE
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vOutlinePos : TEXCOORD2;
+    float4 vViewPos : TEXCOORD3;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -969,20 +977,84 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     
     vViewNormal = normalize(float4(vViewNormal.x, vViewNormal.y, vViewNormal.z * 0.01f, 0.f));
     
-    vector vOutLinePos = vViewPos + (vViewNormal * g_fOutLineRadius);
+    bool IsDraw = true;
+    
+    float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
+    
+    vector vOutLinePos = vViewPos + (vViewNormal * (g_fOutLineRadius * fTimeRatio));
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
-    Out.IsDraw = true;
+    Out.IsDraw = IsDraw;
     Out.vProjPos = Out.vPosition;
+    Out.vOutlinePos = vOutLinePos;
+    Out.vViewPos = vViewPos;
     
     return Out;
 }
+
+float Hash21(float2 ID)
+{
+    float2 vInput = ID;
+    vInput = frac(vInput * float2(123.32, 456.21));
+    vInput += dot(vInput, vInput + 45.32);
+    return frac(vInput.x * vInput.y);
+}
+
+
+VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
+{
+    VS_OUT_OUTLINE Out = (VS_OUT_OUTLINE) 0;
+    
+    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
+    matrix matBone =
+    g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
+    g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
+    g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
+    g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
+    
+    matrix matWV;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+   
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    float4 vNormal = mul(float4(In.vNormal, 0.f), matBone);
+    
+    vector vViewPos = mul(vPosition, matWV);
+    
+    vector vViewNormal = normalize(mul(vNormal, matWV));
+   
+    bool IsDraw = true;
+    
+    float JitterRatio = lerp(1.f, 2.f, Hash21(vNormal.xy));
+    
+    float JitterLength = lerp(0.3f, 0.8f, Hash21(vNormal.xy));
+    
+    float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
+    
+    vViewNormal.xy += vNormalJitter;
+    vViewNormal.xy *= JitterRatio;
+    
+    float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
+    
+    vector vOutLinePos = vViewPos + ((vViewNormal * g_fOutLineRadius) * fTimeRatio);
+    
+    Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
+    Out.IsDraw = IsDraw;
+    Out.vProjPos = Out.vPosition;
+    Out.vOutlinePos = vOutLinePos;
+    Out.vViewPos = vViewPos;
+    
+    return Out;
+}
+
 
 struct PS_IN_OUTLINE
 {
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
     float4 vProjPos : TEXCOORD1;
+    float4 vOutlinePos : TEXCOORD2;
+    float4 vViewPos : TEXCOORD3;
 };
 
 struct PS_OUT_OUTLINE
@@ -1001,6 +1073,37 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
         Out.vColor = g_vOutLineColor;
         Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
         Out.vDepth.y = In.vProjPos.w;
+        Out.vDepth.z = 1.f;
+        Out.vPBR.z = 1.f;
+    }
+    else
+        discard;
+        
+    return Out;
+}
+
+
+PS_OUT_OUTLINE PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
+{
+    PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
+
+    if (In.IsDraw)
+    {
+        float4 vOutlineWorldPos = mul(In.vOutlinePos, g_ViewMatrixInv);
+        
+        float fViewLength = length(In.vOutlinePos.xyz - In.vViewPos.xyz);
+        
+        float fGradiant = pow(saturate(fViewLength / (5.2f * g_fOutLineRadius)), 2.f);
+        
+        float IsLine = fmod(abs(vOutlineWorldPos.y), 0.1f) > 0.05f;
+        Out.vColor = IsLine ? g_vOutLineColor : 0.f;
+        
+        if (all(Out.vColor == 0.f))
+            discard;
+        
+        Out.vColor.xyz *= fGradiant;
+        Out.vColor.xyz *= 3.f;
+        
         Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }
@@ -1200,7 +1303,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_UNDISSOLVE_CHARACTER();
     }
 
-    pass CharacterEye
+    pass CharacterEye       // 17
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -1209,5 +1312,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_CHARACTER_EYE();
+    }
+    
+    pass BossOutLine // 18
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_BOSS_OUTLINE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_BOSS_OUTLINE();
     }
 }

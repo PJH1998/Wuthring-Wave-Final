@@ -103,7 +103,7 @@ _bool CPicking::GetCenterPos(_float3* pOut)
 
 	memcpy(m_pPoints, SubResource.pData, sizeof(_float4) * m_iWinSizeX * m_iWinSizeY);
 
-	_uint iIndex = ((m_iWinSizeY / 2 - 10) * m_iWinSizeX) + m_iWinSizeX / 2 - 100;
+	_uint iIndex = ((m_iWinSizeY / 2 - 10) * m_iWinSizeX) + m_iWinSizeX / 2 - 500;
 
 	_float4 DepthDesc = m_pPoints[iIndex];
 

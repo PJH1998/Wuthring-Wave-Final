@@ -65,7 +65,7 @@ void CGalbrenaGroundSkill::OnEnter(void* pArg)
 
 			// CutScene 실행?
 			m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.1f, 5.f);
-			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"));
+			m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Burst01"), false, true);
 			//m_pGalbrena->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
 			m_pGalbrena->Set_OutLineVisible(false);
 			m_pGalbrena->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);

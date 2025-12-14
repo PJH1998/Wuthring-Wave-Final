@@ -113,16 +113,13 @@ void CRover::Update(_float fTimeDelta)
 	
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-
-	
-
 	if (!IsDissolve)
 	{
 		// 특정 상황일 때 TimeLack 감소.
 		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
 		
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack * m_fEventTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
@@ -138,8 +135,13 @@ void CRover::Update(_float fTimeDelta)
 
 
 	// 6. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
 
 }
 void CRover::Late_Update(_float fTimeDelta)
@@ -268,6 +270,9 @@ void CRover::Render_OutLine()
 	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
 		CRASH("Failed to Bind OutLineColor");
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutlineRadius, sizeof(_float))))
+		CRASH("Failed to Bind OutLineRadius");
+
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
@@ -329,8 +334,8 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			// 내 앞에서 생성. (안 곂치게)
 			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
 			
-			vPos += vLook * 5.f;
-			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
+			vPos += vLook * 1.f;
+			vPos += XMVectorSet(0.f, 2.f, 0.f, 0.f); // 약간 띄우기.
 			m_pColliderCom->Set_Position(vPos);
 			m_pColliderCom->IsActivate(true);
 
@@ -355,6 +360,14 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS:
 			m_IsLeviatanQTE = false;
 			Start_Anim();
+			break;
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
+			// 1. SFX 호출 하면서
+			Process_SpawnSFX(TEXT("SFX|Pooling_Galbrena_Ulti_Prefab"));
+
+			// 2. State 변경하고 => 위치 이동.
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BURST02;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
 			break;
 		default:
 			break;
@@ -596,6 +609,7 @@ void CRover::Sync_Position()
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
+
 void CRover::Bind_QTE(_bool IsQTE)
 {
 	m_IsQTE = IsQTE;
@@ -658,6 +672,14 @@ void CRover::Throw_AttachTarget()
 
 	*m_ThrowInfo.pGrabbed = false;
 	*m_ThrowInfo.pThrow = true;
+}
+
+void CRover::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
 }
 
 
@@ -806,6 +828,8 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 		Process_PlaySound(wStrObjectTag); // Character 함수.
 	else if (var1 == TEXT("MotionTrail"))
 		Process_MotionTrail(wStrObjectTag);
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
 
 	
 

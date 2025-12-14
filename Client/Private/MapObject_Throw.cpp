@@ -35,6 +35,7 @@ void CMapObject_Throw::Priority_Update(_float fTimeDelta)
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vOriginPos));
 		m_fThrowTime = 0.f;
 		m_fattachTime = 0.f;
+		//m_pCollideRigidbodyCom->IsActivate(false);
 	}
 }
 
@@ -49,6 +50,7 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 
 	if (m_IsGrabbed && !m_IsThrow)
 	{
+		m_pCollideRigidbodyCom->IsActivate(false);
 		if (m_fattachTime < 1.f)
 		{
 			m_fattachTime += fTimeDelta;
@@ -77,7 +79,6 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		m_fThrowTime += fTimeDelta;
 		if (m_fThrowTime < m_fFlyTime)
 		{
-
 			_vector vt = XMLoadFloat3(&m_vImpulse) * m_fThrowTime;
 
 			_vector gt2 = 0.5f * XMVectorSet(0.f, -9.81f, 0.f, 0.f) * m_fThrowTime * m_fThrowTime;
@@ -86,30 +87,23 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		}
 		else
 		{
+			m_fThrowTime = 0.f;
 			m_IsThrow = false;
-
 			//이펙트 호출.		
 			m_pCollideRigidbodyCom->IsActivate(true);
 			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-			PREFAB_INFO Info;
-			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), m_pTransformCom->Get_WorldMatrix(), &Info);
 
 			_uint iSoundChannel = m_pGameInstance->Register_Channel();
 
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire0"), iSoundChannel, 0.1f);
+			iSoundChannel = m_pGameInstance->Register_Channel();
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("StoneBroken"), iSoundChannel, 1.f);
+			m_pGameInstance->Return_Channel(iSoundChannel);
 		}
-
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_Y) == KEYSTATE::PRESS)
-	{
-		m_pCollideRigidbodyCom->IsActivate(true);
-		m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	}
 }
 
 void CMapObject_Throw::Late_Update(_float fTimeDelta)
 {
-
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
@@ -175,35 +169,6 @@ void CMapObject_Throw::OnCollider_During(_uint iLayer, void* pDesc, const Contac
 
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
 
-	/*if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-	{
-		if (!m_IsGrabbed && !m_IsThrow)
-			m_IsGrabbed = true;
-		else if (m_IsGrabbed && !m_IsThrow)
-		{
-			m_IsGrabbed = false;
-			m_IsThrow = true;
-		}
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
-	{
-		m_IsGrabbed = false;
-		m_IsThrow = false;
-	}*/
-
-	/*if (m_IsGrabbed && !m_IsThrow)
-	{
-		CTransform* pTransform = static_cast<CTransform*>(pcallDesc->pTransform);
-		_vector Pos = pTransform->Get_State(STATE::POSITION);
-		_vector LerpPos;
-		if (m_fattachTime >= 1.f)
-			m_fattachTime = 1.f;
-
-		XMStoreFloat3(&m_vStartPos, m_pTransformCom->Get_State(STATE::POSITION));
-		LerpPos = XMVectorLerp(XMLoadFloat3(&m_vStartPos), XMVectorSetY(Pos, Pos.m128_f32[1] += 1.f), m_fattachTime * m_fattachTime);
-		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(LerpPos, 1.f));
-	}*/
 }
 
 void CMapObject_Throw::Ready_Components(void* pArg)
@@ -239,7 +204,7 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
+	RigidbodyDesc.vExtent = _float3(3.f, 3.f, 3.f);
 	//플레이어 감지용 1개
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_DetectRigidbody"), reinterpret_cast<CComponent**>(&m_pDetectRigidbodyCom), &RigidbodyDesc);
@@ -260,7 +225,7 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW);
-	RigidbodyDesc.vExtent = _float3(3.f, 3.f, 3.f); 
+	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f); 
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -283,7 +248,7 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	XMStoreFloat3(&BurnRigidboydDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	BurnRigidboydDesc.eType = EMotionType::Kinematic;
 	BurnRigidboydDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::THROW);
-	BurnRigidboydDesc.vExtent = _float3(10.f, 10.f, 10.f);
+	BurnRigidboydDesc.vExtent = _float3(2.f, 2.f, 2.f);
 
 	//불타는 벽과 충돌 감지용
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

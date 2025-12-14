@@ -11,12 +11,14 @@ CGgobul::CGgobul(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CGgobul::CGgobul(const CGgobul& Prototype)
 	:CActor { Prototype }
 	, m_pGameSystem { CGameSystem::GetInstance()}
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CGgobul::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.03f, 0.f, 0.1f, 1.f);
     return S_OK;
 }
 
@@ -87,7 +89,15 @@ void CGgobul::Late_Update(_float fTimeDelta)
 {
 	//뼈 공격 볼륨 동기화 설정, 뼈에다가 맞추려면 sync 사용 X
 	//m_pRigidBodyCom[m_eType]->Sync_Rigidbody(m_pTransformCom);
-
+	if (m_isDissolve)
+	{
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
+		else
+		{
+			m_fDissolveRate = 1.f;
+		}
+	}
 	m_fFxTime = fmod(m_fFxTime + fTimeDelta * 0.5f, 1.f);
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -124,7 +134,12 @@ void CGgobul::Render()
 			CRASH("Failed to Bind FxTime");
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -190,6 +205,8 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	else
 		m_MeshEnables = { true, false, false, true, false, false };
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
+	m_isDissolve = false;
+	m_fDissolveRate = 0.f;
 	m_isActivate = true;
 }
 
@@ -198,6 +215,11 @@ void CGgobul::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 }
 
 void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
@@ -361,6 +383,8 @@ void CGgobul::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("Sound"))
 		Sound_Active(wstrPartTag);
+	else if (wstrTypeTag == TEXT("Dissolve"))
+		m_isDissolve = true;
 }
 
 void CGgobul::Sound_Active(const _wstring& wStrObjectTag)

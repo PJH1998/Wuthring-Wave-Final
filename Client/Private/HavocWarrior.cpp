@@ -10,11 +10,13 @@ CHavocWarrior::CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 CHavocWarrior::CHavocWarrior(const CHavocWarrior& Prototype)
 	: CActor { Prototype }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 }
 
 HRESULT CHavocWarrior::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.4f, 0.f, 0.3f, 1.f);
 	return S_OK;
 }
 
@@ -57,6 +59,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+
 	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
@@ -181,12 +184,14 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 			return;
 		}
 	}
-	if (m_isDeadTrigger)
+	if (m_isDissolve)
 	{
-		if (m_fDesolveRate < 1.f)
-			m_fDesolveRate += fTimeDelta;
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
 		else
-			m_fDesolveRate = 1.f;
+		{
+			m_fDissolveRate = 1.f;
+		}
 	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -237,7 +242,17 @@ void CHavocWarrior::Render()
 		if(m_fBehitAcc < m_fBehitMaxTime)
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
 		else
-			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		{
+			if (m_isDissolve)
+			{
+				if(m_isDeadTrigger)
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+				else
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			}
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		}
 
 		m_pModelCom->Render(i);
 	}
@@ -280,16 +295,18 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
-	m_pAnimMachineCom->Reset(m_pModelCom, "PatrolToFight");
+	m_pAnimMachineCom->Reset(m_pModelCom, "PatrolToFight_2");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_pColliderCom->IsActivate(true);
 	m_isDeadTrigger = false;
-	m_fDesolveRate = 0.f;
+	m_fDissolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
 	m_fBehitAcc = m_fBehitMaxTime;
+	m_isDissolve = false;
+	m_fDissolveRate = 0.f;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
@@ -300,6 +317,11 @@ void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isAct
 	else if (wStrColliderTag == TEXT("Lerp"))
 	{
 		TurnLerp(isActive);
+	}
+	else if (wStrColliderTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = isActive;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -340,59 +362,59 @@ void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.01f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.01f, m_pTransformCom, 2.f, 20.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.01f, m_pTransformCom, 0.04f, 4.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.01f, m_pTransformCom, 2.f, 20.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Run"))
 	{
 		if (wstrPartTag == TEXT("L"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 2.f, 30.f);
 		}
 		else
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 2.f, 30.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk01"))
 	{
 		//m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 2.f, 30.f);
 	}
 	else if (wstrTypeTag == TEXT("Atk02"))
 	{
 		if (wstrPartTag == TEXT("1"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 2.f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("2"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 2.f, 30.f);
 		}
 		else if (wstrPartTag == TEXT("3"))
 		{
-			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 0.f, 7.f);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 2.f, 30.f);
 		}
 	}
 	else if (wstrTypeTag == TEXT("Atk03"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 2.f, 30.f);
 	}
 	else if (wstrTypeTag == TEXT("Aggro"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 8.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 2.f, 35.f);
 	}
 	else if (wstrTypeTag == TEXT("Death"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_qixuezhanshi_death_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_qixuezhanshi_death_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 2.f, 30.f);
 	}
 	else if (wstrTypeTag == TEXT("Stand"))
 	{
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 7.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 2.f, 30.f);
 	}
 }
 
@@ -407,6 +429,11 @@ HRESULT CHavocWarrior::Bind_Resources()
 	{
 		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+	}
+	if(m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
 	}
 
 	return S_OK;
@@ -526,11 +553,6 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		return;
-	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -592,6 +614,13 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 
 	if (m_fBehitAcc < m_fBehitMaxTime)
 		m_fBehitAcc += fTimeDelta;
+
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		//return;
+	}
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
@@ -604,7 +633,7 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
@@ -726,6 +755,8 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_fBehitAcc = 0.f;
 		m_fBehitDMG = pDesc->fAttack;
 		m_eBehitColor = pDesc->eType;
+		if (m_isDissolve)
+			m_isDissolve = false;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;
 

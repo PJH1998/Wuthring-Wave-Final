@@ -386,6 +386,8 @@ enum class ERoverRopeDragType : _uint
 enum class ERoverEventType : _uint
 {
 	BEHIT_FLY_FALL,
+	BURST01,
+	BURST02,
 	END
 };
 

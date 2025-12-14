@@ -48,11 +48,16 @@
 #include "UI_Image.h"
 #include "UI_Text.h"
 #include "Animator_UI.h"
+
 #include "UI_HUD.h"
 #include "UI_HUD_Sector_FuncIcons.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_QuestIndicator.h"
+
 #include "UI_Text_Damage.h"
 #include "UI_Button_Interact.h"
+#include "UI_FinalEnd.h"
+
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
 #include "UI_MobHPBar.h"
@@ -170,7 +175,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1213_first/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1213_first/", m_eCurLevel, "The_False_Sovereign");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1213_second/", m_eCurLevel, "The_False_Sovereign");
 	
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f);
@@ -636,6 +641,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
 
+	_string strFilePath_UI_QuestIndicator = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Quest.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_QuestIndicator));
+
 
 
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
@@ -813,6 +821,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_QuestIndicator",
+		CUI_QuestIndicator::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_Container_QuestIndicator Load Failed. The UI_Container_QuestIndicator may have already been loaded.\n");
 
 	return S_OK;
 }

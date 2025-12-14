@@ -684,6 +684,8 @@ void CLevel_Test::Ready_UI()
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
+		 L"Prototype_GameObject_Custom_UI_Container_QuestIndicator"
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
@@ -897,44 +899,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 #pragma endregion	
 
-
-#pragma region  [NUMPAD 0] KSTA_UITEST_QTE
-	static _bool isQTETrigger = false;
-
-	if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::Q);
-		isQTETrigger = !isQTETrigger;
-	}
-	else if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::F);
-		isQTETrigger = !isQTETrigger;
-	}
-#pragma endregion
-
-
-#pragma region [LCTRL + NUMPAD3] KSTA_UITEST_CURVETRACE
-
-	static _bool isCurveTraceOn = false;
-
-	if (!isCurveTraceOn &&
-		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-	{
-		isCurveTraceOn = true;
-		std::cout << "[Level_Test::Testing_UI] CurveTrace On" << std::endl;
-	}
-	else if (isCurveTraceOn &&
-		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-	{
-		isCurveTraceOn = false;
-		std::cout << "[Level_Test::Testing_UI] CurveTrace Off" << std::endl;
-	}
-
-#pragma endregion
-
+	
 #pragma region [LCTRL + I] KSTA_UITEST_DIALOG
 	static _bool isUITestDialogOn = false;
 
@@ -945,13 +910,76 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		std::cout << "[Level_Test::Testing_UI] Dialog Toggled to" << (_bool)isUITestDialogOn << std::endl;
 
 		if (isUITestDialogOn)
-			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/testdialog.csv");
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv");
 		else
 			m_pGameSystem->Close_DialogUI();
 	}
 
 
 #pragma endregion
+
+
+#pragma region  [NUMPAD 0] KSTA_UITEST_FINAL
+	static _bool isFinalImageOn = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		isFinalImageOn = !isFinalImageOn;
+
+		if (isFinalImageOn)
+			m_pGameSystem->Trigger_PlayEndImage();
+#ifdef _DEBUG
+		else
+			m_pGameSystem->Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+	}
+#pragma endregion
+
+
+
+
+#pragma region [LCTRL + NUMPAD1, 2, 3] KSTA_UITEST_QUEST
+
+	static _bool isQuestUIOn = false;
+
+	if (!isQuestUIOn &&
+		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	{
+		isQuestUIOn = true;
+		std::cout << "[Level_Test::Testing_UI] Quest On" << std::endl;
+		m_pGameSystem->Trigger_ActivateQuest();
+	}
+
+	if (isQuestUIOn &&
+		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	{
+#ifdef _DEBUG
+		m_pGameSystem->Trigger_ForceCompleteQuestProgress();
+#else
+		m_pGameSystem->Trigger_AddQuestProgress();
+#endif  
+	}
+
+
+
+#ifdef _DEBUG
+	if (isQuestUIOn &&
+		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Trigger_AllReset();
+	}
+#endif // _DEBUG
+
+	
+
+#pragma endregion
+
+
+
 
 
 }
@@ -962,6 +990,9 @@ void CLevel_Test::Shader_Gui()
 
 }
 #endif
+
+
+
 
 void CLevel_Test::Toggle_HUD()
 {

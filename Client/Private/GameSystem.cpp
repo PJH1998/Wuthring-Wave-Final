@@ -104,6 +104,11 @@ const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 	return m_pParser->Load_CSV(pFilePath);
 }
 
+const vector<vector<_string>>& CGameSystem::Load_CSV_ADV(const _char* pFilePath)
+{
+	return m_pParser->Load_CSV_ADV(pFilePath);
+}
+
 void CGameSystem::Load_Sequence(const _char* pFolderPath)
 {
 	m_pParser->Load_Sequence(pFolderPath);
@@ -406,6 +411,36 @@ void CGameSystem::Close_DialogUI()
 	m_pUI_ControlHelper->Close_DialogUI();
 }
 
+void CGameSystem::Trigger_PlayEndImage()
+{
+	m_pUI_ControlHelper->Trigger_PlayEndImage();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_StopEndImageForcely()
+{
+	m_pUI_ControlHelper->Trigger_StopEndImageForcely();
+}
+#endif // _DEBUG
+
+void CGameSystem::Trigger_ActivateQuest()
+{
+	m_pUI_ControlHelper->Trigger_ActivateQuest();
+}
+
+void CGameSystem::Trigger_AddQuestProgress()
+{
+	m_pUI_ControlHelper->Trigger_AddQuestProgress();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_AllReset()
+{
+	m_pUI_ControlHelper->Trigger_AllReset();
+}
+#endif // _DEBUG
+
+
 void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
 {
 	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);
@@ -569,6 +604,10 @@ void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pA
 	}
 	else if (strTransition == "LeviatanQTESuccess")
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
+	else if (strTransition == "LeviatanPrevExecute")
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE, pArg);
+	else if (strTransition == "LeviatanExecuteSuccess") // 갈브레나 호출.
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS);
 	else if (strTransition == "GrabRelease")
 		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
 	else if (strTransition == "GrabUnbined")
@@ -593,6 +632,7 @@ void CGameSystem::Bind_Gravity_ToPlayer(_bool IsGravity)
 	m_pPlayer->Bind_Gravity(IsGravity);
 }
 
+// Destination은 1.f 이상 ~ 3.f 이하, Duration은 Zoom In Zoom Out 시간을 길게 주고 싶으면 길게, 짧게 주고 싶으면 짧게.
 void CGameSystem::Use_Spring(_float fDestination, _float fDuration)
 {
 	if (nullptr == m_pPlayer)

@@ -60,13 +60,14 @@ void CGalbrenaGroundSpecial::OnEnter(void* pArg)
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_SECONDGUN);
 		m_ActivePartTypes.emplace_back(CGalbrena::PARTTYPE::PART_DARKWING);
 		m_pGalbrena->Set_Gravity(false);
-		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), true);
+		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack07"), false, true);
 		m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 		break;
 	case EGalbrenaSpecialType::ATTACK08:
 		break;
 	case EGalbrenaSpecialType::ATTACK_H_01:
-		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack_H_01"), true);
+		m_pGalbrena->Rotate_Target();
+		m_pGalbrena->Play_Action(TEXT("Action_Galbrena_Attack_H_01"), false, true);
 		break;
 	}
 
@@ -122,7 +123,6 @@ void CGalbrenaGroundSpecial::OnExit()
 void CGalbrenaGroundSpecial::Handle_Input()
 {
 	EGalbrenaSpecialType eSpecialType = static_cast<EGalbrenaSpecialType>(m_iCurrentAnimIdx);
-
 
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
     m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB))
@@ -203,6 +203,11 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ULTI])
 	{
+		if (eSpType == EGalbrenaSpecialType::ATTACK07 ||
+			eSpType == EGalbrenaSpecialType::ATTACK08 ||
+			eSpType == EGalbrenaSpecialType::ATTACK_H_01)
+			return;
+
 		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Burst01"))
 			return;
 

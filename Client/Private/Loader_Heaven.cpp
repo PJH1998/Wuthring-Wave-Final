@@ -49,6 +49,8 @@
 #include "UI_HUD.h"
 #include "UI_HUD_Sector_FuncIcons.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_FinalEnd.h"
+
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
@@ -165,7 +167,7 @@ HRESULT CLoader_Heaven::Load_Texture()
 HRESULT CLoader_Heaven::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1212_third/", m_eCurLevel, "Heaven");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1213_third/", m_eCurLevel, "Heaven");
 
 	//// SkyBox
 	//_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -180,7 +182,7 @@ HRESULT CLoader_Heaven::Load_Model()
 	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Heaven.dat"))))
 	//	CRASH("SkyFX");
 
-		// SkyBox
+	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(115.f), 0.f);;
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Dome"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Dome.dat"))))
@@ -188,7 +190,7 @@ HRESULT CLoader_Heaven::Load_Model()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Cloud"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Cloud.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Cloud");
-	PreTransformMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, -20.f, -120.f, 1.f));
+	PreTransformMatrix = XMMatrixScaling(25.f, 25.f, 1.f) * XMMatrixRotationRollPitchYaw(0.f, 0.f, 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_FX.dat"))))
 		CRASH("Failed to Add Prototype HeavenSB_Fx");
@@ -794,6 +796,8 @@ HRESULT CLoader_Heaven::Load_UI()
 	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
 
+	_string strFilePath_UI_FinalEnd = "../../Client/Bin/Resource/UI/FJson/UITree/Root_FinalEnd.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_FinalEnd));
 
 
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json";
@@ -987,6 +991,9 @@ HRESULT CLoader_Heaven::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
+		CUI_FinalEnd::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_Container_FinalEnd Load Failed. The UI_Container_FinalEnd may have already been loaded.\n");
 
 
 	return S_OK;

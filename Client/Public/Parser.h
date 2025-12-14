@@ -43,6 +43,7 @@ public:
 #pragma region CSV
 	// Load CSV File (Excel)
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV_ADV(const _char* pFilePath);
 #pragma endregion
 
 #pragma region SEQUENCE

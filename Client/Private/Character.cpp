@@ -19,6 +19,7 @@ CCharacter::CCharacter(const CCharacter& Prototype)
     : CActor(Prototype)
 	, m_pGameSystem{ CGameSystem::GetInstance() }
 	, m_vOutlineColor { Prototype.m_vOutlineColor }
+	, m_fOutlineRadius { Prototype.m_fOutlineRadius }
 {
 	Safe_AddRef(m_pGameSystem);
 }
@@ -27,6 +28,8 @@ HRESULT CCharacter::Initialize_Prototype()
 {
     if (FAILED(CActor::Initialize_Prototype()))
         return E_FAIL;
+
+	m_fOutlineRadius = 0.001f;
 
     return S_OK;
 }
@@ -292,6 +295,13 @@ void CCharacter::Set_Position(_fvector vPos)
 {
 	ASSERT_CRASH(m_pTransformCom);
 	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Save_PreviousPosition();
+}
+
+void CCharacter::Set_ColliderPosition(_fvector vPos)
+{
+	ASSERT_CRASH(m_pColliderCom);
+	m_pColliderCom->Set_Position(vPos);
 }
 
 void CCharacter::ColliderActive(_bool IsActive)
@@ -326,7 +336,17 @@ void CCharacter::Debug_ImGui()
 	ImGui::End();
 }
 
+
+
 #endif // _DEBUG
+
+void CCharacter::Bind_Condition_ToPlayer(const _string& strCondition, void* pArg)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	m_pGameSystem->Bind_Condition_ToPlayer(strCondition, pArg);
+}
 
 #pragma region STATE
 
@@ -392,6 +412,7 @@ void CCharacter::Spawn_LeviatanAnchorEffect(const _wstring& wStrEffectTag)
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
 }
+
 
 void CCharacter::Execute_Telport(_vector vPos)
 {
@@ -535,6 +556,21 @@ void CCharacter::Start_Anim()
 	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
 }
 
+void CCharacter::Stop_Anim_ToEvent()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_fEventTimeRate = 0.f;
+}
+
+void CCharacter::Start_Anim_ToEvent()
+{
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_fEventTimeRate = 1.f;
+}
+
 void CCharacter::Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency)
 {
 	m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(eChannel), fVolume, fFrequency);
@@ -559,12 +595,28 @@ void CCharacter::Camera_Shake(_float fIntensity)
 
 }
 
-void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
+//void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
+//{
+//	if (nullptr == m_pTransformCom)
+//		return;
+//
+//	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
+//}
+
+void CCharacter::Play_Action(const _wstring& strActionTag, _bool isMaintain, _bool isEscape)
 {
-	if (nullptr == m_pTransformCom)
+	if (nullptr == m_pGameSystem)
 		return;
 
-	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
+	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), isMaintain, isEscape);
+}
+
+void CCharacter::Stop_Action()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	m_pGameSystem->Stop_Action();
 }
 
 _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
@@ -1529,6 +1581,21 @@ void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)
 
 	_matrix mat = XMMatrixIdentity();
 	m_pGameInstance->Spawn_PoolingObject_ForStatic(var2, mat, nullptr);
+}
+
+void CCharacter::Process_LightActive(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2;
+	wstringstream wss(wStrObjectTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+
+	if (var2 == L"false")
+		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+	else if (var2 == L"true")
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+
+	
 }
 
 void CCharacter::Free()

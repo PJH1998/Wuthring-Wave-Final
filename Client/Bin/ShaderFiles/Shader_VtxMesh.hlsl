@@ -1572,14 +1572,12 @@ PS_OUT_DOME PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
     //vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
     vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, frac(vTempTexcoord));
     Out.vBackBuffer = vDiffuse2;
-    Out.vBackBuffer.a = 0.1f;
     Out.vBackBuffer.a = g_fAlpha;
     if (length(vDiffuse) == 0.f)
         vDiffuse = 1.f;
     if (g_fAlpha != 0.f)
         Out.vDistortion = vDistored.r;
  
-    vector vEmissive = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
     return Out;
 }
 
@@ -1705,6 +1703,69 @@ PS_OUT_LIGHT PS_MAIN_FORCE_EMISSIVE(PS_IN In)
 
         return Out;
     }
+
+PS_OUT_LIGHT PS_MAIN_DOME_PHAZE2(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    float2 vTempTexcoord = In.vTexcoord + float2(g_DistortionTime * 0.01f, g_DistortionTime * 0.05f);
+    vector vDiffuse = g_DiffuseTexture[1].Sample(DefaultSampler, frac(vTempTexcoord));
+    
+    Out.vDistortion = vMask.r;
+    Out.vDiffuse = vDiffuse;
+    
+    if (length(vDiffuse) == 0.f)
+        vDiffuse = 1.f;
+
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    return Out;
+}
+
+PS_OUT_LIGHT PS_MAIN_METEOR(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    if (vMask.a == 0)
+        Out.vDiffuse = float4(0.3388785421848297f,
+   0.44620344042778015f,
+   0.6740331649780273f,
+   1.0);
+    else
+    {
+        Out.vDiffuse = float4(0.33625346422195435f, 0.5338311195373535f, 0.8950276374816895f, 1.f);
+
+        Out.vEmissive = Out.vDiffuse;
+    }
+    
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSSS.z = In.vProjPos.z / In.vProjPos.w;
+    Out.vSSS.w = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    return Out;
+}
 
 technique11 DefaultTechnique
 {
@@ -1990,7 +2051,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_OVF_PALETTE();
     }
 
-    pass Heaven_Emissive // 25
+    pass Heaven_Emissive // 26
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -1999,5 +2060,27 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_FORCE_EMISSIVE();
+    }
+
+    pass Heaven_After_LeviRevive // 27
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_DOME_DISTORTION_EMISSIVE();
+    }
+
+    pass Meteor_Color// 28
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_METEOR();
     }
 }

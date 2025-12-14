@@ -2153,6 +2153,49 @@ const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 	return m_Data;
 }
 
+
+const vector<vector<_string>>& CParser::Load_CSV_ADV(const _char* pFilePath)
+{
+	ifstream InputFile(pFilePath);
+
+	_string strLine;
+
+	m_Data.clear();
+
+	while (getline(InputFile, strLine))
+	{
+		vector<_string> row;
+		_string strCell;
+		_bool isInQuote = false; // 현재 따옴표 안에 있는지 여부
+
+		for (size_t i = 0; i < strLine.size(); ++i)
+		{
+			char c = strLine[i];
+
+			if (c == '"')
+			{	// 따옴표를 만나면 상태를 반전.
+				isInQuote = !isInQuote;
+			}
+			else if (c == ',' && !isInQuote)
+			{	// 따옴표 밖에서 쉼표를 만났을 때만 셀을 구분
+				row.push_back(strCell);
+				strCell.clear();
+				strCell += c;
+				continue; // 쉼표는 데이터에 넣지 않음
+			}
+
+		}
+		row.push_back(strCell);
+
+		m_Data.push_back(row);
+	}
+
+
+	InputFile.close();
+
+	return m_Data;
+}
+
 void CParser::Load_Sequence(const _char* pFolderPath)
 {
 	for (const auto& entry : filesystem::directory_iterator(pFolderPath))

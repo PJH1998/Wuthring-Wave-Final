@@ -403,8 +403,9 @@ void CLevel_GamePlay::Ready_UI()
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
 	const _wstring strPrototypeTag_UI[] = {
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
-		L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_QuestIndicator",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
@@ -496,6 +497,7 @@ void CLevel_GamePlay::Ready_NPC()
 	Napal.eCurLevel = m_eCurLevel;
 	Napal.vInitPos = _float3(3206.12f, 350.9f, 1680.1f);
 	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	Napal.strFolderPath = "../Bin/Resource/Model/NPC/Napal/Notify";
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
 
@@ -505,7 +507,8 @@ void CLevel_GamePlay::Ready_NPC()
 	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
 	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
 	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
-
+	Desc.strFolderPath = "../Bin/Resource/Model/NPC/Animals/Griffin/Notify";
+	
 	_float3 vRotDegree = _float3(-180.0f, 88.149f, -180.f);
 	_vector vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
 	_vector vTrans = XMVectorSet(3214.813f, 324.34f, 1727.473f, 1.f);

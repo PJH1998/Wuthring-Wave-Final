@@ -1349,7 +1349,6 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pModel_Manager);
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
-	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);
 	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
@@ -1376,6 +1375,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pSound_Manager);
 	
 	Safe_Release(m_pGraphic_Device);
 	Release();

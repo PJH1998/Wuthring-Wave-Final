@@ -55,7 +55,7 @@ void CAugustaGroundQTE::OnEnter(void* pArg)
 	if (IsSelect) // 선택된 캐릭터일때만?
 	{
 		//m_pAugusta->Bind_QTECamera();
-		m_pAugusta->Play_Action(TEXT("Action_Augusta_SkillQTE"), false);
+		m_pAugusta->Play_Action(TEXT("Action_Augusta_SkillQTE"), false, false);
 	}
 		
 }

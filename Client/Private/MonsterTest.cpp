@@ -5,6 +5,7 @@
 #include "AttackVolume.h"
 #include "Projectile.h"
 #include "GameSystem.h"
+#include "MotionTrail.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -23,7 +24,7 @@ CMonsterTest::CMonsterTest(const CMonsterTest& Prototype)
 HRESULT CMonsterTest::Initialize_Prototype()
 {
 	m_vOutLineColor = _float4(0.9535f, 0.9015f, 0.3218f, 1.f);
-	m_fOutLineRadius = 0.05f;
+	m_fOutLineRadius = 0.03f;
 
 	return S_OK;
 }
@@ -80,9 +81,10 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_ShaderIndices[SHINWANG_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 	m_isRender = false;
 	m_pTransformCom->Save_PreviousPosition();
-	m_fBehitMaxTime = 0.15f;
+	m_fBehitMaxTime = 0.3f;
 	m_fBehitAcc = m_fBehitMaxTime;
 	return S_OK;
 }
@@ -132,7 +134,11 @@ void CMonsterTest::Update(_float fTimeDelta)
 		m_pGameSystem->Enable_Parried();
 #pragma endregion
 		PREFAB_INFO Effect{};
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+		Effect.pModelPtr = m_pModelCom;
+		Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), m_pTransformCom->Get_WorldMatrix(), &Effect);
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
 	}
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
@@ -182,9 +188,11 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	{
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 			return;
-
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
-			return;
+		if (m_fBehitAcc < m_fBehitMaxTime)
+		{
+			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
+				return;
+		}
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
@@ -212,9 +220,16 @@ void CMonsterTest::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 			CRASH("Ready g_HasNormal Failed");
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+			if(m_isDeadTrigger)
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -320,6 +335,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 			m_pAtkVolumes[ATK_SOCKET::WEAPON_GL]->TriggerActivate(Isactive);
 		}
 	}
+	else if (wstrTypeTag == TEXT("Collide"))
+	{
+		m_pColliderCom->IsActivate(Isactive);
+	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{
 		m_pParryVolume->TriggerActivate(Isactive);
@@ -339,6 +358,11 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 	else if (wstrTypeTag == TEXT("Render"))
 	{
 		m_isRender = Isactive;
+	}
+	else if (wStrColliderTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = Isactive;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -472,6 +496,18 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_SKILL);
 		}
 	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.4f, 0.05f, 0.45f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.05f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 2.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
+	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{
 		m_pGameSystem->Attach_Parry(&m_vUIPosition);
@@ -485,6 +521,10 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(30.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
+	}
+	else if (wstrTypeTag == TEXT("Desolve"))
+	{
+		m_isDesolve = true;
 	}
 }
 
@@ -736,6 +776,12 @@ HRESULT CMonsterTest::Bind_Resources()
 	m_ShaderIndices[SHINWANG_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
+
 	return S_OK;
 }
 
@@ -939,11 +985,6 @@ void CMonsterTest::Calculate_PosAndDir()
 
 void CMonsterTest::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		return;
-	}
 	if(m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -974,6 +1015,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
 	_matrix WorldSpine = XMLoadFloat4x4(m_pCameraMatrix) * m_pTransformCom->Get_WorldMatrix();
 	XMStoreFloat3(&m_vUIPosition, WorldSpine.r[3]);
+	m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(m_vUIPosition, UI_MINIMAP_OBJTYPE::BOSS);
 #pragma endregion
 
 	if (m_fBehitAcc < m_fBehitMaxTime)
@@ -993,6 +1035,13 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
+
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		return;
+	}
 }
 
 void CMonsterTest::After_Condition(_float fTimeDelta)
@@ -1005,7 +1054,7 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
@@ -1071,6 +1120,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
+		m_fBehitAcc = 0.f;
 		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);

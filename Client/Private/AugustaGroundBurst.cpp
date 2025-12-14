@@ -50,7 +50,7 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	
 	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.0f);
 
-	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
+	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"), false, true);
 	
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));

@@ -147,34 +147,6 @@ void CVIBuffer_Spectrum::Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _in
 		}
 	}
 
-	//_int iMinKeep = 4; 
-
-	//if ((_int)vSamples.size() > iMinKeep)
-	//{
-	//	_float fLen = 0.f;
-
-	//	for (_int i = (_int)vSamples.size() - 1; i > 0; --i)
-	//	{
-	//		_vector a = XMLoadFloat3(&vSamples[i].vPos);
-	//		_vector b = XMLoadFloat3(&vSamples[i - 1].vPos);
-
-	//		_float seg = XMVectorGetX(XMVector3Length(a - b));
-	//		fLen += seg;
-
-	//		if (fLen > m_fMaxTrailLength)
-	//		{
-	//			_int iCutIndex = i; 
-	//			_int iMinIndex = (_int)vSamples.size() - iMinKeep;
-	//			if (iCutIndex > iMinIndex)
-	//				iCutIndex = iMinIndex;
-
-	//			while ((_int)vSamples.size() > iCutIndex)
-	//				vSamples.pop_front();
-	//			break;
-	//		}
-	//	}
-	//}
-
 	_int iSubDiv = 6;
 
 	_int N = (_int)vSamples.size();
