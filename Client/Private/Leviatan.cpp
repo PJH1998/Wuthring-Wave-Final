@@ -742,6 +742,9 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			m_pGameInstance->OnFade(FADE::FADE_IN, 2.f, [this]() {
 				if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 				{
+					m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_TWO);
+					
+					//얘는 돔 디졸브 시킬 노티파이에 옮기기.
 					m_pGameSystem->Dome_DissolveStart(true);
 				}
 				});
@@ -1612,7 +1615,6 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-			m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_TWO);
 		}
 #pragma endregion
 	}
