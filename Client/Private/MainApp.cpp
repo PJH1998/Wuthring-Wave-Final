@@ -35,7 +35,8 @@
 #include "GalbrenaUlti_SFX_Star.h"
 #include "GalbrenaUlti_SFX_Circle.h"
 #include "GalbrenaUlti_PostSFX.h"
-
+#include "Excute_PostSFX.h"
+#include "Excute_SFX.h"
 #include "Spectrum.h"
 #pragma endregion
 
@@ -648,6 +649,15 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Galbrena_UltiPostSFX"),
 		CGalbrenaUlti_PostSFX::Create(m_pDevice, m_pContext))))
 		CRASH("Failed Add Prototype_SFX_Galbrena_UltiPostSFX");
+
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_ExcutePost"),
+		CExcute_PostSFX::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype_SFX_ExcutePost");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_SFX_Excute"),
+		CExcute_SFX::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype_SFX_Excute");
+
 #pragma endregion
 
 }

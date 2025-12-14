@@ -125,6 +125,13 @@ namespace Client
 		_float2 fPadding1;
 	}SFX_RADIAL_DATA;
 	
+	typedef struct tagSFX_SlashData {
+		_float2 vSlashPoint0;
+		_float2 vSlashPoint1;
+		_float2 vScreenSize;
+		_float fOffset;
+		_float fIntensity;
+	}SFX_SLASH_DATA;
 
 	
 

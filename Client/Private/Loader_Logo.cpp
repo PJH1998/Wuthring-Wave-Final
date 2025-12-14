@@ -30,7 +30,7 @@ CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Logo::Initialize()
 {
-	m_iNumLoadingThread = 8;
+	m_iNumLoadingThread = 9;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
@@ -39,6 +39,7 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_LogoMaleRover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_LogoFeMaleRover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
     return S_OK;
 }
@@ -161,6 +162,14 @@ HRESULT CLoader_Logo::Load_LogoFeMaleRover()
 		CRASH("Prototype Create Failed");
 
 	cout << "Logo FeMale Rover" << endl;
+
+	return S_OK;
+}
+
+HRESULT CLoader_Logo::Load_Effect()
+{
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Logo", m_eCurLevel);
+	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Logo/Texture", m_eCurLevel);
 
 	return S_OK;
 }
