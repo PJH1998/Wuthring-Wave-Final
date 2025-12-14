@@ -70,7 +70,7 @@ private:
 
 	_int						m_iShaderPass = 0;
 	_float						m_fLifeTime = {};
-	_float						m_fMinDistance = 0.1f;
+	_float						m_fMinDistance = 0.01f;
 
 	_float3						m_vPreviousPos = {};
 

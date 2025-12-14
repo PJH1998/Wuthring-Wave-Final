@@ -147,8 +147,41 @@ void CVIBuffer_Spectrum::Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _in
 		}
 	}
 
+	//_int iMinKeep = 4; 
+
+	//if ((_int)vSamples.size() > iMinKeep)
+	//{
+	//	_float fLen = 0.f;
+
+	//	for (_int i = (_int)vSamples.size() - 1; i > 0; --i)
+	//	{
+	//		_vector a = XMLoadFloat3(&vSamples[i].vPos);
+	//		_vector b = XMLoadFloat3(&vSamples[i - 1].vPos);
+
+	//		_float seg = XMVectorGetX(XMVector3Length(a - b));
+	//		fLen += seg;
+
+	//		if (fLen > m_fMaxTrailLength)
+	//		{
+	//			_int iCutIndex = i; 
+	//			_int iMinIndex = (_int)vSamples.size() - iMinKeep;
+	//			if (iCutIndex > iMinIndex)
+	//				iCutIndex = iMinIndex;
+
+	//			while ((_int)vSamples.size() > iCutIndex)
+	//				vSamples.pop_front();
+	//			break;
+	//		}
+	//	}
+	//}
+
+	_int iSubDiv = 6;
+
 	_int N = (_int)vSamples.size();
-	_int iTargetCount = N;
+	_int iTargetCount = ( N - 1 ) * iSubDiv + 1;
+
+	if (iTargetCount > m_iMaxSamples)
+		iTargetCount = m_iMaxSamples;
 
 	vector<_float3> vSmoothPoints;
 	vSmoothPoints.resize(iTargetCount);
@@ -170,7 +203,7 @@ void CVIBuffer_Spectrum::Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _in
 		_float U = 0.f;
 
 		if (iTargetCount > 1)
-			U = (float)i * (float)(N - 1) / (float)(iTargetCount - 1);
+			U = (_float)i * (_float)(N - 1) / (_float)(iTargetCount - 1);
 
 		_int iSeg = (_int)U;
 		_float T = U - (_float)iSeg;

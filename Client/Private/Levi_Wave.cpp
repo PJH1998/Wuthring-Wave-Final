@@ -95,6 +95,11 @@ void CLevi_Wave::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	//이펙트 스폰 위치
 
+	PREFAB_INFO Info = {};
+	Info.pActive = &m_isActivate;
+	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Wave"), m_pTransformCom->Get_WorldMatrix(), &Info);
 }
 
 HRESULT CLevi_Wave::Bind_Resources()

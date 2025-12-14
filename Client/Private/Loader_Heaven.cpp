@@ -1023,6 +1023,10 @@ HRESULT CLoader_Heaven::Load_Effect()
 	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Mask", m_eCurLevel);
 	m_pGameSystem->Load_EffectLightData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Light");
 
+	m_pGameSystem->Load_EffectSpecturmTexture_FromFolder("../../Client/Bin/Resource/Effect/Spectrum/Color", m_eCurLevel);
+	m_pGameSystem->Load_EffectSpecturmTexture_FromFolder("../../Client/Bin/Resource/Effect/Spectrum/Mask", m_eCurLevel);
+	m_pGameSystem->Load_EffectSpectrumVB_FromFolder("../../Client/Bin/Resource/Effect/Spectrums/Heaven/SpectrumVB", m_eCurLevel);
+
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Sequence", m_eCurLevel);
 

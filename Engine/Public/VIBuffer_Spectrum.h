@@ -9,6 +9,7 @@ public:
 	typedef struct tagBufferSpectrumDesc
 	{
 		_int	MaxSamples;
+		_float	fMaxTrailLength;
 		_float  fSize;
 	}VB_SPECTRUM_DESC;
 
@@ -31,6 +32,7 @@ public:
 private:
 	_int			m_iMaxSamples = {};
 	_float			m_fSize = {};
+	_float			m_fMaxTrailLength = 1.5f;
 
 	_int			m_iVtxCount = {};
 

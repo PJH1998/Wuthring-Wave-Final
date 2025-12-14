@@ -34,6 +34,7 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
     
 	m_fColorGamma = 1.f;
 	m_fColorGain = 1.f;
+	m_fMinDistance = 0.01f;
 
 	m_isActivate = false;
 

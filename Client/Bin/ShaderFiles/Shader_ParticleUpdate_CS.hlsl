@@ -187,15 +187,14 @@ void main(uint3 tid : SV_DispatchThreadID)
         g_ParticleState[i].Phase = fPhase;
     }
     
-    //}
+    //
     if(IsLoop == 1)
     {
         if(g_ParticleState[i].LifeTime.x >= g_ParticleState[i].LifeTime.y)
         {
-            g_ParticleState[i].LifeTime.x = 0;
+            g_ParticleState[i].LifeTime.x = 0.f;
             g_ParticleState[i].Pos = g_ParticleStatic[i].DefaultPos;
             g_ParticleState[i].VelTail = float4(0.f, 0.f, 0.f, 0.f);
-            g_ParticleState[i].Phase = 0.f;
             g_ParticleState[i].Delay.x = 0.f; 
             g_ParticleState[i].Delay.y = 1.f;
 

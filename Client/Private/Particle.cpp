@@ -224,8 +224,8 @@ void CParticle::Update_Root_Transform()
 		_vector vRot = {};
 		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
 
-		//뼈 회전 안먹어도 될거 같음.
-		_matrix OffsetSpawnMatrix = XMMatrixTranslationFromVector(vPos);
+
+		_matrix OffsetSpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
 
 		XMStoreFloat4x4(&m_ComBindMatrix,
 			m_pTransformCom->Get_WorldMatrix() *
