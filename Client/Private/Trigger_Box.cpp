@@ -335,7 +335,7 @@ void CTrigger_Box::Register_Trigger()
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), XMMatrixTranslationFromVector(XMVectorSet(0.7f, -3.6f, -648.6f, 1.f)), &Info);
 			break;
 		case 70:
-			//m_pGameSystem.
+			m_pGameSystem->Trigger_ActivateQuest();
 			break;
 		}
 #ifndef _DEBUG
