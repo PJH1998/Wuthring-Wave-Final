@@ -929,7 +929,8 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;
-
+		if (m_fHP <= 0.f)
+			m_isAnimationFinished = false;
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
 #ifdef _DEBUG
