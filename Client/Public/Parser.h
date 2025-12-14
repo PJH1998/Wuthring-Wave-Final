@@ -33,7 +33,7 @@ public:
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
-	void							Create_MapEffect();
+	void							Create_MapEffect(_uint iLevel);
 #pragma endregion
 
 #pragma region SPAWNER

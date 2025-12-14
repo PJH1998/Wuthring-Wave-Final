@@ -41,7 +41,7 @@ public:
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
-	void							Create_MapEffects();
+	void							Create_MapEffects(_uint iLevel);
 #pragma endregion
 
 #pragma region FACTORY
