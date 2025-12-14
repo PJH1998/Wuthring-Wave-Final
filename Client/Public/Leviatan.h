@@ -168,6 +168,7 @@ private:
 	_float					m_fLUTIntensity{}; //LUT 강도
 	_float					m_fLUTAcc{}; //LUT 강도
 	_bool					m_isLUTDynamic{}; //LUT 동적 변화 여부
+	_bool					m_isLUTEffectEnable{}; //LUT 함수 사용 여부
 #pragma endregion
 private:
 	HRESULT						Bind_Resources();
@@ -192,6 +193,7 @@ private:
 	void						Reset_NotifyInteraction();
 	void						Event1();				//1페이즈 종료, 원점 원위치
 	void						Event2();				//2페이즈 시작, 변경 맵으로 이동
+	void						Update_LUT_Effect(_float fTimeDelta);				//사망 이후 LUT 업데이트 함수
 
 #pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }

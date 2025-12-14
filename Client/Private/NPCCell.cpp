@@ -141,6 +141,7 @@ void CNPCCell::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		{
 			m_CollideTrigger = true;
 			//m_strAnimationTag = 어깨빵 애니메이션
+			//m_strAnimationTag
 #ifdef _DEBUG
 			cout << m_iInstanceIndex << " 어깨빵!" << endl;
 #endif // _DEBUG

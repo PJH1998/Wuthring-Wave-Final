@@ -843,6 +843,7 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 		{
 			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
 			m_isKnockDown = true;
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f);
 		}
 	}
 	else

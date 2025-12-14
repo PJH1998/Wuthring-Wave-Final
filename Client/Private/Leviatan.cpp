@@ -44,8 +44,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	m_fHP = pDesc->fHP;
-	//m_fHP = 5100.f;
+	//m_fHP = pDesc->fHP;
+	m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -218,7 +218,8 @@ void CLeviatan::Update(_float fTimeDelta)
 	if(m_pParryVolume)
 		m_pParryVolume->Update(fTimeDelta);
 	
-
+	if (m_isLUTEffectEnable)
+		Update_LUT_Effect(fTimeDelta);
 	//5. 파츠 갱신
 	for (auto& Pair : m_PartObjects)
 	{
@@ -388,8 +389,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
-	m_fHP = Info.fMaxHp;
-	//m_fHP = 200.f;
+	//m_fHP = Info.fMaxHp;
+	m_fHP = 100.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -1623,6 +1624,9 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 
 			//사망 시 타임슬로우 효과
 			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.7f);
+			m_pGameInstance->Get_Current_LutSetting(&m_iLUTIndex, &m_fLUTIntensity, &m_isLUTDynamic);
+			m_fLUTAcc = 1.f;
+			m_isLUTEffectEnable = true;
 		}
 		//return;
 	}
@@ -1641,6 +1645,7 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		else
 		{
 			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f);
 			m_isKnockDownTrig = true;
 		}
 	}
@@ -1878,6 +1883,25 @@ void CLeviatan::Event2()
 	m_isBattle = true;
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
+}
+
+void CLeviatan::Update_LUT_Effect(_float fTimeDelta)
+{
+	if(m_fLUTAcc > 0.f)
+	{
+		_uint iLUTIndex{3};
+		m_fLUTAcc -= fTimeDelta;
+		if (m_fLUTAcc < 0.4f)
+			iLUTIndex = m_iLUTIndex;
+		m_pGameInstance->Setting_LUT(iLUTIndex, m_fLUTAcc, false); // 흑백 효과 : 3
+	}
+	else
+	{
+		m_fLUTAcc = 0.f;
+		m_pGameInstance->Setting_LUT(m_iLUTIndex, m_fLUTIntensity, m_isLUTDynamic);
+		m_isLUTEffectEnable = false;
+	}
+	
 }
 
 _bool CLeviatan::isKnockDown()
