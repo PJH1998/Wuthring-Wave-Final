@@ -46,6 +46,7 @@ void CLevi_Drop::Update(_float fTimeDelta)
 		if (false == m_isDisolve)
 		{
 			m_isDisolve = true;
+			m_isLife = false;
 			m_pRigidBodyCom->IsActivate(false);
 
 			//바닥에 떨어졌을때 이펙트 호출
@@ -93,6 +94,7 @@ void CLevi_Drop::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_vTargetPos = pDesc->vTargetPos;
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDisolve = false;
+	m_isLife = true;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
@@ -101,7 +103,7 @@ void CLevi_Drop::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	PREFAB_INFO Info = {};
 	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 	Info.pModelPtr = nullptr;
-	
+	Info.pActive = &m_isLife;
 
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Drop"), m_pTransformCom->Get_WorldMatrix(), &Info);
 }

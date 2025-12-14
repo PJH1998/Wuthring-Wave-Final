@@ -8,6 +8,7 @@ class CUI_Dialog final : public CCustom_UI
 public:
 	typedef struct tUIDialogDesc {
 		_string strFilePath = {};
+		_bool	isInteractable = true;
 	} UI_DIALOG_DESC;
 
 	typedef struct tLocalDialogDesc {
@@ -85,6 +86,8 @@ private:
 
 	_bool				m_isInteracted = false;
 	_bool				m_isInteracted_Externally = false;
+
+	_bool				m_isInteractable = true;
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };

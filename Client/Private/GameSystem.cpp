@@ -401,9 +401,9 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vTailColor);
 }
 
-void CGameSystem::Open_DialogUI(const _char* pFilePath)
+void CGameSystem::Open_DialogUI(const _char* pFilePath, _bool isInteractable)
 {
-	m_pUI_ControlHelper->Open_DialogUI(pFilePath);
+	m_pUI_ControlHelper->Open_DialogUI(pFilePath, isInteractable);
 }
 
 void CGameSystem::Req_Interact_DialogUI(_bool isChangeNext_Forcely)

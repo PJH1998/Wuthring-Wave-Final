@@ -72,7 +72,7 @@ public:
 												_float4 vHeadColor,
 												_float4 vTailColor);
 
-	void				Open_DialogUI(const _char* pFilePath);
+	void				Open_DialogUI(const _char* pFilePath, _bool isInteractable);
 	void				Req_Interact_DialogUI(_bool isChangeNext_Forcely);
 	void				Close_DialogUI();
 

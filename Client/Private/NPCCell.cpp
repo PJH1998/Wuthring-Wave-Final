@@ -40,6 +40,12 @@ HRESULT CNPCCell::Initialize_Clone(void* pArg)
 		memcpy(m_MeshTypeIndices.data(), pDesc->iMeshTypes, sizeof(_uint) * pDesc->iNumMeshType);
 	}
 	m_vDetectOffset = _float3(0.f, 1.f, 0.f);
+	
+	m_strInteractAnim.push_back("Stand_Trip_B");
+	m_strInteractAnim.push_back("Stand_Trip_F");
+	m_strInteractAnim.push_back("Stand_Trip_R");
+	m_strInteractAnim.push_back("Stand_Trip_L");
+	
     return S_OK;
 }
 
@@ -141,6 +147,7 @@ void CNPCCell::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		{
 			m_CollideTrigger = true;
 			//m_strAnimationTag = 어깨빵 애니메이션
+			//m_strAnimationTag
 #ifdef _DEBUG
 			cout << m_iInstanceIndex << " 어깨빵!" << endl;
 #endif // _DEBUG

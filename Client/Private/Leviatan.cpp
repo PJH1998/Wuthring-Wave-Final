@@ -218,7 +218,8 @@ void CLeviatan::Update(_float fTimeDelta)
 	if(m_pParryVolume)
 		m_pParryVolume->Update(fTimeDelta);
 	
-
+	if (m_isLUTEffectEnable)
+		Update_LUT_Effect(fTimeDelta);
 	//5. 파츠 갱신
 	for (auto& Pair : m_PartObjects)
 	{
@@ -232,7 +233,11 @@ void CLeviatan::Late_Update(_float fTimeDelta)
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
+	{
 		m_isParalysis = true;
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
+	}
 	if (m_isExecuteEnable)
 	{
 		m_isExecuteEnable = false;
@@ -385,7 +390,7 @@ void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
 	m_fHP = Info.fMaxHp;
-	//m_fHP = 200.f;
+	//m_fHP = 100.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -1141,10 +1146,12 @@ void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
 		else if (wstrPartTag == TEXT("Story1"))
 		{
 			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_1"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv", true);
 		}
 		else if (wstrPartTag == TEXT("Story2"))
 		{
 			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_2"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+			m_pGameSystem->Req_Interact_DialogUI(true);
 		}
 	}
 	
@@ -1499,6 +1506,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 				{
 					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 					{
+						m_pGameSystem->Close_DialogUI();
 						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
 						m_pGameSystem->Change_Leviathan_Phaze(1);
 						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
@@ -1617,8 +1625,11 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 
-			//사망시 타임슬로우 효과
+			//사망 시 타임슬로우 효과
 			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.7f);
+			m_pGameInstance->Get_Current_LutSetting(&m_iLUTIndex, &m_fLUTIntensity, &m_isLUTDynamic);
+			m_fLUTAcc = 1.f;
+			m_isLUTEffectEnable = true;
 		}
 		//return;
 	}
@@ -1637,6 +1648,7 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		else
 		{
 			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f);
 			m_isKnockDownTrig = true;
 		}
 	}
@@ -1874,6 +1886,25 @@ void CLeviatan::Event2()
 	m_isBattle = true;
 	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
 	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
+}
+
+void CLeviatan::Update_LUT_Effect(_float fTimeDelta)
+{
+	if(m_fLUTAcc > 0.f)
+	{
+		_uint iLUTIndex{3};
+		m_fLUTAcc -= fTimeDelta;
+		if (m_fLUTAcc < 0.15f)
+			iLUTIndex = m_iLUTIndex;
+		m_pGameInstance->Setting_LUT(iLUTIndex, m_fLUTAcc, false); // 흑백 효과 : 3
+	}
+	else
+	{
+		m_fLUTAcc = 0.f;
+		m_pGameInstance->Setting_LUT(m_iLUTIndex, m_fLUTIntensity, m_isLUTDynamic);
+		m_isLUTEffectEnable = false;
+	}
+	
 }
 
 _bool CLeviatan::isKnockDown()

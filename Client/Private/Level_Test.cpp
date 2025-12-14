@@ -80,7 +80,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
     Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
-	//Ready_MonsterTest();
+	Ready_MonsterTest();
 	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
@@ -103,7 +103,7 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_CameraNF();
 
-	Ready_Leviatan();
+	//Ready_Leviatan();
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
@@ -912,7 +912,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		std::cout << "[Level_Test::Testing_UI] Dialog Toggled to" << (_bool)isUITestDialogOn << std::endl;
 
 		if (isUITestDialogOn)
-			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv");
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv", true);
 		else
 			m_pGameSystem->Close_DialogUI();
 	}
