@@ -104,7 +104,7 @@ void CEffect_Light::Update_LightDesc(_float fTimeDelta)
 {
 	if (m_tLightDesc.fRange < m_vRange.y)
 	{
-		m_tLightDesc.fRange = fTimeDelta * m_fSpeed;
+		m_tLightDesc.fRange += fTimeDelta * m_fSpeed;
 	}
 }
 
