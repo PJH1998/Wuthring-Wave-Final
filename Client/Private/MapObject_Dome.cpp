@@ -65,7 +65,7 @@ void CMapObject_Dome::Late_Update(_float fTimeDelta)
 	{
 		m_iShaderPassIndex = 24;
 	}
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONLIGHT, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)

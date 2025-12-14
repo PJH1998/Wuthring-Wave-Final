@@ -84,7 +84,7 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	Ready_Spawner();
+	//Ready_Spawner();
 	//Ready_AnimInstanceTest();
 	//Ready_Leviatan();
 	//Ready_NPC();

@@ -226,14 +226,14 @@
     <Filter Include="01. Level\Effect\Effect_Controller\Mesh_Controller\Radial_Controller\Radial">
       <UniqueIdentifier>{606c33d5-720d-4502-82fe-1a443a9678bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller">
-      <UniqueIdentifier>{0ac5dddb-8f12-46dd-bc9f-6a2d00560acb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller\FXLight">
-      <UniqueIdentifier>{5389f285-edee-4fc2-8c14-a508a90bb558}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Level\Shader\StateMachine">
       <UniqueIdentifier>{cb31a44c-e4ba-40b8-9e45-14e9d8e0e9be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Light_Controller">
+      <UniqueIdentifier>{0ac5dddb-8f12-46dd-bc9f-6a2d00560acb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Light_Controller\FXLight">
+      <UniqueIdentifier>{5389f285-edee-4fc2-8c14-a508a90bb558}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -524,10 +524,10 @@
       <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Effect_Light.h">
-      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller\FXLight</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller\FXLight</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Light_Controller.h">
-      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Spectrum_Controller.h">
       <Filter>01. Level\Effect\Spectrum_Controller</Filter>
@@ -794,10 +794,10 @@
       <Filter>01. Level\Effect\Effect_Controller\VA_Controller</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Light.cpp">
-      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller\FXLight</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller\FXLight</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Light_Controller.cpp">
-      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab\Light_Controller</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Light_Controller</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Spectrum_Controller.cpp">
       <Filter>01. Level\Effect\Spectrum_Controller</Filter>

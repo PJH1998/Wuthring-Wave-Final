@@ -133,7 +133,7 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Stop_Anim();
 				m_pRover->Set_LeviatanQTE(true);
 				m_pRover->Spawn_LeviatanAnchorEffect(TEXT("Common_Bondage"));
-				m_pRover->Stop_Action();
+				//m_pRover->Stop_Action();
 				//m_pRover->Play_Action(TEXT("Camera_Action"), true, false);
 				return;
 			}
