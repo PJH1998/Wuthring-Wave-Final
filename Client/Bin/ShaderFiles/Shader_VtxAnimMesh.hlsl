@@ -1026,7 +1026,7 @@ PS_OUT PS_MONSTER_SPAWN(PS_IN In)
       
     float fMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
     
-    if(fMask >= g_fDissolveRate)
+    if(fMask > g_fDissolveRate)
         discard;
     
     float fMin = saturate(g_fDissolveRate - 0.05f);
@@ -1073,7 +1073,7 @@ PS_OUT PS_MONSTER_DEAD(PS_IN In)
       
     float fMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
     
-    if (fMask <= g_fDissolveRate)
+    if (fMask < g_fDissolveRate)
         discard;
     
     float fMax = saturate(g_fDissolveRate + 0.05f);
