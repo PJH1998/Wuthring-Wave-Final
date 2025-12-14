@@ -273,12 +273,14 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, "Born02", 0.f, &temp, false);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
 	m_fDissolveRate = 0.f;
-	m_isDissolve = false;
+	m_isDissolve = true;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 5.f;
 	m_fAttackAcc[2] = 20.f;
