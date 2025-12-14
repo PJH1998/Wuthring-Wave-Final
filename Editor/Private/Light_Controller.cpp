@@ -86,6 +86,8 @@ void CLight_Controller::Load_LightData_FromJson(const _string& strFilePath)
 	LightDesc.vDiffuse = vColor;
 
 	m_pGameInstance->Add_Light(LightDataTag, LightDesc);
+	
+	m_pGameInstance->Set_LightActive(LightDataTag, false);
 
 	m_LightData.push_back(WStringToString(LightDataTag));
 }

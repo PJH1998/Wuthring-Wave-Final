@@ -165,6 +165,15 @@ void CLevel_Effect::Update(_float fTimeDelta)
 
         m_pEffect_Controller->Update();
 
+		if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
+		{
+			m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+		}
+		if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+		{
+			m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+		}
+
 }
 
 void CLevel_Effect::Render()
