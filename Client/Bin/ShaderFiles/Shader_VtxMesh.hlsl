@@ -1567,8 +1567,6 @@ PS_OUT_NONLIGHT PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
 {
     PS_OUT_NONLIGHT Out = (PS_OUT_NONLIGHT) 0;
     
-    vector vDissolve = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-    
     float2 vTempTexcoord = In.vTexcoord + float2(g_DistortionTime * 0.01f, g_DistortionTime * 0.05f);
 
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, frac(vTempTexcoord));
@@ -1578,13 +1576,12 @@ PS_OUT_NONLIGHT PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
     
     if (g_DissolveStart)
     {
-        float fDissolveAlpha = (vDissolve.r + 1.0f) - (g_DissolveTime * 0.3f);
-        Out.vBackBuffer.a *= saturate(fDissolveAlpha);
+        float vDissolve = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord).r;
+
+        if (vDissolve < g_DissolveTime * 0.2f)
+            discard;
     }
-    
-    if (Out.vBackBuffer.a <= 0.f)
-        discard;
-    
+
     if (length(vDiffuse) == 0.f)
         vDiffuse = 1.f;
 
