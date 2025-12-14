@@ -292,6 +292,7 @@ public:
 #pragma region DOME
 	void	Register_Dome(class CMapObject_Dome* pDome);
 	void    Change_Leviathan_Phaze(_uint iPhaze);
+	void	Dome_DissolveStart(_bool DissolveStart);
 #pragma endregion
 
 private:

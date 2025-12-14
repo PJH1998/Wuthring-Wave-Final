@@ -755,6 +755,10 @@ void CGameSystem::Change_Leviathan_Phaze(_uint iPhaze)
 {
 	m_pLeviDome->Change_MaxAlpha(iPhaze);
 }
+void CGameSystem::Dome_DissolveStart(_bool DissolveStart)
+{
+	m_pLeviDome->Start_Dissolve(DissolveStart);
+}
 #pragma endregion
 
 void CGameSystem::Release_System()
