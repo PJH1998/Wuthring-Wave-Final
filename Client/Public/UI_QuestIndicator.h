@@ -97,7 +97,7 @@ private:
 
 private:
 	_uint				m_iProgress = 0;
-	const _uint			m_iMaxProgress = 7;
+	const _uint			m_iMaxProgress = 5;
 
 private:
 	class CGameSystem*	m_pGameSystem = { nullptr };

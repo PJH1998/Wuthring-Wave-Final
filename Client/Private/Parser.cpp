@@ -1772,6 +1772,8 @@ void CParser::Load_FXLight_Data_FromJson(const _string& strFilePath)
 	LightDesc.vDiffuse = vColor;
 
 	m_pGameInstance->Add_Light(LightDataTag, LightDesc);
+	m_pGameInstance->Set_LightActive(LightDataTag, false);
+
 }
 
 void CParser::Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel)

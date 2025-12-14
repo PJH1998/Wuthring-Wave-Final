@@ -46,6 +46,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
 	m_strCurrentAnimation = "AppearanceIdle";
 	m_strPreAnimation = m_strCurrentAnimation;
 	//m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
+	m_States[STATE_PARTICLE] = true;
     return S_OK;
 }
 
@@ -65,6 +66,16 @@ void CLogoMaleRover::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
+
+	if (m_States[STATE_PARTICLE])
+	{
+		m_States[STATE_PARTICLE] = false;
+		PREFAB_INFO effectInfo = {};
+		effectInfo.pModelPtr = m_pModelCom;
+		effectInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		_matrix mat = m_pTransformCom->Get_WorldMatrix();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Logo_Effect"), mat, &effectInfo);
+	}
 
 	//m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
 	m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);

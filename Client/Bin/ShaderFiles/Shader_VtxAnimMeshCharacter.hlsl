@@ -1025,14 +1025,21 @@ VS_OUT_OUTLINE VS_BOSS_OUTLINE(VS_IN In)
    
     bool IsDraw = true;
     
-    float JitterRatio = lerp(1.f, 2.f, Hash21(vNormal.xy));
+    float JitterRatio = lerp(1.f, 2.f, Hash21(vNormal.xy + vViewPos.xy));
     
-    float JitterLength = lerp(0.3f, 0.8f, Hash21(vNormal.xy));
+    float JitterLength = lerp(0.3f, 0.8f, Hash21(vNormal.xy + vViewPos.xy));
     
     float2 vNormalJitter = float2(vViewNormal.x < 0.f ? JitterLength * -1.f : JitterLength, vViewNormal.y < 0.f ? JitterLength * -1.f : JitterLength);
     
     vViewNormal.xy += vNormalJitter;
     vViewNormal.xy *= JitterRatio;
+    
+    //vViewNormal = normalize(float4(vViewNormal.x, vViewNormal.y, vViewNormal.z * 0.01f, 0.f));
+    
+    if (vViewNormal.z < 0.f)
+    {
+        IsDraw = false;
+    }
     
     float fTimeRatio = saturate(1.f - (g_fCurrentTime / g_fMaxTime));
     
@@ -1095,7 +1102,7 @@ PS_OUT_OUTLINE PS_BOSS_OUTLINE(PS_IN_OUTLINE In)
         
         float fGradiant = pow(saturate(fViewLength / (5.2f * g_fOutLineRadius)), 2.f);
         
-        float IsLine = fmod(abs(vOutlineWorldPos.y), 0.1f) > 0.05f;
+        bool IsLine = fmod(abs(vOutlineWorldPos.y), 0.05f) > 0.025f;
         Out.vColor = IsLine ? g_vOutLineColor : 0.f;
         
         if (all(Out.vColor == 0.f))
@@ -1317,7 +1324,7 @@ technique11 DefaultTechnique
     pass BossOutLine // 18
     {
         SetRasterizerState(RS_Cull_Front);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_BOSS_OUTLINE();

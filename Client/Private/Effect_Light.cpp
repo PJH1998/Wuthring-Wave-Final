@@ -29,6 +29,8 @@ HRESULT CEffect_Light::Initialize_Clone(void* pArg)
 	m_wstrLightTag = m_tDesc.wstrLightTag;
 	m_fSpeed = m_tDesc.fSpeed;
 	m_vRange = m_tDesc.vRange;
+	m_fAmbient = m_tDesc.fAmbient;
+
 
     m_isActivate = false;
 
@@ -92,8 +94,8 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_tLightDesc.vDiffuse = m_tDesc.vColor;
 		m_tLightDesc.vPosition = vPos;
 		m_tLightDesc.fRange = m_vRange.x;
-		//Test
-		m_tLightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+
+		m_tLightDesc.vAmbient = _float4(m_fAmbient, m_fAmbient, m_fAmbient, 1.f);
 
 		m_pGameInstance->Update_LightDesc(m_wstrLightTag, m_tLightDesc);
 		m_pGameInstance->Set_LightActive(m_wstrLightTag, true);

@@ -28,6 +28,7 @@ public:
 private:
 	HRESULT			Ready_Components(void* pArg);
 	void			Ready_Presets();
+	void			Create_ChildText();
 	void			PreAssign_ChildUIs();
 
 private:
@@ -40,9 +41,36 @@ private:
 	CCustom_UI*		m_pUI_FadeAll			= { nullptr };
 	CCustom_UI*		m_pUI_FadeGrad			= { nullptr };
 
+	CCustom_UI*		m_pUI_Names				= { nullptr };
+	CCustom_UI*		m_pUI_TY				= { nullptr };
+
+
 	CAnimator_UI*	m_pUIAnim_MainImage		= { nullptr };		
 	CAnimator_UI*	m_pUIAnim_FadeAll		= { nullptr };		
 	CAnimator_UI*	m_pUIAnim_FadeGrad		= { nullptr };		
+
+	CAnimator_UI*	m_pUIAnim_Names			= { nullptr };		
+	CAnimator_UI*	m_pUIAnim_TY			= { nullptr };		
+
+
+
+	CCustom_UI*		m_pTextUI_TeamRoles1	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamRoles2	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamRoles3	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamRoles4	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamRoles5	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamRoles6	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamRoles7	= { nullptr };
+
+	CCustom_UI*		m_pTextUI_TeamNames1	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamNames2	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamNames3	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamNames4	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamNames5	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamNames6	= { nullptr };
+	CCustom_UI*		m_pTextUI_TeamNames7	= { nullptr };
+
+	CCustom_UI*		m_pTextUI_Thankyou		= { nullptr };
 
 private:
 	class CGameSystem*	m_pGameSystem		= { nullptr };
@@ -51,6 +79,7 @@ private:
 	_bool			m_isStart = false;
 
 	_uint			m_iAnimOrder = 0;
+	_uint			m_iTextAnimOrder = 0;
 	_float			m_fElapsedTime = 0.f;
 
 public:
