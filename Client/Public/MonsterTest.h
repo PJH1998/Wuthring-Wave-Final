@@ -96,8 +96,6 @@ private:
 	_bool					m_isAggro{};
 	_bool					m_isDist_Interp_Enable{};
 	_bool					m_isRender{};
-	_bool					m_isDesolve{};
-	_float					m_fDesolveRate{};
 #pragma endregion
 	
 #pragma region STATUS

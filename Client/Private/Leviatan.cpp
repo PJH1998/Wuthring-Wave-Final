@@ -59,7 +59,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 10.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 65.f;
 #pragma endregion
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
@@ -104,6 +104,14 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 
 	m_strSequenceAnim = "Stand2";
+	m_fTimeLackRate = 1.f;
+
+#pragma region Light_Setting
+	m_LeviLight = *m_pGameInstance->Get_LightDesc(TEXT("Test"));
+	_vector vDiffuseTemp = XMLoadFloat4(&m_LeviLight.vDiffuse);
+	XMStoreFloat4(&m_LeviLight.vDiffuse, XMVectorSetW(vDiffuseTemp * 0.5f, 1.f));
+
+#pragma endregion
 	return S_OK;
 }
 
@@ -124,7 +132,7 @@ void CLeviatan::Priority_Update(_float fTimeDelta)
 	if (m_isAggro && !m_isEncounter)
 	{
 		m_isEncounter = true;
-
+		m_pGameSystem->HUD_FadeOut();
 		m_pGameInstance->OnFade(FADE::FADE_OUT, 0.4f, [this]() {
 			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 			{
@@ -134,8 +142,8 @@ void CLeviatan::Priority_Update(_float fTimeDelta)
 				m_isAnimationFinished = false;
 				m_isBattle = true;
 			}
-			m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, []() {
-				
+			m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, [this]() {
+
 				});
 			});
 	}
@@ -155,22 +163,22 @@ void CLeviatan::Update(_float fTimeDelta)
 			m_pBehaviorTreeCom[m_iPhase]->tick(this);
 	}
 	After_Condition(fTimeDelta);
-	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_fTimeLackRate = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	if (m_isAreaAttack)
-		AreaAttack(fTimeDelta * fTimeRatio);
+		AreaAttack(fTimeDelta * m_fTimeLackRate);
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	if(m_isBattle && m_pAnimMachineCom[m_iPhase])
 	{
 		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
-			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fTimeLackRate); // gpu
 		else											// 전투 애니메이션 갱신, facial X
-			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fTimeLackRate); // gpu
 	}
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	else
 	{
 		_float temp{};
-		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, m_strSequenceAnim, fTimeDelta * fTimeRatio, &temp);
+		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, m_strSequenceAnim, fTimeDelta * m_fTimeLackRate, &temp);
 	}
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 	{
@@ -463,6 +471,17 @@ void CLeviatan::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			m_PartObjects[TEXT("Part_Bayonet")]->SetActivate(IsActive);
 		}
 	}
+	else if (wstrTypeTag == TEXT("Collide"))
+	{
+		m_pColliderCom->IsActivate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("UIEnable"))
+	{
+		if (IsActive)
+			m_pGameSystem->HUD_FadeIn();
+		else
+			m_pGameSystem->HUD_FadeOut();
+	}
 }
 
 void CLeviatan::Effect_Active(const _wstring& wStrEffectTag)
@@ -592,9 +611,9 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		CMotionTrail::MOTION_TRAIL_DESC Desc{};
 		Desc.pModel = m_pModelCom;
 		Desc.pTransform = m_pTransformCom;
-		Desc.vColor = _float4(0.25f, 0.01f, 0.4f, 1.f);
+		Desc.vColor = _float4(0.21f, 0.01f, 0.4f, 1.f);
 		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
-		Desc.fInterval = 0.05f;  // 0.2초 간격으로 생성
+		Desc.fInterval = 0.1f;  // 0.2초 간격으로 생성
 		Desc.fDuration = 1.f;   // 5초 뒤에 트레일 생성 끝
 		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
 		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
@@ -639,6 +658,12 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		else if (wstrAnimTag == TEXT("Default"))
 		{
 			dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
+		}
+		else if (wstrAnimTag == TEXT("Impact"))
+		{
+			PREFAB_INFO Effect{};
+			Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Bow_Pull"), XMLoadFloat4x4(m_pBowSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
 		}
 	}
 	else if (wstrTypeTag == TEXT("SaveMatrix"))
@@ -711,7 +736,6 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 		m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-001 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
 	}
-
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
 		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab", m_pTransformCom);
@@ -725,27 +749,40 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		Reset_NotifyInteraction();
 		dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
 	}
+	else if (wstrTypeTag == TEXT("Light"))
+	{
+		//m_pGameInstance->Update_LightDesc();
+		LIGHT_DESC Desc = *m_pGameInstance->Get_LightDesc(TEXT("Test"));
+		m_pGameInstance->Update_LightDesc(TEXT("Test"),m_LeviLight);
+		memcpy(&m_LeviLight, &Desc, sizeof(LIGHT_DESC));
+	}
 	else if (wstrTypeTag == TEXT("FadeOut"))
 	{
 		m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
 
 			});
 	}
+	else if (wstrTypeTag == TEXT("DOME"))
+	{
+		//돔 디졸브 호출
+
+	}
 	else if (wstrTypeTag == TEXT("Ending"))
 	{
-		m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
-			//UI 호출
-			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
-			{
-
-			}
-			m_pGameInstance->OnFade(FADE::FADE_IN, 2.f, [this]() {
-				if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
-				{
-					
-				}
-				});
-			});
+		//UI 호출
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			m_pGameSystem->Trigger_PlayEndImage();
+		}
+		//m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+		//	
+		//	m_pGameInstance->OnFade(FADE::FADE_IN, 2.f, [this]() {
+		//		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		//		{
+		//			
+		//		}
+		//		});
+		//	});
 	}
 }
 
@@ -1402,6 +1439,7 @@ void CLeviatan::Ready_Events()
 			{
 				
 				//Event1();
+				m_pGameSystem->HUD_FadeOut();
 				m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
 					m_isBattle = true;
 					Event1();
@@ -1462,7 +1500,10 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
 						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
 						if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+						{
+							m_pGameSystem->HUD_FadeIn();
 							m_pGameSystem->Lock_Input_ToPlayer(false);
+						}
 
 					}
 				}
@@ -1473,6 +1514,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 					{
 						Event2();
+						m_pGameSystem->HUD_FadeIn();
 						m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, [this]() {
 							
 							});
@@ -1482,6 +1524,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
 				{
 					m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+					m_pGameSystem->HUD_FadeOut();
 					return;
 				}
 				m_iActionIndex++;
@@ -1505,12 +1548,16 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 #endif
 	}
 	
-	for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+	if(m_isAggro)
 	{
-		if (m_fAttackAcc[m_iPhase][i] > 0.f)
-			m_fAttackAcc[m_iPhase][i] -= fTimeDelta;
+		for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+		{
+			if (m_fAttackAcc[m_iPhase][i] > 0.f)
+				m_fAttackAcc[m_iPhase][i] -= fTimeDelta;
+		}
 	}
 	m_fAttackAcc[m_iPhase][ATK_PATTERN::ATTACK12] = m_fAttackCoolTime[ATK_PATTERN::ATTACK12];
+	m_fAttackAcc[m_iPhase][ATK_PATTERN::ATTACK1] = m_fAttackCoolTime[ATK_PATTERN::ATTACK1];
 	if (m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
 
@@ -1526,8 +1573,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 
 	if (m_isParalysis)
 	{
-		_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
-		m_fParalysisAcc -= fTimeDelta * fTimeRatio;
+		m_fParalysisAcc -= fTimeDelta * m_fTimeLackRate;
 		if (m_fParalysisAcc <= 0.f)
 		{
 			//그로기 유지시간 정의하기
@@ -1566,6 +1612,9 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 			m_isDeadTrigger = true;
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
+
+			//사망시 타임슬로우 효과
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.7f);
 		}
 		//return;
 	}
@@ -1574,7 +1623,7 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 
 	}
 	if (m_isTurnLerp)
-		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta * m_fTimeLackRate);
 
 	//그로기 특수상황
 	if (m_isParalysis)
@@ -1648,7 +1697,8 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		m_beHit = true;
 		if (m_iPhase == PHASE::ONE && m_fHP > 5000.f && ((m_fHP - pDesc->fAttack) < 5000.f))
 			m_isExecuteEnable = true;
-		m_fHP -= pDesc->fAttack;
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
 		m_fBehitAcc = 0.f;
 #pragma region PHASE_1
 		if (m_iPhase == PHASE::ONE && m_fHP <= 0.f)
@@ -1658,7 +1708,6 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 		if(m_fStamina > 0.f)
 			m_fStamina -= 1.f;
 
-		m_fBehitDMG = pDesc->fAttack;
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;
@@ -1768,12 +1817,12 @@ void CLeviatan::Reset_NotifyInteraction()
 	{
 		if(nullptr != m_pAtkVolumes[i])
 		{
-			m_pAtkVolumes[i]->SetActivate(false);
+			m_pAtkVolumes[i]->TriggerActivate(false);
 			m_pAtkVolumes[i]->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
 		}
 	}
 	if (nullptr != m_pParryVolume)
-		m_pParryVolume->SetActivate(false);
+		m_pParryVolume->TriggerActivate(false);
 	m_isAreaAttack = false;
 	m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_SFX));
 	m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_VOICE));

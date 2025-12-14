@@ -176,12 +176,12 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
-	if (m_isDesolve)
+	if (m_isDissolve)
 	{
-		if (m_fDesolveRate < 1.f)
-			m_fDesolveRate += fTimeDelta;
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
 		else
-			m_fDesolveRate = 1.f;
+			m_fDissolveRate = 1.f;
 	}
 
 	if (m_isRender)
@@ -524,7 +524,7 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("Desolve"))
 	{
-		m_isDesolve = true;
+		m_isDissolve = true;
 	}
 }
 
@@ -858,10 +858,10 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown();});
 	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 3.f); });
 	pBlackBoard->Add_Condition("Attack10", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK10, 4.f); });
-	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 5.f); });
+	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 6.5f); });
 	pBlackBoard->Add_Condition("Attack7", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK7, 6.f); });
-	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 8.f); });
-	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 10.f); });
+	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 8.5f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 11.5f); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -1124,9 +1124,9 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
 
-		m_fBehitDMG = pDesc->fAttack;
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;

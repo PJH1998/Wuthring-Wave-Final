@@ -753,9 +753,9 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	{
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
 		m_fBehitAcc = 0.f;
-		m_fBehitDMG = pDesc->fAttack;
 		m_eBehitColor = pDesc->eType;
 		if (m_isDissolve)
 			m_isDissolve = false;

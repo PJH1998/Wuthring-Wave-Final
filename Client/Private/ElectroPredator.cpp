@@ -689,11 +689,11 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 	{
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
 		m_fBehitAcc = 0.f;
 		if (m_isDissolve)
 			m_isDissolve = false;
-		m_fBehitDMG = pDesc->fAttack;
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;
