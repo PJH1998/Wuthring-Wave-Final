@@ -115,6 +115,13 @@ HRESULT CLevel_Effect::Initialize()
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
     }
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMeshCharacter.hlsl")
+			, VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+		return E_FAIL;
+	}
 
     //�ִϸ��̼� ����� ���̴�
     SHADER_MACRO eShaderMacroB = {

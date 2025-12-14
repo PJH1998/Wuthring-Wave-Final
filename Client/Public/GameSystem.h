@@ -41,7 +41,7 @@ public:
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
-	void							Create_MapEffects();
+	void							Create_MapEffects(_uint iLevel);
 #pragma endregion
 
 #pragma region FACTORY
@@ -292,6 +292,7 @@ public:
 #pragma region DOME
 	void	Register_Dome(class CMapObject_Dome* pDome);
 	void    Change_Leviathan_Phaze(_uint iPhaze);
+	void	Dome_DissolveStart(_bool DissolveStart);
 #pragma endregion
 
 private:

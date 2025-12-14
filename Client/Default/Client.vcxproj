@@ -220,6 +220,7 @@
     <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Event_Leviatan.h" />
     <ClInclude Include="..\Public\MapObject_Dome.h" />
+    <ClInclude Include="..\Public\MapObject_DynamicSound.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
     <ClInclude Include="..\Public\MapObject_Throw.h" />
@@ -521,6 +522,7 @@
     <ClCompile Include="..\private\Heaven_SkyBox.cpp" />
     <ClCompile Include="..\Private\MapObject_Burn.cpp" />
     <ClCompile Include="..\Private\MapObject_Dome.cpp" />
+    <ClCompile Include="..\Private\MapObject_DynamicSound.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />

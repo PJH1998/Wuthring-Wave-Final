@@ -26,7 +26,7 @@
 #include "Effect_VA.h"
 #include "Effect_Light.h"
 #include "Spectrum.h"
-
+#include "MapObject_DynamicSound.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -313,23 +313,35 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 }
 
-void CParser::Create_MapEffect()
+void CParser::Create_MapEffect(_uint iLevel)
 {
 	_matrix EffectMat = {};
 	PREFAB_INFO Info{};
-	for(auto& Effect : m_MapEffects)
+	CMapObject_DynamicSound::SOUND_DESC SoundDesc;
+	for (auto& Effect : m_MapEffects)
 	{
 		EffectMat = XMMatrixTranslationFromVector(XMLoadFloat4(&Effect.vEffectPos));
+		XMStoreFloat4x4(&SoundDesc.SoundMat, EffectMat);
+		SoundDesc.iSoundIndex = Effect.iEffectTag;
 		switch (Effect.iEffectTag)
 		{
 		case 0:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 1:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 2:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 3:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
@@ -1698,6 +1710,10 @@ void CParser::Load_FXLight_FromJson(const _string& strFilePath, const _string& L
 
 	if (LightJson.contains("Speed"))
 		Desc.fSpeed = LightJson["Speed"].get<_float>();
+
+	if (LightJson.contains("Ambient"))
+		Desc.fAmbient = LightJson["Ambient"].get<_float>();
+
 
 	if (LightJson.contains("Color") && LightJson["Color"].is_array())
 	{

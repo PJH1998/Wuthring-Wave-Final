@@ -1695,6 +1695,8 @@ void CEffect_Controller::Light_To_Json(json& LightJson, CEffect_Light::LIGHT_DES
 	LightJson["Range"] = Range;
 
 	LightJson["Speed"] = pLightDesc->fSpeed;
+
+	LightJson["Ambient"] = pLightDesc->fAmbient;
 }
 
 void CEffect_Controller::Load_Prefab()

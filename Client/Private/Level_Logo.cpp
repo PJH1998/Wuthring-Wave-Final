@@ -32,6 +32,7 @@ HRESULT CLevel_Logo::Initialize()
 	Ready_Mouse();
 	Ready_Camera();
 	Ready_SkyBox();
+	Ready_Effect();
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -189,6 +190,11 @@ void CLevel_Logo::Ready_SkyBox()
 {
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_LogoSkyBox"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_SkyBox"))))
 		CRASH("Failed to Add GameObject To Layer SkyBox");
+}
+
+void CLevel_Logo::Ready_Effect()
+{
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Logo", m_eCurLevel, 5);
 }
 
 void CLevel_Logo::Update_SoundOrder(_float fTimeDelta)

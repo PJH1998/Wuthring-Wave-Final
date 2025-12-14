@@ -103,11 +103,11 @@ struct PS_IN_POTAL
 };
 struct PS_OUT_POTAL
 {
-    float4 vColor : SV_TARGET0;
-    float4 vEmissive: SV_TARGET3;
-    float4 vDistortion : SV_TARGET4;
-    
+    float4 vBackBuffer : SV_TARGET0;
+    float4 vEmissive : SV_TARGET1;
+    float4 vDistortion : SV_TARGET2;
 };
+
 PS_OUT_POTAL PS_POTAL2(PS_IN In)
 {
     PS_OUT_POTAL Out = (PS_OUT_POTAL) 0;
@@ -125,16 +125,15 @@ PS_OUT_POTAL PS_POTAL2(PS_IN In)
     vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, NewTexcoord);
     vector vMask = g_MaskTexture.Sample(DefaultSampler, NewTexcoord);
     
-        Out.vDistortion = float4(vMask.rgb, 0.6f);
+    Out.vDistortion = float4(vMask.rgb, 0.6f);
     float Alpha = g_TotalTime / 5.f;
-    if (Alpha>=1.f)
+    if (Alpha >= 1.f)
         Alpha = 1.f;
-    Out.vColor = vDiffuse;
-    Out.vColor = float4(0.5f, 0.5f, 0.f, Alpha);
-    Out.vColor *= vMask;
-    Out.vEmissive = Out.vColor;
+    Out.vBackBuffer = float4(0.5f, 0.5f, 0.f, Alpha);
+    Out.vBackBuffer *= vMask;
+    Out.vEmissive = Out.vBackBuffer;
 
-        float Dist = distance(In.vTexcoord, float2(0.5f, 0.5f));
+    float Dist = distance(In.vTexcoord, float2(0.5f, 0.5f));
     if (Dist >= 0.5f)
         discard;
     
@@ -241,7 +240,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AccumBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;

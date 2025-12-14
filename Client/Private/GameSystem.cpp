@@ -127,9 +127,9 @@ void CGameSystem::Clone_Spawners(LEVEL eLevel)
 {
 	m_pParser->Clone_Spawners(eLevel);
 }
-void CGameSystem::Create_MapEffects()
+void CGameSystem::Create_MapEffects(_uint iLevel)
 {
-	m_pParser->Create_MapEffect();
+	m_pParser->Create_MapEffect(iLevel);
 }
 #pragma endregion
 
@@ -754,6 +754,10 @@ void CGameSystem::Register_Dome(CMapObject_Dome* pDome)
 void CGameSystem::Change_Leviathan_Phaze(_uint iPhaze)
 {
 	m_pLeviDome->Change_MaxAlpha(iPhaze);
+}
+void CGameSystem::Dome_DissolveStart(_bool DissolveStart)
+{
+	m_pLeviDome->Start_Dissolve(DissolveStart);
 }
 #pragma endregion
 

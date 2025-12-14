@@ -118,7 +118,7 @@ HRESULT CLevel_GamePlay::Initialize()
 
 //	m_pGameInstance->Bake_EnvMaps();
 
-	m_pGameSystem->Create_MapEffects();
+	m_pGameSystem->Create_MapEffects(m_pGameInstance->Get_CurrentLevel());
 
 	//TEST
 	m_pGameSystem->Change_Level(m_pGameInstance->Get_CurrentLevel());

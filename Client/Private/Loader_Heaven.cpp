@@ -15,7 +15,7 @@
 #include"MapObject_Throw.h"
 #include"MapObject_Burn.h"
 #include"MapObject_Dome.h"
-
+#include"MapObject_DynamicSound.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -254,6 +254,9 @@ HRESULT CLoader_Heaven::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Dome"),
 		CMapObject_Dome::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Sound"),
+		CMapObject_DynamicSound::Create(m_pDevice, m_pContext));
 
 #pragma endregion
 
