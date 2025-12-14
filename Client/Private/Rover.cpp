@@ -51,10 +51,14 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
-	
-	
-	
 	Ready_Variables(pDesc);
+
+	// GamePlay 일때 위치 보정.
+	if (LEVEL::GAMEPLAY == m_eCurLevel)
+	{
+		// 1. Look 변경.
+		m_pTransformCom->LookDir(XMVectorSet(1.0f, 0.0f, -0.5f, 0.f));
+	}
 
 
 

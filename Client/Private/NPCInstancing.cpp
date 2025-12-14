@@ -210,6 +210,7 @@ void CNPCInstancing::Ready_InstanceCells(NPC_DESC* pDesc)
 		CellDesc.fSpeedPerSec = 10.f;
 		CellDesc.fRotationPerSec = XMConvertToRadians(90.f);
 		CellDesc.isCollide = NpcData[i].isCollide;
+		//CellDesc.isRigid = NpcData[i].isRigid;
 		if (false == m_MeshTypePadding.empty())
 		{
 			CellDesc.iNumMeshType = static_cast<_uint>(MeshType.size());
