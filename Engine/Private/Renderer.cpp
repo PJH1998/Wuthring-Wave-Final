@@ -176,13 +176,13 @@ void CRenderer::Render()
 	Render_NonLight();
 	Render_LUT();
 	Render_Fog();
-	Render_DistortionObject();
 	Render_Effect();
 	Render_EffectResolve();
 	Render_SFX();
 	Render_Emissive();	
-	Render_Bloom();		
+	Render_Bloom();
 	Render_BloomCombined();
+	Render_DistortionObject();
 	Render_Blend(); 
 	Render_Distortion();
 	Render_ScreenEffect();
@@ -836,17 +836,6 @@ void CRenderer::Render_Fog()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
-void CRenderer::Render_DistortionObject()
-{
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Distortion"), nullptr, false)))
-		CRASH("Render Fail");
-
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::DISTORTION));
-
-	m_pGameInstance->End_MRT();
-}
-
-
 void CRenderer::Render_Effect()
 {
 	m_pGameInstance->Clear_RT(TEXT("RT_AccumColor"));
@@ -931,6 +920,16 @@ void CRenderer::Render_BloomCombined()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer"));
 }
 
+void CRenderer::Render_DistortionObject()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Distortion"), nullptr, false)))
+		CRASH("Render Fail");
+
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::DISTORTION));
+
+	m_pGameInstance->End_MRT();
+}
+
 void CRenderer::Render_Blend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
@@ -948,11 +947,6 @@ void CRenderer::Render_Distortion()
 
 	if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
 		CRASH("Failed Bind CurrentScene");
-
-	//_wstring strRT = m_IsFog ? TEXT("RT_BackBuffer") : TEXT("RT_Lut");
-
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(strRT, m_pShader, "g_BackBufferTexture")))
-	//	CRASH("Render Fail");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Distortion"), m_pShader, "g_DistortionTexture")))
 		CRASH("Render Fail");
@@ -1291,8 +1285,6 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 	// RENDERGROUP::DISTORTION
 #pragma region MRT_DISTORTION
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_BackBuffer"))))
-		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_Distortion"))))
 		ASSERT_CRASH(false);
 #pragma endregion

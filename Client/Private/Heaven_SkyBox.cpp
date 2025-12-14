@@ -100,6 +100,8 @@ HRESULT CHeaven_SkyBox::Ready_Component()
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
 		TEXT("Com_Model_Fx"), reinterpret_cast<CComponent**>(&m_pModel[ENUM_CLASS(SKYBOX::FX)]), nullptr)))
 		CRASH("Failed to Add Comp Heaven Cloud");
+
+	return S_OK;
 }
 
 CHeaven_SkyBox* CHeaven_SkyBox::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

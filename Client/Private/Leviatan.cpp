@@ -30,8 +30,8 @@ CLeviatan::CLeviatan(const CLeviatan& Prototype)
 
 HRESULT CLeviatan::Initialize_Prototype()
 {
-	m_vOutLineColor = _float4(0.9535f, 0.9015f, 0.3218f, 1.f);
-	m_fOutLineRadius = 0.05f;
+	m_vOutLineColor = _float4(0.9015f, 0.9015f, 0.9015f, 1.f);
+	m_fOutLineRadius = 0.02f;
 	return S_OK;
 }
 
@@ -100,7 +100,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_End"));
 	//m_strSequenceTag[ACTION::PHASE2_DEAD].push_back(TEXT(""));
 
-	m_fBehitAcc = m_fBehitMaxTime = 0.15f;
+	m_fBehitAcc = m_fBehitMaxTime = 0.3f;
 	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
 
 	m_strSequenceAnim = "Stand2";
@@ -765,7 +765,8 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("DOME"))
 	{
 		//돔 디졸브 호출
-
+		//얘는 돔 디졸브 시킬 노티파이에 옮기기.
+		m_pGameSystem->Dome_DissolveStart(true);
 	}
 	else if (wstrTypeTag == TEXT("Ending"))
 	{
@@ -1661,7 +1662,6 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		if (m_fHP <= 0.f)
 		{
 			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-			m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_TWO);
 		}
 #pragma endregion
 	}

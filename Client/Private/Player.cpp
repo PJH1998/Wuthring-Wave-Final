@@ -582,7 +582,8 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
 	}
 	
-	
+	// 8. 사운드 재생
+	m_pGameInstance->Play_Sound(TEXT("ui_ia_com_tick (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_UI), 0.5f);
 	//m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
 
 }
@@ -775,6 +776,9 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
+		// LockOn 해제.
+		m_IsLockOn = false;
+
 		Bind_EventLock(true);
 
 		// 협주 중이였다면?
@@ -802,6 +806,7 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
 	{
+		m_IsLockOn = false;
 		if (m_iCurrentCharacterIdx == CHARACTERTYPE::ROVER)
 		{
 			Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
@@ -809,14 +814,13 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			LEVI_GRAB Desc{ true };
 			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
 			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
-			//m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
 			Bind_EventLock(false);
-
-			m_Characters[m_iCurrentCharacterIdx]->Stop_Action();
+			m_pGameSystem->Stop_Action();
 		}
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE == eEvent) // 레비아탄 위치도 고정시켜야할 것 같은데?..
 	{
+		m_IsLockOn = false;
 		// 1. Rover가 아니면 Rover로변경 (얘가 메인 캐릭터로)
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			Change_Character(CHARACTERTYPE::ROVER, 0.f);
@@ -834,10 +838,16 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
 		);
 
+		
 		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Execute"), true, false);
+
+		// 카메라 액션 시작하면서 실행?
+		//m_Characters[m_iCurrentCharacterIdx]->Spawn_Effect(TEXT("Pooling_Excute_Prefab"));
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS == eEvent)
 	{
+		m_IsLockOn = false;
+
 		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
 		m_Characters[m_iEventCharacterIdx]->Start_Anim();
 		
@@ -855,14 +865,6 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 
 		m_IsEvent = true;
 		
-	}
-	else if (CHARACTER_EVENT::LEVIATAN_GRAB == eEvent)
-	{
-		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
-			return;
-
-		// 1, 2, 3번 도 못누르게 막아야함. QTE도 안되게 하기.?
-		//m_Characters[m_iCurrentCharacterIdx]->Stop_Anim(); // Animation Stop
 	}
 	else if (CHARACTER_EVENT::TELEPORT == eEvent)
 	{

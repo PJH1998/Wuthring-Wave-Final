@@ -63,6 +63,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+
 	return S_OK;
 }
 
@@ -230,15 +231,17 @@ void CHavocWarrior::Render()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			CRASH("Failed to Bind DiffuseTexture");
 
-		_bool HasNormal = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-			HasNormal = true;
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			CRASH("Failed to Bind NormalTexture");
+
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			CRASH("Failed to Bind MaskTexture");
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
+
 		if(m_fBehitAcc < m_fBehitMaxTime)
 			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
 		else
@@ -303,7 +306,6 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_pColliderCom->IsActivate(true);
 	m_isDeadTrigger = false;
-	m_fDissolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
 	m_fBehitAcc = m_fBehitMaxTime;

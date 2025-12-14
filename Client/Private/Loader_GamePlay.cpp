@@ -17,6 +17,7 @@
 #include"Slide_Navigation.h"
 #include"Potal.h"
 #include"MapObject_Turn.h"
+#include"MapObject_DynamicSound.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -172,7 +173,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 
 	// Map Load
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Asphodel_Barrens/Textures/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1214_first/", m_eCurLevel, "Asphodel_Barrens");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1214_second/", m_eCurLevel, "Asphodel_Barrens");
 
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/The_False_Sovereign/Textures/");
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1213_second/", m_eCurLevel, "The_False_Sovereign");
@@ -258,6 +259,9 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Turn"),
 		CMapObject_Turn::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Sound"),
+		CMapObject_DynamicSound::Create(m_pDevice, m_pContext));
 
 #pragma endregion
 	return S_OK;

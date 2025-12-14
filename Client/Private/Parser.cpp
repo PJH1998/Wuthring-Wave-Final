@@ -26,7 +26,7 @@
 #include "Effect_VA.h"
 #include "Effect_Light.h"
 #include "Spectrum.h"
-
+#include "MapObject_DynamicSound.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -313,23 +313,35 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 }
 
-void CParser::Create_MapEffect()
+void CParser::Create_MapEffect(_uint iLevel)
 {
 	_matrix EffectMat = {};
 	PREFAB_INFO Info{};
-	for(auto& Effect : m_MapEffects)
+	CMapObject_DynamicSound::SOUND_DESC SoundDesc;
+	for (auto& Effect : m_MapEffects)
 	{
 		EffectMat = XMMatrixTranslationFromVector(XMLoadFloat4(&Effect.vEffectPos));
+		XMStoreFloat4x4(&SoundDesc.SoundMat, EffectMat);
+		SoundDesc.iSoundIndex = Effect.iEffectTag;
 		switch (Effect.iEffectTag)
 		{
 		case 0:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 1:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 2:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 3:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
@@ -1699,6 +1711,10 @@ void CParser::Load_FXLight_FromJson(const _string& strFilePath, const _string& L
 	if (LightJson.contains("Speed"))
 		Desc.fSpeed = LightJson["Speed"].get<_float>();
 
+	if (LightJson.contains("Ambient"))
+		Desc.fAmbient = LightJson["Ambient"].get<_float>();
+
+
 	if (LightJson.contains("Color") && LightJson["Color"].is_array())
 	{
 		json Color = LightJson["Color"];
@@ -1766,6 +1782,8 @@ void CParser::Load_FXLight_Data_FromJson(const _string& strFilePath)
 	LightDesc.vDiffuse = vColor;
 
 	m_pGameInstance->Add_Light(LightDataTag, LightDesc);
+	m_pGameInstance->Set_LightActive(LightDataTag, false);
+
 }
 
 void CParser::Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel)
@@ -2175,14 +2193,15 @@ const vector<vector<_string>>& CParser::Load_CSV_ADV(const _char* pFilePath)
 			if (c == '"')
 			{	// 따옴표를 만나면 상태를 반전.
 				isInQuote = !isInQuote;
+				continue;
 			}
 			else if (c == ',' && !isInQuote)
 			{	// 따옴표 밖에서 쉼표를 만났을 때만 셀을 구분
 				row.push_back(strCell);
 				strCell.clear();
-				strCell += c;
 				continue; // 쉼표는 데이터에 넣지 않음
 			}
+			strCell += c;
 
 		}
 		row.push_back(strCell);

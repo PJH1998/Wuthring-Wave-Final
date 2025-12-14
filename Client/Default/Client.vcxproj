@@ -212,12 +212,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Effect_VA.h" />
+    <ClInclude Include="..\public\Excute_PostSFX.h" />
+    <ClInclude Include="..\public\Excute_SFX.h" />
     <ClInclude Include="..\Public\GalbrenaControl.h" />
     <ClInclude Include="..\Public\GalbrenaEvent.h" />
     <ClInclude Include="..\public\Heaven_SkyBox.h" />
     <ClInclude Include="..\Public\MapObject_Burn.h" />
     <ClInclude Include="..\Public\Event_Leviatan.h" />
     <ClInclude Include="..\Public\MapObject_Dome.h" />
+    <ClInclude Include="..\Public\MapObject_DynamicSound.h" />
     <ClInclude Include="..\Public\MapObject_FireFly.h" />
     <ClInclude Include="..\Public\LupaSpear.h" />
     <ClInclude Include="..\Public\MapObject_Throw.h" />
@@ -512,11 +515,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Effect_VA.cpp" />
+    <ClCompile Include="..\private\Excute_PostSFX.cpp" />
+    <ClCompile Include="..\private\Excute_SFX.cpp" />
     <ClCompile Include="..\Private\GalbrenaControl.cpp" />
     <ClCompile Include="..\Private\GalbrenaEvent.cpp" />
     <ClCompile Include="..\private\Heaven_SkyBox.cpp" />
     <ClCompile Include="..\Private\MapObject_Burn.cpp" />
     <ClCompile Include="..\Private\MapObject_Dome.cpp" />
+    <ClCompile Include="..\Private\MapObject_DynamicSound.cpp" />
     <ClCompile Include="..\Private\MapObject_FireFly.cpp" />
     <ClCompile Include="..\Private\LupaSpear.cpp" />
     <ClCompile Include="..\Private\MapObject_Throw.cpp" />

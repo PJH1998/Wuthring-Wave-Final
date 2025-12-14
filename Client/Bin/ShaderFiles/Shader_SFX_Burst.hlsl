@@ -301,6 +301,44 @@ PS_OUT_POST_SFX PS_GALBRENA_BLUR(PS_IN In)
     return Out;
 }
 
+cbuffer SlashData : register(b1)
+{
+    float2 vSlashPoint0;
+    float2 vSlashPoint1;
+    float2 vScreenSize;
+    float fOffset;
+    float fIntensity;
+};
+
+PS_OUT_POST_SFX PS_EXCUTE(PS_IN In)
+{
+    PS_OUT_POST_SFX Out = (PS_OUT_POST_SFX) 0;
+    
+    float4 vFinalColor = g_SceneTexture.Sample(ClampSampler, In.vTexcoord);
+    
+    float2 vSlashDir = normalize(vSlashPoint1 - vSlashPoint0);
+    float2 vSlashNormal = float2(-vSlashDir.y, vSlashDir.x);
+    
+    float2 vTexel = In.vTexcoord * vScreenSize;
+    
+    float2 vDir = vTexel - vSlashPoint0;
+    float fDot = dot(vDir, vSlashNormal);
+    
+    float fDist = abs(fDot);
+
+    float2 vOffset = 0.f;    
+    
+    vSlashDir = fDot > 0.f ? vSlashDir * -1.f : vSlashDir;
+    
+    float fUVIntensity = fDot > 0.f ? smoothstep(1.f, 0.f, In.vTexcoord) : smoothstep(0.f, 1.f, In.vTexcoord);
+    
+    vOffset = vSlashDir * (fOffset / vScreenSize) * fIntensity * fUVIntensity;
+    
+    Out.vColor = g_SceneTexture.Sample(ClampSampler, In.vTexcoord + vOffset);
+    
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
     pass AugustaSlash // 0
@@ -346,6 +384,17 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_GALBRENA_BLUR();
     }
+
+    pass Excute
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_EXCUTE();
+    }
 }
 
 /*
@@ -360,7 +409,7 @@ cbuffer g_SlashData : register(b0)
 };
 
     float2 vSlashDir = normalize(vSlashPoint1- vSlashPoint0);
-    float2 vSlashNormal = float2(-vSlashDir.y, vSlashDir.x);
+    float2 vSlashNormal = float2(-vSlashDir.y, vSlashDir.x);m
     
     float2 vTexel = In.vTexcoord * vScreenSize;
     
