@@ -69,6 +69,7 @@ private:
 	_bool m_IsSound = { false };
 
 	_float3 m_vRadians = {};
+	_uint m_iSoundChannel = {};
 public:
 	static vector<_wstring> m_SoundTags;
 public:
