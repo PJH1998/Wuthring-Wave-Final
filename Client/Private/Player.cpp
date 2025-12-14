@@ -54,6 +54,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Players(pDesc)))
         return E_FAIL;
 
+	
+
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
@@ -101,7 +103,9 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
 	// 9. 타이머 지정.
 	m_fChangeCoolTime = 3.f;
+
 	
+
 
     return S_OK;
 }
