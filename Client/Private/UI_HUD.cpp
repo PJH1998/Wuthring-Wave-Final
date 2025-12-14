@@ -1290,97 +1290,75 @@ void CUI_HUD::Update_Text_PlayerCD()
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 {
-	// - required info list..
-	// fPlayerHPRatio
-	
-
-    //static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
-    //static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
-    //const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
-    static _bool isHit = false;
-    static _float fHPReduceLeftTime = 0.f;
-    
-
-
-    //_float fPlayerHPRatio = fPlayerHP[iSelectedCHIndex] / fPlayerMaxHP[iSelectedCHIndex];
 	_float fPlayerHPRatio = m_pPlayerStatus->Get_HpRatio(m_iSelectedCHIndex);
-	static _float fPlayerHPPrevRatio = 0.f;
-	static _float fPlayerHPBackRatio = 0.f; //  = fPlayerHPRatio;
 
-    _float4 vHPColor        = { 1.f, 1.f, 1.f, 1.f };
-    _float4 vHPBackColor    = { 1.f, 0.f, 0.f, 1.f };
+	if (fPlayerHPRatio < 0.f) fPlayerHPRatio = 0.f;
+	else if (fPlayerHPRatio > 1.f) fPlayerHPRatio = 1.f;
 
-    const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
-
-    CCustom_UI* targetUI = m_pUI_HPBar;
-
-
-
-    
-    if (fHPReduceLeftTime > 0)
-    {
-        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // ü�� ���� ����
-
-        if (diff > 0.f)
-        {
-            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // �پ�� ü�� ����
-
-            fPlayerHPBackRatio -= delta;                               
-            if (fPlayerHPBackRatio < fPlayerHPRatio)
-                fPlayerHPBackRatio = fPlayerHPRatio;
-        }
-
-        fHPReduceLeftTime -= fTimeDelta;
-        if (fHPReduceLeftTime < 0)
-            fHPReduceLeftTime = 0;
-    }
-    else
-    {
-        fPlayerHPBackRatio = fPlayerHPRatio;
-    }
-
-
-	// HP 변화를 감지하여 피격 여부 확인
-	if (fPlayerHPPrevRatio > fPlayerHPRatio)
+	if (!m_isInited)
 	{
-		isHit = true;
-	}
-	// 피격 여부 확인 시 뒷 HP바가 따라가기 시작
-	if (isHit == true)
-	{
-		fHPReduceLeftTime = fHPReduceTime;
+		m_fPlayerHPBackRatio = fPlayerHPRatio;
+		m_fPlayerHPPrevRatio = fPlayerHPRatio;
+		m_fPlayerHPReduceLeftTime = 0.f;
+		m_isInited = true;
 	}
 
 
+	_float4 vHPColor = { 1.f, 1.f, 1.f, 1.f };
+	_float4 vHPBackColor = { 1.f, 0.f, 0.f, 1.f };
 
-    // change
-    vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11)    = vHPColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11)      = vHPBackColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21)    = vHPColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21)      = vHPBackColor;
-    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31)     = fPlayerHPRatio;
-    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31)       = fPlayerHPBackRatio;
+	const _float fHPReduceTime = 0.5f;
 
-    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-        vecVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-        true
-    };
-    
-    targetUI->Set_VariantUIDesc(tVariantDesc);
+	CCustom_UI* targetUI = m_pUI_HPBar;
 
 
-    isHit = false;
-	fPlayerHPPrevRatio = fPlayerHPRatio;
+	if (m_fPlayerHPPrevRatio > fPlayerHPRatio)
+	{
+		m_fPlayerHPReduceLeftTime = fHPReduceTime;
+	}
 
+	// Back Guage
+	if (m_fPlayerHPReduceLeftTime > 0.f)
+	{
+		_float diff = m_fPlayerHPBackRatio - fPlayerHPRatio;
 
-#ifdef KSTA_UI_HPBARTEST
-    std::cout << "[UI_HUD][Update_UI_HPBar] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_HPBar] 1 fPlayerHP     : " << fPlayerHPRatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_HPBar] 2 fPlayerHPBack : " << fPlayerHPBackRatio << std::endl;
-#endif // KSTA_UI_HPBARTEST
+		if (diff < 0.f)
+			m_fPlayerHPBackRatio = fPlayerHPRatio;
+		else if (diff > 0.f)
+		{
+			_float delta = diff * (fTimeDelta / m_fPlayerHPReduceLeftTime);
+			m_fPlayerHPBackRatio -= delta;
 
+			if (m_fPlayerHPBackRatio < fPlayerHPRatio)
+				m_fPlayerHPBackRatio = fPlayerHPRatio;
+		}
+
+		m_fPlayerHPReduceLeftTime -= fTimeDelta;
+		if (m_fPlayerHPReduceLeftTime < 0.f)
+			m_fPlayerHPReduceLeftTime = 0.f;
+	}
+	else
+	{
+		m_fPlayerHPBackRatio = fPlayerHPRatio;
+	}
+
+	vector<_float4x4> vecVariantMat = { _float4x4(), _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11) = vHPColor;
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11) = vHPBackColor;
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21) = vHPColor;
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21) = vHPBackColor;
+	*reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31) = fPlayerHPRatio;
+	*reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31) = m_fPlayerHPBackRatio;
+
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
+
+	targetUI->Set_VariantUIDesc(tVariantDesc);
+
+	m_fPlayerHPPrevRatio = fPlayerHPRatio;
 }
 
 void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
@@ -1389,164 +1367,166 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	_float	fBossHP		= 0.f;
 	_float	fBossBackHP = 0.f;
 	_float	fBossMaxHP	= 1.f;
-	
-	_float	fBossSA		= 0.f;
-    _float	fBossBackSA = 0.f;
-    _float	fBossMaxSA	= 1.f;
-    _bool	isSABreak	= false;
 
-	static _float	fTmpBossHP = 0.f;
-	static _float	fTmpBossSA = 0.f;
+	_float	fBossSA		= 0.f;
+	_float	fBossBackSA = 0.f;
+	_float	fBossMaxSA	= 1.f;
+	_bool	isSABreak	= false;
+
+
+
+
 
 	if (m_isOn_BossStatus)
 	{
 		fBossHP		= *m_pCurBossHP;
 		fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
-		fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
-		
+		fBossBackHP = (fBossHP == fBossMaxHP) ? fBossHP : m_fBackBossHP;
+
 		isSABreak	= *m_pIsGroggy;
-		
+
 		if (!isSABreak)
 		{
-			fBossSA = *m_pCurBossSA;
-			fBossMaxSA = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
+			fBossSA		= *m_pCurBossSA;
+			fBossMaxSA	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
 			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
 		}
 		else
 		{
-			fBossSA = *m_pGroggyLeftRatio;
-			fBossMaxSA = 1.f;
+			fBossSA		= *m_pGroggyLeftRatio;
+			fBossMaxSA	= 1.f;
 			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
 		}
 	}
+
+	if (!m_isOn_BossStatus)
+	{
+		m_isPrevBossOn = false;
+		m_fBossHPReduceLeftTime = 0.f;
+		return;
+	}
 	
-	//static _bool isHit = false;
-    static _float fHPReduceLeftTime = 0.f;
+	if (fBossMaxHP <= 0.f) fBossMaxHP = 1.f;
+	if (fBossMaxSA <= 0.f) fBossMaxSA = 1.f;
 
-    _float fBossHPRatio = fBossHP / fBossMaxHP;
-    _float fBossSARatio = fBossSA / fBossMaxSA;
-    static _float fBossHPBackRatio = fBossHPRatio;
-    static _float fBossSABackRatio = fBossSARatio;
+	_float fBossHPRatio = fBossHP / fBossMaxHP;
+	_float fBossSARatio = fBossSA / fBossMaxSA;
 
+
+	if (fBossHPRatio < 0.f) fBossHPRatio = 0.f; else if (fBossHPRatio > 1.f) fBossHPRatio = 1.f;
+	if (fBossSARatio < 0.f) fBossSARatio = 0.f; else if (fBossSARatio > 1.f) fBossSARatio = 1.f;
+
+
+	if (m_isOn_BossStatus && !m_isPrevBossOn)
+	{
+		m_fBossHPBackRatio = fBossHPRatio;
+		m_fBossSABackRatio = fBossSARatio;
+		m_fBossHPReduceLeftTime = 0.f;
+
+		m_fTmpBossHP = fBossHP;
+		m_fTmpBossSA = fBossSA;
+	}
+	m_isPrevBossOn = m_isOn_BossStatus;
 
 	// Colors
-    const _float4 vHPColor1         = { 1.f, .7f, .1f, 1.f };
-    const _float4 vHPColor2         = { 1.f, .2f, .0f, 1.f };
-    const _float4 vHPBackColor1     = { .8f, .8f, .8f, 1.f };
+	const _float4 vHPColor1     = { 1.f, .7f, .1f, 1.f };
+	const _float4 vHPColor2     = { 1.f, .2f, .0f, 1.f };
+	const _float4 vHPBackColor1 = { .8f, .8f, .8f, 1.f };
 
-    const _float4 vSAColor          = { 1.f, 1.f, 1.f, 1.f };   // before armor break
-    const _float4 vSABreakColor     = { .9f, .8f, .3f, 1.f };
-    const _float4 vSABackColor      = { 1.f, 1.f, 1.f, .3f };   // after armor break
-    //const _float4 vSABreakBackColor = { .2f, .2f, .2f, 1.f };
+	const _float4 vSAColor      = { 1.f, 1.f, 1.f, 1.f };   // before armor break
+	const _float4 vSABreakColor = { .9f, .8f, .3f, 1.f };
+	const _float4 vSABackColor  = { 1.f, 1.f, 1.f, .3f };   // after armor break
 
-    const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
+	const _float fHPReduceTime = 0.5f;
 
-    const auto targetUI		= m_pUI_BossHPBar;
-    const auto targetSAUI	= m_pUI_BossSABar;
+	const auto targetUI   = m_pUI_BossHPBar;
+	const auto targetSAUI = m_pUI_BossSABar;
 
+
+
+	if (m_fTmpBossHP > fBossHP || m_fTmpBossSA > fBossSA)
+	{
+		m_fBossHPReduceLeftTime = fHPReduceTime;
+	}
 
 	// Back Guage
-    if (fHPReduceLeftTime > 0)
-    {
-        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // ü�� ���� ����
-        _float fSADiff = fBossSABackRatio - fBossSARatio;              // �Ƹ� ���� ����
-
-        if (fHPDiff > 0.f)
-        {
-            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // �پ�� ü�� ����
-
-            fBossHPBackRatio -= fHPDelta;
-            if (fBossHPBackRatio < fBossHPRatio)
-                fBossHPBackRatio = fBossHPRatio;
-        }
-        if (fSADiff > 0.f)
-        {
-            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // �پ�� �Ƹ� ����
-
-            fBossSABackRatio -= fSADelta;
-            if (fBossSABackRatio < fBossSARatio)
-                fBossSABackRatio = fBossSARatio;
-        }
-
-        fHPReduceLeftTime -= fTimeDelta;
-        if (fHPReduceLeftTime < 0)
-            fHPReduceLeftTime = 0;
-    }
-    else
-    {
-        fBossHPBackRatio = fBossHPRatio;
-        fBossSABackRatio = fBossSARatio;
-    }
-
-
-	if (fTmpBossHP > fBossHP || fTmpBossSA > fBossSA)
+	if (m_fBossHPReduceLeftTime > 0.f)
 	{
-		//isHit = true;
-		fHPReduceLeftTime = fHPReduceTime;
-		//cout << "[UI_HUD::Update_UI_BossHPBar] Triggered!" << endl;
+		_float fHPDiff = m_fBossHPBackRatio - fBossHPRatio;
+		_float fSADiff = m_fBossSABackRatio - fBossSARatio;
+
+
+		if (fHPDiff < 0.f) m_fBossHPBackRatio = fBossHPRatio;
+		if (fSADiff < 0.f) m_fBossSABackRatio = fBossSARatio;
+
+		if (fHPDiff > 0.f)
+		{
+			_float fHPDelta = fHPDiff * (fTimeDelta / m_fBossHPReduceLeftTime);
+			m_fBossHPBackRatio -= fHPDelta;
+
+			if (m_fBossHPBackRatio < fBossHPRatio)
+				m_fBossHPBackRatio = fBossHPRatio;
+		}
+
+		if (fSADiff > 0.f)
+		{
+			_float fSADelta = fSADiff * (fTimeDelta / m_fBossHPReduceLeftTime);
+			m_fBossSABackRatio -= fSADelta;
+
+			if (m_fBossSABackRatio < fBossSARatio)
+				m_fBossSABackRatio = fBossSARatio;
+		}
+
+		m_fBossHPReduceLeftTime -= fTimeDelta;
+		if (m_fBossHPReduceLeftTime < 0.f)
+			m_fBossHPReduceLeftTime = 0.f;
 	}
-
-	if (!(fHPReduceLeftTime <= 0.01f))
+	else
 	{
-		//cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
+		m_fBossHPBackRatio = fBossHPRatio;
+		m_fBossSABackRatio = fBossSARatio;
 	}
 
 
+	vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._11) = vHPColor1;
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._11)   = vHPBackColor1;
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._21) = vHPColor2;
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)   = vHPBackColor1;
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)  = fBossHPRatio;
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)    = m_fBossHPBackRatio;
 
-    // change
-    vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._11)    = vHPColor1;
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._11)      = vHPBackColor1;
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._21)    = vHPColor2;
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)      = vHPBackColor1;
-    *reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)     = fBossHPRatio;
-    *reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)       = fBossHPBackRatio;
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32)  = static_cast<_float>(true);     // isUseNoise
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33)  = m_fElapsedTime;               // Elapsed Time
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34)  = 0.2f;                         // UV Scroll Speed
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.698f, 0.212f, 0.035f, 1.000f); // Mask Color
 
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32) = static_cast<_float>(true);	// isUseNoise
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33) = m_fElapsedTime;							// Elapsed Time
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34) = 0.2f;							// UV Scroll Speed
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.698f, 0.212f, 0.035f, 1.000f);	// Mask Color
+	vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11) = (isSABreak) ? vSABreakColor : vSAColor;
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)   = (isSABreak) ? _float4() : vSABackColor;
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21) = (isSABreak) ? vSABreakColor : vSAColor;
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)   = (isSABreak) ? _float4() : vSABackColor;
+	*reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)  = fBossSARatio;
+	*reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)    = m_fBossSABackRatio;
 
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
 
-    vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11)  = (isSABreak) ? vSABreakColor : vSAColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)    = vSABackColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21)  = (isSABreak) ? vSABreakColor : vSAColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)    = vSABackColor;
-    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)   = fBossSARatio;
-    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)     = fBossSABackRatio;
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDescSA = {
+		vecVariantMatSA,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
 
-
-    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-        vecVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-        true
-    };
-
-    CCustom_UI::VARIANTREADY_UI_DESC tVariantDescSA = {
-        vecVariantMatSA,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-        true
-    };
-
-    targetUI->Set_VariantUIDesc(tVariantDesc);
-    targetSAUI->Set_VariantUIDesc(tVariantDescSA);
-
-    //isHit = false;
-	fTmpBossHP = fBossHP;
-	fTmpBossSA = fBossSA;
+	targetUI->Set_VariantUIDesc(tVariantDesc);
+	targetSAUI->Set_VariantUIDesc(tVariantDescSA);
 
 
-#ifdef KSTA_UI_HPBARBOSSTEST
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 1 fBossHP     : " << fBossHPRatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 2 fBossHPBack : " << fBossHPBackRatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 1 fBossSA     : " << fBossSARatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 2 fBossSABack : " << fBossSABackRatio << std::endl;
-#endif // KSTA_UI_HPBARBOSSTEST
-
-
-
+	m_fTmpBossHP = fBossHP;
+	m_fTmpBossSA = fBossSA;
 }
 
 void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)

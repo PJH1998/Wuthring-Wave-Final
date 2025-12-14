@@ -175,6 +175,21 @@ private:
 	_bool					m_isIn_StrongAtk_Augusta = false;
 	_bool					m_isIn_BurstMode_Galbrena = false;
 
+private:
+
+	_bool	m_isPrevBossOn = false;
+
+	_float	m_fTmpBossHP = 0.f;
+	_float	m_fTmpBossSA = 0.f;
+
+	_float	m_fBossHPReduceLeftTime = 0.f;
+	_float	m_fBossHPBackRatio = 0.f;
+	_float	m_fBossSABackRatio = 0.f;
+
+	_float	m_fPlayerHPReduceLeftTime = 0.f;
+	_float	m_fPlayerHPPrevRatio = 0.f;
+	_float	m_fPlayerHPBackRatio = 0.f;
+	_bool	m_isInited = false;
 
 private:
 	// ========== for Boss ==========
