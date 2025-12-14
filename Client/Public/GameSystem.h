@@ -179,6 +179,7 @@ public:
 	// [WIP] 대화 스크립트 UI를 생성 및 해제합니다. / pFilePath : 대화 내용이 담긴 csv 파일의 경로.
 	// Dialog용 csv 파일은, [1열 발화자], [2열 대사]를 담을 것을 상정합니다.
 	void		Open_DialogUI(const _char* pFilePath);
+	void		Req_Interact_DialogUI(_bool isChangeNext_Forcely);
 	void		Close_DialogUI();
 
 	// [WIP] 종료 이미지를 실행합니다.
@@ -292,6 +293,7 @@ public:
 #pragma region DOME
 	void	Register_Dome(class CMapObject_Dome* pDome);
 	void    Change_Leviathan_Phaze(_uint iPhaze);
+	void	Dome_DissolveStart(_bool DissolveStart);
 #pragma endregion
 
 private:

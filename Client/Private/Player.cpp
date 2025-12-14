@@ -837,7 +837,11 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
 		);
 
+		
 		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Execute"), true, false);
+
+		// 카메라 액션 시작하면서 실행?
+		//m_Characters[m_iCurrentCharacterIdx]->Spawn_Effect(TEXT("Pooling_Excute_Prefab"));
 	}
 	else if (CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS == eEvent)
 	{

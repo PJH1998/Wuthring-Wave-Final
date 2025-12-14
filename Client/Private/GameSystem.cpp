@@ -406,6 +406,11 @@ void CGameSystem::Open_DialogUI(const _char* pFilePath)
 	m_pUI_ControlHelper->Open_DialogUI(pFilePath);
 }
 
+void CGameSystem::Req_Interact_DialogUI(_bool isChangeNext_Forcely)
+{
+	m_pUI_ControlHelper->Req_Interact_DialogUI(isChangeNext_Forcely);
+}
+
 void CGameSystem::Close_DialogUI()
 {
 	m_pUI_ControlHelper->Close_DialogUI();
@@ -754,6 +759,10 @@ void CGameSystem::Register_Dome(CMapObject_Dome* pDome)
 void CGameSystem::Change_Leviathan_Phaze(_uint iPhaze)
 {
 	m_pLeviDome->Change_MaxAlpha(iPhaze);
+}
+void CGameSystem::Dome_DissolveStart(_bool DissolveStart)
+{
+	m_pLeviDome->Start_Dissolve(DissolveStart);
 }
 #pragma endregion
 

@@ -92,7 +92,7 @@ void CNPC_Griffin::Render_Shadow()
 
 void CNPC_Griffin::Object_Func(const _wstring& wStrObjectTag)
 {
-	_float fMinDistance = 2.f;
+	_float fMinDistance = 0.2f;
 	_float fMaxDistance = 25.f;
 	_float fVolume = 0.3f;
 

@@ -327,20 +327,26 @@ void CParser::Create_MapEffect(_uint iLevel)
 		{
 		case 0:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 1:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 2:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 3:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
 			break;
 		}
-		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
-			TEXT("Layer_Sound"), &SoundDesc)))
-			CRASH("Spawner");
 	}
 	m_MapEffects.clear();
 }
@@ -2187,14 +2193,15 @@ const vector<vector<_string>>& CParser::Load_CSV_ADV(const _char* pFilePath)
 			if (c == '"')
 			{	// 따옴표를 만나면 상태를 반전.
 				isInQuote = !isInQuote;
+				continue;
 			}
 			else if (c == ',' && !isInQuote)
 			{	// 따옴표 밖에서 쉼표를 만났을 때만 셀을 구분
 				row.push_back(strCell);
 				strCell.clear();
-				strCell += c;
 				continue; // 쉼표는 데이터에 넣지 않음
 			}
+			strCell += c;
 
 		}
 		row.push_back(strCell);

@@ -47,6 +47,7 @@ public:
 
 
 	void Change_MaxAlpha(_uint iPhaze) { m_iPhaze = iPhaze; }
+	void Start_Dissolve(_bool B) { m_IsDissolveStart = B; }
 
 private:
 	CShader* m_pShaderCom = { nullptr };
@@ -59,7 +60,8 @@ private:
 	_uint					m_iPhaze = {};
 	_float					m_fAlpha = {};
 	_float					m_fMaxAlpha = {};
-
+	_bool					m_IsDissolveStart = { false };
+	_float					m_fDissolveTime = {};
 private:
 	virtual		void						Ready_Component(void* pArg);
 

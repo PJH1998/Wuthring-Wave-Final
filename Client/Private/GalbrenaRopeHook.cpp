@@ -25,7 +25,7 @@ void CGalbrenaRopeHook::OnEnter(void* pArg)
 	m_eRopeDir = m_pGalbrena->Calculate_RopeDirection();
 
 	// 2. 초기 단계 설정.
-	m_eRopeStep = ROPESTEP::STEP_START;
+	/*m_eRopeStep = ROPESTEP::STEP_START;
 
 	switch (m_eRopeDir)
 	{
@@ -37,6 +37,21 @@ void CGalbrenaRopeHook::OnEnter(void* pArg)
 		break;
 	case ROPEDIR::D:
 		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START01_D);
+		break;
+	}*/
+
+	m_eRopeStep = ROPESTEP::STEP_START2;
+
+	switch (m_eRopeDir)
+	{
+	case ROPEDIR::U:
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_U);
+		break;
+	case ROPEDIR::F:
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_F);
+		break;
+	case ROPEDIR::D:
+		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRopeHookType::FIXHOOK_START02_D);
 		break;
 	}
 

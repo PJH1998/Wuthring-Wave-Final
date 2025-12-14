@@ -138,7 +138,7 @@ void CLevel_Test::Update(_float fTimeDelta)
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_Excute_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 #endif
 
@@ -900,7 +900,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion	
 
 	
-#pragma region [LCTRL + I] KSTA_UITEST_DIALOG
+#pragma region [LCTRL + I / LCTRL + O] KSTA_UITEST_DIALOG
 	static _bool isUITestDialogOn = false;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
@@ -915,6 +915,11 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 			m_pGameSystem->Close_DialogUI();
 	}
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Req_Interact_DialogUI(false);
+	}
 
 #pragma endregion
 

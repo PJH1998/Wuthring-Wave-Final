@@ -526,6 +526,9 @@
     <Filter Include="03. GameObject\UI\Containers_Prop\_FinalEnd">
       <UniqueIdentifier>{182387ed-22d4-4767-afd1-e93e00b558fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SFX\Excute">
+      <UniqueIdentifier>{b4816ebb-5dbf-4d2f-a555-bc0c481b6820}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -1367,6 +1370,12 @@
       <Filter>03. GameObject\UI\Containers_Prop\_FinalEnd</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_DynamicSound.h" />
+    <ClInclude Include="..\public\Excute_PostSFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\Excute</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Excute_SFX.h">
+      <Filter>03. GameObject\ScreenEffect\SFX\Excute</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2159,6 +2168,12 @@
       <Filter>03. GameObject\UI\Containers_Prop\_FinalEnd</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_DynamicSound.cpp" />
+    <ClCompile Include="..\private\Excute_PostSFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\Excute</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Excute_SFX.cpp">
+      <Filter>03. GameObject\ScreenEffect\SFX\Excute</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
