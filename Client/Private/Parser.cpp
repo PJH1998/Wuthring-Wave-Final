@@ -26,7 +26,7 @@
 #include "Effect_VA.h"
 #include "Effect_Light.h"
 #include "Spectrum.h"
-
+#include "MapObject_DynamicSound.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -313,13 +313,16 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 }
 
-void CParser::Create_MapEffect()
+void CParser::Create_MapEffect(_uint iLevel)
 {
 	_matrix EffectMat = {};
 	PREFAB_INFO Info{};
-	for(auto& Effect : m_MapEffects)
+	CMapObject_DynamicSound::SOUND_DESC SoundDesc;
+	for (auto& Effect : m_MapEffects)
 	{
 		EffectMat = XMMatrixTranslationFromVector(XMLoadFloat4(&Effect.vEffectPos));
+		XMStoreFloat4x4(&SoundDesc.SoundMat, EffectMat);
+		SoundDesc.iSoundIndex = Effect.iEffectTag;
 		switch (Effect.iEffectTag)
 		{
 		case 0:
@@ -335,6 +338,9 @@ void CParser::Create_MapEffect()
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
 			break;
 		}
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+			TEXT("Layer_Sound"), &SoundDesc)))
+			CRASH("Spawner");
 	}
 	m_MapEffects.clear();
 }
@@ -1770,6 +1776,8 @@ void CParser::Load_FXLight_Data_FromJson(const _string& strFilePath)
 	LightDesc.vDiffuse = vColor;
 
 	m_pGameInstance->Add_Light(LightDataTag, LightDesc);
+	m_pGameInstance->Set_LightActive(LightDataTag, false);
+
 }
 
 void CParser::Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel)

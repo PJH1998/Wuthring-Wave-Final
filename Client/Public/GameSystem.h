@@ -41,7 +41,7 @@ public:
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
-	void							Create_MapEffects();
+	void							Create_MapEffects(_uint iLevel);
 #pragma endregion
 
 #pragma region FACTORY
@@ -187,10 +187,12 @@ public:
 	void		Trigger_StopEndImageForcely();
 #endif // _DEBUG
 
+	// [WIP] 퀘스트 UI를 생성합니다. 목표 진행률에 도달하면 알아서 사라집니다.
 	void		Trigger_ActivateQuest();
+	// [WIP] 퀘스트의 진행률을 ++합니다. (찾은 아이 1명 추가)
 	void		Trigger_AddQuestProgress();
 #ifdef _DEBUG
-	void		Trigger_ForceCompleteQuestProgress()	{ for (_uint i = 0; i < 7; i++)	Trigger_AddQuestProgress();};
+	void		Trigger_ForceCompleteQuestProgress()	{ for (_uint i = 0; i < 5; i++)	Trigger_AddQuestProgress();};
 	void		Trigger_AllReset();
 #endif // _DEBUG
 

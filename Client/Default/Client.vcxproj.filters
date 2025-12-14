@@ -1366,6 +1366,7 @@
     <ClInclude Include="..\public\UI_FinalEnd.h">
       <Filter>03. GameObject\UI\Containers_Prop\_FinalEnd</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_DynamicSound.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -2157,6 +2158,7 @@
     <ClCompile Include="..\private\UI_FinalEnd.cpp">
       <Filter>03. GameObject\UI\Containers_Prop\_FinalEnd</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_DynamicSound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

@@ -127,9 +127,9 @@ void CGameSystem::Clone_Spawners(LEVEL eLevel)
 {
 	m_pParser->Clone_Spawners(eLevel);
 }
-void CGameSystem::Create_MapEffects()
+void CGameSystem::Create_MapEffects(_uint iLevel)
 {
-	m_pParser->Create_MapEffect();
+	m_pParser->Create_MapEffect(iLevel);
 }
 #pragma endregion
 

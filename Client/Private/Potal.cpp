@@ -53,7 +53,7 @@ void CPotal::Update(_float fTimeDelta)
 void CPotal::Late_Update(_float fTimeDelta)
 {
 	//빌보드 직접 만드셈ㅇㅇ
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CPotal::Render()

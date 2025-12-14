@@ -40,7 +40,7 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
 
     m_pAugusta->PartActivate(m_iPartType, true);
-    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+    m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
     m_pAugusta->Set_Gravity(true);
 
 	m_pAugusta->PartActivate(m_iSubPartType, true);
@@ -131,9 +131,11 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 		m_fAnimationScale = 1.f;
 		//m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
 		
+	if (m_fAnimationScale < 0.5f)
+		m_fAnimationScale = 0.5f;
 	// 2. 애니메이션 실행 (루트모션 이동량 존재)
-    //CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, 1.f);
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
+    //CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, 1.f);
 
 
 	m_eDir = m_pAugusta->Calculate_Direction();
@@ -193,8 +195,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK01;
 				//m_pAugusta->Rotate_Target(); // 회전 하고, 왼쪽 이동?
-				m_pAugusta->Rotate_To_Diagonal_Target(30.f, false); // 왼족 사선 회전
-				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+				m_pAugusta->Rotate_To_Diagonal_Target(45.f, false); // 왼족 사선 회전
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 				return;
 			}
 
@@ -206,8 +208,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
 				m_iComboCount = COMBO::COMBO_ATTACK02;
 				//m_pAugusta->Rotate_Target();
-				m_pAugusta->Rotate_To_Diagonal_Target(30.f, true); // 오른쪽 사선 회전
-				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+				m_pAugusta->Rotate_To_Diagonal_Target(45.f, true); // 오른쪽 사선 회전
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 				return;
 			}
 
@@ -219,8 +221,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
 				m_iComboCount = COMBO::COMBO_ATTACK03;
 				//m_pAugusta->Rotate_Target();
-				m_pAugusta->Rotate_To_Diagonal_Target(30.f, false); // 오른쪽 사선 회전
-				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+				m_pAugusta->Rotate_To_Diagonal_Target(45.f, false); // 오른쪽 사선 회전
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 				return;
 			}
 
@@ -232,8 +234,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK04;
 				//m_pAugusta->Rotate_Target();
-				m_pAugusta->Rotate_To_Diagonal_Target(30.f, true); // 오른쪽 사선 회전
-				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+				m_pAugusta->Rotate_To_Diagonal_Target(45.f, true); // 오른쪽 사선 회전
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 				return;
 			}
 
@@ -245,8 +247,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
 				m_iComboCount = COMBO::COMBO_ATTACK05;
 				//m_pAugusta->Rotate_Target();
-				m_pAugusta->Rotate_To_Diagonal_Target(30.f, false); // 오른쪽 사선 회전
-				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+				m_pAugusta->Rotate_To_Diagonal_Target(45.f, false); // 오른쪽 사선 회전
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 				return;
 			}
 
@@ -258,8 +260,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
 				m_iComboCount = COMBO::COMBO_ATTACK06;
 				//m_pAugusta->Rotate_Target();
-				m_pAugusta->Rotate_To_Diagonal_Target(30.f, true); // 오른쪽 사선 회전
-				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
+				m_pAugusta->Rotate_To_Diagonal_Target(45.f, true); // 오른쪽 사선 회전
+				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 
 				// Bind Condition Burst 궁
 				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));

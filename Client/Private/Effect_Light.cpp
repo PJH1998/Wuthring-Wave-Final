@@ -94,6 +94,7 @@ void CEffect_Light::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_tLightDesc.vDiffuse = m_tDesc.vColor;
 		m_tLightDesc.vPosition = vPos;
 		m_tLightDesc.fRange = m_vRange.x;
+
 		m_tLightDesc.vAmbient = _float4(m_fAmbient, m_fAmbient, m_fAmbient, 1.f);
 
 		m_pGameInstance->Update_LightDesc(m_wstrLightTag, m_tLightDesc);

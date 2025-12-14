@@ -70,7 +70,9 @@ HRESULT CUI_FontPreset::Initialize()
 	// - Title_Quest
 	tDesc.vColor			= { 0.843f, 0.863f, 0.914f, 1.0f };
 	tDesc.vOutlineColor		= { 0.208f, 0.231f, 0.286f, 1.0f };
+	tDesc.fFontOutlineWidth = 8.f;
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_QUESTTITLE)] = tDesc;
+	tDesc.fFontOutlineWidth = 2.f;
 	// - Text_Quest
 	tDesc.vColor			= { 0.804f, 0.800f, 0.867f, 1.0f };
 	tDesc.vOutlineColor		= { 0.302f, 0.298f, 0.286f, 1.0f };
