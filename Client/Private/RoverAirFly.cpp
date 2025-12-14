@@ -161,8 +161,8 @@ void CRoverAirFly::Handle_Input()
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DOUBLE_JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
-	//if (m_States[INPUT_ACCEL_KEYDOWN])
-	//	m_pRover->Spawn_WingEffect(TEXT("Common_Fly_Start3"));
+	if (m_States[INPUT_ACCEL_KEYDOWN])
+		m_pRover->Spawn_WingEffect(TEXT("Common_Fly_Start3"));
 }
 
 
