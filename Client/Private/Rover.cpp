@@ -363,6 +363,7 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			break;
 		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
 			// 1. SFX 호출 하면서
+			//Process_SpawnSFX(TEXT("SFX|Pooling_Excute_Prefab"));
 			Process_SpawnSFX(TEXT("SFX|Pooling_Galbrena_Ulti_Prefab"));
 
 			// 2. State 변경하고 => 위치 이동.
@@ -830,6 +831,8 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 		Process_MotionTrail(wStrObjectTag);
 	else if (var1 == TEXT("Light"))
 		Process_LightActive(wStrObjectTag);
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
 
 	
 
