@@ -444,7 +444,7 @@ void CUI_FinalEnd::Create_ChildText()
 	// ==============================
 	// * 3. ty
 	// ==============================
-	vTextPos = { 500.f, 450.f };
+	vTextPos = { 500.f, 420.f };
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
 		L"",
