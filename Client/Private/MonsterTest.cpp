@@ -72,8 +72,8 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_CallBack.pSocketMatrix = m_pCameraMatrix;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 
-	//m_fHP = pDesc->fHP;
-	m_fHP = 1000;
+	m_fHP = pDesc->fHP;
+	//m_fHP = 1000;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;

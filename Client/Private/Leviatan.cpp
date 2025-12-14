@@ -44,8 +44,8 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	//m_fHP = pDesc->fHP;
-	m_fHP = 5100.f;
+	m_fHP = pDesc->fHP;
+	//m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
@@ -389,8 +389,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
-	//m_fHP = Info.fMaxHp;
-	m_fHP = 100.f;
+	m_fHP = Info.fMaxHp;
+	//m_fHP = 100.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -1146,10 +1146,12 @@ void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
 		else if (wstrPartTag == TEXT("Story1"))
 		{
 			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_1"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv", true);
 		}
 		else if (wstrPartTag == TEXT("Story2"))
 		{
 			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_2"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+			m_pGameSystem->Req_Interact_DialogUI(true);
 		}
 	}
 	
@@ -1504,6 +1506,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 				{
 					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 					{
+						m_pGameSystem->Close_DialogUI();
 						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
 						m_pGameSystem->Change_Leviathan_Phaze(1);
 						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
@@ -1891,7 +1894,7 @@ void CLeviatan::Update_LUT_Effect(_float fTimeDelta)
 	{
 		_uint iLUTIndex{3};
 		m_fLUTAcc -= fTimeDelta;
-		if (m_fLUTAcc < 0.4f)
+		if (m_fLUTAcc < 0.15f)
 			iLUTIndex = m_iLUTIndex;
 		m_pGameInstance->Setting_LUT(iLUTIndex, m_fLUTAcc, false); // 흑백 효과 : 3
 	}
