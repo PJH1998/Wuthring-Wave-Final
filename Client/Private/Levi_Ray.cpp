@@ -49,6 +49,15 @@ void CLevi_Ray::Update(_float fTimeDelta)
 
 void CLevi_Ray::Late_Update(_float fTimeDelta)
 {
+	if (m_isHit)
+	{
+		m_pRigidBodyCom->IsActivate(false);
+		//m_isActivate = false;
+		m_isHit = false;
+		m_fLifeAcc = m_fLifeTime;
+		return;
+	}
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
@@ -69,7 +78,7 @@ void CLevi_Ray::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_fLifeAcc = 0.f;
 	m_isActivate = true;
-
+	m_isHit = false;
 	//PREFAB_INFO Info{};
 	//m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &Info);
 }
@@ -110,6 +119,7 @@ void CLevi_Ray::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold
 {
 	if(iLayer == m_iTargetLayer)
 	{
+		m_isHit = true;
 #ifdef _DEBUG
 		cout << "On Hit! (Levi Ray)" << endl;
 #endif // _DEBUG
