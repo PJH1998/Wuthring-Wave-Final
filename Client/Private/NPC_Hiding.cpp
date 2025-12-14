@@ -113,6 +113,7 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 {
 	if (m_isFind)
 	{
+		m_isScaned = false;
 		m_isFind = false;
 		m_pRigidBodyCom->IsActivate(false);
 		m_pGameSystem->Trigger_AddQuestProgress();
