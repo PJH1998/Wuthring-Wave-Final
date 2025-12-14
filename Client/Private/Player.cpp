@@ -587,7 +587,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	}
 	
 	// 8. 사운드 재생
-	m_pGameInstance->Play_Sound(TEXT("ui_ia_com_tick (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_UI), 0.5f);
+	m_pGameInstance->Play_Sound(TEXT("ui_ia_com_tick (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_UI), 0.25f);
 	//m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
 
 }
