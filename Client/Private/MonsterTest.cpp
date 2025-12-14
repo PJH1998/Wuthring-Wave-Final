@@ -961,7 +961,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	vector<COLLISIONLAYER> Targets = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
 	TriggerDesc.eTargetLayers = Targets;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(2); // Root
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 6.f);
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 6.f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, -2.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
@@ -990,6 +990,12 @@ void CMonsterTest::Calculate_PosAndDir()
 
 void CMonsterTest::Reset_Condition(_float fTimeDelta)
 {
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		return;
+	}
 	if(m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -1041,12 +1047,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	else
 		m_isKnockDownTrig = m_isParalysis;
 
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		m_fBehitAcc = m_fBehitMaxTime;
-		return;
-	}
+	
 }
 
 void CMonsterTest::After_Condition(_float fTimeDelta)
@@ -1088,7 +1089,10 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 		if (!m_strBehitSound.empty())
 			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
+		
 	}
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return;
 	//그로기 특수상황
 	if (m_isParalysis)
 	{
@@ -1132,7 +1136,8 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
 		m_fHP -= m_fBehitDMG;
-
+		if (m_fHP <= 0.f)
+			m_isAnimationFinished = false;
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;
