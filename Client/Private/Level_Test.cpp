@@ -138,7 +138,7 @@ void CLevel_Test::Update(_float fTimeDelta)
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_Excute_Prefab"), XMMatrixIdentity(), nullptr);
 	}
 #endif
 

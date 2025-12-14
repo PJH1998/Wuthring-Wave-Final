@@ -212,6 +212,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Effect_VA.h" />
+    <ClInclude Include="..\public\Excute_PostSFX.h" />
+    <ClInclude Include="..\public\Excute_SFX.h" />
     <ClInclude Include="..\Public\GalbrenaControl.h" />
     <ClInclude Include="..\Public\GalbrenaEvent.h" />
     <ClInclude Include="..\public\Heaven_SkyBox.h" />
@@ -512,6 +514,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Effect_VA.cpp" />
+    <ClCompile Include="..\private\Excute_PostSFX.cpp" />
+    <ClCompile Include="..\private\Excute_SFX.cpp" />
     <ClCompile Include="..\Private\GalbrenaControl.cpp" />
     <ClCompile Include="..\Private\GalbrenaEvent.cpp" />
     <ClCompile Include="..\private\Heaven_SkyBox.cpp" />
