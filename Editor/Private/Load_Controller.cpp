@@ -1065,6 +1065,9 @@ void CLoad_Controller::Load_FXLight_FromJson(const _string& strFilePath, const _
 	if (LightJson.contains("Speed"))
 		Desc.fSpeed = LightJson["Speed"].get<_float>();
 
+	if (LightJson.contains("Ambient"))
+		Desc.fAmbient = LightJson["Ambient"].get<_float>();
+
 	if (LightJson.contains("Color") && LightJson["Color"].is_array())
 	{
 		json Color = LightJson["Color"];
