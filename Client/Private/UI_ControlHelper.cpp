@@ -508,6 +508,37 @@ void CUI_ControlHelper::Open_DialogUI(const _char* pFilePath)
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Dialog", _matrix(), &tDesc);
 }
 
+void CUI_ControlHelper::Req_Interact_DialogUI(_bool isChangeNext_Forcely)
+{
+	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
+
+	if (!pRootUI)
+		return;
+	if (pRootUI->IsActivate() == false)
+		return;
+
+	if (!isChangeNext_Forcely)		
+		pRootUI->Req_InteractExternally();
+	else							
+	{
+		//if (pRootUI->Get_isFinished_CurDialog() &&
+		//	pRootUI->Get_isLast_CurDialog())			pRootUI->Req_Close_Dialog();
+		//else if (pRootUI->Get_isFinished_CurDialog())	pRootUI->Req_Next_Dialog();
+		//else											pRootUI->Req_Finish_CurDialog();
+		
+		if (pRootUI->Get_isLast_CurDialog())
+		{
+			pRootUI->Req_Close_Dialog();
+			return;
+		}
+		else 											
+		{
+			pRootUI->Req_Next_Dialog();
+			return;
+		}
+	}
+}
+
 void CUI_ControlHelper::Close_DialogUI()
 {
 	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);

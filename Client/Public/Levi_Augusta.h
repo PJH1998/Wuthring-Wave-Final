@@ -45,6 +45,8 @@ public:
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
+	void			Dissolve(_bool isDissolve);
+
 public:
 	virtual void	Change_Volume(COLLISIONLAYER eLayer);
 	void			Attack_Active(_bool isActive);

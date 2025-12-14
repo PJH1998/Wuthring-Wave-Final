@@ -80,13 +80,13 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
     Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
-	Ready_MonsterTest();
+	//Ready_MonsterTest();
 	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
 	//Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	
 	//Ready_NPC();
 
     Ready_Effect();
@@ -102,6 +102,8 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_CameraNF();
+
+	Ready_Leviatan();
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
@@ -900,7 +902,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma endregion	
 
 	
-#pragma region [LCTRL + I] KSTA_UITEST_DIALOG
+#pragma region [LCTRL + I / LCTRL + O] KSTA_UITEST_DIALOG
 	static _bool isUITestDialogOn = false;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
@@ -915,6 +917,11 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 			m_pGameSystem->Close_DialogUI();
 	}
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)
+	{
+		m_pGameSystem->Req_Interact_DialogUI(false);
+	}
 
 #pragma endregion
 

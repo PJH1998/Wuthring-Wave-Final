@@ -73,6 +73,7 @@ public:
 												_float4 vTailColor);
 
 	void				Open_DialogUI(const _char* pFilePath);
+	void				Req_Interact_DialogUI(_bool isChangeNext_Forcely);
 	void				Close_DialogUI();
 
 	void				Trigger_PlayEndImage();

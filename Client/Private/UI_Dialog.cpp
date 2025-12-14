@@ -115,6 +115,22 @@ void CUI_Dialog::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isGoinDisable = false;
 }
 
+void CUI_Dialog::Req_Next_Dialog()
+{
+	m_iDialogOrder++;
+	m_isCurDialogFinished = false;
+	Change_Dialog(m_iDialogOrder);
+}
+
+void CUI_Dialog::Req_Finish_CurDialog()
+{
+	auto& pDialogInst = m_pTextUI_Dialog->Get_UIDesc().vecInstanceDescs;
+	for (_uint i = 0; i < pDialogInst.size(); i++)
+		pDialogInst[i].matExtraData._11 = 0.f;
+
+	m_isCurDialogFinished = true;
+}
+
 void CUI_Dialog::Load_Dialog(const _char* pFilePath)
 {
 	vector<vector<_string>> vecParsedData = m_pGameSystem->Load_CSV_ADV(pFilePath);
@@ -300,30 +316,27 @@ void CUI_Dialog::Update_DialogOrder(_float fTimeDelta)
 		Change_Dialog(m_iDialogOrder);
 
 	// Interacted when dialog On.
-	if (m_pGameInstance->Get_DIKeyState(DIK_SPACE)			 == KEYSTATE::DOWN ||
-		m_pGameInstance->Get_DIKeyState(DIK_F)				 == KEYSTATE::DOWN ||
-		m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+	m_isInteracted = {
+		m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN ||
+		m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN ||
+		m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN
+	};
+
+	m_isInteracted_Externally;
+
+	
+	if (m_isInteracted || m_isInteracted_Externally)
 	{
 		if (m_isCurDialogFinished &&
 			m_iDialogOrder == m_vecDialogs.size() - 1)	// 마지막 대화 순서. 이러면 종료해야.
-		{
 			Req_Close_Dialog();
-		}
 		else if (m_isCurDialogFinished)					// 현재 대화까지 끝. 다음 대화로..
-		{
-			m_iDialogOrder++;
-			m_isCurDialogFinished = false;
-			Change_Dialog(m_iDialogOrder);
-		}
+			Req_Next_Dialog();
 		else											// 현재 대화 진행중. 현재 대화부터 마치기.
-		{
-			auto& pDialogInst = pTargetText->Get_UIDesc().vecInstanceDescs;
-			for (_uint i = 0; i < pDialogInst.size(); i++)
-				pDialogInst[i].matExtraData._11 = 0.f;
-
-			m_isCurDialogFinished = true;
-		}
+			Req_Finish_CurDialog();
 	}
+
+	if (m_isInteracted_Externally) m_isInteracted_Externally = false;
 }
 
 void CUI_Dialog::Update_GoinDisable(_float fTimeDelta)
