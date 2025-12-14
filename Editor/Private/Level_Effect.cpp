@@ -152,8 +152,8 @@ HRESULT CLevel_Effect::Initialize()
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	//m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
-	//m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
     return S_OK;
@@ -164,6 +164,15 @@ void CLevel_Effect::Update(_float fTimeDelta)
     SetWindowText(g_hWnd, TEXT("Effect"));
 
         m_pEffect_Controller->Update();
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
+		{
+			m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+		}
+		if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+		{
+			m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+		}
 
 }
 

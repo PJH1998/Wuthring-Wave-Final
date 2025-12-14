@@ -53,7 +53,7 @@ void CEffect_Light::Update(_float fTimeDelta)
 
 		//초기화
 		m_vLifeTime.x = 0.f;
-		m_vRange.x = 0.f;
+		
 
 		return;
 	}
