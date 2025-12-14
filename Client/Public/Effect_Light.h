@@ -15,7 +15,7 @@ public:
 		_float2 vLifeTime = {0.f , 5.f};
 		_float	fSpeed = 1.f;
 		_float2 vRange = { 0.f, 1.f };
-		fAmbient 
+		_float fAmbient = 0.1f;
 	}LIGHT_DESC;
 
 private:
@@ -46,6 +46,7 @@ private:
 	_float2						m_vLifeTime = {};
 	_float						m_fSpeed = {};
 	_float2						m_vRange = {};
+	_float						m_fAmbient = {};
 
 
 public:
