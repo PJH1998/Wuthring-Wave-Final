@@ -663,7 +663,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		{
 			PREFAB_INFO Effect{};
 			Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Bow_Pull"), XMLoadFloat4x4(m_pBowSocket) * m_pTransformCom->Get_WorldMatrix(), &Effect);
+			_matrix World = XMLoadFloat4x4(m_pBowSocket)* m_pTransformCom->Get_WorldMatrix();
+			_vector vPos = World.r[3];
+			World = XMMatrixTranslationFromVector(vPos);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Bow_Pull"), World, &Effect);
 		}
 	}
 	else if (wstrTypeTag == TEXT("SaveMatrix"))

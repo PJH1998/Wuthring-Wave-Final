@@ -80,13 +80,13 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
     Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
-	Ready_MonsterTest();
+	//Ready_MonsterTest();
 	//Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
 	//Ready_AnimInstanceTest();
-	//Ready_Leviatan();
+	
 	//Ready_NPC();
 
     Ready_Effect();
@@ -102,6 +102,8 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_CameraNF();
+
+	Ready_Leviatan();
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
