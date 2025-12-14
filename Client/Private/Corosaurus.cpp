@@ -38,10 +38,10 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 
 	m_pGrabSocket = m_pModelCom->Get_BoneMatrixPtr("Bone_WeaponProp004");
 #pragma region ATTACK_STATE
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 14.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 5.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 16.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] =m_fAttackAcc[ATK_PATTERN::BURST] = 65.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 35.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 30.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -609,7 +609,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	pBlackBoard->Add_Condition("ATKArrange", [this]() ->_bool { return AttackArrange(); });
 	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 4.f); });
 	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 5.f); });
-	pBlackBoard->Add_Condition("Attack8", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK8, 15.f); });
+	pBlackBoard->Add_Condition("Attack8", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK8, 18.f); });
 	pBlackBoard->Add_Condition("Attack10", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 14.f); });
 	pBlackBoard->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
 	pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return isChase(); });
@@ -916,13 +916,13 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
 		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 		m_beHit = true;
 		m_fBehitAcc = 0.f;
 
-		m_fBehitDMG = pDesc->fAttack;
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;

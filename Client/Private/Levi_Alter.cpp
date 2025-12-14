@@ -3,6 +3,7 @@
 #include "Levi_Bayonet.h"
 #include "Levi_Bow.h"
 #include "GameSystem.h"
+#include "MotionTrail.h"
 
 CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -12,12 +13,14 @@ CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CLevi_Alter::CLevi_Alter(const CLevi_Alter& Prototype)
 	: CActor { Prototype }
 	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevi_Alter::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.05f, 0.05f, 0.3f, 1.f);
     return S_OK;
 }
 
@@ -34,10 +37,10 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_Tracks.emplace(make_pair("Attack18", make_pair(0.f, 195.f)));
 	m_Tracks.emplace(make_pair("Attack19", make_pair(0.f, 195.f)));
-	m_Tracks.emplace(make_pair("Attack_20|1", make_pair(30.f, 49.f)));
-	m_Tracks.emplace(make_pair("Attack_20|2", make_pair(60.f, 72.f)));
-	m_Tracks.emplace(make_pair("Attack_20|3", make_pair(120.f, 138.f)));
-	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12, 50)));
+	m_Tracks.emplace(make_pair("Attack_20|1", make_pair(30.f, 57.f)));
+	m_Tracks.emplace(make_pair("Attack_20|2", make_pair(60.f, 83.f)));
+	m_Tracks.emplace(make_pair("Attack_20|3", make_pair(120.f, 147.f)));
+	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12.f, 68.f)));
 	m_isActivate = false;
 	m_vBaseColor = _float4(0.25f, 0.2f, 0.25f, 1.f);
 	m_fRootMotionRate = 1.f;
@@ -102,7 +105,15 @@ void CLevi_Alter::Update(_float fTimeDelta)
 void CLevi_Alter::Late_Update(_float fTimeDelta)
 {
 	//m_pColliderCom->Sync_Position(m_pTransformCom);
-
+	if (m_isDissolve)
+	{
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
+		else
+		{
+			m_fDissolveRate = 1.f;
+		}
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) return;
 
 	for (auto& Pair : m_PartObjects)
@@ -142,7 +153,12 @@ void CLevi_Alter::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
 			CRASH("Ready g_HasSkinMask Failed");
 
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 
@@ -205,6 +221,7 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iSoundChannel2 = m_pGameInstance->Register_Channel();
 
 	m_pRigidBodyCom->IsActivate(true);
+	m_isDissolve = false;
 	m_isActivate = true;
 }
 
@@ -291,6 +308,18 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(0.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
 	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.21f, 0.01f, 0.4f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.1f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 1.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
+	}
 	else if (wstrTypeTag == TEXT("Ray"))
 	{
 		
@@ -298,6 +327,10 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
 		Reset_NotifyInteraction();
+	}
+	else if (wstrTypeTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = true;
 	}
 }
 
@@ -374,6 +407,12 @@ void CLevi_Alter::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 }
 
 void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
