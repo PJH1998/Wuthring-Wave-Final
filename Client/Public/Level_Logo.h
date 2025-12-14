@@ -22,6 +22,7 @@ private:
 	void							Ready_UI();
 	void							Ready_Mouse();
 	void							Ready_SkyBox();
+	void							Ready_Effect();
 
 private:
 	void							Update_SoundOrder(_float fTimeDelta);
