@@ -20,6 +20,8 @@ private:
 	HRESULT				Load_Object();
 	HRESULT				Load_LogoMaleRover();
 	HRESULT				Load_LogoFeMaleRover();
+	HRESULT				Load_Effect();
+
 
 	HRESULT				Load_UI();
 private:
