@@ -60,7 +60,11 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
 	Ready_Variables(pDesc);
 	
-
+	if (LEVEL::GAMEPLAY == m_eCurLevel)
+	{
+		// 1. Look 변경.
+		m_pTransformCom->LookDir(XMVectorSet(1.0f, 0.0f, -0.5f, 0.f));
+	}
 	
 	
     return S_OK;

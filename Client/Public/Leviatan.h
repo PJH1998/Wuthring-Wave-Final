@@ -111,6 +111,7 @@ private:
 	_uint					m_iActionIndex{};
 	_uint					m_iActionChecker[ACTION::ACTEND] = {};
 	vector<_string>			m_strAnimTag[ACTION::ACTEND];
+	LIGHT_DESC				m_LeviLight{};
 #pragma endregion
 
 #pragma region STATUS
@@ -128,6 +129,7 @@ private:
 	_bool					m_isTurnLerp{};
 	_float3					m_vBeHit_Normal{};
 	_float4x4				m_PreTransform{};
+	_float					m_fTimeLackRate{};
 #pragma endregion
 
 #pragma region SHADER_VALUE

@@ -82,6 +82,12 @@ private:
 	_uint					m_iSoundChannel2{};
 #pragma endregion
 
+#pragma region SHADER_VALUE
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
+
 private:
 	void			Bind_Resources();
 	void			Ready_Component(ALTER_DESC* pDesc);

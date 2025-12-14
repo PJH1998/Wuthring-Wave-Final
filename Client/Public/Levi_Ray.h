@@ -48,6 +48,7 @@ private:
 	_uint				m_iTargetLayer{ENUM_CLASS(COLLISIONLAYER::END)};
 	_float				m_fLifeTime{};
 	_float				m_fLifeAcc{};
+	_bool				m_isHit{ false };
 	// Effect?
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};
