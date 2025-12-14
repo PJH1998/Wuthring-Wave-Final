@@ -358,7 +358,7 @@ void CUI_QuestIndicator::Create_ChildText()
 	vTextPos = { -862.f, -96.f };	//
 	pFont = m_pGameSystem->Create_FontToScreen_Alpha(
 		_float2{ g_iWinSizeX / 2.f + vTextPos.x, g_iWinSizeY / 2.f + vTextPos.y },
-		L"찾은 아이 : 0 / 7",
+		L"찾은 아이 : " + to_wstring(m_iProgress) + L" / " + to_wstring(m_iMaxProgress),
 		TEXT_COLOR_TYPE::TT_QUESTPROGRESS,
 		0.35f,
 		L"UI_Text_SideDesc"
