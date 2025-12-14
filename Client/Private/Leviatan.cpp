@@ -1779,7 +1779,7 @@ void CLeviatan::AreaAttack(_float fTimeDelta)
 	{
 		m_fDropAcc = 0.f;
 		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
-		_float fRange = m_pGameInstance->Rand(0.2f, 10.f);
+		_float fRange = m_pGameInstance->Rand(1.f, 30.f);
 		_float3 vSpawnPos = { m_PreTransform.m[3][0], m_PreTransform.m[3][1], m_PreTransform.m[3][2] };
 		vSpawnPos.x -= sin(fRadius) * fRange;
 		//vSpawnPos.y = m_PreTransform.m[3][1];
