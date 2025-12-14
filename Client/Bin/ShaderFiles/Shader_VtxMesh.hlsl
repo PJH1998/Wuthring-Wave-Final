@@ -35,7 +35,7 @@ int g_iIndex = 0;
 
 int g_iShadowMapLayer = 0;
 
-float g_DissolveTime = -1.f;
+float g_DissolveTime = 1.f;
 float g_DistortionTime = 0.f;
 float g_fAlpha = 0.f;
 bool g_DissolveStart = false;
@@ -1496,7 +1496,7 @@ PS_OUT_LIGHT PS_MAIN_TREE_BURN_EMISSIVE(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    vector vDissolve= g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vDissolve = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     if (length(vDiffuse) == 0.f)
@@ -1504,11 +1504,13 @@ PS_OUT_LIGHT PS_MAIN_TREE_BURN_EMISSIVE(PS_IN In)
     
     Out.vDiffuse = vDiffuse;
 
-    if (vDissolve.r - g_DissolveTime <= 0.2f)
-        discard;
-    else if (vDissolve.r - g_DissolveTime < 0.4f)
-        Out.vEmissive = float4(float3(Out.vDiffuse.rgb) * float3(0.7f, 0.3f, 0.f), 1.f);
-        
+    if (g_DissolveStart)
+    {
+        if (vDissolve.r - g_DissolveTime <= 0.2f)
+            discard;
+        else if (vDissolve.r - g_DissolveTime < 0.3f)
+            Out.vEmissive = float4(float3(Out.vDiffuse.rgb) * float3(0.7f, 0.3f, 0.f), 1.f);
+    }
     Out.vDiffuse.w = 1.f;
     
     Out.vPBR.y = g_fGlobalStaticRoughness;

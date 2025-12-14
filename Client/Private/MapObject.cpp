@@ -242,14 +242,6 @@ void CMapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.eType = EMotionType::Static;
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 		RigidbodyDesc.pModel = m_pModelCom;
-		//RigidbodyDesc.pModel = m_pModelComArray[0];
-
-		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-		//RigidbodyDesc.vPos = pDesc->vBoundingPos;
-		//RigidbodyDesc.eShape = SHAPE::BOX;
-		//RigidbodyDesc.eType = EMotionType::Static;
-		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-		//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
 
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
