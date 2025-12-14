@@ -1705,6 +1705,10 @@ void CParser::Load_FXLight_FromJson(const _string& strFilePath, const _string& L
 	if (LightJson.contains("Speed"))
 		Desc.fSpeed = LightJson["Speed"].get<_float>();
 
+	if (LightJson.contains("Ambient"))
+		Desc.fAmbient = LightJson["Ambient"].get<_float>();
+
+
 	if (LightJson.contains("Color") && LightJson["Color"].is_array())
 	{
 		json Color = LightJson["Color"];
