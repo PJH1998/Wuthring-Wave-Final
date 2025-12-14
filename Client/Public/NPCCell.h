@@ -61,6 +61,9 @@ private:
 	_uint m_iOriginFaceIndex{};
 	_float3 m_vDetectOffset{};
 	CALLBACK_CLIENT m_tCallBack{};
+	
+	_int m_iSoundChannel{-1};
+	_bool m_isHitSound{};
 
 private:
 	void Ready_Component(DUMMYCELL_DESC* pDesc);
