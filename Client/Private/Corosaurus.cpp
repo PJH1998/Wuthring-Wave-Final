@@ -85,8 +85,13 @@ void CCorosaurus::Update(_float fTimeDelta)
 
 	After_Condition(fTimeDelta);
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio);
-	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio);
+	//if(!m_isDeadTrigger)
+	//{
+		_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio);
+	//}
+	//else
+	//	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta );
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 
 	if(m_isDist_Interp_Enable)
@@ -657,7 +662,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
-	TriggerDesc.vExtent = _float3(4.f, 0.55f, 0.55f);
+	TriggerDesc.vExtent = _float3(6.f, 1.6f, 1.6f);
 	TriggerDesc.vOffsetPos = _float3(-0.4f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.pGrabMatrix = &m_GrabCombinedMat;
@@ -669,7 +674,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.eLayer = COLLISIONLAYER::PARRY;
 	TriggerDesc.eTargetLayers = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(2); // Root
-	TriggerDesc.vExtent = _float3(2.f, 4.f, 4.f);
+	TriggerDesc.vExtent = _float3(2.4f, 5.f, 5.f);
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, -4.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.pGrabMatrix = nullptr;
@@ -698,7 +703,12 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
 {
-	
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		return;
+	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -786,12 +796,7 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 	if (m_fBehitAcc < m_fBehitMaxTime)
 		m_fBehitAcc += fTimeDelta;
 
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		m_fBehitAcc = m_fBehitMaxTime;
-		//return;
-	}
+	
 }
 
 void CCorosaurus::After_Condition(_float fTimeDelta)
@@ -834,7 +839,10 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 		if (!m_strBehitSound.empty())
 			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
 #pragma endregion
+		
 	}
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return;
 	if (m_isParalysis)
 	{
 		if (m_isKnockDown)
@@ -925,7 +933,7 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 			m_fStamina -= 1.f;
 		m_beHit = true;
 		m_fBehitAcc = 0.f;
-
+		
 		m_eBehitColor = pDesc->eType;
 		if (!pDesc->strSoundTag.empty())
 			m_strBehitSound = pDesc->strSoundTag;
@@ -1103,14 +1111,14 @@ _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 
 _bool CCorosaurus::CheckHit()
 {
-	if (m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-		
-		m_beHit = false;
-		return true;
-	}
-	return false;
+	//if (m_beHit)
+	//{
+	//	m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+	//	
+	//	m_beHit = false;
+	//	return true;
+	//}
+	return m_beHit;
 }
 
 _bool CCorosaurus::isChase()
