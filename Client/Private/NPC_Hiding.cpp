@@ -3,20 +3,20 @@
 #include "GameSystem.h"
 
 CNPC_Hiding::CNPC_Hiding(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CActor { pDevice, pContext }
+	: CActor{ pDevice, pContext }
 {
 }
 
 CNPC_Hiding::CNPC_Hiding(const CNPC_Hiding& Prototype)
-	: CActor { Prototype }
-	, m_pGameSystem {CGameSystem::GetInstance()}
+	: CActor{ Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CNPC_Hiding::Initialize_Prototype()
 {
-    return S_OK;
+	return S_OK;
 }
 
 HRESULT CNPC_Hiding::Initialize_Clone(void* pArg)
@@ -35,7 +35,7 @@ HRESULT CNPC_Hiding::Initialize_Clone(void* pArg)
 	m_isFind = false;
 	//m_isActivate = false;
 	m_isRender = true;
-    return S_OK;
+	return S_OK;
 }
 
 void CNPC_Hiding::Priority_Update(_float fTimeDelta)
@@ -71,7 +71,7 @@ void CNPC_Hiding::Update(_float fTimeDelta)
 	_bool isAnimFinished{ false };
 	if (m_pAnimMachineCom)
 		m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
-	
+
 	if (m_iState & ENUM_CLASS(TEST_STATE::MOVE_FORWARD))
 	{
 		if (isAnimFinished)
@@ -114,9 +114,8 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 	if (m_isFind)
 	{
 		m_isScaned = false;
-		m_isFind = false;
+		//m_isFind = false;
 		m_pRigidBodyCom->IsActivate(false);
-		m_pGameSystem->Trigger_AddQuestProgress();
 	}
 
 	m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -217,7 +216,7 @@ HRESULT CNPC_Hiding::Bind_Resources()
 	//XMStoreFloat4(&ResultColor, vResult);
 	//m_pShaderCom->Bind_Value("g_vBaseColor", &ResultColor, sizeof(_float4));
 
-    return S_OK;
+	return S_OK;
 }
 
 void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
@@ -252,7 +251,7 @@ void CNPC_Hiding::Ready_Component(HIDINGDESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	if(strAnimTag == "Common_NewSit_01_Loop")
+	if (strAnimTag == "Common_NewSit_01_Loop")
 		ColliderDesc.vOffset = _float3(0.f, 0.55f, -0.85f);
 	else
 		ColliderDesc.vOffset = _float3(0.f, 0.55f, 0.f);
@@ -313,7 +312,9 @@ void CNPC_Hiding::OnDetect_During(_uint iLayer, void* pDesc, const ContactManifo
 		{
 			m_pGameSystem->Hide_InteractUI(true);
 			m_isFind = true;
+			m_isScaned = false;
 			m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
+			m_pGameSystem->Trigger_AddQuestProgress();
 		}
 #ifdef _DEBUG
 
@@ -339,7 +340,7 @@ void CNPC_Hiding::OnCollide_During(_uint iLayer, void* pDesc, const ContactManif
 		if (fDistance <= pScan->fRadius)
 		{
 			//스캔 성공
-			if(false == m_isScaned)
+			if (false == m_isScaned && false == m_isFind)
 			{
 				m_isScaned = true;
 				m_fScanAcc = 0.f;
@@ -391,10 +392,10 @@ void CNPC_Hiding::Render_Scan()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
-	if(FAILED(m_pShaderCom->Bind_Value("g_fScanTime", &m_fScanAcc, sizeof(_float))))
+	if (FAILED(m_pShaderCom->Bind_Value("g_fScanTime", &m_fScanAcc, sizeof(_float))))
 		CRASH("Failed to Bind ScanTime");
 
-	if(FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+	if (FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
 		CRASH("Failed to Bind CamPos");
 
 	for (_uint i = 0; i < iNumMesh; ++i)
@@ -402,7 +403,7 @@ void CNPC_Hiding::Render_Scan()
 		SHADER_ANIMMESH ePath = SHADER_ANIMMESH::NPC_SCAN;
 
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-	
+
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 
 		if (i == MESH_TYPE::FACE)

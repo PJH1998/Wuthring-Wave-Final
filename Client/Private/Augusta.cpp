@@ -708,8 +708,10 @@ void CAugusta::Bind_QTE(_bool IsQTE)
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 		// 내 앞에서 생성. (안 곂치게)
-		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-		vPos += vLook * 1.5f;
+		_vector vLook = XMVectorSetY(XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), 0.f);
+		_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+		//vPos += vLook * 1.5f;
+		vPos += vRight * 2.f;
 		vPos += XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 1.5f;
 		m_pQTEColliderCom->Set_Position(vPos);
 		m_pQTEColliderCom->IsActivate(true);

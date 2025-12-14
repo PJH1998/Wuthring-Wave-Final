@@ -626,8 +626,11 @@ void CRover::Bind_QTE(_bool IsQTE)
 
 		// 내 앞에서 생성. (안 곂치게)
 		_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+		_vector vRight = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::RIGHT), 0.f));
+
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
-		vPos += vLook * 2.f + vUp;
+		//vPos += vLook * 2.f + vUp;
+		vPos += vRight * 2.f + vUp;
 		m_pQTEColliderCom->Set_Position(vPos);
 		m_pQTEColliderCom->IsActivate(true);
 

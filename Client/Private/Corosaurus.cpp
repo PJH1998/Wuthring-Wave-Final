@@ -40,8 +40,8 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 5.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 16.f;
-	m_fAttackCoolTime[ATK_PATTERN::BURST] =m_fAttackAcc[ATK_PATTERN::BURST] = 65.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 30.f;
+	m_fAttackCoolTime[ATK_PATTERN::BURST] =m_fAttackAcc[ATK_PATTERN::BURST] = 30.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 25.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
