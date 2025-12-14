@@ -41,12 +41,12 @@ HRESULT CMapObject_DynamicSound::Initialize_Clone(void* pArg)
 	case 1:
 		//불
 		m_fSoundCoolDown = 11.5f;
-		m_fSoundVolume = 0.25f;
+		m_fSoundVolume = 0.35f;
 		break;
 	case 2:
 		//모닥불
 		m_fSoundCoolDown = 8.5f;
-		m_fSoundVolume = 0.25f;
+		m_fSoundVolume = 0.35f;
 		break;
 	}
 	
