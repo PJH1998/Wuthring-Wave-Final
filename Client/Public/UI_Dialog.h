@@ -32,6 +32,14 @@ public: // 생성/복제
 
 public:
 	void			Req_Close_Dialog()		{ m_isGoinDisable = true; }
+	void			Req_Next_Dialog();
+	void			Req_Finish_CurDialog();
+
+	void			Req_InteractExternally()	{ m_isInteracted_Externally = true; }
+
+	_bool			Get_isFinished_CurDialog()	{ return m_isCurDialogFinished; }
+	_bool			Get_isLast_CurDialog()		{ return m_iDialogOrder == m_vecDialogs.size() - 1; }
+
 
 private:
 	HRESULT			Ready_Components(void* pArg);
@@ -49,6 +57,7 @@ private:
 
 	void			Load_Dialog(const _char* pFilePath);
 	void			Change_Dialog(_uint iDialogIndex);
+	
 
 private:
 	// 매 프레임 돌릴만한 건 캐싱..
@@ -72,6 +81,10 @@ private:
 	_uint				m_iDialogOrder = 0;
 
 	_bool				m_isCurDialogFinished = false;
+
+
+	_bool				m_isInteracted = false;
+	_bool				m_isInteracted_Externally = false;
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };
