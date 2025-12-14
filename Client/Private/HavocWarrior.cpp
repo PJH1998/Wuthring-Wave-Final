@@ -297,6 +297,8 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "PatrolToFight_2");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, "PatrolToFight_2", 0.f, &temp, false);
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_pColliderCom->IsActivate(true);
@@ -305,7 +307,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
 	m_fBehitAcc = m_fBehitMaxTime;
-	m_isDissolve = false;
+	m_isDissolve = true;
 	m_fDissolveRate = 0.f;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
