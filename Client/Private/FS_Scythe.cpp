@@ -11,12 +11,14 @@ CFS_Scythe::CFS_Scythe(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CFS_Scythe::CFS_Scythe(const CFS_Scythe& Prototype)
 	:CActor { Prototype }
 	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CFS_Scythe::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.03f, 0.f, 0.1f, 1.f);
     return S_OK;
 }
 
@@ -50,7 +52,7 @@ void CFS_Scythe::Update(_float fTimeDelta)
 	_bool isAnimFinished{};
 	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta * fTimeRatio);
-	if(!m_iState && isAnimFinished)
+	if (!m_iState && isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
@@ -68,6 +70,7 @@ void CFS_Scythe::Update(_float fTimeDelta)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
 		m_pGameInstance->Return_Channel(m_iSoundChannel);
 		m_iSoundChannel = -1;
 		for (_uint i = 0; i < 5; ++i)
@@ -77,6 +80,9 @@ void CFS_Scythe::Update(_float fTimeDelta)
 		}
 		return;
 	}
+	else if (m_fLifeTime <= 1.f && false == m_isDissolve)
+		m_isDissolve = true;
+
 	m_fLifeTime -= fTimeDelta;
 
 #pragma region ATTACK_VOLUME
@@ -92,7 +98,15 @@ void CFS_Scythe::Late_Update(_float fTimeDelta)
 {
 	//뼈 공격 볼륨 동기화 설정, 뼈에다가 맞추려면 sync 사용 X
 	//m_pRigidBodyCom[m_eType]->Sync_Rigidbody(m_pTransformCom);
-
+	if (m_isDissolve)
+	{
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
+		else
+		{
+			m_fDissolveRate = 1.f;
+		}
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
@@ -110,8 +124,19 @@ void CFS_Scythe::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			CRASH("Failed to Bind NormalTexture");
+
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			CRASH("Failed to Bind MaskTexture");
+
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		if (m_isDissolve)
+		{
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+		}
+		else
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 		m_pModelCom->Render(i);
 	}
@@ -154,6 +179,8 @@ void CFS_Scythe::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	}
 	m_fLifeTime = 5.f;
 	m_isActivate = true;
+	m_isDissolve = false;
+	m_fDissolveRate = 0.f;
 	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
@@ -162,6 +189,11 @@ void CFS_Scythe::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 }
 
 void CFS_Scythe::Ready_Component(SCYTHE_DESC* pDesc)
@@ -295,8 +327,10 @@ void CFS_Scythe::Object_Func(const _wstring& wStrObjectTag)
 	size_t Index = wStrObjectTag.find(TEXT("|"));
 	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
 	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
-	if(wstrTypeTag == TEXT("Sound"))
+	if (wstrTypeTag == TEXT("Sound"))
 		Sound_Active(wstrPartTag);
+	else if (wstrTypeTag == TEXT("Dissolve"))
+		m_isDissolve = true;
 }
 
 void CFS_Scythe::Sound_Active(const _wstring& wStrObjectTag)

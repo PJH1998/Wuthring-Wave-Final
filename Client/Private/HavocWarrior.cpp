@@ -10,11 +10,13 @@ CHavocWarrior::CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 CHavocWarrior::CHavocWarrior(const CHavocWarrior& Prototype)
 	: CActor { Prototype }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 }
 
 HRESULT CHavocWarrior::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.4f, 0.f, 0.3f, 1.f);
 	return S_OK;
 }
 
@@ -57,7 +59,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
-	m_vMonsterDissolveColor = _float4(0.4f, 0.f, 0.3f, 1.f);
+
 	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
