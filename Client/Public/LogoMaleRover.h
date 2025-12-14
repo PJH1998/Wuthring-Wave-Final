@@ -11,6 +11,7 @@ public:
 		STATE_PICK = 0,
 		STATE_PICK_END,
 		STATE_HOLD,
+		STATE_PARTICLE,
 		STATE_END
 	};
 
