@@ -1575,8 +1575,8 @@ PS_OUT_DOME PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
     Out.vBackBuffer.a = g_fAlpha;
     if (length(vDiffuse) == 0.f)
         vDiffuse = 1.f;
-    if (g_fAlpha != 0.f)
-        Out.vDistortion = vDistored.r;
+    //if (g_fAlpha != 0.f)
+        //Out.vDistortion = vDistored.r;
  
     return Out;
 }

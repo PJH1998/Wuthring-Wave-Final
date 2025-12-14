@@ -32,9 +32,6 @@ HRESULT CMapObject_Burn::Initialize_Clone(void* pArg)
 void CMapObject_Burn::Priority_Update(_float fTimeDelta)
 {
 	m_iShaderPassIndex = 23;
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-		m_IsBurn = !m_IsBurn;
 }
 
 void CMapObject_Burn::Update(_float fTimeDelta)
@@ -50,6 +47,7 @@ void CMapObject_Burn::Update(_float fTimeDelta)
 			m_pGameSystem->OnTriggerActivate(61);
 			m_IsSound = !m_IsSound;
 		}
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 	}
 	else
 		m_fTime = 0.f;
@@ -61,10 +59,10 @@ void CMapObject_Burn::Late_Update(_float fTimeDelta)
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 	else
 	{
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 #ifndef _DEBUG
 		m_pRigidbodyCom->IsActivate(false);
 #endif
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 	}
 }
 

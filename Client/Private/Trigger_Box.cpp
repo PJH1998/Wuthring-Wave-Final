@@ -264,7 +264,7 @@ void CTrigger_Box::Collision_During()
 		{
 			if (!m_IsDoingPalette)
 			{
-				m_pGameSystem->Open_Game_OverflowPalette();
+				m_pGameSystem->Open_Game_OverflowPalette(3);
 				m_pGameSystem->Hide_InteractUI(true);
 				m_pGameSystem->Lock_Input_ToPlayer(true);
 			}
@@ -289,6 +289,7 @@ void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		CAMERA_SHAKE ShakeDesc{};
+		PREFAB_INFO Info;
 		if (m_CamMatrix)
 			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
 		switch (m_iTriggerIndex)
@@ -330,10 +331,11 @@ void CTrigger_Box::Register_Trigger()
 			break;
 
 		case 61:
-			PREFAB_INFO Info;
 			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), XMMatrixTranslationFromVector(XMVectorSet(0.7f, -3.6f, -648.6f, 1.f)), &Info);
-
+			break;
+		case 70:
+			//m_pGameSystem.
 			break;
 		}
 #ifndef _DEBUG

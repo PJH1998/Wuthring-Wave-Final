@@ -98,7 +98,7 @@ void CBGM_Manager::Ready_BGM()
 
 #pragma region ASPHODEL_BARRENS	
 	//m_BGMs[BOSSBGM::ASPHODEL] = TEXT("battle_outside_monster_small_loop_strong_v2 (SFX)");
-	m_BGMs[BOSSBGM::ASPHODEL] = TEXT("music_story_2_6_plot_moretense(SFX)");
+	m_BGMs[BOSSBGM::ASPHODEL] = TEXT("music_story_2_6_plot_moretense (SFX)");
 	
 #pragma endregion
 

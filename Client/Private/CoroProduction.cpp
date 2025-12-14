@@ -217,7 +217,7 @@ HRESULT CCoroProduction::Ready_Components(const COROPROD_DESC* pDesc)
 	Meteo.TriggerIndex = 50;
 	Meteo.TriggerActiveIndex = 40;
 	strcpy_s(Meteo.ModelName, "SM_Com2_Roc_APD_39AX_LOD0");
-	XMStoreFloat4x4(&Meteo.WorldMatrix, XMMatrixScaling(0.2f, 0.2f, 0.2f));
+	XMStoreFloat4x4(&Meteo.WorldMatrix, XMMatrixScaling(0.8f, 0.8f, 0.8f));
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iCurLevel, TEXT("Prototype_GameObject_MapObject_Meteo"), iCurLevel, TEXT("Layer_Meteo"), &Meteo)))
 		return E_FAIL;
 
