@@ -39,7 +39,12 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	for (_uint i = 0; i < ENUM_CLASS(CORNER::END); ++i)
 	{
 		_float3 vOffset = {};
-		vOffset.x = (i & 1) ? 0.5f : -0.5f;
+		//vOffset.x = (i & 1) ? 0.5f : -0.5f;
+		if (i % 4 == 0 || i % 4 == 3)
+			vOffset.x = -0.5f;
+		else
+			vOffset.x = 0.5f;
+
 		vOffset.y = (i & 2) ? 0.5f : -0.5f;
 		vOffset.z = (i & 4) ? -0.5f : 0.5f;
 
