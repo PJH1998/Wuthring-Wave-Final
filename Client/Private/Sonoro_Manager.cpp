@@ -13,7 +13,7 @@ CSonoro_Manager::CSonoro_Manager()
 
 HRESULT CSonoro_Manager::Initialize()
 {
-	m_vUpSpeed = _float4(0.f, 0.6f, 0.f, 0.f);
+	m_vUpSpeed = _float4(0.f, 23.6f, 0.f, 0.f);
 
 	m_EnterSonoro = TEXT("소노라 진입하기");
 	m_ExitSonoro = TEXT("소노라 떠나기");;
@@ -98,11 +98,11 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 			m_pGameInstance->Play_Sound(TEXT("SonoroBegin0"), iSoundChannel, 0.1f);
 			m_pGameInstance->Return_Channel(iSoundChannel);
 
-			
+
 		}
 		else
 			for (auto& pObject : m_NonSonoroObjects)
-				pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed), m_fTriggerdTime);
+				pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed) * fTimeDelta, m_fTriggerdTime);
 	}
 	else
 	{
