@@ -430,13 +430,14 @@ void CSpringCamera::SetUp_Recovery()
 		m_isRecovery = true;
 	m_fFixedDistance = m_fPreFixedDistance;
 	XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+	m_isMaintain = false;
 	//m_vEndTranslation = _float3(0.f, 0.f, 0.f);
 }
 
 void CSpringCamera::Ready_Event()
 {
 	m_pGameInstance->Subscribe<CAMERA_ACTION_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), [this](const CAMERA_ACTION_EVENT& event) {
-		if (CAMERA_STATE::ACTION != m_eCameraState && true == event.isAction)
+		if (CAMERA_STATE::ACTION != m_eCameraState && true == event.isAction && false == m_isMaintain)
 		{
 			_matrix Matrix = XMLoadFloat4x4(&event.WorldMatrix);
 			_vector vScale{}, vQuat{}, vTranslation{};
