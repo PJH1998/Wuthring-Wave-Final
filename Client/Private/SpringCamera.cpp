@@ -456,7 +456,7 @@ void CSpringCamera::Ready_Event()
 			if(false == m_isMaintain && false == m_isEscape)
 				m_pGameSystem->HUD_FadeOut();
 		}
-		else
+		else if(false == event.isAction)
 		{
 			SetUp_Recovery();
 		}
