@@ -148,8 +148,8 @@ HRESULT CUI_Loading::Ready_Texts()
 
 	else if (strBGName == L"BG_Login04")
 	{
-		strTitleText = L"153기 - 명조 웨더링 웨이브";
-		strDescriptionText = L"로고화면 로딩중입니다.";
+		strTitleText = L"Wuthering Waves";
+		strDescriptionText = L"";
 	}
 
 	else if (strBGName == L"Bg_Loading09")
