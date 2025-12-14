@@ -114,9 +114,8 @@ void CNPC_Hiding::Late_Update(_float fTimeDelta)
 	if (m_isFind)
 	{
 		m_isScaned = false;
-		m_isFind = false;
+		//m_isFind = false;
 		m_pRigidBodyCom->IsActivate(false);
-		m_pGameSystem->Trigger_AddQuestProgress();
 	}
 
 	m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -313,6 +312,9 @@ void CNPC_Hiding::OnDetect_During(_uint iLayer, void* pDesc, const ContactManifo
 		{
 			m_pGameSystem->Hide_InteractUI(true);
 			m_isFind = true;
+			if (true == m_isScaned)
+				m_pGameSystem->Trigger_AddQuestProgress();
+			m_isScaned = false;
 			m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
 		}
 #ifdef _DEBUG
@@ -339,7 +341,7 @@ void CNPC_Hiding::OnCollide_During(_uint iLayer, void* pDesc, const ContactManif
 		if (fDistance <= pScan->fRadius)
 		{
 			//스캔 성공
-			if(false == m_isScaned)
+			if(false == m_isScaned && false == m_isFind)
 			{
 				m_isScaned = true;
 				m_fScanAcc = 0.f;
