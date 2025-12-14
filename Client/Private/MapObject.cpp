@@ -33,10 +33,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	Sync_Sectors();
 
 	// Env Map Bake
-	m_pGameInstance->Add_EnvMap_StaticObject(this);
 
-	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
-		return E_FAIL;
 
 	return S_OK;
 }
@@ -256,6 +253,12 @@ void CMapObject::Ready_Component(void* pArg)
 
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
+		m_pGameInstance->Add_EnvMap_StaticObject(this);
+
+		if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
+			CRASH("Failed");
+
 	}
 	else
 	{
