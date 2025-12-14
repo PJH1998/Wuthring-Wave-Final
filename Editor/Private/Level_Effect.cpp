@@ -145,8 +145,8 @@ HRESULT CLevel_Effect::Initialize()
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
-	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+	//m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+	//m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
     return S_OK;
