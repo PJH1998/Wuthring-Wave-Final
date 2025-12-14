@@ -143,7 +143,7 @@ void CSpawner::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold
 			//{
 			//	m_pGameInstance->Spawn_PoolingObject(m_wstrPoolTags[i], XMLoadFloat4x4(&m_SpawnMatrix[i]), nullptr);
 			//}
-			if (!m_pGameSystem->IsModinaryBattle())
+			if (!m_pGameSystem->IsModinaryBattle() && m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 				m_pGameSystem->Engage_Battle(true, BOSSBGM::MODINARY);
 			m_SpawnTrigger = true;
 		}

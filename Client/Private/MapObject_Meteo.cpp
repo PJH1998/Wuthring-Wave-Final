@@ -29,6 +29,7 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 	Ready_Components(pArg);
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex,[this](void* pArg) {
 		m_IsTriggerd = true;
@@ -39,7 +40,8 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Meteor_Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
 		});
-	m_vRadians = _float3(m_pGameInstance->Rand(0.f, 0.3f), m_pGameInstance->Rand(0.f, 0.3f), m_pGameInstance->Rand(0.f, 0.3f));
+	_float2 vRand = _float2(130.f, 180.f);
+	m_vRadians = _float3(XMConvertToRadians(m_pGameInstance->Rand(vRand.x, vRand.y)), XMConvertToRadians(m_pGameInstance->Rand(vRand.x, vRand.y)), XMConvertToRadians(m_pGameInstance->Rand(vRand.x, vRand.y)));
     return S_OK;
 }
 
@@ -111,9 +113,7 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 {
 	if (!m_IsSound)
 	{
-		_uint iSoundChannel = m_pGameInstance->Register_Channel();
-		m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire_Long"), iSoundChannel, 0.2f);
-		m_pGameInstance->Return_Channel(iSoundChannel);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire_Long"), m_iSoundChannel, 0.5f);
 		m_IsSound = !m_IsSound;
 	}
 	m_fFall += fTimeDelta;
@@ -151,8 +151,10 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 		}
 
 		m_pGameInstance->Return_Channel(SoundChannel);
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
 
-		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));
+		//m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));
 		m_fFall = 0.f;
 
 		if (m_iTriggerActiveIndex != -1)
@@ -176,7 +178,7 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
+	m_pTransformCom->Set_WorldMatrix(XMMatrixScaling(0.4f, 0.4f, 0.4f) * XMLoadFloat4x4(&pDesc->WorldMatrix));
 
 	m_farchY = pDesc->fArchY;
 	m_fDuration = pDesc->fDuration;

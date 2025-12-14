@@ -35,7 +35,6 @@ void CMapObject_Throw::Priority_Update(_float fTimeDelta)
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vOriginPos));
 		m_fThrowTime = 0.f;
 		m_fattachTime = 0.f;
-		//m_pCollideRigidbodyCom->IsActivate(false);
 	}
 }
 
@@ -44,10 +43,6 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 	Calc_CombinedMatrix();
 
 	m_pDetectRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-	//m_pTransformCom->Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), fTimeDelta);
-	//그랩 상태 전에는 물리 연산이나 목표 좌표 연산 안하다가
-	//그랩 상태일 때 좌표연산. 그랩에서 던짐 상태가 됐을 때 좌표 연산 안하기. 물리 연산만 하기.
-
 	if (m_IsGrabbed && !m_IsThrow)
 	{
 		m_pCollideRigidbodyCom->IsActivate(false);
@@ -71,7 +66,6 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 
 		_float3 Grav(0.f, -9.8f, 0.f);
 		m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav, &m_vTargetPos);
-		//m_pGameSystem->Req_Render_CurveTrace(m_vStartPos, m_vImpulse, Grav);
 	}
 	
 	if (m_IsThrow)
@@ -89,9 +83,14 @@ void CMapObject_Throw::Update(_float fTimeDelta)
 		{
 			m_fThrowTime = 0.f;
 			m_IsThrow = false;
-			//이펙트 호출.		
+			//이펙트 호출.
 			m_pCollideRigidbodyCom->IsActivate(true);
 			m_pCollideRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+			_vector Pos = m_pTransformCom->Get_State(STATE::POSITION);
+			PREFAB_INFO Info;
+			_int vTemp = 1.f;
+			for (_uint i = 0; i < 10; i++)
+				m_pGameInstance->Spawn_PoolingObject(TEXT("Small_Smoke"), XMMatrixTranslationFromVector(Pos + XMVectorSet(m_pGameInstance->Rand(-vTemp, vTemp), m_pGameInstance->Rand(-vTemp, vTemp), m_pGameInstance->Rand(-vTemp, vTemp), 0.f)), &Info);
 
 			_uint iSoundChannel = m_pGameInstance->Register_Channel();
 
@@ -248,7 +247,7 @@ void CMapObject_Throw::Ready_Components(void* pArg)
 	XMStoreFloat3(&BurnRigidboydDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	BurnRigidboydDesc.eType = EMotionType::Kinematic;
 	BurnRigidboydDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::THROW);
-	BurnRigidboydDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	BurnRigidboydDesc.vExtent = _float3(2.f, 10.f, 2.f);
 
 	//불타는 벽과 충돌 감지용
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

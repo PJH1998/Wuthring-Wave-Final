@@ -59,10 +59,13 @@ void CMapObject_Dome::Late_Update(_float fTimeDelta)
 	if (m_iPhaze == 2 && m_fAlpha >= m_fMaxAlpha)
 	{
 		m_iShaderPassIndex = 27;
+		//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 	}
 	else
+	{
 		m_iShaderPassIndex = 24;
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+	}
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
@@ -170,13 +173,13 @@ void CMapObject_Dome::Ready_Component(void* pArg)
 	RigidbodyDesc.eShape = SHAPE::MESH;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Static;
-//#ifdef _DEBUG
+#ifdef _DEBUG
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-//#endif
+#endif
 
-//#ifndef _DEBUG
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-//#endif
+#ifndef _DEBUG
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+#endif
 	RigidbodyDesc.pModel = m_pModelCom;
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
