@@ -934,10 +934,10 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 				m_arrIsVisited_Sound[iInstIndex] = true;
 
 				_float fSpeedMultiply = m_fChangeRadius / 1000.f + 1.25f;
-				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f, fSpeedMultiply);
+				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.25f, fSpeedMultiply);
 			}
 
-			//m_vChangeStartPos;
+			//m_vChangeStartPos;m
 			//m_fChangeRadius;
 			//Calc_InstBlock_ScrnPos();
 		}

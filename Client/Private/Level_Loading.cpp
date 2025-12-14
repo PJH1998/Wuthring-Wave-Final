@@ -234,7 +234,7 @@ void CLevel_Loading::Ready_LoadingScreen()
 
 	// Create Text..
 	_wstring strLoadingText = L"";
-	CUI_Text* pLoadingText = m_pGameSystem->Create_FontToScreen(_float2{1760.f, 920.f}, strLoadingText, TEXT_COLOR_TYPE::TT_PROGRESS, 0.35f, L"UI_Text_ProgressTest");
+	CUI_Text* pLoadingText = m_pGameSystem->Create_FontToScreen(_float2{1774.f, 920.f}, strLoadingText, TEXT_COLOR_TYPE::TT_PROGRESS, 0.35f, L"UI_Text_ProgressTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pLoadingText);
 
 	_wstring strPercentText = L"%";
@@ -247,18 +247,12 @@ void CLevel_Loading::Ready_LoadingScreen()
 
 void CLevel_Loading::Update_LoadingScreen(_float fTimeDelta)
 {
-	// 로딩 진행상황 정보를 가져올 수 있다면, 그걸 통해 UI의 진행바 및 로딩 퍼센트 등 업데이트하기
-	// 추가로 loading 과정 중에 텍스트의 로드도 필요
-
-	// 그러면 텍스트를 어떻게 ui 위에 띄우는가? ui매니저 만들어뒀던거로 가져오면 될듯
-
 
 	CCustom_UI* pLoadBarUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"))->Find_ChildObject(L"LoadBar");
 	CUI_Text* pLoadingTextUI = dynamic_cast<CUI_Text*>(m_pGameInstance->Find_UIObject(L"UI_Text_LoadingTest"));
 
 
 	auto loadBarUIDesc = pLoadBarUI->Get_UIDesc();
-	auto& loadingTextUIDesc = pLoadingTextUI->Get_TextUIDesc();
 
 	// 임시 테스트. 나중에 값 받아올 수 있으면 받아오긴
 	const _float fTestLoadingTime = 3.f;
@@ -270,24 +264,8 @@ void CLevel_Loading::Update_LoadingScreen(_float fTimeDelta)
 	loadBarUIDesc.vecInstanceDescs[0].vClipTexcoordX.y = m_fElapsedTime;
 	pLoadBarUI->Set_UIDesc(loadBarUIDesc);
 
-	loadingTextUIDesc.strText = to_wstring((int)(m_fElapsedTime * 100.f));
+	pLoadingTextUI->Change_Text(to_wstring(static_cast<_int>(m_fElapsedTime * 100.f)), TEXT_ALIGN_TYPE::RIGHT);
 
-	_uint iAlignmentPixel = 0;	// 오른정렬을 위함
-	static _uint iOriginPosX = UINT_MAX;
-	if (iOriginPosX == UINT_MAX) iOriginPosX = loadingTextUIDesc.vScreenPos.x;
-
-	for (auto& textInstDesc : loadingTextUIDesc.vecInstanceDescs)
-		iAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
-
-	loadingTextUIDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * loadingTextUIDesc.fScale;
-	pLoadingTextUI->Set_TextUIDesc(loadingTextUIDesc);
-
-	//if (!m_isLoadFadeOut && m_fElapsedTime >= 1.0f)
-	//{
-	//	m_isLoadFadeOut = true;
-	//	CCustom_UI* pLoadRootUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"))->Find_ChildObject(L"SubRoot_Loading");
-	//	static_cast<CAnimator_UI*>(pLoadRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//}
 }
 
 CCustom_UI::CUSTOM_UITREE_DESC CLevel_Loading::Load_UITree(_string strFilePath)
