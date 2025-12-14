@@ -742,7 +742,7 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			m_pGameInstance->OnFade(FADE::FADE_IN, 2.f, [this]() {
 				if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 				{
-					
+					m_pGameSystem->Dome_DissolveStart(true);
 				}
 				});
 			});

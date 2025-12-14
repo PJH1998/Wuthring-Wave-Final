@@ -211,7 +211,6 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
-	MobDesc.fHP = 150.f;
 #ifdef _DEBUG
 	MobDesc.fHP = 150.f;
 #endif

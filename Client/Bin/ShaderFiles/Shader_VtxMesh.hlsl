@@ -38,6 +38,7 @@ int g_iShadowMapLayer = 0;
 float g_DissolveTime = -1.f;
 float g_DistortionTime = 0.f;
 float g_fAlpha = 0.f;
+bool g_DissolveStart = false;
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -1566,21 +1567,22 @@ PS_OUT_NONLIGHT PS_MAIN_DOME_DISTORTION_EMISSIVE(PS_IN In)
 {
     PS_OUT_NONLIGHT Out = (PS_OUT_NONLIGHT) 0;
     
-    vector vDistored = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vDissolve = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
     float2 vTempTexcoord = In.vTexcoord + float2(g_DistortionTime * 0.01f, g_DistortionTime * 0.05f);
 
-    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
-    //vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, float2(In.vTexcoord.x, frac(vTempTexcoord.y)));
-    vector vDiffuse2 = g_DiffuseTexture[1].Sample(DefaultSampler, frac(vTempTexcoord));
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, frac(vTempTexcoord));
     
-    Out.vBackBuffer = vDiffuse2;
+    Out.vBackBuffer = vDiffuse;
     Out.vBackBuffer.a = g_fAlpha;
+    
+    Out.vBackBuffer.a -= vDissolve.r * g_DissolveTime;
+    if (Out.vBackBuffer.a <= 0.f)
+        discard;
+    
     if (length(vDiffuse) == 0.f)
         vDiffuse = 1.f;
-    //if (g_fAlpha != 0.f)
-        //Out.vDistortion = vDistored.r;
- 
+
     return Out;
 }
 
