@@ -937,7 +937,7 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.25f, fSpeedMultiply);
 			}
 
-			//m_vChangeStartPos;
+			//m_vChangeStartPos;ㅡㅡ
 			//m_fChangeRadius;
 			//Calc_InstBlock_ScrnPos();
 		}

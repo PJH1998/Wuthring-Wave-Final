@@ -234,7 +234,7 @@ void CLevel_Loading::Ready_LoadingScreen()
 
 	// Create Text..
 	_wstring strLoadingText = L"";
-	CUI_Text* pLoadingText = m_pGameSystem->Create_FontToScreen(_float2{1774.f, 920.f}, strLoadingText, TEXT_COLOR_TYPE::TT_PROGRESS, 0.35f, L"UI_Text_ProgressTest");
+	CUI_Text* pLoadingText = m_pGameSystem->Create_FontToScreen(_float2{1772.f, 920.f}, strLoadingText, TEXT_COLOR_TYPE::TT_PROGRESS, 0.4f, L"UI_Text_ProgressTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pLoadingText);
 
 	_wstring strPercentText = L"%";
