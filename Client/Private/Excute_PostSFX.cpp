@@ -37,7 +37,7 @@ HRESULT CExcute_PostSFX::Initialize_Clone(void* pArg)
 	m_SlashData.vScreenSize = _float2(static_cast<_float>(g_iWinSizeX), static_cast<_float>(g_iWinSizeY));
 	m_SlashData.vSlashPoint0 = _float2(static_cast<_float>(g_iWinSizeX), 85.f);
 	m_SlashData.vSlashPoint1 = _float2(0.f, 780.f);
-	m_SlashData.fOffset = 100.f;
+	m_SlashData.fOffset = 350.f;
 	m_SlashData.fIntensity = 1.f;
 
 	if (FAILED(Ready_Buffer()))

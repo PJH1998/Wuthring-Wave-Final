@@ -113,6 +113,8 @@ void CUI_Dialog::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	static_cast<CAnimator_UI*>(m_pRUI_All->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Dialog_FadeIn");
 	m_isActivate = true;
 	m_isGoinDisable = false;
+
+	m_isInteractable = pDesc->isInteractable;
 }
 
 void CUI_Dialog::Req_Next_Dialog()
@@ -316,11 +318,11 @@ void CUI_Dialog::Update_DialogOrder(_float fTimeDelta)
 		Change_Dialog(m_iDialogOrder);
 
 	// Interacted when dialog On.
-	m_isInteracted = {
+	m_isInteracted = (m_isInteractable)? (
 		m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN ||
 		m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN ||
 		m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN
-	};
+	) : false;
 
 	m_isInteracted_Externally;
 

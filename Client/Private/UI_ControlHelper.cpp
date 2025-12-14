@@ -493,7 +493,7 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 	}
 }
 
-void CUI_ControlHelper::Open_DialogUI(const _char* pFilePath)
+void CUI_ControlHelper::Open_DialogUI(const _char* pFilePath, _bool isInteractable)
 {
 	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
 
@@ -504,6 +504,7 @@ void CUI_ControlHelper::Open_DialogUI(const _char* pFilePath)
 
 	CUI_Dialog::UI_DIALOG_DESC tDesc = {};
 	tDesc.strFilePath = pFilePath;
+	tDesc.isInteractable = isInteractable;
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Dialog", _matrix(), &tDesc);
 }

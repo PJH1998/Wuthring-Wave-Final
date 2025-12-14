@@ -167,7 +167,7 @@ HRESULT CLoader_Heaven::Load_Texture()
 HRESULT CLoader_Heaven::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1213_third/", m_eCurLevel, "Heaven");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1214_third/", m_eCurLevel, "Heaven");
 
 	//// SkyBox
 	//_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
