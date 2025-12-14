@@ -121,6 +121,8 @@ void CCorosaurus::Late_Update(_float fTimeDelta)
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
 	{
 		m_isParalysis = true;
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
 		Reset_NotifyInteraction();
 	}
 
@@ -841,6 +843,7 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 		{
 			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
 			m_isKnockDown = true;
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f);
 		}
 	}
 	else
