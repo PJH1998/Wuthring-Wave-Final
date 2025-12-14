@@ -52,6 +52,8 @@ void CMapObject_Dome::Update(_float fTimeDelta)
 	if (m_fAlpha >= m_fMaxAlpha)
 		m_fAlpha = m_fMaxAlpha;
 
+	if (m_IsDissolveStart)
+		m_fDissolveTime += fTimeDelta;
 }
 
 void CMapObject_Dome::Late_Update(_float fTimeDelta)
@@ -65,7 +67,7 @@ void CMapObject_Dome::Late_Update(_float fTimeDelta)
 	{
 		m_iShaderPassIndex = 24;
 	}
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONLIGHT, this);
 }
 
 void CMapObject_Dome::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
@@ -119,6 +121,7 @@ void CMapObject_Dome::Render()
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_fAlpha", &m_fAlpha, sizeof(_float));
 		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fTotalTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_DissolveTime", &m_fDissolveTime, sizeof(_float));
 		
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);

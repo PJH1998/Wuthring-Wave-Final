@@ -327,20 +327,26 @@ void CParser::Create_MapEffect(_uint iLevel)
 		{
 		case 0:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 1:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 2:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 3:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
 			break;
 		}
-		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
-			TEXT("Layer_Sound"), &SoundDesc)))
-			CRASH("Spawner");
 	}
 	m_MapEffects.clear();
 }
