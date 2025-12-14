@@ -123,8 +123,9 @@ void CAugustaBurstWeapon::Render()
     }
 
 #ifdef _DEBUG
-	if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();
+	m_AttackVolumes[VOLUME_SWORD_ATTACK]->Render();
+	//if (m_pMainAttackVolume->IsActivate())
+	//	m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
@@ -167,8 +168,13 @@ void CAugustaBurstWeapon::Activate(_bool IsActivate)
 
 	if (true == IsActivate)
 	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() * // 현재 프레임의 최신 Transform
+			XMLoadFloat4x4(m_pSocketMatrix) * // 소켓 (애니메이션이 업데이트 되었다면 최신)
+			m_pParentTransform->Get_WorldMatrix());
+
 		Prop_Reset();
-		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+		//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 	}
 
 	if (false == IsActivate)
@@ -178,7 +184,7 @@ void CAugustaBurstWeapon::Activate(_bool IsActivate)
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 
-		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+		//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 	}
 }
 
@@ -197,6 +203,20 @@ void CAugustaBurstWeapon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eL
 {
 	if (m_AttackVolumes[iVolumeIdx] != nullptr)
 		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
+}
+
+void CAugustaBurstWeapon::Volume_Activate(_bool IsActive)
+{
+	if (IsActive)
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() * // 현재 프레임의 최신 Transform
+		XMLoadFloat4x4(m_pSocketMatrix) * // 소켓 (애니메이션이 업데이트 되었다면 최신)
+		m_pParentTransform->Get_WorldMatrix());
+	}
+
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->TriggerActivate(IsActive);
 }
 
 void CAugustaBurstWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -303,7 +323,7 @@ void CAugustaBurstWeapon::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 600.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
