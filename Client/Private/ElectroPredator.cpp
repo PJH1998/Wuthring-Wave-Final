@@ -150,7 +150,7 @@ void CElectroPredator::Late_Update(_float fTimeDelta)
 	}
 	if (m_isDissolve)
 	{
-		if (m_fDissolveRate < 1.f)
+		if (m_fDissolveRate < 1.f)			
 			m_fDissolveRate += fTimeDelta;
 		else
 			m_fDissolveRate = 1.f;

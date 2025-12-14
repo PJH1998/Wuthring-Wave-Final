@@ -1578,7 +1578,7 @@ technique11 DefaultTechnique
     pass BossOutLine // 15
     {
         SetRasterizerState(RS_Cull_Front);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_BOSS_OUTLINE();

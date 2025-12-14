@@ -59,7 +59,7 @@ void CMapObject_Dome::Late_Update(_float fTimeDelta)
 	if (m_iPhaze == 2 && m_fAlpha >= m_fMaxAlpha)
 	{
 		m_iShaderPassIndex = 27;
-		//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+		//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 	}
 	else
 	{
