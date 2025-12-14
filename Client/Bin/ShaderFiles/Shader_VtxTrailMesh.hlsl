@@ -95,8 +95,7 @@ struct PS_OUT
 
 struct PS_DISTORTION_OUT
 {
-    float4 vColor : SV_TARGET0;
-    float4 vDistortion : SV_TARGET1;
+    float4 vDistortion : SV_TARGET0;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -1348,7 +1347,7 @@ technique11 DefaultTechnique
     pass TestDistortionWave // 8
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -1359,7 +1358,7 @@ technique11 DefaultTechnique
     pass TestDistortionPotal // 9
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
