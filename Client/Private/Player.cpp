@@ -787,7 +787,13 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 
 		// 협주 중이였다면?
 		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
+		{
+			// => 협주 중지
 			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+			// => 협주 인덱스를 제거하기.
+			m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
+		}
+			
 
 		m_IsQTE = false;
 
@@ -825,6 +831,14 @@ void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 	else if (CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE == eEvent) // 레비아탄 위치도 고정시켜야할 것 같은데?..
 	{
 		m_IsLockOn = false;
+
+		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
+		{
+			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+			m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
+		}
+		
+
 		// 1. Rover가 아니면 Rover로변경 (얘가 메인 캐릭터로)
 		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
 			Change_Character(CHARACTERTYPE::ROVER, 0.f);
