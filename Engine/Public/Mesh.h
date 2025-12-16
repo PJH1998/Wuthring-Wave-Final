@@ -5,7 +5,7 @@ NS_BEGIN(Engine)
 
 class CMesh final : public CVIBuffer
 {
-	enum CORNER { LTN, RTN, RBN, LBN, LTF, RTF, RBF, LBF, END};
+	enum CORNER { LTN, RTN, RBN, LBN, LTF, RTF, RBF, LBF, END };
 
 	enum BUFFER_TYPE // Buffer를 생성해서 SRV, UAV 생성.
 	{
@@ -15,7 +15,7 @@ class CMesh final : public CVIBuffer
 		BUF_MORPH_INFOCB,
 		BUF_END
 	};
-	
+
 private:
 	explicit CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CMesh(const CMesh& Prototype);
@@ -25,17 +25,17 @@ public:
 	_uint					Get_NumBones() { return m_iNumBones; }
 	void					Copy_BoneMatrices(_float4x4* pOutMatrices, _uint iNumBones);
 	_uint					Get_MaterialIndex() { return m_iMaterialIndex; }
-	const vector<_float3>&	Get_VerticesPos() { return m_VertexPositions; }
-	const vector<_uint>&	Get_Indices() { return m_Indices; }
+	const vector<_float3>& Get_VerticesPos() { return m_VertexPositions; }
+	const vector<_uint>& Get_Indices() { return m_Indices; }
 
 	const vector<_uint>& Get_BoneIndices() { return m_BoneIndices; }
 	const vector<_float4x4>& Get_OffsetMatrices() const { return m_OffsetMatrices; }
 
 	const vector<class CShapeKey*>& Get_ShapeKeys() { return m_ShapeKeys; }
 	_uint	Get_NumVertices() const { return m_iNumVertices; }
-	
+
 public:
-	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos = nullptr, _float* MaxPos = nullptr);
+	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
 	virtual		HRESULT			Initialize_Clone(void* pArg);
 
 public:
@@ -97,13 +97,13 @@ private:
 	HRESULT						Create_BaseVertexBuffer();
 	HRESULT						Create_DeltaBuffer();
 
-	
+
 
 
 
 public:
-	static		CMesh*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos=nullptr, _float* MaxPos=nullptr);
-	virtual		CComponent*		Clone(void* pArg);
+	static		CMesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	virtual		CComponent* Clone(void* pArg);
 	virtual		void			Free() override;
 };
 
