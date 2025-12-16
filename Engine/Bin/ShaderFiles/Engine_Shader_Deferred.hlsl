@@ -202,11 +202,14 @@ PS_OUT_LIGHT PS_LIGHT(PS_IN In)
     if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
         discard;
     
+    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    
+    if(all(vViewPos == 0.f))
+        discard;
+        
     float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
     vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
     float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
@@ -250,247 +253,6 @@ PS_OUT_LIGHT PS_LIGHT(PS_IN In)
     
     return Out;
 }
-
-//PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
-//{
-//    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
-    
-//    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-//    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
-//        discard;
-        
-//    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-
-//    float4 vWorldPos = 0.f;
-
-//    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-//    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-//    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-//    vWorldPos.z = vDepthDesc.x;
-//    vWorldPos.w = 1.f;
-    
-//    vWorldPos *= vDepthDesc.y;
-    
-//    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-//    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-    
-////    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    
-//    vector vLook = normalize(g_vCamPosition - vWorldPos);
-    
-//    float3 vLightDir = g_vLightDirection.xyz * -1.f;
-    
-//    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
-   
-//    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
-    
-//    float fRimPower = 0.f;
-    
-//    if (vDepthDesc.w != 1.f)
-//        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
-
-//    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
-    
-//    float3 vAmbient = 0.f;
-    
-//    float3 vLightDiffuse = 0.f;
-//    float3 vLightSpecular = 0.f;
-    
-//    float3 vResultDiffuse = 0.f;
-//    float3 vResultSpecular = 0.f;
-    
-//    float4 vAmbientColor = 0.f;
-    
-//    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-//    float fViewZ = vViewPos.z;
-
-//    float fShadowMap = 1.f;
-    
-//    float fShadowNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
-    
-//    if (vPBRDesc.z)
-//    {
-//        //float fToonShade = lerp(0.5f, 1.f, smoothstep(-0.4f, -0.2f, NdotL));
-
-//        if (g_HasShadowMap)
-//        {
-//            fShadowMap = clamp(Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap), 0.8f, 1.f);
-//        }
-        
-//        bool IsSkin = all(g_SkinMaskTexture.Sample(DefaultSampler, In.vTexcoord).xy > 0.f);
-        
-//        Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
-//        float3 vRim = (fRimPower * vRimColor);
-//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fShadowMap /* * fToonShade*/));
-//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fShadowMap /** fToonShade*/)) + vRim;
-        
-//        if (false == IsSkin)      // 금속 부분만 PBR 처리
-//        {
-          
-//            Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
-//            Out.vLightSpecular = float4(vLightSpecular, 1.f);
-            
-//            vAmbientColor = vDiffuse;
-//            vAmbient = g_vDynamicMtrlAmbient;
-//        }
-//        else
-//        {
-//            float3 vOrigin = vDiffuse.xyz * fShadowMap;
-            
-//            Out.vLightDiffuse = float4(lerp(vOrigin, vLightDiffuse, 0.6f), 1.f);
-//            Out.vLightSpecular = float4(lerp(vRim, vLightSpecular, 0.6f), 1.f);
-            
-//            vAmbientColor = vDiffuse;
-//            vAmbient = g_vDynamicMtrlAmbient * 0.6f;
-//        }
-//    }
-//    else
-//    {
-//        Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
-        
-//        //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-//        //float fViewZ = vViewPos.z;
-
-//        //vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-
-    
-//        if (g_HasShadowMap)
-//        {
-//            fShadowMap = Compute_ShadowMap(fViewZ, fShadowNdotL, vWorldPos, g_ShadowMap);
-//        }
-   
-//        float fShadow = Compute_Cascade(fViewZ, fShadowNdotL, vWorldPos, g_Cascade);
-    
-//        float fFinalShadow = min(fShadowMap, fShadow);
-    
-////        fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
-        
-//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fFinalShadow));
-//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fFinalShadow));
-//        Out.vLightDiffuse = float4(vLightDiffuse, 1.f);
-//        Out.vLightSpecular = float4(vLightSpecular, 1.f);
-        
-////        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fFinalShadow);
-//        //vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
-        
-//        vAmbientColor = vDiffuse;
-//        vAmbient = g_vStaticMtrlAmbient;
-//    }
-    
-    
-//    Out.vLightAmbient = float4((vAmbientColor.xyz * vAmbient.xyz), 1.f);
-    
-//    return Out;
-//}
-
-
-//PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
-//{
-//    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
-    
-//    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-//    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
-//        discard;
-        
-//    float4 vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-    
-//    float4 vWorldPos = 0.f;
-
-//    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-//    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-//    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-//    vWorldPos.z = vDepthDesc.x;
-//    vWorldPos.w = 1.f;
-    
-//    vWorldPos *= vDepthDesc.y;
-    
-//    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-//    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-    
-////    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    
-//    vector vLook = normalize(g_vCamPosition - vWorldPos);
-    
-//    float3 vLightDir = g_vLightPosition.xyz - vWorldPos.xyz;
-    
-//    //bool IsLight = dot(normalize(vLightDir), vNormal.xyz) > 0.f;
-    
-//    //if(false == IsLight)
-//    //    discard;
-    
-//    float fDistance = length(vLightDir);
-    
-//    float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
-    
-//    if(fAtt == 0.f)
-//        discard;
-    
-//    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
-   
-//    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
-   
-//    float fRimPower = 0.f;
-    
-//    if(vDepthDesc.w != 1.f)
-//        fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
-        
-//    float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
- 
-//    float3 vRimColor = g_IsCustomRimColor ? g_vRimColor : g_vLightDiffuse.xyz;
- 
-//    float3 vLightDiffuse = 0.f;
-//    float3 vLightSpecular = 0.f;
-    
-//    float3 vResultDiffuse = 0.f;
-//    float3 vResultSpecular = 0.f;
- 
-//    if (vPBRDesc.z)
-//    {
-//        Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
-        
-//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse * fToonShade));
-//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular * fToonShade)) + (fRimPower * vRimColor);
-//        Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
-//        Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
-        
-//        //float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, normalize(vLightDir), vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse);
-//        //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade)) + (fRimPower * vRimColor);
-//        //Out.vLightAcc.xyz *= fAtt;
-//    }
-//    else
-//    {
-//        Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vResultDiffuse, vResultSpecular);
-        
-//        vLightDiffuse = g_vLightDiffuse.xyz * ((vResultDiffuse));
-//        vLightSpecular = g_vLightDiffuse.xyz * ((vResultSpecular)) + (fRimPower * vRimColor);
-//        Out.vLightDiffuse = float4(vLightDiffuse * fAtt, 1.f);
-//        Out.vLightSpecular = float4(vLightSpecular * fAtt, 1.f);
-
-//        //float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vLightDiffuse); //g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
-//        //Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
-//        //Out.vLightAcc.xyz *= fAtt;
-//    }
-
-//    float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
-   
-////    Out.vLightAcc.a = 1.f;
-    
-//    float4 vAmbient = float4((vAmbientColor * g_vLightAmbient).xyz * fAtt, 1.f);
-    
-//    Out.vLightAmbient = vAmbient;
-    
-//    //Out.vLightAcc.xyz += (vAmbientColor * g_vLightAmbient).xyz * fAtt;
-    
-//    //Out.vLightAcc.a = 1.f;
-    
-////    Out.vLightDiffuse = float4(vLightDiffuse, 1.f);  // Only Directional?
-    
-//    return Out;
-//}
 
 PS_OUT_BACKBUFFER PS_BLOOM(PS_IN In)
 {
@@ -542,9 +304,6 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
     bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
     bool IsSky = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
     
-    if (false == IsDynamic)
-        vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
-    
     if ((false == g_IsDynamicLUT && true == IsDynamic) || false == IsSky)
     {
         Out.vColor = vOriginColor;
@@ -584,26 +343,37 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (fViewZ <= g_vFogRange.x)
+    bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
+    
+    if (true == IsDynamic)
     {
         Out.vColor = vOriginColor;
         return Out;
     }
-        
+    
+    if (fViewZ <= g_vFogRange.x)
+    {
+        vOriginColor = float4(ToneMap(vOriginColor.xyz * g_fExposure), 1.f);
+        Out.vColor = vOriginColor;
+        return Out;
+    }
+    
     float fZ = saturate(log(fViewZ / g_vFogRange.x) / log(g_vFogRange.y / g_vFogRange.x));
     
     float3 vUV = float3(In.vTexcoord, fZ);
     
     float4 VF = g_VoulmetricTexture.Sample(ClampSampler, vUV);
     
-    float3 vFogColor = ToneMap(VF.xyz);
+    float3 vFogColor = VF.xyz;
     
-    float fAlpha = saturate(1.f - VF.a);
-  
-    Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor.xyz, fAlpha);
+    //float fAlpha = VF.a;
+    float fAlpha = lerp(0.4f, 1.f, saturate(VF.a));
     
-    //float fAlpha = saturate(VF.a);
-  
+    float3 vFinalColor = vOriginColor.xyz * fAlpha + vFogColor.xyz;
+//    float3 vFinalColor = lerp(vFogColor.xyz, vOriginColor.xyz, fAlpha);
+    vFinalColor = ToneMap(vFinalColor.xyz * g_fExposure);
+    
+    Out.vColor.xyz = vFinalColor;
 //    Out.vColor.xyz = vOriginColor.xyz * fAlpha + vFogColor.xyz;
   
     Out.vColor.a = 1.f;
@@ -803,7 +573,8 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     vSceneWorldPos = mul(vSceneWorldPos, g_ViewMatrixInv);
     
     float4 vReflectColor = Compute_Reflect(vWorldPos, vViewPos, vViewNormal, vOriginColor, g_BackBufferTexture, g_DepthTexture);
-    float4 vRefractColor = Compute_Refract(vWorldPos, vNormal, vWaterColor, g_BackBufferTexture, (vWorldPos.y - vSceneWorldPos.y));
+    
+    float4 vRefractColor = Compute_Refract(vWorldPos, vNormal, vWaterColor, g_BackBufferTexture, (vWorldPos.y - vSceneWorldPos.y), g_DepthTexture);
     
     float3 vLook = normalize(g_vCamPosition.xyz - vWorldPos.xyz);
     
@@ -812,9 +583,9 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     float3 vF0 = 0.02f;
     float3 vFresnel = Compute_Fresnel(vF0, fNdotV);
     
-    float fReflectRatio = lerp(0.5f, 0.8f, vFresnel.r);
+    float fReflectRatio = lerp(0.5f, 0.7f, vFresnel.r);
    
-    Out.vColor = lerp(vWaterColor, lerp(vReflectColor, vRefractColor, fReflectRatio), 0.7f);
+    Out.vColor = lerp(vRefractColor, vReflectColor, fReflectRatio);
     
     return Out;
 }

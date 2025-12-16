@@ -14,6 +14,7 @@ private:
 		INPUT_L,
 		INPUT_R,
 		INPUT_ACCEL,
+		INPUT_ACCEL_KEYDOWN,
 		FLY_U,
 		FLY_D,
 		FLY_L,
@@ -42,7 +43,11 @@ private:
     class CGalbrena* m_pGalbrena = { nullptr };
     _bool m_States[AIRFLYSTATE::END] = {};
     
-	
+
+	// Sound
+	_float m_fSoundTimer = {};
+	_float m_fMaxTime = {};
+	vector<_wstring> m_SoundTags = {};
 
 	_float m_fSpeed = {};		// Speed (힘)
 	_float m_fAccel = {};		// 가속.
@@ -59,6 +64,7 @@ private:
      
 
 private:
+	void Process_Timer(_float fTimeDelta);
     virtual void Handle_Input() override;
     void Update_FlyAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);

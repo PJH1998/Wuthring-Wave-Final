@@ -33,11 +33,12 @@ public:
 	virtual	void	Update(_float fTimeDelta) override;
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
-
+	virtual void	Render_Shadow() override;
 public:
 	void Change_Layer(_uint iLayer);
 	void Change_CollisionActive(_bool isActive);
-
+	void Play_SFX(const _wstring& wstrSoundTag, _float fVolume, _float fMin, _float fMax);
+	void Bind_SoundChannel(_bool isBind);
 private:
 	CRigidbody* m_pRigidBodyCom = { nullptr };
 	CModel* m_pModelCom = { nullptr };
@@ -52,6 +53,10 @@ private:
 #endif // _DEBUG
 
 	CALLBACK_CLIENT m_tCallback{};
+
+#pragma region SOUND
+	_int					m_iSoundChannel{};
+#pragma endregion
 
 private:
 	HRESULT		Bind_Resources();

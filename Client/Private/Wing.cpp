@@ -37,21 +37,19 @@ HRESULT CWing::Initialize_Clone(void* pArg)
 
 void CWing::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
 	CProp::Priority_Update(fTimeDelta);
 }
 
 void CWing::Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
 	CProp::Update(fTimeDelta);
 
-
-	//m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
-}
-
-void CWing::Late_Update(_float fTimeDelta)
-{
-
-	//Wing은 본체 Transform이 완전히 확정된 후에 소켓 행렬을 갱신
 	XMStoreFloat4x4(&m_CombinedMatrix,
 		m_pTransformCom->Get_WorldMatrix() *
 		XMLoadFloat4x4(m_pSocketMatrix) *
@@ -59,9 +57,20 @@ void CWing::Late_Update(_float fTimeDelta)
 
 	_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
 
+	//m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
+}
+
+void CWing::Late_Update(_float fTimeDelta)
+{
+	if (!m_isActivate)
+		return;
+
+	//Wing은 본체 Transform이 완전히 확정된 후에 소켓 행렬을 갱신
+	
+
 	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 
 	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
-	CProp::Late_Update(fTimeDelta);
+	//CProp::Late_Update(fTimeDelta);
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
@@ -93,7 +102,35 @@ void CWing::Render()
 
 void CWing::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActivate);
+	//CProp::Activate(IsActivate);
+	if (false == IsActivate)
+	{
+		m_isActivate = false;
+	}
+
+
+	else if (true == IsActivate)
+	{
+		m_isActivate = true;
+
+		SPECTRUM_INFO RightSpectrum{};
+		RightSpectrum.pModelMarixPtr = &m_CombinedMatrix;
+		//RightSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_R");
+		RightSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop017_R");
+		RightSpectrum.pIsActive = &m_isActivate;
+
+		_matrix mat = XMMatrixIdentity();
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Wing_Test"), mat, &RightSpectrum);
+
+		SPECTRUM_INFO LeftSpectrum{};
+		LeftSpectrum.pModelMarixPtr = &m_CombinedMatrix;
+		//LeftSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop009_L");
+		LeftSpectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop017_L");
+		LeftSpectrum.pIsActive = &m_isActivate;
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Wing_Test"), mat, &LeftSpectrum);
+	}
+
 }
 
 void CWing::Ready_Components(const PROP_DESC* pDesc)
@@ -117,6 +154,8 @@ void CWing::Ready_Variables(const PROP_DESC* pDesc)
 	m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 	m_pSocketMatrix = pDesc->pSocketMatrix;
 	m_pParentTransform = pDesc->pParentTransform;
+
+	XMStoreFloat4x4(&m_CombinedMatrix, XMMatrixIdentity());
 
 	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
 		m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);

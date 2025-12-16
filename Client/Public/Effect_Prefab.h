@@ -49,6 +49,9 @@ private:
 	void Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType, _uint CurrentLevel);
 	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info);
 
+	void Check_CameraDistance();
+	void UpdateActiveFromFlag(_float fTimeDelta);
+
 public:
 	_wstring	Get_MyTag() {
 		return m_strMyTag;
@@ -60,6 +63,7 @@ public:
 
 private:
 	void Reset_Prefab_Info();		
+	void Deactivate_AllChildren();
 
 private:
 
@@ -72,10 +76,12 @@ private:
 	//이펙트 소환했을 때 뼈에 붙여줄때 사용할 정보.
 	const _float4x4*					 m_pBoneMatrixPtr = nullptr;
 	const _float4x4*					 m_pObjectMatrixPtr = nullptr;
+	_bool*								 m_pActiveFlag = nullptr;
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
 	_bool								 m_IsLoop = false;
+	_bool								 m_IsLoopActive = false;
 
 	//자식들 주소
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 

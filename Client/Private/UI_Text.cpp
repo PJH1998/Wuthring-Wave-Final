@@ -194,7 +194,6 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_tUIDesc.isInstance	= pDesc->isInstance;
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
-
 	
 
 	m_vOriginScreenPos		= pDesc->vScreenPos;
@@ -215,158 +214,147 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	return S_OK;
 }
 
-
 void CUI_Text::Update_Description(_float fTimeDelta)
 {
-
-	// m_tTextDesc 갱신
-
 	const _wstring& text = m_tTextDesc.strText;
 	if (text.empty())
 		return;
-	// 1. 폰트 매니저에서 폰트 정보 받아오기
+
 	auto* pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	if (!pFont) return;
+
 	const _uint iPadding = pFont->iPadding;
 
+	// 인스턴스 컨테이너 초기화
+	// (줄바꿈 문자는 인스턴스를 생성하지 않으므로 넉넉하게 잡고 나중에 줄입니다)
+	if (m_tTextDesc.vecInstanceDescs.capacity() < text.size())
+		m_tTextDesc.vecInstanceDescs.reserve(text.size());
 
-	_uint tempPrevCode = 0;
-	_int tempAdvance = 0;
-	for (auto ch : text)
-	{
-		if (ch == L'\n') { tempPrevCode = 0; continue; }
-		m_pGameInstance->Get_GlyphAndAdvance(m_tTextDesc.strFontTag, ch, tempPrevCode, tempAdvance);
-		tempPrevCode = ch;
-	}
+	m_tTextDesc.vecInstanceDescs.clear();
 
-
-
-	_float penX = 0.f;
 	_float penY = 0.f;
 	_uint instIndex = 0;
-	_uint prevCode = 0;
 
-	m_tTextDesc.vecInstanceDescs.resize(text.size());	// 임시로 리사이징. (이만치 정의 안해줬어도 일단 보이게?)
+	// 텍스트를 줄 단위로 처리하기 위한 인덱스
+	size_t iLineStartIdx = 0;
+	size_t iTextLen = text.length();
 
-	for (auto ch : text)
+	while (iLineStartIdx < iTextLen)
 	{
-		if (ch == L'\n')
+		// 1. 현재 줄의 끝(\n)을 찾습니다.
+		size_t iLineEndIdx = text.find(L'\n', iLineStartIdx);
+		if (iLineEndIdx == _wstring::npos)
+			iLineEndIdx = iTextLen;
+
+		// 2. 현재 줄의 가로 폭(Width)을 미리 계산합니다.
+		_float fLineWidth = 0.f;
 		{
-			penX = 0.f;
-			penY += pFont->iPixelHeight * m_tTextDesc.fScale;
-			prevCode = 0;
-			continue;
+			_uint tempPrevCode = 0;
+			for (size_t i = iLineStartIdx; i < iLineEndIdx; ++i)
+			{
+				_int advanceX = 0;
+				// 너비 계산용이므로 advance값만 받아옵니다.
+				if (m_pGameInstance->Get_GlyphAndAdvance(m_tTextDesc.strFontTag, text[i], tempPrevCode, advanceX))
+				{
+					fLineWidth += (_float)advanceX * m_tTextDesc.fScale;
+					tempPrevCode = text[i];
+				}
+			}
 		}
 
-		_int advanceX = 0;
-		const FTCUSTOM_FONT_GLYPH* pGlyph =
-			m_pGameInstance->Get_GlyphAndAdvance(m_tTextDesc.strFontTag, ch, prevCode, advanceX);
-
-		if (!pGlyph)
-			continue;
-		if (instIndex >= m_tTextDesc.vecInstanceDescs.size())
-			break;
-
-		auto& inst = m_tTextDesc.vecInstanceDescs[instIndex++];
-
-		// UV 좌표 설정 (아틀라스에서 잘라낼 위치)
-		inst.vSInstCoordX = { pGlyph->fU0, pGlyph->fU1 };
-		inst.vSInstCoordY = { pGlyph->fV0, pGlyph->fV1 };
-
-
-
-		// 크기 설정!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		inst.vSInstRight	=	{ m_tTextDesc.fScale * (pGlyph->sWidth), 0.f, 0.f ,0.f };
-		inst.vSInstUp		=	{ 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
-		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };
-
-		inst.matExtraData._11 = m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha;			// << 기존 UI와 Text UI Alpha 호환
-			//static_cast<CAnimator_UI*>(m_tUIDesc.pParentObject->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc()->fAlpha;
-
-
-
-		// 화면 좌표 (기준 위치 + bearing + 현재 pen 이동량)
-		if (!m_tTextDesc.isTargetExist)
+		// 3. 정렬 방식에 따라 시작 X좌표(penX) 보정
+		_float penX = 0.f;
+		if (m_eTextAlignmentType == TEXT_ALIGN_TYPE::CENTER)
 		{
-			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x										+ m_CombinedWorldMatrix._41 // << 기존 UI와 Text UI Pos 호환
-				+ penX
-				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
-
-
-			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y										- m_CombinedWorldMatrix._42
-				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
-				+ penY;
+			penX = -fLineWidth * 0.5f; // 너비의 절반만큼 왼쪽으로 이동
 		}
-		else
+		else if (m_eTextAlignmentType == TEXT_ALIGN_TYPE::RIGHT)
 		{
-			inst.vSInstTrans.x =/* m_tTextDesc.vScreenPos.x*/
-				+ penX
-				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
+			penX = -fLineWidth;        // 너비 전체만큼 왼쪽으로 이동
+		}
+		// LEFT인 경우 penX = 0.f 유지
 
+		// 4. 현재 줄의 글자들을 인스턴스로 생성
+		_uint prevCode = 0;
+		for (size_t i = iLineStartIdx; i < iLineEndIdx; ++i)
+		{
+			wchar_t ch = text[i];
 
-			inst.vSInstTrans.y =/* m_tTextDesc.vScreenPos.y*/
-				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
-				+ penY;
+			_int advanceX = 0;
+			const FTCUSTOM_FONT_GLYPH* pGlyph =
+				m_pGameInstance->Get_GlyphAndAdvance(m_tTextDesc.strFontTag, ch, prevCode, advanceX);
 
+			if (!pGlyph) continue;
 
+			// 벡터에 공간 확보 (push_back 대신 인덱싱을 썼던 기존 로직 대응)
+			m_tTextDesc.vecInstanceDescs.emplace_back();
+			auto& inst = m_tTextDesc.vecInstanceDescs.back();
 
+			// UV 좌표
+			inst.vSInstCoordX = { pGlyph->fU0, pGlyph->fU1 };
+			inst.vSInstCoordY = { pGlyph->fV0, pGlyph->fV1 };
 
+			// 크기 설정
+			inst.vSInstRight = { m_tTextDesc.fScale * (pGlyph->sWidth), 0.f, 0.f ,0.f };
+			inst.vSInstUp = { 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
+			inst.vSInstLook = { 0.f, 0.f, 1.f ,0.f };
+
+			// Alpha 값 처리 (부모 UI 등에서 가져옴)
+			inst.matExtraData._11 = m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha;
+
+			// 위치 설정 (Target 존재 여부 분기)
+			if (!m_tTextDesc.isTargetExist)
+			{
+				inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
+					+ m_CombinedWorldMatrix._41
+					+ penX
+					+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
+
+				inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
+					- m_CombinedWorldMatrix._42
+					- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
+					+ penY;
+			}
+			else
+			{
+				// Target이 있을 때 로직 (기존 유지)
+				inst.vSInstTrans.x = penX
+					+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
+
+				inst.vSInstTrans.y = -(_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
+					+ penY;
+			}
+
+			// 다음 글자 위치로 이동
+			penX += (_float)advanceX * m_tTextDesc.fScale;
+			prevCode = ch;
 		}
 
-		// 다음 글자 위치 커서 이동 (커닝 반영된 advanceX 사용)
-		penX += (_float)advanceX * m_tTextDesc.fScale;
-		prevCode = ch;
+		// 5. 다음 줄 준비
+		penY += pFont->iPixelHeight * m_tTextDesc.fScale * m_tTextDesc.fLineSpace;
+		iLineStartIdx = iLineEndIdx + 1; // \n 다음 글자부터 시작
 	}
-
-	m_tTextDesc.vecInstanceDescs.resize(instIndex);
 
 	m_tUIDesc.vecInstanceDescs = m_tTextDesc.vecInstanceDescs;
 
 #ifdef KSTA_ON_TRANSFORM_CACHING
-	// m_tUIDesc 갱신 (부모에서 사용)
-
 	if (m_tTextDesc.vecInstanceDescs.size() != m_vecCachedUITransform.size())
 		m_vecCachedUITransform.resize(m_tTextDesc.vecInstanceDescs.size());
-#endif // KSTA_ON_TRANSFORM_CACHING
-
+#endif 
 }
+
 void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 {
-	// 인자가 기본값이 아니면 정렬 타입 갱신
+	// 정렬 타입 갱신
 	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
 		m_eTextAlignmentType = eAlignmentType;
 
-	auto& insts = m_tTextDesc.vecInstanceDescs;
-	if (insts.empty())
-		return;
+	// 이미 Update_Description에서 줄별 정렬을 수행하므로,
+	// 여기서 인스턴스를 일괄 이동시키는 코드는 삭제하거나 
+	// 필요하다면 다시 Update_Description(0.f)를 호출하여 갱신합니다.
 
-	// 폰트에서 패딩 가져오기 (x 방향 보정용)
-	_float pad = 0.f;
-	if (auto pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag))
-		pad = (_float)pFont->iPadding * m_tTextDesc.fScale;
-
-	const auto& firstInst = insts.front();
-	const auto& lastInst = insts.back();
-
-	// "보이는" 글자 영역 기준 좌/우/중앙
-	const _float fVisualLeft = firstInst.vSInstTrans.x + pad;
-	const _float fVisualRight = lastInst.vSInstTrans.x + lastInst.vSInstRight.x - pad;
-	const _float fVisualCenter = (fVisualLeft + fVisualRight) * 0.5f;
-	const _float fVisualWidth = fVisualRight - fVisualLeft;
-
-	_float delta = 0.f;
-	switch (m_eTextAlignmentType)
-	{
-	case Client::TEXT_ALIGN_TYPE::LEFT:			delta = m_vOriginScreenPos.x - fVisualLeft;		break;
-	case Client::TEXT_ALIGN_TYPE::CENTER:		delta = m_vOriginScreenPos.x - fVisualCenter;	break;
-	case Client::TEXT_ALIGN_TYPE::RIGHT:		delta = m_vOriginScreenPos.x - fVisualRight;	break;
-	default:																					return;
-	}
-
-	for (auto& inst : insts)				// align에 따른 전체 이동
-		inst.vSInstTrans.x += delta;
-
-	m_tTextDesc.vScreenPos.x += delta;
+	// 기존 로직 제거 권장:
+	// fVisualLeft, fVisualRight 계산하여 delta 이동시키는 부분 삭제
 }
 
 void CUI_Text::Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType)

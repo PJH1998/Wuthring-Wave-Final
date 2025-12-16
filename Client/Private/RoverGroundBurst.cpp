@@ -51,13 +51,15 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 	if (m_strPrevInfo == "ULTI")
 	{
 		m_pRover->Change_TimeRate(TEXT("Timer_60"), 0.5f, 1.f);
-		m_pRover->Play_Action(TEXT("Action_Rover_Burst01"));
+		m_pRover->Play_Action(TEXT("Action_Rover_Burst01"), false, true);
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 		m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+		m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
 	}
 	else
 	{
+		m_pRover->Play_Action(TEXT("Action_Rover_Ex_Skill_01_01"), false, true);
 		m_iCurrentAnimIdx = ENUM_CLASS(ERoverBurstType::EX_SKILL01_01);
 	}
 	
@@ -108,6 +110,7 @@ void CRoverGroundBurst::OnExit()
 		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
+		m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f);
 	}
 	
 

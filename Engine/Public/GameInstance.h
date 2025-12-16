@@ -35,20 +35,29 @@ public:
 
 #pragma region INPUT_DEVICE
 public:
-	KEYSTATE Get_DIKeyState(_ubyte byKeyID);
-	KEYSTATE Get_DIMouseState(MOUSEKEYSTATE eState);
-	_long Get_DIMouseMove(MOUSEMOVESTATE eState);
+	KEYSTATE		Get_DIKeyState(_ubyte byKeyID);
+	KEYSTATE		Get_DIMouseState(MOUSEKEYSTATE eState);
+	_long			Get_DIMouseMove(MOUSEMOVESTATE eState);
 #pragma endregion
 
 #pragma region SOUND_MANAGER
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath);
-	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath);
-	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop = false);
-	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop = false);
-	void			Play_Other(const _wstring& strSoundTag, _float fVolume);
+	void			Update_Listener(class CTransform* pTransform, _float fTimeDelta);
+	_uint			Register_Channel();
+	void			Return_Channel(_uint iChannelIndex);
+
+	HRESULT			Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D = false);
+	HRESULT			Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D = false);
+	HRESULT			Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D = false);
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency = 1.f);
+	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency = 1.f);	// 3D
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency = 1.f);
+	void			Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, class CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency = 1.f);
+	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency = 1.f);
 	void			Stop_Sound(_uint iChannelID);
+	void			Stop_Sound_Dynamic(_uint iChannelID);
 	void			Stop_All();
 	void			Set_ChannelVolume(_uint iChannelID, _float fVolume);
+	void			Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume);
 #pragma endregion
 
 #pragma region FONT_MANAGER
@@ -135,7 +144,7 @@ public:
 	HRESULT						Add_Render_StaticObject(class CStaticObject* pObject);
 	//HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT						Add_Render_StaticObject(vector<class CStaticObject*>* Container);
-	HRESULT						Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex);
+	HRESULT						Add_Render_StaticObject(class CStaticObject* pRenderObject, _uint iNumLODIndex);
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*				Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
@@ -156,7 +165,7 @@ public:
 
 #pragma region LIGHT_MANAGER
 	const LIGHT_DESC*			Get_LightDesc(const _wstring& strLightTag);
-	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	void						Set_LightActive(const _wstring& strLightTag, _bool isActive);
 	HRESULT						Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT						Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT						Render_LightEnvMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer, BoundingBox* pBounding);
@@ -344,7 +353,10 @@ public:
 	void						Set_FogMaxHeight(_float fFogMaxHeight);
 	void						Set_FogDistanceFallOff(_float fDistanceFallOf);
 	void						Set_FogRayDensityScale(_float fFogRayDensityScale);
-
+	void						Set_FogScatterWeight(_float fFogScatterWeight);
+	void						Set_FogFarRatioToCameraFar(_float fFogFarRatio);
+	void						Set_FogRayIntensity(_float fRayIntensity);
+	void						Set_FogMaxDistance(_float fFogMaxDistance);
 	void						Begin_VF();
 #pragma endregion
 

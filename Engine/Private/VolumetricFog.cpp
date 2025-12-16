@@ -13,10 +13,22 @@ CVolumetricFog::CVolumetricFog(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 	Safe_AddRef(m_pGameInstance);
 }
 
+void CVolumetricFog::Set_FogFarRatioToCameraFar(_float fFogFarRatio)
+{
+	m_fFogFarRatioToCamera = fFogFarRatio;
+
+	m_vFogRange.y = m_VF_Data.fCamFar * m_fFogFarRatioToCamera;
+
+	m_VF_Data.fFar = m_vFogRange.y;
+}
+
 HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 {
+	m_fFogFarRatioToCamera = 0.3f;
+
 	m_vFroxelSize.x = iWinSizeX >> 3; // 3 = DownSacle Factor
 	m_vFroxelSize.y = iWinSizeY >> 3;
+	//m_vFroxelSize.z = 192;				// 64~128
 	m_vFroxelSize.z = 128;				// 64~128
 
 	m_vDefinition.x = 8;
@@ -29,13 +41,13 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_VF_Data.fWinSizeY = static_cast<_float>(iWinSizeY);
 
 	m_VF_Data.vFroxelSize = m_vFroxelSize;
-	m_VF_Data.iSliceCount = 128;
+	m_VF_Data.iSliceCount = m_vFroxelSize.z;
 	m_VF_Data.fLightIntensity = 1.f;
 	m_VF_Data.fDensity = 1.f;
 	m_VF_Data.fPhaseFunctionG = 0.5f;
 	m_VF_Data.fDensityScale = 0.01f;
 
-	m_VF_Data.fFogMinHeight = 100.f;
+	m_VF_Data.fFogMaxDistance = 100.f;
 	m_VF_Data.fFogMaxHeight = 300.f;
 
 	//m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
@@ -77,15 +89,15 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 HRESULT CVolumetricFog::SetUp_FogNF()
 {
-	m_vFogRange.x = m_pGameInstance->Get_CurrentCamera_Near();//m_pGameInstance->Get_CurrentCamera_Near(); 
-	m_vFogRange.y = m_pGameInstance->Get_CurrentCamera_Far() * 0.4f;
+	m_VF_Data.fCamNear = m_pGameInstance->Get_CurrentCamera_Near();
+	m_VF_Data.fCamFar = m_pGameInstance->Get_CurrentCamera_Far();
+	
+	m_vFogRange.x = m_VF_Data.fCamNear;
+	m_vFogRange.y = m_VF_Data.fCamFar * m_fFogFarRatioToCamera;
 
 	m_VF_Data.fNear = m_vFogRange.x;
 	m_VF_Data.fFar = m_vFogRange.y;
-
-	m_VF_Data.fCamNear = m_pGameInstance->Get_CurrentCamera_Near();
-	m_VF_Data.fCamFar = m_pGameInstance->Get_CurrentCamera_Far();
-
+	
 	return S_OK;
 }
 
@@ -154,30 +166,30 @@ HRESULT CVolumetricFog::Bind_VF_Resource(CShader* pShader, const _char* pTexture
 //#ifdef _DEBUG
 void CVolumetricFog::Setting_VF()
 {
-	ImGui::Begin("VolumetricFog");
+	//ImGui::Begin("VolumetricFog");
 
-	ImGui::InputFloat("Fog_Near", &m_VF_Data.fNear, 1.f, 10.f);
-	ImGui::InputFloat("Fog_Far", &m_VF_Data.fFar, 1.f, 10.f);
-	ImGui::InputFloat("LightIntensity", &m_VF_Data.fLightIntensity, 1.f, 10.f);
-	ImGui::DragFloat("Density", &m_VF_Data.fDensity, 0.01f, 0.f, 1.f, "%.2f");
-	ImGui::DragFloat("DENSITY_SCALE", &m_VF_Data.fDensityScale, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("PHASE_FUNCTION", &m_VF_Data.fPhaseFunctionG, 0.01f, -0.5f, 0.5f, "%.2f");
+	//ImGui::InputFloat("Fog_Near", &m_VF_Data.fNear, 1.f, 10.f);
+	//ImGui::InputFloat("Fog_Far", &m_VF_Data.fFar, 1.f, 10.f);
+	//ImGui::InputFloat("LightIntensity", &m_VF_Data.fLightIntensity, 1.f, 10.f);
+	//ImGui::DragFloat("Density", &m_VF_Data.fDensity, 0.01f, 0.f, 1.f, "%.2f");
+	//ImGui::DragFloat("DENSITY_SCALE", &m_VF_Data.fDensityScale, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("PHASE_FUNCTION", &m_VF_Data.fPhaseFunctionG, 0.01f, -0.5f, 0.5f, "%.2f");
 
-	ImGui::DragFloat("DISTANCE_FALLOFF", &m_VF_Data.fDistanceFallOff, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("HEIGHT_FALLOFF", &m_VF_Data.fHegihtFallOff, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("GROUND_FALLOFF", &m_VF_Data.fGroundFallOff, 0.01f, 0.01f, 1.f, "%.2f");
-	ImGui::DragFloat("NOISE_SCALE", &m_VF_Data.fNoiseScale, 0.0001f, 0.00001f, 0.001f, "%.5f");
+	//ImGui::DragFloat("DISTANCE_FALLOFF", &m_VF_Data.fDistanceFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("HEIGHT_FALLOFF", &m_VF_Data.fHegihtFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("GROUND_FALLOFF", &m_VF_Data.fGroundFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	//ImGui::DragFloat("NOISE_SCALE", &m_VF_Data.fNoiseScale, 0.0001f, 0.00001f, 0.001f, "%.5f");
 
-	ImGui::DragFloat("RAY_PHASE_FUNCTION", &m_VF_Data.fRayPhaseFunctionG, 0.01f, 0.5f, 1.f, "%.2f");
-	ImGui::DragFloat("RAY_INTENSITY", &m_VF_Data.fRayIntensity, 0.1f, 2.f, 10.f, "%.5f");
+	//ImGui::DragFloat("RAY_PHASE_FUNCTION", &m_VF_Data.fRayPhaseFunctionG, 0.01f, 0.5f, 1.f, "%.2f");
+	//ImGui::DragFloat("RAY_INTENSITY", &m_VF_Data.fRayIntensity, 0.1f, 2.f, 10.f, "%.5f");
 
-	ImGui::DragFloat("SCATTER_WEIGHT", &m_VF_Data.fScatterWeight, 0.01f, 0.1f, 1.f, "%.5f");
+	//ImGui::DragFloat("SCATTER_WEIGHT", &m_VF_Data.fScatterWeight, 0.01f, 0.1f, 1.f, "%.5f");
 
-	ImGui::DragFloat("RAY_DENSITY", &m_VF_Data.fRayDensity, 0.01f, 0.1f, 1.f, "%.5f");
+	//ImGui::DragFloat("RAY_DENSITY", &m_VF_Data.fRayDensity, 0.01f, 0.1f, 1.f, "%.5f");
 
-	ImGui::DragFloat("RAY_DENSITY_SCALE", &m_VF_Data.fRayDensityScale, 0.01f, 0.05f, 0.5f, "%.5f");
+	//ImGui::DragFloat("RAY_DENSITY_SCALE", &m_VF_Data.fRayDensityScale, 0.01f, 0.05f, 0.5f, "%.5f");
 
-	ImGui::End();
+	//ImGui::End();
 }
 //#endif
 

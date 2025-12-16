@@ -40,7 +40,6 @@ HRESULT CMapObject_Destruction_Debris::Initialize_Clone(void* pArg)
 
 void CMapObject_Destruction_Debris::Priority_Update(_float fTimeDelta)
 {
-	m_pModelCom->Request_LOD(m_iLODIndex);
 
 	if (m_IsTriggered)
 	{
@@ -70,7 +69,7 @@ void CMapObject_Destruction_Debris::Update(_float fTimeDelta)
 void CMapObject_Destruction_Debris::Late_Update(_float fTimeDelta)
 {
 	m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Destruction_Debris::Render()
@@ -132,9 +131,6 @@ HRESULT CMapObject_Destruction_Debris::Ready_Component(void* pArg)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), WModelName,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("FAILED");
-	//if (FAILED(Add_Component(pDesc->iLevel, Model,
-	//	TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-	//	CRASH("FAILED");
 
 	// DeferredShader
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),

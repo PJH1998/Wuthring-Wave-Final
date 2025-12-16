@@ -3,12 +3,16 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 float4 g_GrassColor = float4(0.6f, 0.564136f, 0.48f, 1.f);
-float4 g_LogoWaterColor = 0.f; //float4(0.669f, 0.921f, 1.f, 1.f);
+float4 g_LogoWaterColor = float4(0.2627f, 0.3373f, 0.3725f, 1.f);
+//float4 g_HeavenWaterColor = float4(0.1922f, 0.0235f, 0.2902, 1.f);
+//float4 g_HeavenWaterColor = float4(0.0961f, 0.0117f, 0.1451f, 1.f);
+float4 g_HeavenWaterColor = float4(0.1020f, 0.0235f, 0.1725f, 1.f);
 
 Texture2D   g_DiffuseTexture[4];
 Texture2D   g_NormalTexture[4];
 Texture2D   g_MaskDiffuseTexture;
 Texture2D g_MaskTexture[4];
+Texture2D g_MaskSprite;
 
 bool g_HasNormal = false;
 bool g_HasMask = false;
@@ -42,6 +46,17 @@ struct VS_OUT
     float4 vProjPos : TEXCOORD1;
 };
 
+struct VS_HEAVEN
+{
+    float4 vPosition : SV_POSITION;
+    float4 vNormal : NORMAL;
+    float4 vTangent : TANGENT;
+    float4 vBinormal : BINORMAL;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
+};
+
 VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
@@ -60,6 +75,25 @@ VS_OUT VS_MAIN(VS_IN In)
     return Out;
 }
 
+VS_HEAVEN VS_NONREFLECT(VS_IN In)
+{
+    VS_HEAVEN Out = (VS_HEAVEN) 0;
+    
+    matrix matWV, matWVP;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWV, g_ProjMatrix);
+    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
+    Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
+    Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), g_WorldMatrix));
+    Out.vTexcoord = In.vTexcoord;
+    Out.vProjPos = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+
+    return Out;
+}
+
 struct PS_IN
 {
     float4 vPosition : SV_POSITION;
@@ -70,6 +104,17 @@ struct PS_IN
     float4 vProjPos : TEXCOORD1;
 };
 
+struct PS_IN_HEAVEN
+{
+    float4 vPosition : SV_POSITION;
+    float4 vNormal : NORMAL;
+    float4 vTangent : TANGENT;
+    float4 vBinormal : BINORMAL;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    float4 vWorldPos : TEXCOORD2;
+};
+
 struct PS_OUT_LIGHT
 {
     float4 vDiffuse : SV_TARGET0;
@@ -77,7 +122,6 @@ struct PS_OUT_LIGHT
     float4 vDepth : SV_TARGET2;
     float4 vPBR : SV_TARGET3;
 };
-
 
 PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
 {
@@ -265,7 +309,7 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
  
     float4 vColor = g_LogoWaterColor;
-                                                                                                                                                                                                                                                                                                                      
+
     float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y);
     
     vector vNormalDesc = g_DiffuseTexture[0].Sample(DefaultSampler, vTexcoord);
@@ -296,6 +340,34 @@ PS_OUT_LIGHT PS_LOGO(PS_IN In)
     
     Out.vDepth.w = 1.f;
     Out.vPBR.w = 1.f; // Water Masking
+    
+    return Out;
+}
+
+PS_OUT_LIGHT PS_NONREFLECT(PS_IN_HEAVEN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+ 
+    // Wolrd ±â¹Ý UV
+    float2 vUV = In.vWorldPos.xz * 0.02f;
+    
+    vector vMask = g_MaskSprite.Sample(DefaultSampler, vUV);
+    float fAlpha = max(vMask.r, max(vMask.g, vMask.b));
+    
+    vector vHeavenWaterColor = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord) * 0.5f;
+    vHeavenWaterColor.xyz = lerp(float3(0.f, 0.f, 0.8f), vHeavenWaterColor.xyz, 0.4f);
+    
+    float3 vMaskColor = lerp(vHeavenWaterColor.xyz, vMask.xyz, 0.2f);
+    float3 vColor = lerp(g_HeavenWaterColor.xyz, vMaskColor, fAlpha);
+    //vColor = lerp(float3(0.f, 0.f, 0.2f), vColor, 0.35f);
+    
+    Out.vDiffuse = float4(vColor, 1.f);
+    Out.vNormal = In.vNormal;
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vDepth.w = 1.f;
+    Out.vPBR.w = 0.f; // Water Masking
     
     return Out;
 }
@@ -335,7 +407,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL_FOCUS();
     }
 
-    pass Emissive       //3
+    pass Emissive            // 3
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -346,7 +418,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_EMISSIVE();
     }
     
-    pass LogoWater
+    pass LogoWater        // 4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -355,5 +427,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LOGO();
+    }
+
+    pass HeavenWater      // 5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_NONREFLECT();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NONREFLECT();
     }
 }

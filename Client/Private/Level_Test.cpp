@@ -39,6 +39,7 @@
 
 #include "NPC_Griffin.h"
 #include "DummyNPC.h"
+#include "NPC_Hiding.h"
 //#define KSTA_UITEST_OLD
 #ifdef KSTA_UITEST_OLD
 #include "UI_Text.h"
@@ -80,12 +81,13 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_SequnecePlayer();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_CoroSaurus();
+	Ready_CoroSaurus();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
 	//Ready_Spawner();
-	Ready_AnimInstanceTest();
-	Ready_Leviatan();
+	//Ready_AnimInstanceTest();
+	
+	//Ready_NPC();
 
     Ready_Effect();
 	Ready_RopeAnchor();
@@ -100,6 +102,8 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_CameraNF();
+
+	//Ready_Leviatan();
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
@@ -121,14 +125,6 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Skybox();
 	Ready_UI();
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Scan"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Scan"),
-		TEXT("Pooling_Scan"), 1)))
-		CRASH("Failed Add Pool Scan");
-
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_MotionTrail"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_MotionTrail"),
-		TEXT("Pooling_MotionTrail"), 1)))
-		CRASH("Failed Add Pool MotionTrail");
-
     return S_OK;
 }
 
@@ -138,6 +134,14 @@ void CLevel_Test::Update(_float fTimeDelta)
     
 #ifdef _DEBUG
 	Shader_Gui();
+	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+	{
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_Excute_Prefab"), XMMatrixIdentity(), nullptr);
+	}
 #endif
 
 	Toggle_HUD();
@@ -390,7 +394,7 @@ void CLevel_Test::Ready_HavocWarrior()
 	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	tDesc.fSpeedPerSec = 10.f;
 	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
-	tDesc.pAnimationTag = "Stand1";
+	tDesc.pAnimationTag = "PatrolToFight";
 	tDesc.fHp = pInfo->fMaxHp;
 	tDesc.fAttackDmg = pInfo->fAttack;
 	tDesc.fImpluseRate = pInfo->fImpluseRate;
@@ -614,6 +618,7 @@ void CLevel_Test::Ready_Leviatan()
 	Projectile.fSpeedPerSec = 15.f;
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_Projectile");
 	Projectile.eType = TEXT_COLOR_TYPE::DARK;
+	Projectile.isCollisionDestroy = false;
 	Projectile.wstrEffectTag = TEXT("Leviatan_Dg2");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviSword"), 4, &Projectile)))
@@ -650,6 +655,28 @@ void CLevel_Test::Ready_Leviatan()
 		CRASH("Failed Ready Projectile (Leviatan)");
 }
 
+void CLevel_Test::Ready_NPC()
+{
+	CNPC_Hiding::HIDINGDESC NPCDesc{};
+	NPCDesc.eCurLevel = m_eCurLevel;
+	NPCDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	NPCDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	NPCDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FemaleS370437"));
+	NPCDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	//NPCDesc.strFolderPath = "../Bin/Resource/Model/Monster/ElectroPredator/Notify";
+	NPCDesc.isCollide = true;
+	NPCDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	NPCDesc.fSpeedPerSec = 1.f;
+	NPCDesc.vInitPos = _float3(3.f, -8.f, -33.f);
+	NPCDesc.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	NPCDesc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");
+	NPCDesc.pAnimationTag = "sing02_Loop";
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &NPCDesc)))
+		CRASH("Failed Ready NPC_Hiding");
+}
+
 void CLevel_Test::Ready_UI()
 {
 	// UI
@@ -659,6 +686,8 @@ void CLevel_Test::Ready_UI()
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
+		 L"Prototype_GameObject_Custom_UI_Container_QuestIndicator"
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
@@ -693,14 +722,18 @@ void CLevel_Test::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
-		CRASH("Failed Ready GrapplePoint");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+	//	CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
 		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
 		CRASH("Failed Ready QTE");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Dialog"),
+		iDestLevel, TEXT("Layer_Custom_UI_Dialog"), TEXT("Pool_Custom_Dialog"), 1)))
+		CRASH("Failed Ready Dialog");
 
 
 
@@ -760,165 +793,7 @@ void CLevel_Test::Ready_RopeAnchor()
 
 void CLevel_Test::Testing_UI(_float fTimeDelta)
 {
-#ifdef KSTA_UITEST_OLD
 
-	_uint iDestLevel = ENUM_CLASS(m_eCurLevel);
-	static _bool isInitialized = false;
-	
-	static CUI_Text* testText = nullptr;
-
-	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
-	tDesc.isInstance = true;
-	tDesc.vecInstanceDescs = {};
-
-	tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
-	tDesc.vColor = _float4{ 0.0f, 0.0f, 1.0f, 1.0f };
-	tDesc.vOutlineColor = _float4{ 0.0f, 1.0f, 1.0f, 1.0f };
-	tDesc.fFontOutlineWidth = 2.f;
-
-	tDesc.strFontTag = L"WW_SemiBold";
-	tDesc.strText = L"Test 테스트입니다.";
-	tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
-	tDesc.fScale = 0.25f;
-	tDesc.vLifeTime = { 0.f, 10.f };
-	tDesc.strUIName = L"TestFont";
-
-	tDesc.iPassType = 0;
-
-	tDesc.isTargetExist = true;
-	tDesc.vTargetWorldPos = _float4{ 2.42f, -10.19f, -3.56f, 1.0f };
-
-
-	if (!isInitialized)
-	{
-		// Test Initializing
-		isInitialized = true;
-		
-		//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test",
-		//	CUI_Text::Create(m_pDevice, m_pContext))))
-		//	CRASH("프로토타입 못만들었대~~");
-
-
-
-		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
-		// ===== test
-
-		// =====
-
-
-
-		//CUI_Text* pTextObj = dynamic_cast<CUI_Text*>w
-		//	(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test", PROTOTYPE::GAMEOBJECT, &tDesc));
-		//if (!pTextObj)
-		//	CRASH("폰트오브젝트 못만들었대~~");
-		//
-		//
-		//m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Font", pTextObj);
-		//testText = pTextObj;
-	}
-
-
-	_float fRandX = m_pGameInstance->Rand(-5.f, 5.f);
-	_float fRandY = m_pGameInstance->Rand(-5.f, 5.f);
-	_float fRandZ = m_pGameInstance->Rand(-5.f, 5.f);
-
-	tDesc.vTargetWorldPos = {
-		tDesc.vTargetWorldPos.x + fRandX,
-		tDesc.vTargetWorldPos.y + fRandX,
-		tDesc.vTargetWorldPos.z + fRandZ,
-		tDesc.vTargetWorldPos.w
-	};
-
-	
-	static _float fElapsedTime_TestSpawn = 0.f;
-	fElapsedTime_TestSpawn += fTimeDelta;
-	const _float fTestSpawnSpace = 5.f;
-	if (fElapsedTime_TestSpawn >= fTestSpawnSpace)
-	{
-		fElapsedTime_TestSpawn = 0.f;
-
-		const _float fOffsetY = 5.f;
-		m_pGameSystem->Render_Damage(
-			_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
-			static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
-			static_cast<TEXT_COLOR_TYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
-			3.f
-		);
-
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
-	}
-
-
-
-	//CUI_Text::TEXT_UI_DESC tDesc = testText->Get_TextUIDesc();
-		
-	//_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
-	//_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
-	//
-	//_float4 world = { tDesc.vTargetWorldPos.x, tDesc.vTargetWorldPos.y, tDesc.vTargetWorldPos.z, 1.f };   // (x,y,z)
-	//_matrix view = XMLoadFloat4x4(&matPipelineView);
-	//_matrix proj = XMLoadFloat4x4(&matPipelineProj);
-	//_vector pos = XMVectorSet(world.x, world.y, world.z, 1.0f);
-	//
-	//pos = XMVector3Transform(pos, view);
-	//pos = XMVector3Transform(pos, proj);
-	//_vector ndc = pos / XMVectorSplatW(pos);
-	//
-	//_float3 ndc3;
-	//XMStoreFloat3(&ndc3, ndc);
-	//_float screenX = (ndc3.x * 0.5f + 0.5f) * 1920.f;     // 화면 해상도 X
-	//_float screenY = (1.0f - (ndc3.y * 0.5f + 0.5f)) * 1080.f; // Y 반전
-	//
-	//tDesc.vScreenPos = _float2(screenX, screenY);
-
-	//testText->Set_TextUIDesc(tDesc);
-
-
-
-
-
-	// Interact
-
-	//static _uint iInteractIndex = 0;
-	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
-	//
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
-	//{
-	//	switch (iInteractIndex)
-	//	{
-	//	case TEST_INTERACT0:
-	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	case TEST_INTERACT1:
-	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
-	//		iInteractIndex++;
-	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
-	//		break;
-	//	}
-	//}
-	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
-	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
-	//{
-	//	m_pGameSystem->Hide_InteractUI(true);
-	//}
-	//
-	//
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
-	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endlㅡ
-	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
-	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
-
-
-
-#endif // KSTA_UITEST_OLD
-
-	// interact
 #pragma region [NUMPAD +] KSTA_UITEST_INTERACT
 
 
@@ -948,97 +823,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
 		pRootUILockOn->IsActivate())
 		m_pGameSystem->Detach_LockOnUI();
-#pragma endregion
-
-
-//#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
-//	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
-//	{
-//		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
-//			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
-//
-//		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
-//	}
-//#pragma endregion
-
-
-#pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR
-	//static _bool isActiveMobHPBar = false;
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	//	isActiveMobHPBar = !isActiveMobHPBar;
-
-	//if (isActiveMobHPBar)
-		
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-	{
-		if (m_pGameInstance->Find_UIObject(L"UI_MobHPBar")->IsActivate() == true)
-			m_pGameInstance->Find_UIObject(L"UI_MobHPBar")->SetActivate(false);
-		else
-			m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	}
-
-	//if (isActiveMobHPBar)
-	//{
-	//	UI_MOBINFO_DESC tTmpDesc = {};
-	//
-	//	const _uint iNumTestMobs = 3;
-	//
-	//	for (_uint i = 0; i < iNumTestMobs; i++)
-	//	{
-	//		_float3 fTestOffset = {
-	//			m_pGameInstance->Rand(-10.f, 10.f),
-	//			m_pGameInstance->Rand(-10.f, 10.f) - 10.f,
-	//			m_pGameInstance->Rand(-10.f, 10.f)
-	//		};
-	//
-	//		tTmpDesc.vMobPos = fTestOffset;
-	//		tTmpDesc.fMobCurHP = 50.f;
-	//		tTmpDesc.fMobCurHP = 70.f;
-	//
-	//		m_pGameSystem->Update_MobStatus(tTmpDesc);
-	//	}
-	//}
-
-#pragma endregion
-
-
-#pragma region [TAB] KSTA_UITEST_TABUTILITY
-	static _bool isTabUtilityActive = false;
-	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
-
-	//_uint iTabUtilitySelectedIndex = UINT_MAX;
-	_bool isTabUtilityHided = false;
-
-	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
-		isTabUtilityActive = true;
-	}
-	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
-	{
-		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
-		isTabUtilityActive = false;
-		isTabUtilityHided = true;
-	}
-
-
-	_string strSelectedUtilityName = {};
-	if (isTabUtilityHided)
-	{
-		switch (iTmpSelectedUtility)
-		{
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
-		}
-
-		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
-	}
-
 #pragma endregion
 
 
@@ -1078,104 +862,132 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 #pragma region [INSTANT] KSTA_UITEST_GRAPPLEPOINT
 
 	static _bool isInitialized_GrapplePoint = false;
-
-	_uint iNumGrappleUI = 50;
-
+	
+	_uint iNumGrappleUI = 1;
+	
 	if (!isInitialized_GrapplePoint)
 	{
 		for (_uint i = 0; i < iNumGrappleUI; i++)
 		{
-			
+			UI_GRAPPLE_TYPE eType = UI_GRAPPLE_TYPE::PULL; /* static_cast<UI_GRAPPLE_TYPE>(m_pGameInstance->Rand(0.f, 1.999f));*/
+			_float3 vBasePos = { 0.f, -10.f, 0.f };
+			_float vRandRange= 0.f;
+			_float3 vTmpPos = {
+				m_pGameInstance->Rand(-vRandRange, vRandRange) + vBasePos.x,
+				m_pGameInstance->Rand(-vRandRange, vRandRange) + vBasePos.y,
+				m_pGameInstance->Rand(-vRandRange, vRandRange) + vBasePos.z
+			};
 
-			UI_GRAPPLE_TYPE eType = static_cast<UI_GRAPPLE_TYPE>(m_pGameInstance->Rand(0.f, 1.999f));
-			CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { nullptr, eType };
-			m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
+			m_pGameSystem->Create_GrapplePoint(vTmpPos, eType);
+
+			//CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { _float3(), eType};
+			//m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
 		}
-
+	
 		isInitialized_GrapplePoint = true;
 	}
 
+	_float3 vPlayerPos = {}; XMStoreFloat3(&vPlayerPos, m_pGameSystem->Get_PlayerPosition());
+	//_float fDistance = FLT_MAX;
+	//auto pNearestGrapple = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::ANCHOR, &fDistance);
+	//_float3 vNearGrapplePos = {}; XMStoreFloat3(&vNearGrapplePos, static_cast<CTransform*>(pNearestGrapple->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
+	//_float fPullDistance = FLT_MAX;
+	//auto pNearestPull = m_pGameSystem->Find_NearGrapplePoint(vPlayerPos, UI_GRAPPLE_TYPE::PULL, &fPullDistance);
+	//_float3 vNearPullPos = {}; XMStoreFloat3(&vNearPullPos, static_cast<CTransform*>(pNearestPull->Get_Component(L"Com_Transform"))->Get_State(STATE::POSITION));
+	//
+	//std::cout << "[CLevel_Test::Testing_UI] Nearest Grapple UI Distance : " << fDistance << std::endl;
+	//std::cout << "[CLevel_Test::Testing_UI] Nearest Pull    UI Distance : " << fPullDistance << std::endl;
+	//std::cout << "==================================================================" << std::endl;
+
 #pragma endregion	
 
+	
+#pragma region [LCTRL + I / LCTRL + O] KSTA_UITEST_DIALOG
+	static _bool isUITestDialogOn = false;
 
-#pragma region  [NUMPAD 0] KSTA_UITEST_QTE
-	static _bool isQTETrigger = false;
-
-	if (isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Play_QTE(_float2{ 500.f, 0.f }, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::Q);
-		isQTETrigger = !isQTETrigger;
+		isUITestDialogOn = !isUITestDialogOn;
+		std::cout << "[Level_Test::Testing_UI] Dialog Toggled to" << (_bool)isUITestDialogOn << std::endl;
+
+		if (isUITestDialogOn)
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv", true);
+		else
+			m_pGameSystem->Close_DialogUI();
 	}
-	else if (!isQTETrigger && m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)
 	{
-		m_pGameSystem->Play_QTE(_float2{ -500.f, +300.f }, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
-		isQTETrigger = !isQTETrigger;
+		m_pGameSystem->Req_Interact_DialogUI(false);
+	}
+
+#pragma endregion
+
+
+#pragma region  [NUMPAD 0] KSTA_UITEST_FINAL
+	static _bool isFinalImageOn = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	{
+		isFinalImageOn = !isFinalImageOn;
+
+		if (isFinalImageOn)
+			m_pGameSystem->Trigger_PlayEndImage();
+#ifdef _DEBUG
+		else
+			m_pGameSystem->Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
 	}
 #pragma endregion
 
 
-#pragma region [LCTRL + NUMPAD3] KSTA_UITEST_CURVETRACE
 
-	static _bool isCurveTraceOn = false;
 
-	if (!isCurveTraceOn &&
+#pragma region [LCTRL + NUMPAD1, 2, 3] KSTA_UITEST_QUEST
+
+	static _bool isQuestUIOn = false;
+
+	if (!isQuestUIOn &&
 		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
 		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 	{
-		isCurveTraceOn = true;
-		std::cout << "[Level_Test::Testing_UI] CurveTrace On" << std::endl;
+		isQuestUIOn = true;
+		std::cout << "[Level_Test::Testing_UI] Quest On" << std::endl;
+		m_pGameSystem->Trigger_ActivateQuest();
 	}
-	else if (isCurveTraceOn &&
+
+	if (isQuestUIOn &&
 		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
 	{
-		isCurveTraceOn = false;
-		std::cout << "[Level_Test::Testing_UI] CurveTrace Off" << std::endl;
+#ifdef _DEBUG
+		m_pGameSystem->Trigger_ForceCompleteQuestProgress();
+#else
+		m_pGameSystem->Trigger_AddQuestProgress();
+#endif  
 	}
 
 
-	if (isCurveTraceOn)
+
+#ifdef _DEBUG
+	if (isQuestUIOn &&
+		m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS &&
+		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
 	{
-//#define KSTA_UITEST_BASEDONPLAYER	// 디버그용 매크로
-
-
-#ifndef KSTA_UITEST_BASEDONPLAYER
-		// 사용 예시..
-		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
-
-		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
-		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
-
-		_float fDEBUG_Radius = 10.f;
-		_float fDEBUG_RotateX = sinf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
-		_float fDEBUG_RotateZ = cosf(fDEBUG_CurveTraceElapsedTime) * fDEBUG_Radius;
-
-		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
-		_float3 vStartVel		= _float3(fDEBUG_RotateX, fDEBUG_Radius, fDEBUG_RotateZ);
-		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
-		
-		
-		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
-#endif // !KSTA_UITEST_BASEDONPLAYER
-
-
-
-#ifdef KSTA_UITEST_BASEDONPLAYER
-		// 임시로 플레이어 정면 바라보도록
-		const _float fDEBUG_ElapsedTimeMultiplier = 1.0f;
-
-		static _float fDEBUG_CurveTraceElapsedTime = 0.f;
-		fDEBUG_CurveTraceElapsedTime += (fTimeDelta * fDEBUG_ElapsedTimeMultiplier);
-
-		_float3 vStartPos		= _float3(0.f, 0.f,  0.f);	
-		_float3 vStartVel		= _float3(0.f, 10.f, 10.f);
-		_float3 vAcceleration	= _float3(0.f, -9.8f, 0.f);
-
-		m_pGameSystem->Req_Render_CurveTrace(vStartPos, vStartVel, vAcceleration);
-#endif // KSTA_UITEST_BASEDONPLAYER
+		m_pGameSystem->Trigger_AllReset();
 	}
+#endif // _DEBUG
+
+	
 
 #pragma endregion
+
+
+
+
 
 }
 
@@ -1185,6 +997,9 @@ void CLevel_Test::Shader_Gui()
 
 }
 #endif
+
+
+
 
 void CLevel_Test::Toggle_HUD()
 {

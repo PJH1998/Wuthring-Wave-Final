@@ -20,6 +20,16 @@ public:
 		_uint iTriggerIndex;
 	}TRIGGER;
 
+	/*
+	make_pair(TEXT("Action_Asphodel_Barrens_Horizon"), make_pair(*m_pTransformCom->Get_WorldMatrixPtr(), true
+	*/
+
+	typedef struct tagCamInfo {
+		_wstring szCamTag;
+		_float4x4 CamMatrix;
+		_bool IsMaintain;
+		_bool isEscape = false;
+	}CAM_INFO;
 private:
 	CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CTrigger_Box(const CTrigger_Box& Prototype);
@@ -51,6 +61,13 @@ private:
 	_bool m_IsTriggered = { false };
 	_bool   m_bOnCoolDown = { false }; 
 	_float  m_fCoolDown = { 0.f };     
+
+	void* m_pTempPtr = { nullptr };
+	void* m_pSecondTempPtr = { nullptr };
+	CAM_INFO* m_CamMatrix;
+	_bool m_IsDoingPalette = { false };
+
+	_uint m_iMiniGameClearNum = {};
 public:
 	static CTrigger_Box* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

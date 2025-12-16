@@ -27,25 +27,16 @@ private:
 	void						Ready_Skybox();
 	void						Ready_UI();
 	void						Ready_SFX();
+	void						Ready_Scene();
 
 #ifdef _DEBUG
 private:
 	void DEBUG_FUNCTION();
-	_float m_fRadius = {1.f};
-	_float m_fMaxDistance = { 5.f };
-	_float m_fBias[4] = {0.01f, 0.01f , 0.01f , 0.01f };
-	_float m_fMinBias[4] = { 0.005f , 0.005f , 0.005f , 0.005f };
-	_float m_fSlopeScale = { 2.f};
-	_float m_fMapBias = {0.01f};
-	_int m_iLUT_Index = { 0 };
-	_float m_fLUT_Intensity = {};
 
-	_float  m_fLimitVelocity = {15.f};
-	_float	m_fLimitDepth = {150.f};
-	_float	m_fLengthScale = {5.f};
-	_bool	m_IsDyanmicLUT = { false };
-	_bool	m_IsSSS = { true };
-	_float	m_fExposure = { 0.6f };
+	_int		m_iLUT_Index = { 0 };
+	_float		m_fLUT_Intensity = {};
+	LIGHT_DESC	m_tLightDesc = {};
+	
 #endif
 
 private:

@@ -36,6 +36,7 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
+	virtual void Render_Shadow() override;
 
 
 #ifdef _DEBUG
@@ -48,6 +49,7 @@ public:
 	virtual void Activate(_bool IsActivate) override;
 	virtual void Change_Volume(_uint iVolumeIdx) override;
 	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
+	virtual void Volume_Activate(_bool IsActive) override;
 
 	// Owner의 게이지 채우기?
 	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);

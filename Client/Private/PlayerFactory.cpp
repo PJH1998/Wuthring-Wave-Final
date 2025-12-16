@@ -44,6 +44,13 @@ void CPlayerFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, CPlaye
     CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
     CameraDesc.fMouseSensor = 0.004f;
 
+	if (eLevel == LEVEL::GAMEPLAY)
+	{
+		CameraDesc.vEye = _float4(0.f, 0.f, 0.f, 1.f);
+		CameraDesc.vAt = _float4(0.9406f, 0.0f, -0.3394f, 1.f);
+	}
+		
+
     CSpringCamera* pSpringCamera = dynamic_cast<CSpringCamera*>(pGameInstance->Clone_Prototype(ENUM_CLASS(ePrototypeLevel)
         , TEXT("Prototype_GameObject_SpringCamera"), PROTOTYPE::GAMEOBJECT
         , &CameraDesc));
@@ -56,3 +63,4 @@ void CPlayerFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, CPlaye
 
     pGameInstance->Change_MainCamera(ENUM_CLASS(eLevel), TEXT("Camera_Spring"));
 }
+

@@ -37,7 +37,7 @@ void CGalbrenaGroundRun::OnEnter(void* pArg)
     m_pGalbrena->Set_Gravity(true);
 
 	// 5. SFX Motion 시작.
-	m_pGalbrena->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	//m_pGalbrena->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CGalbrenaGroundRun::OnUpdate(_float fTimeDelta)
@@ -68,7 +68,7 @@ void CGalbrenaGroundRun::OnExit()
     m_pGalbrena->Set_Gravity(true);
 	m_fFallTime = 0.f;
 
-	m_pGalbrena->End_SFX();
+	//m_pGalbrena->End_SFX();
 }
 
 void CGalbrenaGroundRun::Handle_Input()
@@ -78,11 +78,8 @@ void CGalbrenaGroundRun::Handle_Input()
 
 	// Dash 키입력 체크.
 	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
-
 	m_States[HIT] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	//m_States[DODGEABLE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-	//
-	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
@@ -97,6 +94,10 @@ void CGalbrenaGroundRun::Handle_Input()
 	m_States[ROPE_DRAG] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pGalbrena->Is_GrappleDrag());
+
+	m_States[THROW_CONTROL] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pGalbrena->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pGalbrena->Is_AttachThrowTarget());
 
     // 키 입력.
     m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -242,6 +243,12 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 	{
 		// 애니메이션은 Rope 안에서 결정하기.
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::ROPEDRAG));
+		return;
+	}
+
+	if (m_States[THROW_CONTROL])
+	{
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::CONTROL));
 		return;
 	}
 

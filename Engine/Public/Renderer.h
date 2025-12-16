@@ -100,7 +100,7 @@ private:
 	_bool									m_IsStylized = { true };
 	_float									m_fDebugRoughness[2] = {0.f, 0.4f};
 	_float									m_fDebugMetallic[2] = {0.8f, 0.3f};
-
+	_float									m_fShadowMapBias = {0.001f};
 #endif
 private:
 	// Viewport Size 
@@ -116,6 +116,7 @@ private:
 	void						Render_Static();
 	void						Render_Decal();
 	void						Render_SSAO();
+	void						Render_Outline_NonCompare();
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_SSS();
@@ -138,6 +139,7 @@ private:
 	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
+	void						Render_UI_Post();
 	void						Render_Fade();
 	void						Render_NonStatic();
 #ifdef _DEBUG

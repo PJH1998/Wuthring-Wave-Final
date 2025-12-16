@@ -94,6 +94,9 @@ void CAugustaGriffon::Late_Update(_float fTimeDelta)
   
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CAugustaGriffon::Render()
@@ -136,6 +139,26 @@ void CAugustaGriffon::Render()
 #endif // _DEBUG
 }
 
+void CAugustaGriffon::Render_Shadow()
+{
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
 void CAugustaGriffon::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
@@ -175,13 +198,12 @@ void CAugustaGriffon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer
 void CAugustaGriffon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	// 2. 타격감을 위한. Shake
-	CAMERA_SHAKE ShakeDesc{};
-	ShakeDesc.fDuration = 0.12f;
-	ShakeDesc.fFrequency = 12.f;
-	ShakeDesc.fAmplitude = 1.f;
-	ShakeDesc.fFovKick = XMConvertToRadians(0.5f);
-	ShakeDesc.vRotation = _float3(0.0f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
-	m_pGameInstance->OnShake(ShakeDesc);
+	m_PendingShakeDesc.fDuration = 0.12f;
+	m_PendingShakeDesc.fFrequency = 12.f;
+	m_PendingShakeDesc.fAmplitude = 1.f;
+	m_PendingShakeDesc.fFovKick = XMConvertToRadians(0.5f);
+	m_PendingShakeDesc.vRotation = _float3(0.0f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+	m_IsShake = true;
 }
 
 void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)

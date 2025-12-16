@@ -38,9 +38,10 @@ public:
 public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
-	void Collider_Active(const _wstring&, _bool IsActive);
-	void Effect_Active(const _wstring& wStrEffectTag);
-	virtual void Object_Func(const _wstring& wStrObjectTag);
+	void			Collider_Active(const _wstring&, _bool IsActive);
+	void			Effect_Active(const _wstring& wStrEffectTag);
+	void			Object_Func(const _wstring& wStrObjectTag);
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CModel*										m_pModelCom = { nullptr };
@@ -55,7 +56,7 @@ private:
 	_bool										m_IsRootMotion = { false };
 	_bool										m_IsRootMotionRotate = { false };
 	_bool										m_IsRootMotionTranslate = { false };
-
+	_bool										m_isActionEnd[3] = {};
 
 private:
 	void Bind_Resources();

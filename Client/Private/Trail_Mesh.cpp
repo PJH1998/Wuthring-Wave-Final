@@ -52,6 +52,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_fColorGamma = m_tDesc.fColorGamma;
 	m_iDirFalg = m_tDesc.iDirFlag;
 	m_iMaskFlag = m_tDesc.iMaskFlag;
+	m_IsLoop = m_tDesc.IsLoop;
 
 	m_fDistortionWeight = m_tDesc.fDistortionWeight;
 
@@ -76,7 +77,16 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
 	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
-    m_vLifeTime.x += fTimeDelta;
+	m_fCurrentTime += fTimeDelta;
+
+	if (m_pActiveFlag != nullptr)
+	{
+		if (!(*m_pActiveFlag))
+			m_IsEnd = true;
+	}
+
+	if(!m_IsLoop || m_IsEnd)
+		m_vLifeTime.x += fTimeDelta;
 
 	if (m_IsRoot)
 		Update_Root_Transform();
@@ -88,16 +98,10 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_fColorSweep = 0.f;
         m_vLifeTime.x = 0.f;
 		m_fMaskSweep = 0.f;;
+		m_fCurrentTime = 0.f;
+		m_IsEnd = false;
+		m_pActiveFlag = nullptr;
     }
-
-   /* if (m_fSweep >= 1.f + m_fSweepWitdh)
-    {
-        m_fSweep = 0.f;
-        m_isActivate = false;
-        m_fColorSweep = 0.f;
-		m_fMaskSweep = 0.f;
-		m_vLifeTime.x = 0.f;
-    }*/
 }
 
 void CTrail_Mesh::Late_Update(_float fTimeDelta)
@@ -135,6 +139,12 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
     m_fColorSweep = 0.f;
 	m_fMaskSweep = 0.f;
     m_vLifeTime.x = 0.f;
+	m_fCurrentTime = 0.f;
+	m_IsEnd = false;
+	m_pActiveFlag = nullptr;
+
+	if (pDesc->pIsActiveFlag != nullptr)
+		m_pActiveFlag = pDesc->pIsActiveFlag;
 
 	if (m_isActivate && !m_IsRoot)
 	{
@@ -303,7 +313,7 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
 		return E_FAIL;
 
-	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_vLifeTime.x, sizeof(_float))))
+	if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fCurrentTime, sizeof(_float))))
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_vLifeTime, sizeof(_float2))))

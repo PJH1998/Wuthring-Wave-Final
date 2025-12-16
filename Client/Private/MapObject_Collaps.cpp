@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "MapObject_Collaps.h"
 #include"GameSystem.h"
+
+
 CMapObject_Collaps::CMapObject_Collaps(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
 {
@@ -30,6 +32,7 @@ HRESULT CMapObject_Collaps::Initialize_Clone(void* pArg)
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		m_IsTriggerd = true;
 		});
+
 	return S_OK;
 }
 
@@ -43,14 +46,15 @@ void CMapObject_Collaps::Update(_float fTimeDelta)
 	if (m_IsTriggerd) // Trigger 실행 이후.
 		LerpPos(fTimeDelta);
 
-	m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	if (m_pBoxRigidbodyCom)
+		m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	// 매프레임 Target Transform 비우기.
 	m_pTargetTransform = nullptr;
 }
 
 void CMapObject_Collaps::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Collaps::Render()
@@ -101,13 +105,27 @@ void CMapObject_Collaps::Render()
 	}
 
 #ifdef _DEBUG
-	m_pBoxRigidbodyCom->Render();
+	if (m_pBoxRigidbodyCom)
+		m_pBoxRigidbodyCom->Render();
 #endif // _DEBUG
 
 }
 
 void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 {
+	if (m_pPullUI)
+	{
+		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
+		m_pPullUI = nullptr;
+	}
+
+	if (!m_IsSound)
+	{
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Broken0"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
+		m_IsSound = !m_IsSound;
+	}
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 
@@ -120,11 +138,36 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 	{
 #ifdef _DEBUG
 		m_fFall = 0.f;
-		m_IsTriggerd = false;
 #endif
+		m_IsTriggerd = false;
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DestMat));
 		m_pSourRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_pDestRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+
+		_uint iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Broken0"), iSoundChannel, 0.2f);
+		m_pGameInstance->Return_Channel(iSoundChannel);
+
+
+		CAMERA_SHAKE ShakeDesc{};
+		ShakeDesc.fAmplitude = 1.f;
+		ShakeDesc.fDuration = 0.8f;
+		ShakeDesc.fFovKick = 0.f;
+		ShakeDesc.fFrequency = 2.f;
+		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+		ShakeDesc.vTranslation;
+		m_pGameInstance->OnShake(ShakeDesc);
+
+		PREFAB_INFO Info;
+		if (m_iTriggerIndex == 33)
+		{
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), XMLoadFloat4x4(&m_DestMat), &Info);
+		}
+		else
+		{
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), XMLoadFloat4x4(&m_SmokePoint), &Info);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), XMLoadFloat4x4(&m_SmokePoint2), &Info);
+		}
 		return;
 	}
 }
@@ -132,7 +175,7 @@ void CMapObject_Collaps::LerpPos(_float fTimeDelta)
 void CMapObject_Collaps::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	// 1. Detect 감지되면?
-	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer)
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) != iLayer || m_IsTriggerd)
 		return;
 
 	// 2. CallBack 정보 가져오기
@@ -178,6 +221,7 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return;
+
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->vSourWorldMatrix));
 
 	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
@@ -205,21 +249,38 @@ void CMapObject_Collaps::Ready_Components(void* pArg)
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->vSourWorldMatrix));
 
-	CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
-	RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyBoxDesc.eShape = SHAPE::BOX;
-	RigidbodyBoxDesc.eType = EMotionType::Kinematic;
-	RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
-	RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
-	XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	if (m_iTriggerIndex == 33)
+	{
+		_float3 vPointPos;
+		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+		m_pPullUI = m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
+		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
+		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
+		RigidbodyBoxDesc.eShape = SHAPE::BOX;
+		RigidbodyBoxDesc.eType = EMotionType::Kinematic;
+		RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+		RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
+		XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	m_CallBack.pTransform = m_pTransformCom;
-	m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
-	m_CallBack.pCondition = &m_iTriggerIndex;
-	m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+
+		m_CallBack.pTransform = m_pTransformCom;
+		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+		m_CallBack.pCondition = &m_iTriggerIndex;
+		m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+	}
+	else if(m_iTriggerIndex == 31)
+	{
+		XMStoreFloat4x4(&m_SmokePoint, XMMatrixTranslationFromVector(XMVectorSet(3395.6f, 307.8f, 1966.6f, 1.f)));
+		XMStoreFloat4x4(&m_SmokePoint2, XMMatrixTranslationFromVector(XMVectorSet(3391.5f, 307.7f, 1971.3f, 1.f)));
+	}
+	else if (m_iTriggerIndex == 32)
+	{
+		XMStoreFloat4x4(&m_SmokePoint, XMMatrixTranslationFromVector(XMVectorSet(3367.2f, 307.9f, 1976.8f, 1.f)));
+		XMStoreFloat4x4(&m_SmokePoint2, XMMatrixTranslationFromVector(XMVectorSet(3368.9f, 307.9f, 1980.4f, 1.f)));
+	}
 }
 
 
@@ -252,10 +313,12 @@ CGameObject* CMapObject_Collaps::Clone(void* pArg)
 void CMapObject_Collaps::Free()
 {
 	__super::Free();
+	m_pPullUI = nullptr;
 	Safe_Release(m_pSourRigidbodyCom);
 	Safe_Release(m_pDestRigidbodyCom);
 	Safe_Release(m_pBoxRigidbodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
+
 }

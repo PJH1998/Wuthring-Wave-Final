@@ -201,7 +201,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 	PARTICLE_DefaultCB* pOptionCB = new PARTICLE_DefaultCB;
 	pOptionCB->vPivot = m_vPivot;
-	pOptionCB->IsLoop = m_isLoop ? 1 : 0;
+ 	pOptionCB->IsLoop = m_isLoop ? 1 : 0;
 	pOptionCB->IsStretch = pPointDesc->IsStretch ? 1 : 0;
 	pOptionCB->IsSprite = pPointDesc->IsSprite ? 1 : 0;
 	pOptionCB->IsDelay = (pPointDesc->fDelay.y > 0.f) ? 1 : 0;

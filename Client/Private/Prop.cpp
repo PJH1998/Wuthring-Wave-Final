@@ -38,6 +38,7 @@ void CProp::Priority_Update(_float fTimeDelta)
         return;
     CPartObject::Priority_Update(fTimeDelta);
 
+	Process_CameraShake();
 }
 
 void CProp::Update(_float fTimeDelta)
@@ -110,6 +111,16 @@ void CProp::Clear_Animation(const _string& strAnimName)
     m_pModelCom->Clear_Animation(strAnimName);
 	m_fTrackPosition = 0.f;
 	m_strCurrentAnimName.clear();  // 추가
+}
+
+void CProp::Spawn_EffectTag(const _wstring& strEffecTag)
+{
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = &m_CombinedMatrix;
+	EffectDesc.pModelPtr = m_pModelCom;
+
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(strEffecTag, mat, &EffectDesc);
 }
 
 #pragma region NOTIFY
@@ -186,6 +197,15 @@ void CProp::Register_AllNotifies(const _string& strFolderPath)
 		};
 
 	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
+}
+
+void CProp::Process_CameraShake()
+{
+	if (m_IsShake)
+	{
+		m_IsShake = false;
+		m_pGameInstance->OnShake(m_PendingShakeDesc);
+	}
 }
 
 void CProp::Free()

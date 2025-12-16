@@ -52,11 +52,45 @@ struct RampEdit : public ImCurveEdit::Delegate
 		mPoints.push_back(value);
 		if (ENUM_CLASS(ITEM_TYPE::ACTION) == iType)
 		{
+			if (1 == mPoints.size())
+			{
+				CAMERA_FRAME frame = {};
+				frame.fDistance = 0.f;
+				frame.fFovy = 0.f;
+				frame.fStartFrame = 0.f;
+				frame.isLerp = true;
+				frame.vRotation = _float4(0.f, 0.f, 0.f, 1.f);
+				frame.vTranslation = _float3(0.f, 0.f, 0.f);
+				mTargetCameraFrames.push_back(frame);
+				return;
+			}
+
+			for (size_t i = 0; i < mPoints.size(); ++i)
+			{
+				if (mPoints[i].x <= value.x)
+					continue;
+				CAMERA_FRAME frame = {};
+				_int iIndex = i - 1 <= 0 ? 0 : i - 1;
+				memcpy(&frame, &mTargetCameraFrames[iIndex], sizeof(CAMERA_FRAME));
+				//frame.vTranslation = _float3(0.f, 0.f, 0.f);
+				//frame.vRotation = _float4(0.f, 0.f, 0.f, 0.f);
+				//frame.fDistance = 10.f;
+				//frame.fStartFrame = 0.f;
+				mTargetCameraFrames.push_back(frame);
+
+				for (_uint j = mTargetCameraFrames.size() - 1; j > i; --j)
+					swap(mTargetCameraFrames[j], mTargetCameraFrames[j - 1]);
+
+				break;
+			}
+
 			CAMERA_FRAME frame = {};
-			frame.vTranslation = _float3(0.f, 0.f, 0.f);
-			frame.vRotation = _float4(0.f, 0.f, 0.f, 0.f);
-			frame.fDistance = 10.f;
+			frame.fDistance = 0.f;
+			frame.fFovy = 0.f;
 			frame.fStartFrame = 0.f;
+			frame.isLerp = true;
+			frame.vRotation = _float4(0.f, 0.f, 0.f, 1.f);
+			frame.vTranslation = _float3(0.f, 0.f, 0.f);
 			mTargetCameraFrames.push_back(frame);
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::ACTOR) == iType)

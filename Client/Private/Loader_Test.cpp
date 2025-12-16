@@ -8,6 +8,8 @@
 #include "MapObject_Collaps.h"
 #include "AnimationDummy.h"
 #include"Slide_Navigation.h"
+#include"MapObject_Throw.h"
+
 #pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
@@ -79,6 +81,7 @@
 #include "DummyNPC.h"
 #include "DummyCell.h"
 #include"NPC_Griffin.h"
+#include "NPC_Hiding.h"
 #pragma endregion
 
 
@@ -88,9 +91,13 @@
 #include "UI_Image.h"
 #include "UI_Text_Damage.h"
 #include "Animator_UI.h"
+
 #include "UI_HUD.h"
 #include "UI_HUD_Sector_FuncIcons.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_FinalEnd.h"
+#include "UI_QuestIndicator.h"
+
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
@@ -98,6 +105,7 @@
 #include "UI_TabUtility.h"
 #include "UI_GrapplePoint.h"
 #include "UI_QTE.h"
+#include "UI_Dialog.h"
 
 #include "UI_CurveTrace.h"
 
@@ -237,6 +245,9 @@ HRESULT CLoader_Test::Load_Object()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_AttackVolume"),
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Throw"),
+		CMapObject_Throw::Create(m_pDevice, m_pContext));
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Slide_Navigation"),
 		CSlide_Navigation::Create(m_pDevice, m_pContext));
@@ -533,6 +544,10 @@ HRESULT CLoader_Test::Load_Effect()
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
 	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+	m_pGameSystem->Load_EffectVAMeshDat_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Dat", m_eCurLevel);
+	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Color", m_eCurLevel);
+	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Mask", m_eCurLevel);
+	m_pGameSystem->Load_EffectLightData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Light");
 
 	//m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel);
@@ -1074,7 +1089,7 @@ HRESULT CLoader_Test::Load_NPC()
 		CRASH("Prototype Create Failed");
 
 
-	// Prototype_Component_AnimMachine_FalseSovereign
+	// Prototype_Component_AnimMachine_NPCGriffin
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPCGriffin"),
 		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Animation/Griffin_State.json"))))
 		CRASH("Monster AnimMachine Create Failed");
@@ -1087,6 +1102,23 @@ HRESULT CLoader_Test::Load_NPC()
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
 			"../../Client/Bin/Resource/Model/NPC/Animals/Griffin/Griffin.dat"))))
 		CRASH("Prototype Create Failed");
+
+	//Prototype_Component_Model_FemaleS370437
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FemaleS370437"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix,
+			"../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS370437/FemaleS370437.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_NPC_Hiding
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_NPC_Hiding"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/NPC/FemaleS/FemaleS_StateMachine.json"))))
+		CRASH("NPC AnimMachine Create Failed");
+
+	// Prototype_GameObject_NPC_Hiding
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+		CNPC_Hiding::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 	return S_OK;
 }
 
@@ -1112,6 +1144,12 @@ HRESULT CLoader_Test::Load_UI()
 
 	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
+	
+	_string strFilePath_UI_FinalEnd = "../../Client/Bin/Resource/UI/FJson/UITree/Root_FinalEnd.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_FinalEnd));
+
+	_string strFilePath_UI_QuestIndicator = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Quest.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_QuestIndicator));
 
 
 
@@ -1138,6 +1176,9 @@ HRESULT CLoader_Test::Load_UI()
 
 	_string strFilePath_UI_QTE = "../../Client/Bin/Resource/UI/FJson/UITree/Root_QTE1.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_QTE));
+
+	_string strFilePath_UI_Dialog = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Dialog.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Dialog));
 
 
 	
@@ -1273,6 +1314,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_QTE",
 		CUI_QTE::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Dialog",
+		CUI_Dialog::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Dialog Load Failed. The UI_Dialog may have already been loaded.\n");
 
 
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_CurveTrace",
@@ -1299,6 +1343,12 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
+		CUI_FinalEnd::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_Container_FinalEnd Load Failed. The UI_Container_FinalEnd may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_QuestIndicator",
+		CUI_QuestIndicator::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_Container_QuestIndicator Load Failed. The UI_Container_QuestIndicator may have already been loaded.\n");
 
 	return S_OK;
 }

@@ -53,6 +53,7 @@ public:
 	void Change_ShaderPath(_uint iShaderPath) { m_iShaderPath = iShaderPath; }
 	void Clear_Animation(const _string& strAnimName);
 
+	void Spawn_EffectTag(const _wstring& strEffecTag);
 #pragma region NOTIFY
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) ;
@@ -106,6 +107,9 @@ protected:
 	_float4 m_vDissolveColor = { };
 	_float4 m_vEmissiveColor = {};
 	_float  m_fEmissiveIntensity = {};
+
+	_bool m_IsShake = { false };
+	CAMERA_SHAKE m_PendingShakeDesc = {};
 #pragma endregion
 
 
@@ -113,6 +117,7 @@ protected:
 protected:
 	void Bind_Resources();
 	void Register_AllNotifies(const _string& strFolderPath);
+	void Process_CameraShake();
 
 public:
 	static CProp* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

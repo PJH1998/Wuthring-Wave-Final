@@ -108,13 +108,19 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 		if (nullptr == pDesc)
 			return;
 
-		if (pDesc->IsBack)
+		/*if (pDesc->IsBack)
 			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
 		else
-			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_B;
+			m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_B;*/
 
 
 		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+
+		// Dodge 이전에 누른 방향으로 회전.
+		_vector vMoveDir = m_pRover->Calculate_Move_Direction(m_eDir);
+		m_pRover->Rotate_Direction(vMoveDir);
+
+
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
 		return;
 	}

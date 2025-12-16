@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "VIBuffer_Spectrum.h"
 
 CVIBuffer_Spectrum::CVIBuffer_Spectrum(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -23,24 +23,24 @@ HRESULT CVIBuffer_Spectrum::Initialize_Prototype(VB_SPECTRUM_DESC* pDesc)
     m_iNumVertexBuffers = 1;
     m_ePrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-    D3D11_BUFFER_DESC   VBDesc = {};
-    VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
-    VBDesc.Usage = D3D11_USAGE_DYNAMIC;
-    VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    VBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    VBDesc.MiscFlags = 0;
-    VBDesc.StructureByteStride = m_iVertexStride;
-
-    //ÀÎµ¦½º ¾øÀÌ ¹öÆÛ·Î¸¸ ±×¸±°ÅÀÓ.
-    //±×¸± ¶§´Â VertexCount ¸¦ ¼³Á¤ ÇØÁà¾ßÇÔ (¹ÙÀÎµù µÇ¾îÀÖ´Â ¹öÅÍ°¡ ¸î°³ÀÎÁö ¾Ë·ÁÁÖ±â)
-    if (FAILED(m_pDevice->CreateBuffer(&VBDesc, nullptr, &m_pVB)))
-        return E_FAIL;
-
 	return S_OK;
 }
 
 HRESULT CVIBuffer_Spectrum::Initialize_Clone(void* pArg)
 {
+	D3D11_BUFFER_DESC   VBDesc = {};
+	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
+	VBDesc.Usage = D3D11_USAGE_DYNAMIC;
+	VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VBDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	VBDesc.MiscFlags = 0;
+	VBDesc.StructureByteStride = m_iVertexStride;
+
+	//ì¸ë±ìŠ¤ ì—†ì´ ë²„í¼ë¡œë§Œ ê·¸ë¦´ê±°ìž„.
+	//ê·¸ë¦´ ë•ŒëŠ” VertexCount ë¥¼ ì„¤ì • í•´ì¤˜ì•¼í•¨ (ë°”ì¸ë”© ë˜ì–´ìžˆëŠ” ë²„í„°ê°€ ëª‡ê°œì¸ì§€ ì•Œë ¤ì£¼ê¸°)
+	if (FAILED(m_pDevice->CreateBuffer(&VBDesc, nullptr, &m_pVB)))
+		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -76,13 +76,25 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
     if (SampleCount < 2)
         return;
 
+	if (SampleCount > m_iMaxSamples)
+	{
+		_uint iExcessCount = SampleCount - m_iMaxSamples;
+
+		for (_int i = 0; i < iExcessCount; ++i)
+		{
+			vSamples.pop_front();
+		}
+	}
+
+	m_iVtxCount = 2 * vSamples.size();
+
     D3D11_MAPPED_SUBRESOURCE	Resource{};
 
     m_pContext->Map(m_pVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &Resource);
 
     VTXPOSTEX* pVertices = static_cast<VTXPOSTEX*>(Resource.pData);
     
-    for (size_t i = 0; i < SampleCount; i++)
+    for (size_t i = 0; i < vSamples.size(); i++)
     {
         SAMPLE_DESC Desc = vSamples[i];
         XMVECTOR Dir = {};
@@ -111,7 +123,7 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
         XMStoreFloat3(&vPosUp, XMLoadFloat3(&vPosUp) - vSide * (m_fSize * 0.5f));
         XMStoreFloat3(&vPosDown, XMLoadFloat3(&vPosDown) + vSide * (m_fSize * 0.5f));
 
-        float fUV_V = (_float)i / (SampleCount - 1);
+        float fUV_V = (_float)i / (vSamples.size() - 1);
 
         pVertices[2 * i].vPosition = vPosUp;
         pVertices[2 * i + 1].vPosition = vPosDown;
@@ -121,6 +133,129 @@ void CVIBuffer_Spectrum::Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int Samp
     }
 
     m_pContext->Unmap(m_pVB, 0);
+}
+
+void CVIBuffer_Spectrum::Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _int SampleCount, const _float4* vCamPos)
+{
+	if (SampleCount > m_iMaxSamples)
+	{
+		_uint iExcessCount = SampleCount - m_iMaxSamples;
+
+		for (_int i = 0; i < iExcessCount; ++i)
+		{
+			vSamples.pop_front();
+		}
+	}
+
+	_int iSubDiv = 6;
+
+	_int N = (_int)vSamples.size();
+	_int iTargetCount = ( N - 1 ) * iSubDiv + 1;
+
+	if (iTargetCount > m_iMaxSamples)
+		iTargetCount = m_iMaxSamples;
+
+	vector<_float3> vSmoothPoints;
+	vSmoothPoints.resize(iTargetCount);
+
+	auto GetPos = [&](_int iIndex) -> _vector
+	{
+		if (iIndex < 0)
+			iIndex = 0;
+
+		if (iIndex >= (_int)vSamples.size()) 
+			iIndex = (_int)vSamples.size() - 1;
+
+		return XMLoadFloat3(&vSamples[iIndex].vPos);
+	};
+
+
+	for (_int i = 0; i < iTargetCount; ++i)
+	{
+		_float U = 0.f;
+
+		if (iTargetCount > 1)
+			U = (_float)i * (_float)(N - 1) / (_float)(iTargetCount - 1);
+
+		_int iSeg = (_int)U;
+		_float T = U - (_float)iSeg;
+
+		_vector p0 = GetPos(iSeg - 1);
+		_vector p1 = GetPos(iSeg);
+		_vector p2 = GetPos(iSeg + 1);
+		_vector p3 = GetPos(iSeg + 2);
+
+		_vector vPos = XMVectorCatmullRom(p0, p1, p2, p3, T);
+
+		XMStoreFloat3(&vSmoothPoints[i], vPos);
+	}
+
+	m_iVtxCount = 2 * (int)vSmoothPoints.size();
+
+	D3D11_MAPPED_SUBRESOURCE Resource{};
+	m_pContext->Map(m_pVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &Resource);
+
+	VTXPOSTEX* pVertices = static_cast<VTXPOSTEX*>(Resource.pData);
+
+	_vector vPrevSide = {};
+	bool bPrevSide = false;
+
+	for (size_t i = 0; i < vSmoothPoints.size(); ++i)
+	{
+		const _float3& Pos = vSmoothPoints[i];
+		_vector p = XMLoadFloat3(&Pos);
+
+		// Dir 
+		_vector vDirPrev = {};
+		_vector vDirNext = {};
+
+		if (i > 0)
+			vDirPrev = p - XMLoadFloat3(&vSmoothPoints[i - 1]);
+		if (i + 1 < vSmoothPoints.size())
+			vDirNext = XMLoadFloat3(&vSmoothPoints[i + 1]) - p;
+
+		_vector vDir;
+		if (i == 0)
+			vDir = vDirNext;
+		else if (i == vSmoothPoints.size() - 1) 
+			vDir = vDirPrev;
+		else 
+			vDir = vDirPrev + vDirNext;
+
+		vDir = XMVector3Normalize(vDir);
+
+		_vector vViewDir = XMLoadFloat4(vCamPos) - XMVectorSet(Pos.x, Pos.y, Pos.z, 1.f);
+		vViewDir = XMVector3Normalize(vViewDir);
+
+		_vector vSide = XMVector3Cross(vViewDir, vDir);
+		vSide = XMVector3Normalize(vSide);
+
+		if (bPrevSide)
+		{
+			if (XMVectorGetX(XMVector3Dot(vPrevSide, vSide)) < 0.f)
+				vSide = -vSide;
+		}
+
+		vPrevSide = vSide;
+		bPrevSide = true;
+
+		_float3 vPosUp = Pos;
+		_float3 vPosDown = Pos;
+
+		XMStoreFloat3(&vPosUp, XMLoadFloat3(&vPosUp) - vSide * (m_fSize * 0.5f));
+		XMStoreFloat3(&vPosDown, XMLoadFloat3(&vPosDown) + vSide * (m_fSize * 0.5f));
+
+		float fUV_V = (_float)i / (vSmoothPoints.size() - 1);
+
+		pVertices[2 * i].vPosition = vPosUp;
+		pVertices[2 * i + 1].vPosition = vPosDown;
+
+		pVertices[2 * i].vTexcoord = _float2(0.f, fUV_V);
+		pVertices[2 * i + 1].vTexcoord = _float2(1.f, fUV_V);
+	}
+
+	m_pContext->Unmap(m_pVB, 0);
+	
 }
 
 CVIBuffer_Spectrum* CVIBuffer_Spectrum::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, VB_SPECTRUM_DESC* pDesc)

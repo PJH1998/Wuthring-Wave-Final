@@ -16,7 +16,6 @@
 #include "Wing.h"
 #include "GameSystem.h"
 
-
 //TEst
 #include "MotionTrail.h"
 
@@ -34,6 +33,8 @@ HRESULT CAugusta::Initialize_Prototype()
 {
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
+
+	m_vOutlineColor = _float4(0.3f, 0.15f, 0.f, 1.f);
 
     return S_OK;
 }
@@ -56,12 +57,14 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
-
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
-	
 	Ready_Variables(pDesc);
 	
-
+	if (LEVEL::GAMEPLAY == m_eCurLevel)
+	{
+		// 1. Look 변경.
+		m_pTransformCom->LookDir(XMVectorSet(1.0f, 0.0f, -0.5f, 0.f));
+	}
 	
 	
     return S_OK;
@@ -72,36 +75,29 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 1. Delayed Action 수행.
-	Process_DelayedActions(fTimeDelta);
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	Process_Timer(fTimeDelta);
 
-	// 2. Parts 갱신
+	// 1. Dissolve 체크
+	if (!IsDissolve || m_IsEventDissolve)
+	{
+		// 2. Delayed Action 수행.
+		Process_DelayedActions(fTimeDelta);
+
+		// 3. 이전 위치 저장
+		m_pTransformCom->Save_PreviousPosition();
+
+		// 4. 몬스터가 있다면?
+		Update_TargetDistance();
+	}
+		
+	// 5. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Priority_Update(fTimeDelta);
 	}
-
-    // 3. 이전 위치 저장
-	m_pTransformCom->Save_PreviousPosition();
-
-	// 4. 몬스터가 있다면?
-	Update_TargetDistance();
 	
-	// Dissolve 체크.
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-
-	// 5. Dissovle 체크
-	if (IsDissolve)
-	{
-		if (m_fDissolveTimer <= m_fMaxDissolveTime)
-			m_fDissolveTimer += fTimeDelta;
-		else
-		{
-			m_isActivate = false;
-			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-		}
-	}
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -114,7 +110,6 @@ void CAugusta::Update(_float fTimeDelta)
 		m_pGameInstance->Setting_DOF(vCenterPos, 50.f);
 	}
 #endif
-
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
@@ -122,9 +117,10 @@ void CAugusta::Update(_float fTimeDelta)
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
     // 2. 상태 머신 갱신
-	if (!IsDissolve)
+	if (!IsDissolve || m_IsEventDissolve)
 	{
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
@@ -147,23 +143,29 @@ void CAugusta::Update(_float fTimeDelta)
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+
+	if (!IsDissolve || m_IsEventDissolve)
 	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
-	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else
-	{
-		// 2. QTE인 경우 Collider 갱신하지 않음.
-		if (!m_IsQTE)
-			m_pColliderCom->Sync_Position(m_pTransformCom);
+		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
+		else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
 		else
-			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		{
+			// 2. QTE인 경우 Collider 갱신하지 않음.
+			if (!m_IsQTE)
+				m_pColliderCom->Sync_Position(m_pTransformCom);
+			else
+				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		}
+		
 	}
-	
 
 	if (m_IsQTEend)
 	{
@@ -171,6 +173,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
+	
 
 	if (m_IsVisible)
 	{
@@ -185,14 +188,17 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+
+
+		//  파츠 갱신 => Render 할 것인지 말것인지?
+		for (auto& pPart : m_PartObjects)
+		{
+			if (pPart.second->IsActivate())
+				pPart.second->Late_Update(fTimeDelta);
+		}
 	}
 
-	//  파츠 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Late_Update(fTimeDelta);
-	}
+	
 	
     
 }
@@ -200,7 +206,8 @@ void CAugusta::Late_Update(_float fTimeDelta)
 void CAugusta::Render()
 {
 #ifdef _DEBUG
-	Debug_BurstWeapon();
+	//Debug_BurstWeapon();
+	
 #endif // _DEBUG
 
 	
@@ -251,6 +258,7 @@ void CAugusta::Render()
 #ifdef _DEBUG
 	m_pColliderCom->Render();
 	Print_LookRay();
+	//Debug_ImGui();
 	
 	//if (m_pMainAttackVolume->IsActivate())
 	//	m_pMainAttackVolume->Render();
@@ -282,6 +290,13 @@ void CAugusta::Render_OutLine()
 	Bind_Resources();
 	
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
+		CRASH("Failed to Bind OutLineColor");
+	
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutlineRadius, sizeof(_float))))
+		CRASH("Failed to Bind OutLineRadius");
+
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
 		if (i == 5)	//Cloths
@@ -300,7 +315,7 @@ void CAugusta::Render_OutLine()
 	}
 }
 
-void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	// 현재 애니메이션 제거.
 	m_pStateMachineCom->Exit_State();
@@ -601,7 +616,7 @@ void CAugusta::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
@@ -646,7 +661,7 @@ void CAugusta::Grab_Judge(void* pArg)
 	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
 }
 
-void CAugusta::Resolove_PerfectDodge()
+void CAugusta::Resolve_PerfectDodge()
 {
 	// 1. 회피 가능 상태인지 확인.
 	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
@@ -656,18 +671,25 @@ void CAugusta::Resolove_PerfectDodge()
 	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 
 	// 3. (데미지 무효화)
-	// DelayedActions 큐를 비워버리거나, HIT 타입만 제거하는 로직 필요
 	while (!m_DelayedActions.empty())
-	{
-		DELAYED_ACTION eAction = m_DelayedActions.front();
-		if (DELAYED_ACTION::TYPE::HIT == eAction.type) // Hit 면 정보 날리기.
-			m_DelayedActions.pop();
-	}
+		m_DelayedActions.pop();
 
 	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
 	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
 
-	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 1.0f, 0.1f); // 시간 복구
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.02f); // Time Lack
+
+	// 퍼펙트 닷지가 성공했을 경우에만.
+	CAMERA_SHAKE Desc{};
+	Desc.fDuration = 0.15f;
+	Desc.fFrequency = 20.f;
+	Desc.fAmplitude = 0.5f;
+	Desc.vRotation = { 0.f, 0.1f, 0.f };
+	Desc.fFovKick = 0.f; // 
+
+	m_pGameInstance->OnShake(Desc);
+
+	Spawn_Effect(TEXT("Common_Limit"));
 }
 
 
@@ -686,8 +708,10 @@ void CAugusta::Bind_QTE(_bool IsQTE)
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 		// 내 앞에서 생성. (안 곂치게)
-		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-		vPos += vLook * 1.5f;
+		_vector vLook = XMVectorSetY(XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), 0.f);
+		_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+		//vPos += vLook * 1.5f;
+		vPos += vRight * 2.f;
 		vPos += XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 1.5f;
 		m_pQTEColliderCom->Set_Position(vPos);
 		m_pQTEColliderCom->IsActivate(true);
@@ -707,6 +731,47 @@ void CAugusta::Bind_QTECamera()
 {
 	m_fCameraOriginOffset = m_fCameraOffset;
 	m_fCameraOffset = 2.f; // 늘립니다.
+}
+
+
+void CAugusta::Attach_ThrowTarget(_bool isAttach)
+{
+	if (!m_ThrowInfo.IsActive) // 객체가 활성화 되어있지 않은 객체라면?
+		return;
+
+	if (isAttach)
+	{
+		const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+		const _float4x4* pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+
+		*m_ThrowInfo.ppRefBoneMatrix = pBoneMatrix;
+		*m_ThrowInfo.ppRefWorldMatrix = pWorldMatrix;
+		*m_ThrowInfo.pGrabbed = true;
+		*m_ThrowInfo.pThrow = false;
+	}
+	else
+	{
+		*m_ThrowInfo.pGrabbed = false;
+		*m_ThrowInfo.pThrow = false;
+	}
+
+}
+
+void CAugusta::Throw_AttachTarget()
+{
+	if (!m_ThrowInfo.IsActive)
+		return;
+
+	*m_ThrowInfo.pGrabbed = false;
+	*m_ThrowInfo.pThrow = true;
+}
+
+void CAugusta::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
 }
 
 
@@ -820,7 +885,6 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
 
-
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -836,7 +900,7 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {
-
+	
 	// 3개의 변수 준비
 	_wstring var1, var2, var3;
 	wstringstream wss(wStrObjectTag);
@@ -856,14 +920,29 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
 	else if (var1 == TEXT("FXOBJECT")) // 30 ~ 60fps?
-	{
 		Process_FxObject(wStrObjectTag);
+	else if (var1 == TEXT("Throw"))
+		Throw_AttachTarget(); // 던지기.
+	else if (var1 == TEXT("MotionTrail"))
+		Process_MotionTrail(wStrObjectTag); // Character 함수
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
+	else if (var1 == TEXT("EventDissolve"))
+		Process_EventDissolve(wStrObjectTag);
+	else if (var1 == TEXT("RotateTarget"))
+		Process_RotateTarget(wStrObjectTag);
+	else if (var1 == TEXT("Griffon"))
+	{
+		if (var2 == TEXT("false"))
+			m_pGriffon->Activate(false);
+		else if(var2 == TEXT("true"))
+			m_pGriffon->Activate(true);
 	}
-	
-	
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
 
-
-	return;
 }
 
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -923,7 +1002,6 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 				//m_IsHit = true;
 				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-				m_pAbillityCom->Add_Hp(-10.f); // 최소감소?
 				break;
 			}
 			case DELAYED_ACTION::TYPE::GRAB:
@@ -992,6 +1070,8 @@ void CAugusta::Activate(_bool IsActivate)
 	//m_isActivate = IsActivate; // 임시.
 	if (false == IsActivate)
 	{
+		m_IsEventDissolve = false; // Event Dissolve가 아닌 비활성화 임을 명시.
+		m_IsDissolveReverse = false; // 정 방향 Dissolve (점차 사라짐)
 		Bind_DissolveTimer();
 		Bind_DissolveShaderPath();
 		m_IsOutLineVisible = false;
@@ -1001,7 +1081,9 @@ void CAugusta::Activate(_bool IsActivate)
 	if (true == IsActivate)
 	{
 		m_isActivate = true;
+		m_IsEventDissolve = false; // 초기화
 		m_IsOutLineVisible = true;
+		Set_Visible(true);
 		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
 	}
@@ -1222,6 +1304,105 @@ void CAugusta::Process_CameraSpring(const _wstring& wStrObjectTag)
 		m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 
+void CAugusta::Process_EventDissolve(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+
+	m_fMaxDissolveTime = stof(var3); // Dissolve Time 저장.
+	m_IsEventDissolve = true; // 연출용임을 공지
+
+	if (var2 == L"ON")
+	{
+		m_IsDissolveReverse = false; // 정방향 시작    
+		m_fDissolveTimer = 0.f;
+		Bind_DissolveShaderPath();       // 쉐이더 교체
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	}
+	else if (var2 == L"OFF")
+	{
+		m_IsDissolveReverse = true; // 역방향
+		m_fDissolveTimer = m_fMaxDissolveTime;
+		Set_Visible(true);
+		Bind_DissolveShaderPath();
+		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	}
+		
+
+	//m_fEventDissolveTime = stof(var3);
+	
+}
+
+void CAugusta::Process_RotateTarget(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	_wstring var1, var2, var3;
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+
+	if (var2 == TEXT("Lerp"))
+		m_fRotateTargetTimer = stof(var3); // Lerp회전 예약
+	else
+		Rotate_Target(); // 즉시 회전
+
+}
+
+void CAugusta::Process_Timer(_float fTimeDelta)
+{
+	if (m_fRotateTargetTimer > 0.f)
+	{
+		m_fRotateTargetTimer -= fTimeDelta;
+		Rotate_Target_Lerp(fTimeDelta);
+	}
+
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsDissolve)
+	{
+		// 정방향 연산.
+		if (!m_IsDissolveReverse)
+		{
+			m_fDissolveTimer += fTimeDelta;
+			if (m_fDissolveTimer >= m_fMaxDissolveTime)
+			{
+				m_fDissolveTimer = m_fMaxDissolveTime; 
+				m_IsOutLineVisible = false;
+
+				Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+				Set_Visible(false);
+
+				if (!m_IsEventDissolve)
+				{
+					m_isActivate = false;
+				}
+				else
+				{
+					m_IsEventDissolve = false;
+				}
+			}
+		}
+		else
+		{
+			m_fDissolveTimer -= fTimeDelta;
+			if (m_fDissolveTimer <= 0.f)
+			{
+				m_fDissolveTimer = 0.f; // 값 보정 (Rate = 0.0)
+				Bind_DefaultShaderPath();
+				Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+				// 3. 이벤트 플래그 초기화
+				if (m_IsEventDissolve)
+					m_IsEventDissolve = false;
+			}
+		}
+	}
+
+}
+
 void CAugusta::Render_Default(_uint iMeshIndex)
 {
 	if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", iMeshIndex, TEXTURETYPE::DIFFUSE, 0)))
@@ -1230,6 +1411,8 @@ void CAugusta::Render_Default(_uint iMeshIndex)
 	_bool HasNormal = { false };
 	if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", iMeshIndex, TEXTURETYPE::NORMAL, 0)))
 		HasNormal = true;
+
+	m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", iMeshIndex, TEXTURETYPE::MASK);
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 		CRASH("Ready g_HasNormal Failed");
@@ -1284,7 +1467,10 @@ void CAugusta::Render_Eye(_uint iMeshIndex)
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
 	}
 	else
-		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::AUGUSTA);
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::CHARACTER_EYE);
+		//		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::GALBRENA);
+	}
 }
 
 _bool CAugusta::IsSkin(_uint iMeshIndex)
@@ -1390,12 +1576,7 @@ void CAugusta::Update_Camera(_float fTimeDelta)
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 	}
 }
-
-
-
 #pragma endregion
-
-
 
 
 void CAugusta::Bind_Resources()
@@ -1439,10 +1620,6 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 		, pDesc->facialComputeShaderData.second, TEXT("Com_ComputeShaderFacial"), reinterpret_cast<CComponent**>(&m_pFacialComputeShaderCom), nullptr)))
 		CRASH("Com_ComputeShaderFly");
 
-#ifdef _DEBUG
-	cout << "Augusta Model Clone : " << endl;
-#endif // _DEBUG
-
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
@@ -1479,6 +1656,9 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
 	m_fEmissiveIntensity = 3.f;
 
+	//m_vMotionTrailColor = { 0.5f, 0.2f, 0.1f, 1.f }; // 기본
+	m_vMotionTrailColor = { 1.f, 0.5f, 0.1f, 0.7f }; // 기본
+
 	m_pBayonet->SetActivate(false);
 	m_pSkillWeapon->SetActivate(false);
 	m_pGriffon->SetActivate(false);
@@ -1506,7 +1686,6 @@ void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
 
 void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
-
     _float3 vScale = {};
     _float3 vRotation = {};
     _float3 vPosition = {};
@@ -1669,7 +1848,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 8.f); // 
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 700.f;
+	TriggerDesc.fAttackDmg = 500.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::UPPER;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
@@ -1686,6 +1865,7 @@ void CAugusta::Ready_AttackVolumes()
 	m_AttackVolumes[VOULME_RISE_ZERO]->TriggerActivate(false);
 
 
+	TriggerDesc.fAttackDmg = 700.f;
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(7.f, 7.f, 10.f); // 

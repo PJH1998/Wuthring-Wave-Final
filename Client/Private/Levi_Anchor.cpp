@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "Levi_Anchor.h"
+#include "GameSystem.h"
 
 CLevi_Anchor::CLevi_Anchor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
@@ -8,7 +9,9 @@ CLevi_Anchor::CLevi_Anchor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CLevi_Anchor::CLevi_Anchor(const CLevi_Anchor& Prototype)
 	: CGameObject { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevi_Anchor::Initialize_Prototype()
@@ -26,6 +29,7 @@ HRESULT CLevi_Anchor::Initialize_Clone(void* pArg)
 	//m_wstrEffectTag = pDesc->wstrEffectTag;
 	m_fMaxLifeTime = 1.f;
 	m_isActivate = false;
+	m_iSoundChannel = -1;
     return S_OK;
 }
 
@@ -37,9 +41,11 @@ void CLevi_Anchor::Priority_Update(_float fTimeDelta)
 
 void CLevi_Anchor::Update(_float fTimeDelta)
 {
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+
 	_vector vDir = XMVectorSetW(XMLoadFloat3(&m_vTargetPos) - m_pTransformCom->Get_State(STATE::POSITION), 1.f);
 	if (XMVectorGetX(XMVector3Dot(m_pTransformCom->Get_State(STATE::LOOK), vDir)) >= 0.f)
-		m_pTransformCom->Go_Straight(fTimeDelta);
+		m_pTransformCom->Go_Straight(fTimeDelta * fTimeRatio);
 	else
 	{
 		if (false == m_isDisolve)
@@ -52,7 +58,13 @@ void CLevi_Anchor::Update(_float fTimeDelta)
 			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
 			Info.pModelPtr = nullptr;
 
-			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), m_pTransformCom->Get_WorldMatrix(), &Info);
+			_matrix Matrix = m_pTransformCom->Get_WorldMatrix();
+			
+			_vector Trans = {}, Scale = {}, Rot = {};
+			XMMatrixDecompose(&Scale, &Rot, &Trans, Matrix);
+
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Anchor"), XMMatrixTranslationFromVector(Trans), &Info);
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack51_p2 (SFX)"), m_iSoundChannel, 0.4f);
 		}
 	}
 	
@@ -64,6 +76,9 @@ void CLevi_Anchor::Late_Update(_float fTimeDelta)
 {
 	if(m_fLifeTime >= m_fMaxLifeTime)
 	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
 		m_isActivate = false;
 		return;
 	}
@@ -94,7 +109,7 @@ void CLevi_Anchor::Render()
 			if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
 				CRASH("Ready g_HasNormal Failed");
 			//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
-			m_pShaderCom->Begin(0);
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_MONSTERPROP::DEFAULTPASS));
 
 			m_pModelCom->Render(i);
 		}
@@ -114,7 +129,7 @@ void CLevi_Anchor::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isDisolve = false;
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
-
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 	//데칼 스폰 vTargetPos 기준으로 호출하면 될듯.
 }
 
@@ -208,4 +223,5 @@ void CLevi_Anchor::Free()
 	Safe_Release(m_pRigidBodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
+	Safe_Release(m_pGameSystem);
 }

@@ -21,13 +21,13 @@ public: // 생성/복제
 	virtual void    Priority_Update(_float fTimeDelta)				override;
 	virtual void    Update(_float fTimeDelta)						override;
 	virtual void    Late_Update(_float fTimeDelta)					override;
-	virtual void    Render()										override;
+	virtual void    Render()									 	override;
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 	
 public:
 	// 종료 애니메이션 재생 + 현재 선택한 종류의 인덱스 반환
-	_uint			Req_OffTabUI()	{ m_IsGoinDisabled = true; return m_iSelectedIndex; }
+	_uint			Req_OffTabUI();
 
 private:
 	void			Update_InitialCheck_SelectedUtility();			// 여기서 캐릭터 현재 선택중인 게 뭔지 받아옴

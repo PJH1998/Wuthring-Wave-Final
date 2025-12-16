@@ -4,7 +4,7 @@
 
 struct MorphDelta
 {
-    float3 vPosDelta;    // 위치 변화량
+    float3 vPosDelta; // 위치 변화량
     float3 vNormalDelta; // 노멀 변화량
 };
 
@@ -37,7 +37,7 @@ RWStructuredBuffer<OutputVertex> g_OutVertices : register(u0);
 // 5. Constant Buffer
 cbuffer MorphInfoCB : register(b0)
 {
-    uint g_NumVertices;     // 전체 정점 개수
+    uint g_NumVertices; // 전체 정점 개수
     uint g_NumActiveMorphs; // 현재 활성화된 쉐이프 키 개수.
     float2 vPadding;
 }
@@ -55,7 +55,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     // 3. 원본 정점 정보 가져오기.
     BaseVertex baseVert = g_BaseVertices[iVertexID];
     
-    float3 finalPos    = baseVert.vPosition;
+    float3 finalPos = baseVert.vPosition;
     float3 finalNormal = baseVert.vNormal;
     
     // 4. 활성화된 모든 Morph Target을 순회하고 누적합니다.
@@ -78,41 +78,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     // 5. 결과 저장.
     OutputVertex result;
     result.vPosition = finalPos;
-    result.vNormal = normalize(finalNormal); 
+    result.vNormal = normalize(finalNormal);
 
     g_OutVertices[iVertexID] = result;
 }
-
-//[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-//void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
-//{
-//    uint iVertexID = dispatchThreadID.x;
-//    if (iVertexID >= g_TotalVerts)
-//        return;
-
-//    // 1. 기본 위치 가져오기 => 원본 위치에서 노말을 가져옵니다.
-//    float3 vPos = g_OriginPos[iVertexID];
-//    float3 vNormal = g_OriginNormal[iVertexID];
-
-//    // 2. 누적 : 활성화된 모든 쉐이프 키의 변화량을 더함.
-//    for (int i = 0; i < g_NumShapeKeys; ++i)
-//    {
-//        uint vecIndex = i / 4;
-//        uint compIndex = i % 4;
-        
-//        //float fWeight = g_MorphWeights[i];
-//        float fWeight = g_MorphWeights[vecIndex][compIndex];
-        
-//        if (fWeight <= 0.001f)
-//            continue;
-
-//        // 변화량 누적.
-//        uint iBufferIndex = (i * g_TotalVerts) + iVertexID;
-//        vPos += g_MorphDeltaPositions[iBufferIndex] * fWeight;
-//        vNormal += g_MorphDeltaNormals[iBufferIndex] * fWeight;
-//    }
-
-//    // 3. 결과 저장 (RWBuffer)
-//    g_OutMorphedPos[iVertexID] = vPos;
-//    g_OutMorphedNormal[iVertexID] = normalize(vNormal); // Normal은 합산 후 정규화.
-//}

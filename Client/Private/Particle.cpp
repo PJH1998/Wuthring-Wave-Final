@@ -69,7 +69,13 @@ void CParticle::Update(_float fTimeDelta)
    if (m_IsRoot)
 	   Update_Root_Transform();
 
-   if (!m_IsLoop)
+   if (m_pActiveFlag != nullptr)
+   {
+	   if (!(*m_pActiveFlag))
+		   m_IsEnd = true;
+   }
+
+   if (!m_IsLoop || m_IsEnd)
    {
 	   m_vLifeTime.x += fTimeDelta;
 
@@ -109,8 +115,14 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	//기본 초기화
 	m_vLifeTime.x = 0.f;
+	m_IsEnd = false;
+	m_pActiveFlag = nullptr;
+
 	if (m_IsPivot)
 		m_pVIBufferCom->Reset_CS_Option();
+
+	if (pDesc->pIsActiveFlag != nullptr)
+		m_pActiveFlag = pDesc->pIsActiveFlag;
 
 	m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 	m_pTransformCom->Set_WorldMatrix(XMMatrixIdentity());
@@ -135,23 +147,6 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CParticle::Default_Transform(_fmatrix WorldMatrix)
 {
-	/*if (!m_IsRoot)
-	{
-		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
-
-		m_pTransformCom->Set_State(STATE::POSITION, vPos);
-	}
-	else if(m_IsPivot)
-	{
-		_vector vLook = XMVectorSetW(WorldMatrix.r[2], 0.f);
-		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
-
-		m_pTransformCom->Set_State(STATE::POSITION, vPos);
-
-		PARTICLE_DefaultCB Desc = {};
-		XMStoreFloat3(&Desc.vPivot, vLook);
-		m_pVIBufferCom->Bind_CS_Option(&Desc);
-	}*/
 	if (m_IsPivot)
 	{
 		_matrix ObjectMatrix = XMLoadFloat4x4(m_pObjectMatrixPtr);
@@ -187,8 +182,6 @@ void CParticle::Default_Transform(_fmatrix WorldMatrix)
 
 		m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * OffsetSpawnMatrix);
 	}
-
-	//계속 붙으면서 Pivot 갱신도 필요하다면..?허허
 }
 
 void CParticle::Bind_CS_SpriteInfo()
@@ -231,8 +224,8 @@ void CParticle::Update_Root_Transform()
 		_vector vRot = {};
 		XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
 
-		//뼈 회전 안먹어도 될거 같음.
-		_matrix OffsetSpawnMatrix = XMMatrixTranslationFromVector(vPos);
+
+		_matrix OffsetSpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
 
 		XMStoreFloat4x4(&m_ComBindMatrix,
 			m_pTransformCom->Get_WorldMatrix() *

@@ -5,6 +5,9 @@
 #include "Animator_UI.h"
 #include "GameSystem.h"
 
+#include "Event_Level.h"
+#include "Event_Leviatan.h"
+
 #define KSTA_UITEST_TEMPTRIGGER
 
 CUI_QTE::CUI_QTE(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -30,7 +33,9 @@ HRESULT CUI_QTE::Initialize_Clone(void* pArg)
 	CGameObject::Initialize_Clone(pArg);
 	
 	Ready_Components(pArg);
-	__super::Ready_Events();
+	//__super::Ready_Events();
+
+	Ready_Events();
 	
 	// Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
 	_wstring strFilePath =
@@ -122,7 +127,6 @@ void CUI_QTE::Update(_float fTimeDelta)
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
-
 void CUI_QTE::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
@@ -135,7 +139,6 @@ void CUI_QTE::Late_Update(_float fTimeDelta)
 
 	__super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
-
 
 void CUI_QTE::Render()
 {
@@ -182,8 +185,8 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pUI_SectorA_FG_Trigger->SetActivate(false);		// off
 
 		m_fQTEDropRate		= 0.25f;	// 초당 떨어지는 정도.
-		m_fQTEFillAmount	= 0.1f;		// 조작 1회 당 차는 정도
-		m_fQTEMaxTime		= 3.f;		// QTE 제한시간.
+		m_fQTEFillAmount	= 0.15f;		// 조작 1회 당 차는 정도
+		m_fQTEMaxTime		= 5.f;		// QTE 제한시간.
 	}break;
 	case Client::UI_QTE_TYPE::TRIGGER_ROPE:
 	{
@@ -197,7 +200,7 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		m_fQTEDropRate		= 0.0f;
 		m_fQTEFillAmount	= 1.0f;		// 사실상 한번만 누르면 바로 차게끔.	
-		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
+		m_fQTEMaxTime		= 5.f;		// 필요 시 변경
 	}break;
 	case Client::UI_QTE_TYPE::TRIGGER_EXECUTE:
 	{
@@ -211,10 +214,9 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 		m_fQTEDropRate		= 0.0f;
 		m_fQTEFillAmount	= 1.0f;		// 사실상 한번만 누르면 바로 차게끔.	
-		m_fQTEMaxTime		= 3.f;		// 필요 시 변경
+		m_fQTEMaxTime		= FLT_MAX;		// 필요 시 변경
 	}break;
 	}
-	
 
 
 
@@ -243,6 +245,12 @@ void CUI_QTE::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isGoinFail = false;
 
 	m_isActivate = true;
+
+	if (m_isClone)
+	{
+		m_pGameSystem->HUD_FadeOut();
+		m_pGameInstance->Play_Sound(L"UI_QTE_Appear", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	}
 }
 
 void CUI_QTE::PreAssign_ChildUIs()
@@ -385,9 +393,11 @@ void CUI_QTE::Update_QTE_Fillguage(_float fTimeDelta)
 		if (m_fQTEGuage == 1.f)
 			m_isGoinSuccess = true;
 		
+		m_pGameInstance->Play_Sound(L"UI_QTE_Tick", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+
 	}
 		
-	std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
+	//std::cout << "[UI_QTE::Update_QTE] Current QTE Guage : " << m_fQTEGuage << " / 1.0" << std::endl;
 
 	if (!m_isGoinSuccess &&
 		m_fQTEElapsedTime >= m_fQTEMaxTime)
@@ -448,14 +458,31 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 
 	if		(m_isGoinSuccess)
 	{
-		std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
+		if (m_eQTEType == UI_QTE_TYPE::FILLGUAGE)
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
+		else if (m_eQTEType == UI_QTE_TYPE::TRIGGER_EXECUTE)
+		{
+			//m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess");
+			//LEVI_EXECUTE Desc{ true };
+			//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+			LEVI_EXECUTE Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_PrevExecute"), Desc);
+		}
+		
+		//m_isGoinSuccess = false;
+		//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTESuccess", QTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+		m_pGameInstance->Play_Sound(L"UI_QTE_Complete", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 	}
 	else if (m_isGoinFail)
 	{
-		std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
+		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Fail Triggered!" << std::endl;
+
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_QTEFail", QTE_FAIL_UI_EVENT(m_isGoinFail));
 	}
 
 	m_IsGoinDisabled = true;
+	m_pGameSystem->HUD_FadeIn();
 }
 
 void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
@@ -493,6 +520,11 @@ void CUI_QTE::Update_GoinDisabled(_float fTimeDelta)
 	m_fDisableTimer += fTimeDelta;
 }
 
+
+void CUI_QTE::Ready_Events()
+{
+
+}
 
 CUI_QTE* CUI_QTE::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

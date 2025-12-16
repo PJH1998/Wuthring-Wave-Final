@@ -10,6 +10,8 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CLevi_Alter final : public CActor
 {
 public:
@@ -51,11 +53,14 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg);
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
+	CGameSystem*			m_pGameSystem = { nullptr };
+
 	//CAnimMachine* m_pAnimMachineCom = { nullptr };
 	ATTACK_TYPE				m_eType{};
 	_float4					m_vBaseColor{};
@@ -70,6 +75,18 @@ private:
 
 	_bool					m_isTurnLerp{};
 	_bool					m_isDist_Interp_Enable{};
+	_float					m_fRootMotionRate{};
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+	_uint					m_iSoundChannel2{};
+#pragma endregion
+
+#pragma region SHADER_VALUE
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
 
 private:
 	void			Bind_Resources();

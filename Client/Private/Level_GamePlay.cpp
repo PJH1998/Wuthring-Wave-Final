@@ -12,6 +12,7 @@
 #include "NPCInstancing.h"
 #include "Napal.h"
 #include "CoroProduction.h"
+#include "NPC_Hiding.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -67,20 +68,25 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
-
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
 	LightDesc.vDiffuse = _float4(0.5f, 0.55f, 0.85f, 1.f);
-//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
-
 	m_pGameInstance->SettingFog(true);
+
+	m_pGameSystem->Set_Sonora_LightDesc(SONORA::NONE, LightDesc);
+
+	LIGHT_DESC SonoraLightDesc = {};
+	SonoraLightDesc.eType = LIGHT_DESC::DIRECTION;
+	SonoraLightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+	SonoraLightDesc.vDiffuse = _float4(0.85f, 0.55f, 0.4f, 1.f);
+	SonoraLightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	SonoraLightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	m_pGameSystem->Set_Sonora_LightDesc(SONORA::SONORA, SonoraLightDesc);
 
 	Ready_Potal();
 	Ready_UI();
@@ -100,19 +106,22 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Skybox();
 	Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.02f);
+	m_pGameInstance->Set_FogDistanceFallOff(0.1f);
 	m_pGameInstance->Set_FogMaxHeight(230.f);
+	m_pGameInstance->Set_FogMaxDistance(100.f);
 	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+	m_pGameInstance->Set_FogScatterWeight(0.5f);
+	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
+	m_pGameInstance->Set_FogRayIntensity(3.f);
 
 	m_pGameInstance->Begin_VF();
 
 //	m_pGameInstance->Bake_EnvMaps();
 
-	m_pGameSystem->Create_MapEffects();
+	m_pGameSystem->Create_MapEffects(m_pGameInstance->Get_CurrentLevel());
 
 	//TEST
-
-
+	m_pGameSystem->Change_Level(m_pGameInstance->Get_CurrentLevel());
 	return S_OK;
 }
 
@@ -135,104 +144,6 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 	DEBUG_FUNCTION();
 #endif
 	// 임시 Mouse 고정
-	
-
-	// UI Test. Delete it.
-#pragma region [NUMPAD .] KSTA_UITEST_LOCKON
-	CCustom_UI* pRootUILockOn = m_pGameSystem->Find_RootUI(L"UI_LockOn");
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-		!pRootUILockOn->IsActivate())
-		m_pGameSystem->Attach_LockOnUI(nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
-		pRootUILockOn->IsActivate())
-		m_pGameSystem->Detach_LockOnUI();
-#pragma endregion
-
-
-#pragma region [NUMPAD 6] KSTA_UITEST_PARRY
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
-	{
-		if (m_pGameInstance->Find_UIObject(L"UI_Parry")->IsActivate() == true)
-			static_cast<CUI_Parry*>(m_pGameInstance->Find_UIObject(L"UI_Parry"))->Enable_Parried();
-
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_Parry", _fmatrix(), nullptr);
-	}
-#pragma endregion
-
-
-#pragma region [NUMPAD 4] KSTA_UITEST_MOBHPBAR
-	auto pTargetMobHPBarUI = m_pGameSystem->Find_RootUI(L"UI_MobHPBar");
-	_bool isTargetAlive = (pTargetMobHPBarUI) ? pTargetMobHPBarUI->IsActivate() : false;
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
-		!isTargetAlive)
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Image_MobHPBar", _fmatrix(), nullptr);
-	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN &&
-		isTargetAlive)
-		pTargetMobHPBarUI->SetActivate(false);
-#pragma endregion
-
-
-#pragma region [TAB] KSTA_UITEST_TABUTILITY
-	static _bool isTabUtilityActive = false;
-	static _uint iTmpSelectedUtility = ENUM_CLASS(UI_TAB_UTILITY::NOTHING);
-
-	//_uint iTabUtilitySelectedIndex = UINT_MAX;
-	_bool isTabUtilityHided = false;
-
-	if (!isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Show_TabUtilityUI(iTmpSelectedUtility);
-		isTabUtilityActive = true;
-	}
-	else if (isTabUtilityActive &&
-		m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
-	{
-		iTmpSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
-		isTabUtilityActive = false;
-		isTabUtilityHided = true;
-	}
-
-
-	_string strSelectedUtilityName = {};
-	if (isTabUtilityHided)
-	{
-		switch (iTmpSelectedUtility)
-		{
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::GRAPPLE):			strSelectedUtilityName = "GRAPPLE";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::SENSOR):			strSelectedUtilityName = "SENSOR";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::FLIGHT):			strSelectedUtilityName = "FLIGHT";		break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::LEVITATOR):			strSelectedUtilityName = "LEVITATOR";	break;
-		case ENUM_CLASS(Client::UI_TAB_UTILITY::NOTHING):			strSelectedUtilityName = "NOTHING";		break;
-		}
-
-		std::cout << "[CLevel_Test::Testing_UI] : Tab Utility Returned : " << strSelectedUtilityName << std::endl;
-	}
-#pragma endregion
-
-#pragma region [NUMPAD 5] KSTA_UITEST_OVERFLOWINGPALETTE 
-
-	static _bool isOpenOverflowingPalette = false;
-
-	if (!isOpenOverflowingPalette &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Open_Game_OverflowPalette();
-		isOpenOverflowingPalette = true;
-	}
-	else if (isOpenOverflowingPalette &&
-		m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_pGameSystem->Close_Game_OverflowPalette();
-		isOpenOverflowingPalette = false;
-	}
-
-#pragma endregion
-
-
-
 }
 
 void CLevel_GamePlay::Render()
@@ -300,6 +211,9 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/Monster/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
+#ifdef _DEBUG
+	MobDesc.fHP = 150.f;
+#endif
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
@@ -452,9 +366,18 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 void CLevel_GamePlay::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 20);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 200);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 70);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Corro", m_eCurLevel, 10);
+
+	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/GamePlay/SpectrumOB", m_eCurLevel, 15);
+
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Effect_Rope"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Effect"), TEXT("Rope"), 3, nullptr)))
+	{
+		MSG_BOX("Rope Load Fail");
+		return;
+	}
 }
 
 void CLevel_GamePlay::Ready_Skybox()
@@ -480,8 +403,9 @@ void CLevel_GamePlay::Ready_UI()
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
 	const _wstring strPrototypeTag_UI[] = {
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
-		L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
+		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_QuestIndicator",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
@@ -516,15 +440,18 @@ void CLevel_GamePlay::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
-		CRASH("Failed Ready GrapplePoint");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+	//	CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
 		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
 		CRASH("Failed Ready QTE");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Dialog"),
+		iDestLevel, TEXT("Layer_Custom_UI_Dialog"), TEXT("Pool_Custom_Dialog"), 1)))
+		CRASH("Failed Ready Dialog");
 
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_UI_CurveTrace"),
@@ -542,22 +469,7 @@ void CLevel_GamePlay::Ready_UI()
 
 void CLevel_GamePlay::Ready_SFX()
 {
-	m_pGameSystem->Ready_SFX_Prefab("../Bin/Resource/Effect/SFX_Data/", ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Prefab"), ENUM_CLASS(LEVEL::GAMEPLAY));
 
-#pragma region SFX
-	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
-		CRASH("Failed Add Pool SONORA_CHANGE");
-
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
-	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiSlash"), 1)))
-	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
-
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_Galbrena_UltiStar"),
-	//	ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_Galbrena_UltiStar"), 1)))
-	//	CRASH("Failed Add Pool Galbrena_UltiSlash");
-
-#pragma endregion
 }
 
 void CLevel_GamePlay::Ready_NPC()
@@ -585,6 +497,7 @@ void CLevel_GamePlay::Ready_NPC()
 	Napal.eCurLevel = m_eCurLevel;
 	Napal.vInitPos = _float3(3206.12f, 350.9f, 1680.1f);
 	Napal.vInitRot = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	Napal.strFolderPath = "../Bin/Resource/Model/NPC/Napal/Notify";
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Napal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Napal);
 
@@ -594,7 +507,8 @@ void CLevel_GamePlay::Ready_NPC()
 	Desc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_NPCGriffin"));
 	Desc.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPCGriffin");
 	Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
-
+	Desc.strFolderPath = "../Bin/Resource/Model/NPC/Animals/Griffin/Notify";
+	
 	_float3 vRotDegree = _float3(-180.0f, 88.149f, -180.f);
 	_vector vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
 	_vector vTrans = XMVectorSet(3214.813f, 324.34f, 1727.473f, 1.f);
@@ -612,10 +526,41 @@ void CLevel_GamePlay::Ready_NPC()
 	
 	vRotDegree = _float3(-180.f, -17.102f, 180.f);
 	vRot = XMVectorSet(XMConvertToRadians(vRotDegree.x), XMConvertToRadians(vRotDegree.y), XMConvertToRadians(vRotDegree.z), 0.f);
-	vTrans = XMVectorSet(3405.010f, 379.317f, 1623.268f, 1.f);
+	vTrans = XMVectorSet(3405.010f, 379.317f, 1625.268f, 1.f);
 	XMStoreFloat4x4(&Desc.pTransformMatrix, XMMatrixRotationRollPitchYawFromVector(vRot) * XMMatrixTranslationFromVector(vTrans));
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Griffin"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Z_Test"), &Desc);
+
+	CNPC_Hiding::HIDINGDESC Hiding{};
+	vector<NPCINFO> HidingData = m_pGameSystem->Get_NpcData(3);
+	vector<_wstring> ModelTag;
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS370437"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS370708"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS380101"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS371438"));
+	ModelTag.push_back(TEXT("Prototype_Component_Model_FemaleS381221"));
+
+	Hiding.eCurLevel = m_eCurLevel;
+	Hiding.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Hiding.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
+	Hiding.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Hiding.pAnimMachineTag = TEXT("Prototype_Component_AnimMachine_NPC_Hiding");
+	Hiding.fRotationPerSec = XMConvertToRadians(90.f);
+	Hiding.strFolderPath = "../Bin/Resource/Model/NPC/FemaleS/Notify";
+	Hiding.fSpeedPerSec = 1.f;
+
+	for (size_t i = 0; i < HidingData.size(); ++i)
+	{
+		Hiding.modelData = make_pair(m_eCurLevel, ModelTag[i].c_str());
+		Hiding.isCollide = HidingData[i].isCollide;
+		Hiding.vInitPos = HidingData[i].vPosition;
+		Hiding.vInitRot = HidingData[i].vRotation;
+		Hiding.pAnimationTag = HidingData[i].strAnimTag.c_str();
+
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
+			ENUM_CLASS(m_eCurLevel), TEXT("Layer_NPC"), &Hiding)))
+			CRASH("Failed Ready NPC_Hiding");
+	}
 }
 
 void CLevel_GamePlay::Ready_Production()
@@ -635,8 +580,8 @@ void CLevel_GamePlay::Ready_Potal()
 {
 	CPotal::POTAL_DESC PotalDesc{};
 	PotalDesc.iLevel = ENUM_CLASS(m_eCurLevel);
-	PotalDesc.vExtent;
-	PotalDesc.vPos = _float4(3497.f, 147.84f, 3267.5f, 1.f);
+	PotalDesc.vExtent = _float3(15.1f, 15.1f, 0.5f);
+	PotalDesc.vPos = _float4(3490.f, 164.8f, 3313.5f, 1.f);
 
 	m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Potal"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Potal"), &PotalDesc);
@@ -645,69 +590,11 @@ void CLevel_GamePlay::Ready_Potal()
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-	//	m_pGameInstance->End_SFX();
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-	//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
-	{
-		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-		//Desc.fEffectTime = 3.f;
-		//Desc.fRadialTime = 1.f;
-		//Desc.fFadeTime = 1.f;
-		  
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
 
 	ImGui::Begin("SHADER");
-	if (ImGui::CollapsingHeader("SSR"))
-	{
-		ImGui::InputFloat("MIN_STEP", &m_fMinStep, 1.f, 2.f);
-		ImGui::InputFloat("MAX_STEP", &m_fMaxStep, 1.f, 2.f);
-		ImGui::InputFloat("STARTOFFSET", &m_fStart, 1.f, 2.f);
+	ImGui::InputFloat("BIAS", &m_fMapBias);
 
-		m_pGameInstance->Set_SSR(m_fMinStep, m_fMaxStep, m_fStart);
-	}
-	//if (ImGui::CollapsingHeader("HDR"))
-	//{
-
-	//	ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
-	//	
-	//	m_pGameInstance->SettingHDR(m_fExposure);
-	//
-	//}
-	if (ImGui::CollapsingHeader("LUT"))
-	{
-		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
-		{
-			for (_uint i = 0; i < 7; ++i)
-			{
-
-				if (ImGui::Selectable(to_string(i).c_str()))
-				{
-					m_iLUT_Index = i;
-				}
-			}
-
-			ImGui::EndCombo();
-		}
-	
-		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
-		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
-	}
+	m_pGameInstance->Bind_RawValue_Renderer("g_fShadowMapBais", &m_fMapBias, sizeof(_float));
 
 	ImGui::End();
 	//if (ImGui::CollapsingHeader("MOTION_BLUR"))

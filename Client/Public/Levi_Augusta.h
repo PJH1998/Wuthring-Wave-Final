@@ -41,8 +41,11 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
+	virtual void Render_Shadow() override;
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
+
+	void			Dissolve(_bool isDissolve);
 
 public:
 	virtual void	Change_Volume(COLLISIONLAYER eLayer);

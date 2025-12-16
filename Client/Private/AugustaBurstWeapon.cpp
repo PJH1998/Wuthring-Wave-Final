@@ -96,6 +96,8 @@ void CAugustaBurstWeapon::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CAugustaBurstWeapon::Render()
@@ -121,9 +123,30 @@ void CAugustaBurstWeapon::Render()
     }
 
 #ifdef _DEBUG
-	if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();
+	m_AttackVolumes[VOLUME_SWORD_ATTACK]->Render();
+	//if (m_pMainAttackVolume->IsActivate())
+	//	m_pMainAttackVolume->Render();
 #endif // _DEBUG
+}
+
+void CAugustaBurstWeapon::Render_Shadow()
+{
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
 }
 
 #ifdef _DEBUG
@@ -145,8 +168,13 @@ void CAugustaBurstWeapon::Activate(_bool IsActivate)
 
 	if (true == IsActivate)
 	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() * // 현재 프레임의 최신 Transform
+			XMLoadFloat4x4(m_pSocketMatrix) * // 소켓 (애니메이션이 업데이트 되었다면 최신)
+			m_pParentTransform->Get_WorldMatrix());
+
 		Prop_Reset();
-		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+		//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 	}
 
 	if (false == IsActivate)
@@ -156,7 +184,7 @@ void CAugustaBurstWeapon::Activate(_bool IsActivate)
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
 		m_pMainAttackVolume->TriggerActivate(false); // 비활성화
 
-		m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
+		//m_pModelCom->Clear_Animation(m_strCurrentAnimName); // 애니메이션 클리어
 	}
 }
 
@@ -175,6 +203,20 @@ void CAugustaBurstWeapon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eL
 {
 	if (m_AttackVolumes[iVolumeIdx] != nullptr)
 		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
+}
+
+void CAugustaBurstWeapon::Volume_Activate(_bool IsActive)
+{
+	if (IsActive)
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() * // 현재 프레임의 최신 Transform
+		XMLoadFloat4x4(m_pSocketMatrix) * // 소켓 (애니메이션이 업데이트 되었다면 최신)
+		m_pParentTransform->Get_WorldMatrix());
+	}
+
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->TriggerActivate(IsActive);
 }
 
 void CAugustaBurstWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -280,33 +322,31 @@ void CAugustaBurstWeapon::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f);
+	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.fAttackDmg = 600.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
+	TriggerDesc.strSoundTag = TEXT("Augusta_Blade_Hit_Long_V3_03 (SFX)");
 	// Burst 궁 켰을때 평타.
 	m_AttackVolumes[VOLUME_SWORD_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
-	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f);
-
 	// 궁극기용도.
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SWORD_ATTACK])
 		m_AttackVolumes[VOLUME_SWORD_ATTACK]->TriggerActivate(false);
 
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(30.f, 30.f, 30.f); // 3차원 크으게
 	TriggerDesc.fAttackDmg = 1500.f;
+	TriggerDesc.strSoundTag = TEXT("Augusta_Blade_Hit_Long_V3_03 (SFX)");
 	m_AttackVolumes[VOLUME_SWORD_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

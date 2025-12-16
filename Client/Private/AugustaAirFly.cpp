@@ -14,7 +14,15 @@ HRESULT CAugustaAirFly::Initialize(CCharacter* pCharacter)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
-	// Parts 등록.
+	m_fSoundTimer = {};
+	m_fMaxTime = 8.f; // 초기화 시간.
+
+	// 0 ~ 3 사이 랜덤실행.
+	m_SoundTags.reserve(4);
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_01 (SFX)"));
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_02 (SFX)"));
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_03 (SFX)"));
+	m_SoundTags.emplace_back(TEXT("role_wind_fly_04 (SFX)"));
 
     return S_OK;
 }
@@ -64,14 +72,25 @@ void CAugustaAirFly::OnEnter(void* pArg)
 	
 	// 10. SFX 설정.
 	m_pAugusta->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+
+	m_fSoundTimer = 0.f;
+
+	_uint iRandIdx = static_cast<_uint>(m_pAugusta->Rand(0.f, 3.1f));
+	m_pAugusta->Stop_Sound(CHANNEL::PLAYER_ACTION);
+	if (iRandIdx < m_SoundTags.size())
+		m_pAugusta->Play_Sound(m_SoundTags[iRandIdx], CHANNEL::PLAYER_ACTION, 0.3f, 1.f);
 }
 
 void CAugustaAirFly::OnUpdate(_float fTimeDelta)
 {
     CAirState::OnUpdate(fTimeDelta);
 
+	// 사운드 틀기.
+	Process_Timer(fTimeDelta);
+
     // 0. 입력 확인
     Handle_Input();
+
 
     // 1. Fly 업데이트
     Update_FlyAnimations(fTimeDelta);
@@ -90,6 +109,8 @@ void CAugustaAirFly::OnExit()
 {
     CAirState::OnExit();
 
+	m_pAugusta->Stop_Sound(CHANNEL::PLAYER_ACTION);
+
 	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
 		m_pAugusta->PartActivate(m_iPartType, false);
 
@@ -107,6 +128,21 @@ void CAugustaAirFly::OnExit()
 	m_pAugusta->End_SFX();
 }
 
+void CAugustaAirFly::Process_Timer(_float fTimeDelta)
+{
+	if (m_fSoundTimer < m_fMaxTime)
+		m_fSoundTimer += fTimeDelta;
+	else if (m_fSoundTimer >= m_fMaxTime)
+	{
+		m_fSoundTimer = 0.f;
+		_uint iRandIdx = static_cast<_uint>(m_pAugusta->Rand(0.f, 3.1f));
+		m_pAugusta->Stop_Sound(CHANNEL::PLAYER_ACTION);
+		if (iRandIdx < m_SoundTags.size())
+			m_pAugusta->Play_Sound(m_SoundTags[iRandIdx], CHANNEL::PLAYER_ACTION, 0.3f, 1.f);
+	}
+
+}
+
 void CAugustaAirFly::Handle_Input()
 {
 	// 입력 방향 받기.
@@ -119,12 +155,18 @@ void CAugustaAirFly::Handle_Input()
 	m_States[INPUT_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
 	m_States[INPUT_ACCEL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) || m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
+	m_States[INPUT_ACCEL_KEYDOWN] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT), KEYSTATE::DOWN);
+
 	
 	// 상태 변화
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DOUBLE_JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+
+	if (m_States[INPUT_ACCEL_KEYDOWN])
+		m_pAugusta->Spawn_WingEffect(TEXT("Common_Fly_Start3"));
+
 }
 
 

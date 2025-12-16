@@ -93,6 +93,10 @@ void CAugustaGroundRun::Handle_Input()
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pAugusta->Is_GrappleDrag());
 
+	m_States[THROW_CONTROL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pAugusta->Is_AttachThrowTarget());
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -132,7 +136,6 @@ void CAugustaGroundRun::Handle_Input()
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    //m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
     m_fSpeed = 0.6f;
 
 	m_States[LOCKON] = m_pAugusta->Is_LockOn();
@@ -192,15 +195,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
  
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     
-
-	// 1. 우선순위
-	//if (m_States[DODGE])
-	//{
-	//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-	//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
-	//	return;
-	//}
-
 	// 2.
 	if (m_States[HIT])
 	{
@@ -211,13 +205,18 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{
+		m_eDir = m_pAugusta->Calculate_Direction();
+
+		// 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
+		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
+
 		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
 		return;
 	}
 
     // 이 조건은 추후 디테일 잡아보기.
-
 	if (m_States[FALL])
     {
 		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
@@ -243,6 +242,12 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 	{
 		// 애니메이션은 Rope 안에서 결정하기.
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::ROPEDRAG));
+		return;
+	}
+
+	if (m_States[THROW_CONTROL])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EAugustaInteractionState::CONTROL));
 		return;
 	}
 

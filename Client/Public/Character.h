@@ -33,6 +33,12 @@ public:
 		const _float4x4* pSocketMatrix = { nullptr };
 	}CAPTURE_DESC;
 
+	typedef struct tagQTEDesc {
+
+		CTransform* pTargetTransform = { nullptr };
+		CHARACTER_EVENT eEvent = { CHARACTER_EVENT::END };
+	}QTE_DESC;
+
 
 
 public:
@@ -75,6 +81,8 @@ public:
 		_float fHookRange = { 25.f };
 		_float fDragRange = { 15.f };
 		_float fReacedRopeHook = { 1.f };
+		_float fThrowRange = { 40.f };
+
 
 	}CHARACTER_DESC;
 
@@ -104,6 +112,9 @@ public:
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
 	void Set_Collider(class CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius);
 	void Set_Ability(class CAbility* pAbilityCom);
+	void Set_LeviatanQTE(_bool IsQTE) { m_IsLeviatanQTE = IsQTE; }
+
+	_float4 Get_MotionTrailColor() { return m_vMotionTrailColor; }
 #pragma endregion
 
 
@@ -141,11 +152,13 @@ public:
 	// WorldMatrix
 	_matrix Get_WorldMatrix();
 	void Set_Position(_fvector vPos);
+	void Set_ColliderPosition(_fvector vPos);
 
 	void ColliderActive(_bool IsActive);
 
 #ifdef _DEBUG
 	void Print_LookRay();
+	void Debug_ImGui();
 #endif // _DEBUG
 
 #pragma endregion
@@ -156,6 +169,12 @@ public:
 	virtual void Bind_QTE(_bool IsQTE) {};
 	_bool IsQTEend() { return m_IsQTEend; }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
+
+	void Set_Event(_bool IsEvent) { m_IsEvent = IsEvent; }
+	_bool IsEvent() { return m_IsEvent; }
+
+	void Bind_Condition_ToPlayer(const _string& strCondition, void* pArg = nullptr);
+
 
 	_bool IsVisible() { return m_IsVisible; }
 	void Set_Visible(_bool IsVisible) { m_IsVisible = IsVisible; }
@@ -171,8 +190,15 @@ public:
 	virtual void Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	virtual void End_SFX();
 
+	virtual void Spawn_SFX(const _wstring& strSFXTag);
+
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
+
+	void Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName);
+	void Spawn_LeviatanAnchorEffect(const _wstring& wStrEffectTag);
+	
+	void Execute_Telport(_vector vPos);
 
 	void Reserve_LandSlide(const SLIDE_DATA& eData);
 
@@ -184,13 +210,28 @@ public:
 	void Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 
 	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio, _float fDuration);
+	void Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio);
 
 	LEVEL Get_CurrentLevel() { return m_eCurLevel; }
 
-	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor);
+	void Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor, _uint iShaderPath = 0);
 	
 
 	void Use_Spring(_float fDestination, _float fDuration);
+
+	void Stop_Anim();
+	void Start_Anim();
+
+	void Stop_Anim_ToEvent();
+	void Start_Anim_ToEvent();
+
+
+	void Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency = 1.f);
+	void Stop_Sound(CHANNEL eChannel);
+
+	_float Rand(_float fMin, _float fMax);
+
+	
 #pragma endregion
 
 
@@ -200,8 +241,9 @@ public:
 public:
 	// Caemra
 	void Camera_Shake(_float fIntensity);
-	void Play_Action(const _wstring& strActionTag, _bool isEscape = false); // Action Camera (Cut Scene)
-
+//	void Play_Action(const _wstring& strActionTag, _bool isEscape = false); // Action Camera (Cut Scene)
+	void Play_Action(const _wstring& strActionTag, _bool isMaintain = false, _bool isEscape = false);
+	void Stop_Action();
 	// Ability에서 확인 받기 => 상태 판별?
 	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
 
@@ -210,6 +252,8 @@ public:
 
 	// Grapple Target 전달.
 	void Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo);
+
+	// Grapple Target을 이용한 사용 함수들
 	void Rotate_GrappleTarget();
 	void Move_Grapple(_float fTimeDelta, _float fSpeed);
 	void Execute_RopeDragTrigger();
@@ -219,14 +263,22 @@ public:
 	_bool Is_ReachedGrappleHook();
 	ROPEDIR Calculate_RopeDirection();
 
+	// Thorw Target 전달.
+	void Bind_ThrowTarget(const THROW_INFO& throwInfo);
+	_bool Is_AttachThrowTarget();
+
+	virtual void Attach_ThrowTarget(_bool isAttach) {}; // ThrowTarget 객체를 손뼈에 붙입니다.
+	virtual void Throw_AttachTarget() {};
+	
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
 	void Bind_CostCondition_ToAbility(_uint iConditionw, _uint iConditionFlag);
 
 	// Transition Character From Player
-	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
-
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) {}; // 전환 시 실행할 함수.
+	
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) {};
@@ -235,6 +287,8 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {};
 	virtual void Set_AnimationToParts(_uint iPartType, const _string& strAnimName) {};
 	virtual void Part_ShaderPathChange(_uint iPartType, _uint iShaderPath) {};
+
+
 
 	// Look Vector
 	_vector Get_Position();
@@ -301,7 +355,11 @@ public:
 	void Rotate_Direction(_fvector vDir);
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
-	void Rotate_Target();
+	void Rotate_Target(_bool IsReverse = false);
+	void Rotate_To_Diagonal_Target(_float fAngleDegree, _bool IsRight = false);
+	
+	void Rotate_Target(class CTransform* pTransform);
+
 	void Rotate_TargetPosition();
 	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);
@@ -369,6 +427,8 @@ public:
 	virtual void Bind_DissolveShaderPath() {};
 
 	virtual void Activate(_bool IsActivate) {};
+
+	void Rope_Active(_bool IsActive) { m_IsRopeActive = IsActive;  }
 #pragma endregion
 
 
@@ -382,6 +442,7 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 
 	GRAPPLE_INFO m_GrappleInfo = {};
+	THROW_INFO m_ThrowInfo = {};
 
 	class CTransform* m_pTargetGrappleTransform = { nullptr }; // Grapple 용도.
 	OBJECTTYPE m_eTargetGrappleType = { OBJECTTYPE::END };
@@ -405,9 +466,14 @@ protected:
 	// Shader 변수.
 	_float m_fMaxDissolveTime = { 0.5f };
 	_float m_fDissolveTimer = {};
-	_float4 m_vDissolveColor = { };
+	_float4 m_vDissolveColor = {};
 	_float4 m_vEmissiveColor = {};
 	_float  m_fEmissiveIntensity = {};
+	_float4 m_vMotionTrailColor = {};
+
+	// Event Shader 변수.
+	_float m_fEventDissolveTime = {};
+	_float m_fEventDissolveTimer = {};
 
 	_float4x4 m_DissolveWorldMatrix = {};
 	_float4x4 m_MatrixIdentity = {}; // SocketMatrix 전달 시 아무것도 없으면 Identity 행렬 전달.
@@ -417,8 +483,13 @@ protected:
 	_bool m_IsLand = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
+	_bool m_IsEvent = { false }; // Collider 비 갱신.
 	_bool m_IsVisible = { true };
 	_bool m_IsOutLineVisible = { true };
+	_bool m_IsRopeActive = { false };
+	_bool m_IsEventDissolve = { false }; // Dissolve가 연출용인지? 아닌지.
+	_bool m_IsDissolveReverse = { false }; // Dissolve가 반대로 적용되는가?
+	_bool m_IsLeviatanQTE = { false };
 
 	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
 
@@ -430,11 +501,15 @@ protected:
 	CAPTURE_DESC m_PendingCaptureDesc = {};
 	SLIDE_DATA  m_PendingSlideData = {};
 
+	_float m_fEventTimeRate = 1.f;
+
 	_float m_fDodgeableDuration = 0.2f;
 	_float m_fDodgeableHitTimer = {};
 
 	_float m_fChangeDuration = { 1.f }; // 변환시간.
 	_float m_fChangeTimer = { };
+
+	_float m_fRotateTargetTimer = { };
 
 	_float m_fCameraOffset = {};
 	_float m_fCameraOriginOffset = {};
@@ -442,6 +517,7 @@ protected:
 	_float m_fHookRange = {};
 	_float m_fReachedHook = {};
 	_float m_fDragRange = {};
+	_float m_fThrowRange = {};
 
 	_float m_fStateTimeRate = { 1.f }; //
 	_float m_fOriginTimeRate = { 1.f };
@@ -452,11 +528,18 @@ protected:
 	_float m_fCameraOriginDistance = {};
 	_float m_fCaemraDistance = {};
 
+	_float4 m_vOutlineColor = {};
+	_float	m_fOutlineRadius = {};
+
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	_float4x4 m_GrabComibinedMatrix = {};
 
-	
+protected: // 헬퍼 함수 상속
+	void Process_MotionTrail(const _wstring& wStrObjectTag);
+	void Process_PlaySound(const _wstring& wStrObjectTag);
+	void Process_SpawnSFX(const _wstring& wStrobjectTag);
+	void Process_LightActive(const _wstring& wStrObjectTag);
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

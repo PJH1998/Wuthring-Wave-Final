@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "VIBuffer.h"
 
 NS_BEGIN(Engine)
@@ -9,6 +9,7 @@ public:
 	typedef struct tagBufferSpectrumDesc
 	{
 		_int	MaxSamples;
+		_float	fMaxTrailLength;
 		_float  fSize;
 	}VB_SPECTRUM_DESC;
 
@@ -26,9 +27,12 @@ public:
 public:
 	void Update_Spectrum(deque<SAMPLE_DESC>& vSamples, _int SampleCount, const _float4* vCamPos);
 
+	void Update_SmoothSpectrum(deque<SAMPLE_DESC>& vSamples, _int SampleCount, const _float4* vCamPos);
+
 private:
 	_int			m_iMaxSamples = {};
 	_float			m_fSize = {};
+	_float			m_fMaxTrailLength = 1.5f;
 
 	_int			m_iVtxCount = {};
 

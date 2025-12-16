@@ -177,6 +177,8 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(pDesc->eLayer);
 	RigidbodyDesc.vExtent = pDesc->vExtent;
+
+	
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -196,6 +198,7 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_CallBack.eType = pDesc->eDamageType;
 	m_CallBack.eDir = pDesc->eDir;
 	m_CallBack.pSocketMatrix = pDesc->pGrabMatrix;
+	m_CallBack.strSoundTag = pDesc->strSoundTag;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 

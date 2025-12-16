@@ -11,6 +11,7 @@ NS_END
 
 NS_BEGIN(Client)
 class CAttackVolume;
+class CGameSystem;
 
 class CFS_Scythe final : public CActor
 {
@@ -45,10 +46,12 @@ public:
 	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CAttackVolume*			m_pAttackVolumes[5] = {nullptr,};
-	CAnimMachine*		m_pAnimMachineCom = { nullptr };
+	CAnimMachine*			m_pAnimMachineCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 
 	_bool		m_isVolumeActive[5]{};
 	_string		m_strAnimKey;
@@ -56,6 +59,17 @@ private:
 	_float		m_fLifeTime{};
 
 	_float m_fAttackDamage{};
+
+#pragma region SOUND
+	_int					m_iSoundChannel{};
+	_bool					m_isPlay{};
+#pragma endregion
+
+#pragma region SHADER_VALUE
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
 
 private:
 	void			Bind_Resources();

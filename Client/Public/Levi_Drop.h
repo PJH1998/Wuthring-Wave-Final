@@ -46,8 +46,13 @@ private:
 	_float3				m_vTargetPos{};
 	_bool				m_isDisolve{};
 	// Effect?
+	_bool				m_isLife{};
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT		m_CallBack{};
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
 
 private:
 	HRESULT		Bind_Resources();

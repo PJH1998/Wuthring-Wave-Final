@@ -40,6 +40,12 @@ HRESULT CNPCCell::Initialize_Clone(void* pArg)
 		memcpy(m_MeshTypeIndices.data(), pDesc->iMeshTypes, sizeof(_uint) * pDesc->iNumMeshType);
 	}
 	m_vDetectOffset = _float3(0.f, 1.f, 0.f);
+	
+	m_strInteractAnim.push_back("Stand_Trip_B");
+	m_strInteractAnim.push_back("Stand_Trip_F");
+	m_strInteractAnim.push_back("Stand_Trip_R");
+	m_strInteractAnim.push_back("Stand_Trip_L");
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
     return S_OK;
 }
 
@@ -58,7 +64,11 @@ void CNPCCell::Update(_float fTimeDelta)
 		m_CollideTrigger = false;
 		m_strAnimationTag = m_strOriginAnimationTag;
 	}
-
+	if (m_isHitSound)
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Augusta_Punch_L1_01 (SFX)"), m_iSoundChannel, 0.15f);
+		m_isHitSound = false;
+	}
 	if (m_pColliderCom)
 	{
 		_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -86,7 +96,7 @@ void CNPCCell::Late_Update(_float fTimeDelta)
 
 void CNPCCell::Ready_Component(DUMMYCELL_DESC* pDesc)
 {
-	if(pDesc->isRigid)
+	if(pDesc->isCollide)
 	{
 		// Com_Rigidbody
 		CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
@@ -140,7 +150,28 @@ void CNPCCell::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		if (false == m_CollideTrigger)
 		{
 			m_CollideTrigger = true;
+			CALLBACK_CLIENT* pCallBack = static_cast<CALLBACK_CLIENT*>(pDesc);
+			CTransform* pPlayerTransform = static_cast<CTransform*>(pCallBack->pTransform);
+			_vector vPlayerPos = pPlayerTransform->Get_State(STATE::POSITION);
+			_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+			_vector vDir = XMVector3Normalize(vMyPos - vPlayerPos);
+			_float fFrontDot = XMVectorGetX(XMVector3Dot(vDir, m_pTransformCom->Get_State(STATE::LOOK)));
+			_float fRightDot = XMVectorGetX(XMVector3Dot(vDir, m_pTransformCom->Get_State(STATE::RIGHT)));
+			if (fFrontDot >= 0.7071f)
+				m_strAnimationTag = m_strInteractAnim[1]; //앞
+			else if (fFrontDot <= -0.7071f)
+				m_strAnimationTag = m_strInteractAnim[0]; //뒤
+			else
+			{
+				if (fRightDot < 0.f)
+					m_strAnimationTag = m_strInteractAnim[3]; //왼
+				else
+					m_strAnimationTag = m_strInteractAnim[2]; //오
+			}
+			m_isHitSound = true;
+			m_fTrackPos = 0.f;
 			//m_strAnimationTag = 어깨빵 애니메이션
+			//m_strAnimationTag
 #ifdef _DEBUG
 			cout << m_iInstanceIndex << " 어깨빵!" << endl;
 #endif // _DEBUG
@@ -177,7 +208,10 @@ CGameObject* CNPCCell::Clone(void* pArg)
 void CNPCCell::Free()
 {
 	__super::Free();
-
+	if (m_iSoundChannel != -1)
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+	m_iSoundChannel = -1;
 	Safe_Release(m_pColliderCom);
 	Safe_Release(m_pRigidbodyCom);
+	
 }

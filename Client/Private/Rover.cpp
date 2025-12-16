@@ -30,6 +30,8 @@ HRESULT CRover::Initialize_Prototype()
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
 
+	m_vOutlineColor = _float4(0.0745f, 0.0039f, 0.1098f, 1.f);
+
     return S_OK;
 }
 
@@ -49,10 +51,14 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
-	
-	
-	
 	Ready_Variables(pDesc);
+
+	// GamePlay 일때 위치 보정.
+	if (LEVEL::GAMEPLAY == m_eCurLevel)
+	{
+		// 1. Look 변경.
+		m_pTransformCom->LookDir(XMVectorSet(1.0f, 0.0f, -0.5f, 0.f));
+	}
 
 
 
@@ -64,26 +70,9 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 0. Delayed Action 수행.
-	Process_DelayedActions(fTimeDelta);
-
-	// 1. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
-
-    // 2. 이전 위치 저장
-    m_pTransformCom->Save_PreviousPosition();
-
-	// 3. 몬스터가 있다면?
-	Update_TargetDistance(fTimeDelta);
-
-	// Dissolve 체크.
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-	// 5. Dissovle 체크
+	// 1. Dissovle 체크
 	if (IsDissolve)
 	{
 		if (m_fDissolveTimer <= m_fMaxDissolveTime)
@@ -94,6 +83,29 @@ void CRover::Priority_Update(_float fTimeDelta)
 			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
+
+	if (!IsDissolve)
+	{
+		// 2. Delayed Action 수행.
+		Process_DelayedActions(fTimeDelta);
+
+		// 3. 이전 위치 저장
+		m_pTransformCom->Save_PreviousPosition();
+
+		// 4. 몬스터가 있다면?
+		Update_TargetDistance(fTimeDelta);
+	}
+	
+
+	// 5. Parts 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+
+   
+	
 }
 
 void CRover::Update(_float fTimeDelta)
@@ -107,8 +119,11 @@ void CRover::Update(_float fTimeDelta)
 
 	if (!IsDissolve)
 	{
+		// 특정 상황일 때 TimeLack 감소.
+		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+		
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack * m_fEventTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 		// 4. 카메라 업데이트
@@ -124,36 +139,40 @@ void CRover::Update(_float fTimeDelta)
 
 
 	// 6. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
 
 }
 void CRover::Late_Update(_float fTimeDelta)
 {
-    // 1. 파츠 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Late_Update(fTimeDelta);
-    }
+   
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-	// 2. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
-
-	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-
-	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+	if (!IsDissolve)
 	{
-		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-	}
-	else
-	{
-		// 2. QTE인 경우 Collider 갱신하지 않음.
-		if (!m_IsQTE)
-			m_pColliderCom->Sync_Position(m_pTransformCom);
+		// 2. MainAttackVolume 설정
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->Late_Update(fTimeDelta);
+
+		// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+
+		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		{
+			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+		}
 		else
-			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		{
+			// 2. QTE인 경우 Collider 갱신하지 않음.
+			if (!m_IsQTE)
+				m_pColliderCom->Sync_Position(m_pTransformCom);
+			else
+				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+		}
 	}
 
 	if (m_IsQTEend)
@@ -162,6 +181,7 @@ void CRover::Late_Update(_float fTimeDelta)
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
+	
 
 
 	if (m_IsVisible)
@@ -178,6 +198,13 @@ void CRover::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+	}
+
+	// 1. 파츠 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
 	}
 }
 
@@ -212,7 +239,6 @@ void CRover::Render()
 		else
 			Render_Default(i);
 
-
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
@@ -244,6 +270,12 @@ void CRover::Render()
 void CRover::Render_OutLine()
 {
 	Bind_Resources();
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutlineColor, sizeof(_float4))))
+		CRASH("Failed to Bind OutLineColor");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutlineRadius, sizeof(_float))))
+		CRASH("Failed to Bind OutLineRadius");
 
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMeshes; i++)
@@ -286,7 +318,7 @@ void CRover::Render_Shadow()
 
 
 // 캐릭터 전환시 Idle로 상태 전환..
-void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
 	m_pStateMachineCom->Exit_State();
 
@@ -306,8 +338,8 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			// 내 앞에서 생성. (안 곂치게)
 			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
 			
-			vPos += vLook * 5.f;
-			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
+			vPos += vLook * 1.f;
+			vPos += XMVectorSet(0.f, 2.f, 0.f, 0.f); // 약간 띄우기.
 			m_pColliderCom->Set_Position(vPos);
 			m_pColliderCom->IsActivate(true);
 
@@ -317,6 +349,34 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 			break;
 		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE:
+		{
+			if (nullptr == pArg)
+				return;
+
+			// 1. Leiviantan QTE bool 활성화
+			m_IsLeviatanQTE = true;
+			// 2. Leviatan 고정 이펙트 설정. (플레이어 몸체에)
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+			break;
+		}
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS:
+			m_IsLeviatanQTE = false;
+			Start_Anim();
+			break;
+		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
+			// 1. SFX 호출 하면서
+			//Process_SpawnSFX(TEXT("SFX|Pooling_Excute_Prefab"));
+			Process_SpawnSFX(TEXT("SFX|Pooling_Galbrena_Ulti_Prefab"));
+
+			// 2. State 변경하고 => 위치 이동.
+			GetStateContextForWrite().m_eEventType = ERoverEventType::BURST02;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+			break;
+		default:
+			break;
+
 	}
 
 	// 상태 변수 초기화
@@ -484,7 +544,7 @@ void CRover::Hit_Judge(void* pArg)
 		&& eKey.iSubState == ENUM_CLASS(ERoverGroundState::SPECIAL);
 
 	if (!IsAttack && !IsSpecialAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.05f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Dodge 시간 동안 느리게하기? => 0.05로 해야 0.5f?
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f); // Attack은 살짝만 느려지게
 
@@ -518,10 +578,42 @@ void CRover::Grab_Judge(void* pArg)
 	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
 }
 
+void CRover::Resolve_PerfectDodge()
+{
+	// 1. 회피 가능 상태인지 확인.
+	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+		return;
+
+	// 2. 조건 플래그 제거.
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	// 3. (데미지 무효화)
+	while (!m_DelayedActions.empty())
+		m_DelayedActions.pop();
+
+	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
+	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
+
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.02f); // Time Lack
+
+	// 퍼펙트 닷지가 성공했을 경우에만.
+	CAMERA_SHAKE Desc{};
+	Desc.fDuration = 0.15f;
+	Desc.fFrequency = 20.f;
+	Desc.fAmplitude = 0.5f;
+	Desc.vRotation = { 0.f, 0.1f, 0.f };
+	Desc.fFovKick = 0.f; // 
+
+	m_pGameInstance->OnShake(Desc);
+
+	Spawn_Effect(TEXT("Common_Limit"));
+}
+
 void CRover::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
+
 
 void CRover::Bind_QTE(_bool IsQTE)
 {
@@ -534,8 +626,11 @@ void CRover::Bind_QTE(_bool IsQTE)
 
 		// 내 앞에서 생성. (안 곂치게)
 		_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+		_vector vRight = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::RIGHT), 0.f));
+
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
-		vPos += vLook * 5.f;
+		//vPos += vLook * 2.f + vUp;
+		vPos += vRight * 2.f + vUp;
 		m_pQTEColliderCom->Set_Position(vPos);
 		m_pQTEColliderCom->IsActivate(true);
 
@@ -554,6 +649,45 @@ void CRover::Bind_QTECamera()
 {
 	m_fCameraOriginOffset = m_fCameraOffset;
 	m_fCameraOffset = 2.f; // 늘립니다.
+}
+
+void CRover::Attach_ThrowTarget(_bool isAttach)
+{
+	if (!m_ThrowInfo.IsActive) // 객체가 활성화 되어있지 않은 객체라면?
+		return;
+
+	if (isAttach)
+	{
+		const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+		const _float4x4* pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+
+		*m_ThrowInfo.ppRefBoneMatrix = pBoneMatrix;
+		*m_ThrowInfo.ppRefWorldMatrix = pWorldMatrix;
+		*m_ThrowInfo.pGrabbed = true;
+		*m_ThrowInfo.pThrow = false;
+	}
+	else
+	{
+		*m_ThrowInfo.pGrabbed = false;
+		*m_ThrowInfo.pThrow = false;
+	}
+}
+
+void CRover::Throw_AttachTarget()
+{
+	if (!m_ThrowInfo.IsActive)
+		return;
+
+	*m_ThrowInfo.pGrabbed = false;
+	*m_ThrowInfo.pThrow = true;
+}
+
+void CRover::Spawn_WingEffect(const _wstring& strEffectTag)
+{
+	if (nullptr == m_pWing)
+		return;
+
+	m_pWing->Spawn_EffectTag(strEffectTag);
 }
 
 
@@ -626,6 +760,8 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
 		else if (var2 == TEXT("SKILL"))
 			iVolumeIdx = VOLUME::VOLUME_SKILL;
+		else if (var2 == TEXT("QTE"))
+			iVolumeIdx = VOLUME::VOLUME_QTE;
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
 		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
@@ -694,6 +830,17 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 				PartActivate(PARTTYPE::PART_DARKWING, true);
 		}
 	}
+	else if (var1 == TEXT("Throw"))
+		Throw_AttachTarget(); // 던지기.
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
+	else if (var1 == TEXT("MotionTrail"))
+		Process_MotionTrail(wStrObjectTag);
+	else if (var1 == TEXT("Light"))
+		Process_LightActive(wStrObjectTag);
+	else if (var1 == TEXT("SFX"))
+		Process_SpawnSFX(wStrObjectTag);
+
 	
 
 }
@@ -711,6 +858,11 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
 		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
+		break;
+
+	default:
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
 		break;
 	}
 }
@@ -951,7 +1103,11 @@ void CRover::Render_Eye(_uint iMeshIndex)
 		m_pShaderCom->Bind_Value("g_fGalbrenaEyeAlpha", &fGalbrenaEyeAlpha, sizeof(_float));
 	}
 	else
-		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+	{
+		m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::CHARACTER_EYE);
+		
+	//	m_ShaderPaths[iMeshIndex] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVER);
+	}
 }
 
 void CRover::Render_Mask(_uint iMeshIndex)
@@ -988,6 +1144,26 @@ _bool CRover::IsMask(_uint iMeshIndex)
 	if (iMeshIndex == MESHTYPE::MESH_MASK)
 		return true;
 	return false;
+}
+
+void CRover::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
+
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
 }
 
 void CRover::Bind_Resources()
@@ -1074,6 +1250,7 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fEmissiveIntensity = 1.5f;
 
 	m_ShaderPaths[MESH_MASK] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::ROVERMASK);
+	m_vMotionTrailColor = {0.1f, 0.1f, 0.1f, 0.7f};
 
 
 	// 비활성화. 
@@ -1224,7 +1401,8 @@ void CRover::Ready_AttackVolumes()
 
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f); // x, z 크게 y작게
+	TriggerDesc.vExtent = _float3(20.f, 20.f, 20.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 700.f;
 	m_AttackVolumes[VOLUME_SKILL] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -1232,6 +1410,18 @@ void CRover::Ready_AttackVolumes()
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SKILL]);
 	m_AttackVolumes[VOLUME_SKILL]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(5.f, 5.f, 5.f); // x, z 크게 y작게
+	TriggerDesc.fAttackDmg = 550.f;
+	m_AttackVolumes[VOLUME_QTE] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_QTE]);
+	m_AttackVolumes[VOLUME_QTE]->TriggerActivate(false);
 
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_KNOCKBACK];
 	m_pMainAttackVolume->TriggerActivate(false);

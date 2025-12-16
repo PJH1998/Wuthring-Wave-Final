@@ -34,6 +34,7 @@ private:
 	void				Ready_Event();
 	void				Ready_Prototype_ForStatic();
 	void				Ready_Dummies();
+	void				Ready_Sound();
 	void				Start_Level();
 
 public:

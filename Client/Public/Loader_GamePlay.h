@@ -23,6 +23,7 @@ private:
 	HRESULT				Load_Monster();
 	HRESULT				Load_Production();
 	HRESULT				Load_NPC();
+	HRESULT				Load_Hide_And_Seek();
 
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();
@@ -33,7 +34,6 @@ private:
 	HRESULT				Load_UI();
 	HRESULT				Load_Font();
 	HRESULT				Load_Effect();
-	HRESULT				Load_ScreenEffect();
 
 private:
 	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);

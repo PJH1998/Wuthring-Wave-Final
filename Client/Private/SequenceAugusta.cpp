@@ -100,7 +100,7 @@ void CSequenceAugusta::Update(_float fTimeDelta)
 	if (!IsDissolve)
 	{
 		// 2. 상태 머신 갱신
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+		m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 		// 3. Physcis 업데이트
 		Update_Physics(fTimeDelta);
 	}
@@ -398,6 +398,8 @@ void CSequenceAugusta::Object_Func(const _wstring& wStrObjectTag)
 		m_fStateDelayTimer = stof(var3);
 		Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::STATE_DELAY));
 	}
+	else if (var1 == TEXT("Sound"))
+		Process_PlaySound(wStrObjectTag); // Character 함수.
 
 }
 void CSequenceAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -454,7 +456,9 @@ void CSequenceAugusta::Activate(_bool IsActivate)
 		m_IsOutLineVisible = true;
 		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
+		m_pTransformCom->Save_PreviousPosition();
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+		Sync_Collider(XMVectorZero(), 0.f);
 
 		// State까지 결정
 		m_StateContext.m_eSkillType = ESequenceAugustaSkillType::ATTACK_SPSKILL;
@@ -557,6 +561,8 @@ void CSequenceAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
 	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
 
+	m_vMotionTrailColor = { 1.f, 0.5f, 0.1f, 1.f }; // 기본
+
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
@@ -567,6 +573,8 @@ void CSequenceAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 	m_fMaxDissolveTime = 0.35f;
 	m_vDissolveColor = { 0.5f, 0.2f, 0.1f, 1.f };
 	m_fEmissiveIntensity = 3.f;
+
+	
 
 }
 

@@ -1,4 +1,5 @@
-﻿#include "ClientPch.h"
+﻿
+#include "ClientPch.h"
 #include "UI_Text_Damage.h"
 
 CUI_Text_Damage::CUI_Text_Damage(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -81,10 +82,10 @@ void CUI_Text_Damage::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	__super::Bind_Description(pArg);
 
 	m_fLifeElapsed = 0.f;
-	m_fLifeTime = static_cast<TEXT_UI_DESC*>(pArg)->vLifeTime.y;
-	m_tTextDesc = *static_cast<TEXT_UI_DESC*>(pArg);
+	m_fLifeTime = static_cast<TEXT_UI_TIMED_DESC*>(pArg)->vLifeTime.y;
+	m_tTextDesc = *static_cast<TEXT_UI_TIMED_DESC*>(pArg);
 	m_isActivate = true;
-
+		
 	_uint iNumInstances = m_tTextDesc.strText.length();
 	m_tUIDesc.vecInstanceDescs.resize(iNumInstances);
 
@@ -102,10 +103,10 @@ void CUI_Text_Damage::Update_LifeTime(_float fTimeDelta)
 	if (m_isAutoDeactivate && (m_fLifeElapsed >= m_fLifeTime))
 	{
 		m_isActivate = false;
-		// if needs trigger when its deactive, declare here.
-		static _uint iDmgIndex = 0;
-		iDmgIndex++;
-		std::cout << "[CUI_Text_Damage::Update_LifeTime] Damage Destroyed! : " << iDmgIndex << std::endl;
+	//	// if needs trigger when its deactive, declare here.
+	//	static _uint iDmgIndex = 0;
+	//	iDmgIndex++;
+	//	std::cout << "[CUI_Text_Damage::Update_LifeTime] Damage Destroyed! : " << iDmgIndex << std::endl;
 	}
 }
 

@@ -16,7 +16,7 @@ public:
 	//void				Set_CurrentTrackPosition(_float fTrackPos) { m_fCurrentTrackPosition = fTrackPos; m_iNotifyIndex = 0; }
 	void				Set_CurrentTrackPosition(_float fTrackPos);
 	_float				Get_Duration() { return m_fDuration; }
-
+	_float				Get_AnimProgress() { return m_fCurrentTrackPosition / m_fDuration; }
 	void				Release_Channels();
 	
 #ifdef _DEBUG
@@ -24,6 +24,8 @@ public:
 	
 
 	void				Print_MorphKeyIndices();
+
+	void				Clear_AnimNotifies();
 #endif // _DEBUG
 
 public:

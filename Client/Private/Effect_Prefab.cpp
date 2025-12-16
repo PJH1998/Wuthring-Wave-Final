@@ -1,8 +1,5 @@
 ﻿#include "ClientPch.h"
 #include "Effect_Prefab.h"
-#include "Particle.h"
-//#include "Effect_Mesh.h"
-#include "Trail_Mesh.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
@@ -52,8 +49,19 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
 void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 {
+	if (m_IsLoop && m_pActiveFlag == nullptr)
+		Check_CameraDistance();
+		//여기서 카메라 컬링
+
     if (!m_isActivate)
         return;
+
+	if ((m_IsLoop && !m_IsLoopActive) && m_pActiveFlag == nullptr)
+		return;
+
+	if (m_pActiveFlag != nullptr)
+		UpdateActiveFromFlag(fTimeDelta);
+
 
     m_fCurrentTime += fTimeDelta;
 
@@ -66,6 +74,7 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 			InfoDesc.pBoneMatrixPtr = m_pBoneMatrixPtr;
 			InfoDesc.pObjectMatrixPtr = m_pObjectMatrixPtr;
 			InfoDesc.IsActive = true;
+			InfoDesc.pIsActiveFlag = m_pActiveFlag;
 
 			_matrix OffsetMatrix = {};
 
@@ -87,6 +96,9 @@ void CEffect_Prefab::Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+
+	if ((m_IsLoop && !m_IsLoopActive) && m_pActiveFlag == nullptr)
+		return;
 
 	if (!m_IsLoop)
 	{
@@ -111,6 +123,9 @@ void CEffect_Prefab::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	if ((m_IsLoop && !m_IsLoopActive) && m_pActiveFlag == nullptr)
+		return;
+
     for (auto& Children : m_EffectChildren)
     {
         if (Children.second->IsActivate())
@@ -131,7 +146,52 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	_float4x4 PlayerMatrix = {};
 	_float4x4 BoneMatrix = {};
 
-	if (pDesc->pModelPtr != nullptr)
+	if (pDesc->pActive != nullptr)
+	{
+		//프리팹 직접 On Off 하고싶은 객체
+		Reset_SpawnMatrix();
+		Reset_Prefab_Info();
+
+		m_pActiveFlag = pDesc->pActive;
+		m_isActivate = *pDesc->pActive;
+
+		if (pDesc->pModelPtr != nullptr)
+		{
+			XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+			if (m_strBoneTag == "")
+				XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+			else
+				BoneMatrix = *pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+
+			Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+			m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+			m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+		}
+		else 
+		{
+			_float4x4 PlayerMatrix = {};
+			XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+			XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+
+			Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+			m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+			m_pBoneMatrixPtr = nullptr;
+
+			m_isActivate = true;
+
+			if (m_IsLoop)
+			{
+				m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+				m_IsLoopActive = false;
+			}
+		}
+
+	}
+	else if (pDesc->pModelPtr != nullptr)
 	{
 		//프리팹 안에 뼈에 붙어야 할 자식과 안붙어야 할 자식이 같이 있을 수 있음.
 		//그러니 프리팹에 기존 처리 + 만약 뼈에 붙어야할 얘가 있다면 추가적인 정보를 필요로 함 (BonePtr과 ObjectPtr필요)
@@ -173,6 +233,12 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_pBoneMatrixPtr = nullptr;
 
 		m_isActivate = true;
+
+		if (m_IsLoop)
+		{
+			m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+			m_IsLoopActive = false;
+		}
 	}
 }
 
@@ -233,6 +299,20 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
 		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
 		break;
 
+	case EFFECT_TYPE::VA:
+		strChildrenProtoTag += TEXT("FXVA_");
+		strChildrenProtoTag += strChildrenNameTag;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+		break;
+
+	case EFFECT_TYPE::LIGHT:
+		strChildrenProtoTag += TEXT("FXLight_");
+		strChildrenProtoTag += strChildrenNameTag;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+		break;
+
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
         break;
@@ -271,6 +351,47 @@ void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix,
 	OutMatrix = OffsetMatrix * SpawnMatrix;
 }
 
+void CEffect_Prefab::Check_CameraDistance()
+{
+	//우혁이가 깔아둔 이펙트들은 오브젝트 통해서 호출한게 아니라 깡으로 호출한 상태.
+	//그래서 _bool* 참조해서 컨트롤 해줄 수 없어서 Loop (계속 돌아가는 환경이펙트) 같은 경우에는 카메라 거리 비교해서 활성화 비활성화 시켜줘야함
+
+	_vector Trans{}, Scale{}, Rot{};
+
+	XMMatrixDecompose(&Scale, &Rot, &Trans, m_pTransformCom->Get_WorldMatrix());
+
+	const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+
+	_vector vDistance = Trans - XMLoadFloat4(vCamPos);
+
+	_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+	if (fDistance > 100.f && m_IsLoopActive)
+	{
+		m_IsLoopActive = false; //이거대신 다른거 비활성화 해줘야함.
+	}
+	else if (fDistance < 100.f && !m_IsLoopActive)
+	{
+		m_IsLoopActive = true;
+		Deactivate_AllChildren();
+	}
+}
+
+void CEffect_Prefab::UpdateActiveFromFlag(_float fTimeDelta)
+{
+	if (!(*m_pActiveFlag))
+	{
+		if (m_vLifeTime.x >= m_vLifeTime.y)
+		{
+			m_isActivate = false;
+			Reset_Prefab_Info();
+			Deactivate_AllChildren();
+		}
+		else
+			m_vLifeTime.x += fTimeDelta;
+	}
+}
+
 CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
 {
     auto iter = m_EffectChildren.find(ChildrenTag);
@@ -301,6 +422,23 @@ void CEffect_Prefab::Reset_Prefab_Info()
     m_fCurrentTime = 0.f;
 
     m_vLifeTime.x = 0.f;
+}
+
+void CEffect_Prefab::Deactivate_AllChildren()
+{
+	for (auto& Frame : m_vFrames)
+	{
+		Frame.bActivated = false;
+
+		EFFECT_INFO Info;
+		Info.IsActive = false;
+
+		_matrix Matrix = XMMatrixIdentity();
+
+		Get_Children(Frame.strChildrenTag)->Reset(Matrix, &Info);
+	}
+	m_fCurrentTime = 0.f;
+	m_vLifeTime.x = 0.f;
 }
 
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

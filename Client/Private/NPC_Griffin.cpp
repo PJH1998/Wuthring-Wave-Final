@@ -23,6 +23,10 @@ HRESULT CNPC_Griffin::Initialize_Clone(void* pArg)
 	Ready_Component(static_cast<GRIFFIN_DESC*>(pArg));
 
 	m_pAnimMachine->Reset(m_pModelCom, "Idle_Start");
+	m_iSoundChannel1 = m_pGameInstance->Register_Channel();
+	m_iSoundChannel2 = m_pGameInstance->Register_Channel();
+	
+
 	return S_OK;
 }
 
@@ -39,7 +43,6 @@ void CNPC_Griffin::Update(_float fTimeDelta)
 		m_pAnimMachine->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iAnimState, m_IsTrash, fTimeDelta);
 		m_IsRender = true;
 	}
-	
 	if (m_IsTrash)
 		m_iAnimState = m_pGameInstance->Rand(0.f, 3.f - XMVectorGetX(g_XMEpsilon));
 }
@@ -47,7 +50,10 @@ void CNPC_Griffin::Update(_float fTimeDelta)
 void CNPC_Griffin::Late_Update(_float fTimeDelta)
 {
 	if (m_IsRender)
+	{
 		m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
+	}
 }
 
 void CNPC_Griffin::Render()
@@ -64,18 +70,93 @@ void CNPC_Griffin::Render()
 	}
 }
 
+void CNPC_Griffin::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
+void CNPC_Griffin::Object_Func(const _wstring& wStrObjectTag)
+{
+	_float fMinDistance = 0.2f;
+	_float fMaxDistance = 25.f;
+	_float fVolume = 0.3f;
+
+	if (wStrObjectTag == TEXT("Idle_02"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_roar_02 (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_roar_01 (SFX)"), m_iSoundChannel2, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+	}
+	else if (wStrObjectTag == TEXT("Idle_End"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_end (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+
+	}
+	else if (wStrObjectTag == TEXT("Idle_Start"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_sit_start (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+
+	}
+	else if (wStrObjectTag == TEXT("Interact"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
+
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_bow_salute_02 (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_bow_salute_01 (SFX)"), m_iSoundChannel2, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+
+	}
+	else if (wStrObjectTag == TEXT("Land"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_land (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+
+	}
+	else if (wStrObjectTag == TEXT("Stand_Fly"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_stand_fly (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+
+	}
+	else if (wStrObjectTag == TEXT("Takeoff"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel1);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_shouwangjiu_takeoff (SFX)"), m_iSoundChannel1, fVolume, m_pTransformCom, fMinDistance, fMaxDistance);
+
+	}
+
+}
+
 HRESULT CNPC_Griffin::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
 	return S_OK;
 }
 
 void CNPC_Griffin::Ready_Component(GRIFFIN_DESC* pDesc)
 {
-	pDesc->shaderData;
-	pDesc->modelData;
+
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->pTransformMatrix));
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
@@ -112,6 +193,8 @@ void CNPC_Griffin::Ready_Component(GRIFFIN_DESC* pDesc)
 	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->pAnimMachineTag,
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachine), &AnimMachineDesc)))
 		CRASH("NPC_Hiding/Com_AnimMachine");
+
+	Register_AllNotifies(pDesc->strFolderPath);
 }
 
 void CNPC_Griffin::Ready_InstanceCells(GRIFFIN_DESC* pDesc)
@@ -143,5 +226,9 @@ CGameObject* CNPC_Griffin::Clone(void* pArg)
 void CNPC_Griffin::Free()
 {
 	__super::Free();
+	if(m_iSoundChannel1 != -1)
+		m_pGameInstance->Return_Channel(m_iSoundChannel1);
+	if (m_iSoundChannel2 != -1)
+		m_pGameInstance->Return_Channel(m_iSoundChannel2);
 	Safe_Release(m_pAnimMachine);
 }

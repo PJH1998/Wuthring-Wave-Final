@@ -36,6 +36,8 @@ HRESULT CMapObject_Water::Initialize_Clone(void* pArg)
 	//if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 	//	return E_FAIL;
 
+	m_fAnimTime = 0.06f;
+
 	return S_OK;
 }
 
@@ -49,8 +51,23 @@ void CMapObject_Water::Update(_float fTimeDelta)
 
 void CMapObject_Water::Late_Update(_float fTimeDelta)
 {
-	m_fTime = fmod((m_fTime + (fTimeDelta * 0.12f)), 1.f);
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
+	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::WATER, this);
+	else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
+	{
+		m_fTime += fTimeDelta;
+		if (m_fTime > m_fAnimTime)
+		{
+			m_iTextureIndex += 1;
+			m_fTime -= m_fAnimTime;
+		}
+
+		if (m_iTextureIndex >= 25)
+			m_iTextureIndex = 0;
+
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONLIGHT, this);
+	}
 }
 
 void CMapObject_Water::Render()
@@ -70,15 +87,36 @@ void CMapObject_Water::Render()
 	if (FAILED(m_pShaderCom->Bind_Value("g_fTime", &m_fTime, sizeof(_float))))
 		CRASH("Failed to Bind fTime");
 
+	// Color
+
+	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+	_uint iPassIndex = {};
+
+	if (iLevel == ENUM_CLASS(LEVEL::LOGO))
+		iPassIndex = 4;
+	else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
+		iPassIndex = 5;
+
 	m_pModelCom->Bind_Buffer(m_pContext, m_iLODIndex);
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
 			return;
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
+		if (iLevel == ENUM_CLASS(LEVEL::LOGO))
 		{
-			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-			HasMask = false;
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK)))
+			{
+				m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+				HasMask = false;
+			}
+		}
+		else if (iLevel == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskSprite", m_iLODIndex, i, TEXTURETYPE::MASK, m_iTextureIndex)))
+			{
+				m_pShaderCom->Bind_Texture("g_MaskSprite", nullptr);
+				HasMask = false;
+			}
 		}
 
 		if (HasMask)
@@ -98,7 +136,7 @@ void CMapObject_Water::Render()
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
-		m_pShaderCom->Begin(4); // TEST
+		m_pShaderCom->Begin(iPassIndex); // TEST
 //		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}

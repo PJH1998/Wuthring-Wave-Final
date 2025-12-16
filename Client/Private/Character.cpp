@@ -18,6 +18,8 @@ CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CCharacter::CCharacter(const CCharacter& Prototype)
     : CActor(Prototype)
 	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vOutlineColor { Prototype.m_vOutlineColor }
+	, m_fOutlineRadius { Prototype.m_fOutlineRadius }
 {
 	Safe_AddRef(m_pGameSystem);
 }
@@ -26,6 +28,8 @@ HRESULT CCharacter::Initialize_Prototype()
 {
     if (FAILED(CActor::Initialize_Prototype()))
         return E_FAIL;
+
+	m_fOutlineRadius = 0.001f;
 
     return S_OK;
 }
@@ -43,7 +47,10 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 	m_fDragRange = pDesc->fDragRange;
 	m_fReachedHook = pDesc->fReacedRopeHook;
 
-	// 2. 그랩 용도 Matrix
+	// 2. 잡기 가능한 거리 초기화 (모든 캐릭 공통)
+	m_fThrowRange = pDesc->fThrowRange; 
+
+	// 3. 그랩 용도 Matrix
 	XMStoreFloat4x4(&m_GrabComibinedMatrix, XMMatrixIdentity());
 
 	
@@ -288,6 +295,13 @@ void CCharacter::Set_Position(_fvector vPos)
 {
 	ASSERT_CRASH(m_pTransformCom);
 	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Save_PreviousPosition();
+}
+
+void CCharacter::Set_ColliderPosition(_fvector vPos)
+{
+	ASSERT_CRASH(m_pColliderCom);
+	m_pColliderCom->Set_Position(vPos);
 }
 
 void CCharacter::ColliderActive(_bool IsActive)
@@ -308,7 +322,31 @@ void CCharacter::Print_LookRay()
 	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
 }
 
+void CCharacter::Debug_ImGui()
+{
+	ImGui::Begin("Begin Character");
+
+	static float vColor[3] = { 0.f, 0.f, 0.f};
+	ImGui::SliderFloat3("Motion Trail Color", vColor, 0.f, 1.f);
+
+	m_vMotionTrailColor.x = vColor[0];
+	m_vMotionTrailColor.y = vColor[1];
+	m_vMotionTrailColor.z = vColor[2];
+
+	ImGui::End();
+}
+
+
+
 #endif // _DEBUG
+
+void CCharacter::Bind_Condition_ToPlayer(const _string& strCondition, void* pArg)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	m_pGameSystem->Bind_Condition_ToPlayer(strCondition, pArg);
+}
 
 #pragma region STATE
 
@@ -326,6 +364,12 @@ void CCharacter::End_SFX()
 	m_pGameInstance->End_SFX();
 }
 
+void CCharacter::Spawn_SFX(const _wstring& strSFXTag)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(strSFXTag, mat, nullptr);
+}
+
 void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 {
 	PREFAB_INFO EffectDesc{};
@@ -336,6 +380,52 @@ void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
 }
 
+
+
+
+void CCharacter::Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName)
+{
+	if (nullptr == m_GrappleInfo.pTransform||
+		false == m_IsRopeActive)
+		return;
+
+	_float3 vPos = {};
+	XMStoreFloat3(&vPos, m_GrappleInfo.pTransform->Get_State(STATE::POSITION));
+
+	ROPE_INFO RopeInfo{};
+	RopeInfo.pPlayerMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	RopeInfo.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
+	RopeInfo.vRopeObjectPos = vPos;
+	RopeInfo.pIsActive = &m_IsRopeActive;
+
+	_matrix mat = XMMatrixIdentity();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &RopeInfo);
+}
+
+void CCharacter::Spawn_LeviatanAnchorEffect(const _wstring& wStrEffectTag)
+{
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+	EffectDesc.pActive = &m_IsLeviatanQTE;
+
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, &EffectDesc);
+}
+
+
+void CCharacter::Execute_Telport(_vector vPos)
+{
+	if (nullptr == m_pTransformCom ||
+		nullptr == m_pColliderCom)
+		return;
+
+	vPos = XMVectorSetW(vPos, 1.f);
+
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	m_pTransformCom->Save_PreviousPosition();
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+}
 
 void CCharacter::Reserve_LandSlide(const SLIDE_DATA& eData)
 {
@@ -418,7 +508,16 @@ void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float
 	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio, fDuration);
 }
 
-void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor)
+void CCharacter::Change_TimeRatio_ToLayer(COLLISIONLAYER eCollisionLayer, _float fTimeRatio)
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	//m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pGameSystem->Change_TimeRate(eCollisionLayer, fTimeRatio);
+}
+
+void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fMotionLifeTime, _float4 vColor, _uint iShaderPath)
 {
 	CMotionTrail::MOTION_TRAIL_DESC Desc = {};
 	Desc.pModel = m_pModelCom;
@@ -427,8 +526,8 @@ void CCharacter::Spawn_MotionTrail(_float fDuration, _float fInterval, _float fM
 	Desc.fMotionLifeTime = fMotionLifeTime;
 	Desc.fInterval = fInterval;
 	Desc.fDuration = fDuration;
-	Desc.iShaderPassIndex = 0; 
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_MotionTrail"), XMMatrixIdentity(), &Desc);
+	Desc.iShaderPassIndex = iShaderPath; 
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
 }
 
 
@@ -441,6 +540,53 @@ void CCharacter::Use_Spring(_float fDestination, _float fDuration)
 	m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 
+void CCharacter::Stop_Anim()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.f);
+}
+
+void CCharacter::Start_Anim()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
+}
+
+void CCharacter::Stop_Anim_ToEvent()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_fEventTimeRate = 0.f;
+}
+
+void CCharacter::Start_Anim_ToEvent()
+{
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	m_fEventTimeRate = 1.f;
+}
+
+void CCharacter::Play_Sound(const _wstring& strSoundTag, CHANNEL eChannel, _float fVolume, _float fFrequency)
+{
+	m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(eChannel), fVolume, fFrequency);
+}
+
+void CCharacter::Stop_Sound(CHANNEL eChannel)
+{
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(eChannel));
+	
+}
+
+_float CCharacter::Rand(_float fMin, _float fMax)
+{
+	return m_pGameInstance->Rand(fMin, fMax);
+}
+
 
 
 // 내 Velocity 고정.
@@ -449,12 +595,28 @@ void CCharacter::Camera_Shake(_float fIntensity)
 
 }
 
-void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
+//void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
+//{
+//	if (nullptr == m_pTransformCom)
+//		return;
+//
+//	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
+//}
+
+void CCharacter::Play_Action(const _wstring& strActionTag, _bool isMaintain, _bool isEscape)
 {
-	if (nullptr == m_pTransformCom)
+	if (nullptr == m_pGameSystem)
 		return;
 
-	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
+	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), isMaintain, isEscape);
+}
+
+void CCharacter::Stop_Action()
+{
+	if (nullptr == m_pGameSystem)
+		return;
+
+	m_pGameSystem->Stop_Action();
 }
 
 _bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
@@ -475,7 +637,9 @@ UI_TAB_UTILITY CCharacter::Get_UtilityType()
 _bool CCharacter::Is_GrappleHook()
 {
 	// 1. 예외 조건 처리.
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) || 
+		(OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
@@ -493,7 +657,9 @@ _bool CCharacter::Is_GrappleHook()
 _bool CCharacter::Is_GrappleDrag()
 {
 	// 1. 예외 조건 처리. 
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) ||
+		(OBJECTTYPE::ROPE_PULL != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	// 2. 카메라 Frustum 안에 있는가?
@@ -509,7 +675,9 @@ _bool CCharacter::Is_GrappleDrag()
 // Zip 로프액션 이후에 겹쳐지는 경우를 판단.
 _bool CCharacter::Is_ReachedGrappleHook()
 {
-	if ((nullptr == m_GrappleInfo.pTransform) || (OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType))
+	if ((nullptr == m_GrappleInfo.pTransform) || 
+		(OBJECTTYPE::ROPE_ANCHOR != m_GrappleInfo.eObjectType) ||
+		false == m_GrappleInfo.IsActive)
 		return false;
 
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
@@ -541,6 +709,9 @@ void CCharacter::Rotate_GrappleTarget()
 
 void CCharacter::Move_Grapple(_float fTimeDelta, _float fSpeed)
 {
+	if (nullptr == m_GrappleInfo.pTransform)
+		return;
+
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
 	_vector vMoveDir = XMVector3Normalize(vTargetPos - vPos);
@@ -597,6 +768,31 @@ ROPEDIR CCharacter::Calculate_RopeDirection()
 
 	return ROPEDIR::END;
 }
+
+void CCharacter::Bind_ThrowTarget(const THROW_INFO& throwInfo)
+{
+	m_ThrowInfo = throwInfo;
+}
+
+_bool CCharacter::Is_AttachThrowTarget()
+{
+	// 1. 예외 조건 처리. 
+	if ((nullptr == m_ThrowInfo.pTransform) || 
+		(!m_ThrowInfo.IsActive))
+		return false;
+
+	// 2. 카메라 Frustum 안에 있는가?
+	_vector vTargetPos = m_ThrowInfo.pTransform->Get_State(STATE::POSITION);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_bool IsFrustum = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 5.f);
+
+	// 3. 거리가 지정한 거리 이내인가?
+	_float fDistance = XMVectorGetX(XMVector3Length(vTargetPos - vPos));
+
+	return IsFrustum && fDistance <= m_fThrowRange;
+}
+
+
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
@@ -763,7 +959,6 @@ void CCharacter::Bind_TargetPosition(_fvector vPos)
 {
 	XMStoreFloat4(&m_vTargetPosition, vPos); // 타겟 지점.
 }
-
 
 void CCharacter::ActiveCaptureState()
 {
@@ -1029,7 +1224,7 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-void CCharacter::Rotate_Target()
+void CCharacter::Rotate_Target(_bool IsReverse)
 {
     // 1. 타겟이 없는 경우 Return
     if (nullptr == m_pTargetTransform)
@@ -1042,9 +1237,49 @@ void CCharacter::Rotate_Target()
 
 
     vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	if (IsReverse)
+		vToTarget *= -1.f;
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
+}
+
+void CCharacter::Rotate_To_Diagonal_Target(_float fAngleDegree, _bool IsRight)
+{
+	if (nullptr == m_pTargetTransform)
+		return;
+
+	_vector vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION); // Getter 필요 없으면 Transform에서 직접 계산
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVectorSetY(XMVector3Normalize(vTargetPos - vMyPos), 0.f);
+
+	_float fRadians = XMConvertToRadians(fAngleDegree);
+
+	if (!IsRight)
+		fRadians *= -1.f;
+
+	// 3. 회전 행렬 생성.
+	_matrix matRot = XMMatrixRotationY(fRadians);
+
+	// 4. 벡터를 회전 행렬로 회전 시킴.
+	_vector vDiagonalDir = XMVector3TransformNormal(vToTarget, matRot);
+
+	// 5. 캐릭터 즉시 회전 적용.
+	Rotate_Direction(vDiagonalDir);
+}
+
+void CCharacter::Rotate_Target(CTransform* pTransform)
+{
+	if (nullptr == pTransform)
+		return;
+
+	_vector vTarget = pTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+	m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 }
 
 void CCharacter::Rotate_TargetPosition()
@@ -1250,14 +1485,118 @@ void CCharacter::Remove_Condition_FromPlayer(_uint iCondition)
 	m_iCondition &= ~iCondition;
 }
 
-
-
-
 #pragma endregion
 
+void CCharacter::Process_MotionTrail(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_float fDuration = stof(var2);
+	_float fInterval = stof(var3);
+	_float fMotionLifeTime = stof(var4);
+	_uint iShaderPath = stoul(var5);
+
+	// Color는 고정?
+	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
+}
+
+void CCharacter::Process_PlaySound(const _wstring& wStrObjectTag)
+{
+	// return; 추가하면 캐릭터 사운드 안들림.
+	
+	_wstring var1, var2, var3, var4, var5;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+	getline(wss, var5, L'|');
+
+	_wstring strSoundType = var2; // Sound Type
+	_wstring strSoundTag = var3; // Sound Tag
+	_float fVolume = stof(var4); // Volume 크기.
+
+	_float fFrequency = {};
+	
 
 
+	if (var2 == TEXT("Voice"))
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume, fFrequency);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+		}
+	}
+		
+	else if (var2 == TEXT("Action"))
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			//m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume, fFrequency);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), 1.f, 1.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		}
+	}
+	else if (var2 == TEXT("QTE"))
+	{
+		if (!var5.empty())
+		{
+			fFrequency = stof(var5);
+			//m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume, fFrequency);
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_QTE), 1.f, 1.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_QTE), fVolume);
+		}
+	}
+		
+}
 
+void CCharacter::Process_SpawnSFX(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	
+
+	_matrix mat = XMMatrixIdentity();
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(var2, mat, nullptr);
+}
+
+void CCharacter::Process_LightActive(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2;
+	wstringstream wss(wStrObjectTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+
+	if (var2 == L"false")
+		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+	else if (var2 == L"true")
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+
+	
+}
 
 void CCharacter::Free()
 {

@@ -2,6 +2,8 @@
 #include "MapObject_Meteo.h"
 #include"GameSystem.h"
 
+vector<_wstring> CMapObject_Meteo::m_SoundTags;
+
 CMapObject_Meteo::CMapObject_Meteo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
 {
@@ -15,6 +17,10 @@ CMapObject_Meteo::CMapObject_Meteo(const CMapObject_Meteo& Prototype)
 
 HRESULT CMapObject_Meteo::Initialize_Prototype()
 {
+	m_SoundTags.push_back(TEXT("Explosion0"));
+	m_SoundTags.push_back(TEXT("Explosion1"));
+	m_SoundTags.push_back(TEXT("Explosion2"));
+
     return S_OK;
 }
 
@@ -23,15 +29,25 @@ HRESULT CMapObject_Meteo::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 	Ready_Components(pArg);
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex,[this](void* pArg) {
 		m_IsTriggerd = true;
-	});
+		m_ISTrailEffect = true;
+		PREFAB_INFO Info{};
+		Info.pActive = &m_ISTrailEffect;
+		Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Meteor_Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
+		});
+	_float2 vRand = _float2(130.f, 180.f);
+	m_vRadians = _float3(XMConvertToRadians(m_pGameInstance->Rand(vRand.x, vRand.y)), XMConvertToRadians(m_pGameInstance->Rand(vRand.x, vRand.y)), XMConvertToRadians(m_pGameInstance->Rand(vRand.x, vRand.y)));
     return S_OK;
 }
 
 void CMapObject_Meteo::Priority_Update(_float fTimeDelta)
 {
+	m_pTransformCom->Turn_Quaternion(m_vRadians, fTimeDelta);
 }
 
 void CMapObject_Meteo::Update(_float fTimeDelta)
@@ -43,12 +59,7 @@ void CMapObject_Meteo::Update(_float fTimeDelta)
 void CMapObject_Meteo::Late_Update(_float fTimeDelta)
 {
 	if (m_IsTriggerd)
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-	
-	//if (m_IsTriggerd)
-	//	if (FAILED(m_pGameInstance->Add_Render_StaticObject(this, 0)))
-
-			return;
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 }
 
 void CMapObject_Meteo::Render()
@@ -93,21 +104,18 @@ void CMapObject_Meteo::Render()
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
-		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pShaderCom->Begin(28);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
 }
 
 void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 {
-	PREFAB_INFO Info{};
-	Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	if (m_iEffectFrame >= 3)
+	if (!m_IsSound)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
-		m_iEffectFrame = 0;
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("Fire_Long"), m_iSoundChannel, 0.5f);
+		m_IsSound = !m_IsSound;
 	}
-	m_iEffectFrame++;
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 	_vector current_xz = XMVectorLerp(XMLoadFloat4(&m_vSourPos), XMLoadFloat4(&m_vDestPos), Time);
@@ -118,15 +126,51 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 	m_pTransformCom->Set_State(STATE::POSITION, CurrentPos);
 	if (Time >= 1.f)
 	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix(), &Info);
-		//이펙트들 터트리기.
+		m_ISTrailEffect = false;
 		m_IsTriggerd = false;
-		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));
-		m_fFall = 0.f;
 		m_isActivate = false;
 
+		PREFAB_INFO Info{};
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix(), &Info);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Big_Smoke"), m_pTransformCom->Get_WorldMatrix(), &Info);
+		//이펙트들 터트리기.
+		_uint SoundChannel = m_pGameInstance->Register_Channel();
+		switch (static_cast<_uint>(m_pGameInstance->Rand(0.f, 3.f)))
+		{
+		case 0:
+			m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[0], SoundChannel, 0.2f);
+			break;
+
+		case 1:
+			m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[1], SoundChannel, 0.2f);
+			break;
+
+		case 2:
+			m_pGameInstance->Play_Sound_Dynamic(m_SoundTags[2], SoundChannel, 0.2f);
+			break;
+		}
+
+		m_pGameInstance->Return_Channel(SoundChannel);
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+
+		//m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));
+		m_fFall = 0.f;
+
 		if (m_iTriggerActiveIndex != -1)
+		{
 			m_pGameSystem->OnTriggerActivate(m_iTriggerActiveIndex);
+
+			if (m_pTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, true);
+
+			if (m_pSecondTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, true);
+
+			if (m_pThirdTempPtr)
+				m_pGameSystem->Toggle_GrapplePoint(m_pThirdTempPtr, true);
+
+		}
 	}
 }
 
@@ -134,7 +178,7 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
+	m_pTransformCom->Set_WorldMatrix(XMMatrixScaling(0.4f, 0.4f, 0.4f) * XMLoadFloat4x4(&pDesc->WorldMatrix));
 
 	m_farchY = pDesc->fArchY;
 	m_fDuration = pDesc->fDuration;
@@ -162,6 +206,21 @@ void CMapObject_Meteo::Ready_Components(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return;
 
+	switch ((m_iTriggerActiveIndex))
+	{
+	case 11:
+		//m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3458.7f, 334.9, 1782.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		//m_pSecondTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3456.3f, 338.5f, 1769.5f), UI_GRAPPLE_TYPE::ANCHOR);
+		//m_pThirdTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3454.8f, 341.61f, 1759.4), UI_GRAPPLE_TYPE::ANCHOR);
+
+		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3458.7f, 334.9, 1786.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pSecondTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3456.3f, 338.5f, 1764.5f), UI_GRAPPLE_TYPE::ANCHOR);
+
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
+		m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, false);
+		//m_pGameSystem->Toggle_GrapplePoint(m_pThirdTempPtr, false);
+		break;
+	}
 }
 
 CMapObject_Meteo* CMapObject_Meteo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -193,7 +252,9 @@ CGameObject* CMapObject_Meteo::Clone(void* pArg)
 void CMapObject_Meteo::Free()
 {
 	__super::Free();
-
+	m_pTempPtr = nullptr;
+	m_pSecondTempPtr = nullptr;
+	m_pThirdTempPtr = nullptr;
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pModelCom);

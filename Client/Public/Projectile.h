@@ -9,6 +9,8 @@ class CModel;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CProjectile final : public CGameObject
 {
 public:
@@ -22,7 +24,7 @@ public:
 		_float				fAttackDamage;
 		_float				fLifeTime{ 10.f };
 		_float				fMaxDelay{ 1.f };
-		_bool				isCollisionDestroy;
+		_bool				isCollisionDestroy{ true };
 		TEXT_COLOR_TYPE		eType;
 	}PROJECTILEDESC;
 
@@ -30,6 +32,7 @@ public:
 	{
 		_float3				vTargetPos;
 		CTransform*			pOwnerTransform;
+		_wstring			wstrSoundTag;
 	}PROJECTILERESET;
 private:
 	explicit CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -50,6 +53,7 @@ private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	CModel*				m_pModelCom = { nullptr };
 	CShader*			m_pShaderCom = { nullptr };
+	CGameSystem*		m_pGameSystem = { nullptr };
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
@@ -61,6 +65,8 @@ private:
 	// Effect?
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT		m_CallBack{};
+
+	_int				m_iSoundChannel{ -1 };
 
 private:
 	HRESULT		Bind_Resources();

@@ -13,7 +13,9 @@
 #include "Leviatan.h"
 #include "Levi_Alter.h"
 #include "Levi_Ray.h"
-#include"Levi_Anchor.h"
+#include "Levi_Anchor.h"
+#include "Levi_Drop.h"
+#include "Levi_Wave.h"
 
 #include "Player.h"
 #include "SequencePlayer.h"
@@ -21,6 +23,8 @@
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
 #include "UI_QTE.h"
+
+#include "SceneCamera.h"
 
 //SFX
 #ifdef _DEBUG
@@ -35,10 +39,10 @@ CLevel_Heaven::CLevel_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Heaven::Initialize()
 {
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+	m_pGameInstance->SetUp_OctoTree(_float3(-830.1f, 506.82f, -216.83f), _float3(4096.f, 4096.f, 4096.f));
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
 
-	m_pGameInstance->Setting_LUT(0, 0.25f, false);
+	m_pGameInstance->Setting_LUT(0, 0.17f, false);
 
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -47,9 +51,9 @@ HRESULT CLevel_Heaven::Initialize()
 	ShadowMapDesc.iSectorSizeX = 2048;
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
-	ShadowMapDesc.vCenterPos = _float3(-910.f, 0.f, -1870.f);
-	ShadowMapDesc.vExtents = _float3(200.f, 750.f, 160.f);
-	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+	ShadowMapDesc.vCenterPos = _float3(-910.f, -20.f, -1870.f);
+	ShadowMapDesc.vExtents = _float3(200.f, 700.f, 160.f);
+	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, -0.5f);
 
 	// Left Bottom : -910 / -1870
 	// Right Bottom : 600 / -2100
@@ -69,12 +73,16 @@ HRESULT CLevel_Heaven::Initialize()
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
 
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-//	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-//	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
-//LightDesc.vDiffuse = _float4(0.8f, 0.8f, 0.65f, 1.f);
-	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	
+	LightDesc.vDiffuse = _float4(0.8078f, 0.6901f, 0.4431f, 1.f);
+	//	LightDesc.vDiffuse = _float4(0.9137f, 0.7686f, 0.7686f, 1.f);
+	//LightDesc.vDiffuse = _float4(1.f, 1.f, 0.8f, 1.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, -0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+
+#ifdef _DEBUG
+	m_tLightDesc = LightDesc;
+#endif
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
@@ -85,24 +93,32 @@ HRESULT CLevel_Heaven::Initialize()
 	Ready_UI();
 	Ready_Layer_Player();
 	Ready_Layer_SequnecePlayer();
-
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
 	Ready_Leviatan();
 
-	//m_pGameSystem->Clone_Spawners(m_eCurLevel);
+	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
 	Ready_Effect();
 	Ready_Skybox();
+	Ready_Scene();
 	//Ready_SFX();
 
-	m_pGameInstance->Set_FogDistanceFallOff(0.001f);
-	m_pGameInstance->Set_FogMaxHeight(300.f);
-	m_pGameInstance->Set_FogRayDensityScale(0.f);
+//	m_pGameInstance->Set_Fog
+	m_pGameInstance->Set_FogDistanceFallOff(0.1f);
+	m_pGameInstance->Set_FogMaxHeight(0.f);
+	m_pGameInstance->Set_FogMaxDistance(100.f);
+	m_pGameInstance->Set_FogRayDensityScale(0.4f);
+	m_pGameInstance->Set_FogScatterWeight(0.4f);
+	m_pGameInstance->Set_FogFarRatioToCameraFar(0.3f);
+	m_pGameInstance->Set_FogRayIntensity(2.f);
 
 	m_pGameInstance->Begin_VF();
 
-	m_pGameSystem->Create_MapEffects();
+	m_pGameSystem->Create_MapEffects(m_pGameInstance->Get_CurrentLevel());
+	m_pGameSystem->Change_Level(m_pGameInstance->Get_CurrentLevel());
 	return S_OK;
 }
 
@@ -131,7 +147,16 @@ void CLevel_Heaven::Ready_Layer_Player()
 	vRotation = { 0.f, 0.f, 0.f };
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
+#ifdef _DEBUG
 	vPosition = { 0.f, 2.f, -40.f };
+#endif // _DEBUG
+
+#ifndef _DEBUG
+	vPosition = { 0.1f, -7.2f, -1140.1f };
+#endif // !_DEBUG
+
+	
+	
 	
 	CPlayer::PLAYER_DESC Desc{};
 	Desc.eCurLevel = m_eCurLevel;
@@ -383,7 +408,7 @@ void CLevel_Heaven::Ready_Leviatan()
 	MobDesc.fHP = pInfo->fMaxHp;
 	MobDesc.fAttackDmg = pInfo->fAttack;
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
-	MobDesc.vDetectRange = _float3(50.f, 25.f, 50.f);
+	MobDesc.vDetectRange = _float3(65.f, 25.f, 65.f);
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Leviatan"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &MobDesc)))
 		CRASH("Failed Ready Leviatan");
@@ -433,6 +458,7 @@ void CLevel_Heaven::Ready_Leviatan()
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Leviatan_Projectile");
 	Projectile.eType = TEXT_COLOR_TYPE::DARK;
 	Projectile.fMaxDelay = 10.f;
+	Projectile.isCollisionDestroy = false;
 	Projectile.wstrEffectTag = TEXT("Leviatan_Dg2");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_LeviSword"), 1, &Projectile)))
@@ -451,27 +477,49 @@ void CLevel_Heaven::Ready_Leviatan()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Anchor"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviAnchor"), 1, &Anchor)))
 		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Drop::DROPDESC Drop{};
+	Drop.fAttackDamage = pInfo->fAttack * 0.5f;
+	Drop.fSpeedPerSec = 10.f;
+	//Drop.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Drop"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviDrop"), 16, &Drop)))
+		CRASH("Failed Ready Projectile (Leviatan)");
+
+	CLevi_Wave::WAVEDESC Wave{};
+	Wave.fAttackDamage = pInfo->fAttack;
+	Wave.fSpeedPerSec = 15.f;
+	//Wave.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Levi_Wave"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_LeviWave"), 4, &Wave)))
+		CRASH("Failed Ready Projectile (Leviatan)");
 }
 
 void CLevel_Heaven::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 20);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 200);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 70);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel, 15);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Sequence", m_eCurLevel, 10);
+
+	m_pGameSystem->Create_Spertrum("../../Client/Bin/Resource/Effect/Spectrums/Heaven/SpectrumOB", m_eCurLevel, 15);
 }
 
 void CLevel_Heaven::Ready_Skybox()
 {
-	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
-	SkyboxDesc.iNumModel = 3;
-	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
-	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
-	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
-	SkyboxDesc.vUVRate = _float2(1.f, 1.f);
-	SkyboxDesc.fFXScaleRate = 0.3f;
+	//CSkyBox::SKYBOX_DESC SkyboxDesc = {};
+	//SkyboxDesc.iNumModel = 3;
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX"));
+	//SkyboxDesc.vUVRate = _float2(1.f, 1.f);
+	//SkyboxDesc.fFXScaleRate = 0.3f;
 
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
-		TEXT("Layer_BackGround"), &SkyboxDesc)))
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
+	//	TEXT("Layer_BackGround"), &SkyboxDesc)))
+	//	CRASH("Skybox");
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_Heaven_SkyBox"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"))))
 		CRASH("Skybox");
 }
 
@@ -484,6 +532,7 @@ void CLevel_Heaven::Ready_UI()
 		 L"Prototype_GameObject_Custom_UI_Container_HUD",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_Minimap",
 		 L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
+		 L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
 	};
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
@@ -518,14 +567,18 @@ void CLevel_Heaven::Ready_UI()
 		iDestLevel, TEXT("Layer_Custom_UI_TabUtility"), TEXT("Pool_Custom_TabUtility"), 1)))
 		CRASH("Failed Ready TabUtility");
 
-	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
-		iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
-		CRASH("Failed Ready GrapplePoint");
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_GrapplePoint"),
+	//	iDestLevel, TEXT("Layer_Custom_UI_GrapplePoint"), TEXT("Pool_Custom_GrapplePoint"), 50)))
+	//	CRASH("Failed Ready GrapplePoint");
 
 	CUI_QTE::UI_QTE_DESC tQTEDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_QTE"),
 		iDestLevel, TEXT("Layer_Custom_UI_QTE"), TEXT("Pool_Image_QTE"), 1, &tQTEDesc)))
 		CRASH("Failed Ready QTE");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_Custom_UI_Dialog"),
+		iDestLevel, TEXT("Layer_Custom_UI_Dialog"), TEXT("Pool_Custom_Dialog"), 1)))
+		CRASH("Failed Ready Dialog");
 
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(iDestLevel, TEXT("Prototype_GameObject_UI_CurveTrace"),
@@ -561,73 +614,52 @@ void CLevel_Heaven::Ready_SFX()
 #pragma endregion
 }
 
+void CLevel_Heaven::Ready_Scene()
+{
+	// Camera
+	CCamera::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 1000.f;
+	CameraDesc.vEye = _float4(-1.019107f, 5.458634f, -15.936163f, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
+	CameraDesc.fSpeedPerSec = 10.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fMouseSensor = 0.004f;
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+		CRASH("SceneCamera");
+}
+
 #ifdef _DEBUG
 void CLevel_Heaven::DEBUG_FUNCTION()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_pGameInstance->End_SFX();
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
-	{
-		//CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-		//Desc.fEffectTime = 3.f;
-		//Desc.fRadialTime = 1.f;
-		//Desc.fFadeTime = 1.f;
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Galbrena_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	{
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Augusta_Ulti_Prefab"), XMMatrixIdentity(), nullptr);
-	}
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
-	{
-		m_IsSSS = !m_IsSSS;
-		m_pGameInstance->SettingSSS(m_IsSSS);
-	}
-
-
 	ImGui::Begin("SHADER");
 
-	if (ImGui::CollapsingHeader("HDR"))
-	{
-
-		ImGui::InputFloat("EXPOSURE", &m_fExposure, 0.01f, 0.1f);
-
-		m_pGameInstance->SettingHDR(m_fExposure);
-
-	}
 	if (ImGui::CollapsingHeader("LUT"))
 	{
 		if (ImGui::BeginCombo("LUT_INDEX", "LUT"))
 		{
 			for (_uint i = 0; i < 7; ++i)
 			{
-
-#ifdef _DEBUG
 				if (ImGui::Selectable(to_string(i).c_str()))
 				{
 					m_iLUT_Index = i;
 				}
-#endif // _DEBUG
 			}
 
 			ImGui::EndCombo();
 		}
 
-		ImGui::Checkbox("IsDynamic", &m_IsDyanmicLUT);
 		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, m_IsDyanmicLUT);
+		m_pGameInstance->Setting_LUT(m_iLUT_Index, m_fLUT_Intensity, false);
+	}
+
+
+	if (ImGui::CollapsingHeader("LIGHT"))
+	{
+		ImGui::ColorPicker4("LightColor", reinterpret_cast<_float*>(&m_tLightDesc.vDiffuse.x));
+
+		m_pGameInstance->Update_LightDesc(TEXT("Test"), m_tLightDesc);
 	}
 
 	ImGui::End();

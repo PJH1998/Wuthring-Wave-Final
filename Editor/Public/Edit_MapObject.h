@@ -63,6 +63,8 @@ public:
 	void Make_ChildLocalMatrix(_fmatrix ParentMatrix);
 	void Set_ShaderPass(_uint i) { m_iShaderPassIndex = i; }
 
+
+	void Load_SoundTag(_string FilePath);
 protected:
 	void Export_MaterialData();
 	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
@@ -96,7 +98,7 @@ protected:
 
 	_float4x4 m_DefaultMat = {};
 protected:
-
+	_float m_fTestRot = {};
 	_char m_ModelName[MAX_PATH];
 
 	_uint m_iShaderPassIndex = {};
@@ -161,6 +163,12 @@ protected:
 	_float m_fDlayTime = {};
 	_bool m_fMode = { false };
 	_float m_fTotalTime = {};
+	_float m_fDistortionTime = {};
+
+	_float m_fDynamicVolume = {};
+
+	vector<_string> m_SoundTags;
+	_uint m_iPickedSoundTag = {};
 protected:
 	static _uint g_iNumObjects;
 

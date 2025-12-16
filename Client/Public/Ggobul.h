@@ -12,11 +12,13 @@ NS_END
 NS_BEGIN(Client)
 
 class CAttackVolume;
+class CGameSystem;
 
 class CGgobul final : public CActor
 {
 public:
 	enum GGOBULTYPE { HEAD, HAMMER, KNIFE, END};
+	enum ATTACKTYPE { AHEAD, AHAMMER, AKNIFE, LASER, ATKEND};
 	enum GGOBUL_SHADER { BODY, DOWN, HAMMER0, HEAD0, KNIFE0, FX };
 	typedef struct tagGgobulDesc : public CActor::ACTOR_DESC
 	{
@@ -46,16 +48,19 @@ public:
 	virtual	void				Priority_Update(_float fTimeDelta) override;
 	virtual	void				Update(_float fTimeDelta) override;
 	virtual	void				Late_Update(_float fTimeDelta) override;
-	virtual		void			Render() override;
+	virtual void				Render() override;
+	virtual void				Render_Shadow() override;
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg);
 
 	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 private:
-	CAttackVolume*			m_pAttackVolumes[GGOBULTYPE::END] = {nullptr,};
+	CAttackVolume*			m_pAttackVolumes[ATTACKTYPE::ATKEND] = {nullptr,};
 	CAnimMachine*			m_pAnimMachineCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 
 	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
 	const _float4x4*		m_pAttackTransform = { nullptr };
@@ -64,10 +69,24 @@ private:
 	vector<_bool>			m_MeshEnables;
 	vector<_uint>			m_ShaderIndices;
 
+	_float					m_fFxTime = {};
+
 	_string		m_strAnimKey;
 	_uint		m_iState{};
 
 	_float		m_fAttackDmg{};
+
+#pragma region SOUND
+	_int					m_iSoundChannel{};
+	_int					m_iSoundChannel2{};
+	_int					m_iSoundChannel3{};
+#pragma endregion
+
+#pragma region SHADER_VALUE
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
 
 private:
 	void			Bind_Resources();

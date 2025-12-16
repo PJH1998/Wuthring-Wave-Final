@@ -307,9 +307,9 @@ void CGalbrenaGroundHeavyAttack::Check_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundHeavyAttack::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaHeavyAttackType::ATTACK_H_0201),"Attack_H_0201", 1.f, 15.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaHeavyAttackType::ATTACK_H_0202),"Attack_H_0202", 1.f, 8.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaHeavyAttackType::ATTACK_H_0203),"Attack_H_0203", 1.f, 50.f); // 이때 공격하면 전환
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaHeavyAttackType::ATTACK_H_0201),"Attack_H_0201", 1.5f, 15.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaHeavyAttackType::ATTACK_H_0202),"Attack_H_0202", 1.5f, 8.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaHeavyAttackType::ATTACK_H_0203),"Attack_H_0203", 1.5f, 30.f); // 이때 공격하면 전환
 
 }
 

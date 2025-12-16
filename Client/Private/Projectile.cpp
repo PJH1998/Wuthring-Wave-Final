@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "Projectile.h"
+#include "GameSystem.h"
 
 CProjectile::CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
@@ -8,7 +9,9 @@ CProjectile::CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CProjectile::CProjectile(const CProjectile& Prototype)
 	: CGameObject { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CProjectile::Initialize_Prototype()
@@ -42,7 +45,9 @@ void CProjectile::Priority_Update(_float fTimeDelta)
 
 void CProjectile::Update(_float fTimeDelta)
 {
-	m_pTransformCom->Go_Straight(fTimeDelta);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+
+	m_pTransformCom->Go_Straight(fTimeDelta * fTimeRatio);
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	if (m_fDelay <= 0.f)
@@ -54,7 +59,7 @@ void CProjectile::Update(_float fTimeDelta)
 		m_fDelay = m_fMaxDelay;
 	}
 	else
-		m_fDelay -= fTimeDelta;
+		m_fDelay -= fTimeDelta * fTimeRatio;
 }
 
 void CProjectile::Late_Update(_float fTimeDelta)
@@ -65,8 +70,13 @@ void CProjectile::Late_Update(_float fTimeDelta)
 		{
 			m_isActivate = false;
 			m_CallBack.pTransform = nullptr;
-			m_pRigidBodyCom->Set_Desc(&m_CallBack);
+			//m_pRigidBodyCom->Set_Desc(&m_CallBack);
 			m_pRigidBodyCom->IsActivate(false);
+			if (m_iSoundChannel != -1)
+			{
+				m_pGameInstance->Return_Channel(m_iSoundChannel);
+				m_iSoundChannel = -1;
+			}
 			return;
 		}
 	}
@@ -116,6 +126,12 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
 	m_fDelay = 0.f;
+
+	if (false == pDesc->wstrSoundTag.empty())
+	{
+		m_iSoundChannel = m_pGameInstance->Register_Channel();
+		m_pGameInstance->Play_Sound_Dynamic(pDesc->wstrSoundTag, m_iSoundChannel, 0.2f, m_pTransformCom, 0.001f, 1.f);
+	}
 
 	m_CallBack.pTransform = pDesc->pOwnerTransform;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
@@ -219,4 +235,6 @@ void CProjectile::Free()
 	Safe_Release(m_pRigidBodyCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pShaderCom);
+
+	Safe_Release(m_pGameSystem);
 }

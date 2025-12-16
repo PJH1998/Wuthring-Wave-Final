@@ -22,7 +22,7 @@ int g_MaskFlag; // 0이면 R로, 1이면 알파로
 
 float g_DistortionWeight;
 
-//밝기 죽이기?
+//
 float g_ColorGain; // 밝기 스케일 0~1
 float g_ColorGamma; // 톤 커버, (1 == 그대로, >1 어두워지게)
 
@@ -870,7 +870,12 @@ PS_OUT PS_DefaultMeshRender(PS_IN In)
     if (Dissolve - fRatio < 0.f)
         discard;
 
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    float4 vColor;
+    
+    if (g_Dir == 0)
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    else
+        vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.x)));
 
     vColor.a = fAlpha;
     
@@ -886,9 +891,11 @@ PS_OUT PS_DefaultMeshRender(PS_IN In)
     float fWeight = Luminance(vColor.xyz);
 
     if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(vColor.xyz, 1.f);
+        Out.vEmissive = float4(vColor.xyz, 1.f); 
     
     Out.vDiffuse = vColor;
+    
+    Out.vDiffuse.a *= g_Alpha;
     
     
     // 단순 매쉬랜더는 웨이트블랜드 적용 안하는게 나을지도
@@ -1059,7 +1066,6 @@ PS_OUT PS_SkyTrailColor(PS_IN In)
     else
         vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(FlowUV.y, saturate(FlowUV.x)));
     
-    
     vColor.rgb = saturate(vColor.rgb);
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;
@@ -1114,13 +1120,15 @@ PS_OUT PS_SkyTrailMask_X(PS_IN In)
     
     float fVisibleY;
 
-    fVisibleY = step(1.f - g_Sweep, UV.y);
+    float Sweep = min(1.f, g_Sweep);
+    
+    fVisibleY = step(1.f - Sweep, UV.y);
 
     float fVisibleX;
 
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.x);
+    float fTailFad = smoothstep(Sweep - g_SweepWitdh, Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.x);
 
-    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, 1.f - FlowUV.x);
+    float fHeadFad = 1.f - smoothstep(Sweep - g_Soft, Sweep, 1.f - FlowUV.x);
 
     fVisibleX = fTailFad * fHeadFad;
 
@@ -1186,13 +1194,15 @@ PS_OUT PS_SkyTrailMask_Y(PS_IN In)
     
     float fVisible;
 
-    fVisible = step(1.f - g_Sweep, UV.y);
+    float Sweep = min(1.f, g_Sweep);
+    
+    fVisible = step(1.f - Sweep, UV.y);
 
     float fVisibleY;
 
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.y);
+    float fTailFad = smoothstep(Sweep - g_SweepWitdh, Sweep - g_SweepWitdh + g_Soft, 1.f - FlowUV.y);
 
-    float fHeadFad = 1.f - smoothstep(g_Sweep - g_Soft, g_Sweep, 1.f - FlowUV.y);
+    float fHeadFad = 1.f - smoothstep(Sweep - g_Soft, Sweep, 1.f - FlowUV.y);
 
     fVisibleY = fTailFad * fHeadFad;
 

@@ -13,8 +13,9 @@
 #include "Effect_Decal.h"
 #include "Effect_Radial.h"
 #include"Map_Interface.h"
-
 #include "TestVA.h"
+#include "Effect_Light.h"
+#include "Spectrum.h"
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -50,6 +51,12 @@ HRESULT CLevel_Effect::Initialize()
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectVA"),
 		CTestVA::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectLight"),
+		CEffect_Light::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectSpectrum"),
+		CSpectrum::Create(m_pDevice, m_pContext));
+
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
@@ -60,9 +67,11 @@ HRESULT CLevel_Effect::Initialize()
     //�Ϲ� �Ž� �׸���� ���̴� �߰��������.
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxTrailMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
-
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxFXRect"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXRect.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxPosTex"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements));
         
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
@@ -106,6 +115,13 @@ HRESULT CLevel_Effect::Initialize()
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
     }
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMeshCharacter"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMeshCharacter.hlsl")
+			, VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+		return E_FAIL;
+	}
 
     //�ִϸ��̼� ����� ���̴�
     SHADER_MACRO eShaderMacroB = {
@@ -148,6 +164,15 @@ void CLevel_Effect::Update(_float fTimeDelta)
     SetWindowText(g_hWnd, TEXT("Effect"));
 
         m_pEffect_Controller->Update();
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
+		{
+			m_pGameInstance->Set_LightActive(TEXT("Test"), true);
+		}
+		if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+		{
+			m_pGameInstance->Set_LightActive(TEXT("Test"), false);
+		}
 
 }
 

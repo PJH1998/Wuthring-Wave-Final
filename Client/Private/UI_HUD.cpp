@@ -176,6 +176,7 @@ void CUI_HUD::PreAssign_ChildUIs()
 	m_pUI_Group_Augusta = Find_ChildObject(L"Group_Augusta");
 	m_pUI_Group_Galbrena = Find_ChildObject(L"Group_Galbrena");
 
+	m_pUI_Frame_Rover = Find_ChildObject(L"Frame_Rover");
 	m_pUI_Frame_Rover_Dark = Find_ChildObject(L"Frame_Rover_Dark");
 	m_pUI_Frame_Augusta = Find_ChildObject(L"Frame_Augusta");
 	m_pUI_FrameGroup_Augusta_OtherEnergy = Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy");
@@ -281,11 +282,17 @@ HRESULT CUI_HUD::Ready_Presets()
 	m_arrPlayerSymbolicColors[CLR_GALBRENA]			= _float4(1.000f, 0.416f, 0.416f, 1.0f);
 	m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT]		= _float4(0.992f, 0.749f, 0.341f, 1.0f);
 
-	m_arrPlayerAdvSymbolicColors[CLR_ROVER]			= _float4(0.485f, 0.193f, 0.367f, 1.0f);
-	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA]		= _float4(0.581f, 0.271f, 0.600f, 1.0f);
-	m_arrPlayerAdvSymbolicColors[CLR_GALBRENA]		= _float4(0.600f, 0.250f, 0.250f, 1.0f);
-	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT]	= _float4(0.595f, 0.449f, 0.205f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_ROVER]        = _float4(0.339f, 0.135f, 0.257f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA]      = _float4(0.407f, 0.190f, 0.420f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_GALBRENA]     = _float4(0.420f, 0.175f, 0.175f, 1.0f);
+	m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT]  = _float4(0.416f, 0.314f, 0.143f, 1.0f);
 
+
+	for (_uint i = 0; i < m_arrKeyGuidePresets.size(); i++)
+	{
+		auto& keyGuide = m_arrKeyGuidePresets[i];
+		keyGuide = Calc_SpriteSpace(i % 4, i / 4, { 4, 4 });
+	}
 
 	return S_OK;
 }
@@ -422,19 +429,27 @@ void CUI_HUD::Update_Presets()
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	m_isIn_UltMode_Augusta = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_AUGUSTA) ?
+		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
+
+	m_isIn_StrongAtk_Augusta = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_AUGUSTA) ?
+		static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY : false;
+
+	m_isIn_BurstMode_Galbrena = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
+		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
+
 
 	switch (m_iSelectedCHIndex)
 	{
 	case CH_ROVER:		m_arrPlayerColors[CH_ROVER]			= m_arrPlayerSymbolicColors[CLR_ROVER];
 						m_arrPlayerAdvColors[CH_ROVER]		= m_arrPlayerAdvSymbolicColors[CLR_ROVER];		break;
 	case CH_AUGUSTA:	m_arrPlayerColors[CH_AUGUSTA]		=
-					(	isIn_Augusta_AdvUlt ||													// 궁 사용중이거나
+					(	m_isIn_UltMode_Augusta ||													// 궁 사용중이거나
 						m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
 															  m_arrPlayerSymbolicColors[CLR_AUGUSTA_ULT] :
 															  m_arrPlayerSymbolicColors[CLR_AUGUSTA];		
 						m_arrPlayerAdvColors[CH_AUGUSTA]		=
-					(	isIn_Augusta_AdvUlt ||													// 궁 사용중이거나
+					(	m_isIn_UltMode_Augusta ||													// 궁 사용중이거나
 						m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?	// 궁 게이지 100%일 때 색 다르게
 															  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA_ULT] :
 															  m_arrPlayerAdvSymbolicColors[CLR_AUGUSTA];
@@ -489,6 +504,21 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// ==============================
 	// * [Skill Icon Updates] Apply CD Value.
 	// ==============================
+	auto& vecUISlots = m_pAbility->Get_UISkillSlots();
+	_bool isUltReady = {};
+	switch (m_iSelectedCHIndex)
+	{
+	case CH_ROVER:
+	case CH_GALBRENA:
+		isUltReady = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) == 1.f;		break;
+	case CH_AUGUSTA:
+		isUltReady = (m_isIn_UltMode_Augusta) ?
+			pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST4) == 1.f :
+			pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) == 1.f;				break;
+	}
+
+
+
 	for (_uint i = 0; i < CH_END; i++)
 	{
 		auto targetUI = m_pUI_Skill[i];
@@ -499,9 +529,19 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		_uint iTargetNumInstance = static_cast<_uint>(targetUI->Get_UIDesc().vecInstanceDescs.size());
 		vecVariantMat.resize(iTargetNumInstance);
 
-		_float fLeftColorMul		= 0.4f;
-		_float fPassedColorMul		= 0.8f;
-		_float fFilledColorMul		= 0.95f;
+		const _float fLeftColorMul			= 0.4f;
+		const _float fPassedColorMul		= 0.7f;
+		const _float fFilledColorMul		= 1.f;
+
+		// 궁 준비상태에 따른 색상. 궁 준비 + 잔여 쿨 0초면 제대로 보임.또 쿨 진행중이면 쿨 표시. 이것까진 기존대로, 이외엔 흐린 색
+		_float fUltColor = {};
+		if (isUltReady && fBasicSkillCD[i][SK_R] <= 0.f)	fUltColor = fFilledColorMul;
+		else if (fBasicSkillCD[i][SK_R] > 0.f)				fUltColor = fPassedColorMul;
+		else												fUltColor = fPassedColorMul;
+
+		if (static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_READY &&
+			m_iSelectedCHIndex == CH_AUGUSTA)
+			fUltColor = fFilledColorMul;
 
         vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
         vecVariantMat[0].m[0][1] = fLeftColorMul;
@@ -509,13 +549,13 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
         vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
         vecVariantMat[1].m[0][1] = fLeftColorMul;
-		vecVariantMat[1].m[0][2] = (fBasicSkillCD[i][SK_R] != 0.f) ? fPassedColorMul : fFilledColorMul;;
+		vecVariantMat[1].m[0][2] = fUltColor;
 
 		if (vecVariantMat.size() >= 3)
 		{
 			vecVariantMat[2].m[0][0] = 0.0f;	// for LB Btn
 			vecVariantMat[2].m[0][1] = fLeftColorMul;
-			vecVariantMat[2].m[0][2] = fPassedColorMul;
+			vecVariantMat[2].m[0][2] = fFilledColorMul;
 		}
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -527,23 +567,23 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         targetUI->Set_VariantUIDesc(tVariantDesc);
 
 
-		auto& UISlots = m_pAbility->Get_UISkillSlots();
+		
 		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(m_iSelectedCHIndex);
 		switch (eCharacterType)
 		{
 			// * [SK Icon Update] Rover
 		case UI_CHARACTERTYPE::ROVER:
-			Update_Icon_Rover(UISlots);
+			Update_Icon_Rover(vecUISlots);
 			break;
 
 			// * [SK Icon Update] Augusta
 		case UI_CHARACTERTYPE::AUGUSTA:
-			Update_Icon_Augusta(UISlots);
+			Update_Icon_Augusta(vecUISlots);
 			break;
 
 			// * [SK Icon Update] Galbrena
 		case UI_CHARACTERTYPE::GALBRENA:
-			Update_Icon_Galbrena(UISlots);
+			Update_Icon_Galbrena(vecUISlots);
 			break;
 		}
 
@@ -586,6 +626,15 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
+	_bool isReady_Augusta_Griffon = (m_iSelectedCHIndex != CH_AUGUSTA) ? false :
+		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_STATE::E_GRIFFON_READY;
+	_bool isReady_Augusta_Rise =	(m_iSelectedCHIndex != CH_AUGUSTA) ? false :
+		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_STATE::E_RISE_READY;
+	_bool isReady_Augusta_LBStrong =(m_iSelectedCHIndex != CH_AUGUSTA) ? false :
+		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isReady_Galbrena_Burst =	(m_iSelectedCHIndex != CH_GALBRENA) ? false :
+		static_cast<UI_GALBRENA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_GALBRENA_STATE::E_BURST_READY;
+
 
 	static _uint iIndex_EBtn = 2;		static _uint iIndex_PrevEBtn;
 	static _uint iIndex_RBtn = 0;		static _uint iIndex_PrevRBtn ;
@@ -604,10 +653,14 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			iIndex_RBtn = 0;
 			iIndex_LBBtn = 1;
 		}
+		else
+		{
+			iIndex_EBtn = 2;
+			iIndex_RBtn = 0;
+			iIndex_LBBtn = 4;
+		}
 	}break;
 	case CH_GALBRENA:
-	{	// ksta : 버스트 모드 시에 5로 늘려야 함
-	}break;
 	default:
 		iIndex_EBtn = 2;
 		iIndex_RBtn = 0;
@@ -625,6 +678,11 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	
 	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
 
+
+
+
+
+
 	// - LB/E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
 	 
 	//if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
@@ -638,20 +696,32 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	else								readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
 
 
-	switch (m_iSelectedCHIndex)
+	switch (m_iSelectedCHIndex)	// LB
 	{
-	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Augusta_AdvUlt) ?		_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	case CH_AUGUSTA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (!isIn_Augusta_AdvUlt && isReady_Augusta_LBStrong) ?
+																									_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	case CH_GALBRENA:	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = (isIn_Galbrena_BurstMode) ?	_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
 	default:			readyInstDesc[iIndex_LBBtn].vClipTexcoordX = _float2{ 0.f, 0.f };														break;
 	}
 	
-	
+	switch (m_iSelectedCHIndex)	// E
+	{
+	case CH_AUGUSTA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = ((isReady_Augusta_Griffon || isReady_Augusta_Rise) && (!isIn_Augusta_AdvUlt)) ?
+																									_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	case CH_GALBRENA:	readyInstDesc[iIndex_EBtn].vClipTexcoordX = (isReady_Galbrena_Burst) ?		_float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };	break;
+	default:			readyInstDesc[iIndex_EBtn].vClipTexcoordX = _float2{ 0.f, 0.f };
+	}
 
 	;
 
 	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
 	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
+	if ((static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY ||
+		static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_READY) &&
+		m_iSelectedCHIndex == CH_AUGUSTA)
+		fUltGuage = 1.f;
+
 	vector<_float4> vecCustomColor		= { };		vecCustomColor.resize(CH_END);
 	vector<_float4> vecAdvCustomColor	= { };		vecAdvCustomColor.resize(CH_END);
 	
@@ -697,14 +767,14 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	{	// 기본값 설정
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._11) = 0.f;
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._12) = 0.f;								// ColorMul1
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 1.f;								// ColorMul2
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 0.7f;								// ColorMul2
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._14) = static_cast<_float>(true);		// Is Use CustomColor?
-		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vecCustomColor[m_iSelectedCHIndex];	// CustomColor
+		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];	// CustomColor
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 0.f;							// CD Start Degree
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
+		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = false;	// isUseNoise
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._33) = m_fElapsedTime;							// Elapsed Time
 		*reinterpret_cast<_float*>(&vecVariantMat[i]._34) = 0.2f;							// UV Scroll Speed
-		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = vecAdvCustomColor[m_iSelectedCHIndex];	// Mask Color
+		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
 	}
 
 	// R에 대한 예외 적용
@@ -722,9 +792,12 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
-		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE_ADV),
 		true
 	};
+
+
+
 
 	// 만약 버튼 인덱스가 바뀐다면, 꼬임 방지를 위한 이전 버튼 인덱스의 비활성화.
 	if (iIndex_PrevEBtn != iIndex_EBtn)		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
@@ -743,6 +816,14 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 {
 	CCustom_UI* pTargetUI = m_pUI_Skill_ReadyWave;
 	_bool isUltGuageFull = m_pPlayerStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) == 1.f;
+	if (m_iSelectedCHIndex == CH_AUGUSTA)
+	{
+		isUltGuageFull = (m_isIn_UltMode_Augusta)?
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST4) == 1.f) :
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f) || 
+			(m_pPlayerStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST5) == 1.f);
+
+	}
 
 	if (!isUltGuageFull)
 	{
@@ -804,6 +885,15 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 {
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_Augusta_AdvUlt = (m_iSelectedCHIndex == CH_AUGUSTA)?
+		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
+
+
+
 	CCustom_UI* pTargetUI = m_pUI_Skill_Utility;
 
 	auto& utilDesc = pTargetUI->Get_UIDesc();
@@ -814,9 +904,13 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 
 	UI_TAB_UTILITY ePlayerUtility = m_pPlayerStatus->Get_UtilityType();
 
-
 	utilInstDesc.vSInstCoordX = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][0];
 	utilInstDesc.vSInstCoordY = m_arrUtilCoordPresets[ENUM_CLASS(ePlayerUtility)][1];
+
+
+
+	if (isIn_Augusta_AdvUlt)		utilInstDesc.vClipTexcoordX = { 0.f, 0.f };
+	else							utilInstDesc.vClipTexcoordX = { 0.f, 1.f };
 }
 
 void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
@@ -838,6 +932,7 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
 
 
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
@@ -868,9 +963,13 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 
 
 
-	_float4 vBGColor = _float4{ .5f, .5f, .5f, .3f };
+	_float4 vBGColor = _float4{ .4f, .4f, .4f, .5f };
 
 	CCustom_UI* pSkillBGUI = m_pUI_Skill_BG;    // �ν��Ͻ� 4����
+	auto& skillBGIinstDesc = pSkillBGUI->Get_UIDesc().vecInstanceDescs;
+
+	skillBGIinstDesc[1].vClipTexcoordX = m_isIn_UltMode_Augusta? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };
+	
 
 	vector<_float4x4> vecBGVariantMat = {};
 	vecBGVariantMat.resize(5);
@@ -880,6 +979,13 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 		*reinterpret_cast<_float4*>(&vecBGVariantMat[i]._11) = vBGColor;
 		*reinterpret_cast<_float*>(&vecBGVariantMat[i]._21) = (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
 	}
+	
+
+
+
+
+
+	//if (m_iSelectedCHIndex == )
 
 	CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
 		vecBGVariantMat,
@@ -915,7 +1021,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	_uint iIndex_EBtn =	 2;
 	_uint iIndex_RBtn =  0;
 	_uint iIndex_LBBtn = 4;
-	//_uint iIndex_TBtn = ..
+	_uint iIndex_TBtn = 3;
 
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
 	{
@@ -1000,6 +1106,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	_bool isChar_RuttonFeedbackAble = true;
 
 
+	// T Btn
+	_bool isChar_TRuttonFeedbackAble = (m_isIn_UltMode_Augusta) ? false : true;
+
 	
 	// 클릭마다 해당 위치에 피드백 생성
 	if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN &&
@@ -1008,6 +1117,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN &&
 		isChar_RuttonFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_RBtn);
+	if (m_pGameInstance->Get_DIKeyState(DIK_T) == KEYSTATE::DOWN &&
+		isChar_TRuttonFeedbackAble)
+		Add_UI_SkillSection_OnFeedback(iIndex_TBtn);
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		isChar_LBBtnFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_LBBtn);
@@ -1016,9 +1128,9 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 {
     CCustom_UI* pFeedbackUI = m_pUI_Feedback;
-    const _float2 fDestScale = { 1.2f, 1.2f };
+    const _float2 fDestScale = { 1.3f, 1.3f };
     const _float fStartAlpha = 0.f;     // 0�� ����, 1�� �Ⱥ������� ����.
-    const _float fLifeTime = .5f;
+    const _float fLifeTime = .4f;
     _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
 
     auto& uiDesc = pFeedbackUI->Get_UIDesc();
@@ -1127,9 +1239,41 @@ void CUI_HUD::Update_Text_PlayerCD()
 	_float fCurCHCD_E = UISlots[CAbility::KEY_E].fCurrentCoolTime;
 	_float fCurCHCD_T = 0.f;		// 나중에 쓸 것 같으면 그떄가서 넣기
 
+
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_ROVER:
+	{
+		m_pTextUI_SkillCD_R->SetActivate(true);
+		m_pTextUI_SkillCD_E->SetActivate(true);
+	}break;
+	case CH_AUGUSTA:
+	{
+		if (m_isIn_UltMode_Augusta)
+		{
+			m_pTextUI_SkillCD_R->SetActivate(true);
+			m_pTextUI_SkillCD_E->SetActivate(false);
+		}
+		else
+		{
+			m_pTextUI_SkillCD_R->SetActivate(true);
+			m_pTextUI_SkillCD_E->SetActivate(true);
+		}
+	}break;
+	case CH_GALBRENA:
+	default:
+	{
+		m_pTextUI_SkillCD_R->SetActivate(true);
+		m_pTextUI_SkillCD_E->SetActivate(true);
+	}
+		break;
+	}
+
+
+
 	// 0초면 안보이게.
-	if (fCurCHCD_R == 0.f) m_pTextUI_SkillCD_R->SetActivate(false);			else m_pTextUI_SkillCD_R->SetActivate(true); 
-	if (fCurCHCD_E == 0.f) m_pTextUI_SkillCD_E->SetActivate(false);			else m_pTextUI_SkillCD_E->SetActivate(true); 
+	if (fCurCHCD_R == 0.f) m_pTextUI_SkillCD_R->SetActivate(false);
+	if (fCurCHCD_E == 0.f) m_pTextUI_SkillCD_E->SetActivate(false);
 	if (fCurCHCD_T == 0.f) m_pTextUI_SkillCD_T->SetActivate(false);			else m_pTextUI_SkillCD_T->SetActivate(true);
 
 	// 쿨타임 소숫점 잘라내기
@@ -1146,97 +1290,75 @@ void CUI_HUD::Update_Text_PlayerCD()
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 {
-	// - required info list..
-	// fPlayerHPRatio
-	
-
-    //static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
-    //static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
-    //const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
-    static _bool isHit = false;
-    static _float fHPReduceLeftTime = 0.f;
-    
-
-
-    //_float fPlayerHPRatio = fPlayerHP[iSelectedCHIndex] / fPlayerMaxHP[iSelectedCHIndex];
 	_float fPlayerHPRatio = m_pPlayerStatus->Get_HpRatio(m_iSelectedCHIndex);
-	static _float fPlayerHPPrevRatio = 0.f;
-	static _float fPlayerHPBackRatio = 0.f; //  = fPlayerHPRatio;
 
-    _float4 vHPColor        = { 1.f, 1.f, 1.f, 1.f };
-    _float4 vHPBackColor    = { 1.f, 0.f, 0.f, 1.f };
+	if (fPlayerHPRatio < 0.f) fPlayerHPRatio = 0.f;
+	else if (fPlayerHPRatio > 1.f) fPlayerHPRatio = 1.f;
 
-    const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
-
-    CCustom_UI* targetUI = m_pUI_HPBar;
-
-
-
-    
-    if (fHPReduceLeftTime > 0)
-    {
-        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // ü�� ���� ����
-
-        if (diff > 0.f)
-        {
-            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // �پ�� ü�� ����
-
-            fPlayerHPBackRatio -= delta;                               
-            if (fPlayerHPBackRatio < fPlayerHPRatio)
-                fPlayerHPBackRatio = fPlayerHPRatio;
-        }
-
-        fHPReduceLeftTime -= fTimeDelta;
-        if (fHPReduceLeftTime < 0)
-            fHPReduceLeftTime = 0;
-    }
-    else
-    {
-        fPlayerHPBackRatio = fPlayerHPRatio;
-    }
-
-
-	// HP 변화를 감지하여 피격 여부 확인
-	if (fPlayerHPPrevRatio > fPlayerHPRatio)
+	if (!m_isInited)
 	{
-		isHit = true;
-	}
-	// 피격 여부 확인 시 뒷 HP바가 따라가기 시작
-	if (isHit == true)
-	{
-		fHPReduceLeftTime = fHPReduceTime;
+		m_fPlayerHPBackRatio = fPlayerHPRatio;
+		m_fPlayerHPPrevRatio = fPlayerHPRatio;
+		m_fPlayerHPReduceLeftTime = 0.f;
+		m_isInited = true;
 	}
 
 
+	_float4 vHPColor = { 1.f, 1.f, 1.f, 1.f };
+	_float4 vHPBackColor = { 1.f, 0.f, 0.f, 1.f };
 
-    // change
-    vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11)    = vHPColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11)      = vHPBackColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21)    = vHPColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21)      = vHPBackColor;
-    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31)     = fPlayerHPRatio;
-    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31)       = fPlayerHPBackRatio;
+	const _float fHPReduceTime = 0.5f;
 
-    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-        vecVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-        true
-    };
-    
-    targetUI->Set_VariantUIDesc(tVariantDesc);
+	CCustom_UI* targetUI = m_pUI_HPBar;
 
 
-    isHit = false;
-	fPlayerHPPrevRatio = fPlayerHPRatio;
+	if (m_fPlayerHPPrevRatio > fPlayerHPRatio)
+	{
+		m_fPlayerHPReduceLeftTime = fHPReduceTime;
+	}
 
+	// Back Guage
+	if (m_fPlayerHPReduceLeftTime > 0.f)
+	{
+		_float diff = m_fPlayerHPBackRatio - fPlayerHPRatio;
 
-#ifdef KSTA_UI_HPBARTEST
-    std::cout << "[UI_HUD][Update_UI_HPBar] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_HPBar] 1 fPlayerHP     : " << fPlayerHPRatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_HPBar] 2 fPlayerHPBack : " << fPlayerHPBackRatio << std::endl;
-#endif // KSTA_UI_HPBARTEST
+		if (diff < 0.f)
+			m_fPlayerHPBackRatio = fPlayerHPRatio;
+		else if (diff > 0.f)
+		{
+			_float delta = diff * (fTimeDelta / m_fPlayerHPReduceLeftTime);
+			m_fPlayerHPBackRatio -= delta;
 
+			if (m_fPlayerHPBackRatio < fPlayerHPRatio)
+				m_fPlayerHPBackRatio = fPlayerHPRatio;
+		}
+
+		m_fPlayerHPReduceLeftTime -= fTimeDelta;
+		if (m_fPlayerHPReduceLeftTime < 0.f)
+			m_fPlayerHPReduceLeftTime = 0.f;
+	}
+	else
+	{
+		m_fPlayerHPBackRatio = fPlayerHPRatio;
+	}
+
+	vector<_float4x4> vecVariantMat = { _float4x4(), _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11) = vHPColor;
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11) = vHPBackColor;
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21) = vHPColor;
+	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21) = vHPBackColor;
+	*reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31) = fPlayerHPRatio;
+	*reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31) = m_fPlayerHPBackRatio;
+
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
+
+	targetUI->Set_VariantUIDesc(tVariantDesc);
+
+	m_fPlayerHPPrevRatio = fPlayerHPRatio;
 }
 
 void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
@@ -1245,172 +1367,175 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	_float	fBossHP		= 0.f;
 	_float	fBossBackHP = 0.f;
 	_float	fBossMaxHP	= 1.f;
-	
-	_float	fBossSA		= 0.f;
-    _float	fBossBackSA = 0.f;
-    _float	fBossMaxSA	= 1.f;
-    _bool	isSABreak	= false;
 
-	static _float	fTmpBossHP = 0.f;
-	static _float	fTmpBossSA = 0.f;
+	_float	fBossSA		= 0.f;
+	_float	fBossBackSA = 0.f;
+	_float	fBossMaxSA	= 1.f;
+	_bool	isSABreak	= false;
+
+
+
+
 
 	if (m_isOn_BossStatus)
 	{
 		fBossHP		= *m_pCurBossHP;
 		fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
-		fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
-		
+		fBossBackHP = (fBossHP == fBossMaxHP) ? fBossHP : m_fBackBossHP;
+
 		isSABreak	= *m_pIsGroggy;
-		
+
 		if (!isSABreak)
 		{
-			fBossSA = *m_pCurBossSA;
-			fBossMaxSA = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
+			fBossSA		= *m_pCurBossSA;
+			fBossMaxSA	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
 			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
 		}
 		else
 		{
-			fBossSA = *m_pGroggyLeftRatio;
-			fBossMaxSA = 1.f;
+			fBossSA		= *m_pGroggyLeftRatio;
+			fBossMaxSA	= 1.f;
 			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
 		}
 	}
+
+	if (!m_isOn_BossStatus)
+	{
+		m_isPrevBossOn = false;
+		m_fBossHPReduceLeftTime = 0.f;
+		return;
+	}
 	
-	//static _bool isHit = false;
-    static _float fHPReduceLeftTime = 0.f;
+	if (fBossMaxHP <= 0.f) fBossMaxHP = 1.f;
+	if (fBossMaxSA <= 0.f) fBossMaxSA = 1.f;
 
-    _float fBossHPRatio = fBossHP / fBossMaxHP;
-    _float fBossSARatio = fBossSA / fBossMaxSA;
-    static _float fBossHPBackRatio = fBossHPRatio;
-    static _float fBossSABackRatio = fBossSARatio;
+	_float fBossHPRatio = fBossHP / fBossMaxHP;
+	_float fBossSARatio = fBossSA / fBossMaxSA;
 
+
+	if (fBossHPRatio < 0.f) fBossHPRatio = 0.f; else if (fBossHPRatio > 1.f) fBossHPRatio = 1.f;
+	if (fBossSARatio < 0.f) fBossSARatio = 0.f; else if (fBossSARatio > 1.f) fBossSARatio = 1.f;
+
+
+	if (m_isOn_BossStatus && !m_isPrevBossOn)
+	{
+		m_fBossHPBackRatio = fBossHPRatio;
+		m_fBossSABackRatio = fBossSARatio;
+		m_fBossHPReduceLeftTime = 0.f;
+
+		m_fTmpBossHP = fBossHP;
+		m_fTmpBossSA = fBossSA;
+	}
+	m_isPrevBossOn = m_isOn_BossStatus;
 
 	// Colors
-    const _float4 vHPColor1         = { 1.f, .7f, .1f, 1.f };
-    const _float4 vHPColor2         = { 1.f, .2f, .0f, 1.f };
-    const _float4 vHPBackColor1     = { .8f, .8f, .8f, 1.f };
+	const _float4 vHPColor1     = { 1.f, .7f, .1f, 1.f };
+	const _float4 vHPColor2     = { 1.f, .2f, .0f, 1.f };
+	const _float4 vHPBackColor1 = { .8f, .8f, .8f, 1.f };
 
-    const _float4 vSAColor          = { 1.f, 1.f, 1.f, 1.f };   // before armor break
-    const _float4 vSABreakColor     = { .9f, .8f, .3f, 1.f };
-    const _float4 vSABackColor      = { 1.f, 1.f, 1.f, .3f };   // after armor break
-    //const _float4 vSABreakBackColor = { .2f, .2f, .2f, 1.f };
+	const _float4 vSAColor      = { 1.f, 1.f, 1.f, 1.f };   // before armor break
+	const _float4 vSABreakColor = { .9f, .8f, .3f, 1.f };
+	const _float4 vSABackColor  = { 1.f, 1.f, 1.f, .3f };   // after armor break
 
-    const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
+	const _float fHPReduceTime = 0.5f;
 
-    const auto targetUI		= m_pUI_BossHPBar;
-    const auto targetSAUI	= m_pUI_BossSABar;
+	const auto targetUI   = m_pUI_BossHPBar;
+	const auto targetSAUI = m_pUI_BossSABar;
 
+
+
+	if (m_fTmpBossHP > fBossHP || m_fTmpBossSA > fBossSA)
+	{
+		m_fBossHPReduceLeftTime = fHPReduceTime;
+	}
 
 	// Back Guage
-    if (fHPReduceLeftTime > 0)
-    {
-        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // ü�� ���� ����
-        _float fSADiff = fBossSABackRatio - fBossSARatio;              // �Ƹ� ���� ����
-
-        if (fHPDiff > 0.f)
-        {
-            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // �پ�� ü�� ����
-
-            fBossHPBackRatio -= fHPDelta;
-            if (fBossHPBackRatio < fBossHPRatio)
-                fBossHPBackRatio = fBossHPRatio;
-        }
-        if (fSADiff > 0.f)
-        {
-            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // �پ�� �Ƹ� ����
-
-            fBossSABackRatio -= fSADelta;
-            if (fBossSABackRatio < fBossSARatio)
-                fBossSABackRatio = fBossSARatio;
-        }
-
-        fHPReduceLeftTime -= fTimeDelta;
-        if (fHPReduceLeftTime < 0)
-            fHPReduceLeftTime = 0;
-    }
-    else
-    {
-        fBossHPBackRatio = fBossHPRatio;
-        fBossSABackRatio = fBossSARatio;
-    }
-
-
-	if (fTmpBossHP > fBossHP || fTmpBossSA > fBossSA)
+	if (m_fBossHPReduceLeftTime > 0.f)
 	{
-		//isHit = true;
-		fHPReduceLeftTime = fHPReduceTime;
-		cout << "[UI_HUD::Update_UI_BossHPBar] Triggered!" << endl;
+		_float fHPDiff = m_fBossHPBackRatio - fBossHPRatio;
+		_float fSADiff = m_fBossSABackRatio - fBossSARatio;
+
+
+		if (fHPDiff < 0.f) m_fBossHPBackRatio = fBossHPRatio;
+		if (fSADiff < 0.f) m_fBossSABackRatio = fBossSARatio;
+
+		if (fHPDiff > 0.f)
+		{
+			_float fHPDelta = fHPDiff * (fTimeDelta / m_fBossHPReduceLeftTime);
+			m_fBossHPBackRatio -= fHPDelta;
+
+			if (m_fBossHPBackRatio < fBossHPRatio)
+				m_fBossHPBackRatio = fBossHPRatio;
+		}
+
+		if (fSADiff > 0.f)
+		{
+			_float fSADelta = fSADiff * (fTimeDelta / m_fBossHPReduceLeftTime);
+			m_fBossSABackRatio -= fSADelta;
+
+			if (m_fBossSABackRatio < fBossSARatio)
+				m_fBossSABackRatio = fBossSARatio;
+		}
+
+		m_fBossHPReduceLeftTime -= fTimeDelta;
+		if (m_fBossHPReduceLeftTime < 0.f)
+			m_fBossHPReduceLeftTime = 0.f;
 	}
-
-	if (!(fHPReduceLeftTime <= 0.01f))
+	else
 	{
-		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
+		m_fBossHPBackRatio = fBossHPRatio;
+		m_fBossSABackRatio = fBossSARatio;
 	}
 
 
+	vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._11) = vHPColor1;
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._11)   = vHPBackColor1;
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._21) = vHPColor2;
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)   = vHPBackColor1;
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)  = fBossHPRatio;
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)    = m_fBossHPBackRatio;
 
-    // change
-    vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._11)    = vHPColor1;
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._11)      = vHPBackColor1;
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._21)    = vHPColor2;
-    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)      = vHPBackColor1;
-    *reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)     = fBossHPRatio;
-    *reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)       = fBossHPBackRatio;
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32)  = static_cast<_float>(true);     // isUseNoise
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33)  = m_fElapsedTime;               // Elapsed Time
+	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34)  = 0.2f;                         // UV Scroll Speed
+	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.698f, 0.212f, 0.035f, 1.000f); // Mask Color
 
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32) = static_cast<_float>(true);	// isUseNoise
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33) = m_fElapsedTime;							// Elapsed Time
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34) = 0.2f;							// UV Scroll Speed
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.698f, 0.212f, 0.035f, 1.000f);	// Mask Color
+	vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11) = (isSABreak) ? vSABreakColor : vSAColor;
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)   = (isSABreak) ? _float4() : vSABackColor;
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21) = (isSABreak) ? vSABreakColor : vSAColor;
+	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)   = (isSABreak) ? _float4() : vSABackColor;
+	*reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)  = fBossSARatio;
+	*reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)    = m_fBossSABackRatio;
 
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
 
-    vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11)  = (isSABreak) ? vSABreakColor : vSAColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)    = vSABackColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21)  = (isSABreak) ? vSABreakColor : vSAColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)    = vSABackColor;
-    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)   = fBossSARatio;
-    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)     = fBossSABackRatio;
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDescSA = {
+		vecVariantMatSA,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+		true
+	};
 
-
-    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-        vecVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-        true
-    };
-
-    CCustom_UI::VARIANTREADY_UI_DESC tVariantDescSA = {
-        vecVariantMatSA,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
-        true
-    };
-
-    targetUI->Set_VariantUIDesc(tVariantDesc);
-    targetSAUI->Set_VariantUIDesc(tVariantDescSA);
-
-    //isHit = false;
-	fTmpBossHP = fBossHP;
-	fTmpBossSA = fBossSA;
+	targetUI->Set_VariantUIDesc(tVariantDesc);
+	targetSAUI->Set_VariantUIDesc(tVariantDescSA);
 
 
-#ifdef KSTA_UI_HPBARBOSSTEST
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 1 fBossHP     : " << fBossHPRatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 2 fBossHPBack : " << fBossHPBackRatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 1 fBossSA     : " << fBossSARatio << std::endl;
-    std::cout << "[UI_HUD][Update_UI_BossHPBar] 2 fBossSABack : " << fBossSABackRatio << std::endl;
-#endif // KSTA_UI_HPBARBOSSTEST
-
-
-
+	m_fTmpBossHP = fBossHP;
+	m_fTmpBossSA = fBossSA;
 }
 
 void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 {
+	// 오른쪽에서부터 왼쪽 ( <- ) 순서
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
 
-    // ĳ���Ϳ� ���� Ű ���̵� ���̱� ���� �б�
+    // Sector Right
     CCustom_UI* pKeyButtonUI = m_pUI_KeyButton;
     auto& keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
@@ -1432,6 +1557,108 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
         keyButtonDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.0f, 0.0f }; 
         break;
     }
+
+	// Sector Bottom.. On/Off
+	switch (m_iSelectedCHIndex)
+	{
+	case Client::CUI_HUD::CH_AUGUSTA:
+		if (m_isIn_UltMode_Augusta)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		}
+		else if (m_isIn_StrongAtk_Augusta)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 1.0f };
+		}
+		else
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		}
+		break;
+	case Client::CUI_HUD::CH_GALBRENA:
+		if (m_isIn_BurstMode_Galbrena)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 1.0f };
+		}
+		else
+		{
+			keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+			keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+			keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		}
+		break;
+	case Client::CUI_HUD::CH_ROVER:
+	default:
+		keyButtonDesc.vecInstanceDescs[3].vClipTexcoordX = { 0.0f, 1.0f };
+		keyButtonDesc.vecInstanceDescs[4].vClipTexcoordX = { 0.0f, 0.0f };
+		keyButtonDesc.vecInstanceDescs[5].vClipTexcoordX = { 0.0f, 1.0f };
+		keyButtonDesc.vecInstanceDescs[6].vClipTexcoordX = { 0.0f, 1.0f };
+		keyButtonDesc.vecInstanceDescs[7].vClipTexcoordX = { 0.0f, 0.0f };
+		break;
+	}
+
+	// Sector Bottom.. Key Index
+		// Sector Bottom
+	switch (m_iSelectedCHIndex)
+	{
+	case Client::CUI_HUD::CH_AUGUSTA:
+		if (m_isIn_UltMode_Augusta)
+		{
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_R][0];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_LB][0];
+
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_R][1];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_LB][1];
+		}
+		else
+		{
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_R][0];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_Q][0];
+			keyButtonDesc.vecInstanceDescs[5].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_E][0];
+			keyButtonDesc.vecInstanceDescs[6].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_T][0];
+			keyButtonDesc.vecInstanceDescs[7].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_LB][0];
+
+			keyButtonDesc.vecInstanceDescs[3].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_R][1];
+			keyButtonDesc.vecInstanceDescs[4].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_Q][1];
+			keyButtonDesc.vecInstanceDescs[5].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_E][1];
+			keyButtonDesc.vecInstanceDescs[6].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_T][1];
+			keyButtonDesc.vecInstanceDescs[7].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_LB][1];
+		} break;
+	case Client::CUI_HUD::CH_GALBRENA:
+	case Client::CUI_HUD::CH_ROVER:
+	default:
+		keyButtonDesc.vecInstanceDescs[3].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_R][0];
+		keyButtonDesc.vecInstanceDescs[4].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_Q][0];
+		keyButtonDesc.vecInstanceDescs[5].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_E][0];
+		keyButtonDesc.vecInstanceDescs[6].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_T][0];
+		keyButtonDesc.vecInstanceDescs[7].vSInstCoordX = m_arrKeyGuidePresets[HUDKEY_LB][0];
+
+		keyButtonDesc.vecInstanceDescs[3].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_R][1];
+		keyButtonDesc.vecInstanceDescs[4].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_Q][1];
+		keyButtonDesc.vecInstanceDescs[5].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_E][1];
+		keyButtonDesc.vecInstanceDescs[6].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_T][1];
+		keyButtonDesc.vecInstanceDescs[7].vSInstCoordY = m_arrKeyGuidePresets[HUDKEY_LB][1];
+		break;
+	}
+
 }
 
 void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
@@ -1442,7 +1669,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 	auto& skillSlots = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
 
 
-		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
@@ -1465,11 +1692,13 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 		if (!isIn_Rover_BurstMode)
 		{
+			m_pUI_Frame_Rover->Set_Active(true);
 			m_pUI_Frame_Rover_Dark->Set_Active(false);
 			// Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
 		}
 		else if (isIn_Rover_BurstMode)
 		{
+			m_pUI_Frame_Rover->Set_Active(false);
 			m_pUI_Frame_Rover_Dark->Set_Active(true);
 			// Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
 		}
@@ -1594,6 +1823,17 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 
 	_bool isHarmonyGuageFull = m_pAbility->Get_Harmony() == 100.f;
 
+	// [Sound] harmony
+	static _bool isHarmonyGuageFull_PrevFrame = false;
+	if (!isHarmonyGuageFull_PrevFrame && isHarmonyGuageFull)
+	{
+		m_pGameInstance->Play_Sound(L"UI_Harmony_Full", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	}
+
+	isHarmonyGuageFull_PrevFrame = isHarmonyGuageFull;
+
+
+
 	if (!isHarmonyGuageFull)
 	{
 		pTargetUI->SetActivate(false);
@@ -1603,6 +1843,7 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 
 	pTargetUI->SetActivate(true);
 	pTargetBGUI->SetActivate(true);
+
 
 
 
@@ -1687,10 +1928,6 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 		targetInstDesc[i].vClipTexcoordX	= (m_iSelectedCHIndex == i)? _float2( 0.0f, 0.0f ) : _float2( 0.0f, 1.0f );
 		targetBGInstDesc[i].vClipTexcoordX	= (m_iSelectedCHIndex == i)? _float2( 0.0f, 0.0f ) : _float2( 0.0f, 1.0f );		
 	}
-
-
-
-
 
 }
 

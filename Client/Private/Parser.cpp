@@ -23,6 +23,10 @@
 #include "Sequence.h"
 #include "Effect_Radial.h"
 #include "SFX_Prefab.h"
+#include "Effect_VA.h"
+#include "Effect_Light.h"
+#include "Spectrum.h"
+#include "MapObject_DynamicSound.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -309,23 +313,38 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 }
 
-void CParser::Create_MapEffect()
+void CParser::Create_MapEffect(_uint iLevel)
 {
 	_matrix EffectMat = {};
 	PREFAB_INFO Info{};
-	for(auto& Effect : m_MapEffects)
+	CMapObject_DynamicSound::SOUND_DESC SoundDesc;
+	for (auto& Effect : m_MapEffects)
 	{
 		EffectMat = XMMatrixTranslationFromVector(XMLoadFloat4(&Effect.vEffectPos));
+		XMStoreFloat4x4(&SoundDesc.SoundMat, EffectMat);
+		SoundDesc.iSoundIndex = Effect.iEffectTag;
 		switch (Effect.iEffectTag)
 		{
 		case 0:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 1:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Hearth_Fire_2"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
 			break;
 		case 2:
 			m_pGameInstance->Spawn_PoolingObject(TEXT("CampFire"), EffectMat, &Info);
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject_Sound"), iLevel,
+				TEXT("Layer_Sound"), &SoundDesc)))
+				CRASH("Spawner");
+			break;
+		case 3:
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Sonora_StatueEffect"), EffectMat, &Info);
 			break;
 		}
 	}
@@ -339,7 +358,7 @@ void CParser::Clone_Spawners(LEVEL eLevel)
 	{
 		CSpawner::SPAWNERDESC Spawner{};
 		Spawner.vPosition = tSpawnerData.vMonsterSpawnorPos;
-		Spawner.vExtent = _float3(100.f, 20.f, 100.f);
+		Spawner.vExtent = _float3(15.f, 20.f, 15.f);
 		Spawner.strMonsterKey = { tSpawnerData.szMonsterName1, tSpawnerData.szMonsterName2 , tSpawnerData.szMonsterName3 };
 		Spawner.vSpawnPositions = { tSpawnerData.vMonsterPos1, tSpawnerData.vMonsterPos2 ,tSpawnerData.vMonsterPos3 };
 		Spawner.fSpawnTime = 5.f;
@@ -617,6 +636,18 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Throw")
 							, ENUM_CLASS(eLevel), TEXT("Layer_Throw"), &pDesc);
 						break;
+					case OBJECTTYPE::BURN:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Burn")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Burn"), &pDesc);
+						break;
+					case OBJECTTYPE::DOME:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Dome")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Dome"), &pDesc);
+						break;
+					case OBJECTTYPE::TURN:
+						m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Turn")
+							, ENUM_CLASS(eLevel), TEXT("Layer_Turn"), &pDesc);
+						break;
 					default:
 						if (ModelName.find("_Wat_") != string::npos)
 							m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Water")
@@ -773,6 +804,49 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 		}
 	}
 
+	strEffectPath = strDefaultPath;
+	strEffectPath += "/FXVA/";
+	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strVATag = entry.path().stem().string();
+
+				Load_FXVA_FromJson(filePath, strVATag, eLevel);
+			}
+		}
+	}
+
+	strEffectPath = strDefaultPath;
+	strEffectPath += "/FXLight/";
+	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strLightTag = entry.path().stem().string();
+
+				Load_FXLight_FromJson(filePath, strLightTag, eLevel);
+			}
+		}
+	}
 
     //추후 추가 될 이펙트들 더 있음. 나머진 추후 추가 예정.
 }
@@ -792,13 +866,37 @@ void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int Pool
             _string extension = entry.path().extension().string();
 
             if (extension == ".json")
-            {
+            {	
                 _string strPrefabTag = entry.path().stem().string();
 
                 Load_Prefab_FromJson(filePath, strPrefabTag, eLevel, PoolingNum);
             }
         }
     }
+}
+
+void CParser::Create_Spectrum(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
+{
+	//프리팹 폴더 경로 까지 지정해주면 내부에있는 프리팹들 다 읽어줌.
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strPrefabTag = entry.path().stem().string();
+
+				Load_Spectrum_OB_FromJson(filePath, eLevel, PoolingNum);
+			}
+		}
+	}
 }
 
 void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel, _int PoolingNum)
@@ -976,8 +1074,8 @@ void CParser::Load_Particle_VB_FromJson(const _string& strFilePath, const _strin
 	if (ParticleVBJson.contains("RingAngle_Min"))
 		Desc.fRmin = ParticleVBJson["RingAngle_Min"].get<_float>();
 
-	if (ParticleVBJson.contains("RingAngle_max"))
-		Desc.fRmax = ParticleVBJson["RingAngle_max"].get<_float>();
+	if (ParticleVBJson.contains("RingAngle_Max"))
+		Desc.fRmax = ParticleVBJson["RingAngle_Max"].get<_float>();
 
 	if (ParticleVBJson.contains("DegreeAngle") && ParticleVBJson["DegreeAngle"].is_array())
 	{
@@ -1163,6 +1261,9 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 
 	if (TrailMeshJson.contains("Root"))
 		Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
+
+	if (TrailMeshJson.contains("Loop"))
+		Desc.IsLoop = TrailMeshJson["Loop"].get<_bool>();
 
 	if (TrailMeshJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());
@@ -1411,7 +1512,7 @@ void CParser::Load_FXDecal_FromJson(const _string& strFilePath, const _string& D
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
 		CEffect_Decal::Create(m_pDevice, m_pContext, &Desc))))
 	{
-		MSG_BOX("Effect_Rect Load Fail");
+		MSG_BOX("Effect_Decal Load Fail");
 		return;
 	}
 }
@@ -1525,7 +1626,245 @@ void CParser::Load_FXRadial_FromJson(const _string& strFilePath, const _string& 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
 		CEffect_Radial::Create(m_pDevice, m_pContext, &Desc))))
 	{
-		MSG_BOX("Effect_Rect Load Fail");
+		MSG_BOX("Effect_Radial Load Fail");
+		return;
+	}
+}
+
+void CParser::Load_FXVA_FromJson(const _string& strFilePath, const _string& VATag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_GameObject_FXVA_";
+	strProtoTag += VATag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json VAJson;
+	JsonStream >> VAJson;
+	JsonStream.close();
+
+	CEffect_VA::VA_DESC Desc = {};
+
+	if (VAJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(VAJson["MyTag"].get<_string>());
+
+	if (VAJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(VAJson["MyType"].get<double>());
+
+	if (VAJson.contains("MaskTextureTag"))
+		Desc.strTextureTag = StringToWString(VAJson["MaskTextureTag"].get<_string>());
+
+	if (VAJson.contains("ColorTextureTag"))
+		Desc.strColorTextureTag = StringToWString(VAJson["ColorTextureTag"].get<_string>());
+
+	if (VAJson.contains("MeshTag"))
+		Desc.strMeshTag = StringToWString(VAJson["MeshTag"].get<_string>());
+
+	if (VAJson.contains("AnimSpeed"))
+		Desc.fAnimSpeed = VAJson["AnimSpeed"].get<_float>();
+
+	if (VAJson.contains("MovementScale"))
+		Desc.fMovementScale = VAJson["MovementScale"].get<_float>();
+
+	if (VAJson.contains("ShaderPass"))
+		Desc.iShaderPass = VAJson["ShaderPass"].get<_int>();
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CEffect_VA::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("Effect_VA Load Fail");
+		return;
+	}
+}
+
+void CParser::Load_FXLight_FromJson(const _string& strFilePath, const _string& LightTag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_GameObject_FXLight_";
+	strProtoTag += LightTag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json LightJson;
+	JsonStream >> LightJson;
+	JsonStream.close();
+
+	CEffect_Light::LIGHT_DESC Desc = {};
+
+	if (LightJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(LightJson["MyTag"].get<_string>());
+
+	if (LightJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(LightJson["MyType"].get<double>());
+
+	if (LightJson.contains("LightTag"))
+		Desc.wstrLightTag = StringToWString(LightJson["LightTag"].get<_string>());
+
+	if (LightJson.contains("Speed"))
+		Desc.fSpeed = LightJson["Speed"].get<_float>();
+
+	if (LightJson.contains("Ambient"))
+		Desc.fAmbient = LightJson["Ambient"].get<_float>();
+
+
+	if (LightJson.contains("Color") && LightJson["Color"].is_array())
+	{
+		json Color = LightJson["Color"];
+		Desc.vColor.x = Color[0].get<_float>();
+		Desc.vColor.y = Color[1].get<_float>();
+		Desc.vColor.z = Color[2].get<_float>();
+		Desc.vColor.w = Color[3].get<_float>();
+	}
+
+	if (LightJson.contains("LifeTime") && LightJson["LifeTime"].is_array())
+	{
+		json LifeTime = LightJson["LifeTime"];
+		Desc.vLifeTime.x = LifeTime[0].get<_float>();
+		Desc.vLifeTime.y = LifeTime[1].get<_float>();
+	}
+
+	if (LightJson.contains("Range") && LightJson["Range"].is_array())
+	{
+		json Range = LightJson["Range"];
+		Desc.vRange.x = Range[0].get<_float>();
+		Desc.vRange.y = Range[1].get<_float>();
+	}
+
+	Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CEffect_Light::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("Effect_Light Load Fail");
+		return;
+	}
+}
+
+void CParser::Load_FXLight_Data_FromJson(const _string& strFilePath)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json LightDataJson;
+	JsonStream >> LightDataJson;
+	JsonStream.close();
+
+	LIGHT_DESC LightDesc = {};
+
+	_wstring LightDataTag = {};
+	_float4 vColor = {};
+
+	if (LightDataJson.contains("LightTag"))
+		LightDataTag = StringToWString(LightDataJson["LightTag"].get<_string>());
+
+	if (LightDataJson.contains("BaseColor") && LightDataJson["BaseColor"].is_array())
+	{
+		json Color = LightDataJson["BaseColor"];
+		vColor.x = Color[0].get<_float>();
+		vColor.y = Color[1].get<_float>();
+		vColor.z = Color[2].get<_float>();
+		vColor.w = Color[3].get<_float>();
+	}
+
+	LightDesc.eType = LIGHT_DESC::POINT;
+	LightDesc.vPosition = _float4(0.f, 0.f, 0.f, 1.f);
+	LightDesc.fRange = 1.f;
+	LightDesc.vDiffuse = vColor;
+
+	m_pGameInstance->Add_Light(LightDataTag, LightDesc);
+	m_pGameInstance->Set_LightActive(LightDataTag, false);
+
+}
+
+void CParser::Load_Spectrum_VB_FromJson(const _string& strFilePath, const _string& VBtag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_Componenet_VIBuffer_Spectrum_";
+	strProtoTag += VBtag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json SpectrumVBjson;
+	JsonStream >> SpectrumVBjson;
+
+	CVIBuffer_Spectrum::VB_SPECTRUM_DESC Desc = {};
+
+	if (SpectrumVBjson.contains("MaxSamples"))
+		Desc.MaxSamples = SpectrumVBjson["MaxSamples"].get<_int>();
+
+	if (SpectrumVBjson.contains("Size"))
+		Desc.fSize = SpectrumVBjson["Size"].get<_float>();
+
+
+	JsonStream.close();
+
+	//읽은 정보로 원형 생성
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CVIBuffer_Spectrum::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("VIBuffer_Spectrum Load Fail");
+		return;
+	}
+}
+
+void CParser::Load_Spectrum_OB_FromJson(const _string& strFilePath, LEVEL eLevel, _uint iNum)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json SpectrumJson;
+	JsonStream >> SpectrumJson;
+	JsonStream.close();
+
+	CSpectrum::SPECTRUM_DESC Desc = {};
+
+	if (SpectrumJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(SpectrumJson["MyTag"].get<_string>());
+
+	if (SpectrumJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(SpectrumJson["MyType"].get<double>());
+
+	if (SpectrumJson.contains("TextureTag"))
+		Desc.strTextureTag = StringToWString(SpectrumJson["TextureTag"].get<_string>());
+
+	if (SpectrumJson.contains("VIBufferTag"))
+		Desc.strVIBufferTag = StringToWString(SpectrumJson["VIBufferTag"].get<_string>());
+
+	if (SpectrumJson.contains("ColorTexturTag"))
+		Desc.strColorTextureTag = StringToWString(SpectrumJson["ColorTexturTag"].get<_string>());
+
+	if (SpectrumJson.contains("ShaderPass"))
+		Desc.iShaderPass = SpectrumJson["ShaderPass"].get<_int>();
+
+	if (SpectrumJson.contains("Generation"))
+		Desc.fGeneration = SpectrumJson["Generation"].get<_float>();
+
+	if (SpectrumJson.contains("LifeTime"))
+		Desc.fLifeTime = SpectrumJson["LifeTime"].get<_float>();
+
+	Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Spectrum"),
+		ENUM_CLASS(eLevel), TEXT("Layer_Effect"), Desc.strMyTag, iNum, &Desc)))
+	{
+		MSG_BOX("Prefab Load Fail");
 		return;
 	}
 }
@@ -1560,7 +1899,7 @@ void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIn
 				_wstring strSfxTag = StringToWString(Data["Tag"]);
 				SFX_Data.strSfxTag = strPooling + strSfxTag;
 
-				m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
+				m_pGameInstance->Add_PoolingObject_ForStatic(iPrototypeLevelIndex, strPrototype + strSfxTag, iLayerLevelIndex, TEXT("Layer_SFX"),
 					SFX_Data.strSfxTag, 1, nullptr);
 
 				Children.push_back(SFX_Data);
@@ -1576,7 +1915,7 @@ void CParser::Ready_SFX_Prefab(const _char* pFolderPath, _uint iPrototypeLevelIn
 
 			_wstring PoolingTag = StringToWString(PrefabJson["Tag"]);
 
-			m_pGameInstance->Add_PoolingObject(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
+			m_pGameInstance->Add_PoolingObject_ForStatic(iPrototypeLevelIndex, strPrototypeTag, iLayerLevelIndex, TEXT("Layer_SFX_Prefab"),
 				PoolingTag, 1, &PrefabDesc);
 
 			InputFile.close();
@@ -1648,6 +1987,105 @@ void CParser::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL e
     }
 }
 
+void CParser::Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".Dat" || extension == ".dat")
+			{
+				//파일이름만 추출
+				_string strMeshTag = entry.path().stem().string();
+
+				_wstring wstrDefaultTag = TEXT("Prototype_Component_VAMesh_");
+				wstrDefaultTag += StringToWString(strMeshTag);
+
+				_float fSize = 0.01f;
+				_fmatrix DefualtMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+				_wstring wstrFilePath = StringToWString(filePath);
+
+				if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrDefaultTag,
+					CVAMesh::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), DefualtMatrix, 1))))
+				{
+					MSG_BOX("VAMesh Load Fail");
+					return;
+				}
+			}
+		}
+	}
+}
+
+void CParser::Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".png" || extension == ".Png")
+			{
+				//텍스처 파일이름만 추출
+				_string strTextureTag = entry.path().stem().string();
+
+				//텍스처 파일경로
+				_wstring wstrFilePath = StringToWString(filePath);
+
+				_wstring wstrDefaultTag = TEXT("Prototype_Component_VATexture_");
+				wstrDefaultTag += StringToWString(strTextureTag);
+
+				if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrDefaultTag,
+					CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1))))
+				{
+					MSG_BOX("VATexture Load Fail");
+					return;
+				}
+			}
+		}
+	}
+}
+
+void CParser::Load_EffectSpectrumTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".png" || extension == ".Png")
+			{
+				//텍스처 파일이름만 추출
+				_string strTextureTag = entry.path().stem().string();
+
+				//텍스처 파일경로
+				_wstring wstrFilePath = StringToWString(filePath);
+
+				_wstring wstrDefaultTag = TEXT("Prototype_Component_SpectrumTexture_");
+				wstrDefaultTag += StringToWString(strTextureTag);
+
+				if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrDefaultTag,
+					CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1))))
+				{
+					MSG_BOX("SpectrumTexture Load Fail");
+					return;
+				}
+			}
+		}
+	}
+}
+
 void CParser::Load_FXDecal_Data_FromFolder(const string& strFolderPath)
 {
 	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -1662,6 +2100,44 @@ void CParser::Load_FXDecal_Data_FromFolder(const string& strFolderPath)
 			{
 
 				Load_FXDecal_Data_FromJson(filePath);
+			}
+		}
+	}
+}
+
+void CParser::Load_FXLight_Data_FromFolder(const string& strFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				Load_FXLight_Data_FromJson(filePath);
+			}
+		}
+	}
+}
+
+void CParser::Load_Spectrum_VB_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strVBTag = entry.path().stem().string();
+
+				Load_Spectrum_VB_FromJson(filePath, strVBTag, eLevel);
 			}
 		}
 	}
@@ -1690,6 +2166,50 @@ const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 	}
 
 	
+	InputFile.close();
+
+	return m_Data;
+}
+
+
+const vector<vector<_string>>& CParser::Load_CSV_ADV(const _char* pFilePath)
+{
+	ifstream InputFile(pFilePath);
+
+	_string strLine;
+
+	m_Data.clear();
+
+	while (getline(InputFile, strLine))
+	{
+		vector<_string> row;
+		_string strCell;
+		_bool isInQuote = false; // 현재 따옴표 안에 있는지 여부
+
+		for (size_t i = 0; i < strLine.size(); ++i)
+		{
+			char c = strLine[i];
+
+			if (c == '"')
+			{	// 따옴표를 만나면 상태를 반전.
+				isInQuote = !isInQuote;
+				continue;
+			}
+			else if (c == ',' && !isInQuote)
+			{	// 따옴표 밖에서 쉼표를 만났을 때만 셀을 구분
+				row.push_back(strCell);
+				strCell.clear();
+				continue; // 쉼표는 데이터에 넣지 않음
+			}
+			strCell += c;
+
+		}
+		row.push_back(strCell);
+
+		m_Data.push_back(row);
+	}
+
+
 	InputFile.close();
 
 	return m_Data;

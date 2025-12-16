@@ -42,13 +42,15 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
+	virtual		void			Render_Shadow() override;
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool isActive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
@@ -59,10 +61,11 @@ private:
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;
 	_float4					m_vBaseColor{};
-
+	_float					m_fFxTime = {};
 	const _float4x4*		m_pGrabSocket = { nullptr };
 	const _float4x4*		m_pCameraSocket = { nullptr };
 	_float4x4				m_GrabCombinedMat = {};
+
 
 #pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
@@ -105,6 +108,20 @@ private:
 	_bool					m_isParalysis{};
 	_float					m_fParalysisRatio{}; //0.f ~ 1.f
 	_float3					m_vUIPosition{};
+#pragma endregion
+
+#pragma region SHADER_VALUE
+	_float					m_fBehitMaxTime{};
+	_float					m_fBehitAcc{};
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
+
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
 #pragma endregion
 
 private:

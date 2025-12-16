@@ -61,6 +61,17 @@ private:
 	_uint m_iShaderPassIndex = {};
 	_bool m_IsRender = { true };
 	_bool m_IsTriggerd = { false };
+
+	void* m_pTempPtr = { nullptr };
+	void* m_pSecondTempPtr = { nullptr };
+	void* m_pThirdTempPtr = { nullptr };
+	_bool m_ISTrailEffect = { false };
+	_bool m_IsSound = { false };
+
+	_float3 m_vRadians = {};
+	_uint m_iSoundChannel = {};
+public:
+	static vector<_wstring> m_SoundTags;
 public:
 	static CMapObject_Meteo* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

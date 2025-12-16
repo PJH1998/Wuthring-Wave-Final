@@ -53,12 +53,10 @@ public:
 	void								Copy_BoneMatrices(_float4x4* pOutMatrices, _uint iMeshIndex);
 	const vector<class CBone*>			Get_Bones() { return m_Bones; }
 	_uint								Get_NumMesh() { return m_iNumMeshes; }
-	void								Sync_RootNode(class CTransform* pOwnerTransform, class CNavigation* pOwnerNavigation, _float fTimeDelta);
 	void								Sync_RootNode(class CTransform* pOwnerTransform, _float fTimeDelta);
-	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
-	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
-	const vector<_uint>&				Get_Indices(_uint iIndex);
-
+	const _float4x4* Get_BoneMatrixPtr(const _char* pBoneName);
+	const vector<_uint>& Get_Indices(_uint iIndex);
+	const vector<_float3>& Get_VerticesPos(_uint iIndex);
 	// View 용도.
 	const vector<_string>& Get_AllShapeKeyNames() const { return m_ShapeKeyNames; }
 	// 제어용도
@@ -66,9 +64,10 @@ public:
 	_uint Get_NumShapeKeys() { return static_cast<_uint>(m_ShapeKeyNames.size()); }
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
+
 #ifdef _DEBUG
-	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
-	_float*								Get_TrackPositionPtr(const _string& strAnimName);
+	const vector<_string>& Get_AnimationNames() const { return m_AnimationNames; }
+	_float* Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
@@ -82,6 +81,11 @@ public:
 public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
 	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback);
+
+#ifdef _DEBUG
+	void								Clear_AllNotifies(); // Debug 용도
+#endif // _DEBUG
+
 
 
 public:
@@ -100,98 +104,78 @@ public:
 	HRESULT							Bind_Materials(class CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	HRESULT							Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
 	HRESULT							Bind_MorphedResult(class CShader* pShader, _uint iMeshIndex, const _char* pConstantName); // Mesh의 Morph 연산을 바인딩합니다.
-	//HRESULT							Bind_MorphWeights(class CShader* pShader);
-	//HRESULT							Bind_MorphSRV(class CShader* pShader, _uint iMeshIndex);
 	HRESULT							Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	// Compute Shader
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f)
-;
+		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+		, _float fRootMotionRate = 0.1f)
+		;
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f, _bool isFacial = true);
+		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+		, _float fRootMotionRate = 0.1f, _bool isFacial = true);
 
 	_bool								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f);
+		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+		, _float fRootMotionRate = 0.1f);
 
 	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+		, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
-
-	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
-
-	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTrackPosition);
-
+		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+		, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
-	
-
-
-	void								Ready_BoundingBox(_float* pMinPos, _float* pMaxPos);
-	BoundingBox*							Get_BoundingBox();
 
 	_uint								Get_BoneSize() { return  static_cast<_uint>(m_Bones.size()); }
-	const _float4x4*					Get_BoneMatrixPtr(_uint iBoneIndex);
+	const _float4x4* Get_BoneMatrixPtr(_uint iBoneIndex);
 	void								Update_BoneMatrix_Map();
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 
 	_uint									m_iNumMeshes = {};
-	vector<class CMesh*>				m_Meshes;
-
-	
+	vector<class CMesh*>					m_Meshes;
 
 	_uint									m_iNumMaterials = {};
-	vector<class CMeshMaterial*>	m_Materials;
+	vector<class CMeshMaterial*>			m_Materials;
 
 	_float4x4								m_PreTransformMatrix = {};
 
-	_float4								m_vPreRootRotation = {};
-	_float4								m_vPreRootPosition = {};
-	_matrix								m_RootMatrix = {};
+	_float4									m_vPreRootRotation = {};
+	_float4									m_vPreRootPosition = {};
+	_matrix									m_RootMatrix = {};
 	_uint									m_iRootBoneIndex = {};
-	vector<class CBone*>			m_Bones;
+	vector<class CBone*>					m_Bones;
 
 	_uint									m_iNumAnimations = {};
-	_string								m_strPreAnimation;
-	map<_string, class CAnimation*>		m_Animations;
-	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
+	_string									m_strPreAnimation;
+	map<_string, class CAnimation*>			m_Animations;
+	map<_string, _uint>						m_AnimationNameToIndex; // Compute Shader
 
 
-
-
-	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
 
 	_float								m_fPreScale = {}; // RootMotionRate에 곱해줄 값.
 
-	BoundingBox*						m_pBoundingBox = { nullptr };
-
-	_float* pMin = { nullptr };
-	_float* pMax = { nullptr };
+	BoundingBox* m_pBoundingBox = { nullptr };
 
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
 	_uint m_iSelectIndex = { 0 };
 #endif
-	
+
 #pragma region FACIAL
 	vector<_string> 		   m_ShapeKeyNames;
 	vector<_float>			   m_ShapeKeyWeights;
 	map<_string, _uint>		   m_ShapeKeyIndices;
 
 	_float4x4				   m_ConversionMatrix = {};
-	
+
 #pragma endregion
 
-	
+
 
 
 
@@ -222,7 +206,7 @@ private:
 	HRESULT							Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
 	HRESULT							Ready_CharacterModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
 	HRESULT							Ready_EchoModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
-	
+
 
 
 private:
@@ -250,8 +234,8 @@ private:
 
 
 public:
-	static		CModel*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
-	virtual		CComponent*		Clone(void* pArg);
+	static		CModel* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
+	virtual		CComponent* Clone(void* pArg);
 	virtual		void					Free() override;
 };
 

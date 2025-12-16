@@ -9,6 +9,8 @@ class CModel;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
+
 class CLevi_Anchor final : public CGameObject
 {
 public:
@@ -41,6 +43,8 @@ private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	CModel*				m_pModelCom = { nullptr };
 	CShader*			m_pShaderCom = { nullptr };
+	CGameSystem*		m_pGameSystem = { nullptr };
+
 	_float				m_fLifeTime{};
 	_float				m_fMaxLifeTime{};
 	_float3				m_vTargetPos{};
@@ -48,6 +52,10 @@ private:
 	// Effect?
 	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT		m_CallBack{};
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
 
 private:
 	HRESULT		Bind_Resources();

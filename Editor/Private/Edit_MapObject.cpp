@@ -27,6 +27,9 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
 
 HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 {
+
+	Load_SoundTag("/Client/Bin/Resource/Sound/2D/BGM/rock/sound/");
+
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
     if (FAILED(__super::Initialize_Clone(pArg)))
@@ -62,9 +65,31 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
 	m_pGameInstance->Subscribe<MAP_BOUND>(ENUM_CLASS(LEVEL::STATIC), TEXT("Calc_Size"), [this](const MAP_BOUND& event) {
+		if (!m_isActivate)
+			return;
 
-		_vector Center = XMLoadFloat3(&m_pModelCom->Get_BoundingBox()->Center);
-		_vector Extents = XMLoadFloat3(&m_pModelCom->Get_BoundingBox()->Extents);
+		_float4x4 WorldMatrix;
+		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
+
+		_float3 vBoundingBoxPos = m_pModelCom->Get_BoundingBox()->Center;
+		_float3 vBoundingBoxExtends = m_pModelCom->Get_BoundingBox()->Extents;
+		_float3 vLocalCorners[BoundingBox::CORNER_COUNT];
+
+		m_pModelCom->Get_BoundingBox()->GetCorners(vLocalCorners);
+
+		_float3 vTransformedCorners[BoundingBox::CORNER_COUNT];
+
+		for (_uint i = 0; i < BoundingBox::CORNER_COUNT; ++i)
+		{
+			XMStoreFloat3(&vTransformedCorners[i],
+				XMVector3TransformCoord(XMLoadFloat3(&vLocalCorners[i]), XMLoadFloat4x4(&WorldMatrix)));
+		}
+
+		BoundingBox RealBox;
+		BoundingBox::CreateFromPoints(RealBox, BoundingBox::CORNER_COUNT, vTransformedCorners, sizeof(_float3));
+
+		_vector Center = XMLoadFloat3(&RealBox.Center);
+		_vector Extents = XMLoadFloat3(&RealBox.Extents);
 
 		*event.vMin = XMVectorMin(*event.vMin, Center - Extents);
 		*event.vMax = XMVectorMax(*event.vMax, Center + Extents);
@@ -166,7 +191,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
-
+	m_fDistortionTime += fTimeDelta;
 	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
 	{
 
@@ -282,7 +307,8 @@ void CEdit_MapObject::Update(_float fTimeDelta)
 		}
 	}
 #endif
-	//m_pModelCom = m_pModelComArray[m_iLODIndex];
+
+
 }
 
 void CEdit_MapObject::Late_Update(_float fTimeDelta)
@@ -355,7 +381,8 @@ void CEdit_MapObject::Render()
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-
+		m_pShaderCom->Bind_Value("g_DistortionTime", &m_fDistortionTime, sizeof(_float));
+		
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
@@ -374,7 +401,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
 	//현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor" ,"Meteo","Water","Collaps","Throw" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor" ,"Meteo","Water","Collaps","Throw" ,"Burn" ,"Dome" ,"Turn" };
 	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
 	{
 		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -416,7 +443,33 @@ void CEdit_MapObject::Set_ImGuiOption()
 	if (ImGui::Button("Destroy"))
 		m_isActivate = false;
 
+	if (ImGui::Button("Destroy_All"))
+	{
+		m_isActivate = false;
+		for (auto& pChild : m_ChildObjects)
+			pChild->SetActivate(false);
+	}
+
 	About_Texture();
+
+	if (ImGui::BeginCombo("Sound Tag", m_SoundTags[m_iPickedSoundTag].c_str()))
+	{
+		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
+		{
+			if (ImGui::Selectable(m_SoundTags[i].c_str()))
+			{
+				m_iPickedSoundTag = i;
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::InputFloat("Sound Volume", &m_fDynamicVolume);
+
+	if (ImGui::Button("Play Sound"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(ENUM_CLASS(CHANNEL::ENEMY_VOICE));
+		m_pGameInstance->Play_Sound_Dynamic(StringToWString(m_SoundTags[m_iPickedSoundTag]), ENUM_CLASS(CHANNEL::ENEMY_VOICE), m_fDynamicVolume, m_pTransformCom, 0.f, 100.f, 1.f);
+	}
 #endif
 }
 
@@ -555,6 +608,28 @@ void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
 	m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
 }
 
+
+void CEdit_MapObject::Load_SoundTag(_string FilePath)
+{
+	_char ModelPath[MAX_PATH] = {};
+
+	strcat_s(ModelPath, filesystem::current_path().parent_path().parent_path().string().c_str());
+
+
+	strcat_s(ModelPath, FilePath.c_str());
+
+	for (const auto& entry : filesystem::recursive_directory_iterator(ModelPath))
+	{
+		if (!entry.is_regular_file())
+			continue;
+
+		if (entry.path().extension() != ".wav")
+			continue;
+
+		_string Name = entry.path().filename().replace_extension().string();
+		m_SoundTags.push_back(Name);
+	}
+}
 
 void CEdit_MapObject::Export_MaterialData()
 {

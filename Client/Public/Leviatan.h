@@ -46,6 +46,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
+	virtual		void			Render_OutLine() override;
 
 	//virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	void			OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
@@ -53,9 +54,10 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CAnimMachine* m_pAnimMachineCom[PHASE::P_END] = { nullptr };
@@ -64,9 +66,9 @@ private:
 	CComputeShader* m_pFacialComputeShaderCom = { nullptr };
 
 	//const _float4x4* m_pToeMatrix = { nullptr };
-
-	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
-	CAttackVolume* m_pParryVolume = { nullptr, };
+	CRigidbody*				m_pExecuteCom = { nullptr };
+	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::ATKEND] = { nullptr, };
+	CAttackVolume*			m_pParryVolume = { nullptr, };
 	vector<_uint>			m_ShaderIndices;
 	//vector<_float3>			m_BowOffsets;
 	const _float4x4*		m_pBowSocket = { nullptr };
@@ -101,6 +103,7 @@ private:
 	_bool					m_isRender{};
 	_bool					m_isAreaAttack{};
 	_uint					m_iPhase{};
+	_bool					m_isExecuteEnable{};
 #pragma endregion
 
 #pragma region ACTION_PRODUCT
@@ -108,6 +111,7 @@ private:
 	_uint					m_iActionIndex{};
 	_uint					m_iActionChecker[ACTION::ACTEND] = {};
 	vector<_string>			m_strAnimTag[ACTION::ACTEND];
+	LIGHT_DESC				m_LeviLight{};
 #pragma endregion
 
 #pragma region STATUS
@@ -116,7 +120,7 @@ private:
 	_float					m_fStamina{};
 	_float					m_fMaxStamina{};
 	_float					m_fHitStopRatio{};
-	_bool					m_fHitAcc{};
+	//_bool					m_fHitAcc{};
 	_float					m_fFenceAcc{};
 	_float					m_fDropAcc{};
 #pragma endregion
@@ -125,6 +129,18 @@ private:
 	_bool					m_isTurnLerp{};
 	_float3					m_vBeHit_Normal{};
 	_float4x4				m_PreTransform{};
+	_float					m_fTimeLackRate{};
+#pragma endregion
+
+#pragma region SHADER_VALUE
+	_float					m_fBehitMaxTime{};
+	_float					m_fBehitAcc{};
+	_float					m_fOutLineRadius{};
+	_float4					m_vOutLineColor{};
+	_float					m_fNoiseTime = {};
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
@@ -134,11 +150,32 @@ private:
 	_float3					m_vUIPosition{};
 #pragma endregion
 
+#pragma region	SEQUENCE
+	vector<_wstring>		m_strSequenceTag[ACTION::ACTEND];
+	_bool					m_isEncounter{};
+	_bool					m_isBattle{};
+	_string					m_strSequenceAnim{};
+#pragma endregion
+
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
+#pragma endregion
+
+#pragma region LUT
+	_uint						m_iLUTIndex{}; //원래 사용되는 LUT 인덱스
+	_float					m_fLUTIntensity{}; //LUT 강도
+	_float					m_fLUTAcc{}; //LUT 강도
+	_bool					m_isLUTDynamic{}; //LUT 동적 변화 여부
+	_bool					m_isLUTEffectEnable{}; //LUT 함수 사용 여부
+#pragma endregion
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(LEVIATAN_DESC* pDesc);
 	void						Ready_PartObjects(LEVIATAN_DESC* pDesc);
 	void						Ready_Volumes(LEVIATAN_DESC* pDesc);
+	void						Ready_Events();
 
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
@@ -147,6 +184,7 @@ private:
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						Execute_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 	void						AreaAttack(_float fTimeDelta);
 	void						TurnFix();
@@ -155,6 +193,7 @@ private:
 	void						Reset_NotifyInteraction();
 	void						Event1();				//1페이즈 종료, 원점 원위치
 	void						Event2();				//2페이즈 시작, 변경 맵으로 이동
+	void						Update_LUT_Effect(_float fTimeDelta);				//사망 이후 LUT 업데이트 함수
 
 #pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }

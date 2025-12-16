@@ -48,16 +48,15 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 	m_pAugusta->Part_ShaderPathChange(m_iSubPartType, ENUM_CLASS(SHADER_PROPANIMMESH::AUGUSTA_HEADPROP));
 	
-	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.1f, 10.f);
+	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.0f);
 
-	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
+	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"), false, true);
+	
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
-
-
 }
 
 void CAugustaGroundBurst::OnUpdate(_float fTimeDelta)
@@ -92,6 +91,8 @@ void CAugustaGroundBurst::OnExit()
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 	m_pAugusta->Set_OutLineVisible(true);
+
+	m_pAugusta->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.0f);
 
 }
 

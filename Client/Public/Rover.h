@@ -19,6 +19,7 @@ public:
 	{
 		VOLUME_KNOCKBACK = 0,
 		VOLUME_SKILL = 1,
+		VOLUME_QTE = 2,
 		VOLUME_END
 	};
 
@@ -70,6 +71,9 @@ private:
 		// Capture
 		ERoverCaptureType m_eCaptureType = ERoverCaptureType::END;
 
+		// Event 애니메이션
+		ERoverEventType  m_eEventType = ERoverEventType::END;
+
 		// Prev Info
 		_string m_strPrevInfo = {};
 		void Clear()
@@ -105,6 +109,10 @@ private:
 
 			// Capture
 			m_eCaptureType = ERoverCaptureType::END;
+
+			// Event
+			m_eEventType = ERoverEventType::END;
+
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
@@ -156,7 +164,7 @@ public:
 
 #pragma region 1. STATE
 public:
-	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) override;
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) override;
@@ -165,12 +173,18 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	virtual void Grab_Judge(void* pArg = nullptr) override;
+	virtual void Resolve_PerfectDodge() override;
 	void Sync_Position();
 
 	virtual void Bind_QTE(_bool IsQTE) override;
 
 	virtual void Reset_QTECamera() override;
 	virtual void Bind_QTECamera() override;
+
+	virtual void Attach_ThrowTarget(_bool isAttach) override;
+	virtual void Throw_AttachTarget() override;
+
+	void Spawn_WingEffect(const _wstring& strEffectTag);
 #pragma region 2. NOTIFY
 	public:
 		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
@@ -224,6 +238,8 @@ private:
 	_bool IsSkin(_uint iMeshIndex);
 	_bool IsEye(_uint iMeshIndex);
 	_bool IsMask(_uint iMeshIndex);
+
+	void Process_MotionTrail(const _wstring& wStrObjectTag);
 
 private:
 	void Bind_Resources();

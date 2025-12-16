@@ -192,6 +192,8 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
 	m_pFade->Update(fTimeDelta);
+
+	m_pSound_Manager->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -264,29 +266,57 @@ _long CGameInstance::Get_DIMouseMove(MOUSEMOVESTATE eState)
 #pragma endregion
 
 #pragma region SOUND_MANAGER
-HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath)
+void CGameInstance::Update_Listener(CTransform* pTransform, _float fTimeDelta)
 {
-	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath);
+	m_pSound_Manager->Update_Listener(pTransform, fTimeDelta);
 }
-HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath)
+_uint CGameInstance::Register_Channel()
 {
-	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath);
+	return m_pSound_Manager->Register_Channel();
 }
-void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop)
+void CGameInstance::Return_Channel(_uint iChannelIndex)
 {
-	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, isStop);
+	m_pSound_Manager->Return_Channel(iChannelIndex);
 }
-void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop)
+HRESULT CGameInstance::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath, _bool is3D)
 {
-	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume, isStop);
+	return m_pSound_Manager->Load_Sound(strSoundTag, pSoundFilePath, is3D);
 }
-void CGameInstance::Play_Other(const _wstring& strSoundTag, _float fVolume)
+HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath, _bool is3D)
 {
-	m_pSound_Manager->Play_Other(strSoundTag, fVolume);
+	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath, is3D);
+}
+HRESULT CGameInstance::Load_Sound_FromFolderRecursive(const _char* pFolderPath, _bool is3D)
+{
+	return m_pSound_Manager->Load_Sound_FromFolderRecursive(pFolderPath, is3D);
+}
+void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
+{
+	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, fFrequency);
+}
+void CGameInstance::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency)
+{
+	m_pSound_Manager->Play_Sound(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance, fFrequency);
+}
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
+{
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, fFrequency);
+}
+void CGameInstance::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, CTransform* pTransform, _float fMinDistance, _float fMaxDistance, _float fFrequency)
+{
+	m_pSound_Manager->Play_Sound_Dynamic(strSoundTag, iChannelID, fVolume, pTransform, fMinDistance, fMaxDistance, fFrequency);
+}
+void CGameInstance::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
+{
+	m_pSound_Manager->Play_BGM(strSoundTag, iChannelID, fVolume, fFrequency);
 }
 void CGameInstance::Stop_Sound(_uint iChannelID)
 {
 	m_pSound_Manager->Stop_Sound(iChannelID);
+}
+void CGameInstance::Stop_Sound_Dynamic(_uint iChannelID)
+{
+	m_pSound_Manager->Stop_Sound_Dynamic(iChannelID);
 }
 void CGameInstance::Stop_All()
 {
@@ -295,6 +325,10 @@ void CGameInstance::Stop_All()
 void CGameInstance::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 {
 	m_pSound_Manager->Set_ChannelVolume(iChannelID, fVolume);
+}
+void CGameInstance::Set_ChannelVolume_Dynamic(_uint iChannelID, _float fVolume)
+{
+	m_pSound_Manager->Set_ChannelVolume_Dynamic(iChannelID, fVolume);
 }
 #pragma endregion
 
@@ -591,7 +625,7 @@ const LIGHT_DESC* CGameInstance::Get_LightDesc(const _wstring& strLightTag)
 {
 	return m_pLight_Manager->Get_LightDesc(strLightTag);
 }
-void CGameInstance::Set_Active(const _wstring& strLightTag, _bool isActive)
+void CGameInstance::Set_LightActive(const _wstring& strLightTag, _bool isActive)
 {
 	m_pLight_Manager->Set_Active(strLightTag, isActive);
 }
@@ -1083,6 +1117,22 @@ void CGameInstance::Set_FogRayDensityScale(_float fFogRayDensityScale)
 {
 	m_pVF->Set_FogRayDensityScale(fFogRayDensityScale);
 }
+void CGameInstance::Set_FogScatterWeight(_float fFogScatterWeight)
+{
+	m_pVF->Set_FogScatterWeight(fFogScatterWeight);
+}
+void CGameInstance::Set_FogFarRatioToCameraFar(_float fFogFarRatio)
+{
+	m_pVF->Set_FogFarRatioToCameraFar(fFogFarRatio);
+}
+void CGameInstance::Set_FogRayIntensity(_float fRayIntensity)
+{
+	m_pVF->Set_FogRayIntensity(fRayIntensity);
+}
+void CGameInstance::Set_FogMaxDistance(_float fFogMaxDistance)
+{
+	m_pVF->Set_FogMaxDistance(fFogMaxDistance);
+}
 void CGameInstance::Begin_VF()
 {
 	m_pVF->Begin_VF();
@@ -1248,6 +1298,8 @@ HRESULT CGameInstance::SetUp_CameraNF()
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
+	m_pSound_Manager->Stop_All();
+
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
 		return E_FAIL;
 
@@ -1269,7 +1321,6 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pResource_Manager->Clear_Resource();
 	m_pRenderer->Clear_Resource();
 	m_pOctoTree->Clear_OctoTree();
-	m_pSound_Manager->Stop_All();
 	m_pEventBus->Unscribe();
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
@@ -1298,7 +1349,6 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pModel_Manager);
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
-	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);
 	Safe_Release(m_pResource_Manager);
 	Safe_Release(m_pOctoTree);
@@ -1325,6 +1375,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pSound_Manager);
 	
 	Safe_Release(m_pGraphic_Device);
 	Release();

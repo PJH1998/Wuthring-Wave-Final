@@ -24,6 +24,7 @@ public:
 		_char szAnimationTag[MAX_PATH];
 		_bool isCollide;
 		_bool isRigid;
+		_uint iNPCType;
 	}DUMMYCELL_DESC;
 private:
 	explicit CNPCCell(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -48,6 +49,7 @@ private:
 	vector<_uint> m_MeshTypeIndices;
 
 	_string m_strAnimationTag;
+	vector<_string> m_strInteractAnim;
 	_string m_strOriginAnimationTag;
 	_float m_fTrackPos = {};
 	_bool m_CollideTrigger{};
@@ -59,6 +61,9 @@ private:
 	_uint m_iOriginFaceIndex{};
 	_float3 m_vDetectOffset{};
 	CALLBACK_CLIENT m_tCallBack{};
+	
+	_int m_iSoundChannel{-1};
+	_bool m_isHitSound{};
 
 private:
 	void Ready_Component(DUMMYCELL_DESC* pDesc);

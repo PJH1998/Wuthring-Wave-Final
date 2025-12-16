@@ -25,6 +25,7 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vScreenPos		= _float2{ 0.f, 0.f };
 	tDesc.strUIName			= L"DamageFont";
 	tDesc.iPassType			= 0;
+	tDesc.fLineSpace		= 1.3f;
 
 	m_FontTypeDesc.resize(ENUM_CLASS(TEXT_COLOR_TYPE::END));
 
@@ -51,6 +52,11 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vColor			= { 0.984f, 0.592f, 0.443f, 1.0f };
 	tDesc.vOutlineColor		= { 0.620f, 0.306f, 0.212f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::FUSI)] = tDesc;
+	// - Aero (기류)
+	tDesc.vColor			= { 0.522f, 0.914f, 0.933f, 1.0f };
+	tDesc.vOutlineColor		= { 0.231f, 0.420f, 0.522f, 1.0f };
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::AERO)] = tDesc;
+
 
 	// - Title (제목용 색상)
 	tDesc.vColor			= { 0.631f, 0.607f, 0.424f, 1.0f };
@@ -60,6 +66,23 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vColor			= { 0.718f, 0.729f, 0.757f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_NORMAL)] = tDesc;
+	
+	// - Title_Quest
+	tDesc.vColor			= { 0.843f, 0.863f, 0.914f, 1.0f };
+	tDesc.vOutlineColor		= { 0.208f, 0.231f, 0.286f, 1.0f };
+	tDesc.fFontOutlineWidth = 8.f;
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_QUESTTITLE)] = tDesc;
+	tDesc.fFontOutlineWidth = 2.f;
+	// - Text_Quest
+	tDesc.vColor			= { 0.804f, 0.800f, 0.867f, 1.0f };
+	tDesc.vOutlineColor		= { 0.302f, 0.298f, 0.286f, 1.0f };
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_QUESTNORMAL)] = tDesc;
+	// - Text_Progress
+	tDesc.vColor			= { 0.796f, 0.769f, 0.459f, 1.0f };
+	tDesc.vOutlineColor		= { 0.545f, 0.478f, 0.290f, 1.0f };
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_QUESTPROGRESS)] = tDesc;
+
+
 	// - Progress (로딩 창 진행률 숫자용 색상)
 	tDesc.vColor			= { 0.961f, 0.957f, 0.937f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };

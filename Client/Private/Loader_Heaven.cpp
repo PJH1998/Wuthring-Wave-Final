@@ -13,6 +13,9 @@
 #include"MapObject_Meteo.h"
 #include"MapObject_Water.h"
 #include"MapObject_Throw.h"
+#include"MapObject_Burn.h"
+#include"MapObject_Dome.h"
+#include"MapObject_DynamicSound.h"
 #pragma endregion
 
 #pragma region MONSTER
@@ -46,6 +49,8 @@
 #include "UI_HUD.h"
 #include "UI_HUD_Sector_FuncIcons.h"
 #include "UI_HUD_Sector_Minimap.h"
+#include "UI_FinalEnd.h"
+
 #include "UI_Button_Interact.h"
 #include "UI_LockOn.h"
 #include "UI_Parry.h"
@@ -53,6 +58,7 @@
 #include "UI_TabUtility.h"
 #include "UI_GrapplePoint.h"
 #include "UI_QTE.h"
+#include "UI_Dialog.h"
 
 #include "UI_CurveTrace.h"
 
@@ -112,6 +118,7 @@
 #include "GalbrenaUlti_PostSFX.h"
 #pragma endregion
 
+#include "Heaven_SkyBox.h"
 
 CLoader_Heaven::CLoader_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -120,7 +127,7 @@ CLoader_Heaven::CLoader_Heaven(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CLoader_Heaven::Initialize()
 {
-	m_iNumLoadingThread = 16;
+	m_iNumLoadingThread = 17;
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -147,8 +154,6 @@ HRESULT CLoader_Heaven::Initialize()
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
 
-	Load_ScreenEffect();
-
     return S_OK;
 }
 
@@ -162,21 +167,33 @@ HRESULT CLoader_Heaven::Load_Texture()
 HRESULT CLoader_Heaven::Load_Model()
 {
 	m_pGameInstance->Load_Resource("../Bin/Resource/Map/Heaven/");
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1207_second/", m_eCurLevel, "Heaven");
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Heaven_1214_third/", m_eCurLevel, "Heaven");
+
+	//// SkyBox
+	//_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Dome"),
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
+	//	CRASH("SkyDome");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Background"),
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground_Heaven.dat"))))
+	//	CRASH("SkyBackground");
+	//PreTransformMatrix = XMMatrixScaling(0.07f, 0.07f, 0.07f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_FX"),
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Heaven.dat"))))
+	//	CRASH("SkyFX");
 
 	// SkyBox
-	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Dome"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
-		CRASH("SkyDome");
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_Background"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground_Heaven.dat"))))
-		CRASH("SkyBackground");
-	PreTransformMatrix = XMMatrixScaling(0.07f, 0.07f, 0.07f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(110.f), 0.f);
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_Skybox_FX"),
-		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyFX_Heaven.dat"))))
-		CRASH("SkyFX");
-
+	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(115.f), 0.f);;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Dome"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Dome.dat"))))
+		CRASH("Failed to Add Prototype HeavenSB_Dome");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Cloud"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_Cloud.dat"))))
+		CRASH("Failed to Add Prototype HeavenSB_Cloud");
+	PreTransformMatrix = XMMatrixScaling(25.f, 25.f, 1.f) * XMMatrixRotationRollPitchYaw(0.f, 0.f, 0.f) * XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Model_HeavenSB_Fx"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/Heaven_SkyBox_FX.dat"))))
+		CRASH("Failed to Add Prototype HeavenSB_Fx");
 
 	cout << "Model" << endl;
 
@@ -186,6 +203,10 @@ HRESULT CLoader_Heaven::Load_Model()
 HRESULT CLoader_Heaven::Load_Shader()
 {
 	cout << "Shader" << endl;
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Shader_HeavenSkyBox"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox_Heaven.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Failed to Add Prototype Shader_VtxSkyBox_Heaven");
 
     return S_OK;
 }
@@ -227,7 +248,16 @@ HRESULT CLoader_Heaven::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Throw"),
 		CMapObject_Throw::Create(m_pDevice, m_pContext));
-	
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Burn"),
+		CMapObject_Burn::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Dome"),
+		CMapObject_Dome::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Sound"),
+		CMapObject_DynamicSound::Create(m_pDevice, m_pContext));
+
 #pragma endregion
 
 #pragma region SPAWN_OBJECT
@@ -241,6 +271,14 @@ HRESULT CLoader_Heaven::Load_Object()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_AttackVolume"),
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
+
+#pragma region SKYBOX
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_GameObject_Heaven_SkyBox"),
+		CHeaven_SkyBox::Create(m_pDevice, m_pContext))))
+		CRASH("Failed to Add Prototype Heaven_SkyBox");
+
+#pragma endregion
 
 	return S_OK;
 }
@@ -761,6 +799,8 @@ HRESULT CLoader_Heaven::Load_UI()
 	_string strFilePath_UI_HUD_Sector_FuncIcons = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_Sector_FuncIcons.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD_Sector_FuncIcons));
 
+	_string strFilePath_UI_FinalEnd = "../../Client/Bin/Resource/UI/FJson/UITree/Root_FinalEnd.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_FinalEnd));
 
 
 	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json";
@@ -786,6 +826,9 @@ HRESULT CLoader_Heaven::Load_UI()
 
 	_string strFilePath_UI_QTE = "../../Client/Bin/Resource/UI/FJson/UITree/Root_QTE1.json";
 	vecDescs.push_back(Load_UITree(strFilePath_UI_QTE));
+
+	_string strFilePath_UI_Dialog = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Dialog.json";
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Dialog));
 
 
 
@@ -920,6 +963,10 @@ HRESULT CLoader_Heaven::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_QTE",
 		CUI_QTE::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_QTE Load Failed. The UI_QTE may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Dialog",
+		CUI_Dialog::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Dialog Load Failed. The UI_Dialog may have already been loaded.\n");
+
 
 	// Custom UI (but not UI)
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_CurveTrace",
@@ -947,6 +994,9 @@ HRESULT CLoader_Heaven::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD_Sector_FuncIcons",
 		CUI_HUD_Sector_FuncIcons::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD_Sector_FuncIcons Load Failed. The UI_HUD_Sector_FuncIcons may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_FinalEnd",
+		CUI_FinalEnd::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_Container_FinalEnd Load Failed. The UI_Container_FinalEnd may have already been loaded.\n");
 
 
 	return S_OK;
@@ -978,61 +1028,17 @@ HRESULT CLoader_Heaven::Load_Effect()
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
 	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+	m_pGameSystem->Load_EffectVAMeshDat_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Dat", m_eCurLevel);
+	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Color", m_eCurLevel);
+	m_pGameSystem->Load_EffectVATexture_FromFolder("../../Client/Bin/Resource/Effect/EffectVA/Mask", m_eCurLevel);
+	m_pGameSystem->Load_EffectLightData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Light");
+
+	m_pGameSystem->Load_EffectSpecturmTexture_FromFolder("../../Client/Bin/Resource/Effect/Spectrum/Color", m_eCurLevel);
+	m_pGameSystem->Load_EffectSpecturmTexture_FromFolder("../../Client/Bin/Resource/Effect/Spectrum/Mask", m_eCurLevel);
+	m_pGameSystem->Load_EffectSpectrumVB_FromFolder("../../Client/Bin/Resource/Effect/Spectrums/Heaven/SpectrumVB", m_eCurLevel);
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Leviatan", m_eCurLevel);
-
-
-	return S_OK;
-}
-
-HRESULT CLoader_Heaven::Load_ScreenEffect()
-{
-#pragma region SFX_TEXTURE
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Texture_SFX_Slash"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_300156.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Slash");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Texture_SFX_Noise"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Noise_12001.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Noise");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_Component_Texture_SFX_Star"),
-		CTexture::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/Resource/Effect/SFX/T_Mask_11000_WP20002.png"), 1))))
-		CRASH("Failed Add Prototype SFX_Star");
-
-#pragma endregion
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Prefab"),
-		CSFX_Prefab::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Prefab");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_SonoraChange"),
-		CSonoraChange::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_SonoraChange");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Augusta_UltiSFX"),
-		CAugusta_UltiSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiSFX");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Augusta_UltiPostSFX"),
-		CAugusta_UltiPostSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
-
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiSlash"),
-		CGalbrenaUlti_SFX_Slash::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Augusta_UltiPostSFX");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiStar"),
-		CGalbrenaUlti_SFX_Star::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype_SFX_Galbrena_UltiStar");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiCircle"),
-		CGalbrenaUlti_SFX_Circle::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype SFX_Galbrena_UltiCircle");
-
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::HEAVEN), TEXT("Prototype_SFX_Galbrena_UltiPostSFX"),
-		CGalbrenaUlti_PostSFX::Create(m_pDevice, m_pContext))))
-		CRASH("Failed Add Prototype_SFX_Galbrena_UltiPostSFX");
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Sequence", m_eCurLevel);
 
 	return S_OK;
 }

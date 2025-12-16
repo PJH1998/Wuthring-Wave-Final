@@ -11,6 +11,8 @@
 #include "Levi_Wave.h"
 #include "Levi_Augusta.h"
 #include "GameSystem.h"
+#include "Event_Leviatan.h"
+#include "MotionTrail.h"
 
 CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -20,12 +22,16 @@ CLeviatan::CLeviatan(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CLeviatan::CLeviatan(const CLeviatan& Prototype)
 	: CActor { Prototype }
 	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vOutLineColor{ Prototype.m_vOutLineColor }
+	, m_fOutLineRadius{ Prototype.m_fOutLineRadius }
 {
 	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLeviatan::Initialize_Prototype()
 {
+	m_vOutLineColor = _float4(0.9015f, 0.9015f, 0.9015f, 1.f);
+	m_fOutLineRadius = 0.02f;
 	return S_OK;
 }
 
@@ -38,26 +44,27 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
 	m_pTransformCom->Rotation_Quaternion(vQuat);
-	//m_fHP = pDesc->fHP;
-	m_fHP = 200.f;
+	m_fHP = pDesc->fHP;
+	//m_fHP = 5100.f;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
 
 #pragma region ATTACK_STATE
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 22.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 16.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK5] = 22.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK12] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK13] = 35.f;
-	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 10.f;
+	m_fAttackAcc[PHASE::ONE][ATK_PATTERN::BURST] = m_fAttackAcc[PHASE::TWO][ATK_PATTERN::BURST] = m_fAttackCoolTime[ATK_PATTERN::BURST] = 120.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK18] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 80.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK20] = 80.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 80.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK22] = 65.f;
 #pragma endregion
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	Ready_Volumes(pDesc);
+	Ready_Events();
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 
 	m_CallBack.pTransform = m_pTransformCom;
@@ -75,7 +82,7 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
-	m_ShaderIndices[LEVIATAN_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
+	m_ShaderIndices[LEVIATAN_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::LEVI_FX);
 	XMStoreFloat4x4(&m_PreTransform, XMMatrixIdentity());
 	m_isRender = true;
 
@@ -87,6 +94,24 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_iActionChecker[ACTION::PHASE1_DOWN] = 3;
 	m_iActionChecker[ACTION::PHASE2_DEAD] = 4;
 
+	m_strSequenceTag[ACTION::ENCOUNTER].push_back(TEXT("Levi_Start"));
+	m_strSequenceTag[ACTION::ENCOUNTER].push_back(TEXT("Levi_Start02"));
+	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_Start"));
+	m_strSequenceTag[ACTION::PHASE1_DOWN].push_back(TEXT("Levi_Death_End"));
+	//m_strSequenceTag[ACTION::PHASE2_DEAD].push_back(TEXT(""));
+
+	m_fBehitAcc = m_fBehitMaxTime = 0.3f;
+	m_vMonsterDissolveColor = _float4(0.3f, 0.f, 0.4f, 1.f);
+
+	m_strSequenceAnim = "Stand2";
+	m_fTimeLackRate = 1.f;
+
+#pragma region Light_Setting
+	m_LeviLight = *m_pGameInstance->Get_LightDesc(TEXT("Test"));
+	_vector vDiffuseTemp = XMLoadFloat4(&m_LeviLight.vDiffuse);
+	XMStoreFloat4(&m_LeviLight.vDiffuse, XMVectorSetW(vDiffuseTemp * 0.5f, 1.f));
+
+#pragma endregion
 	return S_OK;
 }
 
@@ -104,13 +129,31 @@ void CLeviatan::Priority_Update(_float fTimeDelta)
 		if (Pair.second->IsActivate())
 			Pair.second->Priority_Update(fTimeDelta);
 	}
+	if (m_isAggro && !m_isEncounter)
+	{
+		m_isEncounter = true;
+		m_pGameSystem->HUD_FadeOut();
+		m_pGameInstance->OnFade(FADE::FADE_OUT, 0.4f, [this]() {
+			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			{
+				m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::ENCOUNTER].front());
+				m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
+				m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
+				m_isAnimationFinished = false;
+				m_isBattle = true;
+			}
+			m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, [this]() {
+
+				});
+			});
+	}
 }
 
 void CLeviatan::Update(_float fTimeDelta)
 {
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	if(m_pBehaviorTreeCom[m_iPhase])
+	if(m_isBattle && m_pBehaviorTreeCom[m_iPhase])
 	{
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
@@ -120,24 +163,36 @@ void CLeviatan::Update(_float fTimeDelta)
 			m_pBehaviorTreeCom[m_iPhase]->tick(this);
 	}
 	After_Condition(fTimeDelta);
+	m_fTimeLackRate = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	if (m_isAreaAttack)
-		AreaAttack(fTimeDelta);
+		AreaAttack(fTimeDelta * m_fTimeLackRate);
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
-	if(m_pAnimMachineCom[m_iPhase])
+	if(m_isBattle && m_pAnimMachineCom[m_iPhase])
 	{
 		if(m_iState & ENUM_CLASS(TEST_STATE::SPLINT))	// 연출 애니메이션 갱신, facial 사용
-			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pFacialComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fTimeLackRate); // gpu
 		else											// 전투 애니메이션 갱신, facial X
-			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); // gpu
+			m_pAnimMachineCom[m_iPhase]->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fTimeLackRate); // gpu
 	}
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	else
 	{
 		_float temp{};
-		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", fTimeDelta * fTimeRatio, &temp);
+		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, m_strSequenceAnim, fTimeDelta * m_fTimeLackRate, &temp);
 	}
-	
+	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+	{
+		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
+#pragma region PARRY_UI
+		m_pGameSystem->Enable_Parried();
+#pragma endregion
+		PREFAB_INFO Effect{};
+		Effect.pModelPtr = m_pModelCom;
+		Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Parry"), m_pTransformCom->Get_WorldMatrix(), &Effect);
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
+	}
 
 	//3. 거리 보간
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -151,6 +206,8 @@ void CLeviatan::Update(_float fTimeDelta)
 	
 	// 탐지 볼륨 갱신
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	if (nullptr != m_pExecuteCom)
+		m_pExecuteCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	//4. 충돌 상호작용 볼륨 갱신
 	for (_uint i = 0; i < ATK_SOCKET::ATKEND; i++)
@@ -160,7 +217,9 @@ void CLeviatan::Update(_float fTimeDelta)
 	}
 	if(m_pParryVolume)
 		m_pParryVolume->Update(fTimeDelta);
-
+	
+	if (m_isLUTEffectEnable)
+		Update_LUT_Effect(fTimeDelta);
 	//5. 파츠 갱신
 	for (auto& Pair : m_PartObjects)
 	{
@@ -174,12 +233,27 @@ void CLeviatan::Late_Update(_float fTimeDelta)
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
+	{
 		m_isParalysis = true;
-
+		m_pGameSystem->Use_Spring(1.f, 0.1f);
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.03f);
+	}
+	if (m_isExecuteEnable)
+	{
+		m_isExecuteEnable = false;
+		m_pExecuteCom->IsActivate(true);
+	}
 	if(m_isRender)
 	{
+		m_fNoiseTime = fmod(m_fNoiseTime + (fTimeDelta * 0.2f), 1.f);
+
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) 
 			return;
+		if (m_fBehitAcc < m_fBehitMaxTime)
+		{
+			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE_NONCOMPARE, this)))
+				return;
+		}
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
 	}
@@ -202,6 +276,8 @@ void CLeviatan::Render()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
+	m_pShaderCom->Bind_Value("g_fNoiseTime", &m_fNoiseTime, sizeof(_float));
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
@@ -223,8 +299,15 @@ void CLeviatan::Render()
 
 		if (FAILED(m_pModelCom->Bind_MorphedResult(m_pShaderCom, i, "g_MorphedVertices")))
 			CRASH("Bind Morph Result Failed");
-
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+			if (m_isDeadTrigger)
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::DISSOLVE_CHARACTER));
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::UNDISSOLVE_CHARACTER));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 
@@ -268,6 +351,28 @@ void CLeviatan::Render_Shadow()
 	}
 }
 
+void CLeviatan::Render_OutLine()
+{
+	Bind_Resources();
+	m_pShaderCom->Bind_Value("g_vOutLineColor", &m_vOutLineColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutLineRadius, sizeof(_float));
+
+	m_pShaderCom->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW));
+
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH_CHARACTER::BOSS_OUTLINE))))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
+}
+
 void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
@@ -284,8 +389,8 @@ void CLeviatan::OnCollide_During(_uint iLayer, void* pOther, const ContactManifo
 void CLeviatan::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO Info = *m_pGameSystem->Get_MonsterInfo("Leviatan");
-	//m_fHP = Info.fMaxHp;
-	m_fHP = 200.f;
+	m_fHP = Info.fMaxHp;
+	//m_fHP = 100.f;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
@@ -371,6 +476,17 @@ void CLeviatan::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 			m_PartObjects[TEXT("Part_Bayonet")]->SetActivate(IsActive);
 		}
 	}
+	else if (wstrTypeTag == TEXT("Collide"))
+	{
+		m_pColliderCom->IsActivate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("UIEnable"))
+	{
+		if (IsActive)
+			m_pGameSystem->HUD_FadeIn();
+		else
+			m_pGameSystem->HUD_FadeOut();
+	}
 }
 
 void CLeviatan::Effect_Active(const _wstring& wStrEffectTag)
@@ -378,12 +494,36 @@ void CLeviatan::Effect_Active(const _wstring& wStrEffectTag)
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
-	PREFAB_INFO EffectDesc{};
-	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	EffectDesc.pModelPtr = m_pModelCom;
+	size_t Index = wStrEffectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrEffectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrEffectTag.substr(Index + 1);
 
-	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	if (wstrTypeTag == TEXT("SPECTRUM"))
+	{
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrSpectrumTag = wstrPartTag.substr(0, Index);
+		wstrPartTag = wstrPartTag.substr(Index + 1);
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrBoneName = wstrPartTag.substr(0, Index);
+		_wstring wstrDuration = wstrPartTag.substr(Index + 1);
+
+		SPECTRUM_INFO Spectrum{};
+		Spectrum.pModelMarixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		Spectrum.pIsActive = nullptr;
+		Spectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(WStringToString(wstrBoneName).c_str());
+		Spectrum.fDuration = stof(wstrDuration);
+
+		m_pGameInstance->Spawn_PoolingObject(wstrSpectrumTag, XMMatrixIdentity(), &Spectrum);
+	}
+	else
+	{
+		PREFAB_INFO EffectDesc{};
+		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		EffectDesc.pModelPtr = m_pModelCom;
+		_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+
+		m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	}
 }
 
 void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
@@ -417,6 +557,10 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Look"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	}
+	else if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
 	}
 	else if (wstrTypeTag == TEXT("Alter"))
 	{
@@ -467,6 +611,18 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviAlter"), WorldMatrix, &Desc);
 		}
 	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.21f, 0.01f, 0.4f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.1f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 1.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
+	}
 	else if (wstrTypeTag == TEXT("Parry"))
 	{
 		m_pGameSystem->Attach_Parry(&m_vUIPosition);
@@ -484,12 +640,14 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 			WorldMatrix = XMLoadFloat4x4(m_pSwordSocket) * m_pTransformCom->Get_WorldMatrix();
 			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviAura"), WorldMatrix, &Desc);
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
 		}
 		else if (wstrAnimTag == TEXT("Proj"))
 		{
 			WorldMatrix = XMLoadFloat4x4(m_pBowSocket) * m_pTransformCom->Get_WorldMatrix();
 			XMMatrixDecompose(&vScale, &vQuat, &vTrans, WorldMatrix);
 			m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_LeviSword"), WorldMatrix, &Desc);
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
 		}
 		else if (wstrAnimTag == TEXT("Wave"))
 		{
@@ -505,6 +663,15 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		else if (wstrAnimTag == TEXT("Default"))
 		{
 			dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
+		}
+		else if (wstrAnimTag == TEXT("Impact"))
+		{
+			PREFAB_INFO Effect{};
+			Effect.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+			_matrix World = XMLoadFloat4x4(m_pBowSocket)* m_pTransformCom->Get_WorldMatrix();
+			_vector vPos = World.r[3];
+			World = XMMatrixTranslationFromVector(vPos);
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Leviatan_Bow_Pull"), World, &Effect);
 		}
 	}
 	else if (wstrTypeTag == TEXT("SaveMatrix"))
@@ -561,13 +728,25 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Teleport"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+		if (wstrAnimTag == TEXT("Front"))
+		{
+			vPos = XMLoadFloat3(&m_vTargetPosition) - XMLoadFloat3(&m_vTargetDir) * 4.f;
+			//vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.4f), 1.f);
+			
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
+		else
+		{
+			vPos = XMVectorSetW(XMVectorLerp(vPos, XMLoadFloat3(&m_vTargetPosition), 0.6f), 1.f);
+			m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		}
 		m_pTransformCom->Set_State(STATE::POSITION, vPos);
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+		m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-001 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
 	}
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab");
+		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab", m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("QTE"))
 	{
@@ -578,6 +757,404 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		Reset_NotifyInteraction();
 		dynamic_cast<CLevi_Bow*>(m_PartObjects[TEXT("Part_Bow")])->Change_Scale(1.f);
 	}
+	else if (wstrTypeTag == TEXT("Light"))
+	{
+		//m_pGameInstance->Update_LightDesc();
+		LIGHT_DESC Desc = *m_pGameInstance->Get_LightDesc(TEXT("Test"));
+		m_pGameInstance->Update_LightDesc(TEXT("Test"),m_LeviLight);
+		memcpy(&m_LeviLight, &Desc, sizeof(LIGHT_DESC));
+	}
+	else if (wstrTypeTag == TEXT("FadeOut"))
+	{
+		m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+
+			});
+	}
+	else if (wstrTypeTag == TEXT("DOME"))
+	{
+		//돔 디졸브 호출
+		//얘는 돔 디졸브 시킬 노티파이에 옮기기.
+		m_pGameSystem->Dome_DissolveStart(true);
+	}
+	else if (wstrTypeTag == TEXT("Ending"))
+	{
+		//UI 호출
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			m_pGameSystem->Trigger_PlayEndImage();
+		}
+		//m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+		//	
+		//	m_pGameInstance->OnFade(FADE::FADE_IN, 2.f, [this]() {
+		//		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		//		{
+		//			
+		//		}
+		//		});
+		//	});
+	}
+}
+
+void CLeviatan::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Move"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP));
+		if (wstrPartTag == TEXT("WalkL"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-003 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.01f);
+		}
+		else if (wstrPartTag == TEXT("WalkR"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_footsteps-004 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.01f);
+		}
+		else if (wstrPartTag == TEXT("Dodge1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge4"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_action_move_04 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP), 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Stop"))
+		{
+			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_FOOTSTEP));
+		}
+	}
+	else if (wstrTypeTag == TEXT("AttackS"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
+		if (wstrPartTag == TEXT("0301"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack3_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0302"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack3_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0303"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack3_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0102"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0108"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p8 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0501")) // 찌르기
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack5_p1_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0503")) // 땅 찍기
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack5_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("1803"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("2203"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack22_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("AttackL"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
+		if (wstrPartTag == TEXT("1702"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack17_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("0102"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("1402"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("1802"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack18_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("0201"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack2_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("1508"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Attack15_1Montage_8 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Bow"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
+		if (wstrPartTag == TEXT("Build1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowbuildup_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("Build2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowbuildup_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("Shoot1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_01 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("Shoot2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_02 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("Shoot3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowshot_03 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Impact"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
+		if (wstrPartTag == TEXT("1702"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack17_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("Arrow1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowimpact_1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.45f);
+		}
+		else if (wstrPartTag == TEXT("Arrow2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_arrowimpact_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.45f);
+		}
+		if (wstrPartTag == TEXT("1201")) // 찍어서 터뜨리는 사운드 22패턴 찍기에 사용 중
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack12_p1_impact (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("Grab15"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack15_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.35f);
+		}
+		else if (wstrPartTag == TEXT("Born"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_born (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.2f);
+		}
+		
+	}
+	else if (wstrTypeTag == TEXT("Attack14"))
+	{
+		//m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
+		if (wstrPartTag == TEXT("01"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_1"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("01D"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack2_p1_shanxian (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("02"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d2"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("04"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("05"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("06"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("07"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_pi (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.4f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("SFX"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_SFX));
+		if (wstrPartTag == TEXT("Ding")) // 14패턴 마지막 검 효과용
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_ding (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.45f);
+		}
+		else if (wstrPartTag == TEXT("1403"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_d3"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.26f);
+		}
+		else if (wstrPartTag == TEXT("14023"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("2201")) // 늑대 아우라 사전 SFX
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack22_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("2202")) // 늑대 아우라
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack22_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("2101")) // 영역전개
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack21_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("2102")) // 영역전개
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack21_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("2103")) // 영역전개
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack21_p3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("5102"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack51_p2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("14_1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack14_p2_pi_pre (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("14Last"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Attack15_1Montage_7 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.4f);
+		}
+		else if (wstrPartTag == TEXT("Telpo"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack21_p1 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Death")) // 사망시 환경 효과음
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_DeathMain_2 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.18f);
+		}
+		else if (wstrPartTag == TEXT("DeathEnd")) // 사망시 환경 효과음
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_DeathMain_3 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_SFX), 0.18f);
+		}
+		else if (wstrPartTag == TEXT("Stop"))
+		{
+			m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_SFX));
+		}
+	}
+	else if (wstrTypeTag == TEXT("Pre"))
+	{
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
+		if (wstrPartTag == TEXT("12_1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack12_p1_pre (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.1f);
+		}
+		else if (wstrPartTag == TEXT("Whooshi"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_sword_whoosh (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.23f);
+		}
+		else if (wstrPartTag == TEXT("Aug"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_attack51_p1_pre (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Block"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.23f);
+		}
+		else if (wstrPartTag == TEXT("ParalysisStart"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Paralysis_Start (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+		else if (wstrPartTag == TEXT("ParalysisEnd"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_Paralysis_End (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.3f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("VoiceS"))
+	{
+		if (wstrPartTag == TEXT("A1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_a_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("A3"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_a_03 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("B1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_b_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("B2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_b_02 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("C1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_c_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("C2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_c_02 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("D1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_atk02_d_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("AL"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_skill01_a_02 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Block"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_behit_block_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("VoiceL"))
+	{
+		if (wstrPartTag == TEXT("SK5"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_skill05 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("SK4"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_skill04 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Ult"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_ult (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Paralysis"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_paralysis_start_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Fake"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_fakedeath (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Death"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_mon_dark_fuludelisi_death_01 (ko)"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.25f);
+		}
+		else if (wstrPartTag == TEXT("Story1"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_1"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv", true);
+		}
+		else if (wstrPartTag == TEXT("Story2"))
+		{
+			m_pGameInstance->Play_Sound(TEXT("ko_vo_story_2"), ENUM_CLASS(CHANNEL::ENEMY_VOICE), 0.5f);
+			m_pGameSystem->Req_Interact_DialogUI(true);
+		}
+	}
+	
 }
 
 HRESULT CLeviatan::Bind_Resources()
@@ -585,6 +1162,23 @@ HRESULT CLeviatan::Bind_Resources()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
+	if (m_fBehitAcc < m_fBehitMaxTime)
+	{
+		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+
+		//for (auto& Index : m_ShaderIndices)
+		//{
+		//	Index = ENUM_CLASS(SHADER_ANIMMESH::BOSS_BEHIT);
+		//}
+	}
+
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 
 	return S_OK;
 }
@@ -611,6 +1205,15 @@ void CLeviatan::Ready_Component(LEVIATAN_DESC* pDesc)
 		OnDetect_Enter(iLayer, pDesc, Manifold);
 		});
 
+	RigidbodyDesc.vExtent = _float3(1.5f, 1.5f, 1.5f);
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_RB_Execute"), reinterpret_cast<CComponent**>(&m_pExecuteCom), &RigidbodyDesc)))
+		CRASH("Com_RB_Execute");
+
+	m_pExecuteCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		Execute_Enter(iLayer, pDesc, Manifold);
+		});
+	m_pExecuteCom->IsActivate(false);
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
@@ -810,6 +1413,59 @@ void CLeviatan::Ready_Volumes(LEVIATAN_DESC* pDesc)
 	m_pParryVolume->TriggerActivate(false);
 }
 
+void CLeviatan::Ready_Events()
+{
+	m_pGameInstance->Subscribe<LEVI_GRAB>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), [this](const LEVI_GRAB event) {
+		if (event.isSuccess)
+		{
+			m_fStamina = 0.f;
+			if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+				m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
+		}
+		});
+
+	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_PrevExecute"), [this](const LEVI_EXECUTE event) {
+		if (event.isSuccess)
+		{
+			// 1. 자신의 위치를 중점에 고정 필요. => 그래야 정확한 카메라 앵글 잡기가 편함.
+
+
+			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanPrevExecute", m_pTransformCom);
+			m_isBattle = false;
+			m_strSequenceAnim = "Paralysis_Start";
+			//Event1();
+		}
+	});
+
+	m_pGameInstance->Subscribe<LEVI_EXECUTE>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), [this](const LEVI_EXECUTE event) {
+		if (m_iPhase == PHASE::ONE && event.isSuccess)
+		{
+			m_fHP = 0.f;
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+			m_pExecuteCom->IsActivate(false);
+			m_isBattle = false;
+
+			//m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess", m_pTransformCom); // 무력화 이후에 => 연출 추가.
+			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			{
+				
+				//Event1();
+				m_pGameSystem->HUD_FadeOut();
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 2.f, [this]() {
+					m_isBattle = true;
+					Event1();
+
+					m_pGameInstance->OnFade(FADE::FADE_IN, 0.7f, [this]() {
+						
+						});
+					});
+				m_strSequenceAnim = "Paralysis_Start";
+
+			}
+		}
+		});
+}
+
 void CLeviatan::Calculate_PosAndDir()
 {
 	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
@@ -826,47 +1482,68 @@ void CLeviatan::Calculate_PosAndDir()
 
 void CLeviatan::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		if (m_iPhase == 0)
-		{
-			m_iState = (ENUM_CLASS(TEST_STATE::SPLINT) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
-			m_fHP = 1.f;
-			m_pColliderCom->IsActivate(false);
-			m_pRigidBodyCom->IsActivate(false);
-		}
-		else
-		{
-			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		}
-		return;
-	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
 		if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 			iRemainState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		//연출 진행중
 		if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 		{
 			m_iAnimCheck++;
 			if(m_iAnimCheck < m_iActionChecker[m_iActionIndex])
+			{
 				iRemainState |= ENUM_CLASS(TEST_STATE::SPLINT);
+				if (m_iAnimCheck == m_iActionChecker[m_iActionIndex] - 1)
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+						m_pGameInstance->Play_Sequence(m_strSequenceTag[m_iActionIndex].back());
+			}
 			else
 			{
-				if(m_iActionIndex == ACTION::PHASE1_DOWN)
+				//2페이즈 시작
+
+				if (m_iActionIndex == ACTION::ENCOUNTER)
+				{
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+					{
+						m_pGameSystem->Close_DialogUI();
+						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
+						m_pGameSystem->Change_Leviathan_Phaze(1);
+						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
+						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+						if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+						{
+							m_pGameSystem->HUD_FadeIn();
+							m_pGameSystem->Lock_Input_ToPlayer(false);
+						}
+
+					}
+				}
+				else if(m_iActionIndex == ACTION::PHASE1_DOWN)
 				{
 					m_iPhase = PHASE::TWO;
 					Reset(XMMatrixIdentity(), nullptr);
+					if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+					{
+						Event2();
+						m_pGameSystem->HUD_FadeIn();
+						m_pGameInstance->OnFade(FADE::FADE_IN, 1.f, [this]() {
+							
+							});
+						
+					}
 				}
 				else if (m_iActionIndex == ACTION::PHASE2_DEAD)
 				{
 					m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+					m_pGameSystem->HUD_FadeOut();
 					return;
 				}
 				m_iActionIndex++;
 				m_iAnimCheck = 0;
 				m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 				m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+				m_pGameInstance->Change_MainCamera(m_pGameInstance->Get_CurrentLevel(), TEXT("Camera_Spring"));
 			}
 		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -883,12 +1560,16 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 #endif
 	}
 	
-	for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+	if(m_isAggro)
 	{
-		if (m_fAttackAcc[m_iPhase][i] > 0.f)
-			m_fAttackAcc[m_iPhase][i] -= fTimeDelta;
+		for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+		{
+			if (m_fAttackAcc[m_iPhase][i] > 0.f)
+				m_fAttackAcc[m_iPhase][i] -= fTimeDelta;
+		}
 	}
 	m_fAttackAcc[m_iPhase][ATK_PATTERN::ATTACK12] = m_fAttackCoolTime[ATK_PATTERN::ATTACK12];
+	m_fAttackAcc[m_iPhase][ATK_PATTERN::ATTACK1] = m_fAttackCoolTime[ATK_PATTERN::ATTACK1];
 	if (m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
 
@@ -896,11 +1577,15 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
 	_matrix WorldCamBind = XMLoadFloat4x4(m_pCameraSocket) * m_pTransformCom->Get_WorldMatrix();
 	XMStoreFloat3(&m_vUIPosition, WorldCamBind.r[3]);
+	m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(m_vUIPosition, UI_MINIMAP_OBJTYPE::BOSS);
 #pragma endregion
+
+	if (m_fBehitAcc < m_fBehitMaxTime)
+		m_fBehitAcc += fTimeDelta;
 
 	if (m_isParalysis)
 	{
-		m_fParalysisAcc -= fTimeDelta;
+		m_fParalysisAcc -= fTimeDelta * m_fTimeLackRate;
 		if (m_fParalysisAcc <= 0.f)
 		{
 			//그로기 유지시간 정의하기
@@ -911,6 +1596,23 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
+
+	if (m_fHP <= 0.f)
+	{
+		if (m_iPhase == 0)
+		{
+			m_iState = (ENUM_CLASS(TEST_STATE::SPLINT) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_fHP = 1.f;
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+		}
+		else
+		{
+			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+			m_fBehitAcc = m_fBehitMaxTime;
+		}
+		//return;
+	}
 }
 
 void CLeviatan::After_Condition(_float fTimeDelta)
@@ -922,15 +1624,21 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 			m_isDeadTrigger = true;
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
+
+			//사망 시 타임슬로우 효과
+			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.7f);
+			m_pGameInstance->Get_Current_LutSetting(&m_iLUTIndex, &m_fLUTIntensity, &m_isLUTDynamic);
+			m_fLUTAcc = 1.f;
+			m_isLUTEffectEnable = true;
 		}
-		return;
+		//return;
 	}
 	else if (m_iState & ENUM_CLASS(TEST_STATE::SPLINT))
 	{
 
 	}
 	if (m_isTurnLerp)
-		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta * m_fTimeLackRate);
 
 	//그로기 특수상황
 	if (m_isParalysis)
@@ -940,6 +1648,7 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		else
 		{
 			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_pGameInstance->Play_Sound(TEXT("boss_fuludelisi_behit_block (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f);
 			m_isKnockDownTrig = true;
 		}
 	}
@@ -947,7 +1656,30 @@ void CLeviatan::After_Condition(_float fTimeDelta)
 		m_isKnockDownTrig = m_isParalysis;
 
 	if (m_beHit)
+	{
 		m_beHit = false;
+
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG), m_eBehitColor, 0.4f);
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+			m_pGameInstance->Play_Sound(m_strBehitSound, ENUM_CLASS(CHANNEL::ENEMY_HIT), 0.4f);
+#pragma endregion
+#pragma region UI_UNBIND
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
+#pragma endregion
+	}
 }
 
 void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -959,11 +1691,14 @@ void CLeviatan::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
 		//m_pGameSystem->HUD_Bind_BossStatus(TEXT("명식 레비아탄"), "Leviatan", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
 		//m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+		
 		//조우 연출 시작
-		m_pAnimMachineCom[m_iPhase]->Reset(m_pModelCom, "Heihua01_Start");
-		m_iState = ENUM_CLASS(TEST_STATE::SPLINT);
-		m_isAnimationFinished = false;
 		m_isAggro = true;
+		//m_isEncounter = true;
+		m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_INTRO);
+		m_pGameSystem->Change_BGM(TEXT("Null"));
+		if(m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+			m_pGameSystem->Lock_Input_ToPlayer(true);
 	}
 }
 
@@ -974,25 +1709,24 @@ void CLeviatan::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifol
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_fHP -= pDesc->fAttack;
+		m_beHit = true;
+		if (m_iPhase == PHASE::ONE && m_fHP > 5000.f && ((m_fHP - pDesc->fAttack) < 5000.f))
+			m_isExecuteEnable = true;
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
+		m_fBehitAcc = 0.f;
+#pragma region PHASE_1
+		if (m_iPhase == PHASE::ONE && m_fHP <= 0.f)
+			m_fHP = 1.f;
+#pragma endregion
+
 		if(m_fStamina > 0.f)
 			m_fStamina -= 1.f;
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
-#pragma region UI_UNBIND
-		if (m_fHP <= 0.f)
-		{
-			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
-		}
-#pragma endregion
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
+
 		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
 #ifdef _DEBUG
@@ -1023,13 +1757,17 @@ void CLeviatan::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 
-#pragma region PARRY_UI
-	m_pGameSystem->Enable_Parried();
-#pragma endregion
-
 #ifdef _DEBUG
 	cout << "Parry! Leviatan)" << endl;
 #endif // _DEBUG
+}
+
+void CLeviatan::Execute_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if(iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		m_pGameSystem->Play_QTE(_float2(400.f, 0.f), UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F, _float2(0.6f, 0.6f));
+	}
 }
 
 void CLeviatan::AreaAttack(_float fTimeDelta)
@@ -1037,14 +1775,14 @@ void CLeviatan::AreaAttack(_float fTimeDelta)
 	m_fDropAcc += fTimeDelta;
 	m_fFenceAcc += fTimeDelta;
 
-	if (m_fDropAcc >= 0.5f)
+	if (m_fDropAcc >= 0.25f)
 	{
 		m_fDropAcc = 0.f;
 		_float fRadius = m_pGameInstance->Rand(0.f, XM_2PI);
-		_float fRange = m_pGameInstance->Rand(0.5f, 5.f);
-		_float3 vSpawnPos = m_vTargetPosition;
+		_float fRange = m_pGameInstance->Rand(1.f, 30.f);
+		_float3 vSpawnPos = { m_PreTransform.m[3][0], m_PreTransform.m[3][1], m_PreTransform.m[3][2] };
 		vSpawnPos.x -= sin(fRadius) * fRange;
-		vSpawnPos.y = m_PreTransform.m[3][1];
+		//vSpawnPos.y = m_PreTransform.m[3][1];
 		vSpawnPos.z -= cos(fRadius) * fRange;
 
 		CLevi_Drop::DROPRESET Drop{};
@@ -1094,27 +1832,79 @@ void CLeviatan::Reset_NotifyInteraction()
 	{
 		if(nullptr != m_pAtkVolumes[i])
 		{
-			m_pAtkVolumes[i]->SetActivate(false);
+			m_pAtkVolumes[i]->TriggerActivate(false);
 			m_pAtkVolumes[i]->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
 		}
 	}
 	if (nullptr != m_pParryVolume)
-		m_pParryVolume->SetActivate(false);
-
+		m_pParryVolume->TriggerActivate(false);
+	m_isAreaAttack = false;
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_SFX));
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_VOICE));
+	m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::ENEMY_ACTION));
 	//for (auto& Pair : m_PartObjects)
 	//	Pair.second->Reset(XMMatrixIdentity(), nullptr);
 }
 
 void CLeviatan::Event1()
 {
+	m_pGameInstance->Set_CurrentCamera_Far(1000.f);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
+	m_pTransformCom->Save_PreviousPosition();
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_pGameInstance->Play_Sequence(m_strSequenceTag[ACTION::PHASE1_DOWN].front());
+	m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHNAGE);
+	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_ONE);
+	//m_pGameSystem->Engage_Battle(true, BOSSBGM::END);
+	m_pGameSystem->Change_BGM(TEXT("Null"));
+	m_pGameSystem->Change_Leviathan_Phaze(0);
+	if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		m_pGameSystem->Lock_Input_ToPlayer(true);
+	//레비아탄 채력 데이터 변경 함수
+	m_pGameSystem->Levi_Phase_Change();
+	_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
+	m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+	//떠오를 때 노티파이로 이거 실행
+	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기
+	//m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHANGE);
+
 }
 
 void CLeviatan::Event2()
 {
 	//2페이즈 맵으로 이동하기
-	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_pTransformCom->Save_PreviousPosition();
+	m_pGameInstance->Set_CurrentCamera_Far(200.f);
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
+	m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_TWO);
+	m_pGameSystem->Change_Leviathan_Phaze(2);
+	if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		m_pGameSystem->Lock_Input_ToPlayer(false);
+	m_isBattle = true;
+	//m_pGameSystem->Engage_Battle(false, BOSSBGM::HEAVEN_CHNAGE);
+	//m_pGameSystem->Engage_Battle(true, BOSSBGM::HEAVEN_TWO);
+}
+
+void CLeviatan::Update_LUT_Effect(_float fTimeDelta)
+{
+	if(m_fLUTAcc > 0.f)
+	{
+		_uint iLUTIndex{3};
+		m_fLUTAcc -= fTimeDelta;
+		if (m_fLUTAcc < 0.15f)
+			iLUTIndex = m_iLUTIndex;
+		m_pGameInstance->Setting_LUT(iLUTIndex, m_fLUTAcc, false); // 흑백 효과 : 3
+	}
+	else
+	{
+		m_fLUTAcc = 0.f;
+		m_pGameInstance->Setting_LUT(m_iLUTIndex, m_fLUTIntensity, m_isLUTDynamic);
+		m_isLUTEffectEnable = false;
+	}
+	
 }
 
 _bool CLeviatan::isKnockDown()
@@ -1156,8 +1946,11 @@ _bool CLeviatan::DodgeCooldown()
 
 _bool CLeviatan::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::BURST)
+	// Attack1 빼기, Attack15 처형 활성화되면 사용 x
+	if (m_iPhase == PHASE::ONE && m_fHP < 5000.f && iIndex == ATK_PATTERN::BURST)
 		return false;
+	//if (iIndex != ATK_PATTERN::BURST)
+	//	return false;
 	_bool bResult = (m_fAttackAcc[m_iPhase][iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
@@ -1177,14 +1970,14 @@ _bool CLeviatan::Attack_Arrange()
 
 _bool CLeviatan::CheckHit()
 {
-	if (m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-
-		m_beHit = false;
-		return true;
-	}
-	return false;
+	//if (m_beHit)
+	//{
+	//	m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+	//
+	//	m_beHit = false;
+	//	return true;
+	//}
+	return m_beHit;
 }
 
 _bool CLeviatan::Back()
@@ -1243,6 +2036,7 @@ void CLeviatan::Free()
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pFacialComputeShaderCom);
 	Safe_Release(m_pParryVolume);
+	Safe_Release(m_pExecuteCom);
 	for (_uint i = 0; i < PHASE::P_END; ++i)
 		Safe_Release(m_pBehaviorTreeCom[i]);
 	for (_uint i = 0; i < PHASE::P_END; ++i)

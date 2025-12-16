@@ -17,7 +17,7 @@ CLevel_Shader::CLevel_Shader(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Shader::Initialize()
 {
-	m_pGameInstance->Load_Resource("../../Client/Bin/Resource/Map/The_False_Sovereign/");
+	m_pGameInstance->Load_Resource("../../Client/Bin/Resource/Map/Asphodel_Barrens/");
 
 	if (FAILED(Ready_Light()))
         CRASH("Failed Light");
@@ -58,12 +58,12 @@ void CLevel_Shader::Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Set_Active(TEXT("Test"), false);
+		m_pGameInstance->Set_LightActive(TEXT("Test"), false);
 		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
 	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
-		m_pGameInstance->Set_Active(TEXT("Test"), true);
+		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
 		//m_pGameInstance->Spawn_PoolingObject(TEXT("Poolling_Test"), XMMatrixIdentity());
 	}
 
@@ -98,26 +98,27 @@ HRESULT CLevel_Shader::Ready_Light()
 	m_TestLight.vPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	m_TestLight.vDiffuse = _float4(1.f, 0.f, 0.f, 1.f);
 	m_TestLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
-	m_TestLight.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	m_TestLight.vAmbient = _float4(0.1f, 0.1f, 0.1f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test1"), m_TestLight);
 
-	//LIGHT_DESC PointLight = {};
-	//PointLight.eType = LIGHT_DESC::POINT;
-	//PointLight.vAmbient = _float4(0.8f, 0.8f, 0.8f, 1.f);
-	//PointLight.vDiffuse = _float4(0.f, 0.f, 0.7f, 1.f);
-	//PointLight.fRange = 1500.f;
-	//PointLight.vPosition = _float4(340.f, 230.f, 500.f, 1.f);
+	/*LIGHT_DESC PointLight = {};
+	PointLight.eType = LIGHT_DESC::POINT;
+	PointLight.vAmbient = _float4(0.8f, 0.8f, 0.8f, 1.f);
+	PointLight.vDiffuse = _float4(0.f, 0.f, 0.7f, 1.f);
+	PointLight.fRange = 1500.f;
+	PointLight.vPosition = _float4(340.f, 230.f, 500.f, 1.f);
 
-	//LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
-	//PointLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	PointLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	//m_pGameInstance->Add_Light(TEXT("Test1"), PointLight);
+	m_pGameInstance->Add_Light(TEXT("Test1"), PointLight);*/
 
 	//PointLight.vDiffuse = _float4(0.f, 0.7f, 0.f, 1.f);
 	//PointLight.vPosition = _float4(-340.f, 230.f, 500.f, 1.f);
 	//m_pGameInstance->Add_Light(TEXT("Test2"), PointLight);
-    return S_OK;
+
+	return S_OK;
 }
 
 HRESULT CLevel_Shader::Ready_Interface()

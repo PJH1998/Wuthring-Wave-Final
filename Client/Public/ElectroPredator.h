@@ -35,13 +35,15 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
+	virtual		void			Render_Shadow() override;
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
-	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+	void			Sound_Active(const _wstring& wStrObjectTag);
 
 private:
 	CAnimMachine*			m_pAnimMachineCom = { nullptr };
@@ -75,7 +77,7 @@ private:
 	_bool					m_isPushed{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isDeadTrigger{};
-	_float					m_fDesolveRate{};
+
 #pragma endregion
 
 #pragma region STATUS
@@ -92,6 +94,25 @@ private:
 	_float3					m_vBeHit_Normal{};
 	_bool					m_isTurnLerp{};
 #pragma endregion
+
+#pragma region SOUND
+	_uint					m_iSoundChannel{};
+#pragma endregion
+
+#pragma region SHADER_VALUE
+	_float					m_fBehitMaxTime{};
+	_float					m_fBehitAcc{};
+	_float					m_fDissolveRate{};
+	_bool					m_isDissolve{};
+	_float4					m_vMonsterDissolveColor{};
+#pragma endregion
+
+#pragma region BEHIT_INTERACT
+	_float					m_fBehitDMG{};
+	TEXT_COLOR_TYPE			m_eBehitColor{};
+	_wstring				m_strBehitSound{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(ELECTROPREDATOR_DESC* pDesc);

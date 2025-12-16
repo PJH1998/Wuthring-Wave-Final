@@ -88,17 +88,18 @@ void CAugustaGroundDash::Handle_Input()
 
 void CAugustaGroundDash::Update_DashAnimation(_float fTimeDelta)
 {
-    // 1. 누른키에 따른 방향 계산
-    m_eDir = m_pAugusta->Calculate_Direction();
+    
 
-    // 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
-    if (m_pAugusta->Is_LockOn())
-    {
-        _vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-		m_pAugusta->Rotate_Direction(vMoveDir);
-    }
+  //  // 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
+  //  if (m_pAugusta->Is_LockOn())
+  //  {
+  //      _vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		//m_pAugusta->Rotate_Direction(vMoveDir);
+  //  }
 
-	// 3. Animation 실행
+	// 1. 누른키에 따른 방향 계산
+	m_eDir = m_pAugusta->Calculate_Direction();
+	// 2. Animation 실행
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
 	
@@ -119,12 +120,22 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 		if (nullptr == pDesc)
 			return;
 
-		if (pDesc->IsBack)
-			m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-		else 
-			m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_B;
+		//if (pDesc->IsBack)
+		//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		//else 
+		//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_B;
+
+		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
 		
+		// 맞은 방향으로 한번 회전.
+		//m_pAugusta->Rotate_Target(); 
+
+		// Dodge 이전에 누른 방향으로 회전.
+		_vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
+
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		
 		return;
 	}
 

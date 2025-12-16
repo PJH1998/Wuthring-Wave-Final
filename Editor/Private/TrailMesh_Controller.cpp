@@ -279,6 +279,8 @@ void CTrailMesh_Controller::TrailMesh_Tab()
 
 				ImGui::Checkbox("Distortion", &(m_pSelectedTrailMeshDesc->IsDistortion));
 
+				ImGui::Checkbox("Loop", &(m_pSelectedTrailMeshDesc->IsLoop));
+
 				if (m_pSelectedTrailMeshDesc->IsDistortion)
 				{
 					ImGui::Text("DistortionWeight");
@@ -673,9 +675,6 @@ void CTrailMesh_Controller::Remove_Desc(const _wstring& DescTag)
 
     if (iterEffectMeshDesc != m_tTrailMeshDesc.end())
     {
-        //혹시 같은 이름으로 다시 만들어지는거 대비해서 지워줘야할거 같음.
-        m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterEffectMeshDesc->second.strVIBufferTag);
-
         m_tTrailMeshDesc.erase(iterEffectMeshDesc);
     }
 

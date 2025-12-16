@@ -4,6 +4,7 @@
 #include "SpringCamera.h"
 #include "Collider.h"
 #include "GameSystem.h"
+#include "Event_Level.h"
 
 CLogoMaleRover::CLogoMaleRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -36,7 +37,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
-	
+	Register_AllNotifies(pDesc->strFolderPath);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
@@ -45,6 +46,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
 	m_strCurrentAnimation = "AppearanceIdle";
 	m_strPreAnimation = m_strCurrentAnimation;
 	//m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
+	m_States[STATE_PARTICLE] = true;
     return S_OK;
 }
 
@@ -64,6 +66,19 @@ void CLogoMaleRover::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
+
+	if (m_States[STATE_PARTICLE])
+	{
+		m_States[STATE_PARTICLE] = false;
+		PREFAB_INFO effectInfo = {};
+		effectInfo.pModelPtr = m_pModelCom;
+		effectInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		_matrix mat = m_pTransformCom->Get_WorldMatrix();
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Logo_Effect"), mat, &effectInfo);
+		
+		// Sound 한번만 실행
+
+	}
 
 	//m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
 	m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
@@ -168,6 +183,13 @@ void CLogoMaleRover::Render_OutLine()
 
 void CLogoMaleRover::Logo_Input()
 {
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::UP)
+	{
+		m_States[STATE_PICK] = true;
+		m_strCurrentAnimation = "AppearanceLogin";
+		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
+	}
+
 	// 1번 누르면 선택됨. 두번 누르면 해제됨.
 	if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::UP)
 	{
@@ -180,6 +202,47 @@ void CLogoMaleRover::Logo_Input()
 		m_strCurrentAnimation = "AppearanceIdle";
 	}
 		
+}
+
+void CLogoMaleRover::Object_Func(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3, var4;
+	wstringstream wss(wStrObjectTag);
+
+	getline(wss, var1, L'|'); 
+	getline(wss, var2, L'|'); 
+	getline(wss, var3, L'|');
+	getline(wss, var4, L'|');
+
+	if (var1 == TEXT("FADEOUT"))
+	{
+		_float fDuration = stof(var2);
+#ifndef _DEBUG
+		m_pGameInstance->OnFade(FADE::FADE_OUT, fDuration, [&]() {
+			CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+			});
+#endif // !_DEBUG
+	}
+	else if (var1 == TEXT("Sound"))
+	{
+		_wstring strSoundType = var2; // Sound Type
+		_wstring strSoundTag = var3; // Sound Tag
+		_float fVolume = stof(var4); // Volume 크기.
+
+		if (var2 == TEXT("Voice"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_VOICE), fVolume);
+		else if (var2 == TEXT("Action"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+		else if (var2 == TEXT("QTE"))
+			m_pGameInstance->Play_Sound(strSoundTag, ENUM_CLASS(CHANNEL::PLAYER_ACTION), fVolume);
+	}
+		
+		
+
+	
+
+	
 }
 
 
@@ -237,6 +300,8 @@ void CLogoMaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::LOGOROVER);
+
+	m_ShaderPaths[5] = ENUM_CLASS(SHADER_ANIMMESH::LOGO_ROVERMASK);
 }
 
 void CLogoMaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)

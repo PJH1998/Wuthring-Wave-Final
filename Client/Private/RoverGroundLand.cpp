@@ -69,6 +69,7 @@ void CRoverGroundLand::Handle_Input()
 		return;
 
     m_States[RUN] = m_pRover->Check_AnyInput(m_iMoveKey);
+    m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 }
 
 void CRoverGroundLand::Update_LandAnimation(_float fTimeDelta)
@@ -89,9 +90,20 @@ void CRoverGroundLand::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible && m_States[RUN])
     {
-        m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::RUN_F;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN));
-        return;
+		if (m_States[LAND])
+		{
+			m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::RUN_F;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN));
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
+			return;
+		}
+        
+        
     }
 
     if (m_IsAnimationEnd)
@@ -106,8 +118,8 @@ void CRoverGroundLand::Check_StateTransition(_float fTimeDelta)
 void CRoverGroundLand::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_HEAVY), "Land_Heavy", 1.5f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverLandType::LAND_ROLL), "Land_Roll", 1.5f, 22.f);
     CState::Add_Animations(ENUM_CLASS(ERoverLandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
 }
 

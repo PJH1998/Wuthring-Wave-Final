@@ -46,6 +46,8 @@ HRESULT CCoroProduction::Initialize_Clone(void* pArg)
 	m_pGameSystem->TriggerRegister(30, [this](void* pArg) {
 		Action1();
 		});
+	_float temp{};
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "PatrolToFight", 0.f, &temp);
     return S_OK;
 }
 
@@ -57,8 +59,9 @@ void CCoroProduction::Priority_Update(_float fTimeDelta)
 
 void CCoroProduction::Update(_float fTimeDelta)
 {
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	_float fTrackPosition{};
-	m_IsPlayAnimation = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &fTrackPosition, m_IsRootMotion, m_IsRootMotionRotate, m_IsRootMotionTranslate, 1.f);
+	m_IsPlayAnimation = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * fTimeRatio, &fTrackPosition, m_IsRootMotion, m_IsRootMotionRotate, m_IsRootMotionTranslate, 1.f);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPosition > m_Tracks[m_strCurrentAnimation].second)
 	{
@@ -157,6 +160,11 @@ void CCoroProduction::Object_Func(const _wstring& wStrObjectTag)
 	//}
 }
 
+void CCoroProduction::Sound_Active(const _wstring& wStrObjectTag)
+{
+
+}
+
 void CCoroProduction::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
@@ -209,7 +217,7 @@ HRESULT CCoroProduction::Ready_Components(const COROPROD_DESC* pDesc)
 	Meteo.TriggerIndex = 50;
 	Meteo.TriggerActiveIndex = 40;
 	strcpy_s(Meteo.ModelName, "SM_Com2_Roc_APD_39AX_LOD0");
-	XMStoreFloat4x4(&Meteo.WorldMatrix, XMMatrixScaling(0.2f, 0.2f, 0.2f));
+	XMStoreFloat4x4(&Meteo.WorldMatrix, XMMatrixScaling(0.5f, 0.5f, 0.5f));
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iCurLevel, TEXT("Prototype_GameObject_MapObject_Meteo"), iCurLevel, TEXT("Layer_Meteo"), &Meteo)))
 		return E_FAIL;
 
@@ -219,6 +227,8 @@ HRESULT CCoroProduction::Ready_Components(const COROPROD_DESC* pDesc)
 
 void CCoroProduction::Action1()
 {
+	if (m_isActionEnd[0])
+		return;
 	m_strCurrentAnimation = "PatrolToFight";
 	m_isActivate = true;
 	_vector vScale = XMVectorSet(1.5f, 1.5f, 1.5f, 0.f);
@@ -228,10 +238,16 @@ void CCoroProduction::Action1()
 	//m_pTransformCom->Rotation_Quaternion(vQuat);
 	m_pTransformCom->Set_WorldMatrix(XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vPos));
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
+
+#ifndef _DEBUG
+	m_isActionEnd[0] = true;
+#endif // !_DEBUG
 }
 
 void CCoroProduction::Action2()
 {
+	if (m_isActionEnd[1])
+		return;
 	m_strCurrentAnimation = "Attack4";
 	m_isActivate = true;
 	_vector vScale = XMVectorSet(1.3f, 1.3f, 1.3f, 0.f);
@@ -243,10 +259,16 @@ void CCoroProduction::Action2()
 	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = true;
+
+#ifndef _DEBUG
+	m_isActionEnd[1] = true;
+#endif // !_DEBUG
 }
 
 void CCoroProduction::Action3()
 {
+	if (m_isActionEnd[2])
+		return;
 	m_strCurrentAnimation = "Attack12";
 	m_isActivate = true;
 	_vector vScale = XMVectorSet(2.f, 2.f, 2.f, 0.f);
@@ -258,6 +280,11 @@ void CCoroProduction::Action3()
 	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = false;
+
+#ifndef _DEBUG
+	m_isActionEnd[2] = true;
+#endif // !_DEBUG
+
 }
 
 CGameObject* CCoroProduction::Clone(void* pArg)

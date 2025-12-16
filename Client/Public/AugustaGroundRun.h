@@ -14,6 +14,7 @@ private:
 		FLY,
 		ROPE_HOOK,
 		ROPE_DRAG,
+		THROW_CONTROL,
         DASH,
 		DODGE,
 		DODGEABLE,

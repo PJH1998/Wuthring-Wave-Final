@@ -94,6 +94,10 @@ void CRoverGroundRun::Handle_Input()
 		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pRover->Is_GrappleDrag());
 
+	m_States[THROW_CONTROL] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pRover->Is_AttachThrowTarget());
+
     // 키 입력.
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -128,7 +132,7 @@ void CRoverGroundRun::Handle_Input()
 		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
 
 	// 궁 상태 확인하기.
-	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST2) >= m_pRover->Get_MaxCost());
+	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
 }
 
 
@@ -225,6 +229,12 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 	if (m_States[ROPE_DRAG])
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG));
+		return;
+	}
+
+	if (m_States[THROW_CONTROL])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::CONTROL));
 		return;
 	}
 

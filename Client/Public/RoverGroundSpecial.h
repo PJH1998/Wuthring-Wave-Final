@@ -25,6 +25,13 @@ private:
 	   EX_ATTACK05,
 	   EX_SKILL01,
 	   EX_SKILL02,
+	   SKILL_E,
+	   SKILL_R,
+	   BURST,
+	   BURST_E,
+	   DEFAULT_E,
+	   ULTI,
+	   EXIT,
        END
     };
 

@@ -11,11 +11,14 @@ CElectroPredator::CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 CElectroPredator::CElectroPredator(const CElectroPredator& Prototype)
 	: CActor{ Prototype }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 }
 
 HRESULT CElectroPredator::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.9882f, 0.3843f, 0.145f, 1.f);
+
 	return S_OK;
 }
 
@@ -59,6 +62,8 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+	//m_vMonsterDissolveColor = _float4(0.5f, 0.3f, 0.5f, 1.f);
+	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
 
@@ -85,12 +90,18 @@ void CElectroPredator::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
-
+	if (false == m_isActivate)
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
+	}
 	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //gpu
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); //gpu
 	//_float temp;
 	//m_pModelCom->Play_Animation_CPU("Stand2", fTimeDelta, &temp, false, true, false, true, 1.f);
 	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
@@ -137,12 +148,12 @@ void CElectroPredator::Late_Update(_float fTimeDelta)
 			return;
 		}
 	}
-	if (m_isDeadTrigger)
+	if (m_isDissolve)
 	{
-		if (m_fDesolveRate < 1.f)
-			m_fDesolveRate += fTimeDelta;
+		if (m_fDissolveRate < 1.f)			
+			m_fDissolveRate += fTimeDelta;
 		else
-			m_fDesolveRate = 1.f;
+			m_fDissolveRate = 1.f;
 	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -163,6 +174,9 @@ void CElectroPredator::Late_Update(_float fTimeDelta)
 	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CElectroPredator::Render()
@@ -176,17 +190,48 @@ void CElectroPredator::Render()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
+	//_uint iShaderPass = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+	////IF DISSOLVE
+	//{
+	//	iShaderPass = ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN); // or ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD)
+	//
+	//	if(FAILED(m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDesolveRate, sizeof(_float))))
+	//		CRASH("Failed to Bind DissolveRate");
+	//
+	//	if(FAILED(m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vDissovleColor, sizeof(_float4))))
+	//		CRASH("Failed to Bind DissolveColor");
+	//}
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		_bool HasNormal = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-			HasNormal = true;
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			CRASH("Failed to Bind NormalTexture");
+	
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			CRASH("Failed to Bind MaskTexture");
+
+		//_bool HasNormal = { false };
+		//if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+		//	HasNormal = true;
+		//if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+		//	CRASH("Ready g_HasNormal Failed");
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-   		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		if (m_fBehitAcc < m_fBehitMaxTime)
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
+		else
+		{
+			if (m_isDissolve)
+			{
+				if(m_isDeadTrigger)
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+				else
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			}
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		}
 
 		m_pModelCom->Render(i);
 	}
@@ -200,6 +245,26 @@ void CElectroPredator::Render()
 #endif
 }
 
+void CElectroPredator::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
 void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
@@ -208,14 +273,19 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, "Born02", 0.f, &temp, false);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
-	m_fDesolveRate = 0.f;
+	m_fDissolveRate = 0.f;
+	m_isDissolve = true;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
-	m_fAttackAcc[1] = 10.f;
+	m_fAttackAcc[1] = 5.f;
 	m_fAttackAcc[2] = 20.f;
+	m_fBehitAcc = m_fBehitMaxTime;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
@@ -223,6 +293,11 @@ void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Is
 	if (wStrColliderTag == TEXT("Lerp"))
 	{
 		TurnLerp(Isactive);
+	}
+	else if (wStrColliderTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = Isactive;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -241,7 +316,15 @@ void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 
 void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 {
-	if (wStrObjectTag == TEXT("Shoot"))
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrPartTag);
+	}
+	else if (wstrTypeTag == TEXT("Shoot"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
@@ -255,7 +338,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		ProiDesc.pOwnerTransform = m_pTransformCom;
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_Electro"), WorldMat, &ProiDesc);
 	}
-	else if (wStrObjectTag == TEXT("AoE"))
+	else if (wstrTypeTag == TEXT("AoE"))
 	{
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
@@ -269,9 +352,62 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AOEDOT_Electro"), WorldMat, &AoEDesc);
 	}
-	else if (wStrObjectTag == TEXT("Look"))
+	else if (wstrTypeTag == TEXT("Look"))
 	{
 		TurnFix();
+	}
+}
+
+void CElectroPredator::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Atk01"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_leilie_atk01_1_02 (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack01_impact (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk02"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_cast (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack02_impact (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk03"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_cast (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_attack03_impact (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 0.f, 25.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Aggro"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_patroltofight (SFX)"), m_iSoundChannel, 0.15f, m_pTransformCom, 0.f, 32.f);
+	}
+	else if (wstrTypeTag == TEXT("Death"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_death (SFX)"), m_iSoundChannel, 0.2f, m_pTransformCom, 0.f, 25.f);
+	}
+	else if (wstrTypeTag == TEXT("Stand"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_leilie_stand2_action01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 0.f, 18.f);
 	}
 }
 
@@ -281,7 +417,17 @@ HRESULT CElectroPredator::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
-
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+	if (m_fBehitAcc < m_fBehitMaxTime)
+	{
+		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+	}
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 	return S_OK;
 }
 
@@ -377,11 +523,7 @@ void CElectroPredator::Ready_PartObjects(ELECTROPREDATOR_DESC* pDesc)
 
 void CElectroPredator::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		return;
-	}
+	
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -431,6 +573,15 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 	tDesc.vMobPos.y += 1.25f;
 	m_pGameSystem->Update_MobStatus(tDesc);
 #pragma endregion
+
+	if (m_fBehitAcc < m_fBehitMaxTime)
+		m_fBehitAcc += fTimeDelta;
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		//return;
+	}
 }
 
 void CElectroPredator::After_Condition(_float fTimeDelta)
@@ -443,7 +594,7 @@ void CElectroPredator::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
@@ -470,6 +621,25 @@ void CElectroPredator::After_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 		m_beHit = false;
+#pragma region UI_BIND
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG), m_eBehitColor, 0.4f);
+#pragma endregion
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(m_strBehitSound, m_iSoundChannel, 0.4f);
+		}
+#pragma endregion
 	}
 	else
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
@@ -515,72 +685,49 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
 		return;
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
+		m_fBehitAcc = 0.f;
+		if (m_isDissolve)
+			m_isDissolve = false;
+		m_eBehitColor = pDesc->eType;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.5f, 0.f), &EffectDesc);
+#pragma region PHYSICS
+		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);
 #pragma endregion
+		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+		{
+#ifdef _DEBUG
+			cout << "Be Hit! (Electro Predator)" << endl;
+			//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+#endif // _DEBUG
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+		{
+			if (pDesc->eDir == ATTACKVOULME_DIR::UPPER)
+			{
+				m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+			}
+#ifdef _DEBUG
+			cout << "Be Hit! SKILL (Electro Predator)" << endl;
+#endif // _DEBUG
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+		{
+			m_isPushed = true;
+			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 
 #ifdef _DEBUG
-		cout << "Be Hit! (Electro Predator)" << endl;
-		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+			cout << "Knock Back! (Electro Predator)" << endl;
+			cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
-
-#ifdef _DEBUG
-		cout << "Be Hit! SKILL (False Sovereign)" << endl;
-#endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.5f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_isPushed = true;
-		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
-
-#ifdef _DEBUG
-		cout << "Knock Back! (Electro Predator)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
-#endif // _DEBUG
+		}
 	}
 }
 

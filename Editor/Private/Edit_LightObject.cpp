@@ -134,7 +134,7 @@ void CEdit_LightObject::Set_ImGuiOption()
 	if(ImGui::Button("Delete"))
 	{
 		m_isActivate = false;
-		m_pGameInstance->Set_Active(to_wstring(m_iLightIndex), false);
+		m_pGameInstance->Set_LightActive(to_wstring(m_iLightIndex), false);
 	}
 }
 

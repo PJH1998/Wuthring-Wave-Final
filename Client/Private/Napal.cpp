@@ -32,6 +32,8 @@ HRESULT CNapal::Initialize_Clone(void* pArg)
 	m_strAnimationTag[1] = "SK_Tab_Mon_01AL_Stand";
 	//m_isActivate = false;
 	m_isRender = true;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
+	Register_AllNotifies(pDesc->strFolderPath);
     return S_OK;
 }
 
@@ -88,6 +90,8 @@ void CNapal::Render()
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
 
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
@@ -100,7 +104,7 @@ void CNapal::Render()
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NAPAL));
 		
 		m_pModelCom->Render(i);
 
@@ -149,6 +153,14 @@ void CNapal::Effect_Active(const _wstring& wStrEffectTag)
 
 void CNapal::Object_Func(const _wstring& wStrObjectTag)
 {
+	if (wStrObjectTag == TEXT("Sound"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("amb_npc_alien_horn_01 (SFX)"), m_iSoundChannel, 0.4f ,m_pTransformCom, 1.f, 250.f);
+	}
+}
+
+void CNapal::Sound_Active(const _wstring& wStrObjectTag)
+{
 }
 
 HRESULT CNapal::Bind_Resources()
@@ -177,7 +189,6 @@ void CNapal::Ready_Component(NAPALDESC* pDesc)
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("NPC_Hiding/Com_Model");
 	//m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
-
 }
 
 CNapal* CNapal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

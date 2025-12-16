@@ -103,7 +103,7 @@ _bool CPicking::GetCenterPos(_float3* pOut)
 
 	memcpy(m_pPoints, SubResource.pData, sizeof(_float4) * m_iWinSizeX * m_iWinSizeY);
 
-	_uint iIndex = ((m_iWinSizeY / 2 - 10) * m_iWinSizeX) + m_iWinSizeX / 2 - 100;
+	_uint iIndex = ((m_iWinSizeY / 2 - 30) * m_iWinSizeX) + m_iWinSizeX / 2 - 100;
 
 	_float4 DepthDesc = m_pPoints[iIndex];
 
@@ -113,10 +113,13 @@ _bool CPicking::GetCenterPos(_float3* pOut)
 	if (0.f == DepthDesc.w)
 		return false;
 
+	_float fTargetScreenX = (_float)(iIndex % m_iWinSizeX); // 나머지 연산 = X 좌표
+	_float fTargetScreenY = (_float)(iIndex / m_iWinSizeX); // 나누기 연산 = Y 좌표
+
 	// World濡?移섑솚
 	_vector WorldPos = {};
-	WorldPos = XMVectorSetX(WorldPos, m_ptMouse.x / (m_iWinSizeX * 0.5f) - 1.f);
-	WorldPos = XMVectorSetY(WorldPos, m_ptMouse.y / (m_iWinSizeY * -0.5f) + 1.f);
+	WorldPos = XMVectorSetX(WorldPos, fTargetScreenX / (m_iWinSizeX * 0.5f) - 1.f);
+	WorldPos = XMVectorSetY(WorldPos, fTargetScreenY / (m_iWinSizeY * -0.5f) + 1.f);
 	WorldPos = XMVectorSetZ(WorldPos, DepthDesc.x);
 	WorldPos = XMVectorSetW(WorldPos, 1.f);
 

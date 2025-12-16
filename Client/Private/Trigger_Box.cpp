@@ -1,6 +1,8 @@
 ﻿#include"ClientPch.h"
 #include "Trigger_Box.h"
 #include"GameSystem.h"
+#include"Event_Level.h"
+
 CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice, pContext),m_pGameSystem(CGameSystem::GetInstance())
 {
@@ -25,26 +27,72 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));;
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	Ready_Components(pArg);
-	m_iTriggerIndex = pDesc->iTriggerIndex;
+
+	m_CamMatrix = new CAM_INFO;
+	switch (m_iTriggerIndex)
+	{
+	case 0:
+		m_CamMatrix->szCamTag = TEXT("Action_Asphodel_Barrens_Start");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
+		break;
+
+	case 2:
+		m_CamMatrix->szCamTag = TEXT("Action_Asphodel_Barrens_Meteo");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
+		break;
+
+	case 4:
+		m_CamMatrix->szCamTag = TEXT("Action_Asphodel_Barrens_Horizon");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = true;
+		break;
+	case 21:
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+		m_CamMatrix->IsMaintain = false;
+		break;
+
+	case 22:
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f));
+		m_CamMatrix->IsMaintain = false;
+		break;
+	case 23:
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora_03");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(XMConvertToRadians(177.5f + 180.f)));
+		m_CamMatrix->IsMaintain = false;
+		break;
+	case 24:
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)));
+		m_CamMatrix->IsMaintain = false;
+		break;
+	case 25:
+		m_CamMatrix->szCamTag = TEXT("Action_False_Sonora_04");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, XMMatrixRotationY(XMConvertToRadians(-30.f)));
+		m_CamMatrix->IsMaintain = false;
+		break;
+	case 30:
+		m_CamMatrix->szCamTag = TEXT("Action_Coro_First");
+		XMStoreFloat4x4(&m_CamMatrix->CamMatrix, m_pTransformCom->Get_WorldMatrix());
+		m_CamMatrix->IsMaintain = false;
+		m_CamMatrix->isEscape = true;
+		break;
+	default:
+		Safe_Delete(m_CamMatrix);
+		break;
+	}
+
+
 	Register_Trigger();
 
-	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 24)
-	{
-		if (m_iTriggerIndex == 24)
-			m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
-			m_IsTriggered = true;
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-				});
-		else
-			m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
-			m_IsTriggered = true;
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-				});
 
-	}
 	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 25)
 	{
 		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
@@ -69,14 +117,65 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 				Collision_Enter();
 			});
 	}
+
+	/*if (m_iTriggerIndex == 34)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Bind_Gravity_ToPlayer(true);
+			});
+	}*/
+
+
+	if (m_iTriggerIndex >= 22 && m_iTriggerIndex <= 25)
+	{
+		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
+			m_IsTriggered = true;
+			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
+			});
+	}
+
+	//트리거박스 60번..
+	if (m_iTriggerIndex == 60)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				Collision_During();
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Hide_InteractUI(false);
+			});
+
+		m_pGameInstance->Subscribe< MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", [this](MINIGAMEPALETTE_SUCCESS_UI_EVENT event) {
+			m_iMiniGameClearNum++;
+			if (m_iMiniGameClearNum >= 1)
+			{
+				m_pGameInstance->OnFade(FADE::FADE_OUT, 3.f, [this]() {
+					_float4 vPos = _float4(1.2f, -3.7f, -708.8f, 1.f);
+					m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+					m_pGameSystem->Lock_Input_ToPlayer(false);
+					m_pGameInstance->OnFade(FADE::FADE_IN, 1.5f, [this]() {
+						});
+					});
+			}
+			});
+
+	}
 	return S_OK;
 }
 
 void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
-	if (m_iTriggerIndex > 20)
+	if (m_iTriggerIndex > 20 && m_iTriggerIndex < 30)
 	{
-		if(m_IsTriggered)
+		if (m_IsTriggered)
 		{
 			m_pGameSystem->Change_Sonoro(true);
 			m_IsTriggered = !m_IsTriggered;
@@ -101,7 +200,7 @@ void CTrigger_Box::Update(_float fTimeDelta)
 
 void CTrigger_Box::Late_Update(_float fTimeDelta)
 {
-
+	m_pRigidbodyCom->Render();
 }
 
 void CTrigger_Box::Ready_Components(void* pArg)
@@ -119,24 +218,64 @@ void CTrigger_Box::Ready_Components(void* pArg)
 
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
-
+	switch (m_iTriggerIndex)
+	{
+	case 34:
+		m_pTempPtr = m_pGameSystem->Create_GrapplePoint(_float3(3396.9f, 318.6f, 2016.2f), UI_GRAPPLE_TYPE::ANCHOR);
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, false);
+		break;
+	}
 }
 
 void CTrigger_Box::Collision_Enter()
 {
+	if (m_IsTriggered)
+		return;
+
 	m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+
+	if (m_pTempPtr)
+		m_pGameSystem->Toggle_GrapplePoint(m_pTempPtr, true);
+
+	if (m_pSecondTempPtr)
+		m_pGameSystem->Toggle_GrapplePoint(m_pSecondTempPtr, true);
 }
 
 void CTrigger_Box::Collision_During()
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
+	if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN && !m_bOnCoolDown)
 	{
-		if (!m_pGameSystem->IsSonoro())
+		if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::GAMEPLAY))
 		{
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+
+			if (!m_pGameSystem->IsSonoro())
+			{
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+			}
+			else
+				m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+			m_pGameSystem->Hide_InteractUI(true);
+
+			PREFAB_INFO Info;
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Change_Sonora"), m_pTransformCom->Get_WorldMatrix(), &Info);
+
 		}
-		else
-			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+		else if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
+		{
+			if (!m_IsDoingPalette)
+			{
+				m_pGameSystem->Open_Game_OverflowPalette(3);
+				m_pGameSystem->Hide_InteractUI(true);
+				m_pGameSystem->Lock_Input_ToPlayer(true);
+			}
+			else
+			{
+				m_pGameSystem->Close_Game_OverflowPalette();
+				m_pGameSystem->Show_InteractUI(TEXT("다채화"));
+				m_pGameSystem->Lock_Input_ToPlayer(false);
+			}
+			m_IsDoingPalette = !m_IsDoingPalette;
+		}
 
 		m_pGameSystem->Hide_InteractUI(true);
 	}
@@ -149,50 +288,59 @@ void CTrigger_Box::Collision_End()
 void CTrigger_Box::Register_Trigger()
 {
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
+		CAMERA_SHAKE ShakeDesc{};
+		PREFAB_INFO Info;
+		if (m_CamMatrix)
+			m_pGameSystem->Play_Action(m_CamMatrix->szCamTag, XMLoadFloat4x4(&m_CamMatrix->CamMatrix), m_CamMatrix->IsMaintain, m_CamMatrix->isEscape);
 		switch (m_iTriggerIndex)
 		{
 		case 0:
-			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
+			m_pGameSystem->Change_BGM(TEXT("battle_outside_monster_small_loop (SFX)"));
 			break;
-
-		case 2:
-			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Meteo"), m_pTransformCom->Get_WorldMatrix(), false);
-			break;
-
-		case 4:
-			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Horizon"), m_pTransformCom->Get_WorldMatrix(), true);
-			break;
-
 		case 7:
 			m_pGameSystem->Stop_Action();
 			break;
 
 		case 20:
-			m_pGameInstance->Set_CurrentCamera_Far(500.f);
+			m_pGameInstance->Set_CurrentCamera_Far(600.f);
+			m_pGameInstance->Set_FogFarRatioToCameraFar(1.f);
+			m_pGameSystem->Change_BGM(TEXT("music_story_2_6_plot_purified_loop (SFX)"));
+			break;
+		case 30:
+			m_pGameSystem->Lock_Input_ToPlayer(true);
+			m_pGameSystem->Engage_Battle(true, BOSSBGM::ASPHODEL);
+			break;
+		case 31:
+			ShakeDesc.fAmplitude = 1.f;
+			ShakeDesc.fDuration = 0.8f;
+			ShakeDesc.fFovKick = 0.f;
+			ShakeDesc.fFrequency = 2.f;
+			ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+			ShakeDesc.vTranslation;
+			m_pGameInstance->OnShake(ShakeDesc);
 			break;
 
-		case 21:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_IsTriggered = true;
+		case 34:
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 0.05f, 2.f);
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 0.05f, 2.f);
+			m_pGameSystem->Bind_Gravity_ToPlayer(false);
+			m_pGameSystem->Play_QTE(_float2(-300.f, 300.f), UI_QTE_TYPE::TRIGGER_ROPE, UI_QTE_BTN::T);
+			break;
+		case 50:
+			m_pGameSystem->Lock_Input_ToPlayer(false);
 			break;
 
-		case 22:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_IsTriggered = true;
+		case 61:
+			Info.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+			m_pGameInstance->Spawn_PoolingObject(TEXT("Wall_Fire"), XMMatrixTranslationFromVector(XMVectorSet(0.7f, -3.6f, -648.6f, 1.f)), &Info);
 			break;
-		case 23:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_IsTriggered = true;
-			break;
-		case 24:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_IsTriggered = true;
-			break;
-		case 25:
-			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f + XMConvertToRadians(120.f)) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_IsTriggered = true;
+		case 70:
+			m_pGameSystem->Trigger_ActivateQuest();
 			break;
 		}
+#ifndef _DEBUG
+		m_IsTriggered = true;
+#endif // !_DEBUG
 		});
 }
 
@@ -233,6 +381,9 @@ CGameObject* CTrigger_Box::Clone(void* pArg)
 void CTrigger_Box::Free()
 {
 	__super::Free();
+	m_pTempPtr = nullptr;
+	m_pSecondTempPtr= nullptr;
+	Safe_Delete(m_CamMatrix);
 	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pRigidbodyCom);
 }

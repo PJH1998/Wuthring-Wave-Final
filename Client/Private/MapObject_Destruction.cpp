@@ -3,6 +3,8 @@
 #include"GameSystem.h"
 #include"MapObject_Destruction_Debris.h"
 
+vector<_wstring> CMapObject_Destruction::m_SoundTags;
+
 CMapObject_Destruction::CMapObject_Destruction(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice, pContext)
 {
@@ -16,6 +18,17 @@ CMapObject_Destruction::CMapObject_Destruction(const CMapObject_Destruction& Pro
 
 HRESULT CMapObject_Destruction::Initialize_Prototype()
 {
+	m_SoundTags.push_back(TEXT("Rock_Broken0"));
+	m_SoundTags.push_back(TEXT("Rock_Broken1"));
+	m_SoundTags.push_back(TEXT("Rock_Broken2"));
+	m_SoundTags.push_back(TEXT("Rock_Broken3"));
+	m_SoundTags.push_back(TEXT("Rock_Broken4"));
+	m_SoundTags.push_back(TEXT("Rock_Broken5"));
+	m_SoundTags.push_back(TEXT("Rock_Broken6"));
+	m_SoundTags.push_back(TEXT("Rock_Broken7"));
+	m_SoundTags.push_back(TEXT("Rock_Broken8"));
+	m_SoundTags.push_back(TEXT("Rock_Broken9"));
+	m_SoundTags.shrink_to_fit();
 	return S_OK;
 }
 
@@ -27,6 +40,7 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	if (FAILED(Ready_Component(pArg)))
 		return E_FAIL;
@@ -44,13 +58,13 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 	m_vImpulsePower = pDesc->m_vImpulsePower;
 
 
-	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		if (!m_IsDestroy)
 			Spawn_Particles();
 		});
 	m_IsDestroy = false;
+
 	return S_OK;
 }
 
@@ -60,12 +74,14 @@ void CMapObject_Destruction::Priority_Update(_float fTimeDelta)
 
 void CMapObject_Destruction::Update(_float fTimeDelta)
 {
+	if (m_pBoxRigidbodyCom)
+		m_pBoxRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CMapObject_Destruction::Late_Update(_float fTimeDelta)
 {
 	if (!m_IsDestroy)
-		m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONSTATIC, this);
 	else
 		if (!m_IsChange)
 		{
@@ -73,67 +89,6 @@ void CMapObject_Destruction::Late_Update(_float fTimeDelta)
 			m_IsChange = true;
 		}
 }
-
-//void CMapObject_Destruction::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
-//{
-//	if (m_IsDestroy)
-//		return;
-//
-//	if (m_iLODIndex > m_pModelCom->Get_LastLODIndex())
-//		return;
-//
-//	if (m_pModelCom->Get_MeshState(m_iLODIndex) != LOADSTATE::LOADED)
-//	{
-//		if (m_pModelCom->Get_MeshState(m_iLODIndex) == LOADSTATE::NOTLOADED)
-//			m_pModelCom->Request_LOD(m_iLODIndex);
-//
-//		m_pGameInstance->Add_Render_StaticObject(this, m_iLODIndex = m_pModelCom->Get_ReadyLOD());
-//		return;
-//	}
-//	_bool HasNormal = { true };
-//	_bool HasMask = { true };
-//	_uint iNumMesh = m_pModelCom->Get_NumMesh(m_iLODIndex);
-//
-//	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
-//
-//	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
-//	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
-//	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
-//
-//	//m_pModelCom->Bind_Buffer(pDeferredContext,m_iLODIndex);
-//
-//	for (_uint i = 0; i < iNumMesh; ++i)
-//	{
-//		if (m_pModelCom->Is_Overed(m_iLODIndex, i))
-//			return;
-//		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", m_iLODIndex, i, TEXTURETYPE::MASK, pEffect)))
-//		{
-//			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
-//			HasMask = false;
-//		}
-//
-//		if (HasMask)
-//		{
-//			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, pEffect);
-//
-//			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, pEffect)))
-//				HasNormal = false;
-//		}
-//		else
-//		{
-//			m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", m_iLODIndex, i, TEXTURETYPE::DIFFUSE, 0, pEffect);
-//
-//			if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", m_iLODIndex, i, TEXTURETYPE::NORMAL, 0, pEffect)))
-//				HasNormal = false;
-//		}
-//		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
-//		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
-//
-//		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
-//
-//		m_pModelCom->Render(m_iLODIndex, i, pDeferredContext);
-//	}
-//}
 
 void CMapObject_Destruction::Render()
 {
@@ -149,7 +104,7 @@ void CMapObject_Destruction::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
+	//m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
@@ -181,6 +136,10 @@ void CMapObject_Destruction::Render()
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);
 	}
+#ifdef _DEBUG
+		if (m_pBoxRigidbodyCom)
+			m_pBoxRigidbodyCom->Render();
+#endif // _DEBUG
 }
 
 
@@ -233,6 +192,29 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 
 	_string ModelName = pDesc->ModelName;
 
+	if (m_iTriggerIndex == 37)
+	{
+		_float3 vPointPos;
+		XMStoreFloat3(&vPointPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+		m_pPullUI = m_pGameSystem->Create_GrapplePoint(vPointPos, UI_GRAPPLE_TYPE::PULL);
+		CRigidbody::BOXBODY_DESC RigidbodyBoxDesc = {};
+		RigidbodyBoxDesc.eBodyType = CRigidbody::BODY;
+		RigidbodyBoxDesc.eShape = SHAPE::BOX;
+		RigidbodyBoxDesc.eType = EMotionType::Kinematic;
+		RigidbodyBoxDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::GRAPPLE);
+		RigidbodyBoxDesc.vExtent = _float3(5.f, 5.f, 5.f); // 탐지 범위 안에 들어가있다면?
+		XMStoreFloat3(&RigidbodyBoxDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_BoxRigidBody"), reinterpret_cast<CComponent**>(&m_pBoxRigidbodyCom), &RigidbodyBoxDesc);
+
+		m_CallBack.pTransform = m_pTransformCom;
+		m_CallBack.eObjectType = OBJECTTYPE::ROPE_PULL;
+		m_CallBack.pCondition = &m_iTriggerIndex;
+		m_pBoxRigidbodyCom->Set_Desc(&m_CallBack); // Trigger용도 Box 정의
+	}
+
 	for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
 	{
 		_string Name = ModelName; // 예: "SM_Sev_Roc_24BS_"
@@ -278,6 +260,31 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 
 void CMapObject_Destruction::Spawn_Particles()
 {
+	if (m_pPullUI)
+	{
+		m_pGameSystem->Toggle_GrapplePoint(m_pPullUI, false);
+		m_pPullUI = nullptr;
+
+		CAMERA_SHAKE ShakeDesc{};
+		ShakeDesc.fAmplitude = 1.f;
+		ShakeDesc.fDuration = 0.8f;
+		ShakeDesc.fFovKick = 0.f;
+		ShakeDesc.fFrequency = 2.f;
+		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+		ShakeDesc.vTranslation;
+		m_pGameInstance->OnShake(ShakeDesc);
+	}
+
+	PREFAB_INFO Info{};
+
+	_uint SoundChannel = m_pGameInstance->Register_Channel();
+
+	_uint i = static_cast<_uint>(m_pGameInstance->Rand(0.f, 9.f));
+
+	m_pGameInstance->Play_Sound_Dynamic(CMapObject_Destruction::m_SoundTags[i], SoundChannel, 0.3f);
+	m_pGameInstance->Play_Sound_Dynamic(TEXT("Rock_Down0"), SoundChannel, 0.3f);
+	m_pGameInstance->Return_Channel(SoundChannel);
+
 	m_IsDestroy = true;
 	for(_uint i=2; i<m_pBoneModel->Get_BoneSize();++i)
 	{
@@ -294,13 +301,13 @@ void CMapObject_Destruction::Spawn_Particles()
 			XMMatrixTranslationFromVector(vTrans) *
 			m_pTransformCom->Get_WorldMatrix());
 
-
+		
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Small_Smoke"), XMLoadFloat4x4(&Mat), &Info);
 
 		_vector Pos = XMVectorSetW(XMLoadFloat3(&m_vImpulsePos), 1.f);
 		_vector Power = XMVectorSetW(XMLoadFloat3(&m_vImpulsePower), 0.f);
 
 		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
-
 		
 		XMStoreFloat3(&ResetDesc.vImpulse, vDeltaPos * Power);
 		
@@ -342,11 +349,13 @@ void CMapObject_Destruction::Free()
 {
 	__super::Free();
 
+	m_pPullUI = nullptr;
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pBoneModel);
 	Safe_Release(m_pGameSystem);
 	Safe_Delete(m_pBoundingBox);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pBoxRigidbodyCom);
 	
 }

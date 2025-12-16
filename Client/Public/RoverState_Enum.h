@@ -59,6 +59,8 @@ enum class ERoverInteractionState : _uint
 {
 	ROPEHOOK = 0, // Rope Action
 	ROPEDRAG,
+	CONTROL,
+	EVENT,
 	INTERACTION_END
 };
 
@@ -76,10 +78,6 @@ enum class ERoverCaptureState : _uint
 enum class ERoverIdleType : _uint
 {
 	STAND1_ACTION01 = 0,
-	STAND1_ACTION02,
-	STAND1_ACTION03,
-	STAND1_TURN_L90D,
-	STAND1_TURN_R90D,
 	STAND1,
 	STAND2,
 	STAND_CONTROL,
@@ -384,6 +382,15 @@ enum class ERoverRopeDragType : _uint
 	DRAG_START_U,
 	END
 };
+
+enum class ERoverEventType : _uint
+{
+	BEHIT_FLY_FALL,
+	BURST01,
+	BURST02,
+	END
+};
+
 #pragma endregion
 
 #pragma region CAPTURED
@@ -399,6 +406,21 @@ enum class ERoverCaptureType : _uint
 	BEHIT_PUSH_START,
 	END
 };
+#pragma endregion
+
+
+#pragma region CONTROL
+enum class ERoverControlType : _uint
+{
+	MANIPULATE_ABSORB_END = 0,
+	MANIPULATE_ABSORB_LOOP,
+	MANIPULATE_ABSORB_START,
+	MANIPULATE_HOLD,
+	MANIPULATE_RELEASE_F,
+	MANIPULATE_RELEASE_F_02,
+	END
+};
+
 #pragma endregion
 
 #pragma endregion

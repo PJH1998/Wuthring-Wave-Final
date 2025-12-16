@@ -40,6 +40,7 @@ HRESULT CLevi_Bayonet::Initialize_Clone(void* pArg)
 #endif // _DEBUG
 
 	m_ShaderPaths.resize(SHADERPATH::END);
+	m_ShaderPaths[SHADERPATH::FX] = 1; // Shader_VtxMesh_MonsterProp Pass 1
 	m_vBaseColor = pDesc->vBaseColor;
 	return S_OK;
 }
@@ -74,7 +75,11 @@ void CLevi_Bayonet::Update(_float fTimeDelta)
 
 void CLevi_Bayonet::Late_Update(_float fTimeDelta)
 {
+	m_fRateFX = fmod(m_fRateFX + fTimeDelta, 1.f);
+
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 		return;
 }
 
@@ -88,6 +93,9 @@ void CLevi_Bayonet::Render()
 	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
 	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fFxTime", &m_fRateFX, sizeof(_float))))
+		CRASH("Failed to Bind fFxTime ");
 
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
@@ -118,6 +126,23 @@ void CLevi_Bayonet::Render()
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif // _DEBUG
 
+}
+
+void CLevi_Bayonet::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pShaderCom->Begin(2);
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CLevi_Bayonet::Reset(const _fmatrix& WorldMatrix, void* pArg)

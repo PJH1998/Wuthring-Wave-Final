@@ -11,6 +11,7 @@ public:
 		STATE_PICK = 0,
 		STATE_PICK_END,
 		STATE_HOLD,
+		STATE_PARTICLE,
 		STATE_END
 	};
 
@@ -35,6 +36,9 @@ public:
 #pragma region STATE
 public:
 	void Logo_Input();
+
+public:
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 #pragma endregion
 
 private:

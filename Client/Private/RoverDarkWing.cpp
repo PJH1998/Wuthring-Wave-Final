@@ -106,6 +106,14 @@ void CRoverDarkWing::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+	
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (!IsDissolve) // Dissolve가 아니라면 Render Shadow
+	{
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+			return;
+	}
 }
 
 void CRoverDarkWing::Render()
@@ -162,8 +170,48 @@ void CRoverDarkWing::Render()
 
 }
 
+void CRoverDarkWing::Render_Shadow()
+{
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
 void CRoverDarkWing::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	CAbility* pAbility = CGameSystem::GetInstance()
+		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::ROVER));
+
+	if (nullptr == pAbility)
+		return;
+
+	switch (m_iVolumeIdx)
+	{
+	case VOLUME::VOLUME_ATTACK:
+		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST1, 7.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
+		break;
+
+	default:
+		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST1, 7.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
+		break;
+	}
 }
 
 void CRoverDarkWing::Activate(_bool IsActivate)
@@ -251,6 +299,7 @@ void CRoverDarkWing::Ready_AttackVolumes()
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
+	TriggerDesc.strSoundTag = TEXT("chun_whip_hit_light_2_0910 (SFX)");
 
 	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")

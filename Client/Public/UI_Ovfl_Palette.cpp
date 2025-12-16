@@ -157,6 +157,8 @@ void CUI_Ovfl_Palette::Render()
 
 void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	m_pGameInstance->Play_Sound(L"UI_OVFL_Open", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+
 	UI_OVFLPALETTE_DESC* pDesc = static_cast<UI_OVFLPALETTE_DESC*>(pArg);
 	_uint iTargetLevel = pDesc->iTargetLevel;
 
@@ -167,6 +169,20 @@ void CUI_Ovfl_Palette::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_IsGoinDisabled = false;
 	m_isFinishedEvent = false;
 	m_pGameSystem->Set_MouseFix(false);
+}
+
+HRESULT CUI_Ovfl_Palette::Ready_Events()
+{
+	m_pGameInstance->Subscribe<MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Minigame_Palette_Success"), [this](const MINIGAMEPALETTE_SUCCESS_UI_EVENT event) {
+		if (event.isSuccess)
+		{
+			// 성공 시 시행할 것은 여기에..
+
+			// 이걸 여기서?
+		}
+	});
+
+	return S_OK;
 }
 
 HRESULT CUI_Ovfl_Palette::Ready_Components(void* pArg)
@@ -405,6 +421,9 @@ void CUI_Ovfl_Palette::Trigger_ClickEvent()
 
 		m_iLeftChance--;
 		static_cast<CUI_Text*>(m_pTextUI_LeftChance)->Change_Text(to_wstring(m_iLeftChance));
+
+
+		// [SOUND] 최초 클릭 시 
 	}
 
 
@@ -444,14 +463,14 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 	_uint iNumInstHovers = static_cast<_uint>(pTargetUI->Get_UIDesc().vecInstanceDescs.size());
 
 	_bool isHovered = false;
-	_uint iHoveredIndex = UINT_MAX;
+	m_iHoveredIndex = UINT_MAX;
 
 	for (_uint i = 0; i < iNumInstHovers; i++)
 	{
 		isHovered = pHoverCheckTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), i);
 		if (isHovered)
 		{
-			iHoveredIndex = i;
+			m_iHoveredIndex = i;
 			break;
 		}
 	}
@@ -464,10 +483,15 @@ void CUI_Ovfl_Palette::Update_HoverEvent()
 	{
 		auto& instDesc = targetInstDesc[i];
 
-		instDesc.vClipTexcoordX = (iHoveredIndex == i) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f }; // 마우스를 올린 게 있으면 {0.f, 1.f} 가 들어가야 함
+		instDesc.vClipTexcoordX = (m_iHoveredIndex == i) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f }; // 마우스를 올린 게 있으면 {0.f, 1.f} 가 들어가야 함
 	}
 
 	//pTargetUI->Set_UIDesc(targetDesc);
+
+	_bool isChanged_HoveredIndex = (m_iHoveredIndex == UINT_MAX)? false : m_iPrevHoveredIndex != m_iHoveredIndex;
+	if (isChanged_HoveredIndex)
+		m_pGameInstance->Play_Sound(L"UI_OVFL_MouseOver", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+	m_iPrevHoveredIndex = m_iHoveredIndex;
 }
 
 HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
@@ -761,22 +785,22 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 
 	
 	_bool isHovering = false;
-	static _uint iHoveredIndex = Client::CUI_Ovfl_Palette::PCOLOR_END;
+	m_iHoveredColorIndex;
 	_bool isEntered = false;
 	_bool isExited = false;
 
 	for (_uint i = 0; i < iNumTargetInst; i++)
 		if (pTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), i))
 		{
-			if (iHoveredIndex == PCOLOR_END)						isEntered = true;// 선택 Enter
+			if (m_iHoveredColorIndex == PCOLOR_END)						isEntered = true;// 선택 Enter
 
-			iHoveredIndex = static_cast<PALETTE_COLOR>(i);
+			m_iHoveredColorIndex = static_cast<PALETTE_COLOR>(i);
 			isHovering = true;
 
 #ifdef _DEBUG
 			_string strDebugText = {};
 			_uint iDebugIndex = UINT_MAX;
-			switch (iHoveredIndex)
+			switch (m_iHoveredColorIndex)
 			{
 			case Client::CUI_Ovfl_Palette::PCOLOR_RED:		strDebugText = "RED";		iDebugIndex = PCOLOR_RED;	 	break;
 			case Client::CUI_Ovfl_Palette::PCOLOR_GREEN:	strDebugText = "GREEN";		iDebugIndex = PCOLOR_GREEN;	 	break;
@@ -785,17 +809,17 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 			case Client::CUI_Ovfl_Palette::PCOLOR_END:		strDebugText = "END";		iDebugIndex = PCOLOR_END;	 	break;
 			}
 
-			std::cout << "[CUI_Ovfl_Palette::Update_ChangeColorBtn] Hovered Color Index : " << strDebugText << "(" << iDebugIndex << ")" << std::endl;
+			//std::cout << "[CUI_Ovfl_Palette::Update_ChangeColorBtn] Hovered Color Index : " << strDebugText << "(" << iDebugIndex << ")" << std::endl;
 #endif // _DEBUG
 
 			break;
 		}
 	
 	if (!isHovering &&
-		iHoveredIndex != PCOLOR_END)
+		m_iHoveredColorIndex != PCOLOR_END)
 	{
 		isExited = true;
-		iHoveredIndex = PCOLOR_END;
+		m_iHoveredColorIndex = PCOLOR_END;
 	}
 
 	if (isEntered)
@@ -808,13 +832,25 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 		selectedInstDesc[i].vClipTexcoordX = (m_eDestColorIndex == i) ?
 			_float2(0.f, 1.f) : _float2(0.f, 0.f);
 
-		hoveredInstDesc[i].vClipTexcoordX = (iHoveredIndex == i) ?
+		hoveredInstDesc[i].vClipTexcoordX = (m_iHoveredColorIndex == i) ?
 			_float2(0.f, 1.f) : _float2(0.f, 0.f);
 	}
 
+	_bool isChanged_HoveredColorIndex = (m_iPrevHoveredColorIndex != PCOLOR_END) ? m_iPrevHoveredColorIndex != m_iHoveredColorIndex : false;
+	if (isChanged_HoveredColorIndex)
+	{
+		m_pGameInstance->Play_Sound(L"UI_OVFL_MouseOver", ENUM_CLASS(CHANNEL::UI_HOVER), 0.5f);
+		//std::cout << "[UI_Ovfl_Palette::Update_ChangeColorBtn] Curr HoverColorIndex : " << m_iPrevHoveredColorIndex << " / " << m_iHoveredColorIndex << std::endl;
 
-	//pSelectedRing->Set_UIDesc(selectedDesc);
-	//pHoveredRing->Set_UIDesc(hoveredDesc);
+	}
+	m_iPrevHoveredColorIndex = m_iHoveredColorIndex;
+
+	_bool isChanged_DestColorIndex = (m_iPrevDestColorIndex != PCOLOR_END)? m_iPrevDestColorIndex != m_eDestColorIndex : false;
+	if (isChanged_DestColorIndex)
+		m_pGameInstance->Play_Sound(L"UI_OVFL_ClickColor", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
+	m_iPrevDestColorIndex = m_eDestColorIndex;
+
+
 }
 
 void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
@@ -866,6 +902,7 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 	if (isChangeEnd)
 	{
 		m_isGoinChange = false;
+		m_arrIsVisited_Sound.fill(false);
 		m_fChangeRadius = 0.f;
 
 		for (auto& targets : m_vecTargetsByDepth)
@@ -877,6 +914,33 @@ void CUI_Ovfl_Palette::Update_ChangeEvent(_float fTimeDelta)
 		std::cout << "[CUI_Ovfl_Palette::Update_ChangeEvent] Change Finally Applied!" << std::endl;
 	}
 	 
+
+	// [SOUND] change
+
+
+	for (auto palettes : m_vecTargetsByDepth)
+		for (auto palette : palettes)
+		{
+			_uint iInstIndex = palette.arrIndex[0] * 10 + palette.arrIndex[1];
+			if (m_arrIsVisited_Sound[iInstIndex])
+				continue;
+			
+			_float2 vInstPos = Calc_InstBlock_ScrnPos(iInstIndex);
+			_float fInstDistance = XMVectorGetX(XMVector2Length(
+				XMLoadFloat2(&vInstPos) - XMLoadFloat2(&m_vChangeStartPos)));
+			
+			if (fInstDistance < m_fChangeRadius)
+			{
+				m_arrIsVisited_Sound[iInstIndex] = true;
+
+				_float fSpeedMultiply = m_fChangeRadius / 1000.f + 1.25f;
+				m_pGameInstance->Play_Sound(L"UI_OVFL_Click", ENUM_CLASS(CHANNEL::UI_HOVER), 0.25f, fSpeedMultiply);
+			}
+
+			//m_vChangeStartPos;ㅡㅡ
+			//m_fChangeRadius;
+			//Calc_InstBlock_ScrnPos();
+		}
 
 }
 
@@ -917,8 +981,10 @@ void CUI_Ovfl_Palette::Update_FinishEvent()
 
 	else if	(m_isGoinSuccess)
 	{
-		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), L"Event_Minigame_Palette_Success", MINIGAMEPALETTE_SUCCESS_UI_EVENT(m_isGoinSuccess));
 		Req_OffPalette();
+
+		m_pGameInstance->Play_Sound(L"UI_OVFL_Close01", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 	}
 
 	// ksta : 여기에 실패 / 성공 이벤트?

@@ -9,9 +9,11 @@
 
 #include "UI_FontPreset.h"
 #include "UI_ControlHelper.h"
+#include "UI_GrappleController.h"
 #include "UI_StatusSyncer.h"
 
 #include"Sonoro_Manager.h"
+#include"BGM_Manager.h"
 
 #include "MonsterTable.h"
 
@@ -20,6 +22,7 @@
 #include "SequencePlayer.h"
 #include"Potal.h"
 #include "TimeLack.h"
+#include"MapObject_Dome.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -42,6 +45,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pUI_ControlHelper = CUI_ControlHelper::Create();
 	ASSERT_CRASH(m_pUI_ControlHelper);
 
+	m_pUI_GrappleController = CUI_GrappleController::Create();
+	ASSERT_CRASH(m_pUI_GrappleController);
+
 	//m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
 	//ASSERT_CRASH(m_pUI_ControlHelper);
 
@@ -60,6 +66,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pTimeLack = CTimeLack::Create();
 	ASSERT_CRASH(m_pTimeLack);
 
+	m_pBGM_Manager = CBGM_Manager::Create();
+	ASSERT_CRASH(m_pBGM_Manager);
+
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
 	AbilityFolders.resize(CPlayer::CHARACTERTYPE::TYPE_END);
@@ -73,20 +82,31 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 void CGameSystem::Update(_float fTimeDelta)
 {
 	m_pSonoro_Manager->Update(fTimeDelta);
+	m_pBGM_Manager->Update(fTimeDelta);
 }
 
 void CGameSystem::Clear_Resource()
 {
+	m_pBGM_Manager->Stop_BGM();
 	m_pDirector->Clear_Action();
 	m_pMonsterTable->Clear_NPCData();
 	m_pSonoro_Manager->Clear_Resource();
 	Clear_TriggerCallBack();
 	Safe_Release(m_pPlayer);
+	Safe_Release(m_pPotal);
+	Safe_Release(m_pLeviDome);
+	m_pLeviDome = nullptr;
+	m_pPotal = nullptr;
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 {
 	return m_pParser->Load_CSV(pFilePath);
+}
+
+const vector<vector<_string>>& CGameSystem::Load_CSV_ADV(const _char* pFilePath)
+{
+	return m_pParser->Load_CSV_ADV(pFilePath);
 }
 
 void CGameSystem::Load_Sequence(const _char* pFolderPath)
@@ -107,9 +127,9 @@ void CGameSystem::Clone_Spawners(LEVEL eLevel)
 {
 	m_pParser->Clone_Spawners(eLevel);
 }
-void CGameSystem::Create_MapEffects()
+void CGameSystem::Create_MapEffects(_uint iLevel)
 {
-	m_pParser->Create_MapEffect();
+	m_pParser->Create_MapEffect(iLevel);
 }
 #pragma endregion
 
@@ -137,6 +157,37 @@ void CGameSystem::Load_EffectDecalData_FromFolder(const string& strFolderPath)
 {
 	return m_pParser->Load_FXDecal_Data_FromFolder(strFolderPath);
 }
+
+void CGameSystem::Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectVATexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectVAMeshDat_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectLightData_FromFolder(const string& strFolderPath)
+{
+	return m_pParser->Load_FXLight_Data_FromFolder(strFolderPath);
+}
+
+void CGameSystem::Load_EffectSpecturmTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectSpectrumTexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectSpectrumVB_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_Spectrum_VB_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Create_Spertrum(const string& strFolderPath, LEVEL eLevel, _uint PoolingNum)
+{
+	return m_pParser->Create_Spectrum(strFolderPath, eLevel, PoolingNum);
+}
+
 
 #pragma region FACTORY
 
@@ -300,10 +351,10 @@ void CGameSystem::Close_Game_OverflowPalette()
 	m_pUI_ControlHelper->Close_Game_OverflowPalette();
 }
 
-void CGameSystem::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
-{
-	m_pUI_ControlHelper->Attach_GrapplePoint(pTargetPos, eType);
-}
+//void CGameSystem::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
+//{
+//	m_pUI_ControlHelper->Attach_GrapplePoint(pTargetPos, eType);
+//}
 
 void CGameSystem::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)
 {
@@ -328,6 +379,7 @@ void CGameSystem::Detach_ObjectPos_ToMinimap(void* pOwner)
 void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 										_float3& vStartVelocity,
 										_float3& vAcceleration,
+										_float3* pCustomSpherePos,
 										_float fMaxTime,
 										_uint iSegmentCount,
 										_float fRibbonWidth,
@@ -339,6 +391,7 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 	m_pUI_ControlHelper->Req_Render_CurveTrace(	vStartPos,
 												vStartVelocity,
 												vAcceleration, 
+												pCustomSpherePos,
 												fMaxTime,
 												iSegmentCount, 
 												fRibbonWidth, 
@@ -347,6 +400,69 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 												vHeadColor,
 												vTailColor);
 }
+
+void CGameSystem::Open_DialogUI(const _char* pFilePath, _bool isInteractable)
+{
+	m_pUI_ControlHelper->Open_DialogUI(pFilePath, isInteractable);
+}
+
+void CGameSystem::Req_Interact_DialogUI(_bool isChangeNext_Forcely)
+{
+	m_pUI_ControlHelper->Req_Interact_DialogUI(isChangeNext_Forcely);
+}
+
+void CGameSystem::Close_DialogUI()
+{
+	m_pUI_ControlHelper->Close_DialogUI();
+}
+
+void CGameSystem::Trigger_PlayEndImage()
+{
+	m_pUI_ControlHelper->Trigger_PlayEndImage();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_StopEndImageForcely()
+{
+	m_pUI_ControlHelper->Trigger_StopEndImageForcely();
+}
+#endif // _DEBUG
+
+void CGameSystem::Trigger_ActivateQuest()
+{
+	m_pUI_ControlHelper->Trigger_ActivateQuest();
+}
+
+void CGameSystem::Trigger_AddQuestProgress()
+{
+	m_pUI_ControlHelper->Trigger_AddQuestProgress();
+}
+
+#ifdef _DEBUG
+void CGameSystem::Trigger_AllReset()
+{
+	m_pUI_ControlHelper->Trigger_AllReset();
+}
+#endif // _DEBUG
+
+
+void* CGameSystem::Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn)
+{
+	return m_pUI_GrappleController->Create_GrapplePoint(vPointPos, eType, isDisabledOnSpawn);
+}
+
+CUI_GrapplePoint* CGameSystem::Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance, _bool isIncludeInactive)
+{
+	return m_pUI_GrappleController->Find_NearGrapplePoint(vBasePos, eType, pOutDistance, isIncludeInactive);
+}
+
+void CGameSystem::Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive)
+{
+	m_pUI_GrappleController->Toggle_GrapplePoint(pTargetUIPtr, isActive);
+}
+
+
+
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
@@ -358,6 +474,11 @@ void CGameSystem::Req_Render_CurveTrace(_float3& vStartPos,
 
 
 #pragma region TRIGGER
+
+_uint CGameSystem::Get_CurrentCharacterIndex() const
+{
+	return m_pPlayerStatus->Get_CurrentCharIndex();
+}
 
 // Trigger 등록
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
@@ -394,6 +515,10 @@ const _tchar* CGameSystem::Get_SonoroText()
 
 
 #pragma region SONORO_MANAGER
+void CGameSystem::Set_Sonora_LightDesc(SONORA eType, const LIGHT_DESC& Desc)
+{
+	m_pSonoro_Manager->Set_Sonora_LightDesc(eType, Desc);
+}
 _bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects, _bool** SonoroMode)
 {
 	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
@@ -440,6 +565,10 @@ const vector<NPCINFO>& CGameSystem::Get_NpcData(_uint iType) const
 {
 	return m_pMonsterTable->Get_NpcData(iType);
 }
+void CGameSystem::Levi_Phase_Change()
+{
+	m_pMonsterTable->Phase_Change();
+}
 #pragma endregion
 
 #pragma region SFX_PREFAB
@@ -464,23 +593,57 @@ _bool CGameSystem::IsFix()
 #pragma region GRAB_INTERACT
 void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pArg)
 {
-	if (strTransition == "GrabRelease")
+	if (nullptr == m_pPlayer)
+		return;
+
+	
+	if (strTransition == "LeviatanGrab")
 	{
-		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
-	}
-	else if (strTransition == "GrabUnbined")
-	{
-		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
+		m_pPlayer->Bind_EventLock(true);
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
 	}
 	else if (strTransition == "LeviatanQTEStart")
 	{
-		CTransform* pBoss = static_cast<CTransform*>(pArg);
-		_int a = 10;
+		_float2 vPos = { 500.f, -200.f };
+		Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
 	}
-	else if (strTransition == "LeviatanGrab")
-	{
-		_int a = 10;
-	}
+	else if (strTransition == "LeviatanQTESuccess")
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
+	else if (strTransition == "LeviatanPrevExecute")
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE, pArg);
+	else if (strTransition == "LeviatanExecuteSuccess") // 갈브레나 호출.
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS);
+	else if (strTransition == "GrabRelease")
+		m_pPlayer->Notify_EscapeGrabReady(); // 여기서 탈출애니메이션 실행하고
+	else if (strTransition == "GrabUnbined")
+		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
+	else if (strTransition == "Teleport")
+		m_pPlayer->Notify_Event(CHARACTER_EVENT::TELEPORT, pArg);
+}
+
+void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Lock_Input(IsLock);
+}
+
+void CGameSystem::Bind_Gravity_ToPlayer(_bool IsGravity)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Bind_Gravity(IsGravity);
+}
+
+// Destination은 1.f 이상 ~ 3.f 이하, Duration은 Zoom In Zoom Out 시간을 길게 주고 싶으면 길게, 짧게 주고 싶으면 짧게.
+void CGameSystem::Use_Spring(_float fDestination, _float fDuration)
+{
+	if (nullptr == m_pPlayer)
+		return;
+
+	m_pPlayer->Use_Spring(fDestination, fDuration);
 }
 
 #pragma endregion
@@ -555,20 +718,66 @@ void CGameSystem::Potal_Register(CPotal* pPotal)
 
 void CGameSystem::Set_Potal_Active(_bool B)
 {
-	m_pPotal->SetActivate(B);
+	m_pPotal->PotalActive(B);
 }
 
 #pragma endregion
+#pragma region BGM_MANAGER
 
+void CGameSystem::Change_Level(_uint iLevel)
+{
+	m_pBGM_Manager->Change_Level(iLevel);
+}
+
+void CGameSystem::Stop_BGM()
+{
+	m_pBGM_Manager->Stop_BGM();
+}
+
+void CGameSystem::Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel)
+{
+	m_pBGM_Manager->Engage_Battle(IsBattle, eBossLevel);
+}
+
+void CGameSystem::Change_BGM(const _wstring& BGMText)
+{
+	m_pBGM_Manager->Change_BGM(BGMText);
+}
+_bool CGameSystem::IsModinaryBattle()
+{
+	return m_pBGM_Manager->IsModinaryBattle();
+}
+void CGameSystem::Change_BattleBGM(BOSSBGM eBoss)
+{
+	m_pBGM_Manager->Change_BattleBGM(eBoss);
+}
+void CGameSystem::Register_Dome(CMapObject_Dome* pDome)
+{
+	m_pLeviDome = pDome;
+	Safe_AddRef(m_pLeviDome);
+}
+void CGameSystem::Change_Leviathan_Phaze(_uint iPhaze)
+{
+	m_pLeviDome->Change_MaxAlpha(iPhaze);
+}
+void CGameSystem::Dome_DissolveStart(_bool DissolveStart)
+{
+	m_pLeviDome->Start_Dissolve(DissolveStart);
+}
+#pragma endregion
 
 void CGameSystem::Release_System()
 {
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
-	Safe_Release(m_pPotal);
+	Safe_Release(m_pLeviDome);
+	if (m_pPotal)
+		Safe_Release(m_pPotal);
 
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);
+	Safe_Release(m_pUI_GrappleController);
+
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
@@ -579,7 +788,8 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pSequencePlayer);
 
 	Safe_Release(m_pTimeLack);
-
+	Safe_Release(m_pBGM_Manager);
+	
 	Release();
 }
 

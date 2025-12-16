@@ -13,7 +13,11 @@ CSonoro_Manager::CSonoro_Manager()
 
 HRESULT CSonoro_Manager::Initialize()
 {
-	m_vUpSpeed = _float4(0.f, 0.6f, 0.f, 0.f);
+	m_vUpSpeed = _float4(0.f, 23.6f, 0.f, 0.f);
+
+	m_EnterSonoro = TEXT("소노라 진입하기");
+	m_ExitSonoro = TEXT("소노라 떠나기");;
+	
 	return S_OK;
 }
 
@@ -74,8 +78,10 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 
 	if (m_SonoroRigidActive)
 	{
+		// None -> Sonora
 		if (m_fTriggerdTime >= 5.f)
 		{
+			m_pGameInstance->Update_LightDesc(TEXT("Test"), m_LightDesc[ENUM_CLASS(SONORA::SONORA)]);
 			m_SonoroRender = !m_SonoroRender;
 			m_IsUpdate = !m_IsUpdate;
 			m_fTriggerdTime = 0.f;
@@ -87,16 +93,24 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 
 			for (auto& pObject : m_NonSonoroObjects)
 				pObject->ReturnPos();
+
+			_uint iSoundChannel = m_pGameInstance->Register_Channel();
+			m_pGameInstance->Play_Sound(TEXT("SonoroBegin0"), iSoundChannel, 0.1f);
+			m_pGameInstance->Return_Channel(iSoundChannel);
+
+
 		}
 		else
 			for (auto& pObject : m_NonSonoroObjects)
-				pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed), m_fTriggerdTime);
+				pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed) * fTimeDelta, m_fTriggerdTime);
 	}
 	else
 	{
+		// Sonora -> None
 
 		if (m_fTriggerdTime >= 4.f)
 		{
+			m_pGameInstance->Update_LightDesc(TEXT("Test"), m_LightDesc[ENUM_CLASS(SONORA::NONE)]);
 			for (auto& pObject : m_NonSonoroObjects)
 				pObject->Change_Collision_Layer(m_SonoroRigidActive);
 
@@ -105,6 +119,9 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 			m_SonoroRender = !m_SonoroRender;
 			m_IsUpdate = !m_IsUpdate;
 			m_fTriggerdTime = 0.f;
+			_uint iSoundChannel = m_pGameInstance->Register_Channel();
+			m_pGameInstance->Play_Sound(TEXT("SonoroBegin0"), iSoundChannel, 0.1f);
+			m_pGameInstance->Return_Channel(iSoundChannel);
 		}
 	}
 }
@@ -123,7 +140,7 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 	Desc.fRadialTime = m_SonoroRigidActive == true ? 2.f : 1.f;
 	Desc.fFadeTime = m_SonoroRigidActive == true ? 2.f : 1.f;
 
-	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+	m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
 
 	if (m_SonoroRigidActive)
 	{
@@ -134,13 +151,6 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 			pObject->Compute_DelayTime(vCamPos);
 		}
 	}
-	//else
-	//{	
-	//	for (auto& pObject : m_NonSonoroObjects)
-	//		pObject->Change_Collision_Layer(m_SonoroRigidActive);
-
-	//	m_SonoroRender = !m_SonoroRender;
-	//}
 
 	m_IsUpdate = !m_IsUpdate;
 	return true;
@@ -149,8 +159,8 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 const _tchar* CSonoro_Manager::Get_SonoroText()
 {
 	return m_SonoroRender ?
-		TEXT("소노라 떠나기") :
-		TEXT("소노라 진입하기");
+		m_ExitSonoro.c_str() :
+		m_EnterSonoro.c_str();
 }
 
 void CSonoro_Manager::Clear_Resource()

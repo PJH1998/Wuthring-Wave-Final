@@ -6,6 +6,13 @@ NS_BEGIN(Engine)
 class CFade final : public CBase
 {
 private:
+	typedef struct tagFadeDesc {
+		FADE eFade = {};
+		_float fDuration = {};
+		function<void()> Func = { nullptr };
+	}FADE_DESC;
+
+private:
 	explicit CFade(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CFade() = default;
 
@@ -34,6 +41,8 @@ private:
 	function<void()>			m_Func;
 
 	_bool							m_isFade = { false };
+
+	queue<FADE_DESC>		m_Fades;
 
 private:
 	void							Bind_Resource();

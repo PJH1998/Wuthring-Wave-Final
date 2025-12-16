@@ -95,6 +95,14 @@ void CAugustaBayonet::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(PROP_CONDITION::DISSOLVE));
+
+	if (!IsDissolve) // Dissolve가 아니라면 Render Shadow
+	{
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+			return;
+	}
 }
 
 void CAugustaBayonet::Render()
@@ -148,6 +156,26 @@ void CAugustaBayonet::Render()
 	//if (m_pMainAttackVolume->IsActivate())
 	m_pMainAttackVolume->Render();
 #endif // _DEBUG
+}
+
+void CAugustaBayonet::Render_Shadow()
+{
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CAugustaBayonet::Activate(_bool IsActivate)
@@ -220,13 +248,13 @@ void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifo
 	}
 
 	// 2. 타격감을 위한. Shake
-	CAMERA_SHAKE ShakeDesc{};
-	ShakeDesc.fDuration = 0.12f;
-	ShakeDesc.fFrequency = 12.f;
-	ShakeDesc.fAmplitude = 1.f;
-	ShakeDesc.fFovKick = XMConvertToRadians(0.5f);
-	ShakeDesc.vRotation = _float3(0.0f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
-	m_pGameInstance->OnShake(ShakeDesc);
+	m_IsShake = true;
+	m_PendingShakeDesc.fDuration = 0.12f;
+	m_PendingShakeDesc.fFrequency = 12.f;
+	m_PendingShakeDesc.fAmplitude = 1.f;
+	m_PendingShakeDesc.fFovKick = XMConvertToRadians(0.5f);
+	m_PendingShakeDesc.vRotation = _float3(0.0f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+	//m_pGameInstance->OnShake(ShakeDesc);
 
 	//m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.8f);
 	
@@ -287,13 +315,15 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(1.5f, 1.5f, 1.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.fAttackDmg = 250.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 			this->OnHitEnter(iLayer, pOther, Manifold);
 	};
-
+	
+	TriggerDesc.strSoundTag = TEXT("Augusta_Sword_Hit_Mid_01 (SFX)");
+	
 	// Attack용 만들기.
 	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
@@ -305,6 +335,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f);
 	TriggerDesc.fAttackDmg = 400.f;
+	TriggerDesc.strSoundTag = TEXT("Augusta_Sword_Hit_Big_06 (SFX)");
 	m_AttackVolumes[VOLUME_STRONG_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -316,6 +347,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 1.5f); // 평면으로 크게
 	TriggerDesc.fAttackDmg = 600.f;
+	TriggerDesc.strSoundTag = TEXT("Augusta_Sword_Hit_Big_05 (SFX)");
 	m_AttackVolumes[VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

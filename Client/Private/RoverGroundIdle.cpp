@@ -93,6 +93,10 @@ void CRoverGroundIdle::Handle_Input()
 		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
 		&& (m_pRover->Is_GrappleDrag());
 
+	m_States[THROW_CONTROL] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
+		&& (m_pRover->Get_UtilityType() == UI_TAB_UTILITY::LEVITATOR)
+		&& (m_pRover->Is_AttachThrowTarget());
+
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
@@ -121,7 +125,7 @@ void CRoverGroundIdle::Handle_Input()
 		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
 
 	// 궁 상태 확인하기.
-	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST2) >= m_pRover->Get_MaxCost());
+	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
 }
 
 
@@ -211,6 +215,12 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 	if (m_States[ROPE_DRAG])
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::ROPEDRAG));
+		return;
+	}
+
+	if (m_States[THROW_CONTROL])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::CONTROL));
 		return;
 	}
 
@@ -326,16 +336,13 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 		switch (static_cast<ERoverIdleType>(m_iCurrentAnimIdx))
 		{
 		case ERoverIdleType::STANDCHANGE:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
-		case ERoverIdleType::STAND1_ACTION02:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION03; // 애니메이션 상태 => 블랙보드에 기입.      
-			break;
-		case ERoverIdleType::STAND1_ACTION03:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+		case ERoverIdleType::STAND1_ACTION01:
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
 		default:
-			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
+			m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
 			break;
 		}
 
@@ -349,8 +356,6 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 void CRoverGroundIdle::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1_ACTION01), "Stand1_Action01", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1_ACTION02), "Stand1_Action02", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1_ACTION03), "Stand1_Action03", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND1), "Stand1", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND2), "Stand2", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);

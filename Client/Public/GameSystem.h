@@ -20,6 +20,7 @@ public:
 
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV_ADV(const _char* pFilePath);		// 큰따옴표와 쉼표를 데이터로써 갖는 csv 파싱용
 	void							Load_Sequence(const _char* pFolderPath);
 
 	//============================Effect
@@ -29,12 +30,18 @@ public:
 	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
+	void							Load_EffectVATexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectVAMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectLightData_FromFolder(const string& strFolderPath) ;
+	void							Load_EffectSpecturmTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectSpectrumVB_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Create_Spertrum(const string& strFolderPath, LEVEL eLevel, _uint PoolingNum);
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pDataFilePath, LEVEL eLevel, const _char* pModelFilePath);
 	void							Clone_MapObjects(LEVEL eLevel);
 	void							Clone_Spawners(LEVEL eLevel);
-	void							Create_MapEffects();
+	void							Create_MapEffects(_uint iLevel);
 #pragma endregion
 
 #pragma region FACTORY
@@ -52,6 +59,7 @@ public:
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
+	// 중앙 0,0 / 우하단이 양수 / 범위는 -+ 스크린사이즈 * 0.5
 	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
 	void			Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
 	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
@@ -124,30 +132,31 @@ public:
 
 	// 그래플링 UI가 생길 지점의 점 위치를 할당합니다. (pooling 이용, 최대 50) 
 	// 카메라 거리에 따른 크기 변화 기준 등 내부에서 상수로 변경 가능. 너무 멀면 렌더콜X
-	void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
+	//void		Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);
 
-	// [WIP] QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
+	// QTE 켜기. / _float2 : 스크린 상 스폰 좌표. (중점 0, 0, 우상단이 + 방향)
 	// eQTEType : QTE 종류 (연타로 게이지채우기, 단발성 중 선택), eIconIndex : 사용 버튼 종류.
 	void		Play_QTE(
 		_float2 vSpawnPos = _float2{ 0.f, 0.f },
 		UI_QTE_TYPE eQTEType = UI_QTE_TYPE::FILLGUAGE,
 		UI_QTE_BTN eIconIndex = UI_QTE_BTN::F,
 		_float2 vScale = _float2{ 1.f, 1.f }
-	);		// 여기에 정보 받기용으로 out 포인터 인자라도 만들거나, status 같은 곳에 호출? 
+	);
 
 
-	// [WIP] 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
+	// 미니맵에 표시할 정보를 추가/삭제합니다. PerFrame 함수는 매 프레임 호출이 필요합니다.
 	//      임의로 색상/타입 추가 시, [UI_MINIMAP_OBJTYPE] 및 [UI_HUD_Sector_Minimap::PreAssign_Presets] 에서 추가 후 사용하시면 됩니다.
 	void		Bind_ObjectPos_PerFrame_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType);			// 몬스터 등과 같이 실시간 갱신이 필요한 경우. Update_MobStatus 에 내장됨.
 	void		Attach_ObjectPos_ToMinimap(const _float3& vPosition, UI_MINIMAP_OBJTYPE eType, void* pOwner);	// 상자 등과 같이 고정형 위치이며, 한번만 등록하는게 나은 경우. 실시간 갱신 X
 	void		Detach_ObjectPos_ToMinimap(void* pOwner);														// 제거.
 
 
-	// [WIP] 날아갈 궤적 및 충돌 예상 지점에의 구체를 표시합니다. 계산에 필요한 정보들의 매 프레임 갱신 필요.
+	// 날아갈 궤적 및 충돌 예상 지점에의 구체를 표시합니다. 계산에 필요한 정보들의 매 프레임 갱신 필요.
 	// - vStartPos : 시작 위치. 즉 오브젝트의 위치 + 오프셋 등
 	// - vStartVelocity : 시작 속도. 즉, 던지려는 방향과 그 세기(power)
 	// - vAcceleration : 가속도. (별일 없으면 중력가속도 _float3{0.f, -9.8, 0.f} 넣으면 될 듯)
 	// ===== 이하는 필요 시 수정 ===== 
+	// - vCustomSpherePos : 임의로 구체 좌표 설정. nullptr이면 ray cast 를 통해 도출된 좌표를 기준으로 삼음
 	// - fMaxTime : 해당 값 기준 몇초까지 날아갈 거리만큼 리본메쉬를 그릴 것인지
 	// - iSegmentCount : 리본메쉬 정밀도 (낮으면 버텍스의 굴곡짐이 잘 보임)
 	// - fRibbonWidth : 리본메쉬 가로두께
@@ -157,6 +166,7 @@ public:
 		_float3& vStartPos,
 		_float3& vStartVelocity,
 		_float3& vAcceleration, 
+		_float3* pCustomSpherePos = nullptr,
 		_float fMaxTime = 4.f, 
 		_uint iSegmentCount = 50, 
 		_float fRibbonWidth = 0.25f, 
@@ -166,11 +176,41 @@ public:
 		_float4 vTailColor = _float4(.8f, 0.f, 0.f, 1.f)
 	);
 
+	// [WIP] 대화 스크립트 UI를 생성 및 해제합니다. / pFilePath : 대화 내용이 담긴 csv 파일의 경로.
+	// Dialog용 csv 파일은, [1열 발화자], [2열 대사]를 담을 것을 상정합니다.
+	void		Open_DialogUI(const _char* pFilePath, _bool isInteractable);
+	void		Req_Interact_DialogUI(_bool isChangeNext_Forcely);
+	void		Close_DialogUI();
+
+	// [WIP] 종료 이미지를 실행합니다.
+	void		Trigger_PlayEndImage();
+#ifdef _DEBUG
+	void		Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+	// [WIP] 퀘스트 UI를 생성합니다. 목표 진행률에 도달하면 알아서 사라집니다.
+	void		Trigger_ActivateQuest();
+	// [WIP] 퀘스트의 진행률을 ++합니다. (찾은 아이 1명 추가)
+	void		Trigger_AddQuestProgress();
+#ifdef _DEBUG
+	void		Trigger_ForceCompleteQuestProgress()	{ for (_uint i = 0; i < 5; i++)	Trigger_AddQuestProgress();};
+	void		Trigger_AllReset();
+#endif // _DEBUG
+
+
 
 #pragma endregion
 
+#pragma region [UI] GRAPPLE
+	void*					Create_GrapplePoint(const _float3& vPointPos, UI_GRAPPLE_TYPE eType, _bool isDisabledOnSpawn = false);
+	class CUI_GrapplePoint* Find_NearGrapplePoint(const _float3& vBasePos, UI_GRAPPLE_TYPE eType, _float* pOutDistance = nullptr, _bool isIncludeInactive = false);
+	void					Toggle_GrapplePoint(void* pTargetUIPtr, _bool isActive);
+#pragma endregion
+
+
 #pragma region PLAYER STATUS
 	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
+	_uint Get_CurrentCharacterIndex() const;
 #pragma endregion
 
 
@@ -183,6 +223,7 @@ public:
 #pragma endregion
 
 #pragma region SONORO_MANAGER
+	void	Set_Sonora_LightDesc(SONORA eType, const LIGHT_DESC& Desc);
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(INSTANCETYPE eType, class CMapObject_Instance* pObjects, _bool** SonoroMode);
@@ -197,6 +238,7 @@ public:
 	HRESULT LoadNPCDataTable(const _char* pFilePath, _uint iType);
 	_uint Get_NumNPCInstance(_uint iType) const;
 	const vector<NPCINFO>& Get_NpcData(_uint iType) const;
+	void	Levi_Phase_Change();
 #pragma endregion
 
 #pragma region SFX_PREFAB
@@ -211,9 +253,9 @@ public:
 
 #pragma region PLAYER_INTERACT
 	void						Bind_Condition_ToPlayer(const _string& strTransition, void* pArg = nullptr);
-	void						Call_Animation();
-	void						Call_PlayerVisible();
-	void						Unbind_Grab();
+	void						Lock_Input_ToPlayer(_bool IsLock);
+	void						Bind_Gravity_ToPlayer(_bool IsGravity);
+	void						Use_Spring(_float fDestination, _float fDuration);
 #pragma endregion
 
 #pragma region PLAYER
@@ -239,27 +281,43 @@ public:
 	void						Set_Potal_Active(_bool B);
 #pragma endregion
 
-private:
-	class	CParser*			m_pParser						= { nullptr };
-	class	CFactory*			m_pFactory						= { nullptr };
+#pragma region BGM_MANAGER
+	void Change_Level(_uint iLevel);
+	void Stop_BGM();
+	void Engage_Battle(_bool IsBattle, BOSSBGM eBossLevel = BOSSBGM::END);
+	void Change_BGM(const _wstring& BGMText);
+	_bool IsModinaryBattle();
+	void Change_BattleBGM(BOSSBGM eBoss);
+#pragma endregion
 
-	class	CUI_FontPreset*		m_pUI_FontPreset				= { nullptr };
-	class	CUI_ControlHelper*	m_pUI_ControlHelper				= { nullptr };
+#pragma region DOME
+	void	Register_Dome(class CMapObject_Dome* pDome);
+	void    Change_Leviathan_Phaze(_uint iPhaze);
+	void	Dome_DissolveStart(_bool DissolveStart);
+#pragma endregion
+
+private:
+	class	CParser*				m_pParser					= { nullptr };
+	class	CFactory*				m_pFactory					= { nullptr };
+
+	class	CUI_FontPreset*			m_pUI_FontPreset			= { nullptr };
+	class	CUI_ControlHelper*		m_pUI_ControlHelper			= { nullptr };
+	class	CUI_GrappleController*	m_pUI_GrappleController		= { nullptr };
 	//class	CUI_StatusSyncer*	m_pUI_StatusSyncer				= { nullptr };
 
-	class	CDirector*			m_pDirector 					= { nullptr };
-	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
-	class	CPlayer*			m_pPlayer						= { nullptr };
-	class   CSequencePlayer*	m_pSequencePlayer				= { nullptr };
-	
-	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
+	class	CDirector*				m_pDirector 				= { nullptr };
+	class	CPlayerStatus* 			m_pPlayerStatus 			= { nullptr };
+	class	CPlayer*				m_pPlayer					= { nullptr };
+	class   CSequencePlayer*		m_pSequencePlayer			= { nullptr };
 
-	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
-	class	CMouseController*	m_pMouseController				= { nullptr };
+	class	CSonoro_Manager*		m_pSonoro_Manager			= { nullptr };
+	class   CBGM_Manager*			m_pBGM_Manager				= { nullptr };
+	class	CMonsterTable*			m_pMonsterTable				= { nullptr };
+	class	CMouseController*		m_pMouseController			= { nullptr };
 
-	class  CPotal*				m_pPotal						= { nullptr };
-	class	CTimeLack*				m_pTimeLack = { nullptr };
-
+	class   CPotal*					m_pPotal					= { nullptr };
+	class	CTimeLack*				m_pTimeLack					= { nullptr };
+	class   CMapObject_Dome*		m_pLeviDome					= { nullptr };
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 	Mutex m_Mutex;
 public:

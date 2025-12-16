@@ -92,6 +92,8 @@ void CAugustaSkillWeapon::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CAugustaSkillWeapon::Render()
@@ -126,6 +128,26 @@ void CAugustaSkillWeapon::Render()
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
+}
+
+void CAugustaSkillWeapon::Render_Shadow()
+{
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_PROPANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CAugustaSkillWeapon::Activate(_bool IsActivate)
@@ -171,6 +193,10 @@ void CAugustaSkillWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactMa
 
 	if (nullptr == pAbility)
 		return;
+
+	pAbility->Add_Cost(COST_TYPE::COST1, 8.f);
+	pAbility->Add_Cost(COST_TYPE::COST2, 20.f);
+	pAbility->Add_HarmonyGauge(10.f);
 }
 
 void CAugustaSkillWeapon::Ready_Components(const PROP_DESC* pDesc)
@@ -221,23 +247,22 @@ void CAugustaSkillWeapon::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.fAttackDmg = 470.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
+	TriggerDesc.strSoundTag = TEXT("Augusta_Blade_Hit_Mid_02 (SFX)");
 	// Burst 궁 켰을때 평타.
 	m_AttackVolumes[VOLUME_SWORD_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
-	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f);
 
 	// 궁극기용도.
+	TriggerDesc.strSoundTag = TEXT("Augusta_Blade_Hit_Mid_02 (SFX)");
 	m_AttackVolumes[VOLUME::VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

@@ -34,7 +34,7 @@ public:
 	void				Show_InteractUI(_wstring strText);
 	void				Hide_InteractUI(_bool isPressedAs = false);
 	void				Req_Render_InteractUI(_wstring xstrText, _bool isPressedAs);
-
+	 
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 
@@ -52,7 +52,7 @@ public:
 	void				Open_Game_OverflowPalette(_uint iTargetLevel);
 	void				Close_Game_OverflowPalette();
 
-	void				Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);		// 외부 값 받아올거면, 그래플 UI 헤더, cpp에 최상단 define 해제 필요
+	//void				Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType);		// 외부 값 받아올거면, 그래플 UI 헤더, cpp에 최상단 define 해제 필요
 
 	void				Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale);
 
@@ -63,6 +63,7 @@ public:
 	void				Req_Render_CurveTrace(	_float3& vStartPos,
 												_float3& vStartVelocity,
 												_float3& vAcceleration,
+												_float3* pCustomSpherePos,
 												_float fMaxTime,
 												_uint iSegmentCount,
 												_float fRibbonWidth,
@@ -71,8 +72,27 @@ public:
 												_float4 vHeadColor,
 												_float4 vTailColor);
 
+	void				Open_DialogUI(const _char* pFilePath, _bool isInteractable);
+	void				Req_Interact_DialogUI(_bool isChangeNext_Forcely);
+	void				Close_DialogUI();
+
+	void				Trigger_PlayEndImage();
+#ifdef _DEBUG
+	void				Trigger_StopEndImageForcely();
+#endif // _DEBUG
+
+	void				Trigger_ActivateQuest();
+	void				Trigger_AddQuestProgress();
+
+#ifdef _DEBUG
+	void				Trigger_AllReset();
+#endif // _DEBUG
+
+
+
 private:
 	CCustom_UI*			m_pRootUI_HUD						= { nullptr };
+	CCustom_UI*			m_pUI_HUD_Main_All					= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorR_PartyFrame		= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorB_Status			= { nullptr };
 	CCustom_UI*			m_pUI_HUD_SectorA					= { nullptr };
@@ -97,6 +117,7 @@ private:
 	CCustom_UI*			m_pRootUI_TabUtility				= { nullptr };
 	CCustom_UI*			m_pRootUI_GrapplePoint				= { nullptr };
 	//CCustom_UI*			m_pRootUI_QTE						= { nullptr };
+	CCustom_UI*			m_pRootUI_Dialog					= { nullptr };
 
 	CCustom_UI*			m_pRootUI_Ovfl_Palette				= { nullptr };
 
@@ -106,7 +127,7 @@ private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	class CGameSystem*		m_pGameSystem	= { nullptr };
 
-	vector<CCustom_UI*>		m_vecInteractions = {};
+	//vector<CCustom_UI*>		m_vecInteractions = {};
 
 public:
 	static CUI_ControlHelper* Create();

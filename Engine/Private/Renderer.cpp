@@ -78,43 +78,6 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 	return S_OK;
 }
 
-//HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
-//{
-//	if (8 == m_iCullStack.load(memory_order_acquire))
-//	{
-//		cout << "Cut!" << endl;
-//		return S_OK;
-//	}
-//
-//	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
-//	{
-//		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-//		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
-//	}
-//
-//	return S_OK;
-//}
-//
-//HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
-//{
-//	if (8 == m_iCullStack.load(memory_order_acquire))
-//		return S_OK;
-//
-//	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
-//	{
-//		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-//		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
-//		m_iCullStack.fetch_add(1, memory_order_release);
-//	}
-//
-//	if (8 <= m_iCullStack.load(memory_order_acquire))
-//	{
-//		m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
-//		m_isCompleteFrustumCull.exchange(true, memory_order_release);
-//	}
-//	
-//	return S_OK;
-//}
 HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
 	if (8 == m_iCullStack.load(memory_order_acquire))
@@ -195,18 +158,10 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_NonBlend();
 	Render_Static();
-	Render_NonStatic();
-	//if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
-	//	CRASH("Render Fail");
-	//m_pGameInstance->RenderBufferPool(0);
-	//m_pGameInstance->RenderBufferPool(1);
-	//m_pGameInstance->RenderBufferPool(2);
-	//m_pGameInstance->RenderBufferPool(3);
-	////모델 내부에서 LOD단계가 없을 때 다시 바인딩해야하기 때문에 Real_Late_Render같은 거로 내보낸 뒤 해당 LOD단계 렌더에서 다시 렌더시킬것.
-	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
-	//m_pGameInstance->End_MRT();
 	Render_Decal();
+	Render_NonStatic();
 	Render_SSAO();			
+	Render_Outline_NonCompare();
 	Render_Dynamic();
 
 	Render_Light();
@@ -225,13 +180,14 @@ void CRenderer::Render()
 	Render_EffectResolve();
 	Render_SFX();
 	Render_Emissive();	
-	Render_Bloom();		
+	Render_Bloom();
 	Render_BloomCombined();
 	Render_DistortionObject();
 	Render_Blend(); 
 	Render_Distortion();
 	Render_ScreenEffect();
 	Render_UI();
+	Render_UI_Post();
 	Render_Fade();
 
 #ifdef _DEBUG
@@ -343,44 +299,6 @@ void CRenderer::Render_ShadowMap()
 
 void CRenderer::Render_LOD(_uint iLODIndex)
 {
-	/*size_t iNumObjects = max(1, m_StaticObjects[iReadIndex][iLODIndex].size() / m_iNumThread);
-		for (_uint i = 0; i < m_iNumThread; ++i)
-		{
-			_uint iStartIndex = i * iNumObjects;
-			_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex][iLODIndex].size());
-			if (i == m_iNumThread - 1)
-				//iEndIndex = m_pGameInstance->Render_ObjectsNum(iLODIndex);
-				iEndIndex = m_StaticObjects[iReadIndex][iLODIndex].size();
-
-			m_pGameInstance->Add_Render_Work([this, iLODIndex, iStartIndex, iEndIndex, iReadIndex, i]() {
-				//쓰레드 개수로 분할해서 해야한다ㅇㅇ
-				if (iStartIndex < iEndIndex)
-				{
-					m_pDeferredContext[i]->ClearState();
-					Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
-					m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
-					m_pGameInstance->Bind_SharedBuffer(iLODIndex, m_pDeferredContext[i]);
-					for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
-					{
-						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Set_LOD(iLODIndex);
-						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Render(m_pDeferredContext[i], i);
-						m_StaticObjects[iReadIndex][iLODIndex][iIndex]->Set_RenderTime(iLODIndex, m_pGameInstance->Get_PlayTime());
-					}
-
-					ID3D11CommandList* pCL = { nullptr };
-					m_pDeferredContext[i]->FinishCommandList(false, &pCL);
-					Merge_CommandList(pCL, i);
-				}
-
-				{
-					lock_guard<mutex> lock(m_RenderAddMutex);
-					m_iNumEndThread.fetch_add(1, memory_order_relaxed);
-				}
-				m_CV.notify_one();
-				});
-		}
-		*/
-
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
 	// Static Object Render
@@ -615,43 +533,6 @@ void CRenderer::Render_Static()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 		CRASH("Render Fail");
-	{
-
-		//// Buffer Index
-		//_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
-
-		//// Static Object Render
-		//size_t iNumObjects = max(1, m_StaticObjects[iReadIndex].size() / m_iNumThread);
-		//for (_uint i = 0; i < m_iNumThread; ++i)
-		//{
-		//	_uint iStartIndex = i * iNumObjects;
-		//	_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex].size());
-		//	if (i == m_iNumThread - 1)
-		//		iEndIndex = m_pGameInstance->Render_ObjectsNum(0);
-		//	//iEndIndex = m_StaticObjects[iReadIndex].size();
-
-		//	m_pGameInstance->Add_Render_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
-		//		//쓰레드 개수로 분할해서 해야한다ㅇㅇ
-		//		if (iStartIndex < iEndIndex)
-		//		{
-		//			m_pDeferredContext[i]->ClearState();
-		//			Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
-		//			m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
-		//			//for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
-		//			//	m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
-
-		//			ID3D11CommandList* pCL = { nullptr };
-		//			m_pDeferredContext[i]->FinishCommandList(false, &pCL);
-		//			Merge_CommandList(pCL, i);
-		//		}
-		//		{
-		//			lock_guard<mutex> lock(m_RenderAddMutex);
-		//			m_iNumEndThread.fetch_add(1, memory_order_relaxed);
-		//		}
-		//		m_CV.notify_one();
-		//		});
-		//}
-	}
 
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
@@ -725,6 +606,24 @@ void CRenderer::Render_SSAO()
 
 }
 
+void CRenderer::Render_Outline_NonCompare()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), nullptr, false)))
+		CRASH("Render Fail");
+
+	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONCOMPARE)])
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render_OutLine();
+
+		Safe_Release(pRenderObject);
+	}
+
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONCOMPARE)].clear();
+
+	m_pGameInstance->End_MRT();
+}
+
 void CRenderer::Render_Dynamic()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
@@ -780,8 +679,6 @@ void CRenderer::Render_Light()
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
-
-	/*m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);*/
 
 	m_pGameInstance->End_MRT();
 }
@@ -871,7 +768,7 @@ void CRenderer::Render_Outline()
 
 void CRenderer::Render_NonLight()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_NonLight"), nullptr, false)))
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONLIGHT));
@@ -893,7 +790,6 @@ void CRenderer::Render_LUT()
 	if (FAILED(m_pShader->Bind_Value("g_fExposure", &m_fExposure, sizeof(_float))))
 		CRASH("Render Fail");
 
-
 	if (FAILED(m_pShader->Bind_Value("g_fLutLerpIntensity", &m_fLutLerpIntensity, sizeof(_float))))
 		CRASH("Failed to Bind LutIntensity");
 
@@ -910,14 +806,11 @@ void CRenderer::Render_LUT()
 	m_pCurrentSceneSRV = m_pGameInstance->Get_RT_SRV(TEXT("RT_Lut"));
 }
 
-
 void CRenderer::Render_Fog()
-{
-	
+{	
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Failed Begin MRT_BackBuffer");
 
-	
 	if (false == m_IsFog)
 	{
 		if(FAILED(m_pShader->Bind_Texture("g_Texture", m_pCurrentSceneSRV)))
@@ -1055,11 +948,6 @@ void CRenderer::Render_Distortion()
 	if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pCurrentSceneSRV)))
 		CRASH("Failed Bind CurrentScene");
 
-	//_wstring strRT = m_IsFog ? TEXT("RT_BackBuffer") : TEXT("RT_Lut");
-
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(strRT, m_pShader, "g_BackBufferTexture")))
-	//	CRASH("Render Fail");
-
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Distortion"), m_pShader, "g_DistortionTexture")))
 		CRASH("Render Fail");
 
@@ -1100,6 +988,11 @@ void CRenderer::Render_UI()
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::UI));
 }
 
+void CRenderer::Render_UI_Post()
+{
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::UI_POST));
+}
+
 void CRenderer::Render_Fade()
 {
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::FADE));
@@ -1107,8 +1000,13 @@ void CRenderer::Render_Fade()
 
 void CRenderer::Render_NonStatic()
 {
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+		CRASH("Failed to Begin MRT_Object");
+
 	m_pGameInstance->Bind_SharedBuffer(0, m_pContext);
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONSTATIC));
+
+	m_pGameInstance->End_MRT();
 }
 
 #ifdef _DEBUG
@@ -1185,7 +1083,7 @@ void CRenderer::Render_ObjectList(_uint iRG_Index)
 HRESULT CRenderer::Ready_RT()
 {
 	/* RenderTarget Diffuse */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 0.f, 1.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(1.f, 0.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Normal */
@@ -1322,7 +1220,6 @@ HRESULT CRenderer::Ready_MRT()
 #pragma endregion
 
 #pragma region MRT_EFFECT
-
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_BackBuffer"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Emissive"))))
@@ -1332,6 +1229,15 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_AccumColor"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_AccumAlpha"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_OUTLINE_NONCOMPARE
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
@@ -1356,6 +1262,17 @@ HRESULT CRenderer::Ready_MRT()
 
 #pragma region MRT_COMBINE
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Combine"), TEXT("RT_Combine"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_NONLIGHT
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_Combine"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_Normal"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_NonLight"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

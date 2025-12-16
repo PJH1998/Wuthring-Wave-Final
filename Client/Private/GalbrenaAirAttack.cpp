@@ -51,6 +51,7 @@ void CGalbrenaAirAttack::OnEnter(void* pArg)
 	{
 	case EGalbrenaAirAttackType::AIRATTACK_START:
 		m_pGalbrena->Set_Gravity(false);
+		m_fGravity = 0.f;
 		break;
 	case EGalbrenaAirAttackType::AIRATTACK_LOOP_1:
 		strMainBoneName = "WeaponProp01";
@@ -65,11 +66,15 @@ void CGalbrenaAirAttack::OnEnter(void* pArg)
 		m_pGalbrena->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 		m_pGalbrena->Set_SocketMatrixToParts(m_iSubPartType, strSubBoneName);
 		break;
+	case EGalbrenaAirAttackType::AIRATTACK_LOOP_2:
+		break;
+	default:
+		m_pGalbrena->Set_Gravity(true);
+		m_fGravity = 0.f;
+		break;
 	}
 
-   
 
-  
 	m_fSpeed = 2.f;
 
 	
@@ -110,8 +115,14 @@ void CGalbrenaAirAttack::OnExit()
 		m_pGalbrena->PartActivate(m_iSubPartType, false);
 	}
 
+
+
     m_pGalbrena->Set_Gravity(true);
     m_fSpeed = 0.f;
+	EGalbrenaAirAttackType eAirAttackType = static_cast<EGalbrenaAirAttackType>(m_iCurrentAnimIdx);
+
+	if (eAirAttackType != EGalbrenaAirAttackType::AIRATTACK_LOOP_2)
+		m_fGravity = 0.f;
 
 	m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
 	m_iSubPartType = CGalbrena::PARTTYPE::TYPE_END;
@@ -151,7 +162,9 @@ void CGalbrenaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
     if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2)
     {
-        m_pGalbrena->Move_Fall(fTimeDelta, m_fSpeed);
+		m_fGravity += fTimeDelta * GRAVITY * 0.1f; // 초에 9.8f 가속도?
+        //m_pGalbrena->Move_Fall(fTimeDelta, m_fSpeed);
+        m_pGalbrena->Move_Fall(fTimeDelta, m_fGravity);
     }
 
 	
@@ -187,27 +200,27 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_1)
-		{
-			if (m_States[ATTACK])
-			{
-				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1);
-				//m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
-				//m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
-				return;
-			}
-		}
+		//if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_1)
+		//{
+		//	if (m_States[ATTACK])
+		//	{
+		//		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1);
+		//		//m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
+		//		//m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+		//		return;
+		//	}
+		//}
 
 		// 0. Loop 도중에 공격키 한번 더누르면?
-		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2)
-		{
-			if (m_States[ATTACK])
-			{
-				m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
-				return;
-			}
-		}
+		//if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2)
+		//{
+		//	if (m_States[ATTACK])
+		//	{
+		//		m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
+		//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
+		//		return;
+		//	}
+		//}
 
 		// 0. End면 Move로 전환 가능.
 		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_END)

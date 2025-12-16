@@ -8,8 +8,8 @@ NS_BEGIN(Client)
 class CUI_GrapplePoint final : public CUI_Image
 {
 public:
-	typedef struct tUILockOnDesc {
-		_float3* pTargetPos = nullptr;
+	typedef struct tUIGrapplePointDesc {
+		_float3 vTargetPos = {};
 		UI_GRAPPLE_TYPE eType = UI_GRAPPLE_TYPE::END;
 	} UI_GRAPPLEPOINT_DESC;
 
@@ -30,13 +30,31 @@ public: // 생성/복제
 	virtual void    Late_Update(_float fTimeDelta)					override;
 	virtual void    Render()										override;
 
-	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
+	//virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
+
+public:
+	HRESULT			Ready_Components(void* pArg);
+	virtual void	OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
+public:
+	//void			Set_HardActivate(_bool isHardActivate)	{ m_isHardActivate = isHardActivate; }
+	//_bool			Get_HardActivate()						{ m_isHardActivate; }
+
+	_float3			Get_TargetPos()				{ return m_vTargetPos;		}
+	UI_GRAPPLE_TYPE	Get_GrappleType()			{ return m_eGrappleType;	}
+
+	void			Req_ToggleGrapplePoint(_bool isActivate)	
+												{	m_fReqedTimer = 0.f;
+													if (isActivate)	{m_iReqedEnabled	= true;	m_isActivate = true;}
+													else			{m_iReqedDisabled	= true;}	}
 
 private:
 	void			PreAssign_ChildUIs();
 	void			Ready_Presets();
 	void			Update_ApplyTargetPos(CCustom_UI* pTargetUI, _float3 vTargetPos);
 	void			Update_CamDistScale(CCustom_UI* pTargetUI, _float fPivotDistance);
+
+	void			Update_ToggleReqedEvent(_float );
 
 private:
 	void			Update_TargetColor();
@@ -56,17 +74,32 @@ private:
 
 	array<_float4, ENUM_CLASS(UI_GRAPPLE_TYPE::END) + 1> arrTypeColors = {};
 
+private:
+	CALLBACK_CLIENT	m_CallBack = {};
+
+	CTransform*		m_pTargetTransformCom = nullptr;
+	CTransform*		m_pWorldTransformCom = nullptr;		// 원래같으면 메쉬였을 것
+	CRigidbody*		m_pRigidbodyCom = nullptr;
+	
+	_uint			m_iCondition = {};
+	_float			m_fTargetDistance = {};
+	_float			m_fEventDistance = {};
+
+	mutex			m_Mutex;
+
+
+	_bool			m_iReqedDisabled = false;
+	_bool			m_iReqedEnabled = false;
+	_float			m_fReqedTimer = 0.f;
 
 private:
 	const _float	m_fPivotDistance = 10.f;		// 거리에 따른 크기 조절용. 이 거리일 때 최대 크기로 보임.
 
-	const _float	m_fTriggerDistance = 50.f;		// 상호작용 가이드가 뜰 범위
-	const _float	m_fVisibleDistance = 80.f;		// 보이기 시작할 범위 (가까워질수록.. 안보임 -> 보임 -> 애니메이션도 보임 순)
+	const _float	m_fTriggerDistance = 20.f;		// 상호작용 가이드가 뜰 범위
+	const _float	m_fVisibleDistance = 30.f;		// 보이기 시작할 범위 (가까워질수록.. 안보임 -> 보임 -> 애니메이션도 보임 순)
 
-	_float3*		m_pTargetPos = { nullptr };
+	_float3			m_vTargetPos = {};
 
-
-	//_bool			m_i
 
 #ifdef KSTA_UITEST_GRAPPLE_TOZERO
 	_bool			m_DEBUG_isAssignedPosition = false;
@@ -87,6 +120,8 @@ private:
 	_float				m_fGoinUnvisibleTime = 0.f;
 	const _float		m_fUnvisibledTime = 0.25f;
 	
+	class CGameSystem*	m_pGameSystem = { nullptr };
+
 public:
 	static CUI_GrapplePoint* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject*	Clone(void* pArg) override;

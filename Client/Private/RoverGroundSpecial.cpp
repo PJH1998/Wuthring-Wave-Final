@@ -122,6 +122,19 @@ void CRoverGroundSpecial::Handle_Input()
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
     m_States[DASH] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	m_States[SKILL_E] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
+	m_States[SKILL_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
+
+	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+
+	if (m_States[BURST])
+		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));
+	else
+		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
+	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
+
+	m_States[EXIT] = m_pRover->Get_Cost(COST_TYPE::COST1) <= 0.f;
 }
 
 void CRoverGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
@@ -166,11 +179,42 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
+	if (m_States[ULTI])
+	{
+		if (SKILL_STATE::READY != m_pRover->Use_Skill("Burst01_Ulti"))
+			return;
+
+		m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
+		m_pRover->GetStateContextForWrite().m_strPrevInfo = "ULTI";
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::BURST));
+		return;
+	}
+
+	if (m_States[BURST_E]) // Burst E
+	{
+		if (SKILL_STATE::READY != m_pRover->Use_Skill("Ex_Skill02"))
+			return;
+
+		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::EX_SKILL02;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
+		return;
+	}
+
+	if (m_States[DEFAULT_E])
+	{
+		if (SKILL_STATE::READY != m_pRover->Use_Skill("Skill02"))
+			return;
+
+		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL02;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
+		return;
+	}
+
 	// 1. 탈출 가능한 시점에서
 	if (IsEscapePossible)
 	{
 		// 가장 우선순위 높은 상황.
-		if (m_States[ATTACK])
+		if (m_States[ATTACK] && !m_States[EXIT])
 		{
 			switch (eSpType)
 			{

@@ -16,7 +16,7 @@ private:
 	typedef struct tUIPaletteDesc {
 		array<_uint, 2>		arrIndex = {};
 		PALETTE_COLOR		eColor = PCOLOR_END;
-	} UI_PALETTE_DESC;
+	} UI_PALETTE_DESC;;
 
 public:
 	explicit CUI_Ovfl_Palette(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -33,6 +33,7 @@ public:
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
 
+	HRESULT			Ready_Events();
 	HRESULT			Ready_Components(void* pArg);
 	HRESULT			Ready_ChildExtraComponents();
 
@@ -121,7 +122,8 @@ private:
 	array<_uint, 80>						m_arrDepth = {};				// 깊이 확인
 	vector<vector<UI_PALETTE_DESC>>			m_vecTargetsByDepth = {};
 
-
+private:
+	array<_bool, 80>						m_arrIsVisited_Sound = {};		// 사운드용 방문 체크
 
 private:
 	// local variables for shader.
@@ -142,9 +144,9 @@ private:
 	_bool						m_isGoinChange		= false;
 	_bool						m_isGoinOpen		= false;	// 아직 미사용.
 
-	_bool						m_isGoinSuccess		= false;	// 아직 미사용.?	// 남은 횟수가 0이 된다면, 결과를 바탕으로 success 와 fail 중 하나 진행. 그에 따른 분기 진행
-	_bool						m_isGoinFail		= false;	// 아직 미사용.?	// 분기는 m_isGoinChange 가 끝난 뒤(전환 애니메이션이 다 끝난 뒤) 실질 실행되게끔 만들어야 함.
-																					// 리셋할 시에 이 변수 또한 리셋 필요.
+	_bool						m_isGoinSuccess		= false;
+	_bool						m_isGoinFail		= false;
+															
 	_bool						m_isFinishedEvent	= false;
 	 
 	// local variables for fade-out
@@ -153,6 +155,16 @@ private:
 	_uint						m_iAnimOrder		= { };
 
 	class CGameSystem*			m_pGameSystem		= { nullptr };
+
+private:
+	_uint						m_iHoveredIndex = CUI_Ovfl_Palette::PCOLOR_END;
+	_uint						m_iHoveredColorIndex = CUI_Ovfl_Palette::PCOLOR_END;
+
+	_uint						m_iPrevHoveredIndex = UINT_MAX;
+	_uint						m_iPrevHoveredColorIndex = UINT_MAX;
+
+	_uint						m_iPrevDestColorIndex = CUI_Ovfl_Palette::PCOLOR_END;
+
 
 public:
 	static CUI_Ovfl_Palette*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

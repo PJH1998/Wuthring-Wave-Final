@@ -2,6 +2,8 @@
 #include "Levi_Alter.h"
 #include "Levi_Bayonet.h"
 #include "Levi_Bow.h"
+#include "GameSystem.h"
+#include "MotionTrail.h"
 
 CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -10,11 +12,15 @@ CLevi_Alter::CLevi_Alter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CLevi_Alter::CLevi_Alter(const CLevi_Alter& Prototype)
 	: CActor { Prototype }
+	, m_pGameSystem{ CGameSystem::GetInstance() }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevi_Alter::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.05f, 0.05f, 0.3f, 1.f);
     return S_OK;
 }
 
@@ -31,12 +37,14 @@ HRESULT CLevi_Alter::Initialize_Clone(void* pArg)
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_Tracks.emplace(make_pair("Attack18", make_pair(0.f, 195.f)));
 	m_Tracks.emplace(make_pair("Attack19", make_pair(0.f, 195.f)));
-	m_Tracks.emplace(make_pair("Attack_20|1", make_pair(30.f, 49.f)));
-	m_Tracks.emplace(make_pair("Attack_20|2", make_pair(60.f, 72.f)));
-	m_Tracks.emplace(make_pair("Attack_20|3", make_pair(120.f, 138.f)));
-	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12, 50)));
+	m_Tracks.emplace(make_pair("Attack_20|1", make_pair(30.f, 57.f)));
+	m_Tracks.emplace(make_pair("Attack_20|2", make_pair(60.f, 83.f)));
+	m_Tracks.emplace(make_pair("Attack_20|3", make_pair(120.f, 147.f)));
+	m_Tracks.emplace(make_pair("Attack05_5", make_pair(12.f, 68.f)));
 	m_isActivate = false;
 	m_vBaseColor = _float4(0.25f, 0.2f, 0.25f, 1.f);
+	m_fRootMotionRate = 1.f;
+	m_iSoundChannel = m_iSoundChannel2 = -1;
 	return S_OK;
 }
 
@@ -65,7 +73,8 @@ void CLevi_Alter::Update(_float fTimeDelta)
 	{
 		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
 	}
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta, &fTrackPos, true, false, true, 1.f * temp);
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta * fTimeRatio, &fTrackPos, true, false, true, m_fRootMotionRate * temp);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPos >= m_Tracks[m_strPatternKey].second)
 	{
@@ -96,7 +105,15 @@ void CLevi_Alter::Update(_float fTimeDelta)
 void CLevi_Alter::Late_Update(_float fTimeDelta)
 {
 	//m_pColliderCom->Sync_Position(m_pTransformCom);
-
+	if (m_isDissolve)
+	{
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
+		else
+		{
+			m_fDissolveRate = 1.f;
+		}
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))) return;
 
 	for (auto& Pair : m_PartObjects)
@@ -136,7 +153,12 @@ void CLevi_Alter::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_HasSkinMask", &HasMask, sizeof(_bool))))
 			CRASH("Ready g_HasSkinMask Failed");
 
-		m_pShaderCom->Begin(m_ShaderIndices[i]);
+		if (m_isDissolve)
+		{
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+		}
+		else
+			m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 
@@ -174,9 +196,9 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	_string wstrAnimTag = pDesc->strPatternKey.substr(0, Index);
 	_string wstrTypeTag = pDesc->strPatternKey.substr(Index + 1);
 	m_strAnimKey = wstrAnimTag;
-	//m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
 	m_eType = pDesc->eType;
+	m_fRootMotionRate = 1.f;
 	if(Index == pDesc->strPatternKey.npos)
 		m_pModelCom->Set_TrackPosition(m_strAnimKey, m_Tracks[m_strAnimKey].first);
 	else
@@ -194,10 +216,12 @@ void CLevi_Alter::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_PartObjects[TEXT("Part_Bow")]->SetActivate(true);
 		m_isTurnLerp = true;
 	}
-	//m_pColliderCom->IsActivate(true);
+
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
+	m_iSoundChannel2 = m_pGameInstance->Register_Channel();
+
 	m_pRigidBodyCom->IsActivate(true);
-	//m_pColliderCom->Set_Gravity(false);
-	//m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_isDissolve = false;
 	m_isActivate = true;
 }
 
@@ -232,12 +256,36 @@ void CLevi_Alter::Effect_Active(const _wstring& wStrEffectTag)
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 
-	PREFAB_INFO EffectDesc{};
-	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
-	EffectDesc.pModelPtr = m_pModelCom;
+	size_t Index = wStrEffectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrEffectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrEffectTag.substr(Index + 1);
 
-	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	if (wstrTypeTag == TEXT("SPECTRUM"))
+	{
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrSpectrumTag = wstrPartTag.substr(0, Index);
+		wstrPartTag = wstrPartTag.substr(Index + 1);
+		Index = wstrPartTag.find(TEXT("|"));
+		_wstring wstrBoneName = wstrPartTag.substr(0, Index);
+		_wstring wstrDuration = wstrPartTag.substr(Index + 1);
+
+		SPECTRUM_INFO Spectrum{};
+		Spectrum.pModelMarixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		Spectrum.pIsActive = nullptr;
+		Spectrum.pBoneMatrixPtr = m_pModelCom->Get_BoneMatrixPtr(WStringToString(wstrBoneName).c_str());
+		Spectrum.fDuration = stof(wstrDuration);
+
+		m_pGameInstance->Spawn_PoolingObject(wstrSpectrumTag, XMMatrixIdentity(), &Spectrum);
+	}
+	else
+	{
+		PREFAB_INFO EffectDesc{};
+		EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+		EffectDesc.pModelPtr = m_pModelCom;
+		_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+
+		m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
+	}
 }
 
 void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
@@ -246,6 +294,10 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
 	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
 
+	if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrAnimTag);
+	}
 	if (wstrTypeTag == TEXT("Look"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
@@ -256,6 +308,18 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 		_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(0.f), 0.f);
 		m_pTransformCom->Turn_Quaternion(vQuat);
 	}
+	else if (wstrTypeTag == TEXT("MotionTrail"))
+	{
+		CMotionTrail::MOTION_TRAIL_DESC Desc{};
+		Desc.pModel = m_pModelCom;
+		Desc.pTransform = m_pTransformCom;
+		Desc.vColor = _float4(0.21f, 0.01f, 0.4f, 1.f);
+		Desc.fMotionLifeTime = 1.f; // 생성 되고 1초 뒤에 사라짐
+		Desc.fInterval = 0.1f;  // 0.2초 간격으로 생성
+		Desc.fDuration = 1.f;   // 5초 뒤에 트레일 생성 끝
+		Desc.iShaderPassIndex = 0; // 현재 0번 뿐
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_MotionTrail"), XMMatrixIdentity(), &Desc);
+	}
 	else if (wstrTypeTag == TEXT("Ray"))
 	{
 		
@@ -263,6 +327,77 @@ void CLevi_Alter::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
 		Reset_NotifyInteraction();
+	}
+	else if (wstrTypeTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = true;
+	}
+}
+
+void CLevi_Alter::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Move"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
+		if (wstrPartTag == TEXT("Dodge1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_01 (SFX)"), m_iSoundChannel2, 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_02 (SFX)"), m_iSoundChannel2, 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge3"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_03 (SFX)"), m_iSoundChannel2, 0.07f);
+		}
+		else if (wstrPartTag == TEXT("Dodge4"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_action_move_04 (SFX)"), m_iSoundChannel2, 0.07f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Sword"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		if (wstrPartTag == TEXT("0102"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack1_p2 (SFX)"), m_iSoundChannel, 0.25f);
+		}
+		else if (wstrPartTag == TEXT("1802"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack18_p2 (SFX)"), m_iSoundChannel, 0.2f);
+		}
+		else if (wstrPartTag == TEXT("1803"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack18_p3 (SFX)"), m_iSoundChannel, 0.2f);
+		}
+		else if (wstrPartTag == TEXT("1402"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack14_p2_d1 (SFX)"), m_iSoundChannel, 0.25f);
+		}
+		else if (wstrPartTag == TEXT("0501"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_attack5_p1_01 (SFX)"), m_iSoundChannel, 0.15f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Bow"))
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		if (wstrPartTag == TEXT("Shoot1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_arrowshot_01 (SFX)"), m_iSoundChannel, 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Shoot2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_arrowshot_02 (SFX)"), m_iSoundChannel, 0.15f);
+		}
+		else if (wstrPartTag == TEXT("Shoot3"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("boss_fuludelisi_arrowshot_03 (SFX)"), m_iSoundChannel, 0.15f);
+		}
 	}
 }
 
@@ -272,6 +407,12 @@ void CLevi_Alter::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+	if (m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 }
 
 void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
@@ -324,7 +465,7 @@ void CLevi_Alter::Ready_Component(ALTER_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
-	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA));
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::CHARACTER_COLOR));
 }
 
 void CLevi_Alter::Ready_PartObject(ALTER_DESC* pDesc)
@@ -381,6 +522,13 @@ void CLevi_Alter::UnActive_Resources()
 	//m_pColliderCom->IsActivate(false);
 	m_pRigidBodyCom->IsActivate(false);
 	m_isActivate = false;
+
+	m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+	m_pGameInstance->Return_Channel(m_iSoundChannel);
+	m_iSoundChannel = -1;
+	m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel2);
+	m_pGameInstance->Return_Channel(m_iSoundChannel2);
+	m_iSoundChannel2 = -1;
 }
 
 void CLevi_Alter::Reset_NotifyInteraction()
@@ -420,4 +568,6 @@ CGameObject* CLevi_Alter::Clone(void* pArg)
 void CLevi_Alter::Free()
 {
 	__super::Free();
+
+	Safe_Release(m_pGameSystem);
 }

@@ -10,6 +10,7 @@
 #include "Ability.h"
 #include "GameSystem.h"
 #include "PlayerStatus.h"
+#include "Event_Leviatan.h"
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -52,6 +53,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     if (FAILED(Ready_Players(pDesc)))
         return E_FAIL;
+
+	
 
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
@@ -100,7 +103,9 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
 	// 9. 타이머 지정.
 	m_fChangeCoolTime = 3.f;
+
 	
+
 
     return S_OK;
 }
@@ -108,9 +113,14 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
-	
+
+	Process_Timer(fTimeDelta);
+
     m_pInputControllerCom->Update();
-    
+
+	// . PlayerStatus 갱신
+	m_pPlayerStatus->Set_CurrentCharIndex(m_iCurrentCharacterIdx);
+
 	// 2. 현재 활성화 캐릭터 이후에 키 입력 확인하기
 	Player_KeyInput();
 
@@ -130,6 +140,8 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
 		m_Characters[m_iHarmonyCharacterIdx]->Priority_Update(fTimeDelta);
+	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
+		m_Characters[m_iEventCharacterIdx]->Priority_Update(fTimeDelta);
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Priority_Update(fTimeDelta);
 
@@ -147,9 +159,11 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 			m_ChangeTimers[i] -= fTimeDelta;
 	}
 	
-
 	// 8. PlayerStatus에 Utility Type 바인딩.
 	Sync_UtilityType();
+
+	// 9. Previous Position
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -166,6 +180,8 @@ void CPlayer::Update(_float fTimeDelta)
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
+	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
+		m_Characters[m_iEventCharacterIdx]->Update(fTimeDelta);
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Update(fTimeDelta);
 
@@ -176,11 +192,14 @@ void CPlayer::Update(_float fTimeDelta)
 
 	Sorting_GrappleTarget(); // Grapple Target Sorting;
 	Toggle_Grapple(); 
+	Sorting_ThrowTarget();
+	Toggle_Throw();
 	Sorting_Target(); // 4. Target Sorting
     Toggle_LockOn(); // 5. Lock On
 	
 	m_GrappleCandidates.clear();
 	m_TargetCandidates.clear();
+	m_ThrowCandidates.clear();
 	//m_TargetTransforms.clear();
 
 	
@@ -197,14 +216,16 @@ void CPlayer::Late_Update(_float fTimeDelta)
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
-	
-
     if (m_iHarmonyCharacterIdx != NONE &&
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Late_Update(fTimeDelta);
+	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
+		m_Characters[m_iEventCharacterIdx]->Late_Update(fTimeDelta);
 	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
 		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
 
+	// 채널에서 위치 갱신
+	//m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
 	
 
 #ifdef _DEBUG
@@ -255,6 +276,8 @@ _bool CPlayer::IsQTEPossible(CHARACTERTYPE eCharacterType)
 
 	return fHarmony >= pAbility->Get_MaxHarmony();
 }
+
+// 이전 캐릭터에 대한 QTE 실행.
 void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 {
 	if (NONE == eCharacterType)
@@ -325,10 +348,12 @@ void CPlayer::Player_KeyInput()
 
 		_matrix WorldPosMatrix = XMMatrixTranslationFromVector(vPosition);
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_Scan"), WorldPosMatrix, nullptr);
+		m_pGameInstance->Play_Sound(TEXT("ae_ui_but_scan_v3 (SFX)"), ENUM_CLASS(CHANNEL::EFFECT), 1.f);
+		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_Scan"), WorldPosMatrix, nullptr);
 	}
 
-	if (!m_IsQTE) // QTE 도중이면 플레이어 변경 불가능.
+	if (!m_IsQTE && // QTE 도중이면 플레이어 변경 불가능.
+		!m_IsEventLock) // ANIMSTOP 도중이면 플레이어 변경 불가능.
 	{
 		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 		{
@@ -336,7 +361,7 @@ void CPlayer::Player_KeyInput()
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::ROVER;
-				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
+				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
 				m_ChangeTimers[CHARACTERTYPE::ROVER] = m_fChangeCoolTime;
 				return;
 			}
@@ -348,7 +373,7 @@ void CPlayer::Player_KeyInput()
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
-				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
+				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
 				m_ChangeTimers[CHARACTERTYPE::AUGUSTA] = m_fChangeCoolTime;
 				return;
 			}
@@ -359,13 +384,18 @@ void CPlayer::Player_KeyInput()
 			{
 				m_IsChanage = true;
 				m_eNextCharacter = CHARACTERTYPE::GALBRENA;
-				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
+				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
 				m_ChangeTimers[CHARACTERTYPE::GALBRENA] = m_fChangeCoolTime;
 				return;
 			}
 		}
 
 		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
+		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
+		{
+			m_pGameSystem->Show_TabUtilityUI(ENUM_CLASS(m_eUtilityType));
+		}
+
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
 		{
 			_uint iSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
@@ -382,22 +412,27 @@ void CPlayer::Player_KeyInput()
 				}
 			}
 		}
+		
 
 	}
 
+	
+
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		
+		m_pSpringCamera->Use_Spring(2.5f, 0.1f);
+		m_pGameInstance->Play_Sound(TEXT("role_slide_loop (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_ACTION), 0.3f);
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		
+		m_pGameInstance->Stop_Sound(ENUM_CLASS(CHANNEL::PLAYER_ACTION));
 	}
 
 
@@ -412,25 +447,38 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 		m_Characters[m_iCurrentCharacterIdx]->Spawn_MotionTrail(3.f, 0.5f, 1.f, { 1.f, 1.f, 1.f, 1.f });
-	}
 
+		m_Characters[m_iCurrentCharacterIdx]->Set_LeviatanQTE(false);
+		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		
+		//m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS);
+		LEVI_GRAB Desc{ true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
+		// Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
+
+		m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f);
+		m_pGameSystem->Stop_Action();
+
+	}
+	
 	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
 	{
+		_float2 vPos = { 500.f, -200.f };
+		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
 
-		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-500.f);
-		// 임시
-		m_Characters[m_iCurrentCharacterIdx]->Add_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE_READY));
+
+		//Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
 	{
-		//m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(500.f);
-
-		// 임시
-		
-		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+		_float2 vPos = { 500.f, -200.f };
+		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
+		//m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
 
 	}
 
@@ -443,6 +491,9 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
+#endif // _DEBUG
+
+	
 
 	
 }
@@ -522,7 +573,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 
 
 	// 7. QTE 실행. 가능하면
-	if (IsQTEPossible(ePrevCharacterType))
+	if (IsQTEPossible(ePrevCharacterType) && !m_IsEventLock)
 	{
 		// QTE 실행.
 		ExecuteQTE(ePrevCharacterType);
@@ -535,6 +586,9 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
 	}
 	
+	// 8. 사운드 재생
+	m_pGameInstance->Play_Sound(TEXT("ui_ia_com_tick (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_UI), 0.25f);
+	//m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
 
 }
 
@@ -587,7 +641,8 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 // Grapple 전용 .
 void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer))
+	if ((ENUM_CLASS(COLLISIONLAYER::GRAPPLE) != iLayer) &&
+		(ENUM_CLASS(COLLISIONLAYER::INTERACT_THROW) != iLayer))
 		return;
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
@@ -597,6 +652,9 @@ void CPlayer::OnCollider_GrappleDuring(_uint iLayer, void* pDesc, const ContactM
 	{
 	case COLLISIONLAYER::GRAPPLE:
 		Process_CollideGrapple(pcallDesc);
+		break;
+	case COLLISIONLAYER::INTERACT_THROW:
+		Process_CollideThrow(pcallDesc);
 		break;
 	}
 	
@@ -701,8 +759,6 @@ _bool CPlayer::Is_TargetValid(CTransform* pTarget)
 
 
 
-
-
 #pragma region GameSystem 연계함수.
 void CPlayer::Notify_GrabVisible(_bool IsVisible)
 {
@@ -719,14 +775,151 @@ void CPlayer::Notify_EscapeGrabExecute()
 	m_IsLockOn = false;
 }
 
-void CPlayer::Notify_Event(CHARACTER_EVENT eEvent)
+void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 {
 	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
 	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
 	{
-		_int x = 10;
+		// LockOn 해제.
+		m_IsLockOn = false;
+
+		Bind_EventLock(true);
+
+		// 협주 중이였다면?
+		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
+		{
+			// => 협주 중지
+			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+			// => 협주 인덱스를 제거하기.
+			m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
+		}
+			
+
+		m_IsQTE = false;
+
+		// 2. Rover로 변경.
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+
+		// 3. 작업
+		// => Rover 위치 변경 (위치는 안변경되는거 같기도하고..)
+		// => Rover State 변경. (Leviatan 전용 QTE로)
+		// => Rover 시간 멈춤 (State Machine만)
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
+		);
+		
+		// 4. Levi Cap
+		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Capture")
+			,true, false);
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
+	{
+		m_IsLockOn = false;
+		if (m_iCurrentCharacterIdx == CHARACTERTYPE::ROVER)
+		{
+			Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+
+			LEVI_GRAB Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+			Bind_EventLock(false);
+			m_pGameSystem->Stop_Action();
+		}
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE == eEvent) // 레비아탄 위치도 고정시켜야할 것 같은데?..
+	{
+		m_IsLockOn = false;
+
+		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
+		{
+			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+			m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
+		}
+		
+
+		// 1. Rover가 아니면 Rover로변경 (얘가 메인 캐릭터로)
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+		// 2. Rover의 상태를 변경.
+		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
+		);
+
+
+		// 3. Galbrena 활성화. => 보스의
+		m_iEventCharacterIdx = CHARACTERTYPE::GALBRENA;
+
+		m_Characters[m_iEventCharacterIdx]->TransitionState_FromPlayer(
+			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
+		);
+
+		
+		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Execute"), true, false);
+
+		// 카메라 액션 시작하면서 실행?
+		//m_Characters[m_iCurrentCharacterIdx]->Spawn_Effect(TEXT("Pooling_Excute_Prefab"));
+	}
+	else if (CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS == eEvent)
+	{
+		m_IsLockOn = false;
+
+		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+		m_Characters[m_iEventCharacterIdx]->Start_Anim();
+		
+		m_pGameSystem->Stop_Action();
+
+		// 이벤트 예약? => 1.5f 뒤에 Leviatan 죽음 이벤트를 실행하라.
+		m_Event = [this]() {
+			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f); // 몬스터 TimeRatio 정상화.
+			LEVI_EXECUTE Desc{ true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+			m_iEventCharacterIdx = CHARACTERTYPE::NONE; // Event 캐릭 해제.
+		}; 
+
+		m_fEventMaxTime = { 2.5f };
+
+		m_IsEvent = true;
+		
+	}
+	else if (CHARACTER_EVENT::TELEPORT == eEvent)
+	{
+		// TELEPORT
+		if (nullptr == pArg)
+			return;
+
+		_float4 vPos = *static_cast<_float4*>(pArg);
+		m_Characters[m_iCurrentCharacterIdx]->Execute_Telport(XMLoadFloat4(&vPos));
 	}
 	
+}
+void CPlayer::Bind_EventLock(_bool IsLock)
+{
+	m_IsEventLock = IsLock;
+}
+
+void CPlayer::Lock_Input(_bool IsLock)
+{
+	if (nullptr == m_pInputControllerCom)
+		return;
+
+	m_pInputControllerCom->Set_BlockInput(IsLock);
+}
+void CPlayer::Bind_Gravity(_bool IsGravity)
+{
+	if (nullptr == m_pColliderCom)
+		return;
+
+	m_pColliderCom->Set_Gravity(IsGravity);
+}
+void CPlayer::Use_Spring(_float fDestination, _float fDuration)
+{
+	if (nullptr == m_pSpringCamera)
+		return;
+
+	m_pSpringCamera->Use_Spring(fDestination, fDuration);
 }
 #pragma endregion
 
@@ -750,7 +943,23 @@ void CPlayer::Sorting_Target()
     {
         //m_pTargetTransform = m_TargetTransforms[0];
 		m_TargetInfo = m_TargetCandidates[0];
+		m_TargetInfo.IsActive = true;
+
+		// 몬스터가 탐지되었고, 전투 
+		// 이 진행 중이라면.
+		if (m_pGameSystem->IsModinaryBattle())
+			m_IsBattle = true;
     }
+	else
+	{
+		// 몬스터가 탐지되어 있지 않은데 전투 상태라면?
+		if (m_IsBattle)
+		{
+			m_pGameSystem->Engage_Battle(false);
+			m_IsBattle = false;
+		}
+			
+	}
 
 }
 
@@ -815,9 +1024,6 @@ void CPlayer::Toggle_LockOn()
 		Calc_LockOnPos();
 		_float3 vPos = {};
 		XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-		cout << "LockOn Pos (x, y, z) : " << m_vLockOnPos.x << ", " << m_vLockOnPos.y << ", " << m_vLockOnPos.z << endl;
-		cout << "Player Pos (x, y, z) : " << vPos.x << ", " << vPos.y << ", " << vPos.z << endl;
-
 		m_pGameSystem->Attach_LockOnUI(&m_vLockOnPos);
 
 	
@@ -834,11 +1040,9 @@ void CPlayer::Toggle_LockOn()
 
 
 	// 6. 카메라 업데이트.
-	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
+	m_pSpringCamera->Lock_On(pFinalTarget, m_TargetInfo.pSocketMatrix, m_IsLockOn);
 
-	
-
-	// 7. LockOn 초기화?
+	// 7. Target 정보 초기화.
 	m_TargetInfo.Reset();
 }
 
@@ -847,31 +1051,68 @@ void CPlayer::Toggle_LockOn()
 void CPlayer::Sorting_GrappleTarget()
 {
 	// 거리순으로 정렬해서 넣어줍니다.
+
+
 	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const GRAPPLE_INFO& src, const GRAPPLE_INFO& dst)->_bool {
 		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
 		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
-		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+		/*_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
 			- pSrcTransform->Get_State(STATE::POSITION)));
 		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
+			- pDstTransform->Get_State(STATE::POSITION)));*/
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
 			- pDstTransform->Get_State(STATE::POSITION)));
 		return fSrcDistance < fDstDistance;
 		});
 
 	if (0 < m_GrappleCandidates.size())
+	{
 		m_TargetGrappleInfo = m_GrappleCandidates[0];
+		m_TargetGrappleInfo.IsActive = true;
+	}
+		
 }
 
 
 void CPlayer::Toggle_Grapple()
-
 {
 	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
 	if (m_eUtilityType == UI_TAB_UTILITY::GRAPPLE)
 		m_Characters[m_iCurrentCharacterIdx]->Bind_GrappleTarget(
 			m_TargetGrappleInfo
 		);
+}
+void CPlayer::Sorting_ThrowTarget()
+{
+	// 거리순으로 정렬해서 넣어줍니다.
+	sort(m_ThrowCandidates.begin(), m_ThrowCandidates.end(), [this](const THROW_INFO& src, const THROW_INFO& dst)->_bool {
+		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
+		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
+		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pSrcTransform->Get_State(STATE::POSITION)));
+		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
+			- pDstTransform->Get_State(STATE::POSITION)));
+		return fSrcDistance < fDstDistance;
+		});
+
+	if (0 < m_ThrowCandidates.size())
+	{
+		m_TargetThrowInfo = m_ThrowCandidates[0];
+		m_TargetThrowInfo.IsActive = true;
+	}
+		
+}
+void CPlayer::Toggle_Throw()
+{
+	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
+	if (m_eUtilityType == UI_TAB_UTILITY::LEVITATOR)
+		m_Characters[m_iCurrentCharacterIdx]->Bind_ThrowTarget(
+			m_TargetThrowInfo
+		);
 }
 void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
 {
@@ -900,12 +1141,72 @@ void CPlayer::Process_CollideGrapple(const CALLBACK_CLIENT* pcallDesc)
 		if (nullptr == pTargetTransform)
 			return;
 
-		lock_guard<mutex> lock(m_Mutex);
-		m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
-
 		// 매프레임 초기화.
 		m_TargetGrappleInfo.Reset();
+
+		lock_guard<mutex> lock(m_Mutex);
+
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+		_vector vTargetPos = pTargetTransform->Get_State(STATE::POSITION);
+		_bool IsinWorldSpace = m_pGameInstance->IsIn_WorldSpace(vTargetPos, 0.f);
+		_float fLength = XMVectorGetX(XMVector3Length(vPos - vTargetPos));
+
+		
+		// Camera View Space 안에 있으면 넣기.
+		if (IsinWorldSpace && !(pcallDesc->eObjectType == OBJECTTYPE::ROPE_UI))
+			m_GrappleCandidates.push_back({ pTargetTransform, pcallDesc->eObjectType, pcallDesc->pCondition });
+
+		
 	}
+}
+
+void CPlayer::Process_CollideThrow(const CALLBACK_CLIENT* pcallDesc)
+{
+	{
+		CTransform* pTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+		if (nullptr == pTransform)
+			return;
+
+		lock_guard<mutex> lock(m_Mutex);
+
+		THROW_INFO ThrowInfo = {
+			pTransform,
+			pcallDesc->eObjectType,
+			pcallDesc->IsGrab,
+			pcallDesc->IsThrow,
+			pcallDesc->ppRefBoneMatrix,
+			pcallDesc->ppRefWorldMatrix
+		};
+
+		m_ThrowCandidates.push_back(ThrowInfo);
+
+		// 매프레임 초기화.
+		m_TargetThrowInfo.Reset();
+	}
+}
+
+void CPlayer::Process_QTEEvent(CHARACTER_EVENT eEvent, void* pArg)
+{
+}
+
+void CPlayer::Process_Timer(_float fTimeDelta)
+{
+	if (m_IsEvent)
+	{
+		if (m_fEventTimer <= m_fEventMaxTime)
+		{
+			m_fEventTimer += fTimeDelta;
+		}
+		else
+		{
+			m_fEventTimer = 0.f;
+			m_IsEvent = false;
+
+			if (nullptr != m_Event)
+				m_Event();
+		}
+	}
+
 }
 
 void CPlayer::Manage_Condition()
@@ -1072,7 +1373,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
     RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-    RigidbodyDesc.vExtent = _float3(30.f, 15.f, 30.f);
+    RigidbodyDesc.vExtent = _float3(30.f, 30.f, 30.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
     if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -1088,7 +1389,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
+	RigidbodyDesc.vExtent = _float3(15.f, 15.f, 15.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -1097,7 +1398,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 	m_pGrappleRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
-		});
+	});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };

@@ -10,11 +10,13 @@ CHavocWarrior::CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 CHavocWarrior::CHavocWarrior(const CHavocWarrior& Prototype)
 	: CActor { Prototype }
+	, m_vMonsterDissolveColor{ Prototype.m_vMonsterDissolveColor }
 {
 }
 
 HRESULT CHavocWarrior::Initialize_Prototype()
 {
+	m_vMonsterDissolveColor = _float4(0.4f, 0.f, 0.3f, 1.f);
 	return S_OK;
 }
 
@@ -57,8 +59,11 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_isActivate = false;
 	m_fHitStopRatio = 1.f;
 	m_vBaseColor = _float4(1.f, 1.f, 1.f, 1.f);
+
+	m_fBehitMaxTime = 0.15f;
 	_float temp{};
 	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+
 	return S_OK;
 }
 
@@ -82,10 +87,17 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
+	if (false == m_isActivate)
+	{
+		m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+		m_pGameInstance->Return_Channel(m_iSoundChannel);
+		m_iSoundChannel = -1;
+	}
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //gpu
+	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * fTimeRatio); //gpu
 
 	//공격이 성공했을 때 상태 유지 시간 정의
 	if(m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
@@ -173,12 +185,14 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 			return;
 		}
 	}
-	if (m_isDeadTrigger)
+	if (m_isDissolve)
 	{
-		if (m_fDesolveRate < 1.f)
-			m_fDesolveRate += fTimeDelta;
+		if (m_fDissolveRate < 1.f)
+			m_fDissolveRate += fTimeDelta;
 		else
-			m_fDesolveRate = 1.f;
+		{
+			m_fDissolveRate = 1.f;
+		}
 	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -200,6 +214,8 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CHavocWarrior::Render()
@@ -215,16 +231,31 @@ void CHavocWarrior::Render()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			CRASH("Failed to Bind DiffuseTexture");
 
-		_bool HasNormal = { false };
-		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-			HasNormal = true;
-		if (FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Ready g_HasNormal Failed");
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			CRASH("Failed to Bind NormalTexture");
+
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, 0)))
+			CRASH("Failed to Bind MaskTexture");
 
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+
+		if(m_fBehitAcc < m_fBehitMaxTime)
+			m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::ENEMY_BEHIT));
+		else
+		{
+			if (m_isDissolve)
+			{
+				if(m_isDeadTrigger)
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_DEAD));
+				else
+					m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::MONSTER_SPAWN));
+			}
+			else
+				m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+		}
 
 		m_pModelCom->Render(i);
 	}
@@ -240,6 +271,26 @@ void CHavocWarrior::Render()
 #endif
 }
 
+void CHavocWarrior::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
 void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
@@ -247,15 +298,20 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->Save_PreviousPosition();
 	m_isActivate = true;
-	m_pAnimMachineCom->Reset(m_pModelCom, "Stand1");
+	m_pAnimMachineCom->Reset(m_pModelCom, "PatrolToFight_2");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	_float temp{};
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, "PatrolToFight_2", 0.f, &temp, false);
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 	m_pColliderCom->IsActivate(true);
 	m_isDeadTrigger = false;
-	m_fDesolveRate = 0.f;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_fAttackAcc[1] = 15.f;
+	m_fBehitAcc = m_fBehitMaxTime;
+	m_isDissolve = true;
+	m_fDissolveRate = 0.f;
+	m_iSoundChannel = m_pGameInstance->Register_Channel();
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
@@ -265,6 +321,11 @@ void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isAct
 	else if (wStrColliderTag == TEXT("Lerp"))
 	{
 		TurnLerp(isActive);
+	}
+	else if (wStrColliderTag == TEXT("Dissolve"))
+	{
+		m_isDissolve = isActive;
+		m_fDissolveRate = 0.f;
 	}
 }
 
@@ -282,9 +343,82 @@ void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 
 void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
 {
-	if (wStrObjectTag == TEXT("Look"))
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Look"))
 	{
 		TurnFix();
+	}
+	else if (wstrTypeTag == TEXT("Sound"))
+	{
+		Sound_Active(wstrPartTag);
+	}
+}
+
+void CHavocWarrior::Sound_Active(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrPartTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Walk"))
+	{
+		if (wstrPartTag == TEXT("L"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_03 (SFX)"), m_iSoundChannel, 0.01f, m_pTransformCom, 2.f, 20.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_boots_footstep_walk_dirt_05 (SFX)"), m_iSoundChannel, 0.01f, m_pTransformCom, 2.f, 20.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Run"))
+	{
+		if (wstrPartTag == TEXT("L"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_01 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 2.f, 30.f);
+		}
+		else
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("plot_general_footstep_run_dirt_02 (SFX)"), m_iSoundChannel, 0.1f, m_pTransformCom, 2.f, 30.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk01"))
+	{
+		//m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), 0.5f, m_pTransformCom, 0.f, 5.f);
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk01_1_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 2.f, 30.f);
+	}
+	else if (wstrTypeTag == TEXT("Atk02"))
+	{
+		if (wstrPartTag == TEXT("1"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_1_1_01 (SFX)"), m_iSoundChannel, 0.25f, m_pTransformCom, 2.f, 30.f);
+		}
+		else if (wstrPartTag == TEXT("2"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_2_1_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 2.f, 30.f);
+		}
+		else if (wstrPartTag == TEXT("3"))
+		{
+			m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk02_3_1_01 (SFX)"), m_iSoundChannel, 0.4f, m_pTransformCom, 2.f, 30.f);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Atk03"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_atk03_1_01 (SFX)"), m_iSoundChannel, 0.5f, m_pTransformCom, 2.f, 30.f);
+	}
+	else if (wstrTypeTag == TEXT("Aggro"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("ord_shenpanzhanshi_patrol_to_fight_2_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 2.f, 35.f);
+	}
+	else if (wstrTypeTag == TEXT("Death"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_qixuezhanshi_death_01 (SFX)"), m_iSoundChannel, 0.35f, m_pTransformCom, 2.f, 30.f);
+	}
+	else if (wstrTypeTag == TEXT("Stand"))
+	{
+		m_pGameInstance->Play_Sound_Dynamic(TEXT("mon_shenpanzhanshi_stand02_act01_vo_01 (SFX)"), m_iSoundChannel, 0.3f, m_pTransformCom, 2.f, 30.f);
 	}
 }
 
@@ -294,6 +428,17 @@ HRESULT CHavocWarrior::Bind_Resources()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 	m_pShaderCom->Bind_Value("g_vBaseColor", &m_vBaseColor, sizeof(_float4));
+	m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4));
+	if (m_fBehitAcc < m_fBehitMaxTime)
+	{
+		m_pShaderCom->Bind_Value("g_fMaxTime", &m_fBehitMaxTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_fCurrentTime", &m_fBehitAcc, sizeof(_float));
+	}
+	if(m_isDissolve)
+	{
+		m_pShaderCom->Bind_Value("g_fDissolveRate", &m_fDissolveRate, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_vMonsterDissolveColor", &m_vMonsterDissolveColor, sizeof(_float4));
+	}
 
 	return S_OK;
 }
@@ -412,11 +557,6 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 {
-	if (m_fHP <= 0.f)
-	{
-		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
-		return;
-	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -476,6 +616,15 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 	//m_pGameSystem->Bind_ObjectPos_PerFrame_ToMinimap(vMobPos, UI_MINIMAP_OBJTYPE::MONSTER);
 #pragma endregion
 
+	if (m_fBehitAcc < m_fBehitMaxTime)
+		m_fBehitAcc += fTimeDelta;
+
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		m_fBehitAcc = m_fBehitMaxTime;
+		//return;
+	}
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
@@ -488,7 +637,7 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 			m_pColliderCom->IsActivate(false);
 			m_pRigidBodyCom->IsActivate(false);
 		}
-		return;
+		//return;
 	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
@@ -518,6 +667,26 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 		m_beHit = false;
+
+#pragma region UI_BIND
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.35f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fBehitDMG), m_eBehitColor, 0.4f);
+#pragma endregion
+
+#pragma region HIT_EFFECT
+		PREFAB_INFO EffectDesc{};
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
+
+		if (!m_strBehitSound.empty())
+		{
+			m_pGameInstance->Stop_Sound_Dynamic(m_iSoundChannel);
+			m_pGameInstance->Play_Sound_Dynamic(m_strBehitSound, m_iSoundChannel, 0.4f);
+		}
+#pragma endregion
 	}
 	else
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
@@ -540,7 +709,8 @@ void CHavocWarrior::Calculate_PosAndDir()
 
 void CHavocWarrior::TurnFix()
 {
-	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	if(m_isAggro)
+		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 }
 
 void CHavocWarrior::TurnLerp(_bool isActive)
@@ -581,82 +751,49 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
 		return;
-	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK) || iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL) || iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-		
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-		 * XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
-#ifdef _DEBUG
-		cout << "Be Hit! (Havoc Warrior)" << endl;
-#endif // _DEBUG
-
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-#pragma region UI_BIND
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-#pragma endregion
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
+		m_fBehitDMG = pDesc->fAttack * m_pGameInstance->Rand(0.75f, 1.5f);
+		m_fHP -= m_fBehitDMG;
+		m_fBehitAcc = 0.f;
+		m_eBehitColor = pDesc->eType;
+		if (m_isDissolve)
+			m_isDissolve = false;
+		if (!pDesc->strSoundTag.empty())
+			m_strBehitSound = pDesc->strSoundTag;
 
 #pragma region PHYSICS
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-		_vector vCollisionNormal = XMLoadFloat3(&m_vBeHit_Normal);
-		if (XMVectorGetX(XMVector3Dot(vCollisionNormal, XMVectorSet(0.f, 1.f, 0.f, 0.f))) >= 0.525f)
+		XMStoreFloat3(&m_vBeHit_Normal, XMLoadFloat3(&m_vTargetDir) * -1.f);
+#pragma endregion
+
+		if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 		{
-			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+#ifdef _DEBUG
+			cout << "Be Hit! (Havoc Warrior)" << endl;
+#endif // _DEBUG
 		}
-#pragma endregion
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+		{
+			if (pDesc->eDir == ATTACKVOULME_DIR::UPPER)
+			{
+				m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+			}
 #ifdef _DEBUG
-		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+			cout << "Be Hit! SKILL (Havoc Warrior)" << endl;
 #endif // _DEBUG
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
-	{
-		m_beHit = true;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
-		_float4 vPosition{};
-		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 1.35f;
-		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		m_isPushed = true;
-		//m_isAir = true;
-		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
-
-#pragma region HIT_EFFECT
-		PREFAB_INFO EffectDesc{};
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
-			* XMMatrixTranslation(0.f, 1.35f, 0.f), &EffectDesc);
-#pragma endregion
+		}
+		else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+		{
+			m_isPushed = true;
+			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 
 #ifdef _DEBUG
-		cout << "Knock Back! (Havoc Warrior)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+			cout << "Knock Back! (Havoc Warrior)" << endl;
+			cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
+		}
 	}
 }
 

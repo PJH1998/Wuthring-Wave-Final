@@ -885,7 +885,7 @@ technique11 DefaultTechnique
 
     pass DefaultWeapon // 4
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -896,7 +896,7 @@ technique11 DefaultTechnique
 
     pass DissolveGalbrenaWeapon // 5
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -907,7 +907,7 @@ technique11 DefaultTechnique
 
     pass EnergyBlade // 6
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -918,7 +918,7 @@ technique11 DefaultTechnique
 
     pass AugustaHeadProp // 7
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -929,7 +929,7 @@ technique11 DefaultTechnique
     
     pass DissolveAugustaWeapon // 8
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -940,7 +940,7 @@ technique11 DefaultTechnique
 
     pass DissolveRoverWeapon // 9
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -951,7 +951,7 @@ technique11 DefaultTechnique
 
     pass AugustaBurstWeaponEffect // 10
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -962,7 +962,7 @@ technique11 DefaultTechnique
 
     pass AugustaBurstWeapon // 11
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -974,7 +974,7 @@ technique11 DefaultTechnique
 
     pass YunoWeapon // 12
     {
-        SetRasterizerState(RS_Cull_Front);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 

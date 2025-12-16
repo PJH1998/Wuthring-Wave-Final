@@ -21,6 +21,10 @@
 #include "UI_QTE.h"
 #include "UI_HUD_Sector_Minimap.h"
 #include "UI_CurveTrace.h"
+#include "UI_Dialog.h"
+#include "UI_FinalEnd.h"
+#include "UI_QuestIndicator.h"
+
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -68,6 +72,7 @@ void CUI_ControlHelper::PreAssign_TargetUIs()
 	m_pRootUI_TabUtility			= Find_RootUI (L"UI_TabUtility");
 	m_pRootUI_GrapplePoint			= Find_RootUI (L"UI_GrapplePoint");
 	//m_pRootUI_QTE					= Find_RootUI (L"UI_QTE");
+	m_pRootUI_Dialog				= Find_RootUI (L"UI_Dialog");
 
 	// MiniGames
 	m_pRootUI_Ovfl_Palette			= Find_RootUI (L"UI_Ovfl_Palette");
@@ -202,6 +207,8 @@ void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
 			m_pUI_Interact_Focused->SetActivate(true);
 			static_cast<CAnimator_UI*>(m_pUI_Interact_Focused->Get_Component(L"Com_Animator_UI"))
 				->Change_Animation(L"Interact_Focused_On", true);
+
+			m_pGameInstance->Play_Sound(L"UI_ClickHide", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 		}
 
 		pInteractBtn->Req_OffInteract();
@@ -232,6 +239,8 @@ void CUI_ControlHelper::Req_Render_InteractUI(_wstring strText, _bool isPressedA
 		m_pUI_Interact_Focused->SetActivate(true);
 		static_cast<CAnimator_UI*>(m_pUI_Interact_Focused->Get_Component(L"Com_Animator_UI"))
 			->Change_Animation(L"Interact_Focused_On", true);
+
+		m_pGameInstance->Play_Sound(L"UI_ClickHide", ENUM_CLASS(CHANNEL::UI_INTERACT), 0.5f);
 
 		pRootUI->Req_OffInteract();
 	}
@@ -368,18 +377,19 @@ void CUI_ControlHelper::Close_Game_OverflowPalette()
 	static_cast<CUI_Ovfl_Palette*>(pRootUI)->Req_OffPalette();
 }
 
-void CUI_ControlHelper::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
-{
-	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
-	//CCustom_UI* pRootUI = m_pRootUI_GrapplePoint;
-	//
-	//if (!pRootUI)
-	//	return;
-
-	CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { pTargetPos, eType };
-
-	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
-}
+//void CUI_ControlHelper::Attach_GrapplePoint(_float3* pTargetPos, UI_GRAPPLE_TYPE eType)
+//{
+//	// 인스턴싱하는 단일 클래스가 아니기에 rootUI 등록 불가 (중복등록때문)
+//	//CCustom_UI* pRootUI = m_pRootUI_GrapplePoint;
+//	//
+//	//if (!pRootUI)
+//	//	return;
+//
+//
+//	CUI_GrapplePoint::UI_GRAPPLEPOINT_DESC tDesc = { pTargetPos, eType };
+//
+//	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_GrapplePoint", _fmatrix(), &tDesc);
+//}
 
 void CUI_ControlHelper::Play_QTE(_float2 vSpawnPos, UI_QTE_TYPE eQTEType, UI_QTE_BTN eIconIndex, _float2 vScale)
 {
@@ -432,6 +442,7 @@ void CUI_ControlHelper::Detach_ObjectPos_ToMinimap(void* pOwner)
 void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 												_float3& vStartVelocity,
 												_float3& vAcceleration,
+												_float3* pCustomSpherePos,
 												_float fMaxTime,
 												_uint iSegmentCount,
 												_float fRibbonWidth,
@@ -450,6 +461,7 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 		tDesc.vStartPos = vStartPos;// _float3(0.f, 0.f, 0.f);
 		tDesc.vStartVel = vStartVelocity;// _float3(0.f, 10.f, 10.f);
 		tDesc.vAcceleration = vAcceleration;// _float3(0.f, -9.8f, 0.f);
+		tDesc.pCustomSpherePos = pCustomSpherePos;
 		tDesc.fMaxTime = fMaxTime;
 		tDesc.iSegmentCount = iSegmentCount;
 		tDesc.fWidth = fRibbonWidth;
@@ -467,9 +479,132 @@ void CUI_ControlHelper::Req_Render_CurveTrace(	_float3& vStartPos,
 	}
 	else
 	{
-		pRootUI->Req_Render_CurveTrace(vStartPos, vStartVelocity, vAcceleration);
+		pRootUI->Req_Render_CurveTrace(	vStartPos,
+										vStartVelocity,
+										vAcceleration,
+										pCustomSpherePos,
+										fMaxTime,
+										iSegmentCount,
+										fRibbonWidth,
+										isUseCustomColor,
+										vBaseColor,
+										vHeadColor,
+										vTailColor);
 	}
 }
+
+void CUI_ControlHelper::Open_DialogUI(const _char* pFilePath, _bool isInteractable)
+{
+	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
+
+	if (!pRootUI)
+		return;
+	if (pRootUI->IsActivate())
+		return;
+
+	CUI_Dialog::UI_DIALOG_DESC tDesc = {};
+	tDesc.strFilePath = pFilePath;
+	tDesc.isInteractable = isInteractable;
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Custom_Dialog", _matrix(), &tDesc);
+}
+
+void CUI_ControlHelper::Req_Interact_DialogUI(_bool isChangeNext_Forcely)
+{
+	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
+
+	if (!pRootUI)
+		return;
+	if (pRootUI->IsActivate() == false)
+		return;
+
+	if (!isChangeNext_Forcely)		
+		pRootUI->Req_InteractExternally();
+	else							
+	{
+		//if (pRootUI->Get_isFinished_CurDialog() &&
+		//	pRootUI->Get_isLast_CurDialog())			pRootUI->Req_Close_Dialog();
+		//else if (pRootUI->Get_isFinished_CurDialog())	pRootUI->Req_Next_Dialog();
+		//else											pRootUI->Req_Finish_CurDialog();
+		
+		if (pRootUI->Get_isLast_CurDialog())
+		{
+			pRootUI->Req_Close_Dialog();
+			return;
+		}
+		else 											
+		{
+			pRootUI->Req_Next_Dialog();
+			return;
+		}
+	}
+}
+
+void CUI_ControlHelper::Close_DialogUI()
+{
+	CUI_Dialog* pRootUI = dynamic_cast<CUI_Dialog*>(m_pRootUI_Dialog);
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Req_Close_Dialog();
+}
+
+void CUI_ControlHelper::Trigger_PlayEndImage()
+{
+	CUI_FinalEnd* pRootUI = dynamic_cast<CUI_FinalEnd*>(Find_RootUI(L"UI_FinalEnd"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_PlayEndImage(true);
+}
+
+#ifdef _DEBUG
+void CUI_ControlHelper::Trigger_StopEndImageForcely()
+{
+	CUI_FinalEnd* pRootUI = dynamic_cast<CUI_FinalEnd*>(Find_RootUI(L"UI_FinalEnd"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_PlayEndImage(false);
+}
+#endif // _DEBUG
+
+void CUI_ControlHelper::Trigger_ActivateQuest()
+{
+	CUI_QuestIndicator* pRootUI = dynamic_cast<CUI_QuestIndicator*>(Find_RootUI(L"UI_QuestIndicator"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_ActivateQuest();
+}
+
+void CUI_ControlHelper::Trigger_AddQuestProgress()
+{
+	CUI_QuestIndicator* pRootUI = dynamic_cast<CUI_QuestIndicator*>(Find_RootUI(L"UI_QuestIndicator"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_AddQuestProgress();
+}
+
+#ifdef _DEBUG
+void CUI_ControlHelper::Trigger_AllReset()
+{
+	CUI_QuestIndicator* pRootUI = dynamic_cast<CUI_QuestIndicator*>(Find_RootUI(L"UI_QuestIndicator"));
+
+	if (!pRootUI)
+		return;
+
+	pRootUI->Trigger_AllReset();
+}
+#endif // _DEBUG
+
+
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
 {

@@ -11,6 +11,7 @@ public:
 		STATE_PICK = 0,
 		STATE_PICK_END,
 		STATE_HOLD,
+		STATE_PARTICLE,
 		STATE_END
 	};
 
@@ -42,6 +43,7 @@ private:
 	_string m_strCurrentAnimation = {};
 	_bool m_IsAnimationEnd = { false };
 	_bool m_States[STATE_END] = {};
+
 
 
 private:

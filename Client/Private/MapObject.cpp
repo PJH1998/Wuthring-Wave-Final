@@ -1,6 +1,5 @@
 ﻿#include"ClientPch.h"
 #include "MapObject.h"
-#include "MapObject_Destruction.h"
 #include"GameSystem.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -34,10 +33,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	Sync_Sectors();
 
 	// Env Map Bake
-	m_pGameInstance->Add_EnvMap_StaticObject(this);
 
-	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
-		return E_FAIL;
 
 	return S_OK;
 }
@@ -82,6 +78,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
+	m_pShaderCom->Bind_Value("g_CamPos", m_pGameInstance->Get_CamPos(), sizeof(_float4), pEffect);
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
@@ -245,17 +242,15 @@ void CMapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.eType = EMotionType::Static;
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 		RigidbodyDesc.pModel = m_pModelCom;
-		//RigidbodyDesc.pModel = m_pModelComArray[0];
-
-		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-		//RigidbodyDesc.vPos = pDesc->vBoundingPos;
-		//RigidbodyDesc.eShape = SHAPE::BOX;
-		//RigidbodyDesc.eType = EMotionType::Static;
-		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-		//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
 
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
+		m_pGameInstance->Add_EnvMap_StaticObject(this);
+
+		if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
+			CRASH("Failed");
+
 	}
 	else
 	{

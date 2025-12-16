@@ -69,6 +69,7 @@ void CGalbrenaGroundLand::Handle_Input()
 		return;
 
     m_States[RUN] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
+	m_States[LAND] = m_pGalbrena->Is_LandCollider(&m_vLandNormal);
 }
 
 void CGalbrenaGroundLand::Update_LandAnimation(_float fTimeDelta)
@@ -90,9 +91,20 @@ void CGalbrenaGroundLand::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible && m_States[RUN])
     {
-        m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
-        m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
-        return;
+		if (m_States[LAND])
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
+			return;
+		}
+		else
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eFallType = EGalbrenaFallType::FALL_LOOP;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL));
+			return;
+		}
+        
+        
     }
 
     if (m_IsAnimationEnd)
@@ -107,8 +119,8 @@ void CGalbrenaGroundLand::Check_StateTransition(_float fTimeDelta)
 void CGalbrenaGroundLand::Setup_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EGalbrenaLandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaLandType::LAND_HEAVY), "Land_Heavy", 1.5f, 32.f);
-    CState::Add_Animations(ENUM_CLASS(EGalbrenaLandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaLandType::LAND_HEAVY), "Land_Heavy", 1.5f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaLandType::LAND_ROLL), "Land_Roll", 1.5f, 22.f);
     CState::Add_Animations(ENUM_CLASS(EGalbrenaLandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
 }
 
