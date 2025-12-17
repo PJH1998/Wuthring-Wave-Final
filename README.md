@@ -14,17 +14,22 @@
 
 
 ### 레비아탄 컷씬
-
 <img src="./Styles/Animation.webp" width="70%"/>
+
+
+---
+### 레비아탄 전투.
+
 
 ---
 
+
 ### 코로사우로스 전투
 <img src="./Styles/Corosaurus.webp" width="70%"/>
-</div>
 
+
+---
 ### 거짓된 신왕 전투
-
 
 ---
 
