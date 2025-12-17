@@ -2,7 +2,7 @@
 
 # DX11 Wuthering Waves
 
-<img src="./Styles/Rinascita.jpg" width="70%" />
+<img src="./Styles/Rinascita.jpg" width="80%" />
 </div>
 
 * **개발 기간 : 2개월** </br>
