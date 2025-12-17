@@ -10,16 +10,15 @@
 
 <br></br>
 
-# 게임 플레이 사진.
-
+# 게임 플레이 모음.
 
 ### 레비아탄 컷씬
-<img src="./Styles/Animation.webp" width="70%"/>
+<img src="./Styles/LeviatanCutScene.webp" width="70%"/>
 
 
 ---
-### 레비아탄 전투.
-
+### 레비아탄 전투(QTE)
+<img src="./Styles/LeviatanQTE2.webp" width="70%"/>
 
 ---
 
@@ -27,9 +26,9 @@
 ### 코로사우로스 전투
 <img src="./Styles/Corosaurus.webp" width="70%"/>
 
-
 ---
 ### 거짓된 신왕 전투
+<img src="./Styles/LieKing.webp" width="70%">
 
 ---
 
