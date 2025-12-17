@@ -5,8 +5,8 @@
 <img src="./Styles/Rinascita.jpg" width="80%" />
 </div>
 
-* **개발 기간 : 2개월** </br>
-* **개발 인원 : 7명**   </br>
+<h3>📅 개발 기간 : 2개월 &nbsp;&nbsp;</h3>
+<h3>👥 개발 인원 : 7명</h3>
 
 <br></br>
 
@@ -34,6 +34,7 @@
     </td>
   </tr>
 </table>
+
 
 
 
