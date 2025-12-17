@@ -10,27 +10,30 @@
 
 <br></br>
 
-# 게임 플레이 모음.
+# 게임 플레이 하이라이트
 
-### 레비아탄 컷씬
-<img src="./Styles/LeviatanCutScene.webp" width="70%"/>
-
-
----
-### 레비아탄 전투(QTE)
-<img src="./Styles/LeviatanQTE2.webp" width="70%"/>
-
----
-
-
-### 코로사우로스 전투
-<img src="./Styles/Corosaurus.webp" width="70%"/>
-
----
-### 거짓된 신왕 전투
-<img src="./Styles/LieKing.webp" width="70%">
-
----
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <h3>레비아탄 컷씬</h3>
+      <img src="./Styles/LeviatanCutScene.webp" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <h3>레비아탄 전투 (QTE)</h3>
+      <img src="./Styles/LeviatanQTE2.webp" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <h3>코로사우로스 전투</h3>
+      <img src="./Styles/Corosaurus.webp" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <h3>거짓된 신왕 전투</h3>
+      <img src="./Styles/LieKing.webp" width="100%">
+    </td>
+  </tr>
+</table>
 
 
 
