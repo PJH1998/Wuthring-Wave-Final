@@ -33,6 +33,17 @@
       <img src="./Styles/LieKing.webp" width="100%">
     </td>
   </tr>
+  <tr>
+    <td align="center" width="50%">
+      <h3>로그인 화면 </h3>
+      <img src="./Styles/EnvMap.webp" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <h3>갓 레이</h3>
+      <img src="./Styles/Ray0.webp" width="100%">
+    </td>
+  </tr>
+  
 </table>
 
 <br>
