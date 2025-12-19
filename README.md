@@ -50,7 +50,7 @@
 <br>
 
 # 구현 요약
-
+<img src="./Styles/FlowChart-Prototype.png" width="100%">
 <br>
 
 # 사용한 기술
