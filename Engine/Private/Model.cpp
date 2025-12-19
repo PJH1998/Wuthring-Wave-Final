@@ -1799,7 +1799,7 @@ HRESULT CModel::Ready_MorphInstance_Buffers()
 	//	cout << "Character ShapeKeyWeight Byte : " << BufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
-	// m_Buffers에 공간이 없다면 enum 추가 필요 (BUFFER_MORPH_WEIGHT 등)
+	// m_Buffers에 공간이 없다면 enum 추가 필요
 	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_Buffers[BUFFER_MORPH_WEIGHT])))
 		return E_FAIL;
 
