@@ -25,6 +25,7 @@ public:
 		_string strBoneName = { };
 		CAnimationActor* pParentActor = { nullptr };
 		_bool IsFacial = { false };
+		_bool IsGPU = { true };
 	}ANIMATION_ACTOR_DESC;
 
 
@@ -45,9 +46,13 @@ public:
 
 	
 
-#ifdef _DEBUG
 public:
 	const vector<_string>& Get_AnimationNames() const;
+	void Change_CurrentAnimation(_string strAnimName);
+
+#ifdef _DEBUG
+public:
+	
 	_float* Get_TrackPositionPtr(const _string& strAnimName);
 	_float	Get_Duration(const _string& strAnimName);
 
@@ -57,7 +62,7 @@ public:
 	//Bone GUI 연결
 	HRESULT Bind_Bone_to_GUI();
 
-	void Change_CurrentAnimation(_string strAnimName);
+
 	void Set_TrackPosition(_float fTrackPosition);
 	void Set_PlayAnimation(_bool IsPlay);
 
@@ -125,10 +130,13 @@ private:
 
 
 	_float m_fAnimationSpeed = { 1.f };
+	_bool m_IsGPU = { true };
 
 	// Facial
 	
 	_bool m_IsFacial = { false };
+
+	
 
 #ifdef _DEBUG
 	// PartObject

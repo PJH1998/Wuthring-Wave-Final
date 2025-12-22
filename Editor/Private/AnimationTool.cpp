@@ -182,6 +182,12 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::LOAD_DAT;
         }
 
+		if (ImGui::BeginTabItem("StressTest"))
+		{
+			RenderUI_StressTest();
+			ImGui::EndTabItem();
+		}
+
         if (ImGui::BeginTabItem("CreateActor"))
         {
             RenderUI_CreateActor();
@@ -288,6 +294,143 @@ void CAnimationTool::RenderUI_EditAnimation()
         RenderUI_AnimationList();
 
 
+}
+
+void CAnimationTool::RenderUI_StressTest()
+{
+	_wstring objTag = {};
+	_wstring modelTag = {};
+
+	ImGui::BeginChild("left pane", ImVec2(500, 0), true);
+
+	static int iSelectedIndex = -1;
+
+	_uint id = 0;
+	for (auto& modelName : m_ModelNames)
+	{
+		_bool isSelected = (id == iSelectedIndex);
+
+		if (ImGui::Selectable(modelName.c_str(), isSelected))
+		{
+			iSelectedIndex = id;
+			m_Selected_PrototypeModelTag = modelName;
+			m_wSelected_PrototypeModelTag = StringToWString(modelName);
+		}
+		id++;
+	}
+
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+
+	ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
+
+	static _int iStressTestCount = 10;
+	ImGui::InputInt("Stress Count", &iStressTestCount);
+
+
+	static float fPosition[3] = { 0.f, 0.f, 0.f };
+	ImGui::InputFloat3("Position", fPosition);
+
+	static float fRotation[3] = { 0.f, 0.f, 0.f };
+	ImGui::InputFloat3("Rotation", fRotation);
+
+	static float fScale[3] = { 1.f, 1.f, 1.f };
+	ImGui::InputFloat3("Scale", fScale);
+
+	static bool IsGPU = true;
+	ImGui::Checkbox("Is GPU Animation", &IsGPU);
+
+	_float fSpeedPerSec = { 10.f };
+	_float fRotationPerSec = { 90.f };
+
+	_float3 vTargetPos = { fPosition[0], fPosition[1], fPosition[2] };
+
+	if (ImGui::Button("Create Instance"))
+	{
+		for (_int i = 0; i < iStressTestCount; ++i)
+		{
+			CAnimationActor::ANIMATION_ACTOR_DESC Desc{};
+			Desc.fSpeedPerSec = fSpeedPerSec;
+			Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
+			Desc.strModelTag = m_wSelected_PrototypeModelTag;
+			Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+			Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshCharacter");
+			Desc.strMorphComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMorph");
+			Desc.iShaderPath = 2;
+
+			memcpy(&Desc.vPostion, &vTargetPos, sizeof(_float3));
+			memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
+			memcpy(&Desc.vScale, fScale, sizeof(_float3));
+			Desc.IsGPU = IsGPU;
+
+			if (i % 10 == 0 && i != 0)
+			{
+				vTargetPos.x = 0.f;
+				vTargetPos.z += 2.f; // z축으로 간격 주기?
+			}
+			else
+			{
+				vTargetPos.x += 2.f; // x축으로 간격 주기?
+			}
+			
+			Desc.eLevel = m_eCurLevel;
+
+			_wstring wstrObjTag = TEXT("Prototype_GameObject_Actor_");
+			size_t last_dot_pos = m_wSelected_PrototypeModelTag.find_last_of('_');
+			if (last_dot_pos != std::string::npos) {
+				wstrObjTag += m_wSelected_PrototypeModelTag.substr(last_dot_pos + 1, m_wSelected_PrototypeModelTag.size());
+			}
+
+			static _uint iID = 0;
+			_bool IsExist = { false };
+			for (auto& animActor : m_AnimationActors)
+			{
+				_wstring strTag = animActor.first;
+				if (strTag == wstrObjTag)
+				{
+					IsExist = true;
+					break;
+				}
+
+					
+			}
+
+			if (!IsExist)
+			{
+				if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+					, wstrObjTag
+					, CAnimationActor::Create(m_pDevice, m_pContext))))
+				{
+					MSG_BOX("Animation Actor Prototype");
+					return;
+				}
+				iID = 0;
+			}
+
+			CAnimationActor* pActor = dynamic_cast<CAnimationActor*>(
+				m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel)
+					, wstrObjTag, PROTOTYPE::GAMEOBJECT, &Desc));
+			ASSERT_CRASH(pActor);
+
+			if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel)
+				, TEXT("Layer_Actor"), pActor)))
+			{
+				MSG_BOX("Animation Actor 없습니다. ");
+				return;
+			}
+
+			if (IsExist)
+			{
+				iID += 1;
+				wstrObjTag += to_wstring(iID);
+			}
+			m_ActorNames.emplace_back(WStringToString(wstrObjTag));
+			m_AnimationActors.emplace(wstrObjTag, pActor);    
+		}
+	}
+
+	ImGui::EndChild();
 }
 
 void CAnimationTool::RenderUI_FromState()
@@ -964,24 +1107,55 @@ void CAnimationTool::RenderUI_AnimationList()
             iSelectedIndex = id;
             m_Selected_AnimationTag = animName;
             m_fDuration = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag);
-            m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
+			for (auto& animActor : m_AnimationActors)
+				animActor.second->Change_CurrentAnimation(m_Selected_AnimationTag); // 전체 애니메이션 변경.
 
-            if (m_IsVisibleNotify)
-            {
-                m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimActorTag, "", m_fDuration);
-                m_pAnimNotifyTool->Clear();
-            }
+            //if (m_IsVisibleNotify)
+            //{
+            //    m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimActorTag, "", m_fDuration);
+            //    m_pAnimNotifyTool->Clear();
+            //}
         }
         // 다음 항목을 위해 id를 증가시킵니다.
         id++;
     }
 
-    
-
-
 
     ImGui::SameLine();
+#else
+	for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+	{
+		// 1. 검색어가 있으면 필터링
+		if (szSearchBuffer[0] != '\0')
+		{
+			_string strAnimName = animName;
+			transform(strAnimName.begin(), strAnimName.end(), strAnimName.begin(), ::tolower);
 
+			if (strAnimName.find(strSearch) == string::npos)
+			{
+				id++;
+				continue; // 매치 안되면 스킵
+			}
+		}
+
+		// 2. 애니메이션을 선택했을 경우에는 애니메이션 각각에 대한 Detail한 설정.
+		if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
+		{
+			//iSelectedIndex = id;
+			//m_Selected_AnimationTag = animName;
+			//m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
+			iSelectedIndex = id;
+			m_Selected_AnimationTag = animName;
+			for (auto& animActor : m_AnimationActors)
+				animActor.second->Change_CurrentAnimation(m_Selected_AnimationTag); // 전체 애니메이션 변경.
+			
+		}
+		// 다음 항목을 위해 id를 증가시킵니다.
+		id++;
+	}
+
+
+	ImGui::SameLine();
 #endif 
     ImGui::EndChild();
 

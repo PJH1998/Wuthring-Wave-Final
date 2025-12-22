@@ -74,8 +74,9 @@ CModel::CModel(const CModel& Prototype)
 
 
 
-#ifdef _DEBUG
 	m_AnimationNames = Prototype.m_AnimationNames;
+#ifdef _DEBUG
+	
 #endif
 
 
@@ -205,15 +206,7 @@ void CModel::Render_Gizmo(_fmatrix TransformMatrix)
 	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
 }
 
-_bool CModel::Find_Animation(const _string& strAnimName)
-{
-	for (_uint i = 0; i < m_AnimationNames.size(); i++)
-	{
-		if (m_AnimationNames[i] == strAnimName)
-			return true;
-	}
-	return false;
-}
+
 
 void CModel::Print_ShapeKeyWeights()
 {
@@ -228,7 +221,18 @@ void CModel::Print_ShapeKeyWeights()
 	OutputDebugString(outString.c_str());
 }
 
+
 #endif // _DEBUG
+
+_bool CModel::Find_Animation(const _string& strAnimName)
+{
+	for (_uint i = 0; i < m_AnimationNames.size(); i++)
+	{
+		if (m_AnimationNames[i] == strAnimName)
+			return true;
+	}
+	return false;
+}
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
 {
@@ -366,6 +370,8 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 			return E_FAIL;
 	}
 
+	// 측정용 타이머 초기화
+
 	return S_OK;
 }
 
@@ -427,9 +433,7 @@ HRESULT CModel::Clear_Materials(CDeferredShader* pShader, const _char* pConstanc
 
 _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
-
 	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
-
 	auto iter = m_Animations.find(strAnimationName);
 	if (iter == m_Animations.end())
 		return false;
@@ -1470,8 +1474,11 @@ HRESULT CModel::Ready_Animation(const _char* pFilePath)
 		if (nullptr == pAnimation)
 			return E_FAIL;
 		m_Animations.emplace(pAnimation->Get_Name(), pAnimation);
-#ifdef _DEBUG
+
 		m_AnimationNames.push_back(pAnimation->Get_Name());
+
+#ifdef _DEBUG
+		
 #endif
 	}
 
@@ -1641,13 +1648,14 @@ HRESULT CModel::Ready_Shared_Buffers()
 	}
 
 
-	for (const auto& Pair : m_Animations)
-	{
-		CAnimation* pAnimation = Pair.second;
-
-		// GPU Buffer를 만든 객체들은 모든 키프레임 채널들을 제거한다?
-		pAnimation->Release_Channels();
-	}
+	// 임시 삭제 코드 제거.
+	//for (const auto& Pair : m_Animations)
+	//{
+	//	CAnimation* pAnimation = Pair.second;
+	//
+	//	// GPU Buffer를 만든 객체들은 모든 키프레임 채널들을 제거한다?
+	//	pAnimation->Release_Channels();
+	//}
 
 
 
@@ -1877,5 +1885,7 @@ void CModel::Free()
 	for (auto& pUAV : m_UAVs)
 		Safe_Release(pUAV);
 	m_UAVs.clear();
+
+	// 측정용 타이머 제거.
 
 }

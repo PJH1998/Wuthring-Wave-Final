@@ -65,18 +65,23 @@ public:
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 
-#ifdef _DEBUG
+	_bool Find_Animation(const _string& strAnimName);
 	const vector<_string>& Get_AnimationNames() const { return m_AnimationNames; }
+
+#ifdef _DEBUG
 	_float* Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
 	void Render_Gizmo(_fmatrix TransformMatrix);
 
-	_bool Find_Animation(const _string& strAnimName);
+	
 
 	void Print_ShapeKeyWeights();
+	
+
 #endif
+
 
 public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
@@ -161,8 +166,9 @@ private:
 
 	BoundingBox* m_pBoundingBox = { nullptr };
 
-#ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
+#ifdef _DEBUG
+	
 	_uint m_iSelectIndex = { 0 };
 #endif
 
@@ -175,6 +181,10 @@ private:
 
 #pragma endregion
 
+
+#pragma region 성능 측정.
+	CPUTimer m_CpuTimer;
+#pragma endregion
 
 
 

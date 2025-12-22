@@ -2,6 +2,7 @@
 #define Engine_Struct_h__
 
 #include "Engine_Typedef.h"
+#include "Engine_Function.h"
 
 namespace Engine
 {
@@ -431,6 +432,22 @@ namespace Engine
 
 		//..
 	}FONT_SINGLEDESC;
+
+#pragma region 성능 측정
+	struct CPUTimer {
+		chrono::time_point<chrono::high_resolution_clock> start;
+
+		void Start() { start = chrono::high_resolution_clock::now(); }
+
+		// 밀리초(ms) 단위 결과 반환
+		float Stop() {
+			auto end = chrono::high_resolution_clock::now();
+			return chrono::duration<float, milli>(end - start).count();
+		}
+	};
+
+#pragma endregion
+
 
 #pragma endregion
 

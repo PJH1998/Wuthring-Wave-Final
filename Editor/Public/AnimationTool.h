@@ -50,6 +50,8 @@ private:
 	void RenderUI_EditActor();
 	void RenderUI_EditAnimation();
 
+	void RenderUI_StressTest();
+
 	void RenderUI_FromState();
 	void RenderUI_ToState();
 	void RenderUI_Transitions();

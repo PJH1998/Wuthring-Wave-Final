@@ -44,6 +44,8 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     // Model의 Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
+	m_IsGPU = pDesc->IsGPU;
+
 #ifdef _DEBUG
 	if (!(pDesc->strBoneName.empty()) && nullptr != pDesc->pParentTransform)
 	{
@@ -81,9 +83,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
 
-#ifdef _DEBUG
 	XMStoreFloat4(&m_vInitPosition, m_pTransformCom->Get_State(STATE::POSITION));
-#endif // _DEBUG
 
     
 
@@ -137,10 +137,18 @@ void CAnimationActor::Update(_float fTimeDelta)
     _bool IsAnimationEnd = { false };
     if (m_IsPlayAnimation)
     {
+		//IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
-        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
-        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
-        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
+        
+#pragma region 측정용 코드
+		if (m_IsGPU)
+			IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+		else
+			IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
+#pragma endregion
+
+		
 		//IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
 
@@ -230,12 +238,28 @@ void CAnimationActor::Render_Shadow()
 
 }
 
-#ifdef _DEBUG
 const vector<_string>& CAnimationActor::Get_AnimationNames() const
 {
-    ASSERT_CRASH(m_pModelCom);
-    return m_pModelCom->Get_AnimationNames();
+	ASSERT_CRASH(m_pModelCom);
+	return m_pModelCom->Get_AnimationNames();
 }
+
+
+void CAnimationActor::Change_CurrentAnimation(_string strAnimName)
+{
+	if (!strAnimName.empty())
+	{
+		if (!m_pModelCom->Find_Animation(strAnimName))  // 만약 없는 애니메이션이면? 아무것도 하지마라.
+			return;
+		m_strCurrentAnimation = strAnimName;
+
+
+		if (nullptr != m_pChildActor)
+			m_pChildActor->Change_CurrentAnimation(strAnimName);
+	}
+}
+
+#ifdef _DEBUG
 
 _float* CAnimationActor::Get_TrackPositionPtr(const _string& strAnimName)
 {
@@ -274,19 +298,6 @@ HRESULT CAnimationActor::Bind_Bone_to_GUI()
 
 // Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
 
-void CAnimationActor::Change_CurrentAnimation(_string strAnimName)
-{
-	if (!strAnimName.empty())
-	{
-		if (!m_pModelCom->Find_Animation(strAnimName))  // 만약 없는 애니메이션이면? 아무것도 하지마라.
-			return;
-		m_strCurrentAnimation = strAnimName;
-		
-		
-		if (nullptr != m_pChildActor)
-			m_pChildActor->Change_CurrentAnimation(strAnimName);
-	}
-}
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
