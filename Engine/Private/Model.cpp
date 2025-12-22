@@ -370,6 +370,9 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 			return E_FAIL;
 	}
 
+	// 메모리 공간할당.
+	m_vLocalMatrices.reserve(m_Bones.size());
+
 	// 측정용 타이머 초기화
 
 	return S_OK;
@@ -908,23 +911,24 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
 	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+
+	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
+
+	m_vLocalMatrices.clear();
+
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
 	if (FAILED(hr))
 		return;
-
-	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
-	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
-
-	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+	
+	memcpy(m_vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 9. Unmap으로 마무리합니다.  
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
+		_matrix FinalMatrix = XMLoadFloat4x4(&m_vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
 }
@@ -1078,24 +1082,23 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
 	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+	m_vLocalMatrices.clear();
+
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
 	if (FAILED(hr))
 		return;
 
-	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
-	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
-
-	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
-	for (size_t i = 0; i < m_Bones.size(); ++i)
-	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
-	}
+	memcpy(m_vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 9. Unmap으로 마무리합니다.  
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+
+	for (size_t i = 0; i < m_Bones.size(); ++i)
+	{
+		_matrix FinalMatrix = XMLoadFloat4x4(&m_vLocalMatrices[i]);
+		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+	}
 }
 
 

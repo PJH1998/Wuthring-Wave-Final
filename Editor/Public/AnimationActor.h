@@ -49,6 +49,7 @@ public:
 public:
 	const vector<_string>& Get_AnimationNames() const;
 	void Change_CurrentAnimation(_string strAnimName);
+	void Set_GPUAnimation(_bool IsGPU) { m_IsGPU = IsGPU; }
 
 #ifdef _DEBUG
 public:

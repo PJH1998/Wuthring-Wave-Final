@@ -81,7 +81,7 @@ void CAnimationTool::Export_AnimationData(CEffect_Controller* pEffectController)
 
 void CAnimationTool::Render_Editor()
 {
-    Render_DebugWindow();
+    //Render_DebugWindow();
 
     ImGui::Begin(u8"Editor", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar
         | ImGuiWindowFlags_AlwaysVerticalScrollbar);
@@ -338,8 +338,7 @@ void CAnimationTool::RenderUI_StressTest()
 	static float fScale[3] = { 1.f, 1.f, 1.f };
 	ImGui::InputFloat3("Scale", fScale);
 
-	static bool IsGPU = true;
-	ImGui::Checkbox("Is GPU Animation", &IsGPU);
+	ImGui::Checkbox("Is GPU Animation", &m_IsGPU);
 
 	_float fSpeedPerSec = { 10.f };
 	_float fRotationPerSec = { 90.f };
@@ -362,7 +361,7 @@ void CAnimationTool::RenderUI_StressTest()
 			memcpy(&Desc.vPostion, &vTargetPos, sizeof(_float3));
 			memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
 			memcpy(&Desc.vScale, fScale, sizeof(_float3));
-			Desc.IsGPU = IsGPU;
+			Desc.IsGPU = m_IsGPU;
 
 			if (i % 10 == 0 && i != 0)
 			{
@@ -431,6 +430,9 @@ void CAnimationTool::RenderUI_StressTest()
 	}
 
 	ImGui::EndChild();
+
+
+	
 }
 
 void CAnimationTool::RenderUI_FromState()
@@ -1158,6 +1160,28 @@ void CAnimationTool::RenderUI_AnimationList()
 	ImGui::SameLine();
 #endif 
     ImGui::EndChild();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("Frame pane", ImVec2(200, 0), true);
+
+	static _bool IsGPU = { false };
+	ImGui::Checkbox("GPU Animation", &IsGPU);
+
+	if (IsGPU != m_IsGPU)
+	{
+		m_IsGPU = IsGPU;
+		for (auto& animActor : m_AnimationActors)
+			animActor.second->Set_GPUAnimation(m_IsGPU);
+	}
+
+	if (m_IsGPU)
+		ImGui::Text("Using GPU Animation");
+	else 
+		ImGui::Text("Using CPU Animation");
+
+	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate); // 현재 프레임.
+
+	ImGui::EndChild();
 
     // 애니메이션 상세 정보 조절.
 

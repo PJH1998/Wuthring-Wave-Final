@@ -130,6 +130,7 @@ private:
 	_bool	m_isRootMotionRotate{};
 	_bool	m_isRootMotionTranslate{};
 	_bool m_isLoopCheck;
+	_bool m_IsGPU = { true };
 	_float m_fRootMotionRate;
 	_float m_fTransitTrackPos;
 	_float m_fAnimationSpeed;

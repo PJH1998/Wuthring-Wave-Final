@@ -204,6 +204,8 @@ private:
 
 	_bool m_isRibAnimation = { false };
 
+	vector<_float4x4> m_vLocalMatrices = {};
+
 #pragma endregion
 
 

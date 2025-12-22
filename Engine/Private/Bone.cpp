@@ -13,6 +13,7 @@ CBone::CBone(const CBone& Copy)
 	strcpy_s(m_szName, MAX_PATH, Copy.m_szName);
 }
 
+
 HRESULT CBone::Initialize(const _char* pBoneName, const _fmatrix& TransformationMatrix, _int iParentBoneIndex)
 {
 	strcpy_s(m_szName, pBoneName);
