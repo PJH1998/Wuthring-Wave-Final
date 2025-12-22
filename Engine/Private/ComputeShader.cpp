@@ -72,14 +72,12 @@ HRESULT CComputeShader::Initialize_Prototype(const _tchar* pFilePath, const SHAD
 
 #pragma endregion
 
-#pragma region 
     if (FAILED(m_pDevice->CreateComputeShader(pCSBlob->GetBufferPointer()
         , pCSBlob->GetBufferSize(), nullptr, &m_pComputeShader)))
     {
         Safe_Release(pCSBlob);
         return E_FAIL;
     }
-#pragma endregion
 
  
     if (FAILED(Ready_Reflection(pCSBlob)))
@@ -149,18 +147,22 @@ void CComputeShader::Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY
     Clear_Resources();
 }
 
-/*
-*
-*/
+
+// HLSL 리플렉션 기능을 통해 컴파일 시점에 모든 레지스터 번호를 미리 찾아 캐싱해둡니다.
 HRESULT CComputeShader::Ready_Reflection(ID3DBlob* pCSBlob)
 {
+
+	// 1. 셰이더 데이터 분석을 위한 리플렉션 인터페이스 생성.
     ID3D11ShaderReflection* pReflection = nullptr;
-    if (FAILED(D3DReflect(pCSBlob->GetBufferPointer(), pCSBlob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&pReflection)))
+    if (FAILED(D3DReflect(pCSBlob->GetBufferPointer(), pCSBlob->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&pReflection))))
         return E_FAIL;
 
+	// 2. Shader Description을 통한 바인딩된 전체 리소스 개수 파악.
     D3D11_SHADER_DESC shaderDesc;
     pReflection->GetDesc(&shaderDesc);
 
+
+	// 3. 모든 바인딩 리소스를 순회 정보 추출.
     for (_uint i = 0; i < shaderDesc.BoundResources; ++i)
     {
         D3D11_SHADER_INPUT_BIND_DESC bindDesc;
@@ -168,6 +170,7 @@ HRESULT CComputeShader::Ready_Reflection(ID3DBlob* pCSBlob)
 
         string strName = bindDesc.Name;
 
+		// 4. 리소스 타입별로 구분하여 해당 레지스터 번호를 맵에 캐싱해둡니다.
         switch (bindDesc.Type)
         {
         case D3D_SIT_CBUFFER:
@@ -185,6 +188,7 @@ HRESULT CComputeShader::Ready_Reflection(ID3DBlob* pCSBlob)
         }
     }
 
+	// 5. 사용이 끝난 리플랙션 객체는 해제합니다.
     Safe_Release(pReflection);
     return S_OK;
 }
