@@ -369,7 +369,6 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 	}
 
 	// 메모리 공간할당.
-	m_vLocalMatrices.reserve(m_Bones.size());
 
 	// 측정용 타이머 초기화
 
@@ -452,43 +451,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
 	if (nullptr != pTrackPosition)
 		*pTrackPosition = fTrackPosition;
-
-	_string strRibName = "Rib_" + strAnimationName;
-	auto iterRibbon = m_Animations.find(strRibName);
-
-	if (iterRibbon != m_Animations.end())
-	{
-		// Action 결과를 임시 보관하기 위한 벡터
-		struct SRT { _vector s, r, t; };
-		vector<SRT> actionSRTs(m_Bones.size());
-
-		for (size_t i = 0; i < m_Bones.size(); ++i)
-		{
-			_matrix matAction = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix());
-			XMMatrixDecompose(&actionSRTs[i].s, &actionSRTs[i].r, &actionSRTs[i].t, matAction);
-		}
-
-		// Ribbon Animation 업데이트 (본의 Local Matrix가 Ribbon 결과로 덮어씌워짐)
-		_float fRibbonTrackPos = 0.f;
-		iterRibbon->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fRibbonTrackPos);
-
-		// 3. 가산 블렌딩 적용 
-		for (size_t i = 0; i < m_Bones.size(); ++i)
-		{
-			_vector ribS, ribR, ribT;
-			_matrix matRibbon = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix());
-			XMMatrixDecompose(&ribS, &ribR, &ribT, matRibbon);
-
-			_vector finalS = XMVectorMultiply(ribS, actionSRTs[i].s);
-			_vector finalR = XMQuaternionMultiply(actionSRTs[i].r, ribR);
-			_vector finalT = XMVectorAdd(ribT, actionSRTs[i].t);
-
-			// 최종 행렬 생성 및 적용
-			_matrix matFinal = XMMatrixAffineTransformation(finalS, XMVectorSet(0, 0, 0, 1), finalR, finalT);
-			m_Bones[i]->Set_TransformationMatrix(matFinal);
-		}
-	}
-
 
 	// Root Node Translation 조정
 	if (true == isRootMotion)
@@ -947,21 +909,21 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 
 	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
 
-	m_vLocalMatrices.clear();
+	vector<_float4x4> vLocalMatrices(m_Bones.size());
 
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
 	if (FAILED(hr))
 		return;
 	
-	memcpy(m_vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 9. Unmap으로 마무리합니다.  
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&m_vLocalMatrices[i]);
+		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
 }
@@ -1114,22 +1076,22 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
-	m_vLocalMatrices.clear();
+	vector <_float4x4> vLocalMatrices = vector<_float4x4>(m_Bones.size());
 
+	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
 	if (FAILED(hr))
 		return;
 
-	memcpy(m_vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 9. Unmap으로 마무리합니다.  
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&m_vLocalMatrices[i]);
+		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
 }
