@@ -934,14 +934,16 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
+	
+	vector<_float4x4> vLocalMatrices(m_Bones.size());
+
 	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
 	if (FAILED(hr))
 		return;
 
-	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
+	// 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
 	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
@@ -1047,6 +1049,8 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
+	vector<_float4x4> vLocalMatrices(m_Bones.size());
+	
 	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
@@ -1054,18 +1058,18 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 		return;
 
 	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
+	
 	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
-	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+	// 8. Unmap
+	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+
+	// 9. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
-
-	// 9. Unmap으로 마무리합니다.  
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
 void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
@@ -1104,6 +1108,9 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
+	vector<_float4x4> vLocalMatrices(m_Bones.size());
+	
+	
 	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
 	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
@@ -1111,8 +1118,10 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 		return;
 
 	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
 	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+
+	// 9. Unmap으로 마무리합니다.  
+	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 
 	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
 	for (size_t i = 0; i < m_Bones.size(); ++i)
@@ -1120,9 +1129,6 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
-
-	// 9. Unmap으로 마무리합니다.  
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
 
