@@ -125,10 +125,12 @@ private:
 
 
 	_float m_fAnimationSpeed = { 1.f };
+	_bool m_IsGPU = { true };
 
 	// Facial
 	
 	_bool m_IsFacial = { false };
+	
 
 #ifdef _DEBUG
 	// PartObject

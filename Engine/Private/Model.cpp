@@ -444,42 +444,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	if (nullptr != pTrackPosition)
 		*pTrackPosition = fTrackPosition;
 
-	_string strRibName = "Rib_" + strAnimationName;
-	auto iterRibbon = m_Animations.find(strRibName);
-
-	if (iterRibbon != m_Animations.end())
-	{
-		// Action 결과를 임시 보관하기 위한 벡터
-		struct SRT { _vector s, r, t; };
-		vector<SRT> actionSRTs(m_Bones.size());
-
-		for (size_t i = 0; i < m_Bones.size(); ++i)
-		{
-			_matrix matAction = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix());
-			XMMatrixDecompose(&actionSRTs[i].s, &actionSRTs[i].r, &actionSRTs[i].t, matAction);
-		}
-
-		// Ribbon Animation 업데이트 (본의 Local Matrix가 Ribbon 결과로 덮어씌워짐)
-		_float fRibbonTrackPos = 0.f;
-		iterRibbon->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fRibbonTrackPos);
-
-		// 3. 가산 블렌딩 적용 
-		for (size_t i = 0; i < m_Bones.size(); ++i)
-		{
-			_vector ribS, ribR, ribT;
-			_matrix matRibbon = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix());
-			XMMatrixDecompose(&ribS, &ribR, &ribT, matRibbon);
-
-			_vector finalS = XMVectorMultiply(ribS, actionSRTs[i].s);
-			_vector finalR = XMQuaternionMultiply(actionSRTs[i].r, ribR);
-			_vector finalT = XMVectorAdd(ribT, actionSRTs[i].t);
-
-			// 최종 행렬 생성 및 적용
-			_matrix matFinal = XMMatrixAffineTransformation(finalS, XMVectorSet(0, 0, 0, 1), finalR, finalT);
-			m_Bones[i]->Set_TransformationMatrix(matFinal);
-		}
-	}
-
 
 	// Root Node Translation 조정
 	if (true == isRootMotion)
