@@ -54,7 +54,7 @@ void CEdit_PreViewModel::Late_Update(_float fTimeDelta, _wstring ModelName)
 
 void CEdit_PreViewModel::Render()
 {
-    auto Pair = m_Models.find(ProtoModelName + m_szModelName);
+    /*auto Pair = m_Models.find(ProtoModelName + m_szModelName);
     if (Pair == m_Models.end())
         return;
 

@@ -36,8 +36,6 @@ CModel::CModel(const CModel& Prototype)
 	m_ShapeKeyIndices{ Prototype.m_ShapeKeyIndices },
 	m_fPreScale{ Prototype.m_fPreScale },
 	m_ConversionMatrix{ Prototype.m_ConversionMatrix }
-
-
 	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
 	for (auto& pMesh : m_Meshes)
@@ -441,7 +439,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	if (iter == m_Animations.end())
 		return false;
 
-
 	_float fTrackPosition = {};
 
 	if (m_strPreAnimation != strAnimationName)
@@ -455,6 +452,42 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
 	if (nullptr != pTrackPosition)
 		*pTrackPosition = fTrackPosition;
+
+	_string strRibName = "Rib_" + strAnimationName;
+	auto iterRibbon = m_Animations.find(strRibName);
+
+	if (iterRibbon != m_Animations.end())
+	{
+		// Action 결과를 임시 보관하기 위한 벡터
+		struct SRT { _vector s, r, t; };
+		vector<SRT> actionSRTs(m_Bones.size());
+
+		for (size_t i = 0; i < m_Bones.size(); ++i)
+		{
+			_matrix matAction = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix());
+			XMMatrixDecompose(&actionSRTs[i].s, &actionSRTs[i].r, &actionSRTs[i].t, matAction);
+		}
+
+		// Ribbon Animation 업데이트 (본의 Local Matrix가 Ribbon 결과로 덮어씌워짐)
+		_float fRibbonTrackPos = 0.f;
+		iterRibbon->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fRibbonTrackPos);
+
+		// 3. 가산 블렌딩 적용 
+		for (size_t i = 0; i < m_Bones.size(); ++i)
+		{
+			_vector ribS, ribR, ribT;
+			_matrix matRibbon = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix());
+			XMMatrixDecompose(&ribS, &ribR, &ribT, matRibbon);
+
+			_vector finalS = XMVectorMultiply(ribS, actionSRTs[i].s);
+			_vector finalR = XMQuaternionMultiply(actionSRTs[i].r, ribR);
+			_vector finalT = XMVectorAdd(ribT, actionSRTs[i].t);
+
+			// 최종 행렬 생성 및 적용
+			_matrix matFinal = XMMatrixAffineTransformation(finalS, XMVectorSet(0, 0, 0, 1), finalR, finalT);
+			m_Bones[i]->Set_TransformationMatrix(matFinal);
+		}
+	}
 
 
 	// Root Node Translation 조정
@@ -1147,14 +1180,6 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 		vRotationDelta = XMQuaternionIdentity();
 	}
 
-	// 행렬은 이제 '엔진 좌표계' 기준.
-	//m_RootMatrix = XMMatrixAffineTransformation(
-	//	//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
-	//	XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
-	//	XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
-	//	vRotationDelta,                  // 회전 델타
-	//	vLocalTranslate * fRootMotionRate // 이동 델타
-	//);
 	m_RootMatrix = XMMatrixAffineTransformation(
 		//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
@@ -1252,39 +1277,6 @@ HRESULT CModel::Ready_EchoModel(_fmatrix PreTransformMatrix, const _char* pFileP
 
 	return S_OK;
 }
-
-
-//void CModel::Compute_RootAnimation(_float fRootMotionRate)
-//{
-//	_vector vScale{}, vRotation{}, vTranslation{};
-//	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
-//
-//	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-//	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
-//
-//	// Axis 조정 (-y => +z)
-//	// 이거 빼면 제생각에. 안해도 되지않을까 설정을
-//	// 우리가 생각하는 정면은 +z인데 블렌더에서는 -y라서 문제다.
-//	_float fTemp = vTranslation.m128_f32[2];
-//	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
-//	vTranslation.m128_f32[2] = vTranslation.m128_f32[1];
-//	vTranslation.m128_f32[1] = fTemp;
-//
-//	
-//
-//	// Animation 변경 시, PreRootPosition을 변경된 Animation 처음 KeyFrame Root Position으로 변경
-//	if (true == m_isChangeAnimation)
-//	{
-//		m_isChangeAnimation = false;
-//		XMStoreFloat4(&m_vPreRootPosition, vTranslation);
-//	}
-//
-//	m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * fRootMotionRate);
-//	
-//	XMStoreFloat4(&m_vPreRootRotation, vRotation);
-//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
-//}
-
 
 
 HRESULT CModel::Ready_Bone(ifstream& InputFile, _int iParentIndex)
