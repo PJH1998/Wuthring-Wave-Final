@@ -611,10 +611,16 @@ void CRenderer::Render_Outline_NonCompare()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), nullptr, false)))
 		CRASH("Render Fail");
 
+
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONCOMPARE)])
 	{
 		if (nullptr != pRenderObject)
-			pRenderObject->Render_OutLine();
+		{
+#ifdef _DEBUG
+			if (m_IsOutLine)
+#endif
+				pRenderObject->Render_OutLine();
+		}
 
 		Safe_Release(pRenderObject);
 	}
@@ -637,8 +643,17 @@ void CRenderer::Render_Dynamic()
 
 void CRenderer::Render_Light()
 {
+
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
 		CRASH("Render Fail");
+
+#ifdef _DEBUG
+	
+	if (FAILED(m_pShader->Bind_Value("Debug_IsLight", &m_IsLight, sizeof(_bool))))
+		CRASH("Failed Debug Light");
+#endif
+
+
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_PBR"), m_pShader, "g_PBRTexture")))
 		CRASH("Failed Bind RT_PBR");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Diffuse"), m_pShader, "g_DiffuseTexture")))
@@ -756,8 +771,12 @@ void CRenderer::Render_Outline()
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)])
 	{
 		if (nullptr != pRenderObject)
-			pRenderObject->Render_OutLine();
-
+		{
+#ifdef _DEBUG
+			if (m_IsOutLine)
+#endif
+				pRenderObject->Render_OutLine();
+		}
 		Safe_Release(pRenderObject);
 	}
 
@@ -1015,11 +1034,30 @@ void CRenderer::Render_Debug()
 	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
 		m_isRenderDebug = !m_isRenderDebug;
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::PRESS)
 	{
-		m_IsSSAO = !m_IsSSAO;
-		m_IsFog = !m_IsFog;
+		if (m_pGameInstance->Get_DIKeyState(DIK_4) == KEYSTATE::DOWN)
+			m_IsSSAO != m_IsSSAO;
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_5) == KEYSTATE::DOWN)
+			m_IsFog != m_IsFog;
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_6) == KEYSTATE::DOWN)
+			m_IsOutLine != m_IsOutLine;
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::DOWN)
+			m_IsLight != m_IsLight;
 	}
+
+
+	ImGui::Begin("SHADER_BOOL");
+
+	ImGui::Checkbox("SSAO", &m_IsSSAO);
+	ImGui::Checkbox("FOG", &m_IsFog);
+	ImGui::Checkbox("OUTLINE", &m_IsOutLine);
+	ImGui::Checkbox("LIGHT", &m_IsLight);
+	
+	ImGui::End();
 
 	for (auto& pComponent : m_DebugComponents)
 	{

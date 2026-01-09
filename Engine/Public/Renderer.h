@@ -95,7 +95,11 @@ private:
 #ifdef _DEBUG
 	list<class CComponent*>					m_DebugComponents;
 	_bool									m_isRenderDebug = { false };
+
 	_bool									m_IsSSAO = { true };
+	_bool									m_IsOutLine = { true };
+	_bool									m_IsLight = { true };
+
 	_bool									m_IsSSAO_Blur = { true };	 
 	_bool									m_IsStylized = { true };
 	_float									m_fDebugRoughness[2] = {0.f, 0.4f};
