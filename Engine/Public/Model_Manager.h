@@ -17,7 +17,6 @@ public:
 
 		_uint NumIndices = {};
 		_float fUnUsedTime = {};
-
 	}SHARED_DATA_DESC;
 
 	typedef struct tagLoadedData {
@@ -58,24 +57,16 @@ public:
 
 
 	HRESULT RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
-	//로딩이 완료되면 모델에게 해당 LOD인덱스 모델의 버퍼풀에 해당하는 정보 전달.
 	void RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
-	void LoadData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex, _fmatrix PreMatrix);
-	//m_pModel->Update를 만들어서 각 LOD 단계가 쓰이는지 안쓰이는지 확인하기?
+	void LoadData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex, _fmatrix PreMatrix, _bool IsInitialize = false);
 
 	MODEL_DATA  Acquire_Vector();
 	void		Release_Vector(vector<MODEL_DATA>& data);
 
 
 	void LoadLastLOD();
-	void Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
-	void Add_To_RenderTest(vector<class CStaticObject*>* Container);
-	void RenderBufferPool(_uint iLODIndex);
-	void RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
-	
-	void Clear_BufferPool();
-	_uint Render_ObjectsNum(_uint iLODIndex);
+
 	void Bind_SharedBuffer(_uint iLODIndex,ID3D11DeviceContext** pDC, _uint iNumThread);
 	void Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
 	void Destroy_RigidData();
@@ -87,19 +78,17 @@ private:
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
 	class CGameInstance* m_pGameInstance = { nullptr };
-
+	
 	CBufferPool* m_pBufferPool[4] = { nullptr,nullptr ,nullptr ,nullptr };
-
 	ID3D11Buffer* m_pStagingBuffer = { nullptr };
 
-	//모델을 갖고있기 vs 메쉬를 갖고있기
 	unordered_map<_string, class CModel_Streaming*>* m_ModelPrototypes;
 	vector<SHARED_DATA_DESC> m_Data;
 	vector<MODEL_DATA> m_StagingData;
 	vector<MODEL_DATA> m_DataPool;
 	vector<PEDDING_DATA> m_DelayedNotice;
+
 	_float4x4 m_PreTransformMatrix = {};
-	map<_uint, vector<class CStaticObject*>> m_RenderObjects;
 	mutex m_StagingMutex;
 	mutex m_RenderMutex;
 	mutex m_DataPoolMutex;

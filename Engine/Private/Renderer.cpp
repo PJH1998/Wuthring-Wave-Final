@@ -537,29 +537,22 @@ void CRenderer::Render_Static()
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
-	//Render_LOD(0);
 	Render_LOD_Weight();
 	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
 		for (auto& pObjects : m_StaticObjects[iReadIndex])
 			pObjects.clear();
-		//m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
 
 		vector<CStaticObject*> m_Temp;
 		for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
 			m_Temp.insert(m_Temp.end(), pObjects.begin(), pObjects.end());
-
-		/*for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
-			m_pGameInstance->Occlusion_Culling(pObjects);*/
+		
 		m_pGameInstance->Occlusion_Culling(m_Temp);
 		m_iCullStack.exchange(0, memory_order_release);
 		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
-
-	m_pGameInstance->Clear_BufferPool();
-	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 
 	m_pGameInstance->End_MRT();
 }

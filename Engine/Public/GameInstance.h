@@ -364,15 +364,9 @@ public:
 public:
 	HRESULT						RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
 	void						RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
-	void						RenderBufferPool(_uint iLODIndex);
 	void						LoadLastLOD();
-	void						Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
-	void						Add_To_RenderTest(vector<class CStaticObject*>* Container);
-	_uint						Render_ObjectsNum(_uint iLODIndex);
 	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread);
 	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
-	void						RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
-	void						Clear_BufferPool();
 	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void						Destroy_RigidData();
 	void						Model_Manager_Change_Level(_uint iLevel);
