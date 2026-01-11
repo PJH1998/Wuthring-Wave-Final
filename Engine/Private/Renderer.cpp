@@ -591,7 +591,6 @@ void CRenderer::Render_SSAO()
 	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
 		CRASH("Failed Bind CamPosition");
 
-#ifdef _DEBUG
 	if (false == m_IsSSAO)
 	{
 		m_pGameInstance->Clear_RT(TEXT("RT_SSAO"));
@@ -599,7 +598,7 @@ void CRenderer::Render_SSAO()
 		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO_BLUR_Y"));
 		return;
 	}
-#endif
+
 	if (!m_iCurTime)
 		return;
 
@@ -618,9 +617,7 @@ void CRenderer::Render_Outline_NonCompare()
 	{
 		if (nullptr != pRenderObject)
 		{
-#ifdef _DEBUG
 			if (m_IsOutLine)
-#endif
 				pRenderObject->Render_OutLine();
 		}
 
@@ -649,11 +646,8 @@ void CRenderer::Render_Light()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
 		CRASH("Render Fail");
 
-#ifdef _DEBUG
-	
 	if (FAILED(m_pShader->Bind_Value("Debug_IsLight", &m_IsLight, sizeof(_bool))))
 		CRASH("Failed Debug Light");
-#endif
 
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_PBR"), m_pShader, "g_PBRTexture")))
@@ -774,9 +768,7 @@ void CRenderer::Render_Outline()
 	{
 		if (nullptr != pRenderObject)
 		{
-#ifdef _DEBUG
 			if (m_IsOutLine)
-#endif
 				pRenderObject->Render_OutLine();
 		}
 		Safe_Release(pRenderObject);
@@ -1032,19 +1024,19 @@ void CRenderer::Render_NonStatic()
 
 void CRenderer::Render_Setting()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::PRESS)
+//	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::PRESS)
 	{
 		if (m_pGameInstance->Get_DIKeyState(DIK_4) == KEYSTATE::DOWN)
-			m_IsSSAO != m_IsSSAO;
+			m_IsSSAO = !m_IsSSAO;
 
 		if (m_pGameInstance->Get_DIKeyState(DIK_5) == KEYSTATE::DOWN)
-			m_IsFog != m_IsFog;
+			m_IsFog = !m_IsFog;
 
 		if (m_pGameInstance->Get_DIKeyState(DIK_6) == KEYSTATE::DOWN)
-			m_IsOutLine != m_IsOutLine;
+			m_IsOutLine = !m_IsOutLine;
 
 		if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::DOWN)
-			m_IsLight != m_IsLight;
+			m_IsLight = !m_IsLight;
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
