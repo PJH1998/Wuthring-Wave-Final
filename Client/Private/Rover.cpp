@@ -256,13 +256,13 @@ void CRover::Render()
     }
 
 #ifdef _DEBUG
-	if (!m_IsQTE)
-		m_pColliderCom->Render();
-	else
-		m_pQTEColliderCom->Render();
-
-	if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();
+	//if (!m_IsQTE)
+	//	m_pColliderCom->Render();
+	//else
+	//	m_pQTEColliderCom->Render();
+	//
+	//if (m_pMainAttackVolume->IsActivate())
+	//	m_pMainAttackVolume->Render();
 #endif // _DEBUG
 
 }
