@@ -1,5 +1,4 @@
 typedef row_major matrix matrix_rm;
-//typedef row_major matrix_rm;
 // 구조체 형식
 // Depth 1 => Animation에서 소유하는 Channel 정보
 struct AnimInfo
@@ -38,22 +37,18 @@ struct SRTKeyFrame
     float4 translation;
 };
 
-// --- Resources (CModel::Ready_GPU_Buffers에서 생성한 버퍼들) ---
 #define THREAD_X 64
 #define THREAD_Y 1
 #define THREAD_Z 1
 
-// 입력(Input) 버퍼들
-//StructuredBuffer<int> g_BoneHierarchy : register(t0);
 
 StructuredBuffer<GPUKeyFrame> g_AllKeyframes : register(t0);
 StructuredBuffer<AnimInfo> g_AllAnimInfos : register(t1);
 StructuredBuffer<GPUChannelInfo> g_ChannelInfos : register(t2);
 
-// 출력(Output) 버퍼 - 이제 '로컬' 행렬을 출력합니다.
 RWStructuredBuffer<matrix_rm> g_OutLocalMatrices : register(u0);
 
-// --- Per-Frame Data (매 프레임 C++에서 업데이트) ---
+// 매 프레임 C++에서 업데이트
 cbuffer AnimationInfoCB : register(b0)
 {
     float g_TrackPosition;
@@ -220,7 +215,6 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
         blendFactor = (g_TrackPosition - key1.fTrackPosition) / segmentDuration;
     }
 
-    // ... SRT 보간 코드 ... => 의심.
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
@@ -234,20 +228,6 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
     return result;
 }
 
-// 헬퍼 1: 두 클립을 't' 비율로 1D 블렌딩 (선형 보간)
-SRTKeyFrame Blend1D_SRT(uint clipA_idx, uint clipB_idx, float t, uint boneIndex, float trackPos)
-{
-    // 1. 각 클립에서 현재 시간의 SRT 값을 계산
-    SRTKeyFrame srtA = Calculate_SRT(boneIndex, clipA_idx, false, trackPos);
-    SRTKeyFrame srtB = Calculate_SRT(boneIndex, clipB_idx, false, trackPos);
-
-    // 2. 두 SRT를 선형 보간 (Lerp / Slerp)
-    SRTKeyFrame result;
-    result.scale = lerp(srtA.scale, srtB.scale, t);
-    result.rotation = custom_slerp(srtA.rotation, srtB.rotation, t);
-    result.translation = lerp(srtA.translation, srtB.translation, t);
-    return result;
-}
 
 
 float SafeDivide(float numerator, float denominator)
@@ -284,20 +264,6 @@ SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
     return delta;
 }
 
-//  델타(Delta) SRT 적용 (가산)
-// (baseSRT + deltaSRT)
-SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
-{
-    SRTKeyFrame result;
-    // 척도 덧셈 (곱셈)
-    result.scale = baseSRT.scale * deltaSRT.scale;
-    // 회전 덧셈: delta * base
-    result.rotation = mul_quaternion(deltaSRT.rotation, baseSRT.rotation);
-    // 이동 덧셈
-    result.translation = baseSRT.translation + deltaSRT.translation;
-    return result;
-}
-
 // 가산 블렌딩 방식
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
@@ -319,7 +285,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         //ribbonSRT.translation.xyz *= 0.01f; // 임시로 0.01배 설정하기. => 싹다 1로.
         // => Blender에서 PSA Import 할때 Translation Scale을 0.01배하면된다. => 뭔가 빠다리남.
         
-        // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
+        // 가산 블렌딩
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;
         float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
         float4 finalTranslation = ribbonSRT.translation + actionSRT.translation; // delta 적용
@@ -332,7 +298,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     }
     
-    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
+    // 최종 행렬 출력 버퍼에 저장.
     g_OutLocalMatrices[boneIndex] = result_matrix;
    
 }

@@ -190,6 +190,8 @@ void CRenderer::Render()
 	Render_UI_Post();
 	Render_Fade();
 
+	Render_Setting();
+
 #ifdef _DEBUG
 	Render_Debug();
 #endif
@@ -537,29 +539,22 @@ void CRenderer::Render_Static()
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
-	//Render_LOD(0);
 	Render_LOD_Weight();
 	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
 		for (auto& pObjects : m_StaticObjects[iReadIndex])
 			pObjects.clear();
-		//m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
 
 		vector<CStaticObject*> m_Temp;
 		for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
 			m_Temp.insert(m_Temp.end(), pObjects.begin(), pObjects.end());
-
-		/*for (auto& pObjects : m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2])
-			m_pGameInstance->Occlusion_Culling(pObjects);*/
+		
 		m_pGameInstance->Occlusion_Culling(m_Temp);
 		m_iCullStack.exchange(0, memory_order_release);
 		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
-
-	m_pGameInstance->Clear_BufferPool();
-	//Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 
 	m_pGameInstance->End_MRT();
 }
@@ -589,7 +584,6 @@ void CRenderer::Render_SSAO()
 	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
 		CRASH("Failed Bind CamPosition");
 
-#ifdef _DEBUG
 	if (false == m_IsSSAO)
 	{
 		m_pGameInstance->Clear_RT(TEXT("RT_SSAO"));
@@ -597,7 +591,7 @@ void CRenderer::Render_SSAO()
 		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO_BLUR_Y"));
 		return;
 	}
-#endif
+
 	if (!m_iCurTime)
 		return;
 
@@ -611,10 +605,14 @@ void CRenderer::Render_Outline_NonCompare()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE_NONCOMPARE"), nullptr, false)))
 		CRASH("Render Fail");
 
+
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE_NONCOMPARE)])
 	{
 		if (nullptr != pRenderObject)
-			pRenderObject->Render_OutLine();
+		{
+			if (m_IsOutLine)
+				pRenderObject->Render_OutLine();
+		}
 
 		Safe_Release(pRenderObject);
 	}
@@ -637,8 +635,14 @@ void CRenderer::Render_Dynamic()
 
 void CRenderer::Render_Light()
 {
+
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
 		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Value("Debug_IsLight", &m_IsLight, sizeof(_bool))))
+		CRASH("Failed Debug Light");
+
+
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_PBR"), m_pShader, "g_PBRTexture")))
 		CRASH("Failed Bind RT_PBR");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Diffuse"), m_pShader, "g_DiffuseTexture")))
@@ -756,8 +760,10 @@ void CRenderer::Render_Outline()
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)])
 	{
 		if (nullptr != pRenderObject)
-			pRenderObject->Render_OutLine();
-
+		{
+			if (m_IsOutLine)
+				pRenderObject->Render_OutLine();
+		}
 		Safe_Release(pRenderObject);
 	}
 
@@ -1009,17 +1015,60 @@ void CRenderer::Render_NonStatic()
 	m_pGameInstance->End_MRT();
 }
 
-#ifdef _DEBUG
-void CRenderer::Render_Debug()
+void CRenderer::Render_Setting()
 {
+//	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::PRESS)
+	{
+		if (m_pGameInstance->Get_DIKeyState(DIK_4) == KEYSTATE::DOWN)
+			m_IsSSAO = !m_IsSSAO;
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_5) == KEYSTATE::DOWN)
+			m_IsFog = !m_IsFog;
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_6) == KEYSTATE::DOWN)
+			m_IsOutLine = !m_IsOutLine;
+
+		if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::DOWN)
+			m_IsLight = !m_IsLight;
+	}
+
 	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
 		m_isRenderDebug = !m_isRenderDebug;
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
-	{
-		m_IsSSAO = !m_IsSSAO;
-		m_IsFog = !m_IsFog;
-	}
+	ImGui::Begin("SHADER_BOOL");
+
+	ImGui::Checkbox("SSAO", &m_IsSSAO);
+	ImGui::Checkbox("FOG", &m_IsFog);
+	ImGui::Checkbox("OUTLINE", &m_IsOutLine);
+	ImGui::Checkbox("LIGHT", &m_IsLight);
+
+	ImGui::End();
+
+
+
+	if (false == m_isRenderDebug)
+		return;
+
+	if (FAILED(m_pGameInstance->Render_RT()))
+		CRASH("Render RT");
+
+	if (FAILED(m_pGameInstance->Debug_Render_RCS()))
+		CRASH("Render RCS");
+
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		CRASH("ViewMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		CRASH("ProjMatrix");
+
+	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
+
+	m_pGameInstance->Render_ShadowMap(m_pShader, m_pVIBuffer);
+}
+
+#ifdef _DEBUG
+void CRenderer::Render_Debug()
+{
+
 
 	for (auto& pComponent : m_DebugComponents)
 	{
@@ -1046,23 +1095,7 @@ void CRenderer::Render_Debug()
 		m_pGameInstance->End_MRT();
 	}
 
-	if (false == m_isRenderDebug)
-		return;
 
-	if (FAILED(m_pGameInstance->Render_RT()))
-		CRASH("Render RT");
-	
-	if (FAILED(m_pGameInstance->Debug_Render_RCS()))
-		CRASH("Render RCS");
-
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("ViewMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("ProjMatrix");
-
-	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
-
-	m_pGameInstance->Render_ShadowMap(m_pShader, m_pVIBuffer);
 }
 #endif
 

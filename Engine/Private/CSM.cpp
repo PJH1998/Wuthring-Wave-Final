@@ -119,7 +119,6 @@ HRESULT CCSM::End_CSM()
 	return S_OK;
 }
 
-#ifdef _DEBUG
 void CCSM::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	for (_uint i = 0; i < 4; i++)
@@ -136,7 +135,6 @@ void CCSM::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 		pVIBuffer->Render();
 	}
 }
-#endif
 
 HRESULT CCSM::Ready_CSM_View()
 {

@@ -39,7 +39,12 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	for (_uint i = 0; i < ENUM_CLASS(CORNER::END); ++i)
 	{
 		_float3 vOffset = {};
-		vOffset.x = (i & 1) ? 0.5f : -0.5f;
+		//vOffset.x = (i & 1) ? 0.5f : -0.5f;
+		if (i % 4 == 0 || i % 4 == 3)
+			vOffset.x = -0.5f;
+		else
+			vOffset.x = 0.5f;
+
 		vOffset.y = (i & 2) ? 0.5f : -0.5f;
 		vOffset.z = (i & 4) ? -0.5f : 0.5f;
 
@@ -104,6 +109,13 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 			{
 				if(0 == m_iDepth)
 				{
+					//vector<CStaticObject*> Container[4];
+					//Container[0].reserve(1000);
+					//Container[1].reserve(1000);
+					//Container[2].reserve(1000);
+					//Container[3].reserve(1000);
+					//pCell->Update(vCamPos, Container);
+					//m_pGameInstance->Add_Render_StaticObject(Container);
 					// Thread
 					m_pGameInstance->Add_Work([=, Cell = pCell, CamPos = vCamPos]() {
 						vector<CStaticObject*> Container[4];

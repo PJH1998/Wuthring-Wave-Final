@@ -110,6 +110,7 @@ void CMapObject_Burn::Render()
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 		if (m_IsBurn)
 			m_pShaderCom->Bind_Value("g_DissolveTime", &m_fTime, sizeof(_float));
+		m_pShaderCom->Bind_Value("g_DissolveStart", &m_IsBurn, sizeof(_bool));
 
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 		m_pModelCom->Render(m_iLODIndex, i);

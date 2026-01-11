@@ -54,13 +54,13 @@ void CEdit_PreViewModel::Late_Update(_float fTimeDelta, _wstring ModelName)
 
 void CEdit_PreViewModel::Render()
 {
-    auto Pair = m_Models.find(ProtoModelName + m_szModelName);
+    /*auto Pair = m_Models.find(ProtoModelName + m_szModelName);
     if (Pair == m_Models.end())
         return;
 
     CModel* pModel = Pair->second;
 
-        Sync_BoundingBox(pModel->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+    Sync_BoundingBox(pModel->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 
     _float3 vMinExt = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
     _float3 vMaxExt = _float3(FLT_MIN, FLT_MIN, FLT_MIN);
@@ -106,7 +106,7 @@ void CEdit_PreViewModel::Render()
             m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         m_pShaderCom->Begin(4);
         pModel->Render(i);
-    }
+    }*/
 }
 
 void CEdit_PreViewModel::Add_Model(_wstring ModelName)

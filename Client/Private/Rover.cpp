@@ -260,7 +260,7 @@ void CRover::Render()
 		m_pColliderCom->Render();
 	else
 		m_pQTEColliderCom->Render();
-
+	
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -626,8 +626,11 @@ void CRover::Bind_QTE(_bool IsQTE)
 
 		// 내 앞에서 생성. (안 곂치게)
 		_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+		_vector vRight = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::RIGHT), 0.f));
+
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
-		vPos += vLook * 2.f + vUp;
+		//vPos += vLook * 2.f + vUp;
+		vPos += vRight * 2.f + vUp;
 		m_pQTEColliderCom->Set_Position(vPos);
 		m_pQTEColliderCom->IsActivate(true);
 
@@ -854,7 +857,7 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
 		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
-		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST1, 10.f); // 궁 ULTI
 		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
 		break;
 
