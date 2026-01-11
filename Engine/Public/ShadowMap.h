@@ -57,9 +57,8 @@ public:
 	HRESULT						DownSampleShadowMap();
 
 	void						Clear();
-#ifdef _DEBUG
+
 	void						Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
-#endif
 
 private:
 	ID3D11Device*				m_pDevice = { nullptr };

@@ -90,15 +90,18 @@ private:
 	_bool									m_IsFog = { true };
 	_bool									m_IsSSS = { false };		// 카툰이라 큰 차이가 없음,,
 
+	_bool									m_IsSSAO = { true };
+	_bool									m_IsOutLine = { true };
+	_bool									m_IsLight = { true };
+
+
+	_bool									m_isRenderDebug = { false };
+
 	_float									m_fExposure = {};
 
 #ifdef _DEBUG
 	list<class CComponent*>					m_DebugComponents;
-	_bool									m_isRenderDebug = { false };
 
-	_bool									m_IsSSAO = { true };
-	_bool									m_IsOutLine = { true };
-	_bool									m_IsLight = { true };
 
 	_bool									m_IsSSAO_Blur = { true };	 
 	_bool									m_IsStylized = { true };
@@ -146,6 +149,8 @@ private:
 	void						Render_UI_Post();
 	void						Render_Fade();
 	void						Render_NonStatic();
+
+	void						Render_Setting();
 #ifdef _DEBUG
 	void						Render_Debug();
 #endif
