@@ -190,6 +190,8 @@ void CRenderer::Render()
 	Render_UI_Post();
 	Render_Fade();
 
+	Render_Setting();
+
 #ifdef _DEBUG
 	Render_Debug();
 #endif
@@ -1028,12 +1030,8 @@ void CRenderer::Render_NonStatic()
 	m_pGameInstance->End_MRT();
 }
 
-#ifdef _DEBUG
-void CRenderer::Render_Debug()
+void CRenderer::Render_Setting()
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
-		m_isRenderDebug = !m_isRenderDebug;
-
 	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::PRESS)
 	{
 		if (m_pGameInstance->Get_DIKeyState(DIK_4) == KEYSTATE::DOWN)
@@ -1049,6 +1047,8 @@ void CRenderer::Render_Debug()
 			m_IsLight != m_IsLight;
 	}
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
+		m_isRenderDebug = !m_isRenderDebug;
 
 	ImGui::Begin("SHADER_BOOL");
 
@@ -1056,8 +1056,34 @@ void CRenderer::Render_Debug()
 	ImGui::Checkbox("FOG", &m_IsFog);
 	ImGui::Checkbox("OUTLINE", &m_IsOutLine);
 	ImGui::Checkbox("LIGHT", &m_IsLight);
-	
+
 	ImGui::End();
+
+
+
+	if (false == m_isRenderDebug)
+		return;
+
+	if (FAILED(m_pGameInstance->Render_RT()))
+		CRASH("Render RT");
+
+	if (FAILED(m_pGameInstance->Debug_Render_RCS()))
+		CRASH("Render RCS");
+
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		CRASH("ViewMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		CRASH("ProjMatrix");
+
+	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
+
+	m_pGameInstance->Render_ShadowMap(m_pShader, m_pVIBuffer);
+}
+
+#ifdef _DEBUG
+void CRenderer::Render_Debug()
+{
+
 
 	for (auto& pComponent : m_DebugComponents)
 	{
@@ -1084,23 +1110,7 @@ void CRenderer::Render_Debug()
 		m_pGameInstance->End_MRT();
 	}
 
-	if (false == m_isRenderDebug)
-		return;
 
-	if (FAILED(m_pGameInstance->Render_RT()))
-		CRASH("Render RT");
-	
-	if (FAILED(m_pGameInstance->Debug_Render_RCS()))
-		CRASH("Render RCS");
-
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("ViewMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("ProjMatrix");
-
-	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
-
-	m_pGameInstance->Render_ShadowMap(m_pShader, m_pVIBuffer);
 }
 #endif
 

@@ -523,6 +523,10 @@ HRESULT CGameInstance::Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* p
 {
 	return m_pTargetManager->Bind_OpenRT(eRT, pShader, pConstantName);
 }
+HRESULT CGameInstance::Render_RT()
+{
+	return m_pTargetManager->Render();
+}
 #ifdef _DEBUG
 HRESULT CGameInstance::Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
 {
@@ -532,10 +536,7 @@ HRESULT CGameInstance::Render_RT(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pTargetManager->Render(pShader, pVIBuffer);
 }
-HRESULT CGameInstance::Render_RT()
-{
-	return m_pTargetManager->Render();
-}
+
 ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& strTargetTag)
 {
 	return m_pTargetManager->Get_Debug_RT_Resource(strTargetTag);
@@ -935,12 +936,10 @@ HRESULT CGameInstance::End_CSM()
 {
 	return m_pCSM->End_CSM();
 }
-#ifdef _DEBUG
 void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	m_pCSM->Render(pShader, pVIBuffer);
 }
-#endif
 #pragma endregion
 
 #pragma region HZB
@@ -1010,12 +1009,10 @@ ID3D11ShaderResourceView* CGameInstance::Get_RCS_SRV(const _wstring& strRCSTag, 
 {
 	return m_pRCS_Manager->Get_RCS_SRV(strRCSTag, iMipLevel);
 }
-#ifdef _DEBUG
 HRESULT CGameInstance::Debug_Render_RCS()
 {
 	return m_pRCS_Manager->Debug_Render();
 }
-#endif
 #pragma endregion
 
 #pragma region SHADOW_MAP
@@ -1066,12 +1063,10 @@ ID3D11Buffer* CGameInstance::Get_ShadowMapDownSampleBuffer()
 	return m_pShadowMap->Get_DownSampleBuffer();
 }
 
-#ifdef _DEBUG
 void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
 {
 	m_pShadowMap->Render(pShader, pVIBuffer);
 }
-#endif
 #pragma endregion
 
 #pragma region DECAL_MANAGER

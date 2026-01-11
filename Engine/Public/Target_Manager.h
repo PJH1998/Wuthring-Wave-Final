@@ -27,13 +27,14 @@ public:
 	HRESULT		SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag);
 	void	    End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
-
-#ifdef _DEBUG
-	HRESULT		Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
-	HRESULT		Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT     Render();
 
+
+	HRESULT		Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	void		AddRemoveRT(const _wstring& strTargetTag, class CRenderTarget* pRT);
+#ifdef _DEBUG
+	HRESULT		Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+
 #endif
 
 private:
@@ -45,10 +46,7 @@ private:
 
 	map<const _wstring, class CRenderTarget*> m_RenderTargets;
 	map<const _wstring, list<class CRenderTarget*>> m_MRTs;
-
-#ifdef _DEBUG
 	map<const _wstring, class CRenderTarget*> m_DebugRenderRT;
-#endif
 
 private:
 	class CRenderTarget*				Find_RenderTarget(const _wstring& strTargetTag);
