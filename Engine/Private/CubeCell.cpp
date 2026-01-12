@@ -109,6 +109,13 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 			{
 				if(0 == m_iDepth)
 				{
+					//vector<CStaticObject*> Container[4];
+					//Container[0].reserve(1000);
+					//Container[1].reserve(1000);
+					//Container[2].reserve(1000);
+					//Container[3].reserve(1000);
+					//pCell->Update(vCamPos, Container);
+					//m_pGameInstance->Add_Render_StaticObject(Container);
 					// Thread
 					m_pGameInstance->Add_Work([=, Cell = pCell, CamPos = vCamPos]() {
 						vector<CStaticObject*> Container[4];

@@ -267,13 +267,13 @@ void CGalbrena::Render()
     }
 
 #ifdef _DEBUG
-	if (!m_IsQTE)
-		m_pColliderCom->Render();
-	else
-		m_pQTEColliderCom->Render();
-
-	m_pMainAttackVolume->Render();
-	Print_LookRay();
+	//if (!m_IsQTE)
+	//	m_pColliderCom->Render();
+	//else
+	//	m_pQTEColliderCom->Render();
+	//
+	//m_pMainAttackVolume->Render();
+	//Print_LookRay();
 	//Debug_ImGui();
 
 

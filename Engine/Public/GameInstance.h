@@ -129,10 +129,10 @@ public:
 	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 	HRESULT		Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* pConstantName);
+	HRESULT     Render_RT();
 #ifdef _DEBUG
 	HRESULT		Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render_RT(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
-	HRESULT     Render_RT();
 	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
 #endif
 #pragma endregion
@@ -285,8 +285,9 @@ public:
 	HRESULT				Bind_CSM_SRV(class CShader* pShader, const _char* pConstantName);
 	HRESULT				Begin_CSM();
 	HRESULT				End_CSM();
+
+	void				Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #ifdef _DEBUG
-	void					Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
 
@@ -314,9 +315,8 @@ public:
 	HRESULT						Begin_RCS(const _wstring& strRCSTag, _uint iWidth, _uint iHeight, _uint iMipLevel = 0);
 	void						Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
 	ID3D11ShaderResourceView*	Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel = 0);
-#ifdef _DEBUG
+
 	HRESULT						Debug_Render_RCS();
-#endif
 #pragma endregion
 
 #pragma region SHADOW_MAP
@@ -330,9 +330,8 @@ public:
 	void						Begin_DownSampleShadowMap();
 	ID3D11ShaderResourceView*	Get_ShadowMapDownSampleSRV();
 	ID3D11Buffer*				Get_ShadowMapDownSampleBuffer();
-#ifdef _DEBUG
 	void						Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
-#endif
+
 #pragma endregion
 
 #pragma region DECAL_MANAGER
@@ -364,15 +363,9 @@ public:
 public:
 	HRESULT						RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
 	void						RequestData(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
-	void						RenderBufferPool(_uint iLODIndex);
 	void						LoadLastLOD();
-	void						Add_To_RenderTest(_uint iLODIndex, class CStaticObject* pObject);
-	void						Add_To_RenderTest(vector<class CStaticObject*>* Container);
-	_uint						Render_ObjectsNum(_uint iLODIndex);
 	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext** pDC, _uint iNumThread);
 	void						Bind_SharedBuffer(_uint iLODIndex, ID3D11DeviceContext* pDC);
-	void						RenderBufferPool(_uint iThreadIndex, _uint iLODIndex, _uint iStartIndex, _uint iEndIndex, ID3D11DeviceContext* pContext);
-	void						Clear_BufferPool();
 	void						SetUp_Data(class CModel_Streaming* pModel, const _string& pFilePath, _uint iLODIndex);
 	void						Destroy_RigidData();
 	void						Model_Manager_Change_Level(_uint iLevel);

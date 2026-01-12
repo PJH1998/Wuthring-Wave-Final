@@ -124,20 +124,21 @@ void CRendererCS::Clear_Resource()
 	m_SRVs.resize(0);
 }
 
-#ifdef _DEBUG
 HRESULT CRendererCS::Debug_Render(const _wstring& strRCS_Name)
-{	
-	for(_uint i=0; i<m_iMipLevels; ++i)
+{
+	for (_uint i = 0; i < m_iMipLevels; ++i)
 	{
 		string strName = m_iMipLevels == 1 ? WStringToString(strRCS_Name).c_str() : WStringToString(strRCS_Name).c_str() + to_string(i + 1);
 		ImGui::Begin(strName.c_str());
 
-		ImGui::Image(reinterpret_cast<ImTextureID>( m_ComputeSRVs[i] ), ImVec2(500.f, 500.f));
-		
+		ImGui::Image(reinterpret_cast<ImTextureID>(m_ComputeSRVs[i]), ImVec2(500.f, 500.f));
+
 		ImGui::End();
 	}
 	return S_OK;
 }
+#ifdef _DEBUG
+
 #endif
 
 HRESULT CRendererCS::Ready_Buffer(ID3D11Buffer** ppOut, _uint iLength)

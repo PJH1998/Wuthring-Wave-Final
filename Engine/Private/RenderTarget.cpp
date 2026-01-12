@@ -54,6 +54,16 @@ void CRenderTarget::Clear()
 	m_pContext->ClearRenderTargetView(m_pRTV, reinterpret_cast<_float*>(&m_vClearColor));
 }
 
+HRESULT CRenderTarget::Render(const _wstring& strRT_Name)
+{
+	ImGui::Begin(WStringToString(strRT_Name).c_str());
+
+	ImGui::Image(reinterpret_cast<ImTextureID>(m_pSRV), ImVec2(500.f, 500.f));
+
+	ImGui::End();
+
+	return S_OK;
+}
 #ifdef _DEBUG
 HRESULT CRenderTarget::Ready_Debug(_float fX, _float fY, _float fSizeX, _float fSizeY)
 {
@@ -82,16 +92,7 @@ HRESULT CRenderTarget::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 
 	return S_OK;
 }
-HRESULT CRenderTarget::Render(const _wstring& strRT_Name)
-{
-	ImGui::Begin(WStringToString(strRT_Name).c_str());
 
-	ImGui::Image(reinterpret_cast<ImTextureID>( m_pSRV ), ImVec2(500.f, 500.f));
-
-	ImGui::End();
-
-	return S_OK;
-}
 #endif
 
 CRenderTarget* CRenderTarget::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor)

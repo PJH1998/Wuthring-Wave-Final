@@ -73,32 +73,9 @@ float g_fLimitDepth;
 //Light
 uint g_iNumLight;
 
-//vector  g_vLightDirection = 0.f;
-//vector  g_vLightDiffuse = 1.f;
-//vector  g_vLightAmbient = 1.f;
-//vector  g_vLightPosition;
-//float   g_fLightRange; 
-//vector  g_vLightSpecular = 1.f;
-//vector  g_vMtrlSpecular = 1.f;
-
-//vector  g_vDynamicMtrlAmbient = 0.5f;
-//vector  g_vStaticMtrlAmbient = 0.3f;
+bool Debug_IsLight = true;
 
 int g_DebugCSMIndex;
-
-////SHADOWMAP
-//Texture2DArray<float> g_ShadowMap;
-//bool g_HasShadowMap;
-
-////CASCADE
-//Texture2DArray<float> g_Cascade : register(t2);
-
-//float4 g_vShadowLightDirection;
-
-//RIM_RIGHT
-//bool g_IsCustomRimColor = false;
-//float4 g_vRimColor = 0.f;
-//float4 g_fRimIntensity = 0.8f;
 
 //SFX
 float g_fEffectIntensity;
@@ -201,6 +178,19 @@ PS_OUT_LIGHT PS_LIGHT(PS_IN In)
     
     if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
         discard;
+    
+    if (false == Debug_IsLight)
+    {
+        Out.vLightDiffuse = vDiffuse;
+            
+        Out.vLightDiffuse.w = 1.f;
+
+        Out.vLightSpecular.w = 1.f;
+
+        Out.vLightAmbient.w = 1.f;
+    
+        return Out;
+    }
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
