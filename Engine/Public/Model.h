@@ -167,8 +167,8 @@ private:
 
 	static const _string kRibPrefix;
 
-#ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
+
 #ifdef _DEBUG
 	
 	_uint m_iSelectIndex = { 0 };
