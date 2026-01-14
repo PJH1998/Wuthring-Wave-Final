@@ -1,10 +1,6 @@
 ﻿#pragma once
 #include "Camera.h"
 
-NS_BEGIN(Engine)
-class CRigidbody;
-NS_END
-
 NS_BEGIN(Client)
 
 class CSpringCamera final : public CCamera

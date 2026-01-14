@@ -11,6 +11,8 @@
 #include "ComputeShader.h"
 #include "Model_Streaming.h"
 
+const string CModel::kRibPrefix = "Rib_";
+
 CModel::CModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CComponent{ pDevice, pContext }
 {
@@ -363,7 +365,13 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 {
 	if ((MODELTYPE::ANIM == m_eType) || (MODELTYPE::CHARACTER == m_eType))
 	{
-		// 1. Instance 전용 버퍼 생성.
+		// 0. Copy Resource 용도 멤버 변수 벡터 생성
+		m_vLocalMatrices.resize(m_Bones.size());
+
+		// 1. Rib Prefix 추가 
+		
+
+		// 2. Instance 전용 버퍼 생성.
 		if (FAILED(Ready_Instance_Buffers()))
 			return E_FAIL;
 	}
@@ -451,6 +459,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
 	if (nullptr != pTrackPosition)
 		*pTrackPosition = fTrackPosition;
+
 
 	// Root Node Translation 조정
 	if (true == isRootMotion)
@@ -614,7 +623,7 @@ _bool CModel::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const 
 	{
 		m_isChangeAnimation = true;
 		m_strPreAnimation = strAnimationName;
-		//Clear_Animation(strAnimationName);
+		Clear_Animation(strAnimationName);
 	}
 
 	// 2. 현재 애니메이션의 Track Position 업데이트
@@ -800,6 +809,10 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations.at(strAnimationName)->Set_CurrentTrackPosition(fTrackPosition);
 	fill(m_ShapeKeyWeights.begin(), m_ShapeKeyWeights.end(), 0.0f);
 
+	// 스테이징 버퍼 상태 리셋
+	m_iCurStagingFlip = 0;
+	m_bIsStagingFilled = false;
+
 }
 
 const _float4x4* CModel::Get_BoneMatrixPtr(_uint iBoneIndex)
@@ -859,8 +872,8 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 {
 	ASSERT_CRASH(pComputeShaderCom);
 
+#pragma region 상수 버퍼 업데이트
 	// 1. 상수 버퍼(CB) 업데이트
-	// - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
@@ -873,7 +886,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
-	_string strRibAnimationName = "Rib_" + strAnimationName;
+	_string strRibAnimationName = kRibPrefix + strAnimationName;
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 	{
@@ -886,6 +899,10 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	}
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
+#pragma endregion
+
+
+#pragma region  리소스 바인딩 및 연산 시작(Dispatch)
 
 	// 3. Compute Shader에 리소스 바인딩
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
@@ -901,39 +918,74 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
+#pragma endregion
 
-	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
-	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
-
-	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
-
-	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
-
-	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
-	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
-	if (FAILED(hr))
-		return;
 	
-	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+#pragma region 더블 버퍼링
+	// 5. 쓰기 인덱스와 읽기 인덱스 계산 0번 Write, 1번 Read
+	_uint iWriteIdx = BUFFER_STAGING_0 + m_iCurStagingFlip;
+	_uint iReadIdx = BUFFER_STAGING_0 + ((m_iCurStagingFlip + 1) % 2);
+	
+	// 6. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
+	// 이때 쓰기용 인덱스에 해당하는 버퍼에만 추가합니다.
+	m_pContext->CopyResource(m_Buffers[iWriteIdx], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	// 9. Unmap으로 마무리합니다.  
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
-
-	for (size_t i = 0; i < m_Bones.size(); ++i)
+	// 7. 이전 프레임에 복사 명령을 내려두었던 Staging[iReadIdx]를 Map하여 CPU로 가져옵니다.
+	// 첫 프레임에는 읽을 데이터가 없으므로 m_bIsStagingFilled 체크
+	if (m_bIsStagingFilled)
 	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+		D3D11_MAPPED_SUBRESOURCE Mapped;
+		// 1프레임 전의 버퍼이므로 이미 복사가 끝나있어 CPU 대기 시간이 거의 없습니다.
+		if (SUCCEEDED(m_pContext->Map(m_Buffers[iReadIdx], 0, D3D11_MAP_READ, 0, &Mapped)))
+		{
+			memcpy(m_vLocalMatrices.data(), Mapped.pData, sizeof(_float4x4) * iNumBones);
+			m_pContext->Unmap(m_Buffers[iReadIdx], 0);
+
+			// 8. m_Bones 배열에 로컬 행렬 적용
+			for (size_t i = 0; i < iNumBones; ++i)
+				m_Bones[i]->Set_TransformationMatrix(XMLoadFloat4x4(&m_vLocalMatrices[i]));
+		}
 	}
+	else
+		m_bIsStagingFilled = true;
+
+	// 9. 다음 프레임을 위한 인덱스 교체
+	m_iCurStagingFlip = (m_iCurStagingFlip + 1) % 2;
+#pragma endregion
+
+
+
+	
+	
+	//vector<_float4x4> vLocalMatrices(m_Bones.size());
+
+	//// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+	//D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
+	//HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING_0], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
+	//if (FAILED(hr))
+	//	return;
+
+	//// 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
+	//memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+
+	//// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+
+	//// 9. Unmap으로 마무리합니다.  
+	//m_pContext->Unmap(m_Buffers[BUFFER_STAGING_0], 0);
+
+	//for (size_t i = 0; i < m_Bones.size(); ++i)
+	//{
+	//	_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
+	//	m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+	//}
 }
 
 void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 
+#pragma region 상수 버퍼 업데이트
 	// 1. 상수 버퍼(CB) 업데이트
-	// - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOFLYCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
@@ -946,7 +998,7 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
-	_string strRibAnimationName = "Rib_" + strAnimationName;
+	_string strRibAnimationName = kRibPrefix + strAnimationName;
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 	{
@@ -982,7 +1034,7 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 		// Blending이 비활성화되었음을 GPU에 명확히 알립니다.
 		pAnimCBInfo->IsBlendEnabled = false;
 
-		// (안전 장치) HLSL에서 쓰레기 값을 읽는 것을 방지하기 위해
+		// HLSL에서 쓰레기 값을 읽는 것을 방지하기 위해
 		// 나머지 블렌드 관련 필드들을 0으로 초기화합니다.
 		pAnimCBInfo->fBlendParamLR = 0.f;
 		pAnimCBInfo->fBlendParamDU = 0.f;
@@ -999,12 +1051,13 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 	}
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOFLYCB], 0);
+#pragma endregion
 
+#pragma region 리소스 바인딩 및 연산 시작(Dispatch)
 	// 3. Compute Shader에 리소스 바인딩
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
 	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
 	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
-	pComputeShaderCom->Set_SRV("g_InverseBindPoses", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
 	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
 	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOFLYCB]);
 
@@ -1015,36 +1068,49 @@ void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
+#pragma endregion
 
-	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
-	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
+#pragma region 더블 버퍼링.
+	// 5. 쓰기 인덱스와 읽기 인덱스 계산 0번 Write, 1번 Read
+	_uint iWriteIdx = BUFFER_STAGING_0 + m_iCurStagingFlip;
+	_uint iReadIdx = BUFFER_STAGING_0 + ((m_iCurStagingFlip + 1) % 2);
 
-	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
-	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
-	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
-	if (FAILED(hr))
-		return;
+	// 6. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
+	m_pContext->CopyResource(m_Buffers[iWriteIdx], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size());
-	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
-
-	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
-	for (size_t i = 0; i < m_Bones.size(); ++i)
+	// 7. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+	if (m_bIsStagingFilled)
 	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
-	}
+		D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
+		// 1프레임 이전의 버퍼이므로 복사가 끝나있어 CPU 대기 시간이 거의 없습니다.
+		if (SUCCEEDED(m_pContext->Map(m_Buffers[iReadIdx], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource)))
+		{
+			memcpy(m_vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+			m_pContext->Unmap(m_Buffers[iReadIdx], 0);
+		}
 
-	// 9. Unmap으로 마무리합니다.  
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+		// 8. m_Bones 배열에 로컬 행렬 적용하기.
+		for (size_t i = 0; i < iNumBones; ++i)
+			m_Bones[i]->Set_TransformationMatrix(XMLoadFloat4x4(&m_vLocalMatrices[i]));
+		
+	}
+	else
+		m_bIsStagingFilled = true;
+
+	
+	// 9. 다음 프레임을 위한 인덱스 교체
+	m_iCurStagingFlip = (m_iCurStagingFlip + 1) % 2;
+
+
+#pragma endregion
 }
 
 void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
 {
 	ASSERT_CRASH(pComputeShaderCom);
+
+#pragma region 상수 버퍼 업데이트
 	// 1. 상수 버퍼(CB) 업데이트
-	// - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
@@ -1056,12 +1122,13 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
+#pragma endregion
 
+#pragma region 리소스 바인딩 및 연산 시작(Dispatch)
 	// 3. Compute Shader에 리소스 바인딩
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
 	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
 	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
-	pComputeShaderCom->Set_SRV("g_InverseBindPoses", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
 	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
 	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
 
@@ -1072,28 +1139,38 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
+#pragma endregion
 
-	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
-	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	vector <_float4x4> vLocalMatrices = vector<_float4x4>(m_Bones.size());
+#pragma region 더블 버퍼링.
+	// 5. 쓰기 인덱스와 읽기 인덱스 계산 0번 Write, 1번 Read
+	_uint iWriteIdx = BUFFER_STAGING_0 + m_iCurStagingFlip;
+	_uint iReadIdx = BUFFER_STAGING_0 + ((m_iCurStagingFlip + 1) % 2);
 
-	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
-	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
-	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
-	if (FAILED(hr))
-		return;
+	// 6. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
+	// 이때 쓰기용 인덱스에 해당하는 버퍼에만 추가합니다.
+	m_pContext->CopyResource(m_Buffers[iWriteIdx], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
-
-	// 9. Unmap으로 마무리합니다.  
-	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
-
-	for (size_t i = 0; i < m_Bones.size(); ++i)
+	if (m_bIsStagingFilled)
 	{
-		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+		D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
+		// 7. 이전 프레임에 복사 명령을 내려두었던 Staging[iReadIdx]를 Map하여 CPU로 가져옵니다.
+		if (SUCCEEDED(m_pContext->Map(m_Buffers[iReadIdx], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource)))
+		{
+			memcpy(m_vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+			m_pContext->Unmap(m_Buffers[iReadIdx], 0);
+			// 8. m_Bones 배열에 로컬 행렬 적용하기.
+			for (size_t i = 0; i < iNumBones; ++i)
+				m_Bones[i]->Set_TransformationMatrix(XMLoadFloat4x4(&m_vLocalMatrices[i]));
+		}
 	}
+	else
+		m_bIsStagingFilled = true;
+
+	// 9. 다음 프레임을 위한 인덱스 교체
+	m_iCurStagingFlip = (m_iCurStagingFlip + 1) % 2;
+
+#pragma endregion
 }
 
 
@@ -1136,7 +1213,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 애니메이션 변경 시 순간이동 방지
 	if (true == m_isChangeAnimation)
-	{
+	{  
 		m_isChangeAnimation = false;
 		vLocalTranslate = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 		vRotationDelta = XMQuaternionIdentity();
@@ -1721,12 +1798,15 @@ HRESULT CModel::Ready_Instance_Buffers()
 	//	cout << "Character ANIMATIONFLY_CBINFO Byte : " << bufferDesc.ByteWidth << endl;
 #endif // _DEBUG
 
-	// 2-6. GPU -> CPU 복사를 위한 Staging 버퍼
+	// 2-6. GPU -> CPU 복사를 위한 Staging 버퍼 0, 1
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
 	bufferDesc.Usage = D3D11_USAGE_STAGING;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_STAGING]);
+	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_STAGING_0]);
+	if (FAILED(hr)) return E_FAIL;
+
+	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_STAGING_1]);
 	if (FAILED(hr)) return E_FAIL;
 
 #ifdef _DEBUG

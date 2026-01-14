@@ -135,21 +135,31 @@ void CAnimationActor::Update(_float fTimeDelta)
 
 
     _bool IsAnimationEnd = { false };
+	
+	
+
     if (m_IsPlayAnimation)
     {
-		//IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
-
-        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
-        
-#pragma region 측정용 코드
-		if (m_IsGPU)
-			//IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
-			IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+		if (m_IsFacial)
+		{
+			IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+		}
 		else
-			IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
-#pragma endregion
-
-		
+		{
+			if (m_IsGPU)
+			{
+				IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+			}
+			else
+			{
+				IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
+			}
+			
+		}
+        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
 		//IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
 

@@ -39,8 +39,8 @@ public:
 		return vQuat;
 	}
 
-#ifdef _DEBUG
 	void			Change_Speed(_float fSpeed) { m_fSpeedPerSec = fSpeed; }
+#ifdef _DEBUG
 #endif
 
 private:

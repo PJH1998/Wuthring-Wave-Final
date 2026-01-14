@@ -136,6 +136,7 @@ private:
 	// Facial
 	
 	_bool m_IsFacial = { false };
+	
 
 	
 

@@ -38,7 +38,7 @@ void CFreeCamera::Update(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::PRESS)
 		__super::Mouse_Move_Up();
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 
 	ImGui::Begin("Camera Speed");
 
@@ -60,7 +60,7 @@ void CFreeCamera::Update(_float fTimeDelta)
 	ImGui::End();
 
 	m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
-#endif
+//#endif
 }
 
 void CFreeCamera::Late_Update(_float fTimeDelta)

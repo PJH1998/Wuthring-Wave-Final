@@ -256,8 +256,8 @@ void CAugusta::Render()
     }
 
 #ifdef _DEBUG
-	m_pColliderCom->Render();
-	Print_LookRay();
+	//m_pColliderCom->Render();
+	//Print_LookRay();
 	//Debug_ImGui();
 	
 	//if (m_pMainAttackVolume->IsActivate())

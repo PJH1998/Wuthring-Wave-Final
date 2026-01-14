@@ -114,7 +114,6 @@ void CRCS_Manager::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
     pRCS->Clear(iMipLevel);
 }
 
-#ifdef _DEBUG
 HRESULT CRCS_Manager::Debug_Render()
 {
     ImGui::Begin("RendererCS");
@@ -151,7 +150,6 @@ void CRCS_Manager::AddRemoveRCS(const _wstring& strRCSTag, CRendererCS* pRCS)
     m_RenderRCSs.emplace(strRCSTag, pRCS);
     Safe_AddRef(pRCS);
 }
-#endif
 
 CRendererCS* CRCS_Manager::Find_RCS(const _wstring& strRCSTag)
 {

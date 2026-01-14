@@ -30,25 +30,19 @@ public:
 	HRESULT					Begin_RCS(const _wstring& strRCSTag, _uint iWidth, _uint iHeight, _uint iMipLevel);
 	void					Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel);
 
-#ifdef _DEBUG
 	HRESULT                 Debug_Render();
-#endif
 
 private:
 	ID3D11Device*			m_pDevice = { nullptr }; 
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 	RCS						m_RCSs;
 
-#ifdef _DEBUG
+
 	RCS						m_RenderRCSs;
-#endif
 private:
 	CRendererCS*			Find_RCS(const _wstring& strRCSTag);
 
-
-#ifdef _DEBUG
 	void					AddRemoveRCS(const _wstring& strRCSTag, CRendererCS* pRCS);
-#endif
 
 public:
 	static CRCS_Manager*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
