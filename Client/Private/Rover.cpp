@@ -198,14 +198,16 @@ void CRover::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+
+		// 1. 파츠 갱신
+		for (auto& pPart : m_PartObjects)
+		{
+			if (pPart.second->IsActivate())
+				pPart.second->Late_Update(fTimeDelta);
+		}
 	}
 
-	// 1. 파츠 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Late_Update(fTimeDelta);
-	}
+	
 }
 
 void CRover::Render()
