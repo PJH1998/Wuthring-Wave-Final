@@ -47,9 +47,7 @@ public:
 	void							Clear(_uint iMipLevel);
 	void							Clear_Resource();
 
-#ifdef _DEBUG
 	HRESULT							Debug_Render(const _wstring& strRCS_Name);
-#endif
 
 private:
 	ID3D11Device*						m_pDevice = { nullptr };

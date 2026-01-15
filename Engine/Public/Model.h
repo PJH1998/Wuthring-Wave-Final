@@ -15,11 +15,11 @@ public:
 	{
 		BUFFER_KEY_FRAME = 0,
 		BUFFER_ANIM_INFO = 1,
-		BUFFER_INVERSEBIND_POSE = 2,
-		BUFFER_FINAL_BONEMATRIX = 3,
-		BUFFER_ANIM_INFOCB = 4, // constant
-		BUFFER_ANIM_INFOFLYCB = 5, // constant
-		BUFFER_STAGING = 6,
+		BUFFER_FINAL_BONEMATRIX = 2,
+		BUFFER_ANIM_INFOCB = 3, // constant
+		BUFFER_ANIM_INFOFLYCB = 4, // constant
+		BUFFER_STAGING_0 = 5,
+		BUFFER_STAGING_1 = 6,
 		BUFFER_BONE_CHANNEL = 7,
 		BUFFER_MORPH_WEIGHT = 8,
 		BUFFER_END
@@ -31,9 +31,8 @@ public:
 		SRV_KEY_FRAME = 0,
 		SRV_ANIM_INFO = 1,
 		SRV_BONE_CHANNEL = 2,
-		SRV_INVERSEBIND_POSE = 3,
-		SRV_FINAL_BONEMATRIX = 5,
-		SRV_MORPH_WEIGHT = 6,
+		SRV_FINAL_BONEMATRIX = 3,
+		SRV_MORPH_WEIGHT = 4,
 		SRV_END
 	};
 
@@ -161,6 +160,8 @@ private:
 
 	BoundingBox* m_pBoundingBox = { nullptr };
 
+	static const _string kRibPrefix;
+
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
 	_uint m_iSelectIndex = { 0 };
@@ -175,6 +176,12 @@ private:
 
 #pragma endregion
 
+
+#pragma region 더블 버퍼링
+	_uint m_iCurStagingFlip = { 0 };		// 이번 프레임에 GPU가 복사할 버퍼 인덱스
+	_bool m_bIsStagingFilled = { false }; // 최소한 한 프레임이 지나서 읽을 데이터가 있는지 확인합니다.
+	vector <_float4x4> m_vLocalMatrices;
+#pragma endregion
 
 
 

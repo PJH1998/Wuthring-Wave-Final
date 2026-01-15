@@ -184,7 +184,6 @@ void CShadowMap::Clear()
 	m_SectorUV.clear();
 }
 
-#ifdef _DEBUG
 void CShadowMap::Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
 {
 	if (nullptr == m_pShadowMapSRV)
@@ -206,7 +205,6 @@ void CShadowMap::Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
 	}
 
 }
-#endif
 
 void CShadowMap::Setting_ShadowMapViewPort(_uint iSector)
 {
