@@ -1,6 +1,6 @@
 typedef row_major matrix matrix_rm;
-// ±¸Á¶Ã¼ Çü½Ä
-// Depth 1 => Animation¿¡¼­ ¼ÒÀ¯ÇÏ´Â Channel Á¤º¸
+// êµ¬ì¡°ì²´ í˜•ì‹
+// Depth 1 => Animationì—ì„œ ì†Œìœ í•˜ëŠ” Channel ì •ë³´
 struct AnimInfo
 {
     uint iStartChannelIndexOffset;
@@ -9,7 +9,7 @@ struct AnimInfo
     uint iPadding;
 };
 
-// Depth2 Channel ¿¡¼­ ½ÇÇàÇÏ´Â StartKeyFrame
+// Depth2 Channel ì—ì„œ ì‹¤í–‰í•˜ëŠ” StartKeyFrame
 struct GPUChannelInfo
 {
     uint iStartKeyframeOffset;
@@ -18,7 +18,7 @@ struct GPUChannelInfo
     uint iPadding;
 };
 
-// Dpeth 3 Ã¤³ÎÀÌ ¼ÒÀ¯ÇÏ´Â KeyFrame(¸Å TrackPosition¸¶´Ù »ÀÀÇ ÀÌµ¿ Á¤º¸) ±¸Á¶Ã¼.
+// Dpeth 3 ì±„ë„ì´ ì†Œìœ í•˜ëŠ” KeyFrame(ë§¤ TrackPositionë§ˆë‹¤ ë¼ˆì˜ ì´ë™ ì •ë³´) êµ¬ì¡°ì²´.
 struct GPUKeyFrame
 {
     float4 vScale;
@@ -48,7 +48,7 @@ StructuredBuffer<GPUChannelInfo> g_ChannelInfos : register(t2);
 
 RWStructuredBuffer<matrix_rm> g_OutLocalMatrices : register(u0);
 
-// ¸Å ÇÁ·¹ÀÓ C++¿¡¼­ ¾÷µ¥ÀÌÆ®
+// ë§¤ í”„ë ˆì„ C++ì—ì„œ ì—…ë°ì´íŠ¸
 cbuffer AnimationInfoCB : register(b0)
 {
     float g_TrackPosition;
@@ -65,29 +65,29 @@ float4 mul_quaternion(float4 q1, float4 q2)
     return normalize(result);
 }
 
-// ÄõÅÍ´Ï¾ğ slerp Á÷Á¢ ±¸Çö
+// ì¿¼í„°ë‹ˆì–¸ slerp ì§ì ‘ êµ¬í˜„
 float4 custom_slerp(float4 q1, float4 q2, float t)
 {
-   // 1. ÀÔ·Â ÄõÅÍ´Ï¾ğÀ» Á¤±ÔÈ­ÇØ¼­ ¾ÈÁ¤¼º È®º¸
+   // 1. ì…ë ¥ ì¿¼í„°ë‹ˆì–¸ì„ ì •ê·œí™”í•´ì„œ ì•ˆì •ì„± í™•ë³´
     q1 = normalize(q1);
     q2 = normalize(q2);
 
     float cos_theta = dot(q1, q2);
 
-    // ÂªÀº °æ·Î È¸Àü º¸Àå
+    // ì§§ì€ ê²½ë¡œ íšŒì „ ë³´ì¥
     if (cos_theta < 0.0f)
     {
         q2 = -q2;
         cos_theta = -cos_theta;
     }
     
-    // µÎ ÄõÅÍ´Ï¾ğÀÌ °ÅÀÇ °°À¸¸é, lerp·Î ´ëÃ¼ (0À¸·Î ³ª´©±â ¹æÁö)
+    // ë‘ ì¿¼í„°ë‹ˆì–¸ì´ ê±°ì˜ ê°™ìœ¼ë©´, lerpë¡œ ëŒ€ì²´ (0ìœ¼ë¡œ ë‚˜ëˆ„ê¸° ë°©ì§€)
     if (cos_theta > 0.9995f)
     {
         return normalize(lerp(q1, q2, t));
     }
 
-    // acos ÀÔ·Â°ª º¸È£ (ÇÊ¼ö)
+    // acos ì…ë ¥ê°’ ë³´í˜¸ (í•„ìˆ˜)
     cos_theta = clamp(cos_theta, -1.0f, 1.0f);
     
     float theta = acos(cos_theta);
@@ -96,12 +96,11 @@ float4 custom_slerp(float4 q1, float4 q2, float t)
     float w1 = sin((1.0f - t) * theta) / sin_theta;
     float w2 = sin(t * theta) / sin_theta;
 
-    // 3. ÃÖÁ¾ °á°úµµ Á¤±ÔÈ­ÇØ¼­ ¿ÀÂ÷ ´©Àû ¹æÁö
+    // 3. ìµœì¢… ê²°ê³¼ë„ ì •ê·œí™”í•´ì„œ ì˜¤ì°¨ ëˆ„ì  ë°©ì§€
     return normalize(q1 * w1 + q2 * w2);
 }
 
-// ÇïÆÛ ÇÔ¼ö: SQT(Scale, Quaternion, Translation)·ÎºÎÅÍ º¯È¯ Çà·ÄÀ» »ı¼ºÇÕ´Ï´Ù.
-// ÀÌ°Å ¹®Á¨°¡?
+// í—¬í¼ í•¨ìˆ˜: SQT(Scale, Quaternion, Translation)ë¡œë¶€í„° ë³€í™˜ í–‰ë ¬ì„ ìƒì„±í•©ë‹ˆë‹¤.
 matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
 {
     matrix_rm m;
@@ -134,21 +133,21 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
 {
     SRTKeyFrame result;
     
-    // 1. ÇöÀç ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸ °¡Á®¿À±â
+    // 1. í˜„ì¬ ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ ê°€ì ¸ì˜¤ê¸°
     AnimInfo anim = g_AllAnimInfos[animIndex];
     
-    // 2. ´ÜÀ§ SRT ¼³Á¤. 
+    // 2. ë‹¨ìœ„ SRT ì„¤ì •. 
     result.scale = float4(1.f, 1.f, 1.f, 1.f);
-    result.rotation = float4(0.f, 0.f, 0.f, 1.f); // ´ÜÀ§ ÄõÅÍ´Ï¾ğ (w = 1)
+    result.rotation = float4(0.f, 0.f, 0.f, 1.f); // ë‹¨ìœ„ ì¿¼í„°ë‹ˆì–¸ (w = 1)
     result.translation = float4(0.f, 0.f, 0.f, 1.f);
     
-    // 2. ÇöÀç »À¿¡ ÇØ´çÇÏ´Â Ã¤³Î Ã£±â
+    // 2. í˜„ì¬ ë¼ˆì— í•´ë‹¹í•˜ëŠ” ì±„ë„ ì°¾ê¸°
     int channelIndex = -1;
     for (uint i = 0; i < anim.iNumChannels; i++)
     {
-        // globalChannel IndexÀÎ ÀÌÀ¯ => g_ChannelInfos´Â ¸ğµç ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ Ã¤³Î Á¤º¸¸¦ ´ã°í ÀÖ±â ¶§¹®.
-        // ÇöÀç Ã¤³ÎÀÎµ¦½º¸¦ ÀÌ¿ëÇØ¼­ ¾Ö´Ï¸ŞÀÌ¼Ç ¹è¿­¿¡¼­ 
-        // º»ÀÎµ¦½º¸¦ ¼øÈ¸ÇØ¼­ ½º·¹µå°¡ Ã³¸®ÇØ¾ßÇÏ´Â º»ÀÎµ¦½ºÀÎÁö Ã£´Â´Ù.
+        // globalChannel Indexì¸ ì´ìœ  => g_ChannelInfosëŠ” ëª¨ë“  ì• ë‹ˆë©”ì´ì…˜ì˜ ì±„ë„ ì •ë³´ë¥¼ ë‹´ê³  ìˆê¸° ë•Œë¬¸.
+        // í˜„ì¬ ì±„ë„ì¸ë±ìŠ¤ë¥¼ ì´ìš©í•´ì„œ ì• ë‹ˆë©”ì´ì…˜ ë°°ì—´ì—ì„œ 
+        // ë³¸ì¸ë±ìŠ¤ë¥¼ ìˆœíšŒí•´ì„œ ìŠ¤ë ˆë“œê°€ ì²˜ë¦¬í•´ì•¼í•˜ëŠ” ë³¸ì¸ë±ìŠ¤ì¸ì§€ ì°¾ëŠ”ë‹¤.
         uint globalChannelIdx = anim.iStartChannelIndexOffset + i;
         if (g_ChannelInfos[globalChannelIdx].iBoneIndex == boneIndex)
         {
@@ -157,20 +156,20 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
         }
     }
     
-    // 3. ¾Ö´Ï¸ŞÀÌ¼Ç¿¡¼­ ÀÌ »À¿¡ ÇØ´çÇÏ´Â Ã¤³ÎÀÌ ¾øÀ¸¸é, ´ÜÀ§ Çà·ÄÀ» ¼³Á¤ÇÏ°í Á¾·á
+    // 3. ì• ë‹ˆë©”ì´ì…˜ì—ì„œ ì´ ë¼ˆì— í•´ë‹¹í•˜ëŠ” ì±„ë„ì´ ì—†ìœ¼ë©´, ë‹¨ìœ„ í–‰ë ¬ì„ ì„¤ì •í•˜ê³  ì¢…ë£Œ
     if (channelIndex == -1)
     {
         return result;
     }
     
-    // 4. °¡Áö°í ÀÖ´Â Ã¤³Î ÀÎµ¦½º·Î Ã¤³Î Á¤º¸ °¡Á®¿À±â.
+    // 4. ê°€ì§€ê³  ìˆëŠ” ì±„ë„ ì¸ë±ìŠ¤ë¡œ ì±„ë„ ì •ë³´ ê°€ì ¸ì˜¤ê¸°.
     GPUChannelInfo channel = g_ChannelInfos[channelIndex];
 
-    // 5. ¿¹¿ÜÄÉÀÌ½º => Å°ÇÁ·¹ÀÓÀÌ 1°³ ÀÌÇÏ¸é º¸°£ÇÒ ÇÊ¿ä°¡ ¾øÀ½ (Á¤ÀûÀÎ »À ÀÌ¹Ç·Î)
-    // => µû·Î º¸°£ ÀÛ¾÷À» ÇÏÁö ¾Ê°í º¯È¯ Çà·ÄÀ» ¸¸µé¾î¼­ boneIndex À§Ä¡¿¡ ¹Ù·Î ÀúÀå.
+    // 5. ì˜ˆì™¸ì¼€ì´ìŠ¤ => í‚¤í”„ë ˆì„ì´ 1ê°œ ì´í•˜ë©´ ë³´ê°„í•  í•„ìš”ê°€ ì—†ìŒ (ì •ì ì¸ ë¼ˆ ì´ë¯€ë¡œ)
+    // => ë”°ë¡œ ë³´ê°„ ì‘ì—…ì„ í•˜ì§€ ì•Šê³  ë³€í™˜ í–‰ë ¬ì„ ë§Œë“¤ì–´ì„œ boneIndex ìœ„ì¹˜ì— ë°”ë¡œ ì €ì¥.
     if (channel.iNumKeyframes <= 1)
     {
-        // Ã¹ ¹øÂ° Å°ÇÁ·¹ÀÓÀÇ º¯È¯À» ±×´ë·Î »ç¿ë
+        // ì²« ë²ˆì§¸ í‚¤í”„ë ˆì„ì˜ ë³€í™˜ì„ ê·¸ëŒ€ë¡œ ì‚¬ìš©
         GPUKeyFrame staticKey = g_AllKeyframes[channel.iStartKeyframeOffset];
         result.scale = staticKey.vScale;
         result.rotation = staticKey.vRotation;
@@ -178,47 +177,47 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
         return result;
     }
     
-    // 6. Ribbon AnimationÀÇ °æ¿ì Å°ÇÁ·¹ÀÓÀÌ 2°³ÀÌ¸é Ç×»ó ´ÜÀ§ SRT ¹İÈ¯
+    // 6. Ribbon Animationì˜ ê²½ìš° í‚¤í”„ë ˆì„ì´ 2ê°œì´ë©´ í•­ìƒ ë‹¨ìœ„ SRT ë°˜í™˜
     if (isRibbon == true && channel.iNumKeyframes == 2)
     {
         return result;
     }
     
-    // 7. º¸°£ÇÒ µÎ °³ÀÇ Å°ÇÁ·¹ÀÓÀ» Ã£À» ÀÎµ¦½º¸¦ Ã¤³ÎÀÇ ½ÃÀÛ ¿ÀÇÁ¼ÂÀ¸·Î ÃÊ±âÈ­.
+    // 7. ë³´ê°„í•  ë‘ ê°œì˜ í‚¤í”„ë ˆì„ì„ ì°¾ì„ ì¸ë±ìŠ¤ë¥¼ ì±„ë„ì˜ ì‹œì‘ ì˜¤í”„ì…‹ìœ¼ë¡œ ì´ˆê¸°í™”.
     uint keyframeIndex = channel.iStartKeyframeOffset;
     
     
-    // 8. Ã¤³ÎÀÇ ¸ğµç Å°ÇÁ·¹ÀÓÀ» ¼øÈ¸ÇÏ¸é¼­ ´ÙÀ½ Å°ÇÁ·¹ÀÓÀÇ ½Ã°£ÀÌ ÇöÀç Àç»ı ±â°£ º¸´Ù Å©¸é 
-    // ÇØ´ç Å°ÇÁ·¹ÀÓ°ú ±× ´ÙÀ½ Å°ÇÁ·¹ÀÓ »çÀÌ¸¦ º¸°£ÇÏ¸éµÊ.
+    // 8. ì±„ë„ì˜ ëª¨ë“  í‚¤í”„ë ˆì„ì„ ìˆœíšŒí•˜ë©´ì„œ ë‹¤ìŒ í‚¤í”„ë ˆì„ì˜ ì‹œê°„ì´ í˜„ì¬ ì¬ìƒ ê¸°ê°„ ë³´ë‹¤ í¬ë©´ 
+    // í•´ë‹¹ í‚¤í”„ë ˆì„ê³¼ ê·¸ ë‹¤ìŒ í‚¤í”„ë ˆì„ ì‚¬ì´ë¥¼ ë³´ê°„í•˜ë©´ë¨.
     for (uint k = 0; k < channel.iNumKeyframes - 1; ++k)
     {
-        // ´ÙÀ½ Å°ÇÁ·¹ÀÓÀÇ ½Ã°£ÀÌ ÇöÀç Àç»ı ½Ã°£º¸´Ù Å©¸é, ÇöÀç k¿Í k + 1 »çÀÌ¿¡¼­ º¸°£ÇÏ¸é µÊ
+        // ë‹¤ìŒ í‚¤í”„ë ˆì„ì˜ ì‹œê°„ì´ í˜„ì¬ ì¬ìƒ ì‹œê°„ë³´ë‹¤ í¬ë©´, í˜„ì¬ kì™€ k + 1 ì‚¬ì´ì—ì„œ ë³´ê°„í•˜ë©´ ë¨
         if (g_AllKeyframes[channel.iStartKeyframeOffset + k + 1].fTrackPosition > fTrackPosition)
         {
             keyframeIndex = channel.iStartKeyframeOffset + k;
-            break; // ¿Ã¹Ù¸¥ ±¸°£À» Ã£¾ÒÀ¸¹Ç·Î ¹İº¹ Áß´Ü
+            break; // ì˜¬ë°”ë¥¸ êµ¬ê°„ì„ ì°¾ì•˜ìœ¼ë¯€ë¡œ ë°˜ë³µ ì¤‘ë‹¨
         }
-        // ³¡±îÁö ¸øÃ£¾Ò´Ù¸é ¸¶Áö¸·-1 ÀÎµ¦½º¸¦ »ç¿ëÇÏ°Ô µÊ
+        // ëê¹Œì§€ ëª»ì°¾ì•˜ë‹¤ë©´ ë§ˆì§€ë§‰-1 ì¸ë±ìŠ¤ë¥¼ ì‚¬ìš©í•˜ê²Œ ë¨
         keyframeIndex = channel.iStartKeyframeOffset + k;
     }
     
     GPUKeyFrame key1 = g_AllKeyframes[keyframeIndex];
     GPUKeyFrame key2 = g_AllKeyframes[keyframeIndex + 1];
 
-    // 9. µÎ Å°ÇÁ·¹ÀÓ »çÀÌÀÇ º¸°£ ºñÀ² °è»ê
+    // 9. ë‘ í‚¤í”„ë ˆì„ ì‚¬ì´ì˜ ë³´ê°„ ë¹„ìœ¨ ê³„ì‚°
     float blendFactor = 0.f;
     float segmentDuration = key2.fTrackPosition - key1.fTrackPosition;
     
     if (segmentDuration > 0.0f)
     {
-        // ¼±Çü º¸°£
+        // ì„ í˜• ë³´ê°„
         blendFactor = (g_TrackPosition - key1.fTrackPosition) / segmentDuration;
     }
 
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
-    // C++°ú ´Ş¸® HLSL¿¡´Â DirectXMathÀÇ XMQuaternionSlerp°¡ ¾øÀ¸¹Ç·Î Á÷Á¢ ±¸ÇöÇÑ custom_slerp »ç¿ë
+    // C++ê³¼ ë‹¬ë¦¬ HLSLì—ëŠ” DirectXMathì˜ XMQuaternionSlerpê°€ ì—†ìœ¼ë¯€ë¡œ ì§ì ‘ êµ¬í˜„í•œ custom_slerp ì‚¬ìš©
     float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;
@@ -232,63 +231,36 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
 
 float SafeDivide(float numerator, float denominator)
 {
-    // ºĞ¸ğ°¡ ¾ÆÁÖ ÀÛÀ¸¸é(0¿¡ °¡±î¿ì¸é) ³ª´°¼ÀÀ» ÇÏÁö ¾Ê°í 1(º¯È­ ¾øÀ½)À» ¹İÈ¯
+    // ë¶„ëª¨ê°€ ì•„ì£¼ ì‘ìœ¼ë©´(0ì— ê°€ê¹Œìš°ë©´) ë‚˜ëˆ—ì…ˆì„ í•˜ì§€ ì•Šê³  1(ë³€í™” ì—†ìŒ)ì„ ë°˜í™˜
     if (abs(denominator) < 1e-6f)
         return 1.0f;
     return numerator / denominator;
 }
 
-// µ¨Å¸(Delta) SRT °è»ê (°¡»ê ºí·»µù¿ë)
-// (targetSRT - weightSRT)
-SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
-{
-    SRTKeyFrame delta;
-    
-    // Ã´µµ(Scale) »¬¼À (³ª´°¼À)
-    delta.scale.x = SafeDivide(targetSRT.scale.x, weightSRT.scale.x);
-    delta.scale.y = SafeDivide(targetSRT.scale.y, weightSRT.scale.y);
-    delta.scale.z = SafeDivide(targetSRT.scale.z, weightSRT.scale.z);
-    delta.scale.w = 1.0f;
-    //delta.scale = targetSRT.scale / weightSRT.scale;
-    
-    // È¸Àü(Rotation) »¬¼À: target * inverse(weight)
-    // inverse(q) = (-q.xyz, q.w)
-    //float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
-    float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
-    if (dot(invWeightRot, invWeightRot) < 1e-6f)  invWeightRot = float4(0, 0, 0, 1); // Identity Quaternion
-    else invWeightRot = normalize(invWeightRot);
-    delta.rotation = mul_quaternion(targetSRT.rotation, normalize(invWeightRot));
-    
-    // ÀÌµ¿(Translation) »¬¼À
-    delta.translation = targetSRT.translation - weightSRT.translation;
-    return delta;
-}
-
-// °¡»ê ºí·»µù ¹æ½Ä
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : ÀüÃ¼ ÀÛ¾÷¿¡¼­ÀÇ ½º·¹µå ID
+void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : ì „ì²´ ì‘ì—…ì—ì„œì˜ ìŠ¤ë ˆë“œ ID
 {
-    // ÇöÀç º» Index °¡Á®¿À±â.
+    // í˜„ì¬ ë³¸ Index ê°€ì ¸ì˜¤ê¸°.
     uint boneIndex = dispatchThreadID.x;
     
-      // 1. Action AnimationÀÇ SRT °¡Á®¿À±â
+      // 1. Action Animationì˜ SRT ê°€ì ¸ì˜¤ê¸°
     SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
    
     matrix result_matrix;
     
-    // Ribbon AnimationÀ» »ç¿ëÇÑ´Ù¸é?
+    // Ribbon Animationì„ ì‚¬ìš©í•œë‹¤ë©´?
     if (g_IsRibAnimUsed)
     {
        
-        // 2. Ribbon AnimationÀÇ SRT °¡Á®¿À±â
+        // 2. Ribbon Animationì˜ SRT ê°€ì ¸ì˜¤ê¸°
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        //ribbonSRT.translation.xyz *= 0.01f; // ÀÓ½Ã·Î 0.01¹è ¼³Á¤ÇÏ±â. => ½Ï´Ù 1·Î.
-        // => Blender¿¡¼­ PSA Import ÇÒ¶§ Translation ScaleÀ» 0.01¹èÇÏ¸éµÈ´Ù. => ¹º°¡ ºü´Ù¸®³².
+        //ribbonSRT.translation.xyz *= 0.01f; // ì„ì‹œë¡œ 0.01ë°° ì„¤ì •í•˜ê¸°. => ì‹¹ë‹¤ 1ë¡œ.
+        // => Blenderì—ì„œ PSA Import í• ë•Œ Translation Scaleì„ 0.01ë°°í•˜ë©´ëœë‹¤. => ë­”ê°€ ë¹ ë‹¤ë¦¬ë‚¨.
         
-        // °¡»ê ºí·»µù
+        // ê°€ì‚° ë¸”ë Œë”©
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;
         float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
-        float4 finalTranslation = ribbonSRT.translation + actionSRT.translation; // delta Àû¿ë
+        float4 finalTranslation = ribbonSRT.translation + actionSRT.translation; // delta ì ìš©
         
         finalTranslation.w = 1.f;
         result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
@@ -298,7 +270,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     }
     
-    // ÃÖÁ¾ Çà·Ä Ãâ·Â ¹öÆÛ¿¡ ÀúÀå.
+    // ìµœì¢… í–‰ë ¬ ì¶œë ¥ ë²„í¼ì— ì €ì¥.
     g_OutLocalMatrices[boneIndex] = result_matrix;
    
 }

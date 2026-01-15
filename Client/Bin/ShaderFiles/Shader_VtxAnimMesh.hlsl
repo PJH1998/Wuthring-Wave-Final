@@ -335,7 +335,7 @@ PS_OUT PS_NORMAL_YELLOW(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    //Out.vPBR.x = vNormal1.b; // PBR.X = 노말 텍스처 Blue, Z 값
+    Out.vPBR.x = vNormal1.b; // PBR.X = 노말 텍스처 Blue, Z 값
     Out.vPBR.y = vNormal1.a; // PBR.y = 노말 텍스처 Alpha 값
     //Out.vPBR.y = 0.2f;
     Out.vPBR.z = 1.f;

@@ -1019,16 +1019,16 @@ void CRenderer::Render_Setting()
 {
 //	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::PRESS)
 	{
-		if (m_pGameInstance->Get_DIKeyState(DIK_4) == KEYSTATE::DOWN)
+		if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
 			m_IsSSAO = !m_IsSSAO;
 
-		if (m_pGameInstance->Get_DIKeyState(DIK_5) == KEYSTATE::DOWN)
+		if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD5) == KEYSTATE::DOWN)
 			m_IsFog = !m_IsFog;
 
-		if (m_pGameInstance->Get_DIKeyState(DIK_6) == KEYSTATE::DOWN)
+		if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD6) == KEYSTATE::DOWN)
 			m_IsOutLine = !m_IsOutLine;
 
-		if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::DOWN)
+		if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD7) == KEYSTATE::DOWN)
 			m_IsLight = !m_IsLight;
 	}
 
@@ -1060,6 +1060,8 @@ void CRenderer::Render_Setting()
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		CRASH("ProjMatrix");
 
+
+
 	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
 
 	m_pGameInstance->Render_ShadowMap(m_pShader, m_pVIBuffer);
@@ -1068,8 +1070,6 @@ void CRenderer::Render_Setting()
 #ifdef _DEBUG
 void CRenderer::Render_Debug()
 {
-
-
 	for (auto& pComponent : m_DebugComponents)
 	{
 		if (nullptr != pComponent)

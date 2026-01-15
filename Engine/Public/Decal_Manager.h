@@ -32,10 +32,8 @@ public:
 private:
 	ID3D11Device*						m_pDevice = { nullptr };
 	ID3D11DeviceContext*				m_pContext = { nullptr };
-	CGameInstance*						m_pGameInstance = { nullptr };
 
 	DECALS								m_Decals;
-
 	list<CGameObject*>					m_CustomDecals;
 
 	CShader*							m_pShader = { nullptr };
