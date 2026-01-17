@@ -1245,6 +1245,7 @@ void CCharacter::Rotate_Target(_bool IsReverse)
     return;
 }
 
+// 한 방향으로만 회전하는게 오히려 더 자연스러움.
 void CCharacter::Rotate_To_Diagonal_Target(_float fAngleDegree, _bool IsRight)
 {
 	if (nullptr == m_pTargetTransform)
