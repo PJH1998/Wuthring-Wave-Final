@@ -440,9 +440,10 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		if (nullptr != m_pTransformCom) // 우선 내위치에 켜기?ㅡ
-			m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
+		//if (nullptr != m_pTransformCom) // 우선 내위치에 켜기?ㅡ
+		//	m_pGameSystem->Summon_SequenceCharacter(m_pTransformCom);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)

@@ -113,6 +113,7 @@ void CPatternDummy::Late_Update(_float fTimeDelta)
 #endif // _DEBUG
 
 
+	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(2480.6f, 316.901f, 1826.5f, 1.f));
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 

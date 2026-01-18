@@ -192,45 +192,49 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-		if (m_States[JUMP])
+		if (eSkillType != EGalbrenaSkillType::ATTACK_JUMP_END02)
 		{
-			m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
-			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
-			return;
-		}
-
-		if (m_States[LAND])
-		{
-			if (m_States[MOVE])
+			if (m_States[JUMP])
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
+				m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_SECOND_F;
+				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP));
 				return;
 			}
-		}
 
-		if (m_States[DEFAULT_E])
-		{
-			if (eSkillType == EGalbrenaSkillType::BURST01)
+			if (m_States[LAND])
 			{
-				if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+				if (m_States[MOVE])
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::RUN_F;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN));
 					return;
-
-				m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL)); // 상위, 하위 상태
-				return;
+				}
 			}
-		}
 
-		if (m_States[ATTACK])
-		{
-			if (eSkillType == EGalbrenaSkillType::BURST01)
+			if (m_States[DEFAULT_E])
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK));
-				return;
+				if (eSkillType == EGalbrenaSkillType::BURST01)
+				{
+					if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+						return;
+
+					m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::SKILL)); // 상위, 하위 상태
+					return;
+				}
+			}
+
+			if (m_States[ATTACK])
+			{
+				if (eSkillType == EGalbrenaSkillType::BURST01)
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eAttackType = EGalbrenaAttackType::ATTACK01;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::ATTACK));
+					return;
+				}
 			}
 		}
+		
     }
 
     // 가장 우선순위 낮음.
@@ -238,7 +242,6 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
     {
         if (m_States[LAND])
         {
-
 			if (eSkillType == EGalbrenaSkillType::BURST01)
 			{
 				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE02;
@@ -247,9 +250,20 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			}
 			else
 			{
-				m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
-				m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-				return;
+				if (eSkillType == EGalbrenaSkillType::ATTACK_JUMP_END02)
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eLandType = EGalbrenaLandType::LAND_HEAVY;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::LAND));
+					return;
+				}
+				else
+				{
+					m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STANDCHANGE;
+					m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+					return;
+				}
+				
+				
 			}
 			
         }

@@ -209,8 +209,10 @@ void CLevel_GamePlay::Ready_Dummy()
 	//DummyDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	//DummyDesc.vOffsetRot = _float3(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 
-	DummyDesc.vInitPosition = _float3(2464.6f, 317.2f, 1834.9f);
-	DummyDesc.vInitRotation = _float3(XMConvertToRadians(0.f), XMConvertToRadians(180.f), XMConvertToRadians(0.f));
+	//DummyDesc.vInitPosition = _float3(2464.6f, 317.2f, 184.9f);
+	DummyDesc.vInitPosition = _float3(2480.6f, 317.2f, 1826.5f);
+	//{ 2464.6f, 317.2f, 1832.9f };
+	DummyDesc.vInitRotation = _float3(XMConvertToRadians(0.f), XMConvertToRadians(-90.f), XMConvertToRadians(0.f));
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Dummy"), &DummyDesc)))
 		CRASH("Failed Ready Monster");
