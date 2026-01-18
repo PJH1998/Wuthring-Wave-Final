@@ -21,7 +21,7 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 		m_pBoundingBox = new BoundingBox(vCenter, Extent);
 	}
 	else
-		m_pBoundingBox = new BoundingBox(vCenter, vExtent);
+		m_pBoundingBox = new BoundingBox(vCenter, Extent);
 
 	ASSERT_CRASH(m_pBoundingBox);
 
@@ -49,15 +49,15 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 		vOffset.z = (i & 4) ? -0.5f : 0.5f;
 
 		_float3 vChildCenter = _float3(
-			vCenter.x + vOffset.x * vExtent.x,
-			vCenter.y + vOffset.y * vExtent.y,
-			vCenter.z + vOffset.z * vExtent.z
+			vCenter.x + vOffset.x * Extent.x,
+			vCenter.y + vOffset.y * Extent.y,
+			vCenter.z + vOffset.z * Extent.z
 		);
 
 		_float3 vChildExtent = _float3(
-			vExtent.x * 0.5f,
-			vExtent.y * 0.5f,
-			vExtent.z * 0.5f
+			Extent.x * 0.5f,
+			Extent.y * 0.5f,
+			Extent.z * 0.5f
 		);
 
 		CCubeCell* pCubeCell = CCubeCell::Create(vChildCenter, vChildExtent, m_iDepth + 1);
