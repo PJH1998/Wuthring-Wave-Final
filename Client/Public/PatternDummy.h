@@ -18,6 +18,7 @@ public:
 	{
 		LEVEL eLevel;
 		_float3 vInitPosition;
+		_float3 vInitRotation;
 		_wstring strModelTag;
 		_wstring strPartTag;
 		_string strBoneName;
@@ -26,6 +27,7 @@ public:
 		_float3 vOffsetRot;
 		_string strFolderPath;
 		MODEL_TYPES eType;
+		_bool isCollide{ false };
 	}PAT_DUMMYDESC;
 private:
 	explicit CPatternDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -54,7 +56,7 @@ private:
 	CModel*						m_pModelCom = { nullptr };
 	//CRigidbody*				m_pRigidbodyCom = { nullptr };
 	CCollider*					m_pColliderCom = { nullptr };
-
+	CALLBACK_CLIENT				m_tCallBack{};
 	_string					m_strAnimTag;
 	_string					m_strInitAnimTag;
 	_bool					m_isRootMotion{true};
