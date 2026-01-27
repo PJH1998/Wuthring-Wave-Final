@@ -1116,9 +1116,9 @@ _vector CCharacter::Calculate_LockOn_Move_Direction(ACTORDIR eDir)
 	case ACTORDIR::D:   return -vToTarget;   
 	case ACTORDIR::L:   return -vTargetRight; 
 	case ACTORDIR::R:   return vTargetRight;  
-	case ACTORDIR::LU:  return XMVector3Normalize(vToTarget - vTargetRight);
+	case ACTORDIR::LU:  return XMVector3Normalize(vToTarget * 0.3f - vTargetRight * 0.7f);
 	case ACTORDIR::LD:  return XMVector3Normalize(-vToTarget - vTargetRight);
-	case ACTORDIR::RU:  return XMVector3Normalize(vToTarget + vTargetRight);
+	case ACTORDIR::RU:  return XMVector3Normalize(vToTarget * 0.3f + vTargetRight * 0.7f);
 	case ACTORDIR::RD:  return XMVector3Normalize(-vToTarget + vTargetRight);
 	default: return XMVectorZero();
 	}
