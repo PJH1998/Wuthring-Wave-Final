@@ -64,6 +64,9 @@ private:
 	_bool					m_isRootTranslate{};
 	_float3					m_vPosition{};
 	MODEL_TYPES				m_eType{};
+
+	const _float4x4* m_pCameraSocket = { nullptr };
+	CALLBACK_CLIENT m_CallBack = {};
 #ifdef _DEBUG
 	vector<_string>			m_strAnimationTags;
 #endif // _DEBUG

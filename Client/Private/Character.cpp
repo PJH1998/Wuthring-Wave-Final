@@ -1112,14 +1112,14 @@ _vector CCharacter::Calculate_LockOn_Move_Direction(ACTORDIR eDir)
 
 	switch (eDir)
 	{
-	case ACTORDIR::U:   return -vToTarget;  
-	case ACTORDIR::D:   return vToTarget;   
+	case ACTORDIR::U:   return vToTarget;
+	case ACTORDIR::D:   return -vToTarget;   
 	case ACTORDIR::L:   return -vTargetRight; 
 	case ACTORDIR::R:   return vTargetRight;  
-	case ACTORDIR::LU:  return XMVector3Normalize(-vToTarget - vTargetRight);
-	case ACTORDIR::LD:  return XMVector3Normalize(vToTarget - vTargetRight);
-	case ACTORDIR::RU:  return XMVector3Normalize(-vToTarget + vTargetRight);
-	case ACTORDIR::RD:  return XMVector3Normalize(vToTarget + vTargetRight);
+	case ACTORDIR::LU:  return XMVector3Normalize(vToTarget - vTargetRight);
+	case ACTORDIR::LD:  return XMVector3Normalize(-vToTarget - vTargetRight);
+	case ACTORDIR::RU:  return XMVector3Normalize(vToTarget + vTargetRight);
+	case ACTORDIR::RD:  return XMVector3Normalize(-vToTarget + vTargetRight);
 	default: return XMVectorZero();
 	}
 }
@@ -1140,7 +1140,9 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
 	Rotate_Target_Lerp(fTimeDelta);
 
 	// 2. 이동 방향.
-    _vector vMoveDir = Calculate_Move_Direction(eDir);
+	
+    //_vector vMoveDir = Calculate_Move_Direction(eDir);
+    _vector vMoveDir = Calculate_LockOn_Move_Direction(eDir);
 
     // 3. 이동 적용  
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);

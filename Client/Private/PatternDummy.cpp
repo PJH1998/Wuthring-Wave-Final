@@ -28,6 +28,12 @@ HRESULT CPatternDummy::Initialize_Clone(void* pArg)
 	m_pTransformCom->Rotation_Quaternion(pDesc->vInitRotation);
 	Ready_Component(pDesc);
 
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+
+
+	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_strInitAnimTag = pDesc->strInitAnimTag;
 	m_strAnimTag = m_strInitAnimTag;
 
