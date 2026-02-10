@@ -38,9 +38,9 @@ HRESULT CMapObject_Turn::Initialize_Clone(void* pArg)
 	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;
 
-	m_fTurnSpeed = XMConvertToRadians(m_pGameInstance->Rand(200.f, 400.f) / 1000.f);
+	m_fTurnSpeed = XMConvertToRadians(m_pGameInstance->Rand(2.f, 12.f) / 1000.f);
 
-	_vector vAddYRot = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(m_pGameInstance->Rand(0.f, 50.f)));
+	_vector vAddYRot = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(m_pGameInstance->Rand(0.f, 360.f)));
 	_vector vScale, vRot, vTrans;
 	XMMatrixDecompose(&vScale, &vRot, &vTrans, m_pTransformCom->Get_WorldMatrix());
 
@@ -57,7 +57,7 @@ void CMapObject_Turn::Update(_float fTimeDelta)
 {
 	if (m_iLODIndex <= 1)
 	{
-		_vector vAddYRot = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), m_fTurnSpeed);
+		_vector vAddYRot = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), m_fTurnSpeed / fTimeDelta);
 		_vector vScale, vRot, vTrans;
 		XMMatrixDecompose(&vScale, &vRot, &vTrans, m_pTransformCom->Get_WorldMatrix());
 

@@ -40,17 +40,20 @@ void CInputController::Update_KeyInput()
     m_KeyInput = 0;
     KEYSTATE eState = { KEYSTATE::END };
 
-    // 2. Ű���� �Է� Ȯ��.
+    // 2. 키보드 매핑 로직.
     for (_uint i = 0; i < m_KeyboardMappings.size(); ++i)
     {
-        const auto& keyMapping = m_KeyboardMappings[i];
+		// 벡터에 등록된 키 매핑을 하나씩 꺼냅니다.
+        const auto& keyMapping = m_KeyboardMappings[i]; 
+		// 꺼낸 키 매핑 로직으로 키 상태(ubyte)를 얻어와서 현재 입력되었는지 확인합니다.
         eState = m_pGameInstance->Get_DIKeyState(keyMapping.second);
 
+		// PRESS or Down 상태라면 KeyInput 플래그에 해당 키 매핑 플래그를 설정합니다.
         if (eState == KEYSTATE::PRESS || eState == KEYSTATE::DOWN)
             m_KeyInput |= keyMapping.first;
     }
 
-    // 3. 
+    // 3. 마우스 매핑 로직
     for (_uint i = 0; i < m_MouseMappings.size(); ++i)
     {
         const auto& keyMapping = m_MouseMappings[i];
@@ -65,13 +68,13 @@ _bool CInputController::Check_AnyInput(_uint eKeyInput, KEYSTATE eState)
 {
     _uint iFlag = static_cast<_uint>(eKeyInput);
     if (eState == KEYSTATE::PRESS)
-        return (m_KeyInput & iFlag) != 0;  // ���� ����
+        return (m_KeyInput & iFlag) != 0;
 
     if (eState == KEYSTATE::DOWN)
-        return !(m_PrevKeyInput & iFlag) && (m_KeyInput & iFlag);  // ����X, ����O
+        return !(m_PrevKeyInput & iFlag) && (m_KeyInput & iFlag);
 
     if (eState == KEYSTATE::UP)
-        return (m_PrevKeyInput & iFlag) && !(m_KeyInput & iFlag);  // ����O, ����X
+        return (m_PrevKeyInput & iFlag) && !(m_KeyInput & iFlag);
 
     return false;
 }
@@ -81,13 +84,13 @@ _bool CInputController::Check_AllInput(_uint eKeyInput, KEYSTATE eState)
     _uint iFlag = static_cast<_uint>(eKeyInput);
 
     if (eState == KEYSTATE::PRESS)
-        return (m_KeyInput & iFlag) == iFlag;  // ���� ����
+        return (m_KeyInput & iFlag) == iFlag;
 
     if (eState == KEYSTATE::DOWN)
-        return !((m_PrevKeyInput & iFlag) == iFlag) && ((m_KeyInput & iFlag) == iFlag);  // ����X, ����O
+        return !((m_PrevKeyInput & iFlag) == iFlag) && ((m_KeyInput & iFlag) == iFlag);
 
     if (eState == KEYSTATE::UP)
-        return ((m_PrevKeyInput & iFlag) == iFlag) && !((m_KeyInput & iFlag) == iFlag);  // ����O, ����X
+        return ((m_PrevKeyInput & iFlag) == iFlag) && !((m_KeyInput & iFlag) == iFlag);
 
     return false;
 }

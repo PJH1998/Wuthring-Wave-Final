@@ -55,13 +55,6 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 	// 6. Target이 존재한다면? => Auto Target
 	m_pAugusta->Rotate_Target();
 
-	// 7. Camera 변경.
-	//m_pAugusta->Bind_CameraDistance(2.f);
-
-	// 8. Sound Test
-	//m_pAugusta->Play_Sound(L"ko_vo_aogusita_atk_atk01_01_tone (ko)", CHANNEL::PLAYER_VOICE, 1.f);
-	//m_pAugusta->Play_Sound(L"ko_vo_aogusita_atk_atk01_02_tone (ko)", CHANNEL::PLAYER_VOICE, 1.f);
-	//m_pAugusta->Play_Sound(L"ko_vo_aogusita_atk_atk01_03_tone (ko)", CHANNEL::PLAYER_VOICE, 1.f);
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)

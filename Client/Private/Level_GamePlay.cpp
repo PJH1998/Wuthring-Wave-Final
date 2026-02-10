@@ -24,6 +24,8 @@
 #include"NPC_Griffin.h"
 #include"Potal.h"
 
+#include "PatternDummy.h"
+
 //SFX
 #ifdef _DEBUG
 #include "SonoraChange.h"
@@ -97,7 +99,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_CoroSaurus();
 	Ready_NPC();
 	Ready_Production();
-
+	//허수아비 복제
+	Ready_Dummy();
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
@@ -193,6 +196,26 @@ void CLevel_GamePlay::Ready_Layer_Player()
 
 void CLevel_GamePlay::Ready_Dummy()
 {
+	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
+	DummyDesc.eLevel = m_eCurLevel;
+	DummyDesc.eType = CPatternDummy::MODEL_TYPES::DEFAULT;
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_HavocWarrior");					// 근거리 잡몹
+	DummyDesc.strInitAnimTag = "Stand1";		
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/Monster/HavocWarrior/Notify";			
+	DummyDesc.isCollide = true;
+	//DummyDesc.eType = CPatternDummy::MODEL_TYPES::DEFAULT;
+	//DummyDesc.strPartTag = TEXT("Prototype_Component_Model_Leviatan_Bayonet");
+	//DummyDesc.strBoneName = "WeaponProp02";
+	//DummyDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
+	//DummyDesc.vOffsetRot = _float3(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+
+	//DummyDesc.vInitPosition = _float3(2464.6f, 317.2f, 184.9f);
+	DummyDesc.vInitPosition = _float3(2480.6f, 317.2f, 1826.5f);
+	//{ 2464.6f, 317.2f, 1832.9f };
+	DummyDesc.vInitRotation = _float3(XMConvertToRadians(0.f), XMConvertToRadians(-90.f), XMConvertToRadians(0.f));
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Dummy"), &DummyDesc)))
+		CRASH("Failed Ready Monster");
 }
 
 void CLevel_GamePlay::Ready_MonsterTest()

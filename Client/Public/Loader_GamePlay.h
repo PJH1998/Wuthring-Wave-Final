@@ -24,6 +24,7 @@ private:
 	HRESULT				Load_Production();
 	HRESULT				Load_NPC();
 	HRESULT				Load_Hide_And_Seek();
+	HRESULT				Load_Dummy();
 
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();

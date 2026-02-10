@@ -24,7 +24,6 @@ public:
 	void Set_UAV(const string& strName, ID3D11UnorderedAccessView* pUAV);
 	void Set_ConstantBuffer(const string& strName, ID3D11Buffer* pCB);
 	void Set_Sampler(_uint iSlotIndex, ID3D11SamplerState* pSampler);
-	// 
 	void Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ);
 	void Clear_Resources();
 
@@ -34,7 +33,7 @@ private:
 private:
 	ID3D11ComputeShader* m_pComputeShader = nullptr;
 
-	// 
+	// Shader Thread 개수 정보.
 	COMPUTESHADER_INFO m_ThreadInfo = {};
 
 	// 

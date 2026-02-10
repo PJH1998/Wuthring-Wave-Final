@@ -25,9 +25,15 @@ HRESULT CPatternDummy::Initialize_Clone(void* pArg)
 		return E_FAIL;
 	PAT_DUMMYDESC* pDesc = static_cast<PAT_DUMMYDESC*>(pArg);
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
-
+	m_pTransformCom->Rotation_Quaternion(pDesc->vInitRotation);
 	Ready_Component(pDesc);
 
+	m_pCameraSocket = m_pModelCom->Get_BoneMatrixPtr("CameraPosition");
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.pSocketMatrix = m_pCameraSocket;
+
+
+	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_strInitAnimTag = pDesc->strInitAnimTag;
 	m_strAnimTag = m_strInitAnimTag;
 
@@ -61,8 +67,11 @@ void CPatternDummy::Update(_float fTimeDelta)
 		m_strAnimTag = m_strInitAnimTag;
 	}
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
-	//_vector vVelocity = m_pTransformCom->Get_Velocity();
-	//m_pColliderCom->Update(vVelocity / fTimeDelta);
+	if(m_pColliderCom)
+	{
+		_vector vVelocity = m_pTransformCom->Get_Velocity();
+		m_pColliderCom->Update(vVelocity / fTimeDelta);
+	}
 
 	for (auto& Pair : m_PartObjects)
 	{
@@ -73,11 +82,12 @@ void CPatternDummy::Update(_float fTimeDelta)
 
 void CPatternDummy::Late_Update(_float fTimeDelta)
 {
-	//m_pColliderCom->Sync_Position(m_pTransformCom);
+	if (m_pColliderCom)
+		m_pColliderCom->Sync_Position(m_pTransformCom);
 	// Guizmo Test
-	m_pGameInstance->Use_Gizmo(m_pTransformCom);
 
 #ifdef _DEBUG
+	m_pGameInstance->Use_Gizmo(m_pTransformCom);
 
 	if(!m_strAnimationTags.empty())
 	{
@@ -109,6 +119,7 @@ void CPatternDummy::Late_Update(_float fTimeDelta)
 #endif // _DEBUG
 
 
+	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(2480.6f, 316.901f, 1826.5f, 1.f));
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 
@@ -195,6 +206,25 @@ void CPatternDummy::Ready_Component(PAT_DUMMYDESC* pDesc)
 	// Com_Model
 	Add_Component(ENUM_CLASS(pDesc->eLevel), pDesc->strModelTag,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr);
+
+	if(pDesc->isCollide)
+	{
+		// Com_Collider
+		CCollider::COLLIDER_DESC ColliderDesc = {};
+		XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		ColliderDesc.vOffset = _float3(0.f, 1.1f, 0.f);
+		ColliderDesc.eType = EMotionType::Kinematic;
+		ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
+		ColliderDesc.fHeight = 1.45f;
+		ColliderDesc.fRadius = 0.4f;
+		ColliderDesc.fRayOffset = -0.15f;
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
+			TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
+		ASSERT_CRASH(m_pColliderCom);
+		m_tCallBack.pTransform = m_pTransformCom;
+		m_tCallBack.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(2);
+		m_pColliderCom->Set_Desc(&m_tCallBack);
+	}
 
 #ifdef _DEBUG
 	m_strAnimationTags = m_pModelCom->Get_AnimationNames();

@@ -354,54 +354,6 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
     return result;
 }
 
-// ÇïÆÛ 1: µÎ Å¬¸³À» 't' ºñÀ²·Î 1D ºí·»µù (¼±Çü º¸°£)
-SRTKeyFrame Blend1D_SRT(uint clipA_idx, uint clipB_idx, float t, uint boneIndex, float trackPos)
-{
-    // 1. °¢ Å¬¸³¿¡¼­ ÇöÀç ½Ã°£ÀÇ SRT °ªÀ» °è»ê
-    SRTKeyFrame srtA = Calculate_SRT(boneIndex, clipA_idx, false, trackPos);
-    SRTKeyFrame srtB = Calculate_SRT(boneIndex, clipB_idx, false, trackPos);
-
-    // 2. µÎ SRT¸¦ ¼±Çü º¸°£ (Lerp / Slerp)
-    SRTKeyFrame result;
-    result.scale = lerp(srtA.scale, srtB.scale, t);
-    result.rotation = custom_slerp(srtA.rotation, srtB.rotation, t);
-    result.translation = lerp(srtA.translation, srtB.translation, t);
-    return result;
-}
-
-
-// ÇïÆÛ 2: µ¨Å¸(Delta) SRT °è»ê (°¡»ê ºí·»µù¿ë)
-// (targetSRT - weightSRT)
-SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
-{
-    SRTKeyFrame delta;
-    
-    // Ã´µµ(Scale) »¬¼À (³ª´°¼À)
-    delta.scale = targetSRT.scale / weightSRT.scale;
-    
-    // È¸Àü(Rotation) »¬¼À: target * inverse(weight)
-    // inverse(q) = (-q.xyz, q.w)
-    float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
-    delta.rotation = mul_quaternion(targetSRT.rotation, normalize(invWeightRot));
-    
-    // ÀÌµ¿(Translation) »¬¼À
-    delta.translation = targetSRT.translation - weightSRT.translation;
-    return delta;
-}
-
-// ÇïÆÛ 3: µ¨Å¸(Delta) SRT Àû¿ë (°¡»ê)
-// (baseSRT + deltaSRT)
-SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
-{
-    SRTKeyFrame result;
-    // Ã´µµ µ¡¼À (°ö¼À)
-    result.scale = baseSRT.scale * deltaSRT.scale;
-    // È¸Àü µ¡¼À: delta * base
-    result.rotation = mul_quaternion(deltaSRT.rotation, baseSRT.rotation);
-    // ÀÌµ¿ µ¡¼À
-    result.translation = baseSRT.translation + deltaSRT.translation;
-    return result;
-}
 
 // °¡»ê ºí·»µù ¹æ½Ä
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]

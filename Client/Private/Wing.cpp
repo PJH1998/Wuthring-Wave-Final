@@ -50,6 +50,7 @@ void CWing::Update(_float fTimeDelta)
 
 	CProp::Update(fTimeDelta);
 
+	//Wing은 본체 Transform이 완전히 확정된 후에 소켓 행렬을 갱신
 	XMStoreFloat4x4(&m_CombinedMatrix,
 		m_pTransformCom->Get_WorldMatrix() *
 		XMLoadFloat4x4(m_pSocketMatrix) *
@@ -65,7 +66,6 @@ void CWing::Late_Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 
-	//Wing은 본체 Transform이 완전히 확정된 후에 소켓 행렬을 갱신
 	
 
 	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 

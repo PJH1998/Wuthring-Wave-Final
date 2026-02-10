@@ -198,14 +198,16 @@ void CRover::Late_Update(_float fTimeDelta)
 
 		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
 			return;
+
+		// 1. 파츠 갱신
+		for (auto& pPart : m_PartObjects)
+		{
+			if (pPart.second->IsActivate())
+				pPart.second->Late_Update(fTimeDelta);
+		}
 	}
 
-	// 1. 파츠 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Late_Update(fTimeDelta);
-	}
+	
 }
 
 void CRover::Render()
@@ -260,7 +262,7 @@ void CRover::Render()
 		m_pColliderCom->Render();
 	else
 		m_pQTEColliderCom->Render();
-
+	
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -857,7 +859,7 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
 		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
-		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
+		pAbility->Add_Cost(COST_TYPE::COST1, 10.f); // 궁 ULTI
 		pAbility->Add_Cost(COST_TYPE::COST5, 5.f); // 궁 ULTI
 		break;
 

@@ -174,26 +174,6 @@ HRESULT CTarget_Manager::Clear_RT(const _wstring& strTargetTag)
     return S_OK;
 }
 
-#ifdef _DEBUG
-HRESULT CTarget_Manager::Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
-{
-	CRenderTarget* pRenderTarget = Find_RenderTarget(strTargetTag);
-	if (nullptr == pRenderTarget)
-		return E_FAIL;
-
-	return pRenderTarget->Ready_Debug(fX, fY, fSizeX, fSizeY);
-}
-
-HRESULT CTarget_Manager::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
-{
-	for (auto& Pair : m_RenderTargets)
-	{
-		if(nullptr != Pair.second)
-			Pair.second->Render(pShader, pVIBuffer);
-	}
-
-	return S_OK;
-}
 HRESULT CTarget_Manager::Render()
 {
 	ImGui::Begin("RenderTarget");
@@ -231,6 +211,30 @@ void CTarget_Manager::AddRemoveRT(const _wstring& strTargetTag, CRenderTarget* p
 	m_DebugRenderRT.emplace(strTargetTag, pRT);
 	Safe_AddRef(pRT);
 }
+#ifdef _DEBUG
+
+HRESULT CTarget_Manager::Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY)
+{
+	CRenderTarget* pRenderTarget = Find_RenderTarget(strTargetTag);
+	if (nullptr == pRenderTarget)
+		return E_FAIL;
+
+	return pRenderTarget->Ready_Debug(fX, fY, fSizeX, fSizeY);
+}
+
+HRESULT CTarget_Manager::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	for (auto& Pair : m_RenderTargets)
+	{
+		if(nullptr != Pair.second)
+			Pair.second->Render(pShader, pVIBuffer);
+	}
+
+	return S_OK;
+}
+
+
+
 #endif
 
 CRenderTarget* CTarget_Manager::Find_RenderTarget(const _wstring& strTargetTag)

@@ -215,6 +215,9 @@ void CSound_Manager::Play_Sound_Dynamic(const _wstring& strSoundTag, _uint iChan
 
 void CSound_Manager::Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _float fFrequency)
 {
+	// BGM OFF 용 임시 코드
+	return;
+
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
     if (nullptr == pSound)
         return;
