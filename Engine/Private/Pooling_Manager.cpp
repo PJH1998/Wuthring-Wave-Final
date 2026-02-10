@@ -14,7 +14,11 @@ HRESULT CPooling_Manager::Initialize()
 {
 	m_iNumThread = max(6, thread::hardware_concurrency());
 	m_Threads.reserve(m_iNumThread);
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	m_RenderThreads.reserve(m_iNumThread);
+
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hr))
+		return E_FAIL;
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
 	{
