@@ -29,15 +29,27 @@ private:
 	void Bind_Resources();
 	void Ready_Components();
 	void Foliage();
+	_bool IsSelected(_tchar* szModelname)
+	{
+		return wcslen(szModelname) == 0;
+	}
+	_bool Check_Duplicate();
+	_float4x4* Gen_Points(vector<_float4>& Points, _uint iNumPixels);
+	_bool Generate_Instance(_float4x4* pTransformMatrix,_float4 vMousePos);
+
+	_uint GetVaildRandomIndex(vector<_float4>& Points, _uint iMin, _uint iMax);
+	_float4x4 CreateWorldMatrix(vector<_float4>& Points, _uint iRandNum, _float fRotation);
 
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CVIBuffer_Point* m_pVIBufferCom = { nullptr };
+	map<_uint, vector<class CEdit_MapObject_Instance*>> m_SaveInstanceObjects;
+
 	_float m_fRange = {};
 	_uint m_iNumInstance = {};
 	_float3 m_vMousePos = {};
 	_float4* m_pPoints = { nullptr };
-	_tchar m_ModelName[MAX_PATH] = {};
+	_tchar m_szModelName[MAX_PATH] = {};
 
 	_uint m_iMinNum = {};
 	_uint m_iMaxNum = {};
@@ -47,13 +59,15 @@ private:
 	_uint m_iCurSaveIndex = {};
 	_uint m_iPickedSpecipic = {};
 	_uint m_iShaderPassIndex = {};
-	map<_uint, vector<class CEdit_MapObject_Instance*>> m_SaveInstanceObjects;
+
 	vector<_uint> m_ShaderPasses;
+
 	union MyFloat4 {
 		_vector Vec = XMVectorSet(1.f,1.f,1.f,1.f);
 		_float4 float_4;
 		_float arr[4];
 	};
+
 	MyFloat4 vDiffuseColor = {};
 	INSTANCETYPE m_eInstanceType = { INSTANCETYPE::DEFAULT };
 public:
