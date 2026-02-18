@@ -44,7 +44,8 @@ void CCharacterState::OnExit()
 _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate, _bool isFacial)
 {
 	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
-	m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
+	m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName
+	, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
 		, fStateRootMotionRate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotion
 		, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate
 		, isFacial

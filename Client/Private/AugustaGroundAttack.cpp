@@ -75,9 +75,6 @@ void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
     Check_StateTransition(fTimeDelta);
 
     State_Reset();
-
-	
-
 }
 
 void CAugustaGroundAttack::OnExit()
@@ -165,7 +162,8 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	// 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; 
 
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
@@ -176,11 +174,11 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
         m_fAttackPressTime += fTimeDelta;
 	
     // Attack State에 해당하는 경우 모두 Animation이 존재.
-    m_pAugusta->Play_PartAnimation(
-        m_iPartType,
-        m_Animations.at(m_iCurrentAnimIdx).strAnimName,
-        fTimeDelta, nullptr
-    );
+	m_pAugusta->Play_PartAnimation(
+		m_iPartType,
+		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+		fTimeDelta, nullptr
+	);
 
 	// HeadProp은 계속실행.
 	m_pAugusta->Play_PartAnimation(
