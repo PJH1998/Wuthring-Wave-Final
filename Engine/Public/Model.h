@@ -124,7 +124,7 @@ public:
 
 	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-		, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+		, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo, _bool isFacial = true);
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
 
@@ -206,7 +206,11 @@ private:
 
 
 private:
+	CAnimation*						Get_AnimationOrNull(const string& name);
 	void							Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
+	void							HandleAnimationChange(const _string& strAnimationName);
+	void							Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorphComputeShaderCom, _float fTimeDelta, _bool isFacial);
+	_bool							Update_TrackPosition(CAnimation* pAnimation, _float* pTrackPosition,  _float fTimeDelta);
 
 private:
 	HRESULT							Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);

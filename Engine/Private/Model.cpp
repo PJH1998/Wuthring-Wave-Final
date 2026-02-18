@@ -474,289 +474,155 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	return false;
 }
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+	, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
 {
-	ASSERT_CRASH(pComputeShaderCom);
-	ASSERT_CRASH(pTrackPosition);
-
-	auto iter = m_Animations.find(strAnimationName);
-	if (iter == m_Animations.end())
+	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
+	if (nullptr == pComputeShaderCom || nullptr == pTrackPosition || nullptr == pAnimation)
 		return false;
 
-	if (m_strPreAnimation != strAnimationName)
-	{
-		m_isChangeAnimation = true;
-		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
-	}
+	HandleAnimationChange(strAnimationName);
 
-
-	// 1. 현재 애니메이션의 Track Position 업데이트
-	_float fTrackPosition = 0.f;
-
-	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
-	*pTrackPosition = fTrackPosition;
-
-	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
-
-	// 4. Root Motion 조정.
+	// 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
+	_bool isAnimationEnd = Update_TrackPosition(pAnimation, pTrackPosition, fTimeDelta);
+	// 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	FetchLocalMatrices_FromCompute(pComputeShaderCom, *pTrackPosition, strAnimationName);
+	// Root Motion 조정.
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
-
-	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (bIsAnimationEnd)
+	//  애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
-
-#
-	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
-	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	}
 
 	return false;
 }
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, _bool isFacial)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+	, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, _bool isFacial)
 {
-	ASSERT_CRASH(pComputeShaderCom);
-	ASSERT_CRASH(pTrackPosition);
-
-	auto iter = m_Animations.find(strAnimationName);
-	if (iter == m_Animations.end())
+	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
+	if (nullptr == pComputeShaderCom || nullptr == pMorphComputeShaderCom ||
+		nullptr == pTrackPosition || nullptr == pAnimation)
 		return false;
 
-	if (m_strPreAnimation != strAnimationName)
-	{
-		m_isChangeAnimation = true;
-		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
-	}
+	HandleAnimationChange(strAnimationName);
+	_bool isAnimationEnd = Update_TrackPosition(pAnimation, pTrackPosition, fTimeDelta);
 
+	// 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	FetchLocalMatrices_FromCompute(pComputeShaderCom, *pTrackPosition, strAnimationName);
 
-	// 1. 현재 애니메이션의 Track Position 업데이트
-	_float fTrackPosition = 0.f;
+	// Morph 애니메이션 갱신.
+	Update_MorphAnimation(pAnimation, pMorphComputeShaderCom, fTimeDelta, isFacial);
 
-	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
-	*pTrackPosition = fTrackPosition;
-
-	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
-
-
-	// 4. Facial Animation Weight 계산
-	if (m_eType == MODELTYPE::CHARACTER && isFacial)
-	{
-		// 1. Facial Animation Weight 계산
-		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
-
-		// 2. GPU Weight Buffer 업데이트.
-		if (m_Buffers[BUFFER_MORPH_WEIGHT])
-		{
-			D3D11_MAPPED_SUBRESOURCE MappedSubResource;
-			if (SUCCEEDED(m_pContext->Map(m_Buffers[BUFFER_MORPH_WEIGHT], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
-			{
-				memcpy(MappedSubResource.pData, m_ShapeKeyWeights.data(), sizeof(_float) * m_ShapeKeyWeights.size());
-				m_pContext->Unmap(m_Buffers[BUFFER_MORPH_WEIGHT], 0);
-			}
-		}
-
-		// 3. 각 메쉬 실행
-		for (auto& pMesh : m_Meshes)
-		{
-			// Model이 만든 Weight SRV를 Mesh에게 빌려줌
-			pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
-		}
-	}
-
-	// 4. Root Motion 조정.
+	// Root Motion 조정.
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
-	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (bIsAnimationEnd)
+	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
 
-#
-	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
-	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	}
 
 	return false;
 }
 
 _bool CModel::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
 {
-	ASSERT_CRASH(pComputeShaderCom);
-	ASSERT_CRASH(pTrackPosition);
-
-	auto iter = m_Animations.find(strAnimationName);
-	if (iter == m_Animations.end())
+	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
+	if (nullptr == pComputeShaderCom || nullptr == pTrackPosition || nullptr == pAnimation)
 		return false;
 
-	// 1. 이전 애니메이션 체크해서 동일하지 않은 경우 Clear
-	if (m_strPreAnimation != strAnimationName)
-	{
-		m_isChangeAnimation = true;
-		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
-	}
+	HandleAnimationChange(strAnimationName);
+	_bool isAnimationEnd = Update_TrackPosition(pAnimation, pTrackPosition, fTimeDelta);
 
-	// 2. 현재 애니메이션의 Track Position 업데이트
-	_float fTrackPosition = 0.f;
+	// 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	FetchLocalMatrices_FromComputeNonRib(pComputeShaderCom, *pTrackPosition, strAnimationName);
 
-	// 3. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
-	*pTrackPosition = fTrackPosition;
-
-	// 4. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromComputeNonRib(pComputeShaderCom, fTrackPosition, strAnimationName);
-
-	// 5. Root Motion 설정.
+	// Root Motion 설정.
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
-	// 6. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (bIsAnimationEnd)
+	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
-		return true; // 애니메이션 종료
+		return true;
 	}
 
 	// 7. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
-	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	}
 
 	return false;
 }
 
 _bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
-	ASSERT_CRASH(pComputeShaderCom);
-	ASSERT_CRASH(pTrackPosition);
 
-	auto iter = m_Animations.find(strAnimationName);
-	if (iter == m_Animations.end())
+	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
+	if (nullptr == pComputeShaderCom || nullptr == pTrackPosition || nullptr == pAnimation)
 		return false;
 
-	// RootMotion에서 바뀐 애니메이션에 대한 로직 처리.
-	if (m_strPreAnimation != strAnimationName)
-	{
-		m_isChangeAnimation = true;
-		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
-	}
+	HandleAnimationChange(strAnimationName);
+	_bool isAnimationEnd = Update_TrackPosition(pAnimation, pTrackPosition, fTimeDelta);
 
+	// 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	FetchLocalMatrices_FromComputeFly(pComputeShaderCom, *pTrackPosition, strAnimationName, gpuBlendInfo);
 
-	// 1. 현재 애니메이션의 Track Position 업데이트
-	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
-	_float fTrackPosition = 0.f;
-
-	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
-	*pTrackPosition = fTrackPosition;
-
-	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromComputeFly(pComputeShaderCom, fTrackPosition, strAnimationName, gpuBlendInfo);
-	// Root Node Translation 조정
+	// Root Motion 설정.
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
-
-	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (bIsAnimationEnd)
+	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
 
 #
-	// 5. Combined는 한번만.
+	//Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
-	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	}
 
 
 	return false;
 }
 
-_bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
+_bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo, _bool isFacial)
 {
-	ASSERT_CRASH(pComputeShaderCom);
-	ASSERT_CRASH(pMorphComputeShaderCom);
-	ASSERT_CRASH(pTrackPosition);
-
-	auto iter = m_Animations.find(strAnimationName);
-	if (iter == m_Animations.end())
+	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
+	if (nullptr == pComputeShaderCom || nullptr == pMorphComputeShaderCom ||
+		nullptr == pTrackPosition || nullptr == pAnimation)
 		return false;
 
-	// RootMotion에서 바뀐 애니메이션에 대한 로직 처리.
-	if (m_strPreAnimation != strAnimationName)
-	{
-		m_isChangeAnimation = true;
-		m_strPreAnimation = strAnimationName;
-		Clear_Animation(strAnimationName);
-	}
-
-
-	// 1. 현재 애니메이션의 Track Position 업데이트
-	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
-	_float fTrackPosition = 0.f;
-
-	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
-	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
-	*pTrackPosition = fTrackPosition;
+	HandleAnimationChange(strAnimationName);
+	_bool isAnimationEnd = Update_TrackPosition(pAnimation, pTrackPosition, fTimeDelta);
 
 	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromComputeFly(pComputeShaderCom, fTrackPosition, strAnimationName, gpuBlendInfo);
+	FetchLocalMatrices_FromComputeFly(pComputeShaderCom, *pTrackPosition, strAnimationName, gpuBlendInfo);
 
-	// 4. Facial Animation Weight 계산
-	if (m_eType == MODELTYPE::CHARACTER)
-	{
-		// 1. Facial Animation Weight 계산
-		iter->second->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
-
-		// 2. GPU Weight Buffer 업데이트.
-		if (m_Buffers[BUFFER_MORPH_WEIGHT])
-		{
-			D3D11_MAPPED_SUBRESOURCE MappedSubResource;
-			if (SUCCEEDED(m_pContext->Map(m_Buffers[BUFFER_MORPH_WEIGHT], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
-			{
-				memcpy(MappedSubResource.pData, m_ShapeKeyWeights.data(), sizeof(_float) * m_ShapeKeyWeights.size());
-				m_pContext->Unmap(m_Buffers[BUFFER_MORPH_WEIGHT], 0);
-			}
-		}
-
-		// 3. 각 메쉬 실행
-		for (auto& pMesh : m_Meshes)
-		{
-			// Model이 만든 Weight SRV를 Mesh에게 빌려줌
-			pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
-		}
-	}
+	// Morph 애니메이션 갱신.
+	Update_MorphAnimation(pAnimation, pMorphComputeShaderCom, fTimeDelta, isFacial);
 
 	// Root Node Translation 조정
 	if (true == isRootMotion)
@@ -766,7 +632,7 @@ _bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeS
 
 
 	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (bIsAnimationEnd)
+	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
@@ -775,9 +641,7 @@ _bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeS
 #
 	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
-	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	}
 
 
 	return false;
@@ -865,7 +729,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	ASSERT_CRASH(pComputeShaderCom);
 
 #pragma region 상수 버퍼 업데이트
-	// 1. 상수 버퍼(CB) 업데이트
+	//  상수 버퍼(CB) 업데이트
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
@@ -877,7 +741,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	pAnimCBInfo->iRibAnimUsed = 0;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
-	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
+	// Ribbon 애니메이션이 존재한다면 정보 바인딩
 	_string strRibAnimationName = kRibPrefix + strAnimationName;
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
@@ -896,17 +760,15 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 
 #pragma region  리소스 바인딩 및 연산 시작(Dispatch)
 
-	// 3. Compute Shader에 리소스 바인딩
+	//  Compute Shader에 리소스 바인딩
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
 	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
 	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
 	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
 	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
 
-	// EX) 뼈 504개, 팀 크기 64명
-	// 4. Compute Shader 실행 (Dispatch)
-	// - 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
-	// - 예: 셰이더 스레드 그룹 크기가 64일 때, (총 뼈 개수 + 63) / 64
+	// Compute Shader 실행 (Dispatch)
+	// 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / 
 	                    pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
@@ -915,16 +777,14 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 
 	
 #pragma region 더블 버퍼링
-	// 5. 쓰기 인덱스와 읽기 인덱스 계산 0번 Write, 1번 Read
+	// 쓰기 인덱스와 읽기 인덱스 계산 0번 Write, 1번 Read
 	_uint iWriteIdx = BUFFER_STAGING_0 + m_iCurStagingFlip;
 	_uint iReadIdx = BUFFER_STAGING_0 + ((m_iCurStagingFlip + 1) % 2);
 	
-	// 6. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
-	// 이때 쓰기용 인덱스에 해당하는 버퍼에만 추가합니다.
+	// GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
 	m_pContext->CopyResource(m_Buffers[iWriteIdx], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	// 7. 이전 프레임에 복사 명령을 내려두었던 Staging[iReadIdx]를 Map하여 CPU로 가져옵니다.
-	// 첫 프레임에는 읽을 데이터가 없으므로 m_bIsStagingFilled 체크
+	// 이전 프레임에 복사 명령을 내려두었던 Staging[iReadIdx]를 Map하여 CPU로 가져옵니다.
 	if (m_bIsStagingFilled)
 	{
 		D3D11_MAPPED_SUBRESOURCE Mapped;
@@ -1166,6 +1026,12 @@ void CModel::FetchLocalMatrices_FromComputeNonRib(CComputeShader* pComputeShader
 #pragma endregion
 }
 
+CAnimation* CModel::Get_AnimationOrNull(const string& strAnimationName)
+{
+	auto it = m_Animations.find(strAnimationName);
+
+	return (it == m_Animations.end()) ? nullptr : it->second;
+}
 
 void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRotation, _bool isRootMotionTranslate)
 {
@@ -1178,13 +1044,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	_matrix RootBoneLocalMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneLocalMatrix);
 
-	// 축 변환 쿼터니언 생성
-	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
-
-
-	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_matrix matConversion = XMLoadFloat4x4(&m_ConversionMatrix);
-	//_matrix matConversion =  XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
 	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환
@@ -1213,18 +1073,67 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	}
 
 	m_RootMatrix = XMMatrixAffineTransformation(
-		//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
 		vRotationDelta,                  // 회전 델타
 		vLocalTranslate * m_fPreScale * fRootMotionRate // 이동 델타
-		//vLocalTranslate * m_fPreScale * fRootMotionRate // 이동 델타
 	);
 
 	// 다음 프레임을 위해 '변환된' T, R 값을 저장합니다.
 	XMStoreFloat4(&m_vPreRootPosition, vConvertedTranslation);
 	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
 }
+
+void CModel::HandleAnimationChange(const _string& strAnimationName)
+{
+	if (m_strPreAnimation == strAnimationName)
+		return;
+
+	m_isChangeAnimation = true;
+	m_strPreAnimation = strAnimationName;
+	Clear_Animation(strAnimationName);
+}
+
+void CModel::Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorphComputeShaderCom, _float fTimeDelta, _bool isFacial)
+{
+	// 2. Facial Animation Weight 계산
+	if (m_eType == MODELTYPE::CHARACTER && isFacial)
+	{
+		// 3. Facial Animation Weight 계산
+		pAnimation->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
+
+		// 4. GPU Weight Buffer 업데이트.
+		if (m_Buffers[BUFFER_MORPH_WEIGHT])
+		{
+			D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+			if (SUCCEEDED(m_pContext->Map(m_Buffers[BUFFER_MORPH_WEIGHT], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
+			{
+				memcpy(MappedSubResource.pData, m_ShapeKeyWeights.data(), sizeof(_float) * m_ShapeKeyWeights.size());
+				m_pContext->Unmap(m_Buffers[BUFFER_MORPH_WEIGHT], 0);
+			}
+		}
+
+		// 5. 각 메쉬 실행
+		for (auto& pMesh : m_Meshes)
+		{
+			// Model이 만든 Weight SRV를 Mesh에게 빌려줌
+			pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
+		}
+	}
+}
+
+_bool CModel::Update_TrackPosition(CAnimation* pAnimation, _float* pTrackPosition, _float fTimeDelta)
+{
+	_float fTrackPosition = 0.f;
+
+	_bool isAnimationEnd = pAnimation->Update_TrackPosition(fTimeDelta, &fTrackPosition);
+	*pTrackPosition = fTrackPosition;
+
+	return isAnimationEnd;
+}
+
+
+
 
 
 HRESULT CModel::Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile)
