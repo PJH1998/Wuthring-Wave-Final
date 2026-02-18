@@ -212,6 +212,13 @@ private:
 	void							Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorphComputeShaderCom, _float fTimeDelta, _bool isFacial);
 	_bool							Update_TrackPosition(CAnimation* pAnimation, _float* pTrackPosition,  _float fTimeDelta);
 
+	void							Update_NonRibAnimConstantBuffer(const _string& strAnimationName, _float fTrackPosition);
+	void 							Update_AnimConstantBuffer(const _string& strAnimationName, _float fTrackPosition);
+	void 							Update_FlyAnimConstantBuffer(const GPU_BLEND_INFO& gpuBlendInfo, const _string& strAnimationName, _float fTrackPosition);
+	void							Bind_AnimationResource(CComputeShader* pComputeShaderCom);
+	void							Bind_FlyAnimationResource(CComputeShader* pComputeShaderCom);
+	void							Readback_BoneMatrices();
+
 private:
 	HRESULT							Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
 	HRESULT							Ready_AnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);
