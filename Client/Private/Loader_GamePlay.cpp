@@ -33,6 +33,7 @@
 #include "Corosaurus.h"
 #include "Coro_Rock.h"
 #include "CoroProduction.h"
+#include "PatternDummy.h"
 #pragma endregion
 
 #pragma region NPC
@@ -135,6 +136,8 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_NPC(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Production(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Hide_And_Seek(); Complete_Load(); });
+	//허수아비 생성
+	m_pGameInstance->Add_Work([this]() {Load_Dummy(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -1147,6 +1150,13 @@ HRESULT CLoader_GamePlay::Load_Hide_And_Seek()
 	// Prototype_GameObject_NPC_Hiding
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_NPC_Hiding"),
 		CNPC_Hiding::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+	return S_OK;
+}
+HRESULT CLoader_GamePlay::Load_Dummy()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
+		CPatternDummy::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 	return S_OK;
 }

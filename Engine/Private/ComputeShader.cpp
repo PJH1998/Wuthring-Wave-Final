@@ -99,6 +99,7 @@ HRESULT CComputeShader::Initialize_Clone(void* pArg)
 
 void CComputeShader::Set_SRV(const string& strName, ID3D11ShaderResourceView* pSRV)
 {
+    // 1. 문자열을 통해 슬롯 번호를 탐색
     auto iter = m_SRV_BindPoints.find(strName);
     if (iter != m_SRV_BindPoints.end())
         m_SRVs_To_Bind[iter->second] = pSRV;
@@ -154,7 +155,9 @@ HRESULT CComputeShader::Ready_Reflection(ID3DBlob* pCSBlob)
 
 	// 1. 셰이더 데이터 분석을 위한 리플렉션 인터페이스 생성.
     ID3D11ShaderReflection* pReflection = nullptr;
-    if (FAILED(D3DReflect(pCSBlob->GetBufferPointer(), pCSBlob->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&pReflection))))
+    if (FAILED(D3DReflect(pCSBlob->GetBufferPointer(), pCSBlob->GetBufferSize()
+        , IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&pReflection)))
+    )
         return E_FAIL;
 
 	// 2. Shader Description을 통한 바인딩된 전체 리소스 개수 파악.
@@ -196,30 +199,18 @@ HRESULT CComputeShader::Ready_Reflection(ID3DBlob* pCSBlob)
 
 void CComputeShader::Clear_Resources()
 {
+	ID3D11ShaderResourceView* pNullSRV = nullptr;
+	ID3D11Buffer* pNullCB = nullptr;
+	ID3D11UnorderedAccessView* pNullUAV = nullptr;
+	ID3D11SamplerState* pSampler = nullptr;
     for(auto& Pair : m_SRVs_To_Bind)
-    {
-        ID3D11ShaderResourceView* pNullSRV = nullptr;
         m_pContext->CSSetShaderResources(Pair.first, 1, &pNullSRV);
-    }
-
-    // CB 슬롯도 해제  
     for(auto& Pair : m_CBs_To_Bind)
-    {
-        ID3D11Buffer* pNullCB = nullptr;
         m_pContext->CSSetConstantBuffers(Pair.first, 1, &pNullCB);
-    }
-
     for(auto& Pair : m_UAVs_To_Bind)
-    {
-        ID3D11UnorderedAccessView* pNullUAV = nullptr;
         m_pContext->CSSetUnorderedAccessViews(Pair.first, 1, &pNullUAV, nullptr);
-    }
-
 	for (auto& Pair : m_SAMPLERs_To_Bind)
-	{
-		ID3D11SamplerState* pSampler = nullptr;
 		m_pContext->CSSetSamplers(Pair.first, 1, &pSampler);
-	}
 
     m_SRVs_To_Bind.clear();
     m_UAVs_To_Bind.clear();
