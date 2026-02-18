@@ -102,21 +102,13 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 
 void CAugusta::Update(_float fTimeDelta)
 {
-#ifdef _DEBUG
-	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::DOWN)
-	{
-		_float3 vCenterPos = {};
-		XMStoreFloat3(&vCenterPos, m_pTransformCom->Get_State(STATE::POSITION));
-		m_pGameInstance->Setting_DOF(vCenterPos, 50.f);
-	}
-#endif
-    // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
+    // 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
 
 	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 
-    // 2. 상태 머신 갱신
+    // 상태 머신 갱신
 	if (!IsDissolve || m_IsEventDissolve)
 	{
 		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
@@ -134,7 +126,7 @@ void CAugusta::Update(_float fTimeDelta)
 			pPart.second->Update(fTimeDelta);
 	}
 	
-	// 4. 어택 볼륨 갱신.
+	// 어택 볼륨 갱신.
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
