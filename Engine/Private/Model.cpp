@@ -573,7 +573,8 @@ _bool CModel::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const 
 	return false;
 }
 
-_bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
+_bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+	, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 
 	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
@@ -608,7 +609,8 @@ _bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, const _st
 	return false;
 }
 
-_bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo, _bool isFacial)
+_bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta
+	, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo, _bool isFacial)
 {
 	CAnimation* pAnimation = Get_AnimationOrNull(strAnimationName);
 	if (nullptr == pComputeShaderCom || nullptr == pMorphComputeShaderCom ||
