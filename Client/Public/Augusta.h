@@ -294,6 +294,13 @@ private:
 	void Update_TargetDistance();
 	void Update_Physics(_float fTimeDelta);
 	void Update_Camera(_float fTimeDelta);
+
+	_bool IsUpdateAble() const;
+
+	void LateUpdate_Collider(_float fTimeDelta);
+	void LateUpdate_HandleQTEEnd(_float fTimeDelta);
+	void LateUpdate_Render();
+	
 	
 
 private:

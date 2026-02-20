@@ -75,29 +75,17 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 	Process_Timer(fTimeDelta);
 
-	// 1. Dissolve 체크
-	if (!IsDissolve || m_IsEventDissolve)
+	if (IsUpdateAble())
 	{
-		// 2. Delayed Action 수행.
 		Process_DelayedActions(fTimeDelta);
-
-		// 3. 이전 위치 저장
 		m_pTransformCom->Save_PreviousPosition();
-
-		// 4. 몬스터가 있다면?
 		Update_TargetDistance();
 	}
 		
-	// 5. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
-	
+	// Parts 갱신
+	PreUpdate_Parts(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -106,88 +94,29 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-
-    // 상태 머신 갱신
-	if (!IsDissolve || m_IsEventDissolve)
+	if (IsUpdateAble())
 	{
-		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
-		// 3. Physcis 업데이트
+		Update_StateMachine(fTimeDelta);
 		Update_Physics(fTimeDelta);
-		// 4. 카메라 업데이트
 		Update_Camera(fTimeDelta);
 	}
 
-	// 파츠 갱신.
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
-	}
-	
-	// 어택 볼륨 갱신.
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Update(fTimeDelta);
-	}
+	Update_Parts(fTimeDelta);
+	Update_AttackVolumes(fTimeDelta);
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	if (IsUpdateAble())
+		LateUpdate_Collider(fTimeDelta);
 
-
-	if (!IsDissolve || m_IsEventDissolve)
-	{
-		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
-		{
-			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-		}
-		else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
-		{
-			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-		}
-		else
-		{
-			// 2. QTE인 경우 Collider 갱신하지 않음.
-			if (!m_IsQTE)
-				m_pColliderCom->Sync_Position(m_pTransformCom);
-			else
-				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
-		}
-		
-	}
-
-	if (m_IsQTEend)
-	{
-		Notify_HarmonyEnd();
-		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
-		m_IsQTEend = false;
-	}
+	if(m_IsQTEend)
+		LateUpdate_HandleQTEEnd(fTimeDelta);
 	
 
 	if (m_IsVisible)
 	{
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-			return;
-
-		if (m_IsOutLineVisible)
-		{
-			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
-				return;
-		}
-
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
-			return;
-
-
-		//  파츠 갱신 => Render 할 것인지 말것인지?
-		for (auto& pPart : m_PartObjects)
-		{
-			if (pPart.second->IsActivate())
-				pPart.second->Late_Update(fTimeDelta);
-		}
+		LateUpdate_Render();
+		LateUpdate_Parts(fTimeDelta);
 	}
 
 	
@@ -1567,6 +1496,46 @@ void CAugusta::Update_Camera(_float fTimeDelta)
 	{
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 	}
+}
+_bool CAugusta::IsUpdateAble() const
+{
+	const _bool isDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	return (!isDissolve || m_IsEventDissolve);
+}
+void CAugusta::LateUpdate_Collider(_float fTimeDelta)
+{
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+	else if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE)))
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+	else
+	{
+		// 2. QTE인 경우 Collider 갱신하지 않음.
+		if (!m_IsQTE)
+			m_pColliderCom->Sync_Position(m_pTransformCom);
+		else
+			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+	}
+}
+void CAugusta::LateUpdate_HandleQTEEnd(_float fTimeDelta)
+{
+	Notify_HarmonyEnd();
+	m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
+	m_IsQTEend = false;
+}
+void CAugusta::LateUpdate_Render()
+{
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
+
+	if (m_IsOutLineVisible)
+	{
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+			return;
+	}
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 #pragma endregion
 

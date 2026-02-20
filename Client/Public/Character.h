@@ -408,8 +408,8 @@ public:
 #pragma region CHARACTER CONDITION
 public:
 	void Add_Condition(_uint iConditionFlag);
-	_bool Check_AnyCondition(_uint iConditionFlag);
-	_bool Check_AllCondition(_uint iConditionFlag);
+	_bool Check_AnyCondition(_uint iConditionFlag) const;
+	_bool Check_AllCondition(_uint iConditionFlag) const;
 	void Remove_Condition(_uint iConditionFlag);
 	void Remove_AllCondition();
 	void Sync_Condition_ToPlayer(_uint* pCondition);
@@ -540,6 +540,13 @@ protected: // 헬퍼 함수 상속
 	void Process_PlaySound(const _wstring& wStrObjectTag);
 	void Process_SpawnSFX(const _wstring& wStrobjectTag);
 	void Process_LightActive(const _wstring& wStrObjectTag);
+	void PreUpdate_Parts(_float fTimeDelta);
+	void Update_Parts(_float fTimeDelta);
+	void Update_StateMachine(_float fTimeDelta);
+	void Update_AttackVolumes(_float fTimeDelta);
+
+	void LateUpdate_Parts(_float fTimeDelta);
+
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

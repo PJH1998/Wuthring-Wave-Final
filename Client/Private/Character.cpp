@@ -1450,12 +1450,12 @@ void CCharacter::Add_Condition(_uint iConditionFlag)
 	m_iCondition |= iConditionFlag;
 }
 
-_bool CCharacter::Check_AnyCondition(_uint iConditionFlag)
+_bool CCharacter::Check_AnyCondition(_uint iConditionFlag) const
 {
 	return (m_iCondition & iConditionFlag) != 0;
 }
 
-_bool CCharacter::Check_AllCondition(_uint iConditionFlag)
+_bool CCharacter::Check_AllCondition(_uint iConditionFlag) const
 {
 	return (m_iCondition & iConditionFlag) == iConditionFlag;
 }
@@ -1600,6 +1600,55 @@ void CCharacter::Process_LightActive(const _wstring& wStrObjectTag)
 		m_pGameInstance->Set_LightActive(TEXT("Test"), true);
 
 	
+}
+
+void CCharacter::PreUpdate_Parts(_float fTimeDelta)
+{
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+}
+
+void CCharacter::Update_Parts(_float fTimeDelta)
+{
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
+	}
+}
+
+void CCharacter::Update_StateMachine(_float fTimeDelta)
+{
+	_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
+	m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack);
+}
+
+void CCharacter::Update_AttackVolumes(_float fTimeDelta)
+{
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
+}
+
+void CCharacter::LateUpdate_Parts(_float fTimeDelta)
+{
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
+	}
+}
+
+void CCharacter::Save_PreviousPosition()
+{
+	if (nullptr == m_pTransformCom)
+		return;
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CCharacter::Free()
