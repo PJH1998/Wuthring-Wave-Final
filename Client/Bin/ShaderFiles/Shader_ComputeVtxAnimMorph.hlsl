@@ -22,19 +22,20 @@ struct BaseVertex
     float3 vNormal;
 };
 
-// 1. 원본 정점 데이터 (Read - Only)
+
+// 원본 정점 데이터 (Read - Only)
 StructuredBuffer<BaseVertex> g_BaseVertices : register(t0);
 
-// 2. 모든 쉐이프 키의 Delta Data가 일렬로 담긴 버퍼
+// 모든 쉐이프 키의 Delta Data가 일렬로 담긴 버퍼
 StructuredBuffer<MorphDelta> g_AllMorphDeltas : register(t1);
 
-// 3. 현재 프레임의 Shape Key 가중치 => CPU에서 계산해서 넘겨줍니다.
+// 현재 프레임의 Shape Key 가중치 => CPU에서 계산해서 넘겨줍니다.
 StructuredBuffer<float> g_MorphWeights : register(t2);
 
-// 4. 최종 결과물 RW
+// 최종 결과물 RW
 RWStructuredBuffer<OutputVertex> g_OutVertices : register(u0);
 
-// 5. Constant Buffer
+// Constant Buffer
 cbuffer MorphInfoCB : register(b0)
 {
     uint g_NumVertices; // 전체 정점 개수
@@ -45,20 +46,20 @@ cbuffer MorphInfoCB : register(b0)
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
 {
-    // 1. 현재 스레드가 처리할 정점 인덱스.
+    // 현재 스레드가 처리할 정점 인덱스.
     uint iVertexID = dispatchThreadID.x;
     
-    // 2. 범위 체크.
+    // 남는 스레드는 처리할 정점이 없으므로 종료.
     if (iVertexID >= g_NumVertices)
         return;
     
-    // 3. 원본 정점 정보 가져오기.
+    // 원본 정점 정보 가져오기.
     BaseVertex baseVert = g_BaseVertices[iVertexID];
     
     float3 finalPos = baseVert.vPosition;
     float3 finalNormal = baseVert.vNormal;
     
-    // 4. 활성화된 모든 Morph Target을 순회하고 누적합니다.
+    // 활성화된 모든 Morph Target을 순회하고 누적합니다.
     for (uint i = 0; i < g_NumActiveMorphs; ++i)
     {
         float fWeight = g_MorphWeights[i];
@@ -75,7 +76,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         finalNormal += delta.vNormalDelta * fWeight;
     }
     
-    // 5. 결과 저장.
+    // 결과 저장.
     OutputVertex result;
     result.vPosition = finalPos;
     result.vNormal = normalize(finalNormal);
