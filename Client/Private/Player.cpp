@@ -1,6 +1,5 @@
 ﻿#include "ClientPch.h"
 #include "Player.h"
-#include "Character.h"
 #include "Augusta.h"
 #include "AugustaState_Enum.h"
 #include "Rover.h"
@@ -11,6 +10,7 @@
 #include "GameSystem.h"
 #include "PlayerStatus.h"
 #include "Event_Leviatan.h"
+
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -114,95 +114,23 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
 
-	Process_Timer(fTimeDelta);
-
-    m_pInputControllerCom->Update();
-
-	// . PlayerStatus 갱신
-	m_pPlayerStatus->Set_CurrentCharIndex(m_iCurrentCharacterIdx);
-
-	// 2. 현재 활성화 캐릭터 이후에 키 입력 확인하기
-	Player_KeyInput();
-
-	// 3. 변경이 있다면, 이 프레임 끝에서 처리
-	if (m_IsChanage)
-	{
-		m_IsChanage = false;
-		Change_Character(m_eNextCharacter, fTimeDelta);
-	}
-   
-	// 4. 현재 캐릭터에 대한 초기 업데이트
-	if (m_iCurrentCharacterIdx != NONE)
-		m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
-
-	
-	// 5. Harmony
-	if (m_iHarmonyCharacterIdx != NONE &&
-		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
-		m_Characters[m_iHarmonyCharacterIdx]->Priority_Update(fTimeDelta);
-	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
-		m_Characters[m_iEventCharacterIdx]->Priority_Update(fTimeDelta);
-	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
-		m_Characters[m_iPrevCharacterIdx]->Priority_Update(fTimeDelta);
-
-
-
-	// 6. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
-	if (nullptr != m_pPlayerStatus)
-		m_pPlayerStatus->Update(fTimeDelta);
-
-
-	// 7. Cool Time 갱신
-	for (_int i = 0; i < CHARACTERTYPE::TYPE_END; ++i)
-	{
-		if (m_ChangeTimers[i] > 0.f)
-			m_ChangeTimers[i] -= fTimeDelta;
-	}
-	
-	// 8. PlayerStatus에 Utility Type 바인딩.
+	PreUpdate_Input(fTimeDelta);
+	UpdatePlayerStatusIndex();
+	Handle_Input();
+	ApplySwitchRequest(fTimeDelta);
+	PreUpdate_Characters(fTimeDelta);
+	PreUpdate_PlayerStatus(fTimeDelta);
+	PreUpdate_SwitchCoolDowns(fTimeDelta);
 	Sync_UtilityType();
-
-	// 9. Previous Position
-	m_pTransformCom->Save_PreviousPosition();
+	Save_PreviousPosition();
 }
 
 void CPlayer::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
-	if (m_iCurrentCharacterIdx != NONE)
-	{
-		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
-		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 컨디션 동기화
-		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
-	}
-
-    // 2. Harmony 
-    if (m_iHarmonyCharacterIdx != NONE &&
-		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
-        m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
-	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
-		m_Characters[m_iEventCharacterIdx]->Update(fTimeDelta);
-	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
-		m_Characters[m_iPrevCharacterIdx]->Update(fTimeDelta);
-
-
-	// 3. Rigidbody Update => Camera 
-	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-	m_pGrappleRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-
-	Sorting_GrappleTarget(); // Grapple Target Sorting;
-	Toggle_Grapple(); 
-	Sorting_ThrowTarget();
-	Toggle_Throw();
-	Sorting_Target(); // 4. Target Sorting
-    Toggle_LockOn(); // 5. Lock On
-	
-	m_GrappleCandidates.clear();
-	m_TargetCandidates.clear();
-	m_ThrowCandidates.clear();
-	//m_TargetTransforms.clear();
-
-	
+	UpdateCharacters(fTimeDelta);
+	UpdateRigidbodies(fTimeDelta);
+	Update_Targeting(fTimeDelta);
 
 #ifdef _DEBUG
 	GUI_Teleport();
@@ -213,26 +141,12 @@ void CPlayer::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
 
-    if (m_iCurrentCharacterIdx != NONE)
-        m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
+	if (IsValidCharacterIndex(m_iCurrentCharacterIdx))
+		m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
-    if (m_iHarmonyCharacterIdx != NONE &&
-		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
-        m_Characters[m_iHarmonyCharacterIdx]->Late_Update(fTimeDelta);
-	else if (m_iEventCharacterIdx != CHARACTERTYPE::NONE)
-		m_Characters[m_iEventCharacterIdx]->Late_Update(fTimeDelta);
-	else if (m_iPrevCharacterIdx != NONE && m_Characters[m_iPrevCharacterIdx]->IsActivate())
-		m_Characters[m_iPrevCharacterIdx]->Late_Update(fTimeDelta);
-
-	// 채널에서 위치 갱신
-	//m_pGameInstance->Update_Listener(m_pTransformCom, fTimeDelta);
-	
-
-#ifdef _DEBUG
-	if (FAILED((m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this))))
-		return;
-#endif // DEBUG
-
+	CHARACTERTYPE eExtra = GetExtraCharacterForUpdate();
+	if (eExtra != NONE)
+		m_Characters[eExtra]->Late_Update(fTimeDelta);
 	
 }
 void CPlayer::Render()
@@ -304,7 +218,7 @@ void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 	m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(true);
 	m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(false);
 
-	// 그 뭐냐 UI에 캐릭 변경 불가능 상태를 줘야함
+	//  UI에 캐릭 변경 불가능 상태를 줘야함
 	m_IsQTE = true;
 	m_pPlayerStatus->Bind_QTE(m_IsQTE);
 
@@ -328,17 +242,14 @@ const _float4x4* CPlayer::Get_PlayerMatrixPtr()
 {
 	if (nullptr == m_pTransformCom)
 		return nullptr;
-	//{
-	//	_float4x4 identityMatrix = {}; XMStoreFloat4x4(&identityMatrix, (XMMatrixIdentity()));
-	//	return identityMatrix;
-	//}
+
 
 	return m_pTransformCom->Get_WorldMatrixPtr();
 }
 
 #pragma endregion
 
-void CPlayer::Player_KeyInput()
+void CPlayer::Handle_Input()
 {
 	// Scan 키 설정. => T키로 변경 예정.
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::T), KEYSTATE::UP) &&
@@ -355,46 +266,19 @@ void CPlayer::Player_KeyInput()
 	if (!m_IsQTE && // QTE 도중이면 플레이어 변경 불가능.
 		!m_IsEventLock) // ANIMSTOP 도중이면 플레이어 변경 불가능.
 	{
-		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
+		for (const auto& val : m_SwitchKeys)
 		{
-			if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER && m_ChangeTimers[CHARACTERTYPE::ROVER] <= 0.f)
-			{
-				m_IsChanage = true;
-				m_eNextCharacter = CHARACTERTYPE::ROVER;
-				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
-				m_ChangeTimers[CHARACTERTYPE::ROVER] = m_fChangeCoolTime;
-				return;
-			}
+			if (!m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(val.eKey))) continue;
 
-		}
-		else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
-		{
-			if (m_iCurrentCharacterIdx != CHARACTERTYPE::AUGUSTA && m_ChangeTimers[CHARACTERTYPE::AUGUSTA] <= 0.f)
-			{
-				m_IsChanage = true;
-				m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
-				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
-				m_ChangeTimers[CHARACTERTYPE::AUGUSTA] = m_fChangeCoolTime;
-				return;
-			}
-		}
-		else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
-		{
-			if (m_iCurrentCharacterIdx != CHARACTERTYPE::GALBRENA && m_ChangeTimers[CHARACTERTYPE::GALBRENA] <= 0.f)
-			{
-				m_IsChanage = true;
-				m_eNextCharacter = CHARACTERTYPE::GALBRENA;
-				//m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
-				m_ChangeTimers[CHARACTERTYPE::GALBRENA] = m_fChangeCoolTime;
-				return;
-			}
+			if (m_iCurrentCharacterIdx == val.eType) return;
+			if (m_ChangeTimers[val.eType] > 0.f) return;
+			RequestCharacterSwitch(val.eType);
+			return;
 		}
 
 		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
-		{
 			m_pGameSystem->Show_TabUtilityUI(ENUM_CLASS(m_eUtilityType));
-		}
 
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::UP)
 		{
@@ -412,13 +296,11 @@ void CPlayer::Player_KeyInput()
 				}
 			}
 		}
-		
-
 	}
 
 	
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
@@ -492,7 +374,7 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
-//#endif // _DEBUG
+#endif // _DEBUG
 
 	
 
@@ -526,71 +408,22 @@ void CPlayer::On_HarmonyEnd(CHARACTERTYPE eCharacter)
 }
 
 
-void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
+void CPlayer::Change_Character(CHARACTERTYPE eNext, _float fTimeDelta)
 {
 	// 0. 예외 조건 return;
-	if (nullptr == m_Characters[eNextCharacter])
+	if (!IsValidCharacter(eNext))
 		return;
 
-	// 1. 현재 Idx가 None이 아니라면.
-	if (m_iCurrentCharacterIdx != NONE)
-	{
-		// 이전 캐릭터 비활성화
-		m_Characters[m_iCurrentCharacterIdx]->Activate(false);
-		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)); // 혹시 모르니.
-		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
-		//m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
-		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
-	}
+	const CHARACTERTYPE ePrev = static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx);
 
-	// 2. 새 캐릭터 활성화
-	m_iCurrentCharacterIdx = eNextCharacter;
-	m_Characters[m_iCurrentCharacterIdx]->Activate(true);
-	
-	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT)); // 선택된걸 확인하기.
-	
-	// Change Time 부여를 위한 Condition 추가
-	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
-	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
-
-
-	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화
-	_fmatrix PlayerWorldMatrix = m_pTransformCom->Get_WorldMatrix();
-	m_Characters[m_iCurrentCharacterIdx]->Sync_Transform_FromPlayer(PlayerWorldMatrix, m_Characters[m_iPrevCharacterIdx]->Get_Velocity(), fTimeDelta);
-
-	// 4. 새 캐릭터의 콜라이더 초기화 
-	m_Characters[m_iCurrentCharacterIdx]->Sync_Collider(XMVectorZero(), fTimeDelta);  // 속도 0으로 초기화
-
-	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작)
-	m_Characters[m_iCurrentCharacterIdx]->Set_Gravity(true);  // 중력 활성화 (필요 시)
-	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
-	
-	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
-
-	// 6. 협주 확인. Ensemble
-	// 이전 캐릭터의 협주게이지 확인 => Get_HarmonyGauge
-	CHARACTERTYPE ePrevCharacterType = static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx);
-	CHARACTERTYPE eCurCharacterType = static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx);
-
-
-	// 7. QTE 실행. 가능하면
-	if (IsQTEPossible(ePrevCharacterType) && !m_IsEventLock)
-	{
-		// QTE 실행.
-		ExecuteQTE(ePrevCharacterType);
-
-		// 둘다 실행?
-		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::QTE);
-	}
-	else
-	{
-		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
-	}
-	
-	// 8. 사운드 재생
-	m_pGameInstance->Play_Sound(TEXT("ui_ia_com_tick (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_UI), 0.25f);
-	//m_pPlayerStatus->Set_CurrentCharIndex(eNextCharacter);
-
+	DeactivatePrevCharacter(ePrev);
+	ActivateNextCharacter(eNext);
+	SyncNextCharacterFromPlayer(ePrev, eNext, fTimeDelta);
+	ResetNextCharacterCollider(eNext, fTimeDelta);
+	InitNextCharacterState(eNext);
+	Bind_SwitchVFX(eNext);
+	HandleQTEOnSwitch(ePrev, eNext);
+	PlaySwitchSFX();
 }
 
 void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
@@ -1271,6 +1104,212 @@ void CPlayer::Calc_LockOnPos()
 	
 	
 }
+
+void CPlayer::RequestCharacterSwitch(CHARACTERTYPE eType)
+{
+	m_SwitchRequest = { true, eType };
+	m_ChangeTimers[eType] = m_fChangeCoolTime;
+}
+
+_bool CPlayer::IsValidCharacter(CHARACTERTYPE eType) const
+{
+	return IsValidCharacterIndex(ENUM_CLASS(eType));
+}
+
+_bool CPlayer::IsValidCharacterIndex(_int iIndex) const
+{
+	if (iIndex <= NONE || iIndex >= CHARACTERTYPE::TYPE_END) return false;
+	if (nullptr == m_Characters[iIndex]) return false;
+
+	return true;
+}
+
+
+void CPlayer::DeactivatePrevCharacter(CPlayer::CHARACTERTYPE ePrev)
+{
+	if (ePrev == NONE) return;
+
+	auto* pPrev = m_Characters[ePrev];
+	pPrev->Activate(false);
+	pPrev->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	pPrev->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	m_iPrevCharacterIdx = ePrev;
+}
+
+
+void CPlayer::ActivateNextCharacter(CPlayer::CHARACTERTYPE eNext)
+{
+	m_iCurrentCharacterIdx = eNext;
+
+	auto* pNext = m_Characters[eNext];
+	pNext->Activate(true);
+	pNext->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	pNext->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	pNext->Bind_ChangeTimer();
+}
+
+void CPlayer::SyncNextCharacterFromPlayer(CPlayer::CHARACTERTYPE ePrev, CPlayer::CHARACTERTYPE eNext, _float fTimeDelta)
+{
+	_fmatrix PlayerWorldMatrix = m_pTransformCom->Get_WorldMatrix();
+	_vector prevVel = XMVectorZero();
+
+	if (IsValidCharacter(ePrev))
+		prevVel = m_Characters[ePrev]->Get_Velocity();
+
+	m_Characters[eNext]->Sync_Transform_FromPlayer(PlayerWorldMatrix, prevVel, fTimeDelta);
+}
+
+void CPlayer::ResetNextCharacterCollider(CPlayer::CHARACTERTYPE eNext, _float fTimeDelta)
+{
+	m_Characters[eNext]->Sync_Collider(XMVectorZero(), fTimeDelta);
+}
+
+void CPlayer::InitNextCharacterState(CPlayer::CHARACTERTYPE eNext)
+{
+	auto* pNext = m_Characters[eNext];
+	pNext->Set_Gravity(true);
+	pNext->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
+}
+
+void CPlayer::HandleQTEOnSwitch(CPlayer::CHARACTERTYPE ePrev, CPlayer::CHARACTERTYPE eNext)
+{
+	if (ePrev == NONE)
+	{
+		m_iHarmonyCharacterIdx = NONE;
+		return;
+	}
+
+	if (IsQTEPossible(ePrev) && !m_IsEventLock)
+	{
+		ExecuteQTE(ePrev);
+		m_Characters[eNext]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::QTE);
+	}
+	else
+		m_iHarmonyCharacterIdx = NONE;
+}
+
+void CPlayer::Bind_SwitchVFX(CPlayer::CHARACTERTYPE eNext)
+{
+	m_Characters[eNext]->Bind_ChangeEffect();
+}
+
+void CPlayer::PlaySwitchSFX()
+{
+	m_pGameInstance->Play_Sound(TEXT("ui_ia_com_tick (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_UI), 0.25f);
+}
+
+void CPlayer::UpdateCharacters(_float fTimeDelta)
+{
+	// 1. 현재 캐릭터
+	if (IsValidCharacterIndex(m_iCurrentCharacterIdx))
+	{
+		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
+	}
+
+	// 2. 추가 업데이트 대상 결정 (QTE > 이벤트 > 이전 캐릭터(Dissolve 처리 상태))
+	CHARACTERTYPE eExtra = GetExtraCharacterForUpdate();
+
+	if (eExtra != CHARACTERTYPE::NONE)
+		m_Characters[eExtra]->Update(fTimeDelta);
+}
+
+void CPlayer::UpdateRigidbodies(_float fTimeDelta)
+{
+	const _fmatrix WorldMatrix = m_pTransformCom->Get_WorldMatrix();
+	m_pRigidbodyCom->Update_Rigidbody(WorldMatrix, fTimeDelta);
+	m_pGrappleRigidbodyCom->Update_Rigidbody(WorldMatrix, fTimeDelta);
+}
+
+void CPlayer::Update_Targeting(_float fTimeDelta)
+{
+	// 3. Rigidbody Update => Camera 
+	Sorting_GrappleTarget(); // Grapple Target Sorting;
+	Toggle_Grapple();
+	Sorting_ThrowTarget();
+	Toggle_Throw();
+	Sorting_Target(); // 4. Target Sorting
+	Toggle_LockOn(); // 5. Lock On
+
+	m_GrappleCandidates.clear();
+	m_TargetCandidates.clear();
+	m_ThrowCandidates.clear();
+}
+
+CPlayer::CHARACTERTYPE CPlayer::GetExtraCharacterForUpdate() const
+{
+	if (IsValidCharacterIndex(m_iHarmonyCharacterIdx) &&
+		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
+		return static_cast<CHARACTERTYPE>(m_iHarmonyCharacterIdx);
+
+	if (IsValidCharacterIndex(m_iEventCharacterIdx))
+		return static_cast<CHARACTERTYPE>(m_iEventCharacterIdx);
+
+	if (IsValidCharacterIndex(m_iPrevCharacterIdx) &&
+		m_Characters[m_iPrevCharacterIdx]->IsActivate())
+		return static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx);
+
+	return NONE;
+}
+
+void CPlayer::PreUpdate_Input(_float fTimeDelta)
+{
+	Process_Timer(fTimeDelta);
+	m_pInputControllerCom->Update();
+}
+
+void CPlayer::UpdatePlayerStatusIndex()
+{
+	if (nullptr != m_pPlayerStatus)
+		m_pPlayerStatus->Set_CurrentCharIndex(m_iCurrentCharacterIdx);
+}
+
+void CPlayer::ApplySwitchRequest(_float fTimeDelta)
+{
+	// 변경이 있다면, 이 프레임 끝에서 처리
+	if (m_SwitchRequest.isSwitching)
+	{
+		m_SwitchRequest.isSwitching = false;
+		Change_Character(m_SwitchRequest.eType, fTimeDelta);
+	}
+}
+
+void CPlayer::PreUpdate_Characters(_float fTimeDelta)
+{
+	if (IsValidCharacterIndex(m_iCurrentCharacterIdx))
+		m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
+
+	CHARACTERTYPE eExtra = GetExtraCharacterForUpdate();
+	if (eExtra != CHARACTERTYPE::NONE)
+		m_Characters[eExtra]->Priority_Update(fTimeDelta);
+
+
+}
+
+void CPlayer::PreUpdate_PlayerStatus(_float fTimeDelta)
+{
+	if (nullptr != m_pPlayerStatus)
+		m_pPlayerStatus->Update(fTimeDelta);
+}
+
+void CPlayer::PreUpdate_SwitchCoolDowns(_float fTimeDelta)
+{
+	for (_int i = 0; i < CHARACTERTYPE::TYPE_END; ++i)
+	{
+		if (m_ChangeTimers[i] > 0.f)
+			m_ChangeTimers[i] -= fTimeDelta;
+	}
+}
+
+void CPlayer::Save_PreviousPosition()
+{
+	if (nullptr == m_pTransformCom)
+		return;
+
+	m_pTransformCom->Save_PreviousPosition();
+}
+
 
 #ifdef _DEBUG
 void CPlayer::GUI_Teleport()

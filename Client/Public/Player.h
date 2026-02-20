@@ -7,7 +7,7 @@ NS_BEGIN(Client)
 class CPlayer final : public CGameObject
 {
 public:
-	enum CHARACTERTYPE
+	enum CHARACTERTYPE : _int
 	{
 		NONE = -1,
 		ROVER = 0,
@@ -16,12 +16,6 @@ public:
 		TYPE_END
 	};
 
-	enum SWITCH_STATE
-	{
-		SWITCH_NONE,     // 전환 대기 없음
-		SWITCH_PENDING,  // 전환 준비 중
-		SWITCH_READY     // 전환 준비 완료
-	};
 
 public:
 	typedef struct tagPlayerPartyDesc
@@ -35,6 +29,32 @@ public:
 		_wstring wStrInputControllerTag = {};
 		vector<PLAYER_SPEC> PlayerSpecs = {};
 	}PLAYER_DESC;
+
+
+public:
+	typedef struct tagSwitchRequest
+	{
+		_bool isSwitching = { false };
+		CHARACTERTYPE eType = { CHARACTERTYPE::NONE };
+	}SWITCH_REQUEST;
+
+
+private:
+	typedef struct tagSwitchKeyMap
+	{
+		KEYINPUT eKey;
+		CHARACTERTYPE eType;
+	}SWITCH_KEYMAP;
+
+
+	inline static const SWITCH_KEYMAP m_SwitchKeys[] =
+	{
+		{ KEYINPUT::D1, CHARACTERTYPE::ROVER },
+		{ KEYINPUT::D2, CHARACTERTYPE::AUGUSTA },
+		{ KEYINPUT::D3, CHARACTERTYPE::GALBRENA },
+	};
+	
+
 
 #pragma region 기본 함수들.
 public:
@@ -136,12 +156,11 @@ private:
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };
-	_bool m_IsChanage = { false };
+	_bool m_IsChange = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsEventLock = { false };
 	_bool m_IsBattle = { false };
 
-	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};
 
 	_float3 m_vColliderOffSet = {};
@@ -172,10 +191,12 @@ private:
 
 	function<void()> m_Event = { nullptr };
 
+	SWITCH_REQUEST m_SwitchRequest = {};
+
 
 private:
-	void Player_KeyInput();
-	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
+	void Handle_Input();
+	void Change_Character(CHARACTERTYPE eNext, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
 	void Sync_Condition_FromCharacter(class CCharacter* pCharacter);
 	void Sync_InteractionType_ToCharacter(class CCharacter* pCharacter);
@@ -208,9 +229,35 @@ private:
 
 	void Stop_Anim();
 	void Start_Anim();
+	void RequestCharacterSwitch(CHARACTERTYPE eType);
 
+
+private:
+	_bool IsValidCharacter(CHARACTERTYPE eType) const;
+	_bool IsValidCharacterIndex(_int iIndex) const;
+	void DeactivatePrevCharacter(CHARACTERTYPE eType);
+	void ActivateNextCharacter(CHARACTERTYPE eType);
+	void SyncNextCharacterFromPlayer(CHARACTERTYPE ePrev, CHARACTERTYPE eNext, _float fTimeDelta);
+	void ResetNextCharacterCollider(CHARACTERTYPE eNext, _float fTimeDelta);
+	void InitNextCharacterState(CHARACTERTYPE eNext);
+	void HandleQTEOnSwitch(CHARACTERTYPE ePrev, CHARACTERTYPE eNext);
+	void Bind_SwitchVFX(CHARACTERTYPE eType);
+	void PlaySwitchSFX();
+
+	void UpdateCharacters(_float fTimeDelta);
+	void UpdateRigidbodies(_float fTimeDelta);
+	void Update_Targeting(_float fTimeDelta);
 	
-	
+
+	CHARACTERTYPE GetExtraCharacterForUpdate() const;
+
+	void PreUpdate_Input(_float fTimeDelta);
+	void UpdatePlayerStatusIndex();
+	void ApplySwitchRequest(_float fTimeDelta);
+	void PreUpdate_Characters(_float fTimeDelta);
+	void PreUpdate_PlayerStatus(_float fTimeDelta);
+	void PreUpdate_SwitchCoolDowns(_float fTimeDelta);
+	void Save_PreviousPosition();
 
 #ifdef _DEBUG
 	_float3		m_vDebugTeleportPos = {};
