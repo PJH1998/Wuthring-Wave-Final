@@ -228,7 +228,6 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
 }
 
 
-
 float SafeDivide(float numerator, float denominator)
 {
     // 분모가 아주 작으면(0에 가까우면) 나눗셈을 하지 않고 1(변화 없음)을 반환

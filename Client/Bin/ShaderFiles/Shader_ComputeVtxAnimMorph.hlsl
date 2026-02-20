@@ -43,6 +43,9 @@ cbuffer MorphInfoCB : register(b0)
     float2 vPadding;
 }
 
+
+float g_MorphWeightEpsilon = 0.0001f; // 가중치가 이보다 작으면 무시할 임계값
+
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
 {
@@ -64,7 +67,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     {
         float fWeight = g_MorphWeights[i];
         
-        if (fWeight < 0.0001f)
+        if (fWeight < g_MorphWeightEpsilon)
             continue;
         
         // 데이터 접근 인덱스 계산.

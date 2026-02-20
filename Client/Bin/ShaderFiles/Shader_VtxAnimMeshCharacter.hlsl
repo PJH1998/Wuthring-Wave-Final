@@ -79,27 +79,27 @@ VS_OUT VS_MAIN(VS_IN In)
 {
     VS_OUT Out = (VS_OUT) 0;
 
-    // 0. 정점 정보를 교체합니다.
+    // 정점 정보를 교체합니다.
     OutputVertex MorphedVert = g_MorphedVertices[In.iVertexID];
     
-    // 1. 뼈대 계산 전에 얼굴부터 변형시킵니다. Morphing
+    // 뼈대 계산 전에 얼굴부터 변형시킵니다.
     float3 vMorphedPos = MorphedVert.vPosition;
     float3 vMorphedNormal = MorphedVert.vNormal;
 
-    // 2. [Skinning] 변형된 얼굴(vMorphedPos)을 기준으로 뼈대를 움직입니다.
+    // 스키닝 행렬 생성
     matrix matBone = (matrix) 0;
     matBone += g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x;
     matBone += g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y;
     matBone += g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z;
     matBone += g_BoneMatrices[In.vBlendIndex.w] * In.vBlendWeight.w;
 
-    // 애니메이션 행렬 적용 (vMorphedPos 사용!)
+    // 애니메이션 행렬 적용 (vMorphedPos 사용)
     vector vPosition = mul(float4(vMorphedPos, 1.f), matBone);
     vector vNormal = mul(float4(vMorphedNormal, 0.f), matBone);
-    vector vTangent = mul(float4(In.vTangent, 0.f), matBone); // Tangent는 Morph 안 했으므로 In.vTangent 사용 (약식)
+    vector vTangent = mul(float4(In.vTangent, 0.f), matBone); 
     vector vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
 
-    // 3. [WVP Transformation] 화면 좌표로 변환
+    // [WVP Transformation] 화면 좌표로 변환
     matrix matWVP = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWVP, g_ProjMatrix);
     
