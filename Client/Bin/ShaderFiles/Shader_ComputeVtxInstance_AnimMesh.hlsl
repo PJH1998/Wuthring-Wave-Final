@@ -71,7 +71,7 @@ cbuffer InstanceCB : register(b0)
     float g_TempFloat;
 }
 
-float4 mul_quaternion(float4 q1, float4 q2)
+float4 mulQuaternion(float4 q1, float4 q2)
 {
     float4 result;
     result.w = q1.w * q2.w - dot(q1.xyz, q2.xyz);
@@ -80,7 +80,7 @@ float4 mul_quaternion(float4 q1, float4 q2)
 }
 
 // 쿼터니언 slerp 직접 구현
-float4 custom_slerp(float4 q1, float4 q2, float t)
+float4 customSlerp(float4 q1, float4 q2, float t)
 {
    // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
@@ -116,7 +116,7 @@ float4 custom_slerp(float4 q1, float4 q2, float t)
 
 // 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
 // 이거 문젠가?
-matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
+matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
     matrix_rm m;
     float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
@@ -144,7 +144,7 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
     return m;
 }
 
-SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     SRTKeyFrame result;
     
@@ -234,8 +234,8 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 custom_slerp 사용
-    float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
+    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
+    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;
     result.rotation = interpRotation;
@@ -257,7 +257,7 @@ SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
     // 회전(Rotation) 뺄셈: target * inverse(weight)
     // inverse(q) = (-q.xyz, q.w)
     float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
-    delta.rotation = mul_quaternion(targetSRT.rotation, normalize(invWeightRot));
+    delta.rotation = mulQuaternion(targetSRT.rotation, normalize(invWeightRot));
     
     // 이동(Translation) 뺄셈
     delta.translation = targetSRT.translation - weightSRT.translation;
@@ -272,7 +272,7 @@ SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
     // 척도 덧셈 (곱셈)
     result.scale = baseSRT.scale * deltaSRT.scale;
     // 회전 덧셈: delta * base
-    result.rotation = mul_quaternion(deltaSRT.rotation, baseSRT.rotation);
+    result.rotation = mulQuaternion(deltaSRT.rotation, baseSRT.rotation);
     // 이동 덧셈
     result.translation = baseSRT.translation + deltaSRT.translation;
     return result;
@@ -290,12 +290,12 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         return;
     
     // 1. Action Animation의 SRT 가져오기
-    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimCellsInfo[iInstanceIndex].iAnimIndex, false, g_AnimCellsInfo[iInstanceIndex].fTrackPosition);
+    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimCellsInfo[iInstanceIndex].iAnimIndex, false, g_AnimCellsInfo[iInstanceIndex].fTrackPosition);
     
     matrix result_matrix;
     
     // 2. Action Matrix를 바탕으로 Result Matrix 생성.
-    result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
+    result_matrix = ComposeMatrixFromSRT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     
     // 3. 계층 구조 계산
     

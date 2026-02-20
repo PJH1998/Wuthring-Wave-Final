@@ -728,7 +728,8 @@ _bool CModel::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float
 
 void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
 {
-	ASSERT_CRASH(pComputeShaderCom);
+	if (nullptr == pComputeShaderCom)
+		return;
 
 	// 상수 버퍼 업데이트
 	Update_AnimConstantBuffer(strAnimationName, fTrackPosition);

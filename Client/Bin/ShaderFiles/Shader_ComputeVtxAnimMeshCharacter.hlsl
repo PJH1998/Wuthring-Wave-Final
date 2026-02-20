@@ -57,7 +57,7 @@ cbuffer AnimationInfoCB : register(b0)
     uint g_RibbonAnimIndex;
 }
 
-float4 mul_quaternion(float4 q1, float4 q2)
+float4 mulQuaternion(float4 q1, float4 q2)
 {
     float4 result;
     result.w = q1.w * q2.w - dot(q1.xyz, q2.xyz);
@@ -66,7 +66,7 @@ float4 mul_quaternion(float4 q1, float4 q2)
 }
 
 // 쿼터니언 slerp 직접 구현
-float4 custom_slerp(float4 q1, float4 q2, float t)
+float4 customSlerp(float4 q1, float4 q2, float t)
 {
    // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
@@ -101,7 +101,7 @@ float4 custom_slerp(float4 q1, float4 q2, float t)
 }
 
 // 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
-matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
+matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
     matrix_rm m;
     float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
@@ -129,7 +129,7 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
     return m;
 }
 
-SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     SRTKeyFrame result;
     
@@ -217,8 +217,8 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 custom_slerp 사용
-    float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
+    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
+    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;
     result.rotation = interpRotation;
@@ -244,7 +244,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     uint boneIndex = dispatchThreadID.x;
     
       // 1. Action Animation의 SRT 가져오기
-    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
    
     matrix result_matrix;
     
@@ -253,21 +253,21 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     {
        
         // 2. Ribbon Animation의 SRT 가져오기
-        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
         //ribbonSRT.translation.xyz *= 0.01f; // 임시로 0.01배 설정하기. => 싹다 1로.
         // => Blender에서 PSA Import 할때 Translation Scale을 0.01배하면된다. => 뭔가 빠다리남.
         
         // 가산 블렌딩
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;
-        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
+        float4 finalRotation = mulQuaternion(ribbonSRT.rotation, actionSRT.rotation);
         float4 finalTranslation = ribbonSRT.translation + actionSRT.translation; // delta 적용
         
         finalTranslation.w = 1.f;
-        result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
+        result_matrix = ComposeMatrixFromSRT(finalScale, finalRotation, finalTranslation);
     }
     else
     {
-        result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
+        result_matrix = ComposeMatrixFromSRT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     }
     
     // 최종 행렬 출력 버퍼에 저장.

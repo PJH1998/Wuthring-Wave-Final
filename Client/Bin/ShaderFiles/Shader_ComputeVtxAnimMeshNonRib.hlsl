@@ -68,7 +68,7 @@ cbuffer AnimationInfoCB : register(b0)
 //    uint g_RibbonAnimIndex;
 //}
 
-float4 mul_quaternion(float4 q1, float4 q2)
+float4 mulQuaternion(float4 q1, float4 q2)
 {
     float4 result;
     result.w = q1.w * q2.w - dot(q1.xyz, q2.xyz);
@@ -77,7 +77,7 @@ float4 mul_quaternion(float4 q1, float4 q2)
 }
 
 // 쿼터니언 slerp 직접 구현
-float4 custom_slerp(float4 q1, float4 q2, float t)
+float4 customSlerp(float4 q1, float4 q2, float t)
 {
    // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
@@ -113,7 +113,7 @@ float4 custom_slerp(float4 q1, float4 q2, float t)
 
 // 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
 // 이거 문젠가?
-matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
+matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
     matrix_rm m;
     float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
@@ -188,7 +188,7 @@ matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon, float fTr
     {
         // 첫 번째 키프레임의 변환을 그대로 사용
         GPUKeyFrame staticKey = g_AllKeyframes[channel.iStartKeyframeOffset];
-        resultMatrix = matrix_rmFromSQT(staticKey.vScale, staticKey.vRotation, staticKey.vTranslation);
+        resultMatrix = ComposeMatrixFromSRT(staticKey.vScale, staticKey.vRotation, staticKey.vTranslation);
         return resultMatrix;
     }
     
@@ -243,11 +243,11 @@ matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon, float fTr
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 custom_slerp 사용
-    float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
+    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
+    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     // 보간된 SRT로 로컬 행렬 생성 시 인자 순서를 (Scale, Rotation, Translation)으로 바로잡습니다.
-    matrix_rm localmatrix_rm = matrix_rmFromSQT(interpScale, interpRotation, interpTranslation);
+    matrix_rm localmatrix_rm = ComposeMatrixFromSRT(interpScale, interpRotation, interpTranslation);
     
     // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
     resultMatrix = localmatrix_rm;
@@ -255,7 +255,7 @@ matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon, float fTr
     return resultMatrix;
 }
 
-SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     SRTKeyFrame result;
     
@@ -344,8 +344,8 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 custom_slerp 사용
-    float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
+    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
+    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;
     result.rotation = interpRotation;
@@ -363,12 +363,12 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     uint boneIndex = dispatchThreadID.x;
     
     // 1. Action Animation의 SRT 가져오기
-    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
     
     matrix result_matrix;
     
     // 2. Action Matrix를 바탕으로 Result Matrix 생성.
-    result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
+    result_matrix = ComposeMatrixFromSRT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     
     // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
     g_OutLocalMatrices[boneIndex] = result_matrix;
