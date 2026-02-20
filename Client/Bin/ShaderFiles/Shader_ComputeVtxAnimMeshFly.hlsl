@@ -78,7 +78,7 @@ cbuffer AnimationInfoCB : register(b0)
 }
 
 
-float4 mul_quaternion(float4 q1, float4 q2)
+float4 mulQuaternion(float4 q1, float4 q2)
 {
     float4 result;
     result.w = q1.w * q2.w - dot(q1.xyz, q2.xyz);
@@ -87,7 +87,7 @@ float4 mul_quaternion(float4 q1, float4 q2)
 }
 
 // 쿼터니언 slerp 직접 구현
-float4 custom_slerp(float4 q1, float4 q2, float t)
+float4 customSlerp(float4 q1, float4 q2, float t)
 {
    // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
@@ -123,7 +123,7 @@ float4 custom_slerp(float4 q1, float4 q2, float t)
 
 // 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
 // 이거 문젠가?
-matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
+matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
     matrix_rm m;
     float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
@@ -151,7 +151,7 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
     return m;
 }
 
-SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     SRTKeyFrame result;
     
@@ -240,8 +240,8 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 custom_slerp 사용
-    float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
+    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
+    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;
     result.rotation = interpRotation;
@@ -254,13 +254,13 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
 SRTKeyFrame Blend1D_SRT(uint clipA_idx, uint clipB_idx, float t, uint boneIndex, float trackPos)
 {
     // 1. 각 클립에서 현재 시간의 SRT 값을 계산
-    SRTKeyFrame srtA = Calculate_SRT(boneIndex, clipA_idx, false, trackPos);
-    SRTKeyFrame srtB = Calculate_SRT(boneIndex, clipB_idx, false, trackPos);
+    SRTKeyFrame srtA = CalculateSRT(boneIndex, clipA_idx, false, trackPos);
+    SRTKeyFrame srtB = CalculateSRT(boneIndex, clipB_idx, false, trackPos);
 
     // 2. 두 SRT를 선형 보간 (Lerp / Slerp)
     SRTKeyFrame result;
     result.scale = lerp(srtA.scale, srtB.scale, t);
-    result.rotation = custom_slerp(srtA.rotation, srtB.rotation, t);
+    result.rotation = customSlerp(srtA.rotation, srtB.rotation, t);
     result.translation = lerp(srtA.translation, srtB.translation, t);
     return result;
 }
@@ -296,7 +296,7 @@ SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
     else
         invWeightRot = normalize(invWeightRot);
     
-    delta.rotation = mul_quaternion(targetSRT.rotation, invWeightRot);
+    delta.rotation = mulQuaternion(targetSRT.rotation, invWeightRot);
     
     // 이동(Translation) 뺄셈
     delta.translation = targetSRT.translation - weightSRT.translation;
@@ -311,7 +311,7 @@ SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
     // 척도 덧셈 (곱셈)
     result.scale = baseSRT.scale * deltaSRT.scale;
     // 회전 덧셈: delta * base
-    result.rotation = mul_quaternion(deltaSRT.rotation, baseSRT.rotation);
+    result.rotation = mulQuaternion(deltaSRT.rotation, baseSRT.rotation);
     // 이동 덧셈
     result.translation = baseSRT.translation + deltaSRT.translation;
     return result;
@@ -325,14 +325,14 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     
     // --- 1. 기본(Action) 애니메이션 SRT 계산 ---
     // (예: XA_Loop_Stand)
-    SRTKeyFrame finalSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    SRTKeyFrame finalSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
     
     // --- 2. (신규) 2단계 가산(Additive) 블렌딩 ---
     if (g_IsBlendEnabled)
     {
         // --- 2-1. 좌/우 (LR) 블렌드 ---
         // 가산의 기준이 될 가중치(Weight) 포즈
-        SRTKeyFrame weightLR_SRT = Calculate_SRT(boneIndex, g_WeightClipLR, false, g_TrackPosition);
+        SRTKeyFrame weightLR_SRT = CalculateSRT(boneIndex, g_WeightClipLR, false, g_TrackPosition);
         SRTKeyFrame targetLR_SRT = weightLR_SRT; // 0.0일 경우를 대비해 중립 포즈로 초기화
         
         float lr_t = g_BlendParamLR;
@@ -351,7 +351,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
         // --- 2-2. 상/하 (DU) 블렌드 ---
         // 가산의 기준이 될 가중치(Weight) 포즈 (XA_Loop_Stand)
-        SRTKeyFrame weightDU_SRT = Calculate_SRT(boneIndex, g_WeightClipDU, false, g_TrackPosition);
+        SRTKeyFrame weightDU_SRT = CalculateSRT(boneIndex, g_WeightClipDU, false, g_TrackPosition);
         SRTKeyFrame targetDU_SRT = weightDU_SRT; // 0.0일 경우를 대비해 중립 포즈로 초기화
         
         float du_t = g_fBlendParamDU;
@@ -374,19 +374,19 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     if (1 == g_RibAnimUsed)
     {
         // 리본 SRT 가져오기
-        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
         
         // (기존 코드와 동일한 리본 가산 로직 사용, 대상만 actionSRT -> finalSRT로 변경)
         float4 finalScale = ribbonSRT.scale * finalSRT.scale;
-        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, finalSRT.rotation);
+        float4 finalRotation = mulQuaternion(ribbonSRT.rotation, finalSRT.rotation);
         float4 finalTranslation = ribbonSRT.translation +
                                  (finalSRT.translation - float4(0, 0, 0, 1));
-        result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
+        result_matrix = ComposeMatrixFromSRT(finalScale, finalRotation, finalTranslation);
     }
     else
     {
         // (블렌딩이 적용된) 최종 SRT를 행렬로 변환
-        result_matrix = matrix_rmFromSQT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
+        result_matrix = ComposeMatrixFromSRT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
     }
     
     // 4. 최종 로컬 행렬 출력 ---
