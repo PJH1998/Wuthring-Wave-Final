@@ -80,7 +80,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	if (IsUpdateAble())
 	{
 		Process_DelayedActions(fTimeDelta);
-		m_pTransformCom->Save_PreviousPosition();
+		Save_PreviousPosition();
 		Update_TargetDistance();
 	}
 		
@@ -1522,20 +1522,6 @@ void CAugusta::LateUpdate_HandleQTEEnd(_float fTimeDelta)
 	Notify_HarmonyEnd();
 	m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 	m_IsQTEend = false;
-}
-void CAugusta::LateUpdate_Render()
-{
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-		return;
-
-	if (m_IsOutLineVisible)
-	{
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
-			return;
-	}
-
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
-		return;
 }
 #pragma endregion
 

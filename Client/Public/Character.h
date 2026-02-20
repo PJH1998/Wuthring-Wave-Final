@@ -546,6 +546,9 @@ protected: // 헬퍼 함수 상속
 	void Update_AttackVolumes(_float fTimeDelta);
 
 	void LateUpdate_Parts(_float fTimeDelta);
+	void Save_PreviousPosition();
+
+	void LateUpdate_Render();
 
 
 public:

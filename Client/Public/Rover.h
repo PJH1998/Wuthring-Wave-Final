@@ -240,6 +240,11 @@ private:
 	_bool IsMask(_uint iMeshIndex);
 
 	void Process_MotionTrail(const _wstring& wStrObjectTag);
+	void Process_Timer(_float fTimeDelta);
+	_bool IsUpdateAble();
+
+	void LateUpdate_Collider(_float fTimeDelta);
+	void LateUpdate_HandleQTEEnd(_float fTimeDelta);
 
 private:
 	void Bind_Resources();

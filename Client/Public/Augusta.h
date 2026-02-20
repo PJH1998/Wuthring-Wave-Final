@@ -299,7 +299,6 @@ private:
 
 	void LateUpdate_Collider(_float fTimeDelta);
 	void LateUpdate_HandleQTEEnd(_float fTimeDelta);
-	void LateUpdate_Render();
 	
 	
 

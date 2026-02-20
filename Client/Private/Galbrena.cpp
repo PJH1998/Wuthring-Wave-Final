@@ -71,45 +71,16 @@ void CGalbrena::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-	
-	// 1. Dissolve 체크.
-	if (IsDissolve)
-	{
-		if (m_fDissolveTimer <= m_fMaxDissolveTime)
-			m_fDissolveTimer += fTimeDelta;
-		else
-		{
-			m_isActivate = false;
-			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-			m_IsEvent = false;
-		}
-	}
+	Process_Timer(fTimeDelta);
 
-	
-	if (!IsDissolve)
+	if (IsUpdateAble())
 	{
-		
-		// 0. Delayed Action 수행.
 		Process_DelayedActions(fTimeDelta);
-
-		// 2. 이전 위치 저장
-		m_pTransformCom->Save_PreviousPosition();
-
-		// 3. 몬스터와 타겟간의 거리 계산하기.
+		Save_PreviousPosition();
 		Update_TargetDistance();
-
-		// 4. AttackVolume 몬스터에 바인딩.
 		Bind_TargetToVolumes();
 	}
-	
-	// 5. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
+	PreUpdate_Parts(fTimeDelta);
 	
 }
 
@@ -119,102 +90,35 @@ void CGalbrena::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-
 	// 3. 상태 머신 갱신
-	if (!IsDissolve)
+	if (IsUpdateAble())
 	{
-		// 특정 상황일 때 TimeLack 감소.
-		_float fTimeLack = m_pGameSystem->TimeLack(COLLISIONLAYER::PLAYER);
-
-		m_pStateMachineCom->Update(fTimeDelta * m_fStateTimeRate * fTimeLack * m_fEventTimeRate); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
-
-		// 4. Physcics, Camera 업데이트
-		
+		Update_StateMachine(fTimeDelta);
 		Update_Physics(fTimeDelta);
 		Update_Camera(fTimeDelta);
 	}
 
-	// 4. 파츠 갱신.?
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
-	}
-	
-
-	// 5. MainAttackVolume 설정
-	for (auto& pAttackVoulme : m_AttackVolumes)
-		pAttackVoulme->Update(fTimeDelta);
-
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Update(fTimeDelta);
-
+	Update_Parts(fTimeDelta);
+	Update_AttackVolumes(fTimeDelta);
 }
 void CGalbrena::Late_Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
 
-	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
-
-	if (!IsDissolve)
-	{
-		// 2. MainAttackVolume 설정
-		if (nullptr != m_pMainAttackVolume)
-			m_pMainAttackVolume->Late_Update(fTimeDelta);
-
-		// 3. QTE인 경우 Collider 갱신하지 않습니다.?
-		if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) ||
-			Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
-		{
-			m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
-		}
-		else if (m_IsEvent)
-		{
-			// Collider 비 갱신.
-		}
-		else
-		{
-			// 2. QTE인 경우 Collider 갱신하지 않음.
-			if (!m_IsQTE)
-				m_pColliderCom->Sync_Position(m_pTransformCom);
-			else
-				m_pQTEColliderCom->Sync_Position(m_pTransformCom);
-		}
-	}
+	
+	if (IsUpdateAble())
+		LateUpdate_Collider();
+		
 
 	if (m_IsQTEend)
-	{
-		Notify_HarmonyEnd();
-		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
-		m_IsQTEend = false;
-	}
+		LateUpdate_HandleQTEEnd();
 
 	if (m_IsVisible)
 	{
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
-			return;
-
-		if (m_IsOutLineVisible)
-		{
-			if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
-				return;
-		}
-		
-
-		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
-			return;
+		LateUpdate_Render();
+		LateUpdate_Parts(fTimeDelta);
 	}
-
-
-	//  파츠 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Late_Update(fTimeDelta);
-	}
-    
 }
 
 void CGalbrena::Render()
@@ -1233,6 +1137,61 @@ void CGalbrena::Process_MotionTrail(const _wstring& wStrObjectTag)
 	// Color는 고정?
 	Spawn_MotionTrail(fDuration, fInterval, fMotionLifeTime, m_vMotionTrailColor, iShaderPath);
 
+}
+
+void CGalbrena::Process_Timer(_float fTimeDelta)
+{
+	_bool IsDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+
+	// 1. Dissolve 체크.
+	if (IsDissolve)
+	{
+		if (m_fDissolveTimer <= m_fMaxDissolveTime)
+			m_fDissolveTimer += fTimeDelta;
+		else
+		{
+			m_isActivate = false;
+			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+			m_IsEvent = false;
+		}
+	}
+}
+
+_bool CGalbrena::IsUpdateAble()
+{
+	const _bool isDissolve = Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+	return !isDissolve;
+}
+
+void CGalbrena::LateUpdate_Collider()
+{
+	
+
+	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)) ||
+		Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE)))
+	{
+		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION)); // 이동이 아닌 위치 재설정/
+	}
+	else if (m_IsEvent)
+	{
+
+	}
+	else
+	{
+		// 2. QTE인 경우 Collider 갱신하지 않음.
+		if (!m_IsQTE)
+			m_pColliderCom->Sync_Position(m_pTransformCom);
+		else
+			m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+	}
+}
+
+void CGalbrena::LateUpdate_HandleQTEEnd()
+{
+	Notify_HarmonyEnd();
+	m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
+	m_IsQTEend = false;
 }
 
 void CGalbrena::Bind_Resources()

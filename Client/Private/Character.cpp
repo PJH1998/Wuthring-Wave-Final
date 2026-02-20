@@ -1651,6 +1651,21 @@ void CCharacter::Save_PreviousPosition()
 	m_pTransformCom->Save_PreviousPosition();
 }
 
+void CCharacter::LateUpdate_Render()
+{
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
+
+	if (m_IsOutLineVisible)
+	{
+		if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+			return;
+	}
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
+}
+
 void CCharacter::Free()
 {
     CActor::Free();

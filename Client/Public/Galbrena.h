@@ -241,8 +241,6 @@ private:
 
 	// Attack Volume
 	_uint m_iVolumeIdx = {};
-	vector<class CAttackVolume*> m_AttackVolumes;
-
 	_bool m_PendingConditions[CONDITION_END] = {};
 
 	// Shader Value
@@ -265,7 +263,11 @@ private:
 
 
 	void Process_MotionTrail(const _wstring& wStrObjectTag);
+	void Process_Timer(_float fTimeDelta);
+	_bool IsUpdateAble();
 
+	void LateUpdate_Collider();
+	void LateUpdate_HandleQTEEnd();
 
 private:
 	void Bind_Resources();
