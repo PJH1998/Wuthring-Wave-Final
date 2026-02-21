@@ -117,11 +117,11 @@ void CGalbrenaGroundSkill::OnExit()
 
 
 	// 기본 E 스킬에 적중 시 반동 E 스킬 발동을 위한 Condition
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::SKILLHIT));
 
 	// 궁극기 썼을 때 캐릭터에 부여된 상태 m제거.
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
 	// 활성화된 메인 콜라이더 끄기
 	m_pGalbrena->Collider_Active(TEXT("Galbrena|DEFAULT_E|SKILL"), false);

@@ -103,7 +103,7 @@ void CRoverGroundSkill::OnExit()
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CRoverGroundSkill::Handle_Input()

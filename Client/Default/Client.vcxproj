@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Ability.h" />
+    <ClInclude Include="..\Public\AbilityDefine.h" />
     <ClInclude Include="..\Public\AirState.h" />
     <ClInclude Include="..\public\Animator_UI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

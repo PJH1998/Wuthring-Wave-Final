@@ -107,7 +107,7 @@ void CGalbrenaGroundAttack::OnExit()
 
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 _bool CGalbrenaGroundAttack::Hit_Judge()
@@ -156,7 +156,7 @@ void CGalbrenaGroundAttack::Handle_Input()
 	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
 	// Cost 계속
-	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)); // Burst 상태 인지 체크
+	m_States[BURST] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)); // Burst 상태 인지 체크
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
 
 	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.

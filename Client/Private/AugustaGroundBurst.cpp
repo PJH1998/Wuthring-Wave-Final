@@ -87,8 +87,8 @@ void CAugustaGroundBurst::OnExit()
 	m_pAugusta->PartActivate(m_iSubPartType, false);
 
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 	m_pAugusta->Set_OutLineVisible(true);
 

@@ -81,7 +81,7 @@ void CGalbrenaGroundSprint::Handle_Input()
 	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	m_States[HIT] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	//m_States[DODGEABLE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//m_States[DODGEABLE] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
@@ -127,7 +127,7 @@ void CGalbrenaGroundSprint::Handle_Input()
 
 	
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start")); // 기본 E 사용.
-	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)); // Burst 상태 인지 체크
+	m_States[BURST] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)); // Burst 상태 인지 체크
 
 	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.
 	m_States[BURST_E] = m_States[SKILL_E] && (m_pGalbrena->Get_Cost(COST_TYPE::COST1) >= m_pGalbrena->Get_MaxCost())

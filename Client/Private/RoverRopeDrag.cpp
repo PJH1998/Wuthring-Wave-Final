@@ -85,7 +85,7 @@ void CRoverRopeDrag::OnExit()
 	m_eRopeDir = ROPEDIR::END;
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 	
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
 	m_pRover->Rope_Active(false); // Rope Active 종료.
 }
 

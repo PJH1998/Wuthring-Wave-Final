@@ -66,7 +66,7 @@ void CGalbrenaGroundSpecialDash::Handle_Input()
 	m_States[HIT] = Hit_Judge();
 
 	m_States[DODGE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-	//m_States[DODGEABLE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//m_States[DODGEABLE] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
 	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건

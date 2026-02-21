@@ -69,7 +69,7 @@ void CRoverHit::OnExit()
 
 	// Hit 판정 끝났으므로 정보 초기화
 	m_pRover->ClearPendingHit();
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 

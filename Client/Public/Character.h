@@ -245,7 +245,7 @@ public:
 	void Play_Action(const _wstring& strActionTag, _bool isMaintain = false, _bool isEscape = false);
 	void Stop_Action();
 	// Ability에서 확인 받기 => 상태 판별?
-	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
+	_bool HasAbilityFlag(_uint iFlag);
 
 	// T 사용시 컨디션 공유. Interaction Type 설정.
 	UI_TAB_UTILITY Get_UtilityType();
@@ -272,9 +272,9 @@ public:
 	
 
 	// Ability에 제공. => 상태 판별할때 사용.
-	void Bind_Condition_ToAbillity(_uint iCondition);
-	void Remove_Condition_ToAbillity(_uint iCondition);
-	void Bind_CostCondition_ToAbility(_uint iConditionw, _uint iConditionFlag);
+	void Bind_Flag_ToAbillity(_uint iCondition);
+	void Remove_Flag_ToAbillity(_uint iCondition);
+	void Bind_CostFlag_ToAbility(_uint iConditionw, _uint iConditionFlag);
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg = nullptr) {}; // 전환 시 실행할 함수.
@@ -410,7 +410,7 @@ public:
 	void Add_Condition(_uint iConditionFlag);
 	_bool Check_AnyCondition(_uint iConditionFlag) const;
 	_bool Check_AllCondition(_uint iConditionFlag) const;
-	void Remove_Condition(_uint iConditionFlag);
+	void Remove_Flag(_uint iConditionFlag);
 	void Remove_AllCondition();
 	void Sync_Condition_ToPlayer(_uint* pCondition);
 	void Add_Condition_FromPlayer(_uint iCondition);

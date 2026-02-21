@@ -126,7 +126,7 @@ void CGalbrenaAirAttack::OnExit()
 
 	m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
 	m_iSubPartType = CGalbrena::PARTTYPE::TYPE_END;
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 }

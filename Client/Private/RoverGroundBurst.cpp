@@ -98,8 +98,8 @@ void CRoverGroundBurst::OnExit()
 
 	if (m_strPrevInfo.empty())
 	{
-		m_pRover->Bind_Condition_ToAbillity(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
-		m_pRover->Bind_CostCondition_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+		m_pRover->Bind_Flag_ToAbillity(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
+		m_pRover->Bind_CostFlag_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 	}
 
 	// 공격 콜라이더 비활성화
@@ -107,8 +107,8 @@ void CRoverGroundBurst::OnExit()
 
 	if (m_strPrevInfo == "ULTI")
 	{
-		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-		m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+		m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+		m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 		m_pRover->Set_OutLineVisible(false); // 궁극기 도중에는 입 모양이 보이게 하기 위함.
 		m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f);
 	}

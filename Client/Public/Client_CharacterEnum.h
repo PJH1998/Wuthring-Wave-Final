@@ -67,7 +67,7 @@ namespace Client
 		END
 	};
 
-	enum class UI_AUGUSTA_STATE : unsigned int {
+	enum class UI_AUGUSTA_VIEWSTATE : unsigned int {
 		DEFAULT = 0,				// 기본?
 		LB_STRONG_READY = 1,		// 강공 실행 가능
 		LB_SWORD_READY = 2,         // SWORD LB 아이콘 준비됨.(SpAttack 상태? => 나궁썼어)
@@ -85,7 +85,7 @@ namespace Client
 	};
 
 
-	enum class UI_AUGUSTA_CONDITION : unsigned int {
+	enum class UI_AUGUSTA_VIEWFLAG : unsigned int {
 		LB_SP_ATTACK = 1 << 0, // Special Attack (궁 쓸수 있는 상태)	// 강화 궁 진입한 상태 (LB도 생김)
 		LB_RESONANCE = 1 << 1, // 강공									// -
 		E_GRIFFON = 1 << 2, // 그리폰.									// 그리폰 사용 가능 상태 (3 0)
@@ -96,7 +96,7 @@ namespace Client
 	};
 
 
-	enum class UI_ROVER_STATE : unsigned int {
+	enum class UI_ROVER_VIEWSTATE : unsigned int {
 		DEFAULT = 0,			// 기본
 		E_BURST_READY = 1,		// 서지 E 사용가능
 		E_DEFAULT_READY = 2,	// 기본 E 사용가능
@@ -105,19 +105,19 @@ namespace Client
 	};
 
 	// UI에서 사용하기 위해서 State Machine에서 전달.
-	enum class UI_ROVER_CONDITION : unsigned int {
+	enum class UI_ROVER_VIEWFLAG : unsigned int {
 		BURST_ACTIVE = 1 << 0, // Burst ACTIVE
 		END
 	};
 
-	enum class UI_GALBRENA_STATE : unsigned int {
+	enum class UI_GALBRENA_VIEWSTATE : unsigned int {
 		DEFAULT = 0,
 		E_BURST_READY = 1,		// 강화 E 사용 가능.
 		E_DEFAULT_READY = 2,	// 기본 E 사용가능
 		END
 	};
 
-	enum class UI_GALBRENA_CONDITION : unsigned int {
+	enum class UI_GALBRENA_VIEWFLAG : unsigned int {
 		BURST_ACTIVE = 1 << 0, // Burst ACTIVE
 		END
 	};

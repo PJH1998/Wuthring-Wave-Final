@@ -450,7 +450,7 @@ void CCharacter::Bind_GrabEscapeExecute()
 	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::GRABED)))
 		return;
 
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
+	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::GRABED));
 	//ResetPose();
 }
 
@@ -552,7 +552,7 @@ void CCharacter::Start_Anim()
 {
 	if (nullptr == m_pGameSystem)
 		return;
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
 	m_pGameSystem->Change_TimeRate(COLLISIONLAYER::PLAYER, 1.f);
 }
 
@@ -567,7 +567,7 @@ void CCharacter::Stop_Anim_ToEvent()
 
 void CCharacter::Start_Anim_ToEvent()
 {
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
+	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::ANIMSTOP));
 	m_fEventTimeRate = 1.f;
 }
 
@@ -595,13 +595,6 @@ void CCharacter::Camera_Shake(_float fIntensity)
 
 }
 
-//void CCharacter::Play_Action(const _wstring& strActionTag, _bool isEscape)
-//{
-//	if (nullptr == m_pTransformCom)
-//		return;
-//
-//	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false, isEscape);
-//}
 
 void CCharacter::Play_Action(const _wstring& strActionTag, _bool isMaintain, _bool isEscape)
 {
@@ -619,12 +612,12 @@ void CCharacter::Stop_Action()
 	m_pGameSystem->Stop_Action();
 }
 
-_bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
+_bool CCharacter::HasAbilityFlag(_uint iFlag)
 {
 	if (nullptr == m_pAbillityCom)
 		return false;
 
-	return m_pAbillityCom->Check_AnyCondition(iCondition);
+	return m_pAbillityCom->HasAbilityFlag(iFlag);
 }
 
 UI_TAB_UTILITY CCharacter::Get_UtilityType()
@@ -794,28 +787,28 @@ _bool CCharacter::Is_AttachThrowTarget()
 
 
 
-void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
+void CCharacter::Bind_Flag_ToAbillity(_uint iFlag)
 {
 	if (nullptr == m_pAbillityCom)
 		return;
 
-	m_pAbillityCom->Bind_Condition(iCondition);
+	m_pAbillityCom->Bind_Flag(iFlag);
 }
 
-void CCharacter::Remove_Condition_ToAbillity(_uint iCondition)
+void CCharacter::Remove_Flag_ToAbillity(_uint iCondition)
 {
 	if (nullptr == m_pAbillityCom)
 		return;
 
-	m_pAbillityCom->Remove_Condition(iCondition);
+	m_pAbillityCom->Remove_Flag(iCondition);
 }
 
-void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag)
+void CCharacter::Bind_CostFlag_ToAbility(_uint iCostType, _uint iFlag)
 {
 	if (nullptr == m_pAbillityCom)
 		return;
 
-	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
+	m_pAbillityCom->Bind_CostFlag(iCostType, iFlag);
 }
 
 _vector CCharacter::Get_Position()
@@ -975,7 +968,7 @@ void CCharacter::ClearCaptureState()
 	//m_pColliderCom->IsActivate(true);
 
 	// 3. 제거
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
+	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::GRABRELEASE));
 }
 
 _bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
@@ -1461,7 +1454,7 @@ _bool CCharacter::Check_AllCondition(_uint iConditionFlag) const
 }
 
 
-void CCharacter::Remove_Condition(_uint iConditionFlag)
+void CCharacter::Remove_Flag(_uint iConditionFlag)
 {
 	m_iCondition &= ~iConditionFlag;
 }

@@ -497,7 +497,7 @@ void CGalbrena::Resolve_PerfectDodge()
 		return;
 
 	// 2. 조건 플래그 제거.
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 
 	// 3. (데미지 무효화)
 	while (!m_DelayedActions.empty())
@@ -767,7 +767,7 @@ void CGalbrena::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Ma
 	CTransform* pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 
 	// 2. Burst 상태인지 확인.
-	_bool IsBurst = Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	_bool IsBurst = HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 	
 	switch (m_iVolumeIdx)
 	{
@@ -813,7 +813,7 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 		m_fDodgeableHitTimer -= fTimeDelta;
 		if (m_fDodgeableHitTimer <= 0.f)
 		{
-			Remove_Condition(iDodgeableFlag); // 회피 가능 상태 제거
+			Remove_Flag(iDodgeableFlag); // 회피 가능 상태 제거
 
 			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
 
@@ -829,7 +829,7 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 		m_fStateDelayTimer -= fTimeDelta;
 		if (m_fStateDelayTimer <= 0.f)
 		{
-			Remove_Condition(iDelayFlag);
+			Remove_Flag(iDelayFlag);
 			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
 			m_fStateDelayTimer = 0.f;
 		}
@@ -912,7 +912,7 @@ void CGalbrena::Activate(_bool IsActivate)
 		m_isActivate = true;
 		m_IsOutLineVisible = true;
 		
-		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
 	}
 }
@@ -1151,7 +1151,7 @@ void CGalbrena::Process_Timer(_float fTimeDelta)
 		else
 		{
 			m_isActivate = false;
-			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+			Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 			m_IsEvent = false;
 		}
 	}

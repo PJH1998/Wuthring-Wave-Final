@@ -1376,6 +1376,7 @@
     <ClInclude Include="..\public\Excute_SFX.h">
       <Filter>03. GameObject\ScreenEffect\SFX\Excute</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AbilityDefine.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

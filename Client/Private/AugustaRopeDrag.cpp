@@ -85,7 +85,7 @@ void CAugustaRopeDrag::OnExit()
 	m_pAugusta->Set_Gravity(false);
 	m_eRopeDir = ROPEDIR::END;
 	m_eRopeStep = ROPESTEP::STEP_NONE;
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
 
 	m_pAugusta->Rope_Active(false);
 }

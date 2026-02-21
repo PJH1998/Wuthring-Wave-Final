@@ -67,7 +67,7 @@ void CGalbrenaHit::OnExit()
 
 	// Hit 판정 끝났으므로 정보 초기화
 	m_pGalbrena->ClearPendingHit();
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 

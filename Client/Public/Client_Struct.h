@@ -57,8 +57,8 @@ namespace Client
 		_string strKeyInput;      // "LB", "E", "Q" 등
 		_uint iCharacterType;	  // 캐릭터 타입. => Rover, Augusta, Galbrena => UI_CHARACTERTYPE
 		_uint iStateType;		  // 캐릭터에 따른 State => Character Type을 확인하고 그에 맞게 캐스팅해서 사용. 
-		// => iStateType은 UI_AUGUSTA_STATE 또는 ROVER_STATE GABRENA_STATE
-		 // ex) AUGUSTA면 UI_AUGUSTA_STATE eState = static_cast<UI_AUGUSTA_STATE>(iStateType);
+		// => iStateType은 UI_AUGUSTA_VIEWSTATE 또는 ROVER_STATE GABRENA_STATE
+		 // ex) AUGUSTA면 UI_AUGUSTA_VIEWSTATE eState = static_cast<UI_AUGUSTA_VIEWSTATE>(iStateType);
 
 		_float  fCurrentCoolTime; // 현재 쿨타임.
 		_float  fMaxCoolTime;     // Max 쿨타임

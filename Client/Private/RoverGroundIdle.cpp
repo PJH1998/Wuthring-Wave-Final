@@ -76,7 +76,7 @@ void CRoverGroundIdle::Handle_Input()
 	m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
-	//m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	//m_States[DODGEABLE] = m_pRover->HasAbilityFlag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 
 	//m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
 
@@ -117,7 +117,7 @@ void CRoverGroundIdle::Handle_Input()
     m_States[SKILL_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
 	// Burst 상태 확인하기.
-	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	m_States[BURST] = m_pRover->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 	if (m_States[BURST])
 		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));

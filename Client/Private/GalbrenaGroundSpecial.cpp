@@ -115,9 +115,9 @@ void CGalbrenaGroundSpecial::OnExit()
 	// 공격 콜라이더 비활성화
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);
 
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CGalbrenaGroundSpecial::Handle_Input()

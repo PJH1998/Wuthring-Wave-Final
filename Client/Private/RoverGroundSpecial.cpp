@@ -111,7 +111,7 @@ void CRoverGroundSpecial::OnExit()
 	}
 	
     m_pRover->Set_Gravity(true); 
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	// 공격 콜라이더 비활성화
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 
@@ -126,7 +126,7 @@ void CRoverGroundSpecial::Handle_Input()
 	m_States[SKILL_E] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
 	m_States[SKILL_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
-	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	m_States[BURST] = m_pRover->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 	if (m_States[BURST])
 		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));

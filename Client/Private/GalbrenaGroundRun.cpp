@@ -124,7 +124,7 @@ void CGalbrenaGroundRun::Handle_Input()
     // 상태에 따라 속도 다르게.
 	m_fSpeed = 0.6f;
 
-	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)); // Burst 상태 인지 체크
+	m_States[BURST] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)); // Burst 상태 인지 체크
 	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
 
 	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.

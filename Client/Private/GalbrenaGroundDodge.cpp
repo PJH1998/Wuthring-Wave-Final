@@ -53,8 +53,8 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 }
 
 void CGalbrenaGroundDodge::OnUpdate(_float fTimeDelta)
@@ -77,8 +77,8 @@ void CGalbrenaGroundDodge::OnUpdate(_float fTimeDelta)
 void CGalbrenaGroundDodge::OnExit()
 {
     CGroundState::OnExit();
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CGalbrenaGroundDodge::Handle_Input()

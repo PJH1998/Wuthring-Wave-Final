@@ -493,7 +493,7 @@ void CRover::Resolve_PerfectDodge()
 		return;
 
 	// 2. 조건 플래그 제거.
-	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
 
 	// 3. (데미지 무효화)
 	while (!m_DelayedActions.empty())
@@ -788,7 +788,7 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 		m_fDodgeableHitTimer -= fTimeDelta;
 		if (m_fDodgeableHitTimer <= 0.f)
 		{
-			Remove_Condition(iDodgeableFlag); // 회피 가능 상태 제거
+			Remove_Flag(iDodgeableFlag); // 회피 가능 상태 제거
 
 			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
 
@@ -804,7 +804,7 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 		m_fStateDelayTimer -= fTimeDelta;
 		if (m_fStateDelayTimer <= 0.f)
 		{
-			Remove_Condition(iDelayFlag);
+			Remove_Flag(iDelayFlag);
 			m_fStateTimeRate = m_fOriginTimeRate; // 원래 TimeRate로 변경합니다.
 			m_fStateDelayTimer = 0.f;
 		}
@@ -883,7 +883,7 @@ void CRover::Activate(_bool IsActivate)
 	{
 		m_isActivate = true;
 		m_IsOutLineVisible = true;
-		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
 	}
 }
@@ -1086,7 +1086,7 @@ void CRover::Process_Timer(_float fTimeDelta)
 		else
 		{
 			m_isActivate = false;
-			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+			Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
 }

@@ -87,7 +87,7 @@ void CAugustaGroundAttack::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false); 
     m_pAugusta->PartActivate(m_iSubPartType, false); 
 
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 
@@ -127,7 +127,6 @@ void CAugustaGroundAttack::Handle_Input()
 	m_States[HIT] = Hit_Judge(); // Hit_judge()가 True인 경우.
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
-    // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
 	m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAugustaAttackType::ATTACK01)
 		&& (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
 
@@ -231,7 +230,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
 			return;
 
-		m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+		m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
 		m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
 		return;
@@ -252,7 +251,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
 			return;
 
-		//m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
+		//m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_GRIFFON));
 
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));

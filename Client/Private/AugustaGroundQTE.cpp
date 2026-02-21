@@ -98,7 +98,7 @@ void CAugustaGroundQTE::OnExit()
 	// 공격 콜라이더 비활성화
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
 	m_pAugusta->PartActivate(m_iPartType, false); // 파츠 변경. // Volume Activate는 Notify로..
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	
 	

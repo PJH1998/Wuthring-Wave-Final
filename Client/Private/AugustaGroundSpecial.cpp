@@ -96,12 +96,12 @@ void CAugustaGroundSpecial::OnExit()
     m_iComboCount = 0;
     m_pAugusta->Set_Gravity(true); 
 
-	m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+	m_pAugusta->Remove_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	m_pAugusta->Remove_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::R_SP_ATTACKOMNI));
 
 	// 무적 제거.
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
 	// 공격 콜라이더 비활성화
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
@@ -264,8 +264,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 
 				// Bind Condition Burst 궁
-				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-				m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+				m_pAugusta->Remove_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+				m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::R_SP_ATTACKOMNI));
 
 				return;
 			}
@@ -278,7 +278,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Rotate_Target(true);
 
 				// Remove Condition 마지막 Burst 궁
-				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+				m_pAugusta->Remove_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::R_SP_ATTACKOMNI));
 				m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);

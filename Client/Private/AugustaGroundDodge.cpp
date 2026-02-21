@@ -45,8 +45,8 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	// 10. Effect
 	
@@ -76,8 +76,8 @@ void CAugustaGroundDodge::OnUpdate(_float fTimeDelta)
 void CAugustaGroundDodge::OnExit()
 {
     CGroundState::OnExit();
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDodge::Handle_Input()

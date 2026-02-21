@@ -51,8 +51,8 @@ void CRoverGroundDodge::OnEnter(void* pArg)
 
 	m_pRover->Resolve_PerfectDodge();
 
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); 
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); 
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
 	m_pRover->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
@@ -81,8 +81,8 @@ void CRoverGroundDodge::OnUpdate(_float fTimeDelta)
 void CRoverGroundDodge::OnExit()
 {
     CGroundState::OnExit();
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGE));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CRoverGroundDodge::Handle_Input()

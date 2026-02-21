@@ -75,7 +75,7 @@ void CRoverGroundAttack::OnExit()
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
     m_pRover->PartActivate(m_iPartType, false); 
-	m_pRover->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pRover->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	m_pRover->Collider_Active(TEXT("Main|X|X"), false);
 

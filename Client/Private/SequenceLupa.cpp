@@ -82,7 +82,7 @@ void CSequenceLupa::Priority_Update(_float fTimeDelta)
 		else
 		{
 			m_isActivate = false;
-			Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+			Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		}
 	}
 }
@@ -462,7 +462,7 @@ void CSequenceLupa::Activate(_bool IsActivate)
 		m_isActivate = true;
 		m_IsVisible = true;
 		m_IsOutLineVisible = true;
-		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
+		Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DISSOLVE));
 		Bind_DefaultShaderPath();
 		m_pTransformCom->Save_PreviousPosition();
 		m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));

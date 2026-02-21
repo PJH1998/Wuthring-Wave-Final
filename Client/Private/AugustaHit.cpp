@@ -69,7 +69,7 @@ void CAugustaHit::OnExit()
 
 	// Hit 판정 끝났으므로 정보 초기화
 	m_pAugusta->ClearPendingHit();
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	//m_pAugusta->Set_Hit(false);
 	

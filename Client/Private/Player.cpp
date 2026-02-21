@@ -529,7 +529,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 			m_Characters[m_iCurrentCharacterIdx]->Reserve_LandSlide(pClientDesc.eSlideData);
 		}
 		else
-			m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+			m_Characters[m_iCurrentCharacterIdx]->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
 		
 		//IsStart가 True면 시작지점(SlideData 있음) false면 끝 지점(SlideData 없음)
 		
@@ -1131,8 +1131,8 @@ void CPlayer::DeactivatePrevCharacter(CPlayer::CHARACTERTYPE ePrev)
 
 	auto* pPrev = m_Characters[ePrev];
 	pPrev->Activate(false);
-	pPrev->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
-	pPrev->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
+	pPrev->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	pPrev->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::SELECT));
 	m_iPrevCharacterIdx = ePrev;
 }
 

@@ -90,8 +90,8 @@ void CAugustaGroundLandSlide::OnExit()
 	m_pAugusta->ColliderActive(true);
 	m_pAugusta->Set_Gravity(true);
 	//m_pAugusta->Clear_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, 0.f);
-	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
-	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
+	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
+	//m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::COLLIDER_UNACTIVE));
 	m_iWayPoint = 0;
 	m_SlideData.Reset();
 

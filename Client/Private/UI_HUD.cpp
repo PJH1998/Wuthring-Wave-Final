@@ -427,16 +427,16 @@ void CUI_HUD::Update_Presets()
 {
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 	m_isIn_UltMode_Augusta = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_AUGUSTA) ?
-		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
+		(eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
 
 	m_isIn_StrongAtk_Augusta = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_AUGUSTA) ?
-		static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY : false;
+		static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY : false;
 
 	m_isIn_BurstMode_Galbrena = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
-		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
+		m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)) : false;
 
 
 	switch (m_iSelectedCHIndex)
@@ -539,7 +539,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		else if (fBasicSkillCD[i][SK_R] > 0.f)				fUltColor = fPassedColorMul;
 		else												fUltColor = fPassedColorMul;
 
-		if (static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_READY &&
+		if (static_cast<UI_AUGUSTA_VIEWSTATE>(vecUISlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_VIEWSTATE::R_SWORD_READY &&
 			m_iSelectedCHIndex == CH_AUGUSTA)
 			fUltColor = fFilledColorMul;
 
@@ -619,21 +619,21 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// ==============================
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
-	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY;
 	_bool isIn_Galbrena_BurstMode = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
-		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+		m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)) : false;
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
 	_bool isReady_Augusta_Griffon = (m_iSelectedCHIndex != CH_AUGUSTA) ? false :
-		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_STATE::E_GRIFFON_READY;
+		static_cast<UI_AUGUSTA_VIEWSTATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_VIEWSTATE::E_GRIFFON_READY;
 	_bool isReady_Augusta_Rise =	(m_iSelectedCHIndex != CH_AUGUSTA) ? false :
-		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_STATE::E_RISE_READY;
+		static_cast<UI_AUGUSTA_VIEWSTATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_AUGUSTA_VIEWSTATE::E_RISE_READY;
 	_bool isReady_Augusta_LBStrong =(m_iSelectedCHIndex != CH_AUGUSTA) ? false :
-		static_cast<UI_AUGUSTA_STATE>(vecUISlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+		static_cast<UI_AUGUSTA_VIEWSTATE>(vecUISlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY;
 	_bool isReady_Galbrena_Burst =	(m_iSelectedCHIndex != CH_GALBRENA) ? false :
-		static_cast<UI_GALBRENA_STATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_GALBRENA_STATE::E_BURST_READY;
+		static_cast<UI_GALBRENA_VIEWSTATE>(vecUISlots[CAbility::KEY_E].iStateType) == UI_GALBRENA_VIEWSTATE::E_BURST_READY;
 
 
 	static _uint iIndex_EBtn = 2;		static _uint iIndex_PrevEBtn;
@@ -717,8 +717,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
 	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
-	if ((static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY ||
-		static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_READY) &&
+	if ((static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY ||
+		static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType) == UI_AUGUSTA_VIEWSTATE::R_SWORD_READY) &&
 		m_iSelectedCHIndex == CH_AUGUSTA)
 		fUltGuage = 1.f;
 
@@ -887,10 +887,10 @@ void CUI_HUD::Update_UI_SkillSection_Utility(_float fTimeDelta)
 {
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 	_bool isIn_Augusta_AdvUlt = (m_iSelectedCHIndex == CH_AUGUSTA)?
-		(eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
+		(eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode : false;
 
 
 
@@ -924,14 +924,14 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
-	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY;
 	_bool isIn_Galbrena_BurstMode = (m_pPlayerStatus->Get_CurrentCharIndex() == CH_GALBRENA) ?
-		m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE)) : false;
+		m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)) : false;
 
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
 
 
@@ -1009,13 +1009,13 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
-	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY;
 	_bool isIn_Galbrena_BurstMode = false; /* 나중에 버스트 모드 조건 삽입 */
 
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
 
 	_uint iIndex_EBtn =	 2;
@@ -1057,10 +1057,10 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}break;
 	case CH_AUGUSTA:
 	{
-		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-		UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+		_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+		UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-		_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+		_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 		if (isIn_Augusta_AdvUlt)
 			isChar_LBBtnFeedbackAble = true;
 		else
@@ -1068,7 +1068,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}break;
 	case CH_GALBRENA:
 	{
-		_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+		_bool isIn_Galbrena_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE));
 		if (isIn_Galbrena_BurstMode)
 			isChar_LBBtnFeedbackAble = true;
 		else
@@ -1087,10 +1087,10 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}break;
 	case CH_AUGUSTA:
 	{
-		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-		UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+		_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+		UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-		_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+		_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 		if (isIn_Augusta_AdvUlt)
 			isChar_EButtonFeedbackAble = false;
 		else
@@ -1669,10 +1669,10 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 	auto& skillSlots = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
 
 
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
 
 
@@ -1688,7 +1688,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 		m_pUI_Group_Augusta->Set_Active(false);
 		m_pUI_Group_Galbrena->Set_Active(false);
 
-		_bool isIn_Rover_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+		_bool isIn_Rover_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 		if (!isIn_Rover_BurstMode)
 		{
@@ -1733,7 +1733,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 		m_pUI_Group_Augusta->Set_Active(false);
 		m_pUI_Group_Galbrena->Set_Active(true);
 
-		_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+		_bool isIn_Galbrena_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE));
 
 		if (!isIn_Galbrena_BurstMode)
 		{
@@ -1941,11 +1941,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 	pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST1);
 
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
 
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
     //m_fPlayerEnergy;
     //m_fPlayerMaxEnergy;
@@ -2030,7 +2030,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     {
     case CH_ROVER:     
         {
-			_bool isIn_Rover_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+			_bool isIn_Rover_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
             if      (!isIn_Rover_BurstMode)     /* Normal */
             { 
@@ -2113,7 +2113,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         }break;
     case CH_GALBRENA:  
         {
-			_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+			_bool isIn_Galbrena_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE));
 
             if  (	!isIn_Galbrena_BurstMode	)     /* Normal */
             { 
@@ -2209,7 +2209,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 	// galbrena energy bar
     if (m_iSelectedCHIndex == CH_GALBRENA)
     {
-		_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+		_bool isIn_Galbrena_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE));
 
         if (!isIn_Galbrena_BurstMode)
         {
@@ -2316,10 +2316,10 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 	// Control Active
 	auto& skillSlots = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
     if	(!isIn_Augusta_AdvUlt)
     {
@@ -2422,11 +2422,11 @@ void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 
 	auto& roverUIDesc = m_pUI_Skill[CH_ROVER]->Get_UIDesc();
 
-	UI_ROVER_STATE eState_Rover_E = static_cast<UI_ROVER_STATE>(skillSlots[CAbility::KEY_E].iStateType);
-	UI_ROVER_STATE eState_Rover_R = static_cast<UI_ROVER_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	UI_ROVER_VIEWSTATE eState_Rover_E = static_cast<UI_ROVER_VIEWSTATE>(skillSlots[CAbility::KEY_E].iStateType);
+	UI_ROVER_VIEWSTATE eState_Rover_R = static_cast<UI_ROVER_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
 
 
-	_bool isIn_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	_bool isIn_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 
 	// ==============================
@@ -2435,12 +2435,12 @@ void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 
 	switch (eState_Rover_E)
 	{
-	case Client::UI_ROVER_STATE::E_BURST_READY:
+	case Client::UI_ROVER_VIEWSTATE::E_BURST_READY:
 		// Augusta Normal - E Combo Start
 		roverUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E_Burst"][0];
 		roverUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Rover_E_Burst"][1];
 		break;
-	case Client::UI_ROVER_STATE::E_DEFAULT_READY:
+	case Client::UI_ROVER_VIEWSTATE::E_DEFAULT_READY:
 	default:
 		roverUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E"][0];
 		roverUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Rover_E"][1];
@@ -2454,7 +2454,7 @@ void CUI_HUD::Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots)
 
 	switch (eState_Rover_R)
 	{
-	case Client::UI_ROVER_STATE::R_READY:
+	case Client::UI_ROVER_VIEWSTATE::R_READY:
 	default:
 		roverUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Rover_R"][0];
 		roverUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Rover_R"][1];
@@ -2471,20 +2471,20 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 {
 	auto& augustaUIDesc = m_pUI_Skill[CH_AUGUSTA]->Get_UIDesc();
 
-	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	UI_AUGUSTA_STATE eState_Augusta_LB = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_E = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_E].iStateType);
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_R = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
+	UI_AUGUSTA_VIEWSTATE eState_Augusta_LB = static_cast<UI_AUGUSTA_VIEWSTATE>(skillSlots[CAbility::KEY_LB].iStateType);
 
 
 
 	// if True, In Advanced Ult Mode
-	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	_bool isIn_AdvUltMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
 	
-	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 	// ㄴ 이걸 기점으로 아이콘 조건 주어야 할 듯. 지금 궁 사용 상태에서 안보임
 
-	_bool isAvailable_Griffon = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
-	_bool isAvailable_Rise = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+	_bool isAvailable_Griffon = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_GRIFFON));
+	_bool isAvailable_Rise = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_RISE));
 
 
 
@@ -2496,17 +2496,17 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 	{
 
 
-	case Client::UI_AUGUSTA_STATE::E_GRIFFON_READY:
+	case Client::UI_AUGUSTA_VIEWSTATE::E_GRIFFON_READY:
 		// Augusta Normal - E Combo Start
 		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][1];
 		break;
-	case Client::UI_AUGUSTA_STATE::E_RISE_READY:
+	case Client::UI_AUGUSTA_VIEWSTATE::E_RISE_READY:
 		// Augusta Normal - E Combo 2
 		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][1];
 		break;
-	case Client::UI_AUGUSTA_STATE::E_DEFAULT_READY:
+	case Client::UI_AUGUSTA_VIEWSTATE::E_DEFAULT_READY:
 	default:
 		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
@@ -2521,12 +2521,12 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 	// R Button Ctrl..
 	switch (eState_Augusta_R)
 	{
-	case Client::UI_AUGUSTA_STATE::R_SWORD_READY:
+	case Client::UI_AUGUSTA_VIEWSTATE::R_SWORD_READY:
 		// Augusta Normal - Ult Ready
 		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Ready"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Ready"][1];
 		break;
-	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
+	case Client::UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY:
 		// Augusta in Ult, Useable Final Ult
 		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
@@ -2548,8 +2548,8 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 	// E Button Ctrl.. via R Button State
 	switch (eState_Augusta_R)
 	{
-	case Client::UI_AUGUSTA_STATE::R_SWORD_READY: break;
-	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
+	case Client::UI_AUGUSTA_VIEWSTATE::R_SWORD_READY: break;
+	case Client::UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY:
 		// Augusta in Ult, Useable Final Ult
 		augustaUIDesc.vecInstanceDescs[BTN_E].vClipTexcoordX = { 0.f, 0.f };
 		break;
@@ -2575,7 +2575,7 @@ void CUI_HUD::Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots)
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 750.f;
 	}
-	else if (eState_Augusta_LB == UI_AUGUSTA_STATE::LB_STRONG_READY)
+	else if (eState_Augusta_LB == UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY)
 	{
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][1];
@@ -2598,11 +2598,11 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 {
 	auto& galbrenaUIDesc = m_pUI_Skill[CH_GALBRENA]->Get_UIDesc();
 
-	UI_GALBRENA_STATE eState_Galbrena_E = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
-	UI_GALBRENA_STATE eState_Galbrena_R = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
-	UI_GALBRENA_STATE eState_Galbrena_LB = static_cast<UI_GALBRENA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
+	UI_GALBRENA_VIEWSTATE eState_Galbrena_E = static_cast<UI_GALBRENA_VIEWSTATE>(skillSlots[CAbility::KEY_E].iStateType);
+	UI_GALBRENA_VIEWSTATE eState_Galbrena_R = static_cast<UI_GALBRENA_VIEWSTATE>(skillSlots[CAbility::KEY_R].iStateType);
+	UI_GALBRENA_VIEWSTATE eState_Galbrena_LB = static_cast<UI_GALBRENA_VIEWSTATE>(skillSlots[CAbility::KEY_LB].iStateType);
 
-	_bool isIn_Galbrena_BurstMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+	_bool isIn_Galbrena_BurstMode = m_pAbility->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE));
 
 
 	// ==============================
@@ -2611,13 +2611,13 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 
 	switch (eState_Galbrena_E)
 	{
-	case Client::UI_GALBRENA_STATE::E_DEFAULT_READY:
-	case Client::UI_GALBRENA_STATE::DEFAULT:
+	case Client::UI_GALBRENA_VIEWSTATE::E_DEFAULT_READY:
+	case Client::UI_GALBRENA_VIEWSTATE::DEFAULT:
 	default:
 		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
 		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
 		break;
-	case Client::UI_GALBRENA_STATE::E_BURST_READY:
+	case Client::UI_GALBRENA_VIEWSTATE::E_BURST_READY:
 		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][0];
 		galbrenaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][1];
 		break;
@@ -2630,7 +2630,7 @@ void CUI_HUD::Update_Icon_Galbrena(const vector<UISKILL_SLOT>& skillSlots)
 	// R Button Ctrl..
 	switch (eState_Galbrena_R)
 	{
-	case Client::UI_GALBRENA_STATE::DEFAULT:
+	case Client::UI_GALBRENA_VIEWSTATE::DEFAULT:
 	default:
 		galbrenaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_R"][0];
 		galbrenaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_R"][1];

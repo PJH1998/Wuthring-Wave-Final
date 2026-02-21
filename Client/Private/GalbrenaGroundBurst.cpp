@@ -76,13 +76,13 @@ void CGalbrenaGroundBurst::OnExit()
     m_iPartType = CGalbrena::PARTTYPE::TYPE_END;
 	
 	// 무적 상태 해제?
-	m_pGalbrena->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pGalbrena->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	// 강화 공격 상태를 캐릭터에 바인딩.
-	m_pGalbrena->Bind_Condition_ToAbillity(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+	m_pGalbrena->Bind_Flag_ToAbillity(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE));
 
 	// 강화 E스킬 사용 이후에 시간에 따라 Cost1 게이지가 떨어지게 적용.
-	m_pGalbrena->Bind_CostCondition_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	m_pGalbrena->Bind_CostFlag_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 	// 공격 콜라이더 비활성화
 	m_pGalbrena->Collider_Active(TEXT("Main|X|X"), false);

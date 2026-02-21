@@ -61,7 +61,7 @@ void CAugustaGroundDash::OnExit()
 {
     CGroundState::OnExit();
 	// 무적 제거.
-	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	//m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDash::Handle_Input()

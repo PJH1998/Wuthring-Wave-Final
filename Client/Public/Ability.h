@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Component.h"
-
+#include "AbilityDefine.h"
 NS_BEGIN(Client)
 class CAbility final : public CComponent
 {
@@ -25,7 +25,7 @@ public:
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Update(_float fTimeDelta);
 	void Register_AllAbilityFiles(const _string& strFolderPath);
-	void Update_CostCondition(_float fTimeDelta);
+	void Update_CostFlag(_float fTimeDelta);
 	void UISlotUpdate(_float fTimeDelta);
 	
 public:
@@ -41,8 +41,8 @@ public:
 
 	_float Get_HpRatio() const;
 
-	_bool Check_AnyCondition(_uint iConditionFlag); // 현재 컨디션 제어
-	_bool Check_AllCondition(_uint iConditionFlag); // 모든 컨디션 확인
+	_bool HasAbilityFlag(_uint iFlag); // 현재 컨디션 제어
+	_bool HasAllFlag(_uint iFlag); // 모든 컨디션 확인
 
 	// 수치 값들 (공명 , HP 게이지 등등)
 	_float Get_CostRatio(COST_TYPE eType) const;    // 그냥 캐릭터들 특수 Cost로 사용할 거같고.
@@ -79,10 +79,10 @@ public:
 	void Set_HarmonyGauge(_float fResonance);
 	void Add_HarmonyGauge(_float fResonance);
 
-	void Bind_Condition(_uint iCondition);
-	void Remove_Condition(_uint iCondition);
+	void Bind_Flag(_uint iFlag);
+	void Remove_Flag(_uint iCondition);
 
-	void Bind_CostCondition(_uint iCostType, _uint iConditionFlag);
+	void Bind_CostFlag(_uint iCostType, _uint iConditionFlag);
 	
 
 	UISKILL_SLOT Determine_State(_uint iCharacterIdx, const _string& strKey); // CharacterIdx와 누른 키.
@@ -126,7 +126,7 @@ private:
 	vector<_string> m_Keys = {};
 
 	// 6. 특정 상황에 특정 Cost가 자연적으로 감소되는 경우 ex) 인멸자 공명 게이지 강공 실행시
-	unordered_map<_uint, _uint> m_mapCostConditions;
+	unordered_map<_uint, _uint> m_mapCostFlags;
 
 	CHARACTER_INFO m_CharacterInfo = {};
 	_string m_strPrevSkillName = {};
@@ -135,7 +135,7 @@ private:
 
 	// 7. 자기가 어떤 캐릭터인지 알 수 있게. => 어디서 초기화하지?
 	_uint m_iCharacter = {}; 
-	_uint m_iCondition = {}; // 캐릭터에 따라 컨디션 변경.
+	_uint m_iFlag = {}; // 캐릭터에 따라 컨디션 변경.
 
 
 	/*

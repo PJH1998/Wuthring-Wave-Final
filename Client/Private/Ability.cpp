@@ -3,6 +3,8 @@
 #include "GameInstance.h"
 #include "GameSystem.h"
 
+using namespace AbilityConst;
+
 CAbility::CAbility(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CComponent { pDevice, pContext }
 {
@@ -20,11 +22,11 @@ HRESULT CAbility::Initialize_Prototype()
 
 	m_UISlots.resize(KEY_END);
 	m_Keys.resize(KEY_END);
-	m_Keys[KEY_LB] = "LB";
-	m_Keys[KEY_T] = "T";
-	m_Keys[KEY_E] = "E";
-	m_Keys[KEY_Q] = "Q";
-	m_Keys[KEY_R] = "R";
+	m_Keys[KEY_LB] = KeyType::LB;
+	m_Keys[KEY_T] = KeyType::T;
+	m_Keys[KEY_E] = KeyType::E;
+	m_Keys[KEY_Q] = KeyType::Q;
+	m_Keys[KEY_R] = KeyType::R;
 
 	return S_OK;
 }
@@ -56,10 +58,10 @@ void CAbility::Update(_float fTimeDelta)
 			++iter;
 	}
 
-	Update_CostCondition(fTimeDelta);
+	Update_CostFlag(fTimeDelta);
 
 	// 매프레임 Stamina 자동 회복. // 초당 10
-	Add_Cost(COST_TYPE::STAMINA, fTimeDelta * 10.f);
+	Add_Cost(COST_TYPE::STAMINA, fTimeDelta * Value::fRecoveryStemina);
 
 	// UI 슬롯 업데이트
 	UISlotUpdate(fTimeDelta);
@@ -67,31 +69,31 @@ void CAbility::Update(_float fTimeDelta)
 
 void CAbility::Register_AllAbilityFiles(const _string& strFolderPath)
 {
-	_string skillPath = strFolderPath + "Skill.csv";
-	_string statPath = strFolderPath + "Stat.csv";
+	_string skillPath = strFolderPath + Config::SkillFileName;
+	_string statPath = strFolderPath + Config::StatFileName;
 
 	Read_Skill(skillPath.c_str());
 	Read_Stat(statPath.c_str());
 }
 
-void CAbility::Update_CostCondition(_float fTimeDelta)
+void CAbility::Update_CostFlag(_float fTimeDelta)
 {
 
 	// 감소시켜야할 Cost가 있다면?
-	for (auto iter = m_mapCostConditions.begin(); iter != m_mapCostConditions.end();)
+	for (auto iter = m_mapCostFlags.begin(); iter != m_mapCostFlags.end();)
 	{
 		COST_TYPE eCostType = static_cast<COST_TYPE>(iter->first);
 
 		// 초당 8.f 감소.
-		Add_Cost(eCostType, -fTimeDelta * 8.f);
+		Add_Cost(eCostType, -fTimeDelta * Value::fDecreaseCost);
 
 		// Cost가 0.f 라면? 제거.
 		if (m_Costs[iter->first] <= 0.f)
 		{
-			Remove_Condition(iter->second);
+			Remove_Flag(iter->second);
 			Set_Cost(eCostType, 0.f); // 0으로 초기화
 
-			iter = m_mapCostConditions.erase(iter);
+			iter = m_mapCostFlags.erase(iter);
 		}
 		else
 			++iter;
@@ -143,14 +145,14 @@ _float CAbility::Get_HpRatio() const
 	return m_CharacterInfo.fMaxHp > 0.f ? m_CharacterInfo.fHp / m_CharacterInfo.fMaxHp : 0.f;
 }
 
-_bool CAbility::Check_AnyCondition(_uint iConditionFlag)
+_bool CAbility::HasAbilityFlag(_uint iFlag)
 {
-	return (m_iCondition & iConditionFlag) != 0;
+	return (m_iFlag & iFlag) != 0;
 }
 
-_bool CAbility::Check_AllCondition(_uint iConditionFlag)
+_bool CAbility::HasAllFlag(_uint iFlag)
 {
-	return (m_iCondition & iConditionFlag) == iConditionFlag;
+	return (m_iFlag & iFlag) == iFlag;
 }
 
 #pragma endregion
@@ -432,20 +434,20 @@ void CAbility::Add_HarmonyGauge(_float fResonance)
 	m_CharacterInfo.fHarmonyGauge = min(100.f, m_CharacterInfo.fHarmonyGauge);
 }
 
-void CAbility::Bind_Condition(_uint iCondition)
+void CAbility::Bind_Flag(_uint iFlag)
 {
-	m_iCondition |= iCondition;
+	m_iFlag |= iFlag;
 }
 
-void CAbility::Remove_Condition(_uint iCondition)
+void CAbility::Remove_Flag(_uint iCondition)
 {
-	m_iCondition &= ~iCondition; // 반전 마스크 적용.
+	m_iFlag &= ~iCondition; // 반전 마스크 적용.
 }
 
-void CAbility::Bind_CostCondition(_uint iCostType, _uint iConditionFlag)
+void CAbility::Bind_CostFlag(_uint iCostType, _uint iFlag)
 {
 	// 시간에 따라 Cost 감소 시작.
-	m_mapCostConditions.emplace(iCostType, iConditionFlag);
+	m_mapCostFlags.emplace(iCostType, iFlag);
 }
 
 
@@ -477,40 +479,40 @@ UISKILL_SLOT CAbility::Determine_StateRover(_uint iCharacterIdx, const _string& 
 
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
-	skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::DEFAULT);
+	skillSlot.iStateType = ENUM_CLASS(UI_ROVER_VIEWSTATE::DEFAULT);
 	skillSlot.fMaxCoolTime = 0.f;
 
 	// E 공격. => 말고 슬롯 안바뀜.
-	if (strKey == "E")
+	if (strKey == KeyType::E)
 	{
-		if (m_iCondition & ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE))
+		if (m_iFlag & ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE))
 		{
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Ex_Skill02");
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::RoverBurstE);
 			if (nullptr != pSkillInfo)
 			{
-				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Ex_Skill02");
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::RoverBurstE);
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_BURST_READY);
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_VIEWSTATE::E_BURST_READY);
 			}
 		}
 		else
 		{
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill02");
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::RoverDefaultE);
 			if (nullptr != pSkillInfo)
 			{
-				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill02");
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::RoverDefaultE);
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_DEFAULT_READY);
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_VIEWSTATE::E_DEFAULT_READY);
 			}
 		}
 	}
-	else if (strKey == "R")
+	else if (strKey == KeyType::R)
 	{
-		skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Burst01_Ulti");
-		const SKILL_INFO* pSkillInfo = Get_SkillInfo("Burst01_Ulti");
+		skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::RoverBurstR);
+		const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::RoverBurstR);
 		if (nullptr != pSkillInfo)
 			skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-		skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::R_READY);
+		skillSlot.iStateType = ENUM_CLASS(UI_ROVER_VIEWSTATE::R_READY);
 	}
 
 
@@ -527,93 +529,84 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
 	skillSlot.fMaxCoolTime = 0.f;
-	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::DEFAULT);
-	if (strKey == "LB")
+	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::DEFAULT);
+	if (strKey == KeyType::LB)
 	{
 		// Bit And 연산해서 걸리면?
 		// 우선 순위별
-		if (m_iCondition & ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK))
+		if (m_iFlag & ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK))
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::LB_SWORD_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::LB_SWORD_READY);
 		}
 		else if (m_Costs[ENUM_CLASS(COST_TYPE::COST1)] >= m_fCostMax)
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::LB_STRONG_READY); // 강공 실행 가능.
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::LB_STRONG_READY); // 강공 실행 가능.
 		}
 	}
-	else if (strKey == "T")
+	else if (strKey == KeyType::T)
 	{
 
 	}
-	else if (strKey == "E")
+	else if (strKey == KeyType::E)
 	{
 
 
 		// 1. Skill Strike에 진입하자마자 컨디션을 E_RISE_READY로 변경.
-		if (m_iCondition & ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE))
+		if (m_iFlag & ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_RISE))
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_RISE_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::E_RISE_READY);
 		}
 		// 2. Griffon의 컨디션 상태면 Griffon Ready가 가능하게?
-		else if ((m_Costs[ENUM_CLASS(COST_TYPE::COST2)] >= m_fCostMax) || Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON)))
+		else if ((m_Costs[ENUM_CLASS(COST_TYPE::COST2)] >= m_fCostMax) || HasAbilityFlag(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_GRIFFON)))
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_GRIFFON_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::E_GRIFFON_READY);
 		}
 		else
 		{
 			// 3. 아무런 상태가 아닌 경우 기본 E가 나오게?
-			skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill_Hack");
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill_Hack");
+			skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::AugustaDefaultE);
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::AugustaDefaultE);
 			if (nullptr != pSkillInfo)
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_DEFAULT_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::E_DEFAULT_READY);
 		}
 
-		//else if (m_Costs[ENUM_CLASS(COST_TYPE::COST2)] >= m_fCostMax)
-		//{
-		//	skillSlot.fCurrentCoolTime = 0.f;
-		//	skillSlot.fMaxCoolTime = 0.f;
-		//	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_GRIFFON_READY);
-		//}
-		//// Rise 다음 단계에서 그리폰이 나와야하는데 바로 기본 스킬이 나옴.
-
-		
 	}
-	else if (strKey == "Q")
+	else if (strKey == KeyType::Q)
 	{
 		//
 
 	}
-	else if (strKey == "R")
+	else if (strKey == KeyType::R)
 	{
-		if (m_iCondition & ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI))
+		if (m_iFlag & ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::R_SP_ATTACKOMNI))
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::R_SWORD_ULTI_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::R_SWORD_ULTI_READY);
 		}
 		else if (m_Costs[ENUM_CLASS(COST_TYPE::COST3)] >= m_fCostMax)
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::R_SWORD_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::R_SWORD_READY);
 		}
 		else
 		{
 			// 궁극기..
-			skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Attack_SpeedDrive");
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Attack_SpeedDrive");
+			skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::AugustaDefaultR);
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::AugustaDefaultR);
 			if (nullptr != pSkillInfo)
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::R_ULTI_READY);
+			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::R_ULTI_READY);
 		}
 	}
 
@@ -626,41 +619,41 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
-	skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::DEFAULT);
+	skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_VIEWSTATE::DEFAULT);
 	skillSlot.fMaxCoolTime = 0.f;
 
 	// E 공격. => 말고 슬롯 안바뀜.
-	if (strKey == "E")
+	if (strKey == KeyType::E)
 	{
 		if (m_Costs[ENUM_CLASS(COST_TYPE::COST1)] >= m_fCostMax) // 기본 공명 게이지가 가득 찼다면?
 		{
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill01");
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::GalbrenaBurstE);
 			if (nullptr != pSkillInfo)
 			{
-				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill01");
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::GalbrenaBurstE);
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-				skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_STATE::E_BURST_READY);
+				skillSlot.iStateType = ENUM_CLASS(UI_GALBRENA_VIEWSTATE::E_BURST_READY);
 			}
 		}
 		else
 		{
-			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Attack_Jump_Start");
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::GalbrenaDefaultE);
 			if (nullptr != pSkillInfo)
 			{
-				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Attack_Jump_Start");
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::GalbrenaDefaultE);
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_DEFAULT_READY);
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_VIEWSTATE::E_DEFAULT_READY);
 			}
 		}
 	}
 	else if (strKey == "R")
 	{
 		// 궁극기..
-		skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Burst01");
-		const SKILL_INFO* pSkillInfo = Get_SkillInfo("Burst01");
+		skillSlot.fCurrentCoolTime = Get_RemainingCooldown(SkillNames::GalbrenaDefaultR);
+		const SKILL_INFO* pSkillInfo = Get_SkillInfo(SkillNames::GalbrenaDefaultR);
 		if (nullptr != pSkillInfo)
 			skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
-		skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::R_ULTI_READY);
+		skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_VIEWSTATE::R_ULTI_READY);
 	}
 
 	return skillSlot;
@@ -873,23 +866,23 @@ SKILL_STATE CAbility::Check_SkillState(const _string& strSkillName, const _strin
 SKILL_TYPE CAbility::ConvertSkillType(const _string& strCostType)
 {
 	SKILL_TYPE eCommonSkillType = SKILL_TYPE::SKILL_TYPE_END;
-	if (strCostType == "NONE")
+	if (strCostType == SkillTypes::None)
 	{
 		eCommonSkillType = SKILL_TYPE::NONE;
 	}
-	else if (strCostType == "RESONANCE")
+	else if (strCostType == SkillTypes::Resonanace)
 	{
 		eCommonSkillType = SKILL_TYPE::RESONANCE;
 	}
-	else if (strCostType == "AUGUSTA_POINT")
+	else if (strCostType == SkillTypes::AugustaPoint)
 	{
 		eCommonSkillType = SKILL_TYPE::AUGUSTA_POINT;
 	}
-	else if (strCostType == "AUGUSTA_ULTI")
+	else if (strCostType == SkillTypes::AugustaUlti)
 	{
 		eCommonSkillType = SKILL_TYPE::AUGUSTA_ULTI;
 	}
-	else if (strCostType == "AUGUSTA_SWORD")
+	else if (strCostType == SkillTypes::AugustaSword)
 	{
 		eCommonSkillType = SKILL_TYPE::AUGUSTA_SWORD;
 	}
