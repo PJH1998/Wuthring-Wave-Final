@@ -220,10 +220,6 @@ void CGalbrenaGroundAttack::LockOn_StateTransition(_float fTimeDelta)
 
 void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 {
-    // 1. 스킬 입력 (E, R 등) 들어오면 Skill로 => 우선순위 별.
-    // ... 추후 구현
-    // 2. Normal Attack의 경우 콤보 공격이 가능하게.
-    
     EGalbrenaAttackType eAttackType = static_cast<EGalbrenaAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
@@ -232,13 +228,6 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
 		return;
 	}
-
-	//if (m_States[DASH]) 
-	//{
-	//	m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
-	//	return;
-	//}
 
 	if (m_States[DASH])
 	{

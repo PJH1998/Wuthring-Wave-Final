@@ -114,10 +114,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
 
+	ApplySwitchRequest(fTimeDelta);
 	PreUpdate_Input(fTimeDelta);
 	UpdatePlayerStatusIndex();
 	Handle_Input();
-	ApplySwitchRequest(fTimeDelta);
 	PreUpdate_Characters(fTimeDelta);
 	PreUpdate_PlayerStatus(fTimeDelta);
 	PreUpdate_SwitchCoolDowns(fTimeDelta);
