@@ -3,6 +3,10 @@
 #include "Rover.h"
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
+
 
 HRESULT CRoverGroundRun::Initialize(CCharacter* pCharacter)
 {
@@ -127,9 +131,9 @@ void CRoverGroundRun::Handle_Input()
 	m_States[BURST] = m_pRover->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 	if (m_States[BURST])
-		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));
+		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverBurstE));
 	else
-		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
+		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverDefaultE));
 
 	// 궁 상태 확인하기.
 	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
@@ -247,7 +251,7 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ULTI])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Burst01_Ulti"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstR))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
@@ -258,7 +262,7 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[BURST_E]) // Burst E
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Ex_Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstE))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::EX_SKILL02;
@@ -268,7 +272,7 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DEFAULT_E])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverDefaultE))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL02;
@@ -294,24 +298,6 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 		}
 
 	}
-
-
-	//// 뛰다가 Dash
-	//if (m_States[DASH])
-	//{
-	//	if (m_States[RUN_D])
-	//	{
-	//		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
-	//		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-	//		return;
-	//	}
-	//	else
-	//	{
-	//		m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-	//		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-	//		return;
-	//	}
-	//}
 
     // Dash 보다 우선순위 높음.
 	if (m_States[SPRINT])

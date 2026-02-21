@@ -2,6 +2,9 @@
 #include "AugustaAirSkill.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CAugustaAirSkill::Initialize(CCharacter* pCharacter)
 {
@@ -170,10 +173,10 @@ void CAugustaAirSkill::Check_StateTransition(_float fTimeDelta)
 		}
 		else
 		{
-			m_States[AIRATTACK_HACKDOWN_END] = SKILL_STATE::READY != m_pAugusta->Check_Skill("AirAttack_HackDown_End");
+			m_States[AIRATTACK_HACKDOWN_END] = SKILL_STATE::READY != m_pAugusta->Check_Skill(AugustaAirAttackEnd);
 			if (m_States[AIRATTACK_HACKDOWN_END])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_End"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaAirAttackEnd))
 					return;
 			}
 		}

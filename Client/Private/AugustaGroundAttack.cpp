@@ -3,7 +3,10 @@
 #include "Augusta.h"
 #include "StateMachine.h"
 #include "AugustaBayonet.h"
+#include "AbilityDefine.h"
 
+
+using namespace AbilityConst::SkillNames;
 HRESULT CAugustaGroundAttack::Initialize(CCharacter* pCharacter)
 {
     if (FAILED(CGroundState::Initialize(pCharacter)))
@@ -149,11 +152,11 @@ void CAugustaGroundAttack::Handle_Input()
             m_IsNextAttackInput = true;
     }
 
-	m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Hack")); // 기본 E스킬
-	m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Strike"));// 그리폰
+	m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaDefaultE)); // 기본 E스킬
+	m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaGriffonE));// 그리폰
 
-	m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Burst01")); // 궁극기 R스킬(검뽑는거)
-	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // Echo 궁극기. (기본 궁극기)
+	m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaBurstR)); // 궁극기 R스킬(검뽑는거)
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaDefaultR)); // Echo 궁극기. (기본 궁극기)
 	
 }
 
@@ -227,7 +230,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	if (m_States[SWORD_R])
 	{
 		// 위에 서체크하긴 했지만? 다시 체크.
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaBurstR))
 			return;
 
 		m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
@@ -237,7 +240,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	}
 	if (m_States[ULTI])
 	{
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Attack_SpeedDrive"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaDefaultR))
 			return;
 
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPEEDDRIVE;
@@ -248,7 +251,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	if (m_States[POINT_E])
 	{
 		// 위에 서체크하긴 했지만? 다시 체크.
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaGriffonE))
 			return;
 
 		//m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_GRIFFON));
@@ -260,7 +263,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[NORMAL_E])
 	{
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Hack"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaGriffonE))
 			return;
 
 
@@ -272,7 +275,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
     {
-		if (SKILL_STATE::READY == m_pAugusta->Use_Skill("Attack_HeavyHack"))
+		if (SKILL_STATE::READY == m_pAugusta->Use_Skill(AugustaChargeE))
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);

@@ -4,6 +4,9 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 #include "GameInstance.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CAugustaGroundSprint::Initialize(CCharacter* pCharacter)
 {
@@ -120,15 +123,15 @@ void CAugustaGroundSprint::Handle_Input()
 	if (m_States[SKILL_E])
 	{
 		// Ability System
-		m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Hack")); // 기본 E스킬
-		m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Strike"));// 그리폰
+		m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaDefaultE)); // 기본 E스킬
+		m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaGriffonE));// 그리폰
 	}
 	
 
 	if (m_States[SKILL_R])
-		m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Burst01")); // 궁극기 R스킬(검뽑는거)
+		m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaBurstR)); // 궁극기 R스킬(검뽑는거)
 	
-	m_States[ECHO_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // Echo 궁극기. (기본 궁극기)
+	m_States[ECHO_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaDefaultR)); // Echo 궁극기. (기본 궁극기)
 	
 
     // DASH보다 우선순위 높음.
@@ -258,7 +261,7 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 	if (m_States[SWORD_R])
 	{
 		// 위에 서체크하긴 했지만? 다시 체크.
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaBurstR))
 			return;
 
 		m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::LB_SP_ATTACK));
@@ -268,7 +271,7 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 	}
 	if (m_States[ECHO_R])
 	{
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Attack_SpeedDrive"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaDefaultR))
 			return;
 
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPEEDDRIVE;
@@ -278,7 +281,7 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 	if (m_States[POINT_E])
 	{
 		// 위에 서체크하긴 했지만? 다시 체크.
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaGriffonE))
 			return;
 
 		//m_pAugusta->Bind_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_GRIFFON));
@@ -290,7 +293,7 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[NORMAL_E])
 	{
-		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Hack"))
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaDefaultE))
 			return;
 
 

@@ -2,6 +2,9 @@
 #include "GalbrenaGroundSkill.h"
 #include "Galbrena.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CGalbrenaGroundSkill::Initialize(CCharacter* pCharacter)
 {
@@ -138,7 +141,7 @@ void CGalbrenaGroundSkill::Handle_Input()
     m_States[SKILL_E] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
 	m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
-	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultE));
 }
 
 void CGalbrenaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
@@ -215,7 +218,7 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			{
 				if (eSkillType == EGalbrenaSkillType::BURST01)
 				{
-					if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+					if (SKILL_STATE::READY != m_pGalbrena->Use_Skill(GalbrenaDefaultE))
 						return;
 
 					m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;
@@ -279,15 +282,11 @@ void CGalbrenaGroundSkill::Check_StateTransition(_float fTimeDelta)
 }
 void CGalbrenaGroundSkill::SetUp_Animations()
 {
-    //CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::SKILL01), "Skill01", 1.f, 20.f);
-    //CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::SKILL02), "Skill02", 1.f, 20.f); => Burst?
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP_START), "Attack_Jump_Start", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP), "Attack_Jump", 1.f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::ATTACK_JUMP_END02), "Attack_Jump_End02", 1.3f, 20.f);
 	CState::Add_Animations(ENUM_CLASS(EGalbrenaSkillType::BURST01), "Burst01", 1.0f, 130.f);
 
-    //m_PartsAnimations.emplace("Ex_Skill02", "Scythe_Ex_Attack03");
-    //m_PartsAnimations.emplace("Skill02", "G_Skill02");
 
 	m_PartsAnimations.emplace("Burst01", "Gun01");
 

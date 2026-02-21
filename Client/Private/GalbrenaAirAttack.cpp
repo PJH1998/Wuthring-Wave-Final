@@ -200,28 +200,6 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-		//if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_1)
-		//{
-		//	if (m_States[ATTACK])
-		//	{
-		//		m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_1);
-		//		//m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
-		//		//m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
-		//		return;
-		//	}
-		//}
-
-		// 0. Loop 도중에 공격키 한번 더누르면?
-		//if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2)
-		//{
-		//	if (m_States[ATTACK])
-		//	{
-		//		m_pGalbrena->GetStateContextForWrite().m_eAirAttackType = EGalbrenaAirAttackType::AIRATTACK_LOOP_1; // 애니메이션 상태 => 블랙보드에 기입.        
-		//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::AIR_ATTACK)); // 상위, 하위 상태
-		//		return;
-		//	}
-		//}
-
 		// 0. End면 Move로 전환 가능.
 		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_END)
 		{
@@ -262,21 +240,6 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 	// 애니메이션이 끝나면?
     if (m_IsAnimationEnd)
     {
-		// 기본 공중 공격 2번째..
-		//if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START02)
-		//{
-		//	m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2); // 떨어지게.
-		//	m_fSpeed = 2.f;
-		//	return;
-		//}
-
-		// 기본 공중 공격
-        //if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
-        //{
-        //    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_START02); // 떨어지게.
-        //    m_fSpeed = 2.f;
-        //    return;
-        //}
 		if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_LOOP_2); // 떨어지게.
@@ -326,12 +289,6 @@ void CGalbrenaAirAttack::Check_StateTransition(_float fTimeDelta)
 
 			}
 
-			// Loop 상태일때 땅에 닿으면 END 애니메이션 실행.
-			/*if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START02 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
-			{
-				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END);
-				return;
-			}*/
 			if (eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_LOOP_2 || eAirAttackType == EGalbrenaAirAttackType::AIRATTACK_START)
 			{
 				m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaAirAttackType::AIRATTACK_END);

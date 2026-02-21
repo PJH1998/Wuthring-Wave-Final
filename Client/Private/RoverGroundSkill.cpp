@@ -159,9 +159,6 @@ void CRoverGroundSkill::Check_StateTransition(_float fTimeDelta)
 				return;
 			}
 		}
-
-		/*if (eSkillType == ERoverSkillType::SKILL02)
-			m_pRover->PartActivate(m_iPartType, false);*/
     }
 
 

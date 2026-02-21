@@ -35,15 +35,6 @@ void CGalbrenaGroundDodge::OnEnter(void* pArg)
 
     State_Reset();
 
-	// 4. 락온 중이였다면? => 한번만 입력방향에 따른 회전.
-	//if (m_pGalbrena->Is_LockOn())
-	//{
-	//	// 5. 누른 키에 따른 입력 방향 받아오기.
-	//	m_eDir = m_pGalbrena->Calculate_Direction();
-	//	_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
-	//	m_pGalbrena->Rotate_Direction(vMoveDir);
-	//}
-
 	m_pGalbrena->Set_Gravity(true);
 
 	

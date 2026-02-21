@@ -20,8 +20,26 @@ namespace AbilityConst
 		inline constexpr const _char* RoverBurstE = "Ex_Skill02";
 		inline constexpr const _char* RoverDefaultE = "Skill02";
 		inline constexpr const _char* RoverBurstR = "Burst01_Ulti";
+
 		inline constexpr const _char* AugustaDefaultE = "Skill_Hack";
+		inline constexpr const _char* AugustaChargeE = "Attack_HeavyHack";
+		inline constexpr const _char* AugustaGriffonE = "Skill_Strike";
+		inline constexpr const _char* AugustaESkillRiseZero = "Skill_Rise_Zero";
+		inline constexpr const _char* AugustaESkillRise = "Skill_Rise";
+		inline constexpr const _char* AugustaSkill_AirAttackEnd = "AirAttack_HackDown_Sp_End";
+
+		inline constexpr const _char* AugustaAirAttackStart = "AirAttack_HackDown_Start";
+		inline constexpr const _char* AugustaAirAttackEnd = "AirAttack_HackDown_End";
+
+		
+		
 		inline constexpr const _char* AugustaDefaultR = "Attack_SpeedDrive";
+		inline constexpr const _char* AugustaBurstR = "Burst01";
+		inline constexpr const _char* AugustaSpecialAttackFirst = "SpAttack01";
+		inline constexpr const _char* AugustaSpecialAttackSecond = "SpAttack02";
+		inline constexpr const _char* AugustaSpecialAttackThird = "SpAttack03";
+		inline constexpr const _char* AugustaSpecialAttackEnd = "SpAttackOmni";
+
 		inline constexpr const _char* GalbrenaBurstE = "Skill01";
 		inline constexpr const _char* GalbrenaDefaultE = "Attack_Jump_Start";
 		inline constexpr const _char* GalbrenaDefaultR = "Burst01";

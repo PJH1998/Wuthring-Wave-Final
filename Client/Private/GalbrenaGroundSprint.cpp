@@ -4,6 +4,9 @@
 #include "StateMachine.h"
 #include "GalbrenaState_Enum.h"
 #include "GameInstance.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CGalbrenaGroundSprint::Initialize(CCharacter* pCharacter)
 {
@@ -126,7 +129,7 @@ void CGalbrenaGroundSprint::Handle_Input()
 
 
 	
-	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start")); // 기본 E 사용.
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultE)); // 기본 E 사용.
 	m_States[BURST] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)); // Burst 상태 인지 체크
 
 	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.
@@ -136,7 +139,7 @@ void CGalbrenaGroundSprint::Handle_Input()
 	m_States[BURST_ATTACK] = m_States[BURST] && m_States[ATTACK]; // 강화 공격 상태인지 체크.
 
 	// 궁 상태 확인하기.
-	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Burst01")); // 기본 궁극기
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultR)); // 기본 궁극기
 }
 
 

@@ -5,6 +5,8 @@
 #include "RoverSword.h"
 #include "Ability.h"
 
+using namespace AbilityConst::SkillNames;
+
 HRESULT CRoverGroundAttack::Initialize(CCharacter* pCharacter)
 {
     if (FAILED(CGroundState::Initialize(pCharacter)))
@@ -127,7 +129,7 @@ void CRoverGroundAttack::Handle_Input()
 	// Cost 계속
 	m_States[BURST] = (m_pRover->Get_Cost(COST_TYPE::COST1) >= m_pRover->Get_MaxCost());
 
-	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverDefaultE));
 	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
 
     if (eAttackType >= ERoverAttackType::ATTACK01 && eAttackType < ERoverAttackType::ATTACK04) // 05가 마지막이 아니라 04가 마지막
@@ -208,7 +210,7 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ULTI])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Burst01_Ulti"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstR))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
@@ -219,7 +221,7 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DEFAULT_E])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverDefaultE))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL02;

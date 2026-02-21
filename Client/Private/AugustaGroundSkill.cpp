@@ -2,6 +2,9 @@
 #include "AugustaGroundSkill.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CAugustaGroundSkill::Initialize(CCharacter* pCharacter)
 {
@@ -275,14 +278,14 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 
 		if (m_States[SKILL_E])
 		{
-			m_States[SKILL_RISE_ZERO] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Rise_Zero", m_strSkillName));
-			m_States[SKILL_RISE] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Rise", m_strSkillName));
-			m_States[AIRATTACK_HACKDOWN_START] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("AirAttack_HackDown_Start", m_strSkillName));
+			m_States[SKILL_RISE_ZERO] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaESkillRiseZero, m_strSkillName));
+			m_States[SKILL_RISE] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaESkillRise, m_strSkillName));
+			m_States[AIRATTACK_HACKDOWN_START] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaAirAttackStart, m_strSkillName));
 
 			//if (eSkillType == EAugustaSkillType::SKILL_STRIKE)
 			if (m_States[SKILL_RISE_ZERO])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise_Zero"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaESkillRiseZero))
 					return;
 
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE_ZERO;
@@ -293,7 +296,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			// 1. Skill Rise Zero
 			if (eSkillType == EAugustaSkillType::SKILL_RISE_ZERO)
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaESkillRise))
 					return;
 
 				m_pAugusta->Remove_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_RISE));
@@ -305,7 +308,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			// 2. Skill Rise
 			if (m_States[AIRATTACK_HACKDOWN_START])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_Start"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaAirAttackStart))
 					return;
 
 				m_pAugusta->Remove_Flag_ToAbillity(ENUM_CLASS(UI_AUGUSTA_VIEWFLAG::E_GRIFFON));

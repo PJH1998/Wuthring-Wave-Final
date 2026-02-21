@@ -2,6 +2,9 @@
 #include "RoverGroundSpecial.h"
 #include "Rover.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 // OMNI 상태에서만 탈출 가능.
 HRESULT CRoverGroundSpecial::Initialize(CCharacter* pCharacter)
@@ -129,9 +132,9 @@ void CRoverGroundSpecial::Handle_Input()
 	m_States[BURST] = m_pRover->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 	if (m_States[BURST])
-		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));
+		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverBurstE));
 	else
-		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
+		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverDefaultE));
 	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST5) >= m_pRover->Get_MaxCost());
 
 	m_States[EXIT] = m_pRover->Get_Cost(COST_TYPE::COST1) <= 0.f;
@@ -181,7 +184,7 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ULTI])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Burst01_Ulti"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstR))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
@@ -192,7 +195,7 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[BURST_E]) // Burst E
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Ex_Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstE))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::EX_SKILL02;
@@ -202,7 +205,7 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DEFAULT_E])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverDefaultE))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL02;

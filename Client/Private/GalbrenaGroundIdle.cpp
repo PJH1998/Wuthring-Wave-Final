@@ -5,6 +5,7 @@
 #include "Ability.h"
 #include "GalbrenaState_Enum.h"
 
+using namespace AbilityConst::SkillNames;
 
 HRESULT CGalbrenaGroundIdle::Initialize(CCharacter* pCharacter)
 {
@@ -120,7 +121,7 @@ void CGalbrenaGroundIdle::Handle_Input()
 
 	// Burst 상태 확인하기.
 	m_States[BURST] = m_pGalbrena->HasAbilityFlag(ENUM_CLASS(UI_GALBRENA_VIEWFLAG::BURST_ACTIVE)); // Burst 상태 인지 체크
-	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultE));
 
 	// 1. E스킬 클릭 && Cost1이 100을 넘으면서 Burst 상태가 아닌 경우.
 	m_States[BURST_E] = m_States[SKILL_E] && (m_pGalbrena->Get_Cost(COST_TYPE::COST1) >= m_pGalbrena->Get_MaxCost())
@@ -129,7 +130,7 @@ void CGalbrenaGroundIdle::Handle_Input()
 	m_States[BURST_ATTACK] = m_States[BURST] && m_States[ATTACK]; // 강화 공격 상태인지 체크.
 
 	// 궁 상태 확인하기.
-	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Burst01")); // 기본 궁극기
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultR)); // 기본 궁극기
 }
 
 
@@ -166,22 +167,12 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
     _uint iKeyInput = {};
 
 
-	// 1. 우선순위
-	//if (m_States[DODGE])
-	//{
-	//	m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
-	//	return;
-	//}
-
-	// 2. 
 	if (m_States[HIT])
 	{
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
 		return;
 	}
 
-	// Idle Dash
 	if (m_States[DASH])
 	{
 		if (m_States[MOVE_D])
@@ -239,7 +230,7 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ULTI])
 	{
-		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Burst01"))
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill(GalbrenaDefaultR))
 			return;
 
 		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::BURST01;
@@ -256,7 +247,7 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DEFAULT_E])
 	{
-		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill(GalbrenaDefaultE))
 			return;
 
 		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;

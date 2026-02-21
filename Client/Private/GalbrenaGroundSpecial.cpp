@@ -2,6 +2,9 @@
 #include "GalbrenaGroundSpecial.h"
 #include "Galbrena.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 // OMNI 상태에서만 탈출 가능.
 HRESULT CGalbrenaGroundSpecial::Initialize(CCharacter* pCharacter)
@@ -134,8 +137,8 @@ void CGalbrenaGroundSpecial::Handle_Input()
 	m_States[SKILL_E] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
 	m_States[SKILL_R] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
-	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Attack_Jump_Start"));
-	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Burst01")); // 기본 궁극기
+	m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultE));
+	m_States[ULTI] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill(GalbrenaDefaultR)); // 기본 궁극기
 
 	m_States[EXIT] = m_pGalbrena->Get_Cost(COST_TYPE::COST1) <= 0.f;
 }
@@ -208,7 +211,7 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 			eSpType == EGalbrenaSpecialType::ATTACK_H_01)
 			return;
 
-		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Burst01"))
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill(GalbrenaDefaultR))
 			return;
 
 		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::BURST01;
@@ -218,7 +221,7 @@ void CGalbrenaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DEFAULT_E])
 	{
-		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill("Attack_Jump_Start"))
+		if (SKILL_STATE::READY != m_pGalbrena->Use_Skill(GalbrenaDefaultE))
 			return;
 
 		m_pGalbrena->GetStateContextForWrite().m_eSkillType = EGalbrenaSkillType::ATTACK_JUMP_START;

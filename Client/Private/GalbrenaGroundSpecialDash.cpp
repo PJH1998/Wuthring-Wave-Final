@@ -87,12 +87,6 @@ void CGalbrenaGroundSpecialDash::Update_SprintAnimation(_float fTimeDelta)
     // 1. 누른키에 따른 방향 계산
     m_eDir = m_pGalbrena->Calculate_Direction();
 
-    // 2. LockOn 상태일때는 현재 방향에서 누른 방향을 바라보게 수정.
-    //if (m_pGalbrena->Is_LockOn())
-    //{
-    //    _vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
-    //    m_pGalbrena->Rotate_Direction(vMoveDir);
-    //}
 	_vector vMoveDir = m_pGalbrena->Calculate_Move_Direction(m_eDir);
 	m_pGalbrena->Rotate_Direction(vMoveDir);
 

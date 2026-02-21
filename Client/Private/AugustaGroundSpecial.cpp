@@ -2,6 +2,9 @@
 #include "AugustaGroundSpecial.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 // OMNI 상태에서만 탈출 가능.
 HRESULT CAugustaGroundSpecial::Initialize(CCharacter* pCharacter)
@@ -179,17 +182,17 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 		// 2. 어택키를 눌렀을때 => Ability에 사용 가능한 스킬인지를 묻습니다.
 		if (m_States[ATTACK])
 		{
-			m_States[ATTACK01] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack01")) && (m_iComboCount == 0);
-			m_States[ATTACK02] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack02")) && (m_iComboCount == 1);
-			m_States[ATTACK03] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack03")) && (m_iComboCount == 2);
-			m_States[ATTACK04] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack01")) && (m_iComboCount == 3);
-			m_States[ATTACK05] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack02")) && (m_iComboCount == 4);
-			m_States[ATTACK06] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack03")) && (m_iComboCount == 5);
-			m_States[ATTACKOMNI] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttackOmni")) && (m_iComboCount == 6);
+			m_States[ATTACK01] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackFirst)) && (m_iComboCount == 0);
+			m_States[ATTACK02] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackSecond)) && (m_iComboCount == 1);
+			m_States[ATTACK03] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackThird)) && (m_iComboCount == 2);
+			m_States[ATTACK04] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackFirst)) && (m_iComboCount == 3);
+			m_States[ATTACK05] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackSecond)) && (m_iComboCount == 4);
+			m_States[ATTACK06] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackThird)) && (m_iComboCount == 5);
+			m_States[ATTACKOMNI] = (SKILL_STATE::READY == m_pAugusta->Check_Skill(AugustaSpecialAttackEnd)) && (m_iComboCount == 6);
 
 			if (m_States[ATTACK01])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack01"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackFirst))
 					return;
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
@@ -202,7 +205,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[ATTACK02])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack02"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackSecond))
 					return;
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
@@ -215,7 +218,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[ATTACK03])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack03"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackThird))
 					return;
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
@@ -228,7 +231,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[ATTACK04])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack01"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackFirst))
 					return;
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
@@ -241,7 +244,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[ATTACK05])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack02"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackSecond))
 					return;
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
@@ -254,7 +257,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[ATTACK06])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack03"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackThird))
 					return;
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
@@ -272,7 +275,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[ATTACKOMNI])
 			{
-				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttackOmni"))
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSpecialAttackEnd))
 					return;
 
 				m_pAugusta->Rotate_Target(true);

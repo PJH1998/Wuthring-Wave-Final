@@ -2,6 +2,9 @@
 #include "AugustaAirAttack.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CAugustaAirAttack::Initialize(CCharacter* pCharacter)
 {
@@ -302,12 +305,6 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 					return;
 				}
 
-				/*if (!m_States[MOVE])
-				{
-					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
-					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-					return;
-				}*/
 			}
 
 
@@ -339,7 +336,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
         {
 			// 스킬 쓸 수 있는지 파악하고?
-			if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_Sp_End"))
+			if (SKILL_STATE::READY != m_pAugusta->Use_Skill(AugustaSkill_AirAttackEnd))
 				return;
 
 			// 땅체크

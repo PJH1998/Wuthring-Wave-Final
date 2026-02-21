@@ -4,6 +4,9 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 #include "GameInstance.h"
+#include "AbilityDefine.h"
+
+using namespace AbilityConst::SkillNames;
 
 HRESULT CRoverGroundSprint::Initialize(CCharacter* pCharacter)
 {
@@ -127,9 +130,9 @@ void CRoverGroundSprint::Handle_Input()
 	m_States[BURST] = m_pRover->HasAbilityFlag(ENUM_CLASS(UI_ROVER_VIEWFLAG::BURST_ACTIVE));
 
 	if (m_States[BURST])
-		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));
+		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverBurstE));
 	else
-		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
+		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill(RoverDefaultE));
 
 	// 궁 상태 확인하기.
 	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST2) >= m_pRover->Get_MaxCost());
@@ -182,15 +185,7 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
  
     ERoverSprintType eSprintType = static_cast<ERoverSprintType>(m_iCurrentAnimIdx);
 
-	// 1. 우선순위
-	//if (m_States[DODGE])
-	//{
-	//	m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
-	//	m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
-	//	return;
-	//}
-
-	// 2.Hit 상태.
+	// 1. Hit 상태.
 	if (m_States[HIT])
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
@@ -242,7 +237,7 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[ULTI])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Burst01_Ulti"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstR))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
@@ -253,7 +248,7 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[BURST_E]) // Burst E
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Ex_Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverBurstE))
 			return;
 
 		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::EX_SKILL02;
@@ -263,7 +258,7 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
 
 	if (m_States[DEFAULT_E])
 	{
-		if (SKILL_STATE::READY != m_pRover->Use_Skill("Skill02"))
+		if (SKILL_STATE::READY != m_pRover->Use_Skill(RoverDefaultE))
 			return;
 
 
@@ -288,15 +283,6 @@ void CRoverGroundSprint::Check_StateTransition(_float fTimeDelta)
 			return;
 		}
 	}
-
-
-	// 뛰다가 Dash
-	//if (m_States[DASH])
-	//{
-	//	m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-	//	m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-	//	return;
-	//}
     
 	// Sprint 상태면?
 	if (m_States[SPRINT])
