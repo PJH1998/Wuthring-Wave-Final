@@ -130,7 +130,7 @@ _bool CPicking::GetCenterPos(_float3* pOut)
 	return true;
 }
 
-_bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels,_float4* pOutMousePos)
+_bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_float4* pOutMousePos)
 {
 
 	_uint MousePos = m_ptMouse.y * m_iWinSizeX + m_ptMouse.x;
@@ -153,11 +153,6 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 	if (0.f == DepthDesc.w)
 		return false;
 
-	//스크린 기준 마우스 찍은 점 기준으로 옆으로 1칸 2칸씩 움직이면서 내가 지정한 월드 길이보다 길어지면 거기서 스탑. 스크린 상에서 마우스 점이랑 그 점이랑 
-	//길이 비교해서 범위가 되는 지점 생성. 벡터로 저장 후 벡터에 있는 점들을 월드까지 내리기? -> 카메라가 가까워지면 연산 많이함.
-	
-	//현재 인스턴스 한 놈이 자꾸 카메라 위치로 나오는 오류 있음.
-
 	_vector MouseWorldPos = {};
 
 	MouseWorldPos = XMVectorSetX(MouseWorldPos, m_ptMouse.x / (m_iWinSizeX * 0.5f) - 1.f);
@@ -168,13 +163,16 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 	MouseWorldPos = XMVector3TransformCoord(MouseWorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ));
 	MouseWorldPos = XMVector3TransformCoord(MouseWorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW));
 	XMStoreFloat4(pOutMousePos, MouseWorldPos);
+
 	_float4 TempPoint = {};
 	_int PixelRange = {};
 	_uint ViewPorts = { 0 };
 	D3D11_VIEWPORT ViewPort;
+
 	m_pContext->RSGetViewports(&ViewPorts, &ViewPort);
 	ViewPort.MinDepth;
 	ViewPort.MaxDepth;
+
 	for (_uint i=0; i< m_iWinSizeX; ++i)
 	{
 		TempPoint = m_pPoints[iIndex - i];
@@ -238,40 +236,7 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 	if (m_WorldPoints.empty())
 		return false;
 
-
-	/*for (_uint y = 0; y < m_iWinSizeY; ++y)
-	{
-		for (_uint x = 0; x < m_iWinSizeX; ++x)
-		{
-			_uint PixelIndex = y * m_iWinSizeX + x;
-			_float4 Depth = m_pPoints[y * m_iWinSizeX + x];
-
-			if (0.f == Depth.w)
-			{
-				m_WorldPoints[PixelIndex] = _float4(0.f, 0.f, 0.f, 0.f);
-				continue;
-			}
-
-			_vector PixelPos = {};
-			PixelPos = XMVectorSetX(PixelPos, x / (m_iWinSizeX * 0.5f) - 1.f);
-			PixelPos = XMVectorSetY(PixelPos, y / (m_iWinSizeY * -0.5f) + 1.f);
-			PixelPos = XMVectorSetZ(PixelPos, Depth.x);
-			PixelPos = XMVectorSetW(PixelPos, 1.f);
-
-			PixelPos = XMVector3TransformCoord(PixelPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ));
-			PixelPos = XMVector3TransformCoord(PixelPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW));
-
-			_vector Delta = MouseWorldPos - PixelPos;
-
-			_float Dist= Delta.m128_f32[0] * Delta.m128_f32[0] + Delta.m128_f32[2] * Delta.m128_f32[2];
-			if (Dist < fRange)
-				XMStoreFloat4(&m_WorldPoints[PixelIndex], PixelPos);
-			else
-				XMStoreFloat4(&m_WorldPoints[PixelIndex], XMVectorSet(0.f, 0.f, 0.f, 0.f));
-		}
-	}*/
 	pOut = m_WorldPoints;
-	*NumPixels = PixelRange;
 	return true;
 }
 

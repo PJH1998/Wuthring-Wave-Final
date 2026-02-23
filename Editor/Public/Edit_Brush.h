@@ -34,11 +34,11 @@ private:
 		return wcslen(szModelname) == 0;
 	}
 	_bool Check_Duplicate();
-	_float4x4* Gen_Points(vector<_float4>& Points, _uint iNumPixels);
-	_bool Generate_Instance(_float4x4* pTransformMatrix,_float4 vMousePos);
+	vector<_float4x4> Generate_WorldMatrices(const vector<_float4>& Points);
+	_bool Generate_Instance(vector<_float4x4>& TransformMatrices,_float4 vMousePos);
 
-	_uint GetVaildRandomIndex(vector<_float4>& Points, _uint iMin, _uint iMax);
-	_float4x4 CreateWorldMatrix(vector<_float4>& Points, _uint iRandNum, _float fRotation);
+	_uint GetVaildRandomIndex(const vector<_float4>& Points, _uint iMin, _uint iMax);
+	_float4x4 Composite_WorldMatrix(const _float4& RandWorldPos, _float fRotation);
 
 private:
 	CShader* m_pShaderCom = { nullptr };

@@ -18,7 +18,7 @@ public:
 
 	_bool				isPicked(_float3* pOut);
 	_bool				GetCenterPos(_float3* pOut);
-	_bool				Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos);
+	_bool				Get_Points(_float fRange, vector<_float4>& pOut, _float4* pOutMousePos);
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	ID3D11Device*				m_pDevice = { nullptr };

@@ -52,7 +52,7 @@ HRESULT CEdit_Brush::Initialize_Prototype()
 
 			vector<_float4x4> Totalmatrix;
 			vector<_vector> Objectmatrix;
-			_uint iNumTotalInstance = {};
+			_uint iNumTotalInstance = { 0 };
 			_float4 m_RealCenterPos = {};
 
 			INSTANCE_SAVE SaveEvent(Totalmatrix, Objectmatrix, &iNumTotalInstance);
@@ -334,47 +334,47 @@ void CEdit_Brush::Ready_Components()
 
 void CEdit_Brush::Foliage()
 {
-    if (!IsSelected(m_szModelName))
-        return;
+    if (IsSelected(m_szModelName) == false)
+	{
+		MSG_BOX("Model Not Selected");
+		return;
+	}
 
     if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::PRESS)
     {
-		if (!Check_Duplicate())
+		if (Check_Duplicate() == false)
 		{
+			MSG_BOX("Diffrent Model Selected");
 			return;
 		}
 
         vector<_float4> Points;
-        _uint iNumPixels = {};
         _float4 vMousePos = {};
 
-		if (m_pGameInstance->Get_Points(m_fRange, Points, &iNumPixels, &vMousePos))
+		if (m_pGameInstance->Get_Points(m_fRange, Points, &vMousePos) == true)
 		{
-			if (vMousePos.w == 0.f)
-				return;
+			vector<_float4x4> TransformMatrices = Generate_WorldMatrices(Points);
 
-			_float4x4* pTransformMatrix = Gen_Points(Points, iNumPixels);
-
-			if (!pTransformMatrix)
+			if (TransformMatrices.empty() == true)
 			{
+				MSG_BOX("TransformMatrices Create Failed");
 				return;
 			}
-			Generate_Instance(pTransformMatrix, vMousePos);
 
-			Safe_Delete_Array(pTransformMatrix);
+			Generate_Instance(TransformMatrices, vMousePos);
 		}
     }
-}	
+}
 	
 _bool CEdit_Brush::Check_Duplicate()
 {		
-	if (!m_SaveInstanceObjects[m_iCurSaveIndex].empty())
+	if (m_SaveInstanceObjects[m_iCurSaveIndex].empty() == false)
 	{	
 		_string szSavedModel = m_SaveInstanceObjects[m_iCurSaveIndex][0]->GetName();
 		szSavedModel.pop_back();
 		_string szCurModel = WStringToString(m_szModelName);
 		szCurModel.pop_back();
-		if (strcmp(szSavedModel.c_str(), szCurModel.c_str()))
+		if (szSavedModel != szCurModel)
 		{
 			MSG_BOX("Diffrent Model");
 			return false;
@@ -384,31 +384,35 @@ _bool CEdit_Brush::Check_Duplicate()
 	return true;
 }		
 
-_float4x4* CEdit_Brush::Gen_Points(vector<_float4>& Points, _uint iNumPixels)
+vector<_float4x4> CEdit_Brush::Generate_WorldMatrices(const vector<_float4>& Points)
 {
-	if (m_iNumInstance == 0 || Points.empty())
-		return nullptr;
+	vector<_float4x4> TempVec;
+	if (m_iNumInstance == 0 || Points.size() <= 1)
+	{
+		MSG_BOX("Check Settings");
+		return TempVec;
+	}
 
-	_float4x4* pTransformMatrix = new _float4x4[m_iNumInstance];
-
-	_uint iRandSize = static_cast<_uint>(Points.size()) - 1;
-	_uint iRandNum = {};
-	_float fRotation = {};
+	size_t iRandSize = Points.size() - 1;
+	_uint iRandNum = { 0 };
+	_float fRotation = { 0.f };
+	_float4x4 InstanceMatrix = {};
 
 	for (_uint i = 0; i < m_iNumInstance; ++i)
 	{
 		iRandNum = GetVaildRandomIndex(Points, 0, iRandSize);
 		fRotation = m_pGameInstance->Rand(m_vMinRotation, m_vMaxRotation);
-		pTransformMatrix[i] = CreateWorldMatrix(Points, iRandNum, fRotation);
+		InstanceMatrix = Composite_WorldMatrix(Points[iRandNum], fRotation);
+		TempVec.push_back(InstanceMatrix);
 	}
-		
-	return pTransformMatrix;
+
+	return TempVec;
 }
 
-_bool CEdit_Brush::Generate_Instance(_float4x4* pTransformMatrix, _float4 vMousePos)
+_bool CEdit_Brush::Generate_Instance(vector<_float4x4>& TransformMatrices, _float4 vMousePos)
 {
 	CEdit_MapObject_Instance::MAP_LOAD Desc;
-	Desc.InstanceWorldMatrix = pTransformMatrix;
+	Desc.InstanceWorldMatrix = TransformMatrices.data();
 	Desc.iNumInstance = m_iNumInstance;
 	strcpy_s(Desc.ModelName, WStringToString(m_szModelName).c_str());
 	XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&vMousePos)));
@@ -419,12 +423,15 @@ _bool CEdit_Brush::Generate_Instance(_float4x4* pTransformMatrix, _float4 vMouse
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_MapObject_Instance")
 		, ENUM_CLASS(LEVEL::MAP), TEXT("Layer_Instance"), &Desc)))
+	{
+		MSG_BOX("Failed to Create Instance");
 		return false;
+	}
 
 	return true;
 }
 
-_uint CEdit_Brush::GetVaildRandomIndex(vector<_float4>& Points, _uint iMin, _uint iMax)
+_uint CEdit_Brush::GetVaildRandomIndex(const vector<_float4>& Points, _uint iMin, _uint iMax)
 {
 	_uint RandIndex = { 0 };
 
@@ -435,16 +442,16 @@ _uint CEdit_Brush::GetVaildRandomIndex(vector<_float4>& Points, _uint iMin, _uin
 	return RandIndex;
 }
 
-_float4x4 CEdit_Brush::CreateWorldMatrix(vector<_float4>& Points, _uint iRandNum, _float fRotation)
+_float4x4 CEdit_Brush::Composite_WorldMatrix(const _float4& RandWorldPos, _float fRotation)
 {
 	_float4x4 TransfromMatrix = {};
 
 	if (m_vMaxRotation == 0.0f)
-		XMStoreFloat4x4(&TransfromMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Points[iRandNum])));
+		XMStoreFloat4x4(&TransfromMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&RandWorldPos)));
 	else
 	{
 		_vector RotationQuat = XMQuaternionRotationNormal(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(fRotation));
-		XMStoreFloat4x4(&TransfromMatrix, XMMatrixRotationQuaternion(RotationQuat) * XMMatrixTranslationFromVector(XMLoadFloat4(&Points[iRandNum])));
+		XMStoreFloat4x4(&TransfromMatrix, XMMatrixRotationQuaternion(RotationQuat) * XMMatrixTranslationFromVector(XMLoadFloat4(&RandWorldPos)));
 	}
 
 	return TransfromMatrix;
@@ -468,7 +475,6 @@ void CEdit_Brush::Free()
     __super::Free();
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pVIBufferCom);
-
 
 	for (auto& Pair: m_SaveInstanceObjects)
 	{
