@@ -9,7 +9,7 @@ struct AnimInfo
     uint iPadding;
 };
 
-// Depth2 Channel 에서 실행하는 StartKeyFrame
+// Depth 2: Channel 정보 (시작 KeyFrame 오프셋 등)
 struct GPUChannelInfo
 {
     uint iStartKeyframeOffset;
@@ -18,7 +18,7 @@ struct GPUChannelInfo
     uint iPadding;
 };
 
-// Dpeth 3 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체.
+// Depth 3: 채널이 소유하는 KeyFrame (매 TrackPosition마다 뼈의 이동 정보)
 struct GPUKeyFrame
 {
     float4 vScale;
@@ -27,8 +27,6 @@ struct GPUKeyFrame
     float fTrackPosition;
     float3 vPadding;
 };
-
-float4 gScale = { 1.f, 1.f, 1.f, 1.f };
 
 struct SRTKeyFrame
 {
@@ -68,7 +66,7 @@ float4 mulQuaternion(float4 q1, float4 q2)
 // 쿼터니언 slerp 직접 구현
 float4 customSlerp(float4 q1, float4 q2, float t)
 {
-   // 1. 입력 쿼터니언을 정규화해서 안정성 확보
+    // 입력 쿼터니언 정규화
     q1 = normalize(q1);
     q2 = normalize(q2);
 
@@ -96,37 +94,24 @@ float4 customSlerp(float4 q1, float4 q2, float t)
     float w1 = sin((1.0f - t) * theta) / sin_theta;
     float w2 = sin(t * theta) / sin_theta;
 
-    // 3. 최종 결과도 정규화해서 오차 누적 방지
+    // 결과 정규화로 오차 누적 방지
     return normalize(q1 * w1 + q2 * w2);
 }
 
-// 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
+// SQT(Scale, Quaternion, Translation) → 변환 행렬 생성 (CSE 최적화)
 matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
-    matrix_rm m;
     float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
+    float qx2 = qx * qx, qy2 = qy * qy, qz2 = qz * qz;
+    float qxqy = qx * qy, qxqz = qx * qz, qyqz = qy * qz;
+    float qwqx = qw * qx, qwqy = qw * qy, qwqz = qw * qz;
 
-    m._11 = s.x * (1 - 2 * qy * qy - 2 * qz * qz);
-    m._12 = s.x * (2 * qx * qy + 2 * qw * qz);
-    m._13 = s.x * (2 * qx * qz - 2 * qw * qy);
-    m._14 = 0;
-
-    m._21 = s.y * (2 * qx * qy - 2 * qw * qz);
-    m._22 = s.y * (1 - 2 * qx * qx - 2 * qz * qz);
-    m._23 = s.y * (2 * qy * qz + 2 * qw * qx);
-    m._24 = 0;
-
-    m._31 = s.z * (2 * qx * qz + 2 * qw * qy);
-    m._32 = s.z * (2 * qy * qz - 2 * qw * qx);
-    m._33 = s.z * (1 - 2 * qx * qx - 2 * qy * qy);
-    m._34 = 0;
-
-    m._41 = t.x;
-    m._42 = t.y;
-    m._43 = t.z;
-    m._44 = 1;
-	
-    return m;
+    return matrix_rm(
+        s.x * (1.f - 2.f * (qy2 + qz2)),  s.x * 2.f * (qxqy + qwqz),  s.x * 2.f * (qxqz - qwqy),  0.f,
+        s.y * 2.f * (qxqy - qwqz),        s.y * (1.f - 2.f * (qx2 + qz2)), s.y * 2.f * (qyqz + qwqx),  0.f,
+        s.z * 2.f * (qxqz + qwqy),        s.z * 2.f * (qyqz - qwqx),  s.z * (1.f - 2.f * (qx2 + qy2)), 0.f,
+        t.x, t.y, t.z, 1.f
+    );
 }
 
 SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
@@ -136,12 +121,11 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
     // 1. 현재 애니메이션 정보 가져오기
     AnimInfo anim = g_AllAnimInfos[animIndex];
     
-    // 2. 단위 SRT 설정. 
     result.scale = float4(1.f, 1.f, 1.f, 1.f);
-    result.rotation = float4(0.f, 0.f, 0.f, 1.f); // 단위 쿼터니언 (w = 1)
+    result.rotation = float4(0.f, 0.f, 0.f, 1.f);   // 단위 쿼터니언
     result.translation = float4(0.f, 0.f, 0.f, 1.f);
-    
-    // 2. 현재 뼈에 해당하는 채널 찾기
+
+    // 현재 뼈에 해당하는 채널 검색
     int channelIndex = -1;
     for (uint i = 0; i < anim.iNumChannels; i++)
     {
@@ -178,27 +162,19 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
     }
     
     // 6. Ribbon Animation의 경우 키프레임이 2개이면 항상 단위 SRT 반환
-    if (isRibbon == true && channel.iNumKeyframes == 2)
+    if (isRibbon && channel.iNumKeyframes == 2)
     {
         return result;
     }
     
-    // 7. 보간할 두 개의 키프레임을 찾을 인덱스를 채널의 시작 오프셋으로 초기화.
-    uint keyframeIndex = channel.iStartKeyframeOffset;
-    
-    
-    // 8. 채널의 모든 키프레임을 순회하면서 다음 키프레임의 시간이 현재 재생 기간 보다 크면 
-    // 해당 키프레임과 그 다음 키프레임 사이를 보간하면됨.
+    // 7~8. 보간할 키프레임 구간 검색 (다음 키프레임 시간 > 현재 재생 시간이 되는 구간)
+    uint keyStart = channel.iStartKeyframeOffset;
+    uint keyframeIndex = keyStart;
     for (uint k = 0; k < channel.iNumKeyframes - 1; ++k)
     {
-        // 다음 키프레임의 시간이 현재 재생 시간보다 크면, 현재 k와 k + 1 사이에서 보간하면 됨
-        if (g_AllKeyframes[channel.iStartKeyframeOffset + k + 1].fTrackPosition > fTrackPosition)
-        {
-            keyframeIndex = channel.iStartKeyframeOffset + k;
-            break; // 올바른 구간을 찾았으므로 반복 중단
-        }
-        // 끝까지 못찾았다면 마지막-1 인덱스를 사용하게 됨
-        keyframeIndex = channel.iStartKeyframeOffset + k;
+        keyframeIndex = keyStart + k;
+        if (g_AllKeyframes[keyframeIndex + 1].fTrackPosition > fTrackPosition)
+            break;
     }
     
     GPUKeyFrame key1 = g_AllKeyframes[keyframeIndex];
@@ -209,10 +185,7 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
     float segmentDuration = key2.fTrackPosition - key1.fTrackPosition;
     
     if (segmentDuration > 0.0f)
-    {
-        // 선형 보간
-        blendFactor = (g_TrackPosition - key1.fTrackPosition) / segmentDuration;
-    }
+        blendFactor = (fTrackPosition - key1.fTrackPosition) / segmentDuration;
 
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
@@ -228,39 +201,19 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
 }
 
 
-float SafeDivide(float numerator, float denominator)
-{
-    // 분모가 아주 작으면(0에 가까우면) 나눗셈을 하지 않고 1(변화 없음)을 반환
-    if (abs(denominator) < 1e-6f)
-        return 1.0f;
-    return numerator / denominator;
-}
-
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
+void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    // 현재 본 Index 가져오기.
     uint boneIndex = dispatchThreadID.x;
-    
-      // 1. Action Animation의 SRT 가져오기
     SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
-   
+
     matrix result_matrix;
-    
-    // Ribbon Animation을 사용한다면?
     if (g_IsRibAnimUsed)
     {
-       
-        // 2. Ribbon Animation의 SRT 가져오기
         SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        //ribbonSRT.translation.xyz *= 0.01f; // 임시로 0.01배 설정하기. => 싹다 1로.
-        // => Blender에서 PSA Import 할때 Translation Scale을 0.01배하면된다. => 뭔가 빠다리남.
-        
-        // 가산 블렌딩
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;
         float4 finalRotation = mulQuaternion(ribbonSRT.rotation, actionSRT.rotation);
-        float4 finalTranslation = ribbonSRT.translation + actionSRT.translation; // delta 적용
-        
+        float4 finalTranslation = ribbonSRT.translation + actionSRT.translation;
         finalTranslation.w = 1.f;
         result_matrix = ComposeMatrixFromSRT(finalScale, finalRotation, finalTranslation);
     }
@@ -268,9 +221,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     {
         result_matrix = ComposeMatrixFromSRT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     }
-    
-    // 최종 행렬 출력 버퍼에 저장.
+
     g_OutLocalMatrices[boneIndex] = result_matrix;
-   
 }
 
