@@ -1,4 +1,4 @@
-﻿#include "EnginePch.h"
+#include "EnginePch.h"
 #include "Mesh.h"
 
 #include "Bone.h"
@@ -158,6 +158,7 @@ void CMesh::Compute_Morph(CComputeShader* pMorphComputeShaderCom, ID3D11ShaderRe
 	// CHARACTER Type이 아니거나, Shared, Instance Buffer가 준비되지 않았다면 리턴.
 	if (m_eModelType != MODELTYPE::CHARACTER) return;
 	if (!m_IsSharedReady || !m_IsInstanceReady) return;
+	if (m_ShapeKeys.empty() || m_iNumAnimMeshes == 0) return;
 
 	// 1. 상수 버퍼(CB) 업데이트 (정점 개수 등)
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;

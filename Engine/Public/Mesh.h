@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "VIBuffer.h"
 
 NS_BEGIN(Engine)
@@ -33,6 +33,7 @@ public:
 
 	const vector<class CShapeKey*>& Get_ShapeKeys() { return m_ShapeKeys; }
 	_uint	Get_NumVertices() const { return m_iNumVertices; }
+	_bool	HasMorphTargets() const { return !m_ShapeKeys.empty() && m_iNumAnimMeshes > 0; }
 
 public:
 	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);

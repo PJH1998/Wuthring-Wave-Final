@@ -866,9 +866,12 @@ void CModel::Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorp
 			}
 		}
 
-		// 5. 각 메쉬 실행
+		// 5. Morph 타겟이 있는 메쉬만 실행
 		for (auto& pMesh : m_Meshes)
 		{
+			if (false == pMesh->HasMorphTargets())
+				continue;
+
 			// Model이 만든 Weight SRV를 Mesh에게 빌려줌
 			pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
 		}
@@ -1356,7 +1359,6 @@ HRESULT CModel::Ready_MorphAnimation(const _char* pFilePath)
 {
 	_uint iNumAnimations = {};
 	_uint iNumMorphAnimations = {};
-
 #pragma region 두번 불러오는 방법. MORPH ANIMATION은?
 
 	if (MODELTYPE::CHARACTER == m_eType)
