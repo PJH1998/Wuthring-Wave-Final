@@ -492,6 +492,9 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
 	else
 		m_RootMatrix = XMMatrixIdentity();
+	
+	for (_uint i = 0; i < m_Bones.size(); i++)
+		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 	//  애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (isAnimationEnd)
@@ -499,8 +502,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
-	for (_uint i = 0; i < m_Bones.size(); i++)
-		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 	return false;
 }
@@ -528,15 +529,16 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, CComputeShad
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
+
+	for (_uint i = 0; i < m_Bones.size(); i++)
+		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+
 	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
-
-	for (_uint i = 0; i < m_Bones.size(); i++)
-		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 	return false;
 }
@@ -559,16 +561,17 @@ _bool CModel::Play_NonRibAnimation_GPU(CComputeShader* pComputeShaderCom, const 
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
+
+	//  Combined는 한번만.
+	for (_uint i = 0; i < m_Bones.size(); i++)
+		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+
 	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true;
 	}
-
-	// 7. Combined는 한번만.
-	for (_uint i = 0; i < m_Bones.size(); i++)
-		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 	return false;
 }
@@ -593,17 +596,15 @@ _bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, const _st
 	else
 		m_RootMatrix = XMMatrixIdentity();
 
-	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
-	if (isAnimationEnd)
-	{
-		Clear_Animation(strAnimationName);
-		return true; // 애니메이션 종료
-	}
-
-#
 	//Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+
+	if (isAnimationEnd)
+	{
+		Clear_Animation(strAnimationName);
+		return true;
+	}
 
 
 	return false;
@@ -633,17 +634,16 @@ _bool CModel::Play_FlyAnimation_GPU(CComputeShader* pComputeShaderCom, CComputeS
 		m_RootMatrix = XMMatrixIdentity();
 
 
-	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	// Combined는 한번만.
+	for (_uint i = 0; i < m_Bones.size(); i++)
+		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+
+	// 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (isAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
-
-#
-	// 5. Combined는 한번만.
-	for (_uint i = 0; i < m_Bones.size(); i++)
-		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 
 	return false;
