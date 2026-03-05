@@ -850,31 +850,29 @@ void CModel::HandleAnimationChange(const _string& strAnimationName)
 void CModel::Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorphComputeShaderCom, _float fTimeDelta, _bool isFacial)
 {
 	// 2. Facial Animation Weight 계산
-	if (m_eType == MODELTYPE::CHARACTER && isFacial)
+	if (m_eType != MODELTYPE::CHARACTER || !isFacial) 
+		return;
+	if (nullptr == m_Buffers[BUFFER_MORPH_WEIGHT] || nullptr == m_SRVs[SRV_MORPH_WEIGHT])
+		return;
+	
+	// [CPU] Shape Key 가중치 갱신
+	pAnimation->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
+
+	// [CPU + GPU] 가중치 버퍼 업로드
+	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+	if (SUCCEEDED(m_pContext->Map(m_Buffers[BUFFER_MORPH_WEIGHT], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
 	{
-		// 3. Facial Animation Weight 계산
-		pAnimation->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
+		memcpy(MappedSubResource.pData, m_ShapeKeyWeights.data(), sizeof(_float) * m_ShapeKeyWeights.size());
+		m_pContext->Unmap(m_Buffers[BUFFER_MORPH_WEIGHT], 0);
+	}
 
-		// 4. GPU Weight Buffer 업데이트.
-		if (m_Buffers[BUFFER_MORPH_WEIGHT])
-		{
-			D3D11_MAPPED_SUBRESOURCE MappedSubResource;
-			if (SUCCEEDED(m_pContext->Map(m_Buffers[BUFFER_MORPH_WEIGHT], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
-			{
-				memcpy(MappedSubResource.pData, m_ShapeKeyWeights.data(), sizeof(_float) * m_ShapeKeyWeights.size());
-				m_pContext->Unmap(m_Buffers[BUFFER_MORPH_WEIGHT], 0);
-			}
-		}
+	// [GPU] Morph 적용 (대상 Mesh만)
+	for (auto& pMesh : m_Meshes)
+	{
+		if (false == pMesh->HasMorphTargets())
+			continue;
 
-		// 5. Morph 타겟이 있는 메쉬만 실행
-		for (auto& pMesh : m_Meshes)
-		{
-			if (false == pMesh->HasMorphTargets())
-				continue;
-
-			// Model이 만든 Weight SRV를 Mesh에게 빌려줌
-			pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
-		}
+		pMesh->Compute_Morph(pMorphComputeShaderCom, m_SRVs[SRV_MORPH_WEIGHT]);
 	}
 }
 

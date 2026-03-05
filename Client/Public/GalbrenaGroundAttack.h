@@ -15,7 +15,7 @@ private:
         THIRED_ATTACK,
         LAST_ATTACK,
         HEAVY_ATTACK_PENDING,
-        HEAVY_ATTACK,
+        HEAVY_ATTACK_READY,
 		DASH,
         SKILL_Q,
         SKILL_E,

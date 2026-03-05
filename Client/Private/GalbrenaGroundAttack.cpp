@@ -143,7 +143,7 @@ void CGalbrenaGroundAttack::Handle_Input()
 	m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EGalbrenaAttackType::ATTACK01)
 		&& (m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
 
-	m_States[HEAVY_ATTACK] = m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime);
+	m_States[HEAVY_ATTACK_READY] = m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime);
 
     // 입력키 체크
     m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey);
@@ -264,7 +264,7 @@ void CGalbrenaGroundAttack::Check_StateTransition(_float fTimeDelta)
 	}
 
 	// 강공 조건이 되었다면?
-	if (m_States[HEAVY_ATTACK] && IsEscapePossible)
+	if (m_States[HEAVY_ATTACK_READY] && IsEscapePossible)
 	{
 		m_pGalbrena->GetStateContextForWrite().m_eHeavyAttackType = EGalbrenaHeavyAttackType::ATTACK_H_0201;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::HEAVYATTACK));
