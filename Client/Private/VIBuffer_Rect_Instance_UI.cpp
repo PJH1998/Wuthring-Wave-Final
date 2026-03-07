@@ -21,7 +21,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	//m_vPivot = pInstDesc->vPivot;
 
 	m_iNumIndexPerInstance = 6;
-	m_iInstanceVertexStride = sizeof(SINGLE_INST_DESC); // ksta : DO NOT USE EMEMENT INCLUDED STRUCT !! IT EXCEEDS AND USE WRONG BUFFER SPACE
+	m_iInstanceVertexStride = sizeof(SINGLE_INST_DESC);
 	m_iNumInstance = pInstDesc->iNumInstance;
 	m_iNumVertices = 4;
 	m_iVertexStride = sizeof(VTXPOSTEX);
@@ -132,8 +132,6 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(vector<SINGLE_INST_DESC>& vecD
 {
  	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-	SINGLE_INST_DESC* pInstanceVertices = static_cast<SINGLE_INST_DESC*>(m_pVBInstanceVertices);
-
 	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource); // ksta : "D3D11_MAP_WRITE_DISCARD", "D3D11_MAP_WRITE_NO_OVERWRITE"
 	SINGLE_INST_DESC* pVertices = static_cast<SINGLE_INST_DESC*>(SubResource.pData);
 
@@ -142,7 +140,6 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(vector<SINGLE_INST_DESC>& vecD
 
 	for (size_t i = 0; i < m_iNumAvailableInstance; i++)
 	{
-		// ���⼭ �� Instance�� ��ġ �� ���� ����
 		pVertices[i].vSInstRight	= vecDescs[i].vSInstRight;
 		pVertices[i].vSInstUp		= vecDescs[i].vSInstUp   ;
 		pVertices[i].vSInstLook		= vecDescs[i].vSInstLook ;
@@ -158,7 +155,6 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(vector<SINGLE_INST_DESC>& vecD
 	}
 
 	m_pContext->Unmap(m_pVBInstance, 0);
-
 }
 
 

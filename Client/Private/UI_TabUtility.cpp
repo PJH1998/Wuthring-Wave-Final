@@ -407,7 +407,7 @@ void CUI_TabUtility::Create_ChildText_CurUtil()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
@@ -439,7 +439,7 @@ void CUI_TabUtility::Create_ChildText_IsUsing()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;

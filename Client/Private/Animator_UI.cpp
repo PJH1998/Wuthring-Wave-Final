@@ -128,7 +128,6 @@ HRESULT CAnimator_UI::Change_Animation(_uint iAnimIndex, _bool isForceRestart)
 		m_fElapsedTime = 0;
 
     m_pCurAnimDesc = pDesc;
-    //m_fElapsedTime = 0;??
 	Update_Animation_Calculate();
 
     return S_OK;
@@ -169,17 +168,10 @@ _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
     {
     default:
     case UI_LERPTYPE::END:
-    case UI_LERPTYPE::LINEAR:               return fIn;
-
-        //case UI_LERPTYPE_SPEED::MT:                   return sqrt(1.0f - 4.0f * pow(fIn - 0.5f, 2.0f));
-        //case UI_LERPTYPE_SPEED::MB:                   return 1.0f - sqrt(max(0.0f, 1.0f - 4.0f * pow(fIn - 0.5f, 2.0f)));
-    case UI_LERPTYPE::LT:                   return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));                          //
-        //case UI_LERPTYPE_SPEED::LB:                   return 1.0f - sqrt(1.0f - pow(fIn - 1.0f, 2.0f));;
-        //case UI_LERPTYPE_SPEED::RT:                   return sqrt(1.0f - pow(fIn, 2.0f));;
-    case UI_LERPTYPE::RB:                   return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));                          //
-
-    case UI_LERPTYPE::CUBIC:                return fIn * fIn * (3.0f - 2.0f * fIn);
-        //case UI_LERPTYPE_SPEED::CUBICR:
+    case UI_LERPTYPE::LINEAR:   return fIn;
+    case UI_LERPTYPE::LT:       return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));
+    case UI_LERPTYPE::RB:       return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));
+    case UI_LERPTYPE::CUBIC:    return fIn * fIn * (3.0f - 2.0f * fIn);
     }
 }
 
@@ -245,46 +237,41 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
 
 void CAnimator_UI::Update_Animation_Calculate()
 {
-    // if target doesnt have selected animation, binds default value to shader.
-    // if not, it will be affected by pre-played animations.
+#pragma region exception handing
 
-    if (!(m_pOwner && m_pOwnerShaderCom))		// rootUI doesnt need animator.
-        return;
+	if (!(m_pOwner && m_pOwnerShaderCom))
+		return;
 
-	UI_ANIM_KEYFRAME_DESC tDesc = {};
-    CShader* pTargetShader = m_pOwnerShaderCom;
+	CShader* pTargetShader = m_pOwnerShaderCom;
 
-    if (m_pCurAnimDesc == nullptr)
-    {
+	if (m_pCurAnimDesc == nullptr)
+	{
 		m_tCalcedKeyFrameDesc = UI_ANIM_KEYFRAME_DESC{};
 		return;
-    }
+	}
 
+#pragma endregion
 
+#pragma region Calculate CurFrame
+	// ==============================
+	// * Calculate Frame..
+	// ==============================
 
-    // Calculate Frame..
-    const _uint     iKeyFrameRate = 60; // ���� �ʴ� ������
-    const _float    fSingleFrameTime = 1.f / iKeyFrameRate;
+	_float fCurFrame = m_fElapsedTime / m_fSingleFrameTime;
+	if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
+	{
+		if (m_pCurAnimDesc->isLoop)
+			m_fElapsedTime = 0.f;
+	}
 
-    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // ���� Ű������
-    if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
-    {
-        if (m_pCurAnimDesc->isLoop)
-            m_fElapsedTime = 0.f;                                           // ���� ��, ���� �Ѿ�� 0����
-    }
+	fCurFrame = m_fElapsedTime / m_fSingleFrameTime;
+	_uint iCurFrame = static_cast<_uint>(fCurFrame);
+#pragma endregion
 
-    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // ���� ���� Ű������
-    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // ���� ���� Ű������ (int�� ����)
-
-
-    // ==============================
     // * Calculate Ratio..
-    // ==============================
-    _uint iFrame_LerpStart = {};        // ������ ��
-    _uint iFrame_LerpEnd = {};          // ������ ��
-    _uint iFrame_StartIndex = {};       // ���� �ε���
-    _uint iFrame_EndIndex = {};         // ���� �ε���
-
+	_uint	iFrame_LerpStart = {},	iFrame_LerpEnd = {};
+	_uint	iFrame_StartIndex = {},	iFrame_EndIndex = {};
+    
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
         if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex <= iCurFrame)
@@ -308,20 +295,22 @@ void CAnimator_UI::Update_Animation_Calculate()
     }
 
     _float fRawLerpRatio = static_cast<_float>((fCurFrame - iFrame_LerpStart) / (iFrame_LerpEnd - iFrame_LerpStart));
-    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // ���� Ű�����ӿ� ���� Ű������ ���� ���� ���� ����
+    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType);
 
-
-    // ==============================
     // * Calculate Results..
-    // ==============================
-    _uint iResultTexIndex = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iTexIndex;
-    _float fResultAlpha = Calc_LerpRatio(
+
+	_float fResultAlpha = Calc_LerpRatio(
         m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].fAlpha,
         m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha,
         fFixedLerpRatio
     );
 
-	_float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
+    _float3 vResultSca = {};
+    XMStoreFloat3(&vResultSca, XMVectorLerp(
+        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
+        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vSca),
+        fFixedLerpRatio
+    ));
 
     _float3 vResultRot = {};
     XMStoreFloat3(&vResultRot, XMVectorLerp(
@@ -330,13 +319,8 @@ void CAnimator_UI::Update_Animation_Calculate()
         fFixedLerpRatio)
     );
     _float3 vResultRotRad = { DegreesToRadians(vResultRot.x), DegreesToRadians(vResultRot.y), DegreesToRadians(vResultRot.z) };
-    _float3 vResultSca = {};
-    XMStoreFloat3(&vResultSca, XMVectorLerp(
-        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
-        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vSca),
-        fFixedLerpRatio
-    ));
 
+	_float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
 
     _float2 vResultScreenLT = {};
     XMStoreFloat2(&vResultScreenLT, XMVectorLerp(
@@ -359,21 +343,16 @@ void CAnimator_UI::Update_Animation_Calculate()
         fFixedLerpRatio
     ));
 
+    _uint iResultTexIndex = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iTexIndex;
+
+
     // ==============================
     // * Apply Results..
-    // ==============================
-
-
     CTransform* pOwnerTransformCom = m_pOwnerTransformCom;
-
 
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
     _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
-
-	// 만약 비활성화된 요소가 있다면 해당하는 것은 반영X
-
-
 
 
 	if (m_iDisableFlag)
@@ -412,10 +391,9 @@ void CAnimator_UI::Update_Animation_Calculate()
 		
     _matrix matTransform = matSca * matRot * matPos;
 
+
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
 
-
-	// 계산된 결과를 복사. 실시간 desc 정보를 저장하여 자식 계산에 사용하기 위함
 	m_tCalcedKeyFrameDesc = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex];
 	m_tCalcedKeyFrameDesc.vPos = vResultPos;
 	m_tCalcedKeyFrameDesc.vRot = vResultRotRad;
@@ -425,13 +403,6 @@ void CAnimator_UI::Update_Animation_Calculate()
 	m_tCalcedKeyFrameDesc.vBlendToOuterWidth = vResultOuterWidth;
 	m_tCalcedKeyFrameDesc.fAlpha = fResultAlpha;
 	
-	//if (pParentCombinedDesc)
-	//	m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha * pParentCombinedDesc->fAlpha;		// 알파값만 부모 키프레임값을 가져와 계산
-
-	//pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));	//
-	//pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
-	//pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
-	//pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 	pOwnerTransformCom->Set_WorldMatrix(matTransform);
 }
 

@@ -82,12 +82,13 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	pFontInfo->iPenX = pFontInfo->iPenY = pFontInfo->iRowH = 0;
 
 	D3D11_TEXTURE2D_DESC td = {};
-	td.Width = iAtlasW; td.Height = iAtlasH;
-	td.MipLevels = 1; td.ArraySize = 1;
-	td.Format = DXGI_FORMAT_R8_UNORM;
-	td.SampleDesc.Count = 1;
-	td.Usage = D3D11_USAGE_DEFAULT;
-	td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	td.Width				= iAtlasW;
+	td.Height				= iAtlasH;
+	td.MipLevels			= 1; td.ArraySize = 1;
+	td.Format				= DXGI_FORMAT_R8_UNORM;
+	td.SampleDesc.Count		= 1;
+	td.Usage				= D3D11_USAGE_DEFAULT;
+	td.BindFlags			= D3D11_BIND_SHADER_RESOURCE;
 
 	HRESULT hr = m_pDevice->CreateTexture2D(&td, nullptr, &pFontInfo->pAtlasTex);
 	if (FAILED(hr))
@@ -96,9 +97,9 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC sd = {};
-	sd.Format = td.Format;
-	sd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	sd.Texture2D.MipLevels = 1;
+	sd.Format				= td.Format;
+	sd.ViewDimension		= D3D11_SRV_DIMENSION_TEXTURE2D;
+	sd.Texture2D.MipLevels	= 1;
 
 	hr = m_pDevice->CreateShaderResourceView(pFontInfo->pAtlasTex, &sd, &pFontInfo->pAtlasSRV);
 	if (FAILED(hr))
@@ -108,7 +109,7 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	}
 
 	D3D11_SAMPLER_DESC smp = {};
-	smp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	smp.Filter				= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	smp.AddressU = smp.AddressV = smp.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
 	hr = m_pDevice->CreateSamplerState(&smp, &pFontInfo->pSampler);
@@ -125,7 +126,6 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 _bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH)
 {
-	// pad 인자는 무시 가능. f->uPad만 사용.
 	if (!Reset_AtlasTexture(pFontInfo, iAtlasW, iAtlasH)) return false;
 
 	pFontInfo->iPenX = pFontInfo->iPenY = pFontInfo->iRowH = 0;
@@ -201,17 +201,15 @@ _bool CFont_Manager::Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh,
 	// 먼저 시도
 	if (Atlas_AllocRect(pFontInfo, gw, gh, outX, outY))
 		return true;
-
-	// 리빌드 정책: 가로/세로 중 더 필요한 방향 위주로 2배 증가
+	
+	// 리빌드
 	_uint newW = pFontInfo->iAtlasW;
 	_uint newH = pFontInfo->iAtlasH;
 
-	// 간단 정책: 둘 다 2배 (안전)
 	newW = max(newW * 2, (_uint)(pFontInfo->iAtlasW + gw + 8));
 	newH = max(newH * 2, (_uint)(pFontInfo->iAtlasH + gh + 8));
 
-	// 상한 (원하면 제한)
-	const _uint MAX_ATLAS = 4096;
+	const _uint MAX_ATLAS = 4096; // 상한
 	newW = min(newW, MAX_ATLAS);
 	newH = min(newH, MAX_ATLAS);
 
@@ -368,10 +366,13 @@ const FTCUSTOM_FONT_GLYPH* CFont_Manager::Get_GlyphAndAdvance(const _wstring& fo
 	if (pFont->isHasKerning && prevCodePoint != 0)
 	{
 		FT_Vector kerning = {};
-		FT_Get_Kerning(pFont->pFace,
+		FT_Get_Kerning(
+			pFont->pFace,
 			FT_Get_Char_Index(pFont->pFace, prevCodePoint),
 			FT_Get_Char_Index(pFont->pFace, codePoint),
-			FT_KERNING_DEFAULT, &kerning);
+			FT_KERNING_DEFAULT,
+			&kerning
+		);
 
 		outAdvanceX += (kerning.x >> 6);
 	}

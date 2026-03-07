@@ -822,7 +822,6 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
-    
 
     
     
@@ -833,25 +832,22 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // ==============================
             // * [1] Circle Cooldown
             // ==============================
-            // * matrix info [size : 2] (skillbtn_e, skillbtn_r)
             // [CDRATE] [COLORMUL_1] [COLORMUL_2] [IS_USECUSTOMCOLOR]
             // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
             // [STARTRATIO(DEG)] [ISUSENOISE] [ELAPSEDTIME] [UVSCROLLSPEED]
-            // >> MASK : [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // [MASKCOLOR.x] [MASKCOLOR.y] [MASKCOLOR.z] [MASKCOLOR.w]
             // ==============================
-            // (MASK) : Extra0
-            // ==============================
-            float fCooldown = In.mExtra0.x; // 0 ~ 1.
-            float fColorMul1 = In.mExtra0.y;
-            float fColorMul2 = In.mExtra0.z;
-            bool isUseCustomColor = _BOOL(In.mExtra0.w);
-            float4 vCustomColor = In.mExtra1.rgba;
-            float fStartRatio = In.mExtra2.x;       // 각도(degree) 및 시계방향 기준. 0 기준 12시부터 시작.
+            float   fCooldown           = In.mExtra0.x; // 0 ~ 1.
+            float   fColorMul1          = In.mExtra0.y;
+            float   fColorMul2          = In.mExtra0.z;
+            bool    isUseCustomColor    = _BOOL(In.mExtra0.w);
+            float4  vCustomColor        = In.mExtra1.rgba;
+            float   fStartRatio         = In.mExtra2.x;                         // 각도(degree) 및 시계방향 기준. 0 기준 12시부터 시작.
             
-            bool isUseNoise = _BOOL(In.mExtra2.y);
-            float fElapsedTime = In.mExtra2.z;
-            float fUVScrollSpeed = In.mExtra2.w;
-            float4 vMaskColor = In.mExtra3;
+            bool    isUseNoise          = _BOOL(In.mExtra2.y);
+            float   fElapsedTime        = In.mExtra2.z;
+            float   fUVScrollSpeed      = In.mExtra2.w;
+            float4  vMaskColor          = In.mExtra3;
             
             // g_fLeftCDRate 가 1 일때는 밝은 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록

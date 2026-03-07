@@ -141,7 +141,7 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_CO
 
 	tDesc.vecInstanceDescs.resize(tDesc.strText.size());
 	for (_uint i = 0; i < tDesc.vecInstanceDescs.size(); i++)
-		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+		tDesc.vecInstanceDescs[i].matExtraData.Text.fAlpha = 1.f;
 
 
 	//tDesc.vColor			= m_FontTypeDesc[ENUM_CLASS(eDmgElemType)].vColor;
@@ -177,7 +177,7 @@ CUI_Text* CUI_FontPreset::Create_FontToScreen(_float2 vScreenPos, _wstring strTe
 
 	tDesc.vecInstanceDescs.resize(tDesc.strText.size());
 	for (_uint i = 0; i < tDesc.vecInstanceDescs.size(); i++)
-		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+		tDesc.vecInstanceDescs[i].matExtraData.Text.fAlpha = 1.f;
 
 	// 인스턴스별 Transform 행렬 지정해주어야 함
 
@@ -209,7 +209,7 @@ CUI_Text* CUI_FontPreset::Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring
 
 	tDesc.vecInstanceDescs.resize(tDesc.strText.size());
 	for (_uint i = 0; i < tDesc.vecInstanceDescs.size(); i++)
-		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+		tDesc.vecInstanceDescs[i].matExtraData.Text.fAlpha = 1.f;
 
 	// 인스턴스별 Transform 행렬 지정해주어야 함
 

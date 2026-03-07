@@ -176,9 +176,7 @@ HRESULT CUI_Ovfl_Palette::Ready_Events()
 	m_pGameInstance->Subscribe<MINIGAMEPALETTE_SUCCESS_UI_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Minigame_Palette_Success"), [this](const MINIGAMEPALETTE_SUCCESS_UI_EVENT event) {
 		if (event.isSuccess)
 		{
-			// 성공 시 시행할 것은 여기에..
-
-			// 이걸 여기서?
+			// Success Event
 		}
 	});
 
@@ -278,7 +276,7 @@ void CUI_Ovfl_Palette::Create_ChildText_InfoText()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
@@ -307,7 +305,7 @@ void CUI_Ovfl_Palette::Create_ChildText_LeftChance()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
@@ -336,7 +334,7 @@ void CUI_Ovfl_Palette::Create_ChildText_Description()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
@@ -367,7 +365,7 @@ void CUI_Ovfl_Palette::Create_ChildText_DestColor()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;
@@ -519,7 +517,7 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 	auto& frameDesc = pTargetFrameUI->Get_UIDesc();
 	auto& frameInstDesc = frameDesc.vecInstanceDescs;
 
-	vector<_float4x4> vecFrameVariantMat = { _float4x4() };
+	vector<UI_EXTRA_DATA> vecFrameVariantMat = { UI_EXTRA_DATA() };
 
 
 	if (isNotExistLevel)
@@ -557,7 +555,7 @@ HRESULT CUI_Ovfl_Palette::Load_LevelData(_uint iLevelIndex)
 	m_iMaxChance		= static_cast<_uint>(stoi(vecLoadDatas[8][0]));
 	m_eGoalColorIndex	= static_cast<PALETTE_COLOR>(stoi(vecLoadDatas[8][1]));
 	static_cast<CUI_Text*>(m_pTextUI_DestColor)->Change_Text(arrText[m_eGoalColorIndex]);
-	*reinterpret_cast<_float4*>(&vecFrameVariantMat[0]._11) = m_arrColors[m_eGoalColorIndex];
+	vecFrameVariantMat[0].OverflowPalette.vColorCurr = m_arrColors[m_eGoalColorIndex];
 	CCustom_UI::VARIANTREADY_UI_DESC tFrameVariantDesc = {
 		vecFrameVariantMat,
 		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLE_COLORIZE),
@@ -649,8 +647,8 @@ void CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex)
 			if (target == UINT_MAX)		continue;		// 유효 X
 			if (m_arrIsVisited[target]) continue;		// 이미 탐색한 인덱스 X
 
-			auto iOriginIndex	= m_arrPalettesInfo[iIndex / iPaletteSizeX][iIndex % iPaletteSizeX];
-			auto iOtherIndex	= m_arrPalettesInfo[target / iPaletteSizeX][target % iPaletteSizeX];
+			auto& iOriginIndex	= m_arrPalettesInfo[iIndex / iPaletteSizeX][iIndex % iPaletteSizeX];
+			auto& iOtherIndex	= m_arrPalettesInfo[target / iPaletteSizeX][target % iPaletteSizeX];
 
 			_bool isSameColor	= iOriginIndex.eColor == iOtherIndex.eColor;
 			if (!isSameColor)			continue;		// 같은 색이 아니면 X
@@ -725,16 +723,16 @@ void CUI_Ovfl_Palette::Update_ChangeColorBtn()
 	auto& targetInstDesc = targetDesc.vecInstanceDescs;
 
 	_uint iNumTargetInst = static_cast<_uint>(targetInstDesc.size());
-	vector<_float4x4> vecColorBtnVariantMat = {};
+	vector<UI_EXTRA_DATA> vecColorBtnVariantMat = {};
 	vecColorBtnVariantMat.resize(iNumTargetInst);
 
 	// 항시 색상변경 반영
 	for (_uint i = 0; i < vecColorBtnVariantMat.size(); i++)
 	{
 		// [COLORCURR.x] [COLORCURR.y] [COLORCURR.z] [COLORCURR.w]
-		*reinterpret_cast<_float4*>(&vecColorBtnVariantMat[i]._11) = m_arrColors[i];
+		vecColorBtnVariantMat[i].OverflowPalette.vColorCurr = m_arrColors[i];
 		//..
-		*reinterpret_cast<_float2*>(&vecColorBtnVariantMat[i]._41) = _float2{1340.f, 1080.f};		// extra texture size.
+		vecColorBtnVariantMat[i].OverflowPalette.vExtraImgSize = _float2{1340.f, 1080.f};		// extra texture size.
 
 	}
 	
@@ -1003,7 +1001,7 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 	auto& blocksDesc = m_pUI_InstBlocks->Get_UIDesc();
 	
 	_uint iNumTargetDesc = static_cast<_uint>(blocksDesc.vecInstanceDescs.size());
-	vector<_float4x4> vecPaletteVariantMat = {};
+	vector<UI_EXTRA_DATA> vecPaletteVariantMat = {};
 	vecPaletteVariantMat.resize(iNumTargetDesc);
 
 
@@ -1023,14 +1021,14 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 
 			auto& target = m_arrPalettesInfo[iTargetIndexX][iTargetIndexY];
 
-			_float4x4& targetMat = vecPaletteVariantMat[iSingleIndex];
+			UI_EXTRA_DATA& targetMat = vecPaletteVariantMat[iSingleIndex];
 
-			*reinterpret_cast<_float4*>(&targetMat._11) = m_arrColors[target.eColor];		// 현재 블럭의 색상
-			*reinterpret_cast<_float4*>(&targetMat._21) = m_arrColors[m_eDestColorIndex];	// 변하려는 색상
-			*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
-			*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isGoinChange);
-			*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
-			*reinterpret_cast<_float2*>(&targetMat._41) = _float2{ 1340.f, 1080.f };		// extra texture size.
+			targetMat.OverflowPalette.vColorCurr = m_arrColors[target.eColor];		// 현재 블럭의 색상
+			targetMat.OverflowPalette.vColorDest = m_arrColors[m_eDestColorIndex];	// 변하려는 색상
+			targetMat.OverflowPalette.vChangePos = m_vChangeStartPos;
+			targetMat.OverflowPalette.bChanging = static_cast<_float>(m_isGoinChange);
+			targetMat.OverflowPalette.fRadius = m_fChangeRadius;
+			targetMat.OverflowPalette.vExtraImgSize = _float2{ 1340.f, 1080.f };		// extra texture size.
 
 			arrIsVisited[iSingleIndex] = true;
 		}
@@ -1048,14 +1046,10 @@ void CUI_Ovfl_Palette::Update_PalettesInstance()
 			if (arrIsVisited[iSingleIndex] == true)		//  "방문 체크 후 방문했으면 스킵"
 				continue;
 
-			_float4x4& targetMat = vecPaletteVariantMat[i * iWidth + j];
+			UI_EXTRA_DATA& targetMat = vecPaletteVariantMat[i * iWidth + j];
 
-			*reinterpret_cast<_float4*>(&targetMat._11) = m_arrColors[m_arrPalettesInfo[i][j].eColor];
-			//*reinterpret_cast<_float4*>(&targetMat._21) = m_arrColors[m_eDestColorIndex];
-			//*reinterpret_cast<_float2*>(&targetMat._31) = m_vChangeStartPos;
-			//*reinterpret_cast<_float*> (&targetMat._33) = static_cast<_float>(m_isGoinChange);
-			//*reinterpret_cast<_float*> (&targetMat._34) = m_fChangeRadius;
-			*reinterpret_cast<_float2*>(&targetMat._41) = _float2{ 1340.f, 1080.f };		// extra texture size.
+			targetMat.OverflowPalette.vColorCurr = m_arrColors[m_arrPalettesInfo[i][j].eColor];
+			targetMat.OverflowPalette.vExtraImgSize = _float2{ 1340.f, 1080.f };		// extra texture size.
 		}
 
 	CCustom_UI::VARIANTREADY_UI_DESC tPaletteVariantDesc = {

@@ -90,7 +90,7 @@ void CUI_Text_Damage::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_tUIDesc.vecInstanceDescs.resize(iNumInstances);
 
  	for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++) // 종종 터짐.
-		m_tUIDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+		m_tUIDesc.vecInstanceDescs[i].matExtraData.Text.fAlpha = 1.f;
 }
 
 void CUI_Text_Damage::Update_LifeTime(_float fTimeDelta)
@@ -143,20 +143,20 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		_float2 vScale = _float2{ curDesc.vSInstRight.x, curDesc.vSInstUp.y };
 		_float2 vPos = _float2{ curDesc.vSInstTrans.x, curDesc.vSInstTrans.y };
 
-		if (curDesc.matExtraData.m[0][3] != 1.0f)
+		if (curDesc.matExtraData.raw.m[0][3] != 1.0f)
 		{
 			// 최초 1회, 원본 크기 및 '원본 위치'를 저장
-			curDesc.matExtraData.m[0][1] = curDesc.vSInstRight.x;  // s0x (원본 너비)
-			curDesc.matExtraData.m[0][2] = curDesc.vSInstUp.y;    // s0y (원본 높이)
-			curDesc.matExtraData.m[1][1] = curDesc.vSInstTrans.x; // p0x (원본 위치 X)
-			curDesc.matExtraData.m[1][2] = curDesc.vSInstTrans.y; // p0y (원본 위치 Y)
-			curDesc.matExtraData.m[0][3] = 1.0f;
+			curDesc.matExtraData.raw.m[0][1] = curDesc.vSInstRight.x;  // s0x (원본 너비)
+			curDesc.matExtraData.raw.m[0][2] = curDesc.vSInstUp.y;    // s0y (원본 높이)
+			curDesc.matExtraData.raw.m[1][1] = curDesc.vSInstTrans.x; // p0x (원본 위치 X)
+			curDesc.matExtraData.raw.m[1][2] = curDesc.vSInstTrans.y; // p0y (원본 위치 Y)
+			curDesc.matExtraData.raw.m[0][3] = 1.0f;
 		}
 		// 매 프레임 '원본' 값들을 읽어옴
-		const _float s0x = curDesc.matExtraData.m[0][1];
-		const _float s0y = curDesc.matExtraData.m[0][2];
-		const _float p0x = curDesc.matExtraData.m[1][1]; // 원본 위치 X
-		const _float p0y = curDesc.matExtraData.m[1][2]; // 원본 위치 Y
+		const _float s0x = curDesc.matExtraData.raw.m[0][1];
+		const _float s0y = curDesc.matExtraData.raw.m[0][2];
+		const _float p0x = curDesc.matExtraData.raw.m[1][1]; // 원본 위치 X
+		const _float p0y = curDesc.matExtraData.raw.m[1][2]; // 원본 위치 Y
 
 		const _float tLocal = fLifeElapsed - (fInstIntervalTime * (_float)i);
 		// 기본값
@@ -213,7 +213,7 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		vScale.x = sx;
 		vScale.y = sy;
 
-		curDesc.matExtraData.m[0][0] = fAlpha;
+		curDesc.matExtraData.raw.m[0][0] = fAlpha;
 		curDesc.vSInstRight.x = vScale.x;
 		curDesc.vSInstUp.y = vScale.y;
 		curDesc.vSInstTrans.x = finalPosX;

@@ -129,7 +129,7 @@ void CUI_Dialog::Req_Finish_CurDialog()
 {
 	auto& pDialogInst = m_pTextUI_Dialog->Get_UIDesc().vecInstanceDescs;
 	for (_uint i = 0; i < pDialogInst.size(); i++)
-		pDialogInst[i].matExtraData._11 = 0.f;
+		pDialogInst[i].matExtraData.Text.fAlpha = 0.f;
 
 	m_isCurDialogFinished = true;
 }
@@ -207,7 +207,7 @@ void CUI_Dialog::Change_Dialog(_uint iDialogIndex)
 	
 	auto& pDialogInst = pTargetText->Get_UIDesc().vecInstanceDescs;	// dialog 최초 전체 투명.
 	for (_uint i = 0; i < pDialogInst.size(); i++)
-		pDialogInst[i].matExtraData._11 = 1.f;
+		pDialogInst[i].matExtraData.Text.fAlpha = 1.f;
 
 	m_fTickElapsedTime = 0.f;
 }
@@ -299,8 +299,8 @@ void CUI_Dialog::Update_DialogInstance(_float fTimeDelta)
 		_float fInstAlpha = 1.f - Clamp(SmoothStep(fInstFadeStartTime, fInstFadeStartTime + m_fInstFadeInTime, m_fTickElapsedTime), 0.f, 1.f);
 		
 
-		pDialogInsts[i].matExtraData._11 = (pDialogInsts[i].matExtraData._11 >= fInstAlpha)?		// 계산값보다 지금이 더 투명함?
-			pDialogInsts[i].matExtraData._11 : fInstAlpha;
+		pDialogInsts[i].matExtraData.Text.fAlpha = (pDialogInsts[i].matExtraData.Text.fAlpha >= fInstAlpha)?		// 계산값보다 지금이 더 투명함?
+			pDialogInsts[i].matExtraData.Text.fAlpha : fInstAlpha;
 	}
 
 	if (fDialogFinishTime <= m_fTickElapsedTime &&

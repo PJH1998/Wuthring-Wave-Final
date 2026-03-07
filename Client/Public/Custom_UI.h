@@ -87,7 +87,7 @@ public:
 	// 특수한 상황 (pass 5번) 에 비정형 값을 던져주어야 할 때 사용.
 	typedef struct tagVariantUIReadyDesc
 	{
-		vector<_float4x4>	matVariantValues = {};	// per instance
+		vector<UI_EXTRA_DATA>	matVariantValues = {};	// per instance
 		_uint		iShaderFlag = {};
 		_bool		isVariant = false;
 	} VARIANTREADY_UI_DESC;
@@ -156,16 +156,14 @@ protected:
 protected:
 	CShader*				m_pShaderCom			= { nullptr };
 	CVIBuffer*				m_pVIBufferCom			= { nullptr };
-
 	CTexture*				m_pTextureCom			= { nullptr };
 	vector<CTexture*>		m_vecExtraTextureCom	= {};
-	
 	CAnimator_UI*			m_pAnimator_UICom		= { nullptr };
 
-
-	CUSTOM_UI_DESC			m_tUIDesc = {};
-	CUSTOM_UI_DESC			m_tCombinedDesc = {};
 	_uint					m_iCurTexIndex = {};
+
+protected:
+	CUSTOM_UI_DESC			m_tUIDesc = {};
 
 	_float4x4				m_CombinedWorldMatrix = {};
 	vector<CCustom_UI*>		m_vecChildObjects = {};

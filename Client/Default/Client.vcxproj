@@ -208,6 +208,7 @@
     <ClInclude Include="..\Public\Augusta_UltiSFX.h" />
     <ClInclude Include="..\Public\BGM_Manager.h" />
     <ClInclude Include="..\Public\CaptureState.h" />
+    <ClInclude Include="..\Public\Client_UIVariantStruct.h" />
     <ClInclude Include="..\Public\Effect_Light.h" />
     <ClInclude Include="..\Public\Effect_Rope.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

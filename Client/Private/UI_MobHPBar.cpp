@@ -567,13 +567,13 @@ void CUI_MobHPBar::Calc_HBEff()
 	auto& vecBGInstDesc = targetBGDesc.vecInstanceDescs;
 	auto& vecLineInstDesc = targetLineDesc.vecInstanceDescs;
 
-	vector<_float4x4> vecVariantMat = {};		// for Variant Desc
+	vector<UI_EXTRA_DATA> vecVariantMat = {};		// for Variant Desc
 	vecVariantMat.resize(vecInstDesc.size());
-	vector<_float4x4> vecInvVariantMat = {};		// for Variant Desc
+	vector<UI_EXTRA_DATA> vecInvVariantMat = {};		// for Variant Desc
 	vecInvVariantMat.resize(vecInvInstDesc.size());
-	vector<_float4x4> vecLineVariantMat = {};		// for BG Variant Desc
+	vector<UI_EXTRA_DATA> vecLineVariantMat = {};		// for BG Variant Desc
 	vecLineVariantMat.resize(vecLineInstDesc.size());
-	vector<_float4x4> vecBGVariantMat = {};		// for BG Variant Desc
+	vector<UI_EXTRA_DATA> vecBGVariantMat = {};		// for BG Variant Desc
 	vecBGVariantMat.resize(vecBGInstDesc.size());
 
 
@@ -691,33 +691,33 @@ void CUI_MobHPBar::Calc_HBEff()
 		targetInst.vClipTexcoordX = { 0.f, arrClipXRate[0] };
 		targetInvInst.vClipTexcoordX = { 0.f, arrClipXRate[1] };
 
-		*reinterpret_cast<_float4*>(&targetVariantMat._11)		= vColorRate;
-		*reinterpret_cast<_float4*>(&targetVariantMat._21)		= vColorRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._31)		= arrAlphaRate[0] * fAlphaViaDistance;
-		*reinterpret_cast<_float*>(&targetVariantMat._32)		= fScaleRate;
-		*reinterpret_cast<_float*>(&targetVariantMat._33)		= fStackedTime;
-		*reinterpret_cast<_float*>(&targetVariantMat._34)		= fCoordSpeedX;
+		targetVariantMat.EnemyHP.vColorGrad1		= vColorRate;
+		targetVariantMat.EnemyHP.vColorGrad2		= vColorRate;
+		targetVariantMat.EnemyHP.fAlpha				= arrAlphaRate[0] * fAlphaViaDistance;
+		targetVariantMat.EnemyHP.fYScale			= fScaleRate;
+		targetVariantMat.EnemyHP.fElapsedTime		= fStackedTime;
+		targetVariantMat.EnemyHP.fCoordSpeed		= fCoordSpeedX;
 
-		*reinterpret_cast<_float4*>(&targetInvVariantMat._11)	= vColorRate;
-		*reinterpret_cast<_float4*>(&targetInvVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetInvVariantMat._31)	= arrAlphaRate[1] * fAlphaViaDistance;
-		*reinterpret_cast<_float*>(&targetInvVariantMat._32)	= fScaleRate;
-		*reinterpret_cast<_float*>(&targetInvVariantMat._33)	= fStackedTime;
-		*reinterpret_cast<_float*>(&targetInvVariantMat._34)	= fCoordSpeedX;
+		targetInvVariantMat.EnemyHP.vColorGrad1		= vColorRate;
+		targetInvVariantMat.EnemyHP.vColorGrad2		= vColorRate;
+		targetInvVariantMat.EnemyHP.fAlpha			= arrAlphaRate[1] * fAlphaViaDistance;
+		targetInvVariantMat.EnemyHP.fYScale			= fScaleRate;
+		targetInvVariantMat.EnemyHP.fElapsedTime	= fStackedTime;
+		targetInvVariantMat.EnemyHP.fCoordSpeed		= fCoordSpeedX;
 
-		*reinterpret_cast<_float4*>(&targetLineVariantMat._11)	= vColorRate;
-		*reinterpret_cast<_float4*>(&targetLineVariantMat._21)	= vColorRate;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._31)	= (isDead) ? targetLineVariantMat._31 : (0.5f + fAlphaRate * 0.5f) * fAlphaViaDistance;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._32)	= 0.7f;					// 기본 선의 굵기
-		*reinterpret_cast<_float*>(&targetLineVariantMat._33)	= fStackedTime;
-		*reinterpret_cast<_float*>(&targetLineVariantMat._34)	= fCoordSpeedX;
+		targetLineVariantMat.EnemyHP.vColorGrad1	= vColorRate;
+		targetLineVariantMat.EnemyHP.vColorGrad2	= vColorRate;
+		targetLineVariantMat.EnemyHP.fAlpha			= (isDead) ? targetLineVariantMat.EnemyHP.fAlpha : (0.5f + fAlphaRate * 0.5f) * fAlphaViaDistance;
+		targetLineVariantMat.EnemyHP.fYScale		= 0.7f;					// 기본 선의 굵기
+		targetLineVariantMat.EnemyHP.fElapsedTime	= fStackedTime;
+		targetLineVariantMat.EnemyHP.fCoordSpeed	= fCoordSpeedX;
 
-		*reinterpret_cast<_float4*>(&targetBGVariantMat._11)	= m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float4*>(&targetBGVariantMat._21)	= m_arrColorPresets[HRC_BACKGROUND];
-		*reinterpret_cast<_float*>(&targetBGVariantMat._31)		= (isDead) ? targetBGVariantMat._31 :(0.5f + fAlphaRate * 0.5f) * fAlphaViaDistance;// fAlphaRate;
-		*reinterpret_cast<_float*>(&targetBGVariantMat._32)		= fScaleRate;
-		*reinterpret_cast<_float*>(&targetBGVariantMat._33)		= fStackedTime;
-		*reinterpret_cast<_float*>(&targetBGVariantMat._34)		= fCoordSpeedX;
+		targetBGVariantMat.EnemyHP.vColorGrad1		= m_arrColorPresets[HRC_BACKGROUND];
+		targetBGVariantMat.EnemyHP.vColorGrad2		= m_arrColorPresets[HRC_BACKGROUND];
+		targetBGVariantMat.EnemyHP.fAlpha			= (isDead) ? targetBGVariantMat.EnemyHP.fAlpha : (0.5f + fAlphaRate * 0.5f) * fAlphaViaDistance;// fAlphaRate;
+		targetBGVariantMat.EnemyHP.fYScale			= fScaleRate;
+		targetBGVariantMat.EnemyHP.fElapsedTime		= fStackedTime;
+		targetBGVariantMat.EnemyHP.fCoordSpeed		= fCoordSpeedX;
 
 		// 체력이 특정 이상일 때에는 애니메이션 반영 없이 그대로
 		//if (fHPRatio > fFlickStartHPRatio)

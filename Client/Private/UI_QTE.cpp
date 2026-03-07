@@ -358,12 +358,12 @@ void CUI_QTE::Update_Instances(_float fTImeDelta)
 	auto& guageDesc = m_pUI_FG_QTEGuage->Get_UIDesc();
 	auto& guageInstDesc = guageDesc.vecInstanceDescs;
 
-	vector<_float4x4> vecGuageVariantMat = { _float4x4()};
-	*reinterpret_cast<_float*>(&vecGuageVariantMat[0]._11) = (1.f - m_fQTEGuage);
-	*reinterpret_cast<_float*>(&vecGuageVariantMat[0]._12) = 0.0f;				// 세부조절 필요
-	*reinterpret_cast<_float*>(&vecGuageVariantMat[0]._13) = 1.0f;
-	*reinterpret_cast<_float*>(&vecGuageVariantMat[0]._14) = static_cast<_float>(false);
-	*reinterpret_cast<_float*>(&vecGuageVariantMat[0]._31) = 180.f;
+	vector<UI_EXTRA_DATA> vecGuageVariantMat = { UI_EXTRA_DATA()};
+	vecGuageVariantMat[0].CooldownCircle.fCDRate = (1.f - m_fQTEGuage);
+	vecGuageVariantMat[0].CooldownCircle.fColorMul1 = 0.0f;						// 세부조절 필요
+	vecGuageVariantMat[0].CooldownCircle.fColorMul2 = 1.0f;
+	vecGuageVariantMat[0].CooldownCircle.bUseCustomColor = static_cast<_float>(false);
+	vecGuageVariantMat[0].CooldownCircle.fStartRatio = 180.f;
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecGuageVariantMat,
