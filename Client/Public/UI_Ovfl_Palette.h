@@ -72,7 +72,7 @@ private:
 	// 1. 주변 블록 탐색 및 동일 색상이면 저장을 반복. 이는 유사 재귀식으로 작용할 필요 있음
 	// 2. 해당 탐색 결과를 로컬 vector에 담음. 이후 size 기반으로 count 넘어가면서 순차적 변화 + 애니메이션 재생.
 	void			Assign_TargetBlocksQueue(_uint iStartBlockIndex);	// 주변 박스를 순회하며, 같은 색인지 확인하고, 결과를 m_vecTargetsQueue 에 저장한다.	
-	void			Calc_NearTarget(_uint iBlockIndex);					// ㄴ 실질 계산부. Queue 기반
+	void			Check_NearTarget(_uint iBlockIndex);					// ㄴ 실질 계산부. Queue 기반
 
 	_bool			Check_ClickedBlockInstance(_uint* OutIndex);	// 몇 번째 인스턴스가 눌림?
 	_float2			Calc_InstBlock_ScrnPos(_uint iInstIndex);		// 그 인스턴스의 스크린 좌표가 어디임?

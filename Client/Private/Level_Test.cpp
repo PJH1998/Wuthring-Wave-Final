@@ -912,7 +912,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		std::cout << "[Level_Test::Testing_UI] Dialog Toggled to" << (_bool)isUITestDialogOn << std::endl;
 
 		if (isUITestDialogOn)
-			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/leviatandialog.csv", true);
+			m_pGameSystem->Open_DialogUI("../../Client/Bin/Resource/UI/Dialog/testdialog2.csv", true);
 		else
 			m_pGameSystem->Close_DialogUI();
 	}

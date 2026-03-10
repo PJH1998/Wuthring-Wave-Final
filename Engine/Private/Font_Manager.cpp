@@ -142,10 +142,13 @@ _bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uin
 	return true;
 }
 
-static _bool FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot)
+_bool CFont_Manager::FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot)
 {
 	// FreeType이 글자를 그레이스케일 비트맵으로 변환.
 	if (FT_Load_Char(face, iCodePoint, FT_LOAD_RENDER))
+		return false;
+
+	if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF))
 		return false;
 
 	outSlot = face->glyph;
@@ -257,13 +260,6 @@ _bool CFont_Manager::Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _in
 		D3D11_BOX box = { (UINT)x, (UINT)(y + row), 0, (UINT)(x + w), (UINT)(y + row + 1), 1 };
 		m_pContext->UpdateSubresource(Font.pAtlasTex, 0, &box, pRow, static_cast<UINT>(absPitch), 0);
 	}
-	return true;
-}
-
-_bool CFont_Manager::FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot)
-{
-	if (FT_Load_Char(face, iCodePoint, FT_LOAD_RENDER)) return FALSE;
-	outSlot = face->glyph;
 	return true;
 }
 

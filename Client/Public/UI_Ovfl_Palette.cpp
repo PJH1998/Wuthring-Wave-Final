@@ -575,7 +575,7 @@ void CUI_Ovfl_Palette::Assign_TargetBlocksQueue(_uint iStartBlockIndex)
 	// 클릭 시 트리거.
 	
 	m_arrIsVisited.fill(false);
-	Calc_NearTarget(iStartBlockIndex);
+	Check_NearTarget(iStartBlockIndex);
 
 #ifdef _DEBUG
 	_uint iSize = 0;
@@ -597,7 +597,7 @@ void CUI_Ovfl_Palette::Assign_TargetBlocksQueue(_uint iStartBlockIndex)
 
 }
 
-void CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex)
+void CUI_Ovfl_Palette::Check_NearTarget(_uint iStartBlockIndex)
 {
 	enum NEXT_TARGET { UP, RIGHT, DOWN, LEFT, END };
 
@@ -615,48 +615,49 @@ void CUI_Ovfl_Palette::Calc_NearTarget(_uint iBlockIndex)
 	// [5] 다음 인덱스가 비어있으면 종료
 	// [6] 이후, 큐 돌며 진행한 저장 및 계산 결과를 바탕으로 원하는 값 도출
 
-
-	// 1. 큐 정의, 최초 위치의 큐 설정
 	queue<_uint> qTargetIndices = {};
 
-	m_arrIsVisited[iBlockIndex] = true;
-	qTargetIndices.push(iBlockIndex);
-	m_arrDepth[iBlockIndex]++;
+	m_arrIsVisited[iStartBlockIndex] = true;
+	qTargetIndices.push(iStartBlockIndex);
+	m_arrDepth[iStartBlockIndex]++;
 
-	// 2~5. 반복문 정의, 최초 위치 진입, 반복문 구성
 	while (!qTargetIndices.empty())
 	{
-		// 최초에는 최초 위치, 이후에는 탐색을 통해 다음 큐가 쌓임. 이를 통해 점차 깊어지는 depth 탐색.
-
 		_uint iIndex = qTargetIndices.front();
-		qTargetIndices.pop();					// 다음 계산을 위해 인덱스만 뽑고 버림
+		qTargetIndices.pop();					// 다음 계산을 위해 인덱스 추출
 
+		const _uint iIndexUp		= iIndex - iPaletteSizeX;
+		const _uint iIndexRight		= iIndex + 1;
+		const _uint iIndexDown		= iIndex + iPaletteSizeX;
+		const _uint iIndexLeft		= iIndex - 1;
+
+		const _uint iRow			= iIndex / iPaletteSizeX;
+		const _uint iCol			= iIndex % iPaletteSizeX;
+		const _uint iRowRight		= iIndexRight / iPaletteSizeX;
+		const _uint iRowLeft		= iIndexLeft / iPaletteSizeX;
 
 		// 주변부 탐색..
-		//vector<_uint> vecCheckIndices = {};
-		_uint iTargets[END] = {};				// >> left, right : +/-를 수행했을 때에 줄바꿈이 일어나지는 않는가의 확인 필요
-		iTargets[UP]	=	IS_BETWEEN(iIndex	 - iPaletteSizeX, 0, iNumPalettes)	? iIndex - iPaletteSizeX	: UINT_MAX;
-		iTargets[RIGHT]	=	IS_BETWEEN(iIndex	 + 1			, 0, iNumPalettes) &&										
-							((iIndex + 1) / iPaletteSizeX == (iIndex / iPaletteSizeX))? iIndex + 1				: UINT_MAX;
-		iTargets[DOWN]	=	IS_BETWEEN(iIndex	 + iPaletteSizeX, 0, iNumPalettes)	? iIndex + iPaletteSizeX	: UINT_MAX;
-		iTargets[LEFT]	=	IS_BETWEEN(iIndex	 - 1			, 0, iNumPalettes) &&
-							((iIndex - 1) / iPaletteSizeX == (iIndex / iPaletteSizeX))? iIndex - 1				: UINT_MAX;
+		_uint iTargets[END] = {};
+		iTargets[UP]	=	IS_BETWEEN(iIndexUp		, 0, iNumPalettes)		? iIndexUp		: UINT_MAX;
+		iTargets[RIGHT]	=	IS_BETWEEN(iIndexRight	, 0, iNumPalettes) &&
+							(iRowRight == (iRow))							? iIndexRight	: UINT_MAX;
+		iTargets[DOWN]	=	IS_BETWEEN(iIndexDown	, 0, iNumPalettes)		? iIndexDown	: UINT_MAX;
+		iTargets[LEFT]	=	IS_BETWEEN(iIndexLeft	, 0, iNumPalettes) &&
+							(iRowLeft == (iRow))							? iIndexLeft	: UINT_MAX;
 
-		for (auto& target : iTargets)			// 유효하다면 큐에 삽입
+		for (auto& target : iTargets)					// 유효하다면 큐에 삽입
 		{
 			if (target == UINT_MAX)		continue;		// 유효 X
 			if (m_arrIsVisited[target]) continue;		// 이미 탐색한 인덱스 X
 
-			auto& iOriginIndex	= m_arrPalettesInfo[iIndex / iPaletteSizeX][iIndex % iPaletteSizeX];
+			auto& iOriginIndex	= m_arrPalettesInfo[iRow][iCol];
 			auto& iOtherIndex	= m_arrPalettesInfo[target / iPaletteSizeX][target % iPaletteSizeX];
 
 			_bool isSameColor	= iOriginIndex.eColor == iOtherIndex.eColor;
 			if (!isSameColor)			continue;		// 같은 색이 아니면 X
-
-
+			
 			m_arrDepth[target] = m_arrDepth[iIndex] + 1;
 			m_arrIsVisited[target] = true;
-			//vecCheckIndices.push_back(target);
 			qTargetIndices.push(target);
 		}
 	}

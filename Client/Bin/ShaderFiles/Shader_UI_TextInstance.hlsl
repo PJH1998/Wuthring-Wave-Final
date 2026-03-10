@@ -8,6 +8,9 @@
 // Define (as const / for debug)
 #define PI          3.14159265359f
 #define _BOOL(x)    ((x) != 0.0f)
+#define	IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))
+#define	IS_BETWEEN_FLOAT2(condition, space)		        (((space.x) <= (condition)) && ((condition) < (space.y)))
+
 
 //#define KSTA_DEBUG_1_RETURN_AFTERGRAD
 //#define KSTA_DEBUG_2_RETURN_AFTEROUTLINE
@@ -384,8 +387,6 @@ PS_OUT PS_MAIN(PS_IN In)
     //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
     //return Out;
 	
-	
-	
     // Apply InstCoord for atlas / sprite style
 	//PS_OUT Out = (PS_OUT) 0;
 	float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),			// 이걸로 In.vSInstCoord 범위에 따라.. 이용?
@@ -409,75 +410,95 @@ PS_OUT PS_MAIN(PS_IN In)
 	// * declare here.
 	// ==============================
 	
-    float alphaCenter = g_Texture.Sample(FontSampler, fixedUV).r; // [0 ~ 1] 현재 바라보는 픽셀 색상에서 a값 추출
-        
-    
-
-    float fillMask = smoothstep(0.5f, 0.8f, alphaCenter);       // [0 ~ 1] 글자에 색상 채워진 정도를 저장. 경계 부드럽게
-    float4 fillColor = float4(g_FontColor.rgb, g_FontColor.a * fillMask);
-
-    Out.vColor.rgb = g_FontColor.rgb;
-    Out.vColor.a = g_FontColor.a * fillMask;                    // 글자가 존재하는 영역만을 남김. (r채널에 의해 구분)
+    //float alphaCenter = g_Texture.Sample(FontSampler, fixedUV).r; // [0 ~ 1] 현재 바라보는 픽셀 색상에서 a값 추출
+    //    
+    //
+    //
+    //float fillMask = smoothstep(0.5f, 0.8f, alphaCenter);       // [0 ~ 1] 글자에 색상 채워진 정도를 저장. 경계 부드럽게
+    //float4 fillColor = float4(g_FontColor.rgb, g_FontColor.a * fillMask);
+    //
+    //Out.vColor.rgb = g_FontColor.rgb;
+    //Out.vColor.a = g_FontColor.a * fillMask;                    // 글자가 존재하는 영역만을 남김. (r채널에 의해 구분)
     
     //
-        
     
-    if (g_FontFlag & FL_GRAD)           // ===== grad (wip) =====
+    
+    float fDistance = 1.f - g_Texture.Sample(FontSampler, fixedUV).r;
+       
+    const float fFontWidth = 0.6f;
+    const float fDiscardWidth = 0.3f;
+    const float fGradWidth              = 0.2f;
+    const float fFontOutlineWidth       = saturate((g_FontOutlineWidth / 40.f));        // fontOutlineWidth = 2.f;
+        
+    const float fTotalWidth             = fFontWidth + fGradWidth * 2.f + fFontOutlineWidth + fDiscardWidth;
+    
+    float4 vFontColor                   = g_FontColor;
+    float4 vOutlineColor                = g_FontColor;
+    float fAdditionalAlpha              = 1.f;
+    
+    // ===== outline =====
+    if (g_FontFlag & FL_OUTLINE)
+    {
+        vOutlineColor = g_FontOutlineColor;
+    }
+    // END== outline =====
+    
+    // ===== grad (wip) =====
+    if (g_FontFlag & FL_GRAD)           
     {
         // Gradiant
         const float4 GradRColor = g_FontGradColor;
-        
-        
-#ifdef KSTA_DEBUG_1_RETURN_AFTERGRAD
-            return Out;
-#endif   
-    } // END== grad (wip) =====
+    }
     
+    // END== grad (wip) =====
     
-    
-    
-    if (g_FontFlag & FL_OUTLINE)        // ===== outline =====
-    {
-        int width = (int) g_FontOutlineWidth;
-
-        // 주변 탐색
-        float outerMax = 0.0f;
-        for (int x = -width; x <= width; ++x)
-        {
-        [loop]
-            for (int y = -width; y <= width; ++y)
-            {
-                float2 uvO = fixedUV + float2(x, y) * g_FontTexPerPixel;
-                float aO = g_Texture.SampleLevel(FontSampler, uvO, 0).r;
-                outerMax = max(outerMax, aO);
-            }
-        }
-        
-        // 글자 내부가 아닌 픽셀에만 아웃라인 적용
-        float outlineOnly = saturate(outerMax - fillMask);
-
-        Out.vColor.rgb = lerp(Out.vColor.rgb, g_FontOutlineColor.rgb, outlineOnly);
-        Out.vColor.a = max(Out.vColor.a, outlineOnly * g_FontOutlineColor.a);
-        
-#ifdef KSTA_DEBUG_2_RETURN_AFTEROUTLINE
-            return Out;
-#endif   
-    } // END== outline =====
-    
-    
-    
-    
-    
+    // ===== additional alpha =====
     if (g_FontFlag & FL_ALPHA_EDITABLE)
     {
         // 11. Alpha per Inst
-        float fAdditionalAlpha = (1.f - In.mExtra0.x);
-        
-        Out.vColor.a = Out.vColor.a * fAdditionalAlpha;
+        fAdditionalAlpha = (1.f - In.mExtra0.x);
+    }
+    // END== additional alpha =====
+    
+    
+    
+     
+    const float2 vFontInnerWidth = { 0.f, fFontWidth / fTotalWidth };
+    const float2 vFontGrad2OuterWidth = { vFontInnerWidth.y, vFontInnerWidth.y + fGradWidth / fTotalWidth };
+    const float2 vFontOuterWidth = { vFontGrad2OuterWidth.y, vFontGrad2OuterWidth.y + fFontOutlineWidth / fTotalWidth };
+    const float2 vFontGrad2DiscardWidth = { vFontOuterWidth.y, vFontOuterWidth.y + fGradWidth / fTotalWidth };
+    
+    float4 vResultColor = (float4) 0;
+    
+    if (fDistance < vFontInnerWidth.y)
+    {
+        vResultColor.rgb = vFontColor.rgb;
+        vResultColor.a = 1.f;
+    }
+    else if (fDistance < vFontGrad2OuterWidth.y)
+    {
+        float fRatio = smoothstep(vFontGrad2OuterWidth.x, vFontGrad2OuterWidth.y, fDistance);
+        vResultColor.rgb = lerp(vFontColor.rgb, vOutlineColor.rgb, fRatio);
+        vResultColor.a = 1.f;
+    }
+    else if (fDistance < vFontOuterWidth.y)
+    {
+        vResultColor.rgb = vOutlineColor.rgb;
+        vResultColor.a = 1.f;
+    }
+    else if (fDistance < vFontGrad2DiscardWidth.y)
+    {
+        float fRatio = smoothstep(vFontGrad2DiscardWidth.x, vFontGrad2DiscardWidth.y, fDistance);
+        vResultColor.rgb = vOutlineColor.rgb;
+        vResultColor.a = 1.f - smoothstep(vFontGrad2DiscardWidth.x, vFontGrad2DiscardWidth.y, fRatio);
+    }
+    else
+    {
+        discard;
     }
     
- 
-    
+    Out.vColor.rgb = vResultColor.rgb;
+    Out.vColor.a = vResultColor.a * fAdditionalAlpha;
     
     
     return Out;
