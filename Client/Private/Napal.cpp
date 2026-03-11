@@ -45,7 +45,18 @@ void CNapal::Update(_float fTimeDelta)
 {
 	_bool isAnimationFinished{ false };
 	_float fTrackPosition{};
-	isAnimationFinished = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimationTag[m_iIndex], fTimeDelta, &fTrackPosition, false);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &fTrackPosition;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = m_strAnimationTag[m_iIndex];
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 1.f;
+	rootMotionDesc.isEnable = false;
+	rootMotionDesc.isRotate = false;
+	rootMotionDesc.isTranslate = false;
+	isAnimationFinished = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	if (isAnimationFinished)
 	{
 		if (m_iIndex > 0)

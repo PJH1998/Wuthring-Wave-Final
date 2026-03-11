@@ -55,7 +55,18 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	//조우 애니메이션 고정하기
 
 	_float temp{51.f};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp, false);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.strAnimationName = pDesc->pAnimationTag;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = false;
+	rootMotionDesc.isRotate = false;
+	rootMotionDesc.isTranslate = false;
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	m_pModelCom->Set_TrackPosition(pDesc->pAnimationTag, 52.f);
 	m_pTransformCom->Save_PreviousPosition();
 	return S_OK;

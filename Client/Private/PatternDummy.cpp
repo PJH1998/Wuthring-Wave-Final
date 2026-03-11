@@ -58,7 +58,18 @@ void CPatternDummy::Priority_Update(_float fTimeDelta)
 void CPatternDummy::Update(_float fTimeDelta)
 {
 	_bool isFinished{};
-	isFinished = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strAnimTag, fTimeDelta * 1.f, &m_fTrackPosition, m_isRootMotion, m_isRootRotate, m_isRootTranslate, 1.f);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = m_strAnimTag;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 1.f;
+	rootMotionDesc.isEnable = m_isRootMotion;
+	rootMotionDesc.isRotate = m_isRootRotate;
+	rootMotionDesc.isTranslate = m_isRootTranslate;
+	isFinished = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	XMStoreFloat3(&m_vPosition, m_pTransformCom->Get_State(STATE::POSITION));

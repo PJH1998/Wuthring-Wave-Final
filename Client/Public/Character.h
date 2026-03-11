@@ -324,15 +324,9 @@ public:
 	// Animation
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
 	virtual void Clear_Animation(const _string& strAnimName, _float fTrackPosition = 0.f);
-	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
-		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsFacial = true);
+	virtual _bool Play_Animation(const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc);
 
-	virtual _bool Play_Animation_NonFacical(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
-		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
-
-	virtual _bool Play_AnimationFly(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
-		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true,
-		const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+	virtual _bool Play_AnimationFly(const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc, const GPU_BLEND_INFO& gpuBlendInfo);
 
 	// Change State
 	void Change_State(_uint iCategory, _uint iSubState, void* pArg = nullptr);

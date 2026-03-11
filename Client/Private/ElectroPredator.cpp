@@ -65,7 +65,19 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	//m_vMonsterDissolveColor = _float4(0.5f, 0.3f, 0.5f, 1.f);
 	m_fBehitMaxTime = 0.15f;
 	_float temp{};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = pDesc->pAnimationTag;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
 	return S_OK;
 }
@@ -274,7 +286,20 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
 	_float temp{};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, "Born02", 0.f, &temp, false);
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = "Born02";
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 1.f;
+	rootMotionDesc.isEnable = false;
+	rootMotionDesc.isRotate = false;
+	rootMotionDesc.isTranslate = false;
+
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);

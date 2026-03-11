@@ -270,6 +270,26 @@ namespace Engine
 		_uint  iRibbonAnimIndex; // 4
 	}ANIMATION_CBINFO;
 
+
+	typedef struct tagGpuBlendInfo {
+		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.
+		_float fBlendParamLR;       // 4 
+		_float fBlendParamDU;       // 4 
+		_float fPadding;            // 4 
+
+		// RL Blend Clip
+		_string strClipxL;          // 4 
+		_string strClipMidLR;      // 4 
+		_string strClipxR;          // 4 
+		_string strWeightClipLR;       // 4 
+
+		// UD Blend Clip
+		_string strClipxD;          // 4 
+		_string strClipMidDU;      // 4 
+		_string strClipxU;          // 4 
+		_string strWeightClipDU;       // 4 
+	}GPU_BLEND_INFO;
+
 	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationFlyCBInfo {
 		// 1. Default Animation CB info
@@ -297,24 +317,7 @@ namespace Engine
 		_uint iWeightClipDU;       // 4 
 	}ANIMATIONFLY_CBINFO;
 
-	typedef struct tagGpuBlendInfo {
-		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.
-		_float fBlendParamLR;       // 4 
-		_float fBlendParamDU;       // 4 
-		_float fPadding;            // 4 
-
-		// RL Blend Clip
-		_string strClipxL;          // 4 
-		_string strClipMidLR;      // 4 
-		_string strClipxR;          // 4 
-		_string strWeightClipLR;       // 4 
-
-		// UD Blend Clip
-		_string strClipxD;          // 4 
-		_string strClipMidDU;      // 4 
-		_string strClipxU;          // 4 
-		_string strWeightClipDU;       // 4 
-	}GPU_BLEND_INFO;
+	
 
 	typedef struct tagMorphDeltaInfo
 	{
@@ -334,6 +337,23 @@ namespace Engine
 		_uint iNumActiveMorphs;
 		_float2 vPadding;
 	}MORPH_CBINFO;
+
+
+	typedef struct tagAnimationPlayDesc
+	{
+		_float* pTrackPosition = nullptr;
+		_string strAnimationName;
+		_float fTimeDelta = 0.f;
+		_bool isFacial = false;
+	}ANIMATION_PLAY_DESC;
+
+	typedef struct tagRootMotionDesc
+	{
+		_bool isEnable = false;
+		_bool isRotate = false;
+		_bool isTranslate = false;
+		_float fRate = 0.1f;
+	}ROOTMOTION_DESC;
 
 	typedef struct tagCollisionData {
 		class CCollideComponent* pComponent = { nullptr };

@@ -34,9 +34,9 @@ public:
 	// cpu
 	void Update(CModel* pModelCom, CTransform* pTransform, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
 	// gpu
-	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelata);
+	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelta);
 	// facial
-	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CComputeShader* pFacialShaderCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelata);
+	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CComputeShader* pFacialShaderCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelta);
 	
 	void Reset(CModel* pModelCom, const _string& strAnimTag);
 

@@ -44,34 +44,45 @@ void CCharacterState::OnExit()
 _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate, _bool isFacial)
 {
 	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
-	m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName
-	, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
-		, fStateRootMotionRate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotion
-		, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate
-		, isFacial
-	);
+
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.fTimeDelta = fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed;
+	playDesc.strAnimationName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.isFacial = isFacial;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = fStateRootMotionRate;
+	rootMotionDesc.isEnable = m_Animations.at(m_iCurrentAnimIdx).IsRootMotion;
+	rootMotionDesc.isRotate = m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate;
+	rootMotionDesc.isTranslate = m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate;
+	
+	m_IsAnimationEnd = pCharacter->Play_Animation(playDesc, rootMotionDesc);
+
+	
 
 	return m_IsAnimationEnd;
 }
 
-_bool CCharacterState::Play_Animation_NonFacial(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate)
-{
-	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
-	m_IsAnimationEnd = pCharacter->Play_Animation_NonFacical(m_Animations.at(m_iCurrentAnimIdx).strAnimName, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
-		, fStateRootMotionRate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotion
-		, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate
-	);
-
-	return m_IsAnimationEnd;
-}
 
 _bool CCharacterState::Play_AnimationFly(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
-	m_IsAnimationEnd = pCharacter->Play_AnimationFly(m_Animations.at(m_iCurrentAnimIdx).strAnimName, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
-		, fStateRootMotionRate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotion
-		, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate, gpuBlendInfo
-	);
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.fTimeDelta = fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed;
+	playDesc.strAnimationName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.isFacial = true;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = fStateRootMotionRate;
+	rootMotionDesc.isEnable = m_Animations.at(m_iCurrentAnimIdx).IsRootMotion;
+	rootMotionDesc.isRotate = m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate;
+	rootMotionDesc.isTranslate = m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate;
+
+	m_IsAnimationEnd = pCharacter->Play_AnimationFly(playDesc, rootMotionDesc, gpuBlendInfo);
 
 	return m_IsAnimationEnd;
 }

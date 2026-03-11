@@ -52,7 +52,18 @@ HRESULT CAnimationDummy::Initialize_Clone(void* pArg)
 
     m_IsPlayAnimation = true;
 	m_strCurrentAnimation = "Pose";
-    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 1.f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
     
@@ -79,7 +90,19 @@ void CAnimationDummy::Update(_float fTimeDelta)
     // 1. 무조건 처음 해줘야하는거
     if (m_IsPlayAnimation)
     {
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
+		ANIMATION_PLAY_DESC playDesc{};
+		playDesc.strAnimationName = m_strCurrentAnimation;
+		playDesc.fTimeDelta = 0.f;
+		playDesc.pTrackPosition = &m_fTrackPosition;
+		playDesc.isFacial = false;
+
+		ROOTMOTION_DESC rootMotionDesc{};
+		rootMotionDesc.fRate = 1.f;
+		rootMotionDesc.isEnable = true;
+		rootMotionDesc.isRotate = true;
+		rootMotionDesc.isTranslate = true;
+
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 
@@ -180,11 +203,19 @@ void CAnimationDummy::Set_TrackPosition(_float fTrackPosition)
 
         // 4. fTimeDelta = 0.f로 GPU 업데이트를 1회 실행합니다.
         //    (기존 주석 코드를 GPU 버전으로 변경)
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,
-            m_strCurrentAnimation,
-            0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
-            &m_fTrackPosition,
-            true);
+		ANIMATION_PLAY_DESC playDesc{};
+		playDesc.strAnimationName = m_strCurrentAnimation;
+		playDesc.fTimeDelta = 0.f;
+		playDesc.pTrackPosition = &m_fTrackPosition;
+		playDesc.isFacial = false;
+
+		ROOTMOTION_DESC rootMotionDesc{};
+		rootMotionDesc.fRate = 1.f;
+		rootMotionDesc.isEnable = true;
+		rootMotionDesc.isRotate = true;
+		rootMotionDesc.isTranslate = true;
+
+		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
        // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
        // m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);

@@ -74,7 +74,19 @@ void CLevi_Alter::Update(_float fTimeDelta)
 		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
 	}
 	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strAnimKey, fTimeDelta * fTimeRatio, &fTrackPos, true, false, true, m_fRootMotionRate * temp);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &fTrackPos;
+	playDesc.fTimeDelta = fTimeDelta * fTimeRatio;
+	playDesc.strAnimationName = m_strAnimKey;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = m_fRootMotionRate * temp;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = false;
+	rootMotionDesc.isTranslate = true;
+
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPos >= m_Tracks[m_strPatternKey].second)
 	{

@@ -45,6 +45,7 @@ void CActor::Update(_float fTimeDelta)
 void CActor::Late_Update(_float fTimeDelta)
 {
     CContainerObject::Late_Update(fTimeDelta);
+	ANIMATION_PLAY_DESC Desc{};
 }
 
 void CActor::Render()

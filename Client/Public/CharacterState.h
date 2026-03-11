@@ -19,7 +19,6 @@ public:
 protected:
     //_bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate = 1.f);
     _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate = 1.f, _bool isFacial = true);
-    _bool Play_Animation_NonFacial(class CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate = 1.f);
     _bool Play_AnimationFly(class CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate = 1.f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 protected:

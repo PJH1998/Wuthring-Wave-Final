@@ -260,7 +260,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
 			m_PartsAnimations.at(m_Animations[m_iCurrentAnimIdx].strAnimName),
-			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true,false
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true
 		);
 	}
     

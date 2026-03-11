@@ -97,11 +97,19 @@ void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float
 
 	// 2. 현재 Animation 기록.
 	m_strCurrentAnimName = strAnimName;
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.fTimeDelta = fTimeDelta;
+	playDesc.strAnimationName = strAnimName;
+	playDesc.isFacial = false;
 
-    m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(
-        m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-	/* m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(
-        strAnimName, fTimeDelta, &m_fTrackPosition, false, IsRootMotion, fRootMotionRate);*/
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = IsRootMotion;
+	rootMotionDesc.isRotate = IsRootMotionRotate;
+	rootMotionDesc.isTranslate = IsRootMotionTranslate;
+
+    m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 }
 

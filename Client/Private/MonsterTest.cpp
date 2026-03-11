@@ -59,7 +59,18 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	//m_pTransformCom->Rotation(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
 	/////////////////////
 	_float temp{};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = pDesc->pAnimationTag;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
 	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
 	m_pCameraMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001Spine2"); // Bip001Spine2, CameraPosition

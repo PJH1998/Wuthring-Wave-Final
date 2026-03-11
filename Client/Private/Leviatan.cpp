@@ -77,7 +77,20 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_pColliderCom->Set_Gravity(true);
 
 	_float temp{};
-	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, pDesc->pAnimationTag, 0.f, &temp);
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = pDesc->pAnimationTag;
+	playDesc.isFacial = true;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+	
+	m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom,playDesc, rootMotionDesc);
 	//m_iPhase = PHASE::TWO;
 	
 	m_fParalysisAcc = 5.f;
@@ -87,7 +100,13 @@ HRESULT CLeviatan::Initialize_Clone(void* pArg)
 	m_isRender = true;
 
 	_float fTemp{};
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, "Stand2", 0.f, &fTemp, true);
+	playDesc.pTrackPosition = &fTemp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = "Stand2";
+	playDesc.isFacial = true;
+
+	
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, playDesc, rootMotionDesc);
 	//m_BowOffsets.push_back(_float3(0.f, 0.f, 0.f)); // attack20
 	//m_BowOffsets.push_back(_float3(XMConvertToRadians(15.f), XMConvertToRadians(0.f), XMConvertToRadians(90.f))); // attack13
 	m_iActionChecker[ACTION::ENCOUNTER] = 2;
@@ -151,6 +170,10 @@ void CLeviatan::Priority_Update(_float fTimeDelta)
 
 void CLeviatan::Update(_float fTimeDelta)
 {
+	ANIMATION_PLAY_DESC playDesc{};
+	ROOTMOTION_DESC rootMotionDesc{};
+
+
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
 	if(m_isBattle && m_pBehaviorTreeCom[m_iPhase])
@@ -178,7 +201,17 @@ void CLeviatan::Update(_float fTimeDelta)
 	else
 	{
 		_float temp{};
-		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, m_strSequenceAnim, fTimeDelta * m_fTimeLackRate, &temp);
+
+		playDesc.pTrackPosition = &temp;
+		playDesc.fTimeDelta = fTimeDelta * m_fTimeLackRate;
+		playDesc.strAnimationName = m_strSequenceAnim;
+		playDesc.isFacial = true;
+
+		rootMotionDesc.fRate = 0.1f;
+		rootMotionDesc.isEnable = true;
+		rootMotionDesc.isRotate = true;
+		rootMotionDesc.isTranslate = true;
+		m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, playDesc, rootMotionDesc);
 	}
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 	{

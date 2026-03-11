@@ -42,7 +42,18 @@ HRESULT CLevi_Bow::Initialize_Clone(void* pArg)
 
 	m_vBaseColor = _float4(0.15f, 0.1f, 0.15f, 1.f);
 	_float temp{};
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Stand2_Ex", 0.f, &temp, false, false, false, false);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = "Stand2_Ex";
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = false;
+	rootMotionDesc.isRotate = false;
+	rootMotionDesc.isTranslate = false;
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	return S_OK;
 }
 

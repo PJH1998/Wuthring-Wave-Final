@@ -136,6 +136,8 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     _bool IsAnimationEnd = { false };
 	
+	ANIMATION_PLAY_DESC playDesc{};
+	ROOTMOTION_DESC rootMotionDesc{};
 	
 
     if (m_IsPlayAnimation)

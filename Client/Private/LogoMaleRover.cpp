@@ -81,7 +81,18 @@ void CLogoMaleRover::Update(_float fTimeDelta)
 	}
 
 	//m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
-	m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.fTimeDelta = fTimeDelta;
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+	m_IsAnimationEnd = m_pModelCom->Play_NonRibAnimation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
 	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
 }

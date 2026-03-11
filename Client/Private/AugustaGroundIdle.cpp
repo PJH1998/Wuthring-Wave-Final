@@ -39,9 +39,10 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
 	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
+	_string strBoneName;
     if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02)
     {
-        _string strBoneName = "Root";
+        strBoneName = "Root";
         m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
         m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
@@ -49,7 +50,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 
 	if (eIdleType == EAugustaIdleType::STAND2)
 	{
-		_string strBoneName = "WeaponProp05";
+		strBoneName = "WeaponProp05";
 		m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
@@ -61,7 +62,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 
 	if (eIdleType == EAugustaIdleType::STANDCHANGE)
 	{
-		_string strBoneName = "WeaponProp05";
+		strBoneName = "WeaponProp05";
 		m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);

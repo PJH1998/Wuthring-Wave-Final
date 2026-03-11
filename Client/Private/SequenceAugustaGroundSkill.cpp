@@ -92,7 +92,7 @@ void CSequenceAugustaGroundSkill::Update_AttackAnimations(_float fTimeDelta)
 	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
 
 	// 1. 애니메이션 실행.
-    CCharacterState::Play_Animation_NonFacial(m_pSequenceAugusta, fTimeDelta, m_fAnimationScale);
+    CCharacterState::Play_Animation(m_pSequenceAugusta, fTimeDelta, m_fAnimationScale, false);
 
 	m_pSequenceAugusta->Play_PartAnimation(
 		m_iPartType,

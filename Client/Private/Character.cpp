@@ -996,36 +996,28 @@ void CCharacter::Clear_Animation(const _string& strAnimName, _float fTrackPositi
 	
 }
 
-
-_bool CCharacter::Play_Animation_NonFacical(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+_bool CCharacter::Play_Animation(const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc)
 {
 	ASSERT_CRASH(m_pModelCom);
-	//_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-	_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+	_bool IsPlayAnimationEnd = false; 
+	if (playDesc.isFacial)
+		IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, playDesc, rootMotionDesc);
+	else 
+		IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
-	return IsPlayAnimationEnd;
-}
-
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate
-	, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsFacial)
-{
-	ASSERT_CRASH(m_pModelCom);
-	_bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pFacialComputeShaderCom, strAnimName
-		, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, IsFacial);
-	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+	m_pModelCom->Sync_RootNode(m_pTransformCom, playDesc.fTimeDelta);
 
 	return IsPlayAnimationEnd;
 }
 
 
 // Fly Animation 전용.
-_bool CCharacter::Play_AnimationFly(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
+_bool CCharacter::Play_AnimationFly(const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(m_pModelCom);
 	//_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
-	_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, m_pFacialComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
-	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+	_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, m_pFacialComputeShaderCom, playDesc, rootMotionDesc, gpuBlendInfo);
+	m_pModelCom->Sync_RootNode(m_pTransformCom, playDesc.fTimeDelta);
 
 	return IsPlayAnimationEnd;
 }

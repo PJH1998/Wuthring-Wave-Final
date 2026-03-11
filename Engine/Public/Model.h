@@ -106,25 +106,15 @@ public:
 	HRESULT							Clear_Materials(class CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect);
 	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	// Compute Shader
-	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-		, _float fRootMotionRate = 0.1f)
+	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc);
 		;
-	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-		, _float fRootMotionRate = 0.1f, _bool isFacial = true);
+	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc);
 
-	_bool								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-		, _float fRootMotionRate = 0.1f);
+	_bool								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom, const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc);
 
-	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-		, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc, const GPU_BLEND_INFO& gpuBlendInfo);
 
-	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, class CComputeShader* pMorphComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
-		, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
-		, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo, _bool isFacial = true);
+	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, CComputeShader* pMorphComputeShaderCom, const ANIMATION_PLAY_DESC& playDesc, const ROOTMOTION_DESC& rootMotionDesc, const GPU_BLEND_INFO& gpuBlendInfo);
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
 
@@ -218,6 +208,7 @@ private:
 	void							Bind_AnimationResource(CComputeShader* pComputeShaderCom);
 	void							Bind_FlyAnimationResource(CComputeShader* pComputeShaderCom);
 	void							Readback_BoneMatrices();
+	_uint							GetSafeIndex(const _string& strAnimName);
 
 private:
 	HRESULT							Ready_NonAnimModel(_fmatrix PreTransformMatrix, const _char* pFilePath, ifstream& InputFile);

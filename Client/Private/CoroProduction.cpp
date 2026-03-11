@@ -47,7 +47,20 @@ HRESULT CCoroProduction::Initialize_Clone(void* pArg)
 		Action1();
 		});
 	_float temp{};
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "PatrolToFight", 0.f, &temp);
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &temp;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = "PatrolToFight";
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
     return S_OK;
 }
 
@@ -61,7 +74,19 @@ void CCoroProduction::Update(_float fTimeDelta)
 {
 	_float fTimeRatio = m_pGameSystem->TimeLack(COLLISIONLAYER::ENEMY);
 	_float fTrackPosition{};
-	m_IsPlayAnimation = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * fTimeRatio, &fTrackPosition, m_IsRootMotion, m_IsRootMotionRotate, m_IsRootMotionTranslate, 1.f);
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &fTrackPosition;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 1.f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+	m_IsPlayAnimation = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	if (fTrackPosition > m_Tracks[m_strCurrentAnimation].second)
 	{
@@ -256,7 +281,19 @@ void CCoroProduction::Action2()
 
 	m_pTransformCom->Set_WorldMatrix(XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vPos));
 	_float fTrackPos{};
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &fTrackPos;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = true;
 
@@ -277,7 +314,18 @@ void CCoroProduction::Action3()
 	
 	m_pTransformCom->Set_WorldMatrix(XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vPos));
 	_float fTrackPos{};
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &fTrackPos);
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.pTrackPosition = &fTrackPos;
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 	m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, m_Tracks[m_strCurrentAnimation].first);
 	m_IsRootMotion = false;
 
