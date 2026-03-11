@@ -1,6 +1,10 @@
 #include "Engine_Shader_Function.hlsli"
 #include "Engine_Shader_Defines.hlsli"
 
+#define MAX_ENVMAP 8
+#define FLT_MAX 3.402823466e+38F
+#define EPSILON 1e-5
+
 float g_fMinStepSize;
 float g_fMaxStepSize;
 float g_fStartOffset;
@@ -16,169 +20,114 @@ const static float g_fMaxDistance = 400.f;
 
 struct ENV_MAP
 {
+    float4 vPosition;
     uint iIndex;
     float fRange;
     float Padding[2];
-    float4 vPosition;
 };
 
-uint g_iNumEnvMaps;
-bool g_HasEnvMap;
+uint        g_iNumEnvMaps;
 StructuredBuffer<ENV_MAP> g_EnvMapDatas : register(t3);
-TextureCube g_EnvMapTexture[8] : register(t4);
 
-float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, float4 vViewNormal, float4 vOriginColor, Texture2D<float4> SceneTexture, Texture2D<float4> DepthTexture)
+bool        g_HasEnvMap;
+TextureCube g_EnvMapTexture[MAX_ENVMAP] : register(t4);
+
+ENV_MAP Find_EnvMap(float4 vWorldPos, out bool isFind)
 {
-    float4 vColor = 0.f;
-
-    if (vViewPos.z == 0.f || g_iStep <= 0 || g_fMaxDistance <= g_fStartOffset)
+    ENV_MAP EnvMap = (ENV_MAP) 0;
+    
+    uint iNumEnvMap = clamp(g_iNumEnvMaps, 0, MAX_ENVMAP);
+    float fMinDistance = FLT_MAX;
+    
+    isFind = false;
+    
+    for (uint i = 0; i < iNumEnvMap; ++i)
     {
-        vColor = vOriginColor;
+        ENV_MAP Temp = (ENV_MAP) 0;
+        Temp = g_EnvMapDatas[i];
         
+        float fLength = length(vWorldPos - Temp.vPosition);
+        
+        if(Temp.fRange >= fLength && fMinDistance > fLength)
+        {
+            fMinDistance = fLength;
+            isFind = true;
+            EnvMap = Temp;
+        }
+    }
+    return EnvMap;
+}
+
+
+float4 SampleEnvMap(int iIndex, float3 vUV)
+{
+    float4 vColor = (float4) 0;
+    
+    switch (iIndex)
+    {
+        case 0:
+            vColor = g_EnvMapTexture[0].Sample(DefaultSampler, vUV);
+            break;
+        case 1:
+            vColor = g_EnvMapTexture[1].Sample(DefaultSampler, vUV);
+            break;
+        case 2:
+            vColor = g_EnvMapTexture[2].Sample(DefaultSampler, vUV);
+            break;
+        case 3:
+            vColor = g_EnvMapTexture[3].Sample(DefaultSampler, vUV);
+            break;
+        case 4:
+            vColor = g_EnvMapTexture[4].Sample(DefaultSampler, vUV);
+            break;
+        case 5:
+            vColor = g_EnvMapTexture[5].Sample(DefaultSampler, vUV);
+            break;
+        case 6:
+            vColor = g_EnvMapTexture[6].Sample(DefaultSampler, vUV);
+            break;
+        case 7:
+            vColor = g_EnvMapTexture[7].Sample(DefaultSampler, vUV);
+            break;
+    }
+    
+    return vColor;
+}
+
+
+float4 Compute_Reflect(float4 vWorldPos, float4 vViewPos, 
+                        float4 vViewNormal, float4 vOriginColor)
+{
+    float4 vColor = vOriginColor;
+
+    if (vViewPos.z == 0.f || false == g_HasEnvMap)
+    {
         return vColor;
     }
     
-    float4 vLook = normalize(float4(vViewPos.xyz, 0.f));
+    bool isFind = false;
+    ENV_MAP FindMap = Find_EnvMap(vWorldPos, isFind);
     
-    float4 vReflect = normalize(float4(reflect(vLook.xyz, vViewNormal.xyz), 0.f));
-    
-    float4 vReflectColor = 0.f;
-
-    bool IsHit = false;
-    
-    float fOffsetSize = g_fStartOffset;
-    
-    float2 vTexcoord = 0.f;
-    
-    float2 vHitRange = float2(0.f, 0.f);
-    float fHitDepth = 0.f;
-    
-    //float Jitter = lerp(0.2f, 1.f, Hash13(vViewPos.xyz));
-    
-    //fOffsetSize *= Jitter;
-    
-    //for (int i = 0; i < g_iStep && fOffsetSize < g_fMaxDistance; ++i)
-    //{   
-    //    float4 vLay = vViewPos + float4((vReflect.xyz * fOffsetSize), 0.f);
-       
-    //    vHitRange.x = vHitRange.y;
-    //    vHitRange.y = fOffsetSize;
-       
-    //    float4 vProjPos = mul(vLay, g_CamProjMatrix);
-        
-    //    vProjPos /= vProjPos.w;
-
-    //    if (false == IsInNDC(vProjPos))
-    //        break;
-        
-    //    vTexcoord = Compute_Texcoord(vProjPos.xy);
-        
-    //    float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
-        
-    //    if(fDepth <= 0.f)
-    //        break; 
-            
-    //    if (fDepth <= vLay.z)//            +g_fMaxTickness)
-    //    {
-    //        IsHit = true;
-    //        fHitDepth = fDepth;
-    //        break;
-    //    }
-        
-    //    float fOffsetRatio = saturate((float) i / (float) g_iStep);
-        
-    //    fOffsetSize += lerp(g_fMinStepSize, g_fMaxStepSize, fOffsetRatio);
-    //}
-    
-    //float fDistWeight = 1.f;
-    //float fStepDepth = 0.f;
-    //float4 vEnvColor = 0.f;
-    
-    //if (IsHit && fHitDepth > 0.f)
-    //{ 
-    //    // binary Step
-    //    for (uint i = 0; i < g_iBinaryStep; ++i)
-    //    {
-    //        float fBinaryOffset = (vHitRange.x + vHitRange.y) * 0.5f;
-            
-    //        float4 vBinaryLay = vViewPos + float4((vReflect.xyz * fBinaryOffset), 0.f);
-            
-    //        float4 vProjPos = mul(vBinaryLay, g_CamProjMatrix);
-        
-    //        vProjPos /= vProjPos.w;
-
-    //        vTexcoord = Compute_Texcoord(vProjPos.xy);
-        
-    //        float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
-            
-
-    //        if (fDepth <= vBinaryLay.z)
-    //            vHitRange.y = fBinaryOffset;
-    //        else
-    //            vHitRange.x = fBinaryOffset;
-                
-    //        fStepDepth = fDepth;
-    //    }
-        
-    //    vReflectColor = SceneTexture.Sample(DefaultSampler, vTexcoord);
-        
-    //    fDistWeight = saturate(fStepDepth / g_fMaxDistance);
-    //}
-    ////else
-    ////{
-    ////    vReflectColor = vOriginColor;
-    ////}
-    ////else
+    if(isFind)
     {
-        float fMinDistance = 10000.f;
+        float3 vLook = normalize(vViewPos.xyz);
     
-        float4 vEnvColor = 0.f;
-    
-        uint iIndex = 0;
-        uint iSampleCount = clamp(g_iNumEnvMaps, 0, 8);
-      
-        bool IsInEnvMap = false;
-      
-        float3 vHitPlane = 0.f;
-      
-        ENV_MAP Envmap = (ENV_MAP) 0;
-      
-        for (uint j = 0; j < iSampleCount; ++j)
-        {
-            Envmap = g_EnvMapDatas[j];
-              
-            float fLength = length(vWorldPos - Envmap.vPosition);
-          
-            if (Envmap.fRange >= fLength && fMinDistance > fLength)
-            {
-                fMinDistance = fLength;
-              
-                float3 vWorldReflect = normalize(mul(vReflect, g_ViewMatrixInv).xyz);
-              
-                float3 vLocalPos = vWorldPos.xyz - Envmap.vPosition.xyz;
-              
-                float3 vExtents = Envmap.fRange;
-              
-                float3 vToPlane = ((sign(vWorldReflect) * vExtents) - vLocalPos) / vWorldReflect;
-              
-                float fPlaneDistance = min(vToPlane.x, min(vToPlane.y, vToPlane.z));
-              
-                vHitPlane = vLocalPos + (vWorldReflect * fPlaneDistance);
-              
-                vEnvColor = g_EnvMapTexture[j].Sample(DefaultSampler, normalize(vHitPlane));
-              
-                vReflectColor = vEnvColor;
-            }
-        }
+        float3 vReflect = normalize(reflect(vLook.xyz, vViewNormal.xyz));
+               
+        float3 vWorldReflect = normalize(mul(float4(vReflect, 0.f), g_ViewMatrixInv).xyz);
+        float3 vSafeWorldReflect = max(abs(vWorldReflect), EPSILON) * sign(vWorldReflect);
+        
+        float3 vLocalPos = vWorldPos.xyz - FindMap.vPosition.xyz;
+        
+        float3 vExtents = FindMap.fRange;
+        
+        float3 vToPlane = ((sign(vWorldReflect) * vExtents) - vLocalPos) / vSafeWorldReflect;
+        float fPlaneDistance = min(vToPlane.x, min(vToPlane.y, vToPlane.z));
+        float3 vHitPoint = vLocalPos + (vWorldReflect * fPlaneDistance);
+        
+        vColor = SampleEnvMap(FindMap.iIndex, normalize(vHitPoint));
     }
-    
-
-    //float fWeight = IsHit ? fDistWeight : 1.f;
-    
-    vColor = float4(vReflectColor.xyz, 1.f);
-
-//    vColor = lerp(vReflectColor, vEnvColor, fWeight);
-    
+  
     return vColor;
 }
 

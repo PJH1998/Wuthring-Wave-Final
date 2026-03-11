@@ -124,6 +124,8 @@ namespace Engine
 	const unsigned int g_iMaxSector = 16;
 
 	const unsigned int g_iEnvMapSize = 512;
+
+	const unsigned int g_iMaxEnvMap = 8;
 }
 
 #define MAX_RENDER_THREAD 5

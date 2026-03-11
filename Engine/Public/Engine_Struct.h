@@ -50,12 +50,12 @@ namespace Engine
 		_float4 vPosition;
 	}VF_LIGHT;
 
-	typedef struct tagENVIRONMENTMAP
+	typedef struct tagEnvironmentMap
 	{
-		_uint iIndex;
-		_float fRange;
+		_float4 vPosition;		// Probe World 위치
+		_uint iIndex;			// EnvironmentMap 텍스처 Index
+		_float fRange;			// Probe 탐색용 Range
 		_float2 Padding;
-		_float4 vPosition;
 	}ENV_MAP;
 
 	typedef struct tagShadowLightDesc
@@ -69,28 +69,30 @@ namespace Engine
 
 	typedef struct tagShadowMapDesc
 	{
-		_uint iSectorSizeX;		// Texture Size
-		_uint iSectorSizeZ;		// Texture Size
+		_float3 vStartPos;		// 기록할 영역의 World상 시작 지점
+		_float3 vExtents;		// 구역의 World상 Half Size
+		_float3 vLightDir;		// 전역 조명의 방향
 
-		_uint iNumSectorX;		// Sector
-		_uint iNumSectorZ;		// Sector
+		_uint iSectorSizeX;		// 구역 1개의 텍스처 해상도 X
+		_uint iSectorSizeZ;		// 구역 1개의 텍스처 해상도 Z (Y)
 
-		_float3 vCenterPos;
-		_float3 vExtents;
-		_float3 vLightDir;
+		_uint iNumSectorX;		// 레벨 내 구역 X 개수
+		_uint iNumSectorZ;		// 레벨 내 구역 Z (Y)  개수
 	}SHADOW_MAP_DESC;
 
 	typedef struct tagDecalData
 	{
 		// Input Data
-		enum TYPE { STATIC, NONSTATIC};
-		TYPE eType;
+		enum TYPE { STATIC, NONSTATIC };
+
 		_matrix WorldMatrix;
 		_matrix EndWorldMatrix;
-		_float fBlendTime;
-		_float fLifeTime;
 		_float4 vColor;
-		_float fEmissiveIntensity;
+
+		_float	fBlendTime;
+		_float	fLifeTime;
+		_float	fEmissiveIntensity;
+		TYPE	eType;
 	}DECAL_DATA;
 
 	typedef struct tagNotify

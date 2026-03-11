@@ -38,11 +38,10 @@ private:
 	virtual ~CDecal() = default;
 
 public:
-	HRESULT						Initialize();
+	HRESULT						Initialize(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], const _float3& vEmissiveLuminance);
 	void						Update(_float fTimeDelta);
 	void						Render(CShader* pShader);
 	
-	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance);
 	HRESULT						Add_DecalData(const DECAL_DATA& Decal);
 	ID3D11ShaderResourceView*	Get_DecalSRV(TEXTURETYPE eTextureType);
 	
@@ -60,11 +59,13 @@ private:
 	CVIBuffer_Decal*			m_pVIBuffer_Decal = { nullptr };
 
 private:
+	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance);
 	_bool						Update_InstanceData(DECAL_INSTANCE_DATA& Data, _float fTimeDelta);
 	HRESULT						Bind_Resources(CShader* pShader);
 
 public:
-	static CDecal*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CDecal*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)],
+								const _float3& vEmissiveLuminance);
 	virtual void				Free() override;
 };
 

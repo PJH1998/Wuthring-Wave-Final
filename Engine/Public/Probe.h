@@ -23,7 +23,7 @@ private:
 	virtual ~CProbe() = default;
 
 public:
-	HRESULT						Initialize(_float3 vCenter, _float fRange);
+	HRESULT						Initialize(const _float3& vCenter, const _float& fRange);
 	_bool						IsInProbe(BoundingBox* pObjectBounding);
 	_bool						IsInFrustrum();
 	
@@ -35,6 +35,10 @@ public:
 	void						Add_StaticObject(CStaticObject* pStaticObject);
 
 private:
+	BoundingBox*				m_pBounding = { nullptr };
+
+	vector<CGameObject*>		m_SkyBoxs;
+	vector<CStaticObject*>		m_StaticObjects;				
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*				m_pGameInstance = { nullptr };
@@ -43,11 +47,6 @@ private:
 	_float						m_fRange = {};
 	vector<_float4x4>			m_Matrices[ENUM_CLASS(D3DTS::END)];
 	vector<_float4x4>			m_MatricesInv[ENUM_CLASS(D3DTS::END)];
-
-	BoundingBox*				m_pBounding = { nullptr };
-
-	vector<CGameObject*>		m_SkyBoxs;
-	vector<CStaticObject*>		m_StaticObjects;				// PBR 적용 때문에 좀 미뤄질듯,,
 
 	ID3D11Texture2D*			m_pTexture = { nullptr };
 	ID3D11RenderTargetView*		m_pRTVs[6] = {nullptr};
@@ -73,7 +72,7 @@ private:
 	HRESULT					Bind_ShaderResource(CShader* pShader, _uint iCubeFace);
 
 public:
-	static CProbe*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _float3 vCenter, _float fRange);
+	static CProbe*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _float3& vCenter, const _float& fRange);
 	virtual void			Free() override;
 };
 

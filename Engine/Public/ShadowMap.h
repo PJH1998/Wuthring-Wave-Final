@@ -10,6 +10,8 @@ class CComputeShader;
 
 class CShadowMap final : public CBase
 {
+
+
 private:
 	typedef struct ShadowMap_Data
 	{
@@ -41,9 +43,9 @@ private:
 	virtual ~CShadowMap() = default;
 
 public:
-	const _uint					Get_ShadowMapLayer(_uint iSectorIndex) { return (iSectorIndex / m_iNumSectorToLayer); }
 	const vector<BoundingBox*>& Get_ShadowMapSectors() { return m_Boundings; }
 
+	const _uint					Get_ShadowMapLayer(_uint iSectorIndex) { return (iSectorIndex / m_iNumSectorToLayer); }
 	ID3D11ShaderResourceView*	Get_DownSampleSRV() { return m_pDS_SRV; }
 	ID3D11Buffer*				Get_DownSampleBuffer() { return m_pShadowMapBuffer; }
 public:
@@ -60,7 +62,10 @@ public:
 
 	void						Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 
+
 private:
+	vector<BoundingBox*>		m_Boundings;
+
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*				m_pGameInstance = { nullptr };
@@ -80,7 +85,6 @@ private:
 	_uint						m_iNumSectorToLayer = {};
 
 	vector<_float4x4>			m_Matrices[ENUM_CLASS(D3DTS::END)];
-	vector<BoundingBox*>		m_Boundings;
 
 	vector<_float4>				m_SectorUV;
 
@@ -91,7 +95,7 @@ private:
 	_float2						m_vSectorSize = {};
 
 	D3D11_VIEWPORT				m_PrevViewPort = {};
-
+	_float						m_fMargin = { 0.1f };
 	//DOWNSAMPLE
 	ID3D11UnorderedAccessView*	m_pDS_UAV = { nullptr };
 	ID3D11ShaderResourceView*	m_pDS_SRV= { nullptr };

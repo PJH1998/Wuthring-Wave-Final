@@ -639,9 +639,8 @@ void CRenderer::Render_Light()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pShader->Bind_Value("Debug_IsLight", &m_IsLight, sizeof(_bool))))
-		CRASH("Failed Debug Light");
-
+	//if (FAILED(m_pShader->Bind_Value("Debug_IsLight", &m_IsLight, sizeof(_bool))))
+	//	CRASH("Failed Debug Light");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_PBR"), m_pShader, "g_PBRTexture")))
 		CRASH("Failed Bind RT_PBR");

@@ -1277,6 +1277,9 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 	if (m_pModel_Manager)
 		m_pModel_Manager->Clear_Resource(iLevelID);
 
+	if(m_pEnvMap)
+		m_pEnvMap->Clear();
+
 	return S_OK;
 }
 

@@ -18,7 +18,7 @@ private:
 
 public:
 	HRESULT						Initialize();
-	HRESULT						Add_Probe(_float3 vCenter, _float fRange);
+	HRESULT						Add_Probe(const _float3& vCenter, const _float& fRange);
 	void						Bake_EnvMaps();
 
 	void						Add_EnvMap_SkyBox(CGameObject* pSkyBox);
@@ -29,11 +29,11 @@ public:
 	void						Clear();
 
 private:
+	vector<CProbe*>				m_Probes;
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*				m_pGameInstance = { nullptr };
 
-	vector<CProbe*>				m_Probes;
 	CShader*					m_pShader = { nullptr };
 	CVIBuffer_Rect*				m_pVIBuffer_Rect = { nullptr };
 
@@ -56,8 +56,6 @@ private:
 	HRESULT						Ready_Buffer();
 	HRESULT						Ready_MRT();
 	HRESULT						Ready_RT();
-
-	void						Update_Buffer();
 
 public:
 	static CEnvironmentMap* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

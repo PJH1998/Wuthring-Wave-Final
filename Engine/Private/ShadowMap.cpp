@@ -80,29 +80,27 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 		CRASH("Failed SectorStartPos");
 
 	//TEST
-	_float fMinX = m_MapDesc.vCenterPos.x;
-	_float fMinZ = m_MapDesc.vCenterPos.z;
 	_float2 vSectorWorldSize = _float2(m_MapDesc.vExtents.x * 2.f, m_MapDesc.vExtents.z * 2.f);
-	_float2 vMin = _float2(fMinX, fMinZ);
+	_float2 vStartPos = _float2(m_MapDesc.vStartPos.x, m_MapDesc.vStartPos.z);
 
-	if (FAILED(pShader->Bind_Value("iNumSector", &m_iNumSector, sizeof(_int))))
+	if (FAILED(pShader->Bind_Value("g_iNumSector", &m_iNumSector, sizeof(_int))))
 		CRASH("Failed SectorStartPos");
 
-	if (FAILED(pShader->Bind_Value("iNumSectorX", &m_MapDesc.iNumSectorX, sizeof(_int))))
+	if (FAILED(pShader->Bind_Value("g_iNumSectorX", &m_MapDesc.iNumSectorX, sizeof(_int))))
 		CRASH("Failed SectorStartPos");
 
-	if (FAILED(pShader->Bind_Value("iNumSectorToLayer", &m_iNumSectorToLayer, sizeof(_int))))
+	if (FAILED(pShader->Bind_Value("g_iNumSectorToLayer", &m_iNumSectorToLayer, sizeof(_int))))
 		CRASH("Failed SectorStartPos");
 
-	if (FAILED(pShader->Bind_Value("vSectorWorldSize", &vSectorWorldSize, sizeof(_float2))))
+	if (FAILED(pShader->Bind_Value("g_vSectorWorldSize", &vSectorWorldSize, sizeof(_float2))))
 		CRASH("Failed SectorStartPos");
 
-	if (FAILED(pShader->Bind_Value("vMin", &vMin, sizeof(_float2))))
-		CRASH("Failed SectorStartPos");
-
-	if (FAILED(pShader->Bind_Value("vShadowMapSize", &m_vShadowMapSize, sizeof(_float2))))
+	if (FAILED(pShader->Bind_Value("g_vStartPos", &vStartPos, sizeof(_float2))))
 		CRASH("Failed SectorStartPos");
 	
+	if (FAILED(pShader->Bind_Value("g_vShadowMapSize", &m_vShadowMapSize, sizeof(_float2))))
+		CRASH("Failed SectorStartPos");
+
 	return S_OK;
 }
 
@@ -253,18 +251,16 @@ HRESULT CShadowMap::Ready_ShadowMap()
 
 	m_vSectorSize = _float2(static_cast<_float>(m_MapDesc.iSectorSizeX), static_cast<_float>(m_MapDesc.iSectorSizeZ));
 
-	D3D11_TEXTURE2D_DESC TextureDesc = {};
+	D3D11_TEXTURE2D_DESC TextureDesc = {};				// TEXTURE
 	TextureDesc.Width = m_iShadowMapSizeX;
 	TextureDesc.Height = m_iShadowMapSizeY;
 	TextureDesc.MipLevels = 1;
 	TextureDesc.ArraySize = m_iNumLayer;
-
 	TextureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	TextureDesc.SampleDesc.Quality = 0;
 	TextureDesc.SampleDesc.Count = 1;
-
 	TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-	TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;			// DSV, SRV
+	TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	TextureDesc.CPUAccessFlags = 0;
 	TextureDesc.MiscFlags = 0;
 
@@ -272,8 +268,7 @@ HRESULT CShadowMap::Ready_ShadowMap()
 	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D)))
 		CRASH("Failed Created ShadowMap Texture");
 
-	/////DSV/////
-	D3D11_DEPTH_STENCIL_VIEW_DESC DsvDesc = {};
+	D3D11_DEPTH_STENCIL_VIEW_DESC DsvDesc = {};			// DSV
 	DsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	DsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 	DsvDesc.Texture2DArray.MipSlice = 0;
@@ -283,7 +278,7 @@ HRESULT CShadowMap::Ready_ShadowMap()
 	if (FAILED(m_pDevice->CreateDepthStencilView(pTexture2D, &DsvDesc, &m_pShadowMapDSV)))
 		CRASH("Failed Created ShadowMap DSV");
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
+	D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};		// SRV
 	SrvDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	SrvDesc.Texture2DArray.MostDetailedMip = 0;
@@ -294,7 +289,8 @@ HRESULT CShadowMap::Ready_ShadowMap()
 	if (FAILED(m_pDevice->CreateShaderResourceView(pTexture2D, &SrvDesc, &m_pShadowMapSRV)))
 		CRASH("Failed Created ShadowMap SRV");
 
-	m_pContext->ClearDepthStencilView(m_pShadowMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+	m_pContext->ClearDepthStencilView(m_pShadowMapDSV, 
+										D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 	Safe_Release(pTexture2D);
 
@@ -378,19 +374,17 @@ HRESULT CShadowMap::Ready_SectorUV()
 
 HRESULT CShadowMap::Ready_Matrices()
 {
-	_int iRadiusX = (m_MapDesc.iNumSectorX);
-	_int iRadiusZ = (m_MapDesc.iNumSectorZ);
-
-	for (_uint z = 0; z < iRadiusZ; ++z)
+	for (_uint z = 0; z < m_MapDesc.iNumSectorZ; ++z)
 	{
-		for (_uint x = 0; x < iRadiusX; ++x)
+		for (_uint x = 0; x < m_MapDesc.iNumSectorX; ++x)
 		{
 			_uint iWeightX = (x * 2) + 1;
 			_uint iWeightZ = (z * 2) + 1;
-			_float3 vCenterPos = Compute_CenterPos(iWeightX, iWeightZ, m_MapDesc.vCenterPos, m_MapDesc.vExtents);
+			_float3 vCenterPos = Compute_CenterPos(iWeightX, iWeightZ, 
+												m_MapDesc.vStartPos, m_MapDesc.vExtents);
 
-			_float vMarginX = m_MapDesc.vExtents.x + (m_MapDesc.vExtents.x * 0.1f);
-			_float vMarginZ = m_MapDesc.vExtents.z + (m_MapDesc.vExtents.z * 0.1f);
+			_float vMarginX = m_MapDesc.vExtents.x + (m_MapDesc.vExtents.x * m_fMargin);
+			_float vMarginZ = m_MapDesc.vExtents.z + (m_MapDesc.vExtents.z * m_fMargin);
 
 			_float3 vMarginExtents = _float3(vMarginX, m_MapDesc.vExtents.y, vMarginZ);
 			BoundingBox* Bounding = new BoundingBox(vCenterPos, vMarginExtents);
@@ -426,8 +420,8 @@ HRESULT CShadowMap::Ready_Buffer()
 	Data.iNumSectorX = m_MapDesc.iNumSectorX;
 	Data.iNumSectorToLayer = m_iNumSectorToLayer;
 	Data.vSectorWorldSize = _float2(m_MapDesc.vExtents.x * 2.f, m_MapDesc.vExtents.z * 2.f);
-	Data.vMin = _float2(m_MapDesc.vCenterPos.x, m_MapDesc.vCenterPos.z);
-	Data.vMax = _float2(m_MapDesc.vCenterPos.x + (Data.vSectorWorldSize.x * m_MapDesc.iNumSectorX), m_MapDesc.vCenterPos.z + (Data.vSectorWorldSize.y * m_MapDesc.iNumSectorZ));
+	Data.vMin = _float2(m_MapDesc.vStartPos.x, m_MapDesc.vStartPos.z);
+	Data.vMax = _float2(m_MapDesc.vStartPos.x + (Data.vSectorWorldSize.x * m_MapDesc.iNumSectorX), m_MapDesc.vStartPos.z + (Data.vSectorWorldSize.y * m_MapDesc.iNumSectorZ));
 	Data.vShadowMapSize = _float2(static_cast<_float>(m_iShadowMapSizeX >> 1), static_cast<_float>(m_iShadowMapSizeY >> 1));
 
 	memcpy(Data.SectorViewMatrix, m_Matrices[ENUM_CLASS(D3DTS::VIEW)].data(), sizeof(_float4x4) * m_iNumSector);

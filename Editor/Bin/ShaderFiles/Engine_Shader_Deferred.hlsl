@@ -215,18 +215,7 @@ PS_OUT_LIGHT PS_LIGHT(PS_IN In)
                 Result = Compute_Directional(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
                 break;
             case 1: // POINT
-              Result = Compute_Point(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
-              //{
-              //      float3 vLightDir = g_LightDatas[i].vPosition.xyz - vWorldPos.xyz;
-    
-              //      float fDistance = length(vLightDir);
-    
-              //      vLightDir = normalize(vLightDir);
-    
-              //      float fAtt = saturate((g_LightDatas[i].fRange - fDistance) / g_LightDatas[i].fRange);
-                    
-              //      Result.vLightDiffuse = float4(fAtt, fAtt, fAtt, 1.f);
-              //  }
+                Result = Compute_Point(vDiffuse, vNormal, vWorldPos, vViewPos, vPBRDesc.z, vPBRDesc.y, vPBRDesc.x, IsSkin, i);
                 break;
         }
         
@@ -562,7 +551,7 @@ PS_OUT_BACKBUFFER PS_WATER(PS_IN In)
     vSceneWorldPos = mul(vSceneWorldPos, g_ProjMatrixInv);
     vSceneWorldPos = mul(vSceneWorldPos, g_ViewMatrixInv);
     
-    float4 vReflectColor = Compute_Reflect(vWorldPos, vViewPos, vViewNormal, vOriginColor, g_BackBufferTexture, g_DepthTexture);
+    float4 vReflectColor = Compute_Reflect(vWorldPos, vViewPos, vViewNormal, vOriginColor);
     
     float4 vRefractColor = Compute_Refract(vWorldPos, vNormal, vWaterColor, g_BackBufferTexture, (vWorldPos.y - vSceneWorldPos.y), g_DepthTexture);
     

@@ -36,8 +36,14 @@ HRESULT CEnvironmentMap::Initialize()
 	return S_OK;
 }
 
-HRESULT CEnvironmentMap::Add_Probe(_float3 vCenter, _float fRange)
+HRESULT CEnvironmentMap::Add_Probe(const _float3& vCenter, const _float& fRange)
 {
+	if (m_Probes.size() >= g_iMaxEnvMap)
+	{
+		MSG_BOX("EnvMap is Over");
+		return E_FAIL;
+	}
+
 	CProbe* pProbe = CProbe::Create(m_pDevice, m_pContext, vCenter, fRange);
 	ASSERT_CRASH(pProbe);
 
@@ -82,9 +88,6 @@ HRESULT CEnvironmentMap::Bind_EnvMapDatas(CShader* pShader, const _char* pTextur
 
 	for (auto& pProbe : m_Probes)
 	{
-		if (iNumSRV >= m_iMaxBindEnvMap)
-			MSG_BOX("EnvMap is Over");
-
 		if(pProbe->IsInFrustrum())
 		{
 			pSRVs[iNumSRV] = pProbe->Get_EnvMap();

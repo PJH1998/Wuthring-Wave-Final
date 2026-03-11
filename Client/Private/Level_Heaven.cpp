@@ -51,7 +51,7 @@ HRESULT CLevel_Heaven::Initialize()
 	ShadowMapDesc.iSectorSizeX = 2048;
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
-	ShadowMapDesc.vCenterPos = _float3(-910.f, -20.f, -1870.f);
+	ShadowMapDesc.vStartPos = _float3(-910.f, -20.f, -1870.f);
 	ShadowMapDesc.vExtents = _float3(200.f, 700.f, 160.f);
 	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, -0.5f);
 
