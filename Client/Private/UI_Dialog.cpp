@@ -129,7 +129,7 @@ void CUI_Dialog::Req_Finish_CurDialog()
 {
 	auto& pDialogInst = m_pTextUI_Dialog->Get_UIDesc().vecInstanceDescs;
 	for (_uint i = 0; i < pDialogInst.size(); i++)
-		pDialogInst[i].matExtraData._11 = 0.f;
+		pDialogInst[i].matExtraData.Text.fAlpha = 0.f;
 
 	m_isCurDialogFinished = true;
 }
@@ -207,7 +207,7 @@ void CUI_Dialog::Change_Dialog(_uint iDialogIndex)
 	
 	auto& pDialogInst = pTargetText->Get_UIDesc().vecInstanceDescs;	// dialog 최초 전체 투명.
 	for (_uint i = 0; i < pDialogInst.size(); i++)
-		pDialogInst[i].matExtraData._11 = 1.f;
+		pDialogInst[i].matExtraData.Text.fAlpha = 1.f;
 
 	m_fTickElapsedTime = 0.f;
 }
@@ -277,34 +277,27 @@ void CUI_Dialog::Update_DialogInstance(_float fTimeDelta)
 	if (m_isCurDialogFinished)
 		return;
 
-	// 각각의 글자 인스턴스들을 서서히 나오도록 조정한다.
-
 	CUI_Text* pTargetText = dynamic_cast<CUI_Text*>(m_pTextUI_Dialog);
-	
 	auto& pDialogInsts = pTargetText->Get_UIDesc().vecInstanceDescs;
-	//for (_uint i = 0; i < pTargetText->Get_TextUIDesc().strText.length(); i++)
-	//	pDialogInsts[i].matExtraData._11 = 0.f;
-
 
 	// 1. 전역 elapsedtime 하나만 두고..
 	// 2. 글자 갯수에 맞춰서 인터벌타임 및 글자별 변화시간 기준으로 완전히 대화 나올시간 계산하고
 	// 3. 각 인스턴스마다의 투명도는 인덱스와 인터벌타임만으로도 계산이 가능하니 그렇게.
 	//	 굳이 인스턴스마다 felapsedtime 같은거 들 필요 없음
-
 	const _float fDialogFinishTime = m_fInstIntervalTime * pDialogInsts.size() + m_fInstFadeInTime;
 	
 	for (_uint i = 0; i < pDialogInsts.size(); i++)
 	{
 		const _float fInstFadeStartTime = m_fInstIntervalTime * i;
-		_float fInstAlpha = 1.f - Clamp(SmoothStep(fInstFadeStartTime, fInstFadeStartTime + m_fInstFadeInTime, m_fTickElapsedTime), 0.f, 1.f);
+		_float fInstAlpha = 1.f - Clamp(SmoothStep(
+			fInstFadeStartTime, fInstFadeStartTime + m_fInstFadeInTime, m_fTickElapsedTime
+		), 0.f, 1.f);
 		
-
-		pDialogInsts[i].matExtraData._11 = (pDialogInsts[i].matExtraData._11 >= fInstAlpha)?		// 계산값보다 지금이 더 투명함?
-			pDialogInsts[i].matExtraData._11 : fInstAlpha;
+		pDialogInsts[i].matExtraData.Text.fAlpha = max(pDialogInsts[i].matExtraData.Text.fAlpha, fInstAlpha);
 	}
 
-	if (fDialogFinishTime <= m_fTickElapsedTime &&
-		!m_isCurDialogFinished)
+	_bool isShouldFinish = (fDialogFinishTime <= m_fTickElapsedTime && !m_isCurDialogFinished);
+	if (isShouldFinish)
 		m_isCurDialogFinished = true;
 }
 
@@ -313,8 +306,6 @@ void CUI_Dialog::Update_DialogOrder(_float fTimeDelta)
 	// 글자가 전부 보이는 상태에서, 클릭이나 엔터, F 등 상호작용 시 다음으로 넘어가도록.
 	// 만약 아직 전부 보이지 않는 상태에서 상호작용 시도 시 바로 다 보이게.
 	
-	CUI_Text* pTargetText = dynamic_cast<CUI_Text*>(m_pTextUI_Dialog);
-
 	if (m_fTickElapsedTime == 0)
 		Change_Dialog(m_iDialogOrder);
 
@@ -325,21 +316,19 @@ void CUI_Dialog::Update_DialogOrder(_float fTimeDelta)
 		m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN
 	) : false;
 
-	m_isInteracted_Externally;
-
-	
-	if (m_isInteracted || m_isInteracted_Externally)
+	_bool isInteracted = m_isInteracted || m_isInteracted_Externally;
+	_bool isDialogOrderEnd = m_iDialogOrder == m_vecDialogs.size() - 1;
+	if (isInteracted)
 	{
-		if (m_isCurDialogFinished &&
-			m_iDialogOrder == m_vecDialogs.size() - 1)	// 마지막 대화 순서. 이러면 종료해야.
+		if (m_isCurDialogFinished && isDialogOrderEnd)	// 마지막 대화 순서.
 			Req_Close_Dialog();
-		else if (m_isCurDialogFinished)					// 현재 대화까지 끝. 다음 대화로..
+		else if (m_isCurDialogFinished)					// 현재 대화까지 끝.
 			Req_Next_Dialog();
-		else											// 현재 대화 진행중. 현재 대화부터 마치기.
+		else											// 현재 대화 진행중.
 			Req_Finish_CurDialog();
 	}
 
-	if (m_isInteracted_Externally) m_isInteracted_Externally = false;
+	if (m_isInteracted_Externally)	m_isInteracted_Externally = false;
 }
 
 void CUI_Dialog::Update_GoinDisable(_float fTimeDelta)

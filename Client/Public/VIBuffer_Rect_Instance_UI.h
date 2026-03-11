@@ -7,6 +7,8 @@ class CVIBuffer_Rect_Instance_UI final : public CVIBuffer_Instance
 {
 #pragma region structs
 public:
+
+
 	typedef struct tagRectSingleInstanceDesc
 	{
 		_float4 vSInstRight		= { 1.f, 0.f, 0.f ,0.f };
@@ -18,7 +20,7 @@ public:
 		_float2 vClipTexcoordX	= { 0.f, 1.f };
 		_float2 vClipTexcoordY	= { 0.f, 1.f };
 
-		_float4x4 matExtraData = {};
+		UI_EXTRA_DATA matExtraData = {};
 	}SINGLE_INST_DESC;
 
 	typedef struct tagRectInstanceUIDesc : public CVIBuffer_Instance::INSTANCE_DESC

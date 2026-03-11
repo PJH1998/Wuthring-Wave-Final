@@ -21,8 +21,7 @@ Texture2D g_MaskTexture[4];
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
 
-matrix g_ShadowMapViewMatrix;
-matrix g_ShadowMapProjMatrix;
+
 
 float g_fOutLineRadius = 0.0005;
 float g_fOutLineRadiusZ = 0.0005f;
@@ -33,7 +32,6 @@ bool g_HasMetallic = false;
 bool g_IsDynamicObject = false;
 int g_iIndex = 0;
 
-int g_iShadowMapLayer = 0;
 
 float g_DissolveTime = 1.f;
 float g_DistortionTime = 0.f;
@@ -551,12 +549,13 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 
 /*======================================================SHADOW_MAP_BEGIN======================================================*/
 
+matrix  g_ShadowMapViewMatrix;
+matrix  g_ShadowMapProjMatrix;
+int     g_iShadowMapLayer;
 
 struct VS_OUT_SHADOW_MAP
 {
     float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
-    float4 vProjPos : TEXCOORD1;
     uint iIndex : SV_RenderTargetArrayIndex;
 };
 
@@ -570,27 +569,10 @@ VS_OUT_SHADOW_MAP VS_SHADOW_MAP(VS_IN In)
     matWVP = mul(matWV, g_ShadowMapProjMatrix);
 
     Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
-    Out.vTexcoord = In.vTexcoord;
-    Out.vProjPos = Out.vPosition;
     Out.iIndex = g_iShadowMapLayer;
     
     return Out;
 }
-
-struct PS_IN_SHADOW_MAP
-{
-    float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
-    float4 vProjPos : TEXCOORD1;
-    uint iIndex : SV_RenderTargetArrayIndex;
-};
-
-void PS_SHADOW_MAP(PS_IN_SHADOW_MAP In)
-{
-    if (false == IsInNDC(In.vProjPos))
-        discard;
-}
-
 
 /*======================================================SHADOW_MAP_END======================================================*/
 
@@ -1871,7 +1853,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_SHADOW_MAP();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_SHADOW_MAP();
+        PixelShader = NULL;
     }
     
     pass LogoMountain // 9

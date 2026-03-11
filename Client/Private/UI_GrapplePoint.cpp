@@ -378,8 +378,8 @@ void CUI_GrapplePoint::Update_ToggleReqedEvent(_float fTimeDelta)
 
 void CUI_GrapplePoint::Update_TargetColor()
 {
-	static vector<_float4x4> vecVariantMat = { _float4x4() };
-	*reinterpret_cast<_float4*>(&vecVariantMat[0]) = arrTypeColors[ENUM_CLASS(m_eGrappleType)];	// Ready_Presets 에서 정의해 둔 색상으로.
+	static vector<UI_EXTRA_DATA> vecVariantMat = { UI_EXTRA_DATA() };
+	vecVariantMat[0].SimpleColorize.vColor = arrTypeColors[ENUM_CLASS(m_eGrappleType)];	// Ready_Presets 에서 정의해 둔 색상으로.
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,

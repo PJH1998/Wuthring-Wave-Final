@@ -245,7 +245,7 @@ void CUI_Button_Interact::Create_ChildText()
 	pAttacher->Add_Child(pFont);
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
 	fontDesc.pParentObject = pAttacher;

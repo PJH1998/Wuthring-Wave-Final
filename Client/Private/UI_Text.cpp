@@ -79,9 +79,11 @@ void CUI_Text::Render()
 
 	ID3D11ShaderResourceView* pFontSRV = m_pGameInstance->Get_AtlasSRV(m_tTextDesc.strFontTag);
 
-#ifdef KSTA_UI_ATLAS_DEBUG
-	ImGui::Image(pFontSRV, ImVec2(512, 512));
-#endif // KSTA_UI_ATLAS_DEBUG
+//#ifdef KSTA_UI_ATLAS_DEBUG
+	ImGui::Begin("Font Atlas Debug (UI_Text)");
+	ImGui::Image(pFontSRV, ImVec2(1024, 1024));
+	ImGui::End();
+//#endif // KSTA_UI_ATLAS_DEBUG
 
 
 	if (FAILED(m_pShaderCom->Bind_Texture("g_Texture", pFontSRV)))
@@ -121,10 +123,10 @@ void CUI_Text::Render()
 
 	FTCUSTOM_FONT* pFontInfo = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	ID3D11Resource* pRes = nullptr;
-	pFontInfo->pAtlasSRV->GetResource(&pRes);
 	ID3D11Texture2D* pTex2D = nullptr;
-	pRes->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTex2D);
 	D3D11_TEXTURE2D_DESC desc = {};
+	pFontInfo->pAtlasSRV->GetResource(&pRes);
+	pRes->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTex2D);
 	pTex2D->GetDesc(&desc);
 	_float2 vTexPerPixel = { 1.0f / desc.Width,	1.0f / desc.Height };
 	m_pShaderCom->Bind_Value("g_FontTexPerPixel", &vTexPerPixel, sizeof(_float2));
@@ -266,13 +268,12 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 		_float penX = 0.f;
 		if (m_eTextAlignmentType == TEXT_ALIGN_TYPE::CENTER)
 		{
-			penX = -fLineWidth * 0.5f; // 너비의 절반만큼 왼쪽으로 이동
+			penX = -fLineWidth * 0.5f;
 		}
 		else if (m_eTextAlignmentType == TEXT_ALIGN_TYPE::RIGHT)
 		{
-			penX = -fLineWidth;        // 너비 전체만큼 왼쪽으로 이동
+			penX = -fLineWidth;
 		}
-		// LEFT인 경우 penX = 0.f 유지
 
 		// 4. 현재 줄의 글자들을 인스턴스로 생성
 		_uint prevCode = 0;
@@ -300,7 +301,7 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 			inst.vSInstLook = { 0.f, 0.f, 1.f ,0.f };
 
 			// Alpha 값 처리 (부모 UI 등에서 가져옴)
-			inst.matExtraData._11 = m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha;
+			inst.matExtraData.Text.fAlpha = m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha;
 
 			// 위치 설정 (Target 존재 여부 분기)
 			if (!m_tTextDesc.isTargetExist)
@@ -345,16 +346,8 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 
 void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 {
-	// 정렬 타입 갱신
 	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
 		m_eTextAlignmentType = eAlignmentType;
-
-	// 이미 Update_Description에서 줄별 정렬을 수행하므로,
-	// 여기서 인스턴스를 일괄 이동시키는 코드는 삭제하거나 
-	// 필요하다면 다시 Update_Description(0.f)를 호출하여 갱신합니다.
-
-	// 기존 로직 제거 권장:
-	// fVisualLeft, fVisualRight 계산하여 delta 이동시키는 부분 삭제
 }
 
 void CUI_Text::Change_Text(_wstring strText, TEXT_ALIGN_TYPE eAlignmentType)
@@ -377,7 +370,7 @@ HRESULT CUI_Text::Attach_AsChildToUI(CCustom_UI* pAttachTargetUI)
 	fontDesc.pParentObject = pAttacher;
 
 	for (auto& inst : fontDesc.vecInstanceDescs)
-		inst.matExtraData._11 = 1.f;
+		inst.matExtraData.Text.fAlpha = 1.f;
 
 	this->Update_Description(0.f);
 

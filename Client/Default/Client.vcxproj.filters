@@ -1377,6 +1377,9 @@
       <Filter>03. GameObject\ScreenEffect\SFX\Excute</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AbilityDefine.h" />
+    <ClInclude Include="..\Public\Client_UIVariantStruct.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

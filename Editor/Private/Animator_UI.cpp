@@ -1,6 +1,9 @@
 ﻿#include "EditorPch.h"
 #include "Animator_UI.h"
 
+
+
+
 CAnimator_UI::CAnimator_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CComponent(pDevice, pContext)
 {
@@ -146,7 +149,6 @@ CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
     return &m_vecAnimationDescs[iAnimIndex];
 }
 
-// ?뚯쟾 諛??ㅼ??쇱슜
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
 {
     switch (static_cast<UI_LERPTYPE>(iLerpType))
@@ -154,16 +156,9 @@ _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
     default:        
     case UI_LERPTYPE::END:
     case UI_LERPTYPE::LINEAR:               return fIn;
-
-    //case UI_LERPTYPE_SPEED::MT:                   return sqrt(1.0f - 4.0f * pow(fIn - 0.5f, 2.0f));
-    //case UI_LERPTYPE_SPEED::MB:                   return 1.0f - sqrt(max(0.0f, 1.0f - 4.0f * pow(fIn - 0.5f, 2.0f)));
-    case UI_LERPTYPE::LT:                   return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));                          //
-    //case UI_LERPTYPE_SPEED::LB:                   return 1.0f - sqrt(1.0f - pow(fIn - 1.0f, 2.0f));;
-    //case UI_LERPTYPE_SPEED::RT:                   return sqrt(1.0f - pow(fIn, 2.0f));;
-    case UI_LERPTYPE::RB:                   return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));                          //
-
+    case UI_LERPTYPE::LT:                   return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));
+    case UI_LERPTYPE::RB:                   return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));
     case UI_LERPTYPE::CUBIC:                return fIn * fIn * (3.0f - 2.0f * fIn);
-    //case UI_LERPTYPE_SPEED::CUBICR:
     }
 }
 

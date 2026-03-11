@@ -8,6 +8,8 @@ NS_BEGIN(Client)
 
 class CAnimator_UI final : public CComponent
 {
+#pragma region enum & typedef
+
 public:
 	enum class UI_LERPTYPE
 	{
@@ -57,6 +59,7 @@ public:
 		_bool							isLoop = false;
 	} UI_ANIM_DESC;
 
+#pragma endregion
 
 	private:
 	explicit				CAnimator_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -84,7 +87,6 @@ public:
 	UI_ANIM_DESC*			Find_Animation(_uint iAnimIndex);
 
 	UI_ANIM_DESC*			Get_CurAnimation() { return m_pCurAnimDesc; }
-	//_bool					Get_IsLastFrame() { return m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex == (static_cast<_uint>(m_fElapsedTime / fSingleFrameTime);) }
 
 	void					Set_DisableFlag(_uint iDisableFlag = 0) { m_iDisableFlag = iDisableFlag; }
 
@@ -93,16 +95,18 @@ public:
 	void					Set_CurCombinedAnimKeyframeDesc(UI_ANIM_KEYFRAME_DESC tCombinedKeyFrameDesc) { m_tCombinedKeyFrameDesc = tCombinedKeyFrameDesc; }
 
 private:
-	_float					Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ���� �����, LerpType�� ���� ���� fIn���� ������ ��ȯ (0 -> 1 �� ���� �׷����� �ȭ)
-	_float					Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ���� �ܼ��� Ratio �� ���� Start�� End ������ ���� ��ȯ
+	_float					Fix_LerpRatio(_float fIn, _uint iLerpType);					
+	_float					Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	
 
-	_float3					Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Ű�������� ������ ���� �ִϸ��̼��� ���� position�� �´� ���� ��ȯ (catmull-rom ����)
+	_float3					Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				
 
 	void					Update_Animation_Calculate(); 
 	void					Update_Animation_BindShader();
 
 private:
 	const _uint				m_iKeyFrameRate = 60;
+	const _float			m_fSingleFrameTime = 1.f / m_iKeyFrameRate;
+
 	vector<UI_ANIM_DESC>	m_vecAnimationDescs = {};
 	UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 

@@ -13,9 +13,10 @@ CProbe::CProbe(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CProbe::Initialize(_float3 vCenter, _float fRange)
+HRESULT CProbe::Initialize(const _float3& vCenter, const _float& fRange)
 {
 	_float3 vExtents = _float3(fRange, fRange, fRange);
+
 	m_pBounding = new BoundingBox(vCenter, vExtents);
 	ASSERT_CRASH(m_pBounding);
 
@@ -298,7 +299,7 @@ void CProbe::Add_StaticObject(CStaticObject* pStaticObject)
 	}
 }
 
-CProbe* CProbe::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _float3 vCenter, _float fRange)
+CProbe* CProbe::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _float3& vCenter, const _float& fRange)
 {
 	CProbe* pInstance = new CProbe(pDevice, pContext);
 	if (FAILED(pInstance->Initialize(vCenter, fRange)))

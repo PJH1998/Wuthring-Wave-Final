@@ -15,10 +15,13 @@ CDecal::CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CDecal::Initialize()
+HRESULT CDecal::Initialize(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], const _float3& vEmissiveLuminance)
 {
 	m_pVIBuffer_Decal = CVIBuffer_Decal_Cube::Create(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pVIBuffer_Decal);
+
+	if (FAILED(Add_DecalTexture(pFilePath, vEmissiveLuminance)))
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -245,10 +248,10 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 	return S_OK;
 }
 
-CDecal* CDecal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CDecal* CDecal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], const _float3& vEmissiveLuminance)
 {
 	CDecal* pInstance = new CDecal(pDevice, pContext);
-	if (FAILED(pInstance->Initialize()))
+	if (FAILED(pInstance->Initialize(pFilePath, vEmissiveLuminance)))
 	{
 		MSG_BOX("Failed to Created : CDecal");
 		Safe_Release(pInstance);

@@ -524,7 +524,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		auto targetUI = m_pUI_Skill[i];
 
 		// 스킬 ui 인스턴스 갯수는 캐릭터마다 다름. 이에 따라 인스턴스 갯수만큼 리사이징 및 할당 
-		vector<_float4x4> vecVariantMat = {/* _float4x4() , _float4x4() */};	
+		vector<UI_EXTRA_DATA> vecVariantMat = { UI_EXTRA_DATA{} };
 
 		_uint iTargetNumInstance = static_cast<_uint>(targetUI->Get_UIDesc().vecInstanceDescs.size());
 		vecVariantMat.resize(iTargetNumInstance);
@@ -543,19 +543,19 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			m_iSelectedCHIndex == CH_AUGUSTA)
 			fUltColor = fFilledColorMul;
 
-        vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
-        vecVariantMat[0].m[0][1] = fLeftColorMul;
-		vecVariantMat[0].m[0][2] = (fBasicSkillCD[i][SK_E] != 0.f)? fPassedColorMul : fFilledColorMul;
+        vecVariantMat[0].CooldownCircle.fCDRate		= fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
+		vecVariantMat[0].CooldownCircle.fColorMul1	= fLeftColorMul;
+		vecVariantMat[0].CooldownCircle.fColorMul2	= (fBasicSkillCD[i][SK_E] != 0.f)? fPassedColorMul : fFilledColorMul;
 
-        vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
-        vecVariantMat[1].m[0][1] = fLeftColorMul;
-		vecVariantMat[1].m[0][2] = fUltColor;
+        vecVariantMat[1].CooldownCircle.fCDRate		= fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
+		vecVariantMat[1].CooldownCircle.fColorMul1	= fLeftColorMul;
+		vecVariantMat[1].CooldownCircle.fColorMul2	= fUltColor;
 
 		if (vecVariantMat.size() >= 3)
 		{
-			vecVariantMat[2].m[0][0] = 0.0f;	// for LB Btn
-			vecVariantMat[2].m[0][1] = fLeftColorMul;
-			vecVariantMat[2].m[0][2] = fFilledColorMul;
+			vecVariantMat[2].CooldownCircle.fCDRate		= 0.0f;	// for LB Btn
+			vecVariantMat[2].CooldownCircle.fColorMul1	= fLeftColorMul;
+			vecVariantMat[2].CooldownCircle.fColorMul2	= fFilledColorMul;
 		}
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -598,10 +598,10 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         _float fCooldown = fChangeCD[i];
         auto targetUI = m_pUI_Change[i];
 
-        vector<_float4x4> vecVariantMat = { _float4x4() };
-        vecVariantMat[0].m[0][0] = 1.f - (fCooldown / fMaxChangeCD[i]);
-        vecVariantMat[0].m[0][1] = 1.0f;
-        vecVariantMat[0].m[0][2] = 0.8f;
+		vector<UI_EXTRA_DATA> vecVariantMat = { UI_EXTRA_DATA{} };
+        vecVariantMat[0].CooldownCircle.fCDRate		= 1.f - (fCooldown / fMaxChangeCD[i]);
+		vecVariantMat[0].CooldownCircle.fColorMul1	= 1.0f;
+		vecVariantMat[0].CooldownCircle.fColorMul2	= 0.8f;
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
@@ -676,8 +676,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	for (auto& instDesc : readyInstDesc)
 		instDesc.vClipTexcoordX = { 0.f, 0.f };
 	
-	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
-
+	vector<UI_EXTRA_DATA> vecVariantMat = { };
+	vecVariantMat.resize(readyInstDesc.size());
 
 
 
@@ -765,30 +765,29 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	
 	for (_uint i = 0; i < vecVariantMat.size(); i++)
 	{	// 기본값 설정
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._11) = 0.f;
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._12) = 0.f;								// ColorMul1
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._13) = 0.7f;								// ColorMul2
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._14) = static_cast<_float>(true);		// Is Use CustomColor?
-		*reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];	// CustomColor
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._31) = 0.f;							// CD Start Degree
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._32) = false;	// isUseNoise
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._33) = m_fElapsedTime;							// Elapsed Time
-		*reinterpret_cast<_float*>(&vecVariantMat[i]._34) = 0.2f;							// UV Scroll Speed
-		*reinterpret_cast<_float4*>(&vecVariantMat[i]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
+		vecVariantMat[i].CooldownCircle.fCDRate				= 0.f;
+		vecVariantMat[i].CooldownCircle.fColorMul1			= 0.f;								// ColorMul1
+		vecVariantMat[i].CooldownCircle.fColorMul2			= 0.7f;								// ColorMul2
+		vecVariantMat[i].CooldownCircle.bUseCustomColor		= static_cast<_float>(true);		// Is Use CustomColor?
+		vecVariantMat[i].CooldownCircle.vColor				= m_arrPlayerSymbolicColors[m_iSelectedCHIndex];	// CustomColor
+		vecVariantMat[i].CooldownCircle.fStartRatio			= 0.f;								// CD Start Degree
+		vecVariantMat[i].CooldownCircle.bUseNoise			= false;							// isUseNoise
+		vecVariantMat[i].CooldownCircle.fElapsedTime		= m_fElapsedTime;					// Elapsed Time
+		vecVariantMat[i].CooldownCircle.fUVScrollSpeed		= 0.2f;								// UV Scroll Speed
+		vecVariantMat[i].CooldownCircle.vMaskColor			= m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
 	}
 
 	// R에 대한 예외 적용
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._11) = (1.f - fUltGuage / 1.f);		// CD or Resource Rate
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._12) = 0.f;							// ColorMul1
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._13) = (fUltGuage >= 1.f) ? 1.f : 0.85f ;	// ColorMul2
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._14) = static_cast<_float>(true);	// Is Use CustomColor?
-	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21)= vecCustomColor[m_iSelectedCHIndex];	// CustomColor
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._31) = 0.f;							// CD Start Degree
-
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._32) = static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._33) = m_fElapsedTime;							// Elapsed Time
-	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._34) = 0.2f;							// UV Scroll Speed
-	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._41)= vecAdvCustomColor[m_iSelectedCHIndex];	// Mask Color
+	vecVariantMat[iIndex_RBtn].CooldownCircle.fCDRate			= (1.f - fUltGuage / 1.f);		// CD or Resource Rate
+	vecVariantMat[iIndex_RBtn].CooldownCircle.fColorMul1		= 0.f;							// ColorMul1
+	vecVariantMat[iIndex_RBtn].CooldownCircle.fColorMul2		= (fUltGuage >= 1.f) ? 1.f : 0.85f ;	// ColorMul2
+	vecVariantMat[iIndex_RBtn].CooldownCircle.bUseCustomColor	= static_cast<_float>(true);	// Is Use CustomColor?
+	vecVariantMat[iIndex_RBtn].CooldownCircle.vColor			= vecCustomColor[m_iSelectedCHIndex];	// CustomColor
+	vecVariantMat[iIndex_RBtn].CooldownCircle.fStartRatio		= 0.f;							// CD Start Degree
+	vecVariantMat[iIndex_RBtn].CooldownCircle.bUseNoise			= static_cast<_float>(fUltGuage == 1.f);	// isUseNoise
+	vecVariantMat[iIndex_RBtn].CooldownCircle.fElapsedTime		= m_fElapsedTime;							// Elapsed Time
+	vecVariantMat[iIndex_RBtn].CooldownCircle.fUVScrollSpeed	= 0.2f;							// UV Scroll Speed
+	vecVariantMat[iIndex_RBtn].CooldownCircle.vMaskColor		= vecAdvCustomColor[m_iSelectedCHIndex];	// Mask Color
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
@@ -838,7 +837,7 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 	auto& waveInstDesc = waveDesc.vecInstanceDescs;
 	waveInstDesc.resize(1);
 
-	static vector<_float4x4> vecVariantMat = { _float4x4() };
+	static vector<UI_EXTRA_DATA> vecVariantMat = { UI_EXTRA_DATA{} };
 
 	// ===== Variant Edit.. ===== 
 	
@@ -862,14 +861,15 @@ void CUI_HUD::Update_UI_SkillSection_Wave(_float fTimeDelta)
 	_float fUVRotateSpeed = -10.f / 60.f;
 
 
+	// ksta important : 기존에 bDisableNormalize 와 fAlphaMul 값이 반대로 되어 있었음. 문제 생길 시 확인 필요.
 	_float4 vDestColor = m_arrPlayerColors[m_iSelectedCHIndex];
-	*reinterpret_cast<_float4*>(&vecVariantMat[0]._11) = vDestColor;					// dest color
-	*reinterpret_cast<_float*>(&vecVariantMat[0]._21) = static_cast<_float>(true);	// is Distort On?
-	*reinterpret_cast<_float*>(&vecVariantMat[0]._22) = m_fElapsedTime;				// ElapsedTime. for transforming UV
-	*reinterpret_cast<_float*>(&vecVariantMat[0]._23) = fLateDistortStrength;		// distort strength.
-	*reinterpret_cast<_float*>(&vecVariantMat[0]._24) = fUVRotateSpeed;				// rotate speed (deg per sec).
-	*reinterpret_cast<_float*>(&vecVariantMat[0]._31) = 1.5f;						// Alpha Multiplier.
-	*reinterpret_cast<_float*>(&vecVariantMat[0]._32) = static_cast<_float>(false);	// isDisableNormalize (deg per sec).
+	vecVariantMat[0].WaveCircle.vColor					= vDestColor;					// dest color
+	vecVariantMat[0].WaveCircle.bDistort				= static_cast<_float>(true);	// is Distort On?
+	vecVariantMat[0].WaveCircle.fElapsedTime			= m_fElapsedTime;				// ElapsedTime. for transforming UV
+	vecVariantMat[0].WaveCircle.fDistortStrength		= fLateDistortStrength;			// distort strength.
+	vecVariantMat[0].WaveCircle.fRotateSpeed			= fUVRotateSpeed;				// rotate speed (deg per sec).
+	vecVariantMat[0].WaveCircle.bDisableNormalize		= static_cast<_float>(false);	// isDisableNormalize (deg per sec).
+	vecVariantMat[0].WaveCircle.fAlphaMul				= 1.5f;							// Alpha Multiplier.
 
 
 	// ==============================
@@ -971,13 +971,13 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 	skillBGIinstDesc[1].vClipTexcoordX = m_isIn_UltMode_Augusta? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };
 	
 
-	vector<_float4x4> vecBGVariantMat = {};
+	vector<UI_EXTRA_DATA> vecBGVariantMat = {};
 	vecBGVariantMat.resize(5);
 
 	for (_uint i = 0; i < iNumActiveBG; i++)
 	{
-		*reinterpret_cast<_float4*>(&vecBGVariantMat[i]._11) = vBGColor;
-		*reinterpret_cast<_float*>(&vecBGVariantMat[i]._21) = (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
+		vecBGVariantMat[i].SimpleMask.vColor	= vBGColor;
+		vecBGVariantMat[i].SimpleMask.bActive	= (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
 	}
 	
 
@@ -1128,7 +1128,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 {
     CCustom_UI* pFeedbackUI = m_pUI_Feedback;
-    const _float2 fDestScale = { 1.3f, 1.3f };
+    const _float2 vDestScale = { 1.3f, 1.3f };
     const _float fStartAlpha = 0.f;     // 0�� ����, 1�� �Ⱥ������� ����.
     const _float fLifeTime = .4f;
     _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
@@ -1146,15 +1146,15 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
             vecLifeTimeElapsed.push_back(0.f);
     }
 
-    vector<_float4x4> vecVariantMat = {};
+    vector<UI_EXTRA_DATA> vecVariantMat = {};
     vecVariantMat.resize(uiInstDescs.size());
 
     for (uint i = 0; i < vecVariantMat.size(); i++)
     {
-        *reinterpret_cast<_float2*>(&vecVariantMat[i]._11) = fDestScale;
-        *reinterpret_cast<_float*>(&vecVariantMat[i]._13) = fStartAlpha;
-        *reinterpret_cast<_float*>(&vecVariantMat[i]._14) = vecLifeTimeElapsed[i] / fLifeTime;
-        *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vColor;
+        vecVariantMat[i].ActiveFeedback.vDestScaleX		= vDestScale;
+        vecVariantMat[i].ActiveFeedback.fStartAlpha		= fStartAlpha;
+        vecVariantMat[i].ActiveFeedback.fTimeRatio		= vecLifeTimeElapsed[i] / fLifeTime;
+        vecVariantMat[i].ActiveFeedback.vColor			= vColor;
     }
 
     CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -1342,13 +1342,13 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 		m_fPlayerHPBackRatio = fPlayerHPRatio;
 	}
 
-	vector<_float4x4> vecVariantMat = { _float4x4(), _float4x4() };
-	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11) = vHPColor;
-	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11) = vHPBackColor;
-	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21) = vHPColor;
-	*reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21) = vHPBackColor;
-	*reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31) = fPlayerHPRatio;
-	*reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31) = m_fPlayerHPBackRatio;
+	vector<UI_EXTRA_DATA> vecVariantMat = { UI_EXTRA_DATA(), UI_EXTRA_DATA() };
+	vecVariantMat[PLHP_NORMAL].	PlayerHP.vColorGrad1	= vHPColor;
+	vecVariantMat[PLHP_BACK].	PlayerHP.vColorGrad1	= vHPBackColor;
+	vecVariantMat[PLHP_NORMAL].	PlayerHP.vColorGrad2	= vHPColor;
+	vecVariantMat[PLHP_BACK].	PlayerHP.vColorGrad2	= vHPBackColor;
+	vecVariantMat[PLHP_NORMAL].	PlayerHP.fHPRate		= fPlayerHPRatio;
+	vecVariantMat[PLHP_BACK].	PlayerHP.fHPRate		= m_fPlayerHPBackRatio;
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
@@ -1488,26 +1488,26 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	}
 
 
-	vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._11) = vHPColor1;
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._11)   = vHPBackColor1;
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._21) = vHPColor2;
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)   = vHPBackColor1;
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)  = fBossHPRatio;
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)    = m_fBossHPBackRatio;
+	vector<UI_EXTRA_DATA> vecVariantMat = { UI_EXTRA_DATA{} , UI_EXTRA_DATA{} };
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.vColorGrad1	= vHPColor1;
+	vecVariantMat[BOHP_BACK].	PlayerHP.vColorGrad1	= vHPBackColor1;
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.vColorGrad2	= vHPColor2;
+	vecVariantMat[BOHP_BACK].	PlayerHP.vColorGrad2	= vHPBackColor1;
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.fHPRate		= fBossHPRatio;
+	vecVariantMat[BOHP_BACK].	PlayerHP.fHPRate		= m_fBossHPBackRatio;
 
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._32)  = static_cast<_float>(true);     // isUseNoise
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._33)  = m_fElapsedTime;               // Elapsed Time
-	*reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._34)  = 0.2f;                         // UV Scroll Speed
-	*reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._41) = _float4(0.698f, 0.212f, 0.035f, 1.000f); // Mask Color
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.bUseNoise		= static_cast<_float>(true);     // isUseNoise
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.fElapsedTime	= m_fElapsedTime;               // Elapsed Time
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.fUVScrollSpeed	= 0.2f;                         // UV Scroll Speed
+	vecVariantMat[BOHP_NORMAL].	PlayerHP.vMaskColor		= _float4(0.698f, 0.212f, 0.035f, 1.000f); // Mask Color
 
-	vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
-	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11) = (isSABreak) ? vSABreakColor : vSAColor;
-	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)   = (isSABreak) ? _float4() : vSABackColor;
-	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21) = (isSABreak) ? vSABreakColor : vSAColor;
-	*reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)   = (isSABreak) ? _float4() : vSABackColor;
-	*reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)  = fBossSARatio;
-	*reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)    = m_fBossSABackRatio;
+	vector<UI_EXTRA_DATA> vecVariantMatSA = { UI_EXTRA_DATA{} , UI_EXTRA_DATA{} };
+	vecVariantMatSA[BOSA_NORMAL].	PlayerHP.vColorGrad1	= (isSABreak) ? vSABreakColor : vSAColor;
+	vecVariantMatSA[BOSA_BACK].		PlayerHP.vColorGrad1	= (isSABreak) ? _float4() : vSABackColor;
+	vecVariantMatSA[BOSA_NORMAL].	PlayerHP.vColorGrad2	= (isSABreak) ? vSABreakColor : vSAColor;
+	vecVariantMatSA[BOSA_BACK].		PlayerHP.vColorGrad2	= (isSABreak) ? _float4() : vSABackColor;
+	vecVariantMatSA[BOSA_NORMAL].	PlayerHP.fHPRate		= fBossSARatio;
+	vecVariantMatSA[BOSA_BACK].		PlayerHP.fHPRate		= m_fBossSABackRatio;
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
 		vecVariantMat,
@@ -1757,7 +1757,6 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 
 
-    // �Ӽ� ������ ���� ����
     vector<CCustom_UI*> pElementIcons = {
         m_pUI_Icon_ElementDark,
         m_pUI_Icon_ElementThunder,
@@ -1765,9 +1764,9 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     };
     CCustom_UI* pElementTargetUI = pElementIcons[m_iSelectedCHIndex];
 
-    vector<_float4x4> vecElementVariantMat = { _float4x4() };
-    *reinterpret_cast<_float4*>(&vecElementVariantMat[0]._11) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
-    *reinterpret_cast<_float*>(&vecElementVariantMat[0]._21) = static_cast<_float>(true);
+	vector<UI_EXTRA_DATA> vecElementVariantMat = { UI_EXTRA_DATA{} };
+    vecElementVariantMat[0].SimpleMask.vColor	= m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
+    vecElementVariantMat[0].SimpleMask.bActive	= static_cast<_float>(true);
 
     CCustom_UI::VARIANTREADY_UI_DESC tElementVariantDesc = {
         vecElementVariantMat,
@@ -1791,18 +1790,18 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     CCustom_UI* pElementGuageUI = m_pUI_Icon_ElementGuage;
     //auto elementGuageDesc = pElementGuageUI->Get_UIDesc();
 
-    vector<_float4x4> vecElementGuageVariantMat = { _float4x4() };
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[m_iSelectedCHIndex] / fMaxElementAmounts[m_iSelectedCHIndex]);
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._12) = 0.0f;
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._13) = 1.0f;
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_float>(true);
-    *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
+    vector<UI_EXTRA_DATA> vecElementGuageVariantMat = { UI_EXTRA_DATA() };
+    vecElementGuageVariantMat[0].CooldownCircle.fCDRate			= (1.f - fElementAmounts[m_iSelectedCHIndex] / fMaxElementAmounts[m_iSelectedCHIndex]);
+    vecElementGuageVariantMat[0].CooldownCircle.fColorMul1		= 0.0f;
+    vecElementGuageVariantMat[0].CooldownCircle.fColorMul2		= 1.0f;
+    vecElementGuageVariantMat[0].CooldownCircle.bUseCustomColor = static_cast<_float>(true);
+    vecElementGuageVariantMat[0].CooldownCircle.vColor			= m_arrPlayerSymbolicColors[m_iSelectedCHIndex];
+    vecElementGuageVariantMat[0].CooldownCircle.fStartRatio		= 90.f;
 
-	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._32) = static_cast<_float>(fElementAmounts[m_iSelectedCHIndex] == 100.f);	// isUseNoise
-	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._33) = m_fElapsedTime;							// Elapsed Time
-	*reinterpret_cast<_float*> (&vecElementGuageVariantMat[0]._34) = 0.2f;							// UV Scroll Speed
-	*reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._41) = m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
+	vecElementGuageVariantMat[0].CooldownCircle.bUseNoise		= static_cast<_float>(fElementAmounts[m_iSelectedCHIndex] == 100.f);	// isUseNoise
+	vecElementGuageVariantMat[0].CooldownCircle.fElapsedTime	= m_fElapsedTime;							// Elapsed Time
+	vecElementGuageVariantMat[0].CooldownCircle.fUVScrollSpeed	= 0.2f;							// UV Scroll Speed
+	vecElementGuageVariantMat[0].CooldownCircle.vMaskColor		= m_arrPlayerAdvSymbolicColors[m_iSelectedCHIndex];	// Mask Color
 
 
 
@@ -1854,7 +1853,7 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 	auto& targetBGInstDesc = targetBGDesc.vecInstanceDescs;
 	targetBGInstDesc.resize(3);
 
-	static vector<_float4x4> vecVariantMat = { };
+	static vector<UI_EXTRA_DATA> vecVariantMat = { };
 	vecVariantMat.resize(3);
 
 	
@@ -1883,13 +1882,13 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 	for (auto& variantMat : vecVariantMat)		// Outline
 	{
 		_float4 vDestColor = _float4(1.f, 1.f, 1.f, 1.f);
-		*reinterpret_cast<_float4*>(&variantMat._11) = vDestColor;					// dest color
-		*reinterpret_cast<_float*>(&variantMat._21) = static_cast<_float>(true);	// is Distort On?
-		*reinterpret_cast<_float*>(&variantMat._22) = m_fElapsedTime;				// ElapsedTime. for transforming UV
-		*reinterpret_cast<_float*>(&variantMat._23) = fLateDistortStrength;			// distort strength.
-		*reinterpret_cast<_float*>(&variantMat._24) = fUVRotateSpeed;				// rotate speed (deg per sec).
-		*reinterpret_cast<_float*>(&variantMat._31) = 1.0f;							// fAlphaMultiplier.
-		*reinterpret_cast<_float*>(&variantMat._32) = static_cast<_float>(false);	// isDisableNormalize (deg per sec).
+		variantMat.WaveCircle.vColor				= vDestColor;					// dest color
+		variantMat.WaveCircle.bDistort				= static_cast<_float>(true);	// is Distort On?
+		variantMat.WaveCircle.fElapsedTime			= m_fElapsedTime;				// ElapsedTime. for transforming UV
+		variantMat.WaveCircle.fDistortStrength		= fLateDistortStrength;			// distort strength.
+		variantMat.WaveCircle.fRotateSpeed			= fUVRotateSpeed;				// rotate speed (deg per sec).
+		variantMat.WaveCircle.bDisableNormalize		= 1.0f;							// fAlphaMultiplier.
+		variantMat.WaveCircle.fAlphaMul				= static_cast<_float>(false);	// isDisableNormalize (deg per sec).
 	}
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -1903,13 +1902,13 @@ void CUI_HUD::Update_UI_Icon_HarmonyReady(_float fTimeDelta)
 	for (auto& variantMat : vecVariantMat)		// Background Circle
 	{
 		_float4 vDestColor = _float4(1.f, 1.f, 1.f, 0.2f);
-		*reinterpret_cast<_float4*>(&variantMat._11) = vDestColor;					// dest color
-		*reinterpret_cast<_float*>(&variantMat._21) = static_cast<_float>(true);	// is Distort On?
-		*reinterpret_cast<_float*>(&variantMat._22) = m_fElapsedTime;				// ElapsedTime. for transforming UV
-		*reinterpret_cast<_float*>(&variantMat._23) = fLateDistortStrength;			// distort strength.
-		*reinterpret_cast<_float*>(&variantMat._24) = fUVRotateSpeed;				// rotate speed (deg per sec).
-		*reinterpret_cast<_float*>(&variantMat._31) = 1.0f;							// fAlphaMultiplier.
-		*reinterpret_cast<_float*>(&variantMat._32) = static_cast<_float>(true);	// isDisableNormalize (deg per sec).
+		variantMat.WaveCircle.vColor				= vDestColor;					// dest color
+		variantMat.WaveCircle.bDistort				= static_cast<_float>(true);	// is Distort On?
+		variantMat.WaveCircle.fElapsedTime			= m_fElapsedTime;				// ElapsedTime. for transforming UV
+		variantMat.WaveCircle.fDistortStrength		= fLateDistortStrength;			// distort strength.
+		variantMat.WaveCircle.fRotateSpeed			= fUVRotateSpeed;				// rotate speed (deg per sec).
+		variantMat.WaveCircle.bDisableNormalize		= 1.0f;							// fAlphaMultiplier.
+		variantMat.WaveCircle.fAlphaMul				= static_cast<_float>(true);	// isDisableNormalize (deg per sec).
 	}
 
 	tVariantDesc = {
@@ -2177,32 +2176,30 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     }
 
 
-    array<_float4x4, 41> arrVariantMat = {};
-	array<_float4x4, 41> arrVariantBackMat = {};
-	array<_float4x4, 41> arrVariantStaticMat = {};
+    array<UI_EXTRA_DATA, 41> arrVariantMat = {};
+	array<UI_EXTRA_DATA, 41> arrVariantBackMat = {};
+	array<UI_EXTRA_DATA, 41> arrVariantStaticMat = {};
 
     for (uint i = 0; i < arrVariantMat.size(); i++)         // front spectrum.
     {
-        *reinterpret_cast<_float4*>(&arrVariantMat[i]._11) = vSingleColor[0];
-        *reinterpret_cast<_float4*>(&arrVariantMat[i]._21) = vSingleColor[1];
-        arrVariantMat[i]._31 = static_cast<_float>(arrIsVisible[i]);
-        arrVariantMat[i]._32 = vSpectrumHeights[VALUE][i];
+        arrVariantMat[i].PlayerTransmit.vColorGrad1			= vSingleColor[0];
+        arrVariantMat[i].PlayerTransmit.vColorGrad2			= vSingleColor[1];
+        arrVariantMat[i].PlayerTransmit.bVisible			= static_cast<_float>(arrIsVisible[i]);
+        arrVariantMat[i].PlayerTransmit.fHeight				= vSpectrumHeights[VALUE][i];
     }
     for (uint i = 0; i < arrVariantBackMat.size(); i++)     // back spectrum. 
     {
-        *reinterpret_cast<_float4*>(&arrVariantBackMat[i]._11) = vBackColor[0];
-        *reinterpret_cast<_float4*>(&arrVariantBackMat[i]._21) = vBackColor[1];
-		arrVariantBackMat[i]._31 = static_cast<_float>(arrIsVisible[i]);
-        //vecVariantBackMat[i]._31 = false;
-		arrVariantBackMat[i]._32 = vBackSpectrumHeights[VALUE][i];
+        arrVariantBackMat[i].PlayerTransmit.vColorGrad1		= vBackColor[0];
+        arrVariantBackMat[i].PlayerTransmit.vColorGrad2		= vBackColor[1];
+		arrVariantBackMat[i].PlayerTransmit.bVisible		= static_cast<_float>(arrIsVisible[i]);
+		arrVariantBackMat[i].PlayerTransmit.fHeight			= vBackSpectrumHeights[VALUE][i];
     }
     for (uint i = 0; i < arrVariantStaticMat.size(); i++)   // static spectrum.
     {
-        *reinterpret_cast<_float4*>(&arrVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];
-        *reinterpret_cast<_float4*>(&arrVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];
-		arrVariantStaticMat[i]._31 = static_cast<_float>(arrIsVisibleStatic[i]);
-        //vecVariantStaticMat[i]._31 = false;                                                
-		arrVariantStaticMat[i]._32 = 1.f;
+        arrVariantStaticMat[i].PlayerTransmit.vColorGrad1	= vecColorPreset[ENCL_STATIC][0];
+        arrVariantStaticMat[i].PlayerTransmit.vColorGrad2	= vecColorPreset[ENCL_STATIC][1];
+		arrVariantStaticMat[i].PlayerTransmit.bVisible		= static_cast<_float>(arrIsVisibleStatic[i]);
+		arrVariantStaticMat[i].PlayerTransmit.fHeight		= 1.f;
     }
 
 
@@ -2216,8 +2213,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
             for (uint i = 0; i < arrVariantMat.size(); i++)
                 if (i >= 15)
                 {
-                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._11) = vExtraColor[0];
-                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._21) = vExtraColor[1];
+                    arrVariantMat[i].PlayerTransmit.vColorGrad1 = vExtraColor[0];
+                    arrVariantMat[i].PlayerTransmit.vColorGrad2 = vExtraColor[1];
                 }
             for (uint i = 0; i < arrVariantBackMat.size(); i++)
                 if (i >= 15)
@@ -2225,13 +2222,13 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     _float4 vExtraBackColor[2];
                     vExtraBackColor[0] = vExtraColor[0];   vExtraBackColor[0].w = 0.5f;
                     vExtraBackColor[1] = vExtraColor[1];   vExtraBackColor[1].w = 0.5f;
-                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._11) = vExtraBackColor[0];
-                    *reinterpret_cast<_float4*>(&arrVariantMat[i]._21) = vExtraBackColor[1];
+                    arrVariantMat[i].PlayerTransmit.vColorGrad1 = vExtraBackColor[0];
+                    arrVariantMat[i].PlayerTransmit.vColorGrad2 = vExtraBackColor[1];
                 }   
         }
     }
 
-	static vector<_float4x4> vecResultVariantMat = {};
+	static vector<UI_EXTRA_DATA> vecResultVariantMat = {};
 	vecResultVariantMat.resize(123);
 
 	for (_uint i = 0; i < 41; i++)
@@ -2361,13 +2358,13 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 
 
-    vector<_float4x4> vecPointVariantMat = { _float4x4() };
+	vector<UI_EXTRA_DATA> vecPointVariantMat = { UI_EXTRA_DATA{} };
 
-    vecPointVariantMat[0].m[0][0] = 1 - (fPointEnergyRatio);
-    vecPointVariantMat[0].m[0][1] = 0.f;
-    vecPointVariantMat[0].m[0][2] = 1.f;
-    vecPointVariantMat[0].m[0][3] = static_cast<_float>(true);
-    *reinterpret_cast<_float4*>(&vecPointVariantMat[0].m[1][0]) = _float4(1.0f, 0.941f, 0.729f, 1.f);
+    vecPointVariantMat[0].CooldownCircle.fCDRate			= 1 - (fPointEnergyRatio);
+    vecPointVariantMat[0].CooldownCircle.fColorMul1			= 0.f;
+    vecPointVariantMat[0].CooldownCircle.fColorMul2			= 1.f;
+    vecPointVariantMat[0].CooldownCircle.bUseCustomColor	= static_cast<_float>(true);
+    vecPointVariantMat[0].CooldownCircle.vColor				= _float4(1.0f, 0.941f, 0.729f, 1.f);
 
     CCustom_UI::VARIANTREADY_UI_DESC tPointVariantDesc = {
         vecPointVariantMat,

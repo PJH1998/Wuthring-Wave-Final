@@ -27,13 +27,10 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 {
     __super::Initialize_Clone(pArg);
 
-    //Ready_Prototypes(pArg);
     Ready_Components(pArg);
     Ready_Events();
-
     Bind_Description(pArg);
     
-    //__super::Begin();
 
     return S_OK;
 }
@@ -56,32 +53,9 @@ void CCustom_UI::Update(_float fTimeDelta)
         m_pAnimator_UICom->Update(fTimeDelta);
 
     Update_InputState();
-#ifdef KSTA_ON_TRANSFORM_CACHING
-	Update_CacheTransform(fTimeDelta);
-#endif // KSTA_ON_TRANSFORM_CACHING
 
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
-
-
-#ifdef KSTA_UICLICKTEST
-
-    if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
-    {
-        if (Check_IsInSpace())
-        {
-            std::cout << "Clicked!" << std::endl;
-        }
-
-        for (auto& child : m_vecChildObjects)
-        {
-            if (Check_IsInSpace())
-                std::cout << "Clicked!" << std::endl;
-        }
-    }
-
-#endif // KSTA_UICLICKTEST
-
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -93,7 +67,11 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
         return;
 
 	if (m_tUIDesc.isInstance)
-		dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(m_tUIDesc.vecInstanceDescs);
+	{
+		auto pVIBuffer = dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom);
+		if (pVIBuffer)
+			pVIBuffer->Update_Instances(m_tUIDesc.vecInstanceDescs);
+	}
 
     for (auto& child : m_vecChildObjects)
         child->Late_Update(fTimeDelta);
@@ -519,6 +497,9 @@ void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 {
 	if (m_pAnimator_UICom)
 	{
+		auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+
+		// 부모가 Animator가 있다면, 해당 키프레임 데이터를 반영함.
 		if (!pParentAnimatorCom)
 		{
 			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
@@ -528,27 +509,18 @@ void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 		else
 		{
 			auto pParentKFDesc = pParentAnimatorCom->Get_CurCombinedAnimKeyframeDesc();
-			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
-
 			if (pParentKFDesc)
 			{
-				CAnimator_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
-				tDesc = *thisCalcedKFDesc;
-
-				// 일단은 Alpha만 연결되도록.. 
-				tDesc.fAlpha = 1.f - ((1.f - thisCalcedKFDesc->fAlpha) * (1.f - pParentKFDesc->fAlpha)); // 다시 사라짐 값으로 되돌림
+				auto tDesc = *thisCalcedKFDesc;
+				tDesc.fAlpha = 1.f - ((1.f - thisCalcedKFDesc->fAlpha) * (1.f - pParentKFDesc->fAlpha));
 				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(tDesc);
 			}
 
 		}
 	}
 
-
-
-	// transfer to child..
 	for (auto& child : m_vecChildObjects)
 		child->Update_CombinedDesc(m_pAnimator_UICom);
-
 }
 
 void CCustom_UI::Update_InputState()

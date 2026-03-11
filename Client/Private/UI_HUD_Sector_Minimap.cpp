@@ -273,13 +273,13 @@ void CUI_HUD_Sector_Minimap::Update_Instances()
 	}
 
 	// 색상은 나중에 variantDesc 사용해서 그걸로 적용..
-	static vector<_float4x4> vecObjIndiVariantMat = {};
+	static vector<UI_EXTRA_DATA> vecObjIndiVariantMat = {};
 	vecObjIndiVariantMat.resize(objIndiInstDesc.size());
 
 	for (_uint i = 0; i < m_vecTmpCacledRelativeObjects.size(); i++)
 	{
 		auto targetObjType = m_vecTmpCacledRelativeObjects[i].eType;
-		*reinterpret_cast<_float4*>(&vecObjIndiVariantMat[i]) = m_arrPreset[ENUM_CLASS(targetObjType)].vColor;
+		vecObjIndiVariantMat[i].SimpleColorize.vColor = m_arrPreset[ENUM_CLASS(targetObjType)].vColor;
 	}
 
 	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {

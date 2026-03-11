@@ -2,6 +2,9 @@
 #include "Engine_Define.h"
 #include "Client_Enum.h"
 
+#include "Client_UIVariantStruct.h"
+
+
 namespace Engine
 {
 	class CTransform;

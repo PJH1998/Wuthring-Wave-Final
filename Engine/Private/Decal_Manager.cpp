@@ -1,13 +1,11 @@
 ﻿#include "EnginePch.h"
 #include "Decal_Manager.h"
 #include "Shader.h"
-#include "VIBuffer_Decal.h"
-#include "Texture.h"
 #include "GameInstance.h"
 #include "Decal.h"
 
 CDecal_Manager::CDecal_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: m_pDevice { pDevice}
+	: m_pDevice { pDevice }
 	, m_pContext { pContext }
 {
 	Safe_AddRef(m_pDevice);
@@ -18,6 +16,17 @@ HRESULT CDecal_Manager::Initialize()
 {
 	if (FAILED(Ready_Components()))
 		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT CDecal_Manager::Ready_Components()
+{
+	m_pShader = CShader::Create(m_pDevice, m_pContext,
+		TEXT("../Bin/ShaderFiles/Engine_Shader_Decal.hlsl"),
+		VTX_DECAL::Elements, VTX_DECAL::iNumElements);
+
+	ASSERT_CRASH(m_pShader);
 
 	return S_OK;
 }
@@ -39,21 +48,20 @@ HRESULT CDecal_Manager::Add_CustomDecal(CGameObject* pCustomDecalObject)
 	return S_OK;
 }
 
-HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], _float3 vEmissiveLuminance)
+HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, 
+	const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)], const _float3& vEmissiveLuminance)
 {
 	if (nullptr != Find_Decal(strDecalTag))
 		CRASH("Failed to Add Decal Duplication");
 
-	CDecal* pDecal = CDecal::Create(m_pDevice, m_pContext);
+	CDecal* pDecal = CDecal::Create(m_pDevice, m_pContext, pFilePath, vEmissiveLuminance);
 	ASSERT_CRASH(pDecal);
-
-	if (FAILED(pDecal->Add_DecalTexture(pFilePath, vEmissiveLuminance)))
-		CRASH("Failed Add DecalTexture");
 
 	m_Decals.emplace(strDecalTag, pDecal);
 
 	return S_OK;
 }
+
 
 HRESULT CDecal_Manager::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
 {
@@ -86,15 +94,13 @@ void CDecal_Manager::Clear()
 	for (auto& Pair : m_Decals)
 		Safe_Release(Pair.second);
 	m_Decals.clear();
+
+	for (auto& pCustomDecal : m_CustomDecals)
+		Safe_Release(pCustomDecal);
+	m_CustomDecals.clear();
 }
 
-HRESULT CDecal_Manager::Ready_Components()
-{
-	m_pShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Engine_Shader_Decal.hlsl"), VTX_DECAL::Elements, VTX_DECAL::iNumElements);
-	ASSERT_CRASH(m_pShader);
 
-	return S_OK;
-}
 
 CDecal* CDecal_Manager::Find_Decal(const _wstring& strDecalTag)
 {
@@ -103,7 +109,6 @@ CDecal* CDecal_Manager::Find_Decal(const _wstring& strDecalTag)
 		return nullptr;
 	return iter->second;
 }
-
 
 CDecal_Manager* CDecal_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -122,15 +127,13 @@ void CDecal_Manager::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pShader);
 
 	for (auto& Pair : m_Decals)
 		Safe_Release(Pair.second);
 	m_Decals.clear();
 	
-	Safe_Release(m_pShader);
-
 	for (auto& pCustomDecal : m_CustomDecals)
 		Safe_Release(pCustomDecal);
-	
 	m_CustomDecals.clear();
 }
