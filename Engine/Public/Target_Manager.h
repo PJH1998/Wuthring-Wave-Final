@@ -14,6 +14,9 @@ public:
 	ID3D11ShaderResourceView* Get_RT_SRV(const _wstring& strTargetTag);
 #ifdef _DEBUG
 	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
+public:
+	void					Change_BackBufferColor(const _wstring& strTargetTag, const _float4& vClearColor);
+
 #endif
 
 public:

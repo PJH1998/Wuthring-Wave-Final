@@ -15,6 +15,8 @@ public:
 	ID3D11ShaderResourceView*           Get_SRV() { return m_pSRV; }
 
 #ifdef _DEBUG
+public:
+	void								Change_BackBufferColor(const _float4& vClearColor) { m_vClearColor = vClearColor; }
 #endif
 
 public:

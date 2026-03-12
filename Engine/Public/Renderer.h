@@ -94,6 +94,7 @@ private:
 	_bool									m_IsOutLine = { true };
 	_bool									m_IsLight = { true };
 
+	_float4									m_vBackBufferColor = {};
 
 	_bool									m_isRenderDebug = { false };
 

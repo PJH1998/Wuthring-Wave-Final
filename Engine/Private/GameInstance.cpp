@@ -541,6 +541,10 @@ ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& s
 {
 	return m_pTargetManager->Get_Debug_RT_Resource(strTargetTag);
 }
+void CGameInstance::Change_BackBufferColor(const _wstring& strTargetTag, const _float4& vClearColor)
+{
+	m_pTargetManager->Change_BackBufferColor(strTargetTag, vClearColor);
+}
 #endif
 #pragma endregion
 

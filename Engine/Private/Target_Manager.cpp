@@ -38,6 +38,14 @@ ID3D11ShaderResourceView* CTarget_Manager::Get_Debug_RT_Resource(const _wstring&
 
 	return pRenderTarget->Get_SRV();
 }
+void CTarget_Manager::Change_BackBufferColor(const _wstring& strTargetTag, const _float4& vClearColor)
+{
+	CRenderTarget* pRenderTarget = Find_RenderTarget(strTargetTag);
+	if (nullptr == pRenderTarget)
+		return;
+
+	pRenderTarget->Change_BackBufferColor(vClearColor);
+}
 #endif
 
 HRESULT CTarget_Manager::Bind_OpenRT(OPEN_RT eRT, CShader* pShader, const _char* pConstantName)
