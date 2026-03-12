@@ -114,11 +114,11 @@ matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
     );
 }
 
+// 애니메이션의 현재 진행도를 이용하여 SRT를 반환
 SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     SRTKeyFrame result;
     
-    // 1. 현재 애니메이션 정보 가져오기
     AnimInfo anim = g_AllAnimInfos[animIndex];
     
     result.scale = float4(1.f, 1.f, 1.f, 1.f);
@@ -129,9 +129,6 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
     int channelIndex = -1;
     for (uint i = 0; i < anim.iNumChannels; i++)
     {
-        // globalChannel Index인 이유 => g_ChannelInfos는 모든 애니메이션의 채널 정보를 담고 있기 때문.
-        // 현재 채널인덱스를 이용해서 애니메이션 배열에서 
-        // 본인덱스를 순회해서 스레드가 처리해야하는 본인덱스인지 찾는다.
         uint globalChannelIdx = anim.iStartChannelIndexOffset + i;
         if (g_ChannelInfos[globalChannelIdx].iBoneIndex == boneIndex)
         {
@@ -140,17 +137,13 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
         }
     }
     
-    // 3. 애니메이션에서 이 뼈에 해당하는 채널이 없으면, 단위 행렬을 설정하고 종료
     if (channelIndex == -1)
     {
         return result;
     }
     
-    // 4. 가지고 있는 채널 인덱스로 채널 정보 가져오기.
     GPUChannelInfo channel = g_ChannelInfos[channelIndex];
 
-    // 5. 예외케이스 => 키프레임이 1개 이하면 보간할 필요가 없음 (정적인 뼈 이므로)
-    // => 따로 보간 작업을 하지 않고 변환 행렬을 만들어서 boneIndex 위치에 바로 저장.
     if (channel.iNumKeyframes <= 1)
     {
         // 첫 번째 키프레임의 변환을 그대로 사용

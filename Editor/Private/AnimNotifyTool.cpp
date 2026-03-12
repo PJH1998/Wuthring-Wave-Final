@@ -340,8 +340,7 @@ void CAnimNotifyTool::Load_SoundFiles()
         , vMinSize
         , vMaxSize)) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
-            _string 
-                Path = ImGuiFileDialog::Instance()->GetFilePathName();
+            _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string strSoundPath = ImGuiFileDialog::Instance()->GetCurrentFileName();
             Load_SoundsFromFile(strFilePath, strSoundPath);
         }

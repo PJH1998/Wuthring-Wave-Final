@@ -79,7 +79,20 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     m_IsPlayAnimation = true;
 	//m_strCurrentAnimation = "Blend_BasePose";
     //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
-    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
+
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = "Blend_BasePose";
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.01f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+
+    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 
 #ifdef _DEBUG
 	XMStoreFloat4(&m_vInitPosition, m_pTransformCom->Get_State(STATE::POSITION));
@@ -137,20 +150,30 @@ void CAnimationActor::Update(_float fTimeDelta)
     _bool IsAnimationEnd = { false };
 	
 	ANIMATION_PLAY_DESC playDesc{};
-	ROOTMOTION_DESC rootMotionDesc{};
-	
+	playDesc.fTimeDelta = fTimeDelta * m_fAnimationSpeed;
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.pTrackPosition = &m_fTrackPosition;
 
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 1.f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
     if (m_IsPlayAnimation)
     {
 		if (m_IsFacial)
 		{
-			IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+			playDesc.isFacial = true;
+
+			
+			IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, playDesc, rootMotionDesc);
 		}
 		else
 		{
+			playDesc.isFacial = false; 
 			if (m_IsGPU)
 			{
-				IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+				IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, playDesc, rootMotionDesc);
 			}
 			else
 			{
@@ -160,7 +183,7 @@ void CAnimationActor::Update(_float fTimeDelta)
 		}
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
-        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_pMorphComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
 		//IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
@@ -319,6 +342,18 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
    /* if (!m_IsPlayAnimation)
         m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
+	ANIMATION_PLAY_DESC playDesc{};
+	playDesc.fTimeDelta = 0.f;
+	playDesc.strAnimationName = m_strCurrentAnimation;
+	playDesc.pTrackPosition = &m_fTrackPosition;
+	playDesc.isFacial = false;
+
+	ROOTMOTION_DESC rootMotionDesc{};
+	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.isEnable = true;
+	rootMotionDesc.isRotate = true;
+	rootMotionDesc.isTranslate = true;
+
     if (!m_IsPlayAnimation)
     {
         // 3. m_fTrackPosition을 방금 설정한 값으로 업데이트합니다.
@@ -329,10 +364,7 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
         //    (기존 주석 코드를 GPU 버전으로 변경)
 		//m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, 0.f, &m_fTrackPosition, false);
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,
-            m_strCurrentAnimation,
-            0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
-            &m_fTrackPosition,
-            true, 0.1f);
+			playDesc, rootMotionDesc);
 
        // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
        // m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
