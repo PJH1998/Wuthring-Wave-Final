@@ -208,9 +208,9 @@ void CAnimationActor::Update(_float fTimeDelta)
         
 #ifdef _DEBUG
 	_int iBoneIndex = 0;
-    m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
-
-    m_pModelCom->Render_Gizmo(m_pTransformCom->Get_WorldMatrix());
+    //m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
+	//
+    //m_pModelCom->Render_Gizmo(m_pTransformCom->Get_WorldMatrix());
 #endif // _DEBUG
 
 	if (nullptr != m_pSpringCamera)

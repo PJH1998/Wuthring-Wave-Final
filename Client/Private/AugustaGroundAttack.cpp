@@ -26,25 +26,20 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 {
 	CGroundState::OnEnter(pArg);
 
-	// 1. 복사본 Context 받아오기
 	const auto context = m_pAugusta->TakeStateContext();
 
-	// 2. 복사본에서 필요한 값 읽기
 	EAugustaAttackType eAttackType = context.m_eAttackType;
 
-	// 3. 애니메이션 세팅.
 	m_iCurrentAnimIdx = ENUM_CLASS(eAttackType);
 
-	// 4. Attack 상태 초기화
 	State_Reset();
 
 
-	// 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
 	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; 
 	m_iSubPartType = CAugusta::PARTTYPE::PART_HEADPROP;
 
 	_string strBoneName = "WeaponProp02";
-	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
+	m_pAugusta->PartActivate(m_iPartType, true);
 	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
@@ -55,7 +50,6 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 	m_pAugusta->Set_SocketMatrixToParts(m_iSubPartType, "Bone_Hair001_M");
 	m_pAugusta->Part_ShaderPathChange(m_iSubPartType, ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON));
 
-	// 6. Target이 존재한다면? => Auto Target
 	m_pAugusta->Rotate_Target();
 
 }
@@ -64,19 +58,10 @@ void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
 {
     CGroundState::OnUpdate(fTimeDelta);
 
-    // 0. 입력 확인
     Handle_Input();
-
-    // 1. Attack 업데이트
     Update_AttackAnimations(fTimeDelta);
-
-    // 2. 물리 체크
     Check_Physics(fTimeDelta);
-
-    // 3. LockOn 여부 확인 및 상태 전환
-
     Check_StateTransition(fTimeDelta);
-
     State_Reset();
 }
 
@@ -84,17 +69,12 @@ void CAugustaGroundAttack::OnExit()
 {
     CGroundState::OnExit();
 
-    // 콤보 카운트 초기화
     m_iComboCount = 0;
-    m_fAttackPressTime = 0.f; // 시간 초기화
+    m_fAttackPressTime = 0.f; 
     m_pAugusta->PartActivate(m_iPartType, false); 
     m_pAugusta->PartActivate(m_iSubPartType, false); 
-
 	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::HIT));
-
 	m_pAugusta->Collider_Active(TEXT("Main|X|X"), false);
-
-	//m_pAugusta->Reset_CameraDistance();
 }
 
 _bool CAugustaGroundAttack::Hit_Judge()

@@ -64,15 +64,19 @@ private:
      
 
 private:
+	_float Approach(_float fCurrent, _float fTarget, _float fTimeDelta);
+	void Update_AxisBlend(_float& fValue, _bool isNegativeInput, _bool isPositiveInput, _float fStep);
+	void SetUp_FlyBlendClips();
 	void Process_Timer(_float fTimeDelta);
     virtual void Handle_Input() override;
     void Update_FlyAnimations(_float fTimeDelta);
+	void Update_FlyMovement(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void SetUp_Animations();
     void State_Reset();
-
+	
 public:
     static CGalbrenaAirFly* Create(class CCharacter* pOwner);
     virtual void Free() override;

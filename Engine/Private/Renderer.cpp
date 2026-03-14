@@ -1045,7 +1045,9 @@ void CRenderer::Render_Setting()
 
 	ImGui::End();
 
+#ifdef _DEBUG
 	m_pGameInstance->Change_BackBufferColor(TEXT("RT_BackBuffer"), m_vBackBufferColor);
+#endif
 
 	if (false == m_isRenderDebug)
 		return;

@@ -8,6 +8,12 @@
 #include "AttackVolume.h"
 #include "MotionTrail.h"
 
+namespace
+{
+	constexpr float LOCKON_FORWARD_WEIGHT = 0.3f;
+	constexpr float LOCKON_RIGHT_WEIGHT = 0.7f;
+}
+
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
     , m_pGameSystem { CGameSystem::GetInstance() }
@@ -1102,15 +1108,14 @@ _vector CCharacter::Calculate_LockOn_Move_Direction(ACTORDIR eDir)
 	case ACTORDIR::D:   return -vToTarget;   
 	case ACTORDIR::L:   return -vTargetRight; 
 	case ACTORDIR::R:   return vTargetRight;  
-	case ACTORDIR::LU:  return XMVector3Normalize(vToTarget * 0.3f - vTargetRight * 0.7f);
+	case ACTORDIR::LU:  return XMVector3Normalize(vToTarget * LOCKON_FORWARD_WEIGHT - vTargetRight * LOCKON_RIGHT_WEIGHT);
 	case ACTORDIR::LD:  return XMVector3Normalize(-vToTarget - vTargetRight);
-	case ACTORDIR::RU:  return XMVector3Normalize(vToTarget * 0.3f + vTargetRight * 0.7f);
+	case ACTORDIR::RU:  return XMVector3Normalize(vToTarget * LOCKON_FORWARD_WEIGHT + vTargetRight * LOCKON_RIGHT_WEIGHT);
 	case ACTORDIR::RD:  return XMVector3Normalize(-vToTarget + vTargetRight);
 	default: return XMVectorZero();
 	}
 }
 
-// LockOn 시 이동
 void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
 {
     if (!m_IsLockOn)
@@ -1119,18 +1124,8 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
     ASSERT_CRASH(m_pSpringCamera);
     ASSERT_CRASH(m_pTransformCom);
 
-	/*_vector vMoveDir = Calculate_LockOn_Move_Direction(eDir);
-	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);*/
-
-    // 1. 회전.
 	Rotate_Target_Lerp(fTimeDelta);
-
-	// 2. 이동 방향.
-	
-    //_vector vMoveDir = Calculate_Move_Direction(eDir);
     _vector vMoveDir = Calculate_LockOn_Move_Direction(eDir);
-
-    // 3. 이동 적용  
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
 }
 
@@ -1141,7 +1136,6 @@ void CCharacter::Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta,
 
     _vector vMoveDir = Calculate_Move_Direction(eDir);
 
-    // 이동 방향으로 회전 (부드러운 회전)
     m_pTransformCom->LookLerp(vMoveDir, fTimeDelta, 10.f);
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
 }

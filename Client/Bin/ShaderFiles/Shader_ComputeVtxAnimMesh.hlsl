@@ -42,8 +42,6 @@ struct SRTKeyFrame
 StructuredBuffer<GPUKeyFrame> g_AllKeyframes : register(t0);
 StructuredBuffer<AnimInfo> g_AllAnimInfos : register(t1);
 StructuredBuffer<GPUChannelInfo> g_ChannelInfos : register(t2);
-
-// 출력 버퍼 => 로컬 행렬 출력
 RWStructuredBuffer<matrix_rm> g_OutLocalMatrices : register(u0);
 
 // 매 프레임 C++에서 업데이트)
@@ -55,7 +53,7 @@ cbuffer AnimationInfoCB : register(b0)
     uint g_RibbonAnimIndex;
 }
 
-float4 mulQuaternion(float4 q1, float4 q2)
+float4 MulQuaternion(float4 q1, float4 q2)
 {
     float4 result;
     result.w = q1.w * q2.w - dot(q1.xyz, q2.xyz);
@@ -64,7 +62,7 @@ float4 mulQuaternion(float4 q1, float4 q2)
 }
 
 // 쿼터니언 slerp 직접 구현
-float4 customSlerp(float4 q1, float4 q2, float t)
+float4 CustomSlerp(float4 q1, float4 q2, float t)
 {
    // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
@@ -98,6 +96,41 @@ float4 customSlerp(float4 q1, float4 q2, float t)
     return normalize(q1 * w1 + q2 * w2);
 }
 
+SRTKeyFrame MakeIdentitySRT()
+{
+    SRTKeyFrame srt;
+    srt.scale = float4(1.f, 1.f, 1.f, 1.f);
+    srt.rotation = float4(0.f, 0.f, 0.f, 1.f);
+    srt.translation = float4(0.f, 0.f, 0.f, 1.f);
+    return srt;
+}
+
+int FindChannelIndex(uint boneIndex, AnimInfo anim)
+{
+    for (uint i = 0; i < anim.iNumChannels; ++i)
+    {
+        uint idx = anim.iStartChannelIndexOffset + i;
+        if (g_ChannelInfos[idx].iBoneIndex == boneIndex)
+            return idx;
+    }
+    return -1;
+}
+
+uint FindKeyframeIndex(GPUChannelInfo channel, float trackPos)
+{
+    uint keyIndex = channel.iStartKeyframeOffset;
+
+    for (uint k = 0; k < channel.iNumKeyframes - 1; ++k)
+    {
+        keyIndex = channel.iStartKeyframeOffset + k;
+        if (g_AllKeyframes[keyIndex + 1].fTrackPosition > trackPos)
+            break;
+    }
+
+    return keyIndex;
+}
+
+
 // 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
 matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
@@ -127,97 +160,41 @@ matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
     return m;
 }
 
+
+
+
+
 SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
-    SRTKeyFrame result;
-    
-    // 1. 현재 애니메이션 정보 가져오기
+    SRTKeyFrame result = MakeIdentitySRT();
     AnimInfo anim = g_AllAnimInfos[animIndex];
-    
-    // 2. 단위 SRT 설정. 
-    result.scale = float4(1.f, 1.f, 1.f, 1.f);
-    result.rotation = float4(0.f, 0.f, 0.f, 1.f); // 단위 쿼터니언 (w = 1)
-    result.translation = float4(0.f, 0.f, 0.f, 1.f);
-    
-    // 2. 현재 뼈에 해당하는 채널 찾기
-    int channelIndex = -1;
-    for (uint i = 0; i < anim.iNumChannels; i++)
-    {
-        // globalChannel Index인 이유 => g_ChannelInfos는 모든 애니메이션의 채널 정보를 담고 있기 때문.
-        // 현재 채널인덱스를 이용해서 애니메이션 배열에서 
-        // 본인덱스를 순회해서 스레드가 처리해야하는 본인덱스인지 찾는다.
-        uint globalChannelIdx = anim.iStartChannelIndexOffset + i;
-        if (g_ChannelInfos[globalChannelIdx].iBoneIndex == boneIndex)
-        {
-            channelIndex = globalChannelIdx;
-            break;
-        }
-    }
-    
-    // 3. 애니메이션에서 이 뼈에 해당하는 채널이 없으면, 단위 행렬을 설정하고 종료
-    if (channelIndex == -1)
-    {
+
+    int channelIndex = FindChannelIndex(boneIndex, anim);
+    if (channelIndex < 0)
         return result;
-    }
-    
-    // 4. 가지고 있는 채널 인덱스로 채널 정보 가져오기.
+
     GPUChannelInfo channel = g_ChannelInfos[channelIndex];
 
-    // 5. 예외케이스 => 키프레임이 1개 이하면 보간할 필요가 없음 (정적인 뼈 이므로)
-    // => 따로 보간 작업을 하지 않고 변환 행렬을 만들어서 boneIndex 위치에 바로 저장.
     if (channel.iNumKeyframes <= 1)
-    {
-        // 첫 번째 키프레임의 변환을 그대로 사용
-        GPUKeyFrame staticKey = g_AllKeyframes[channel.iStartKeyframeOffset];
-        result.scale = staticKey.vScale;
-        result.rotation = staticKey.vRotation;
-        result.translation = staticKey.vTranslation;
         return result;
-    }
-    
-    // 6. Ribbon Animation의 경우 키프레임이 2개이면 항상 단위 SRT 반환
-    if (isRibbon == true && channel.iNumKeyframes == 2)
-    {
+
+    if (isRibbon && channel.iNumKeyframes == 2)
         return result;
-    }
-    
-    // 7. 보간할 두 개의 키프레임을 찾을 인덱스를 채널의 시작 오프셋으로 초기화.
-    uint keyframeIndex = channel.iStartKeyframeOffset;
-    
-    
-    // 8. 채널의 모든 키프레임을 순회하면서 다음 키프레임의 시간이 현재 재생 기간 보다 크면 
-    // 해당 키프레임과 그 다음 키프레임 사이를 보간하면됨.
-    for (uint k = 0; k < channel.iNumKeyframes - 1; ++k)
-    {
-        // 다음 키프레임의 시간이 현재 재생 시간보다 크면, 현재 k와 k + 1 사이에서 보간하면 됨
-        if (g_AllKeyframes[channel.iStartKeyframeOffset + k + 1].fTrackPosition > fTrackPosition)
-        {
-            keyframeIndex = channel.iStartKeyframeOffset + k;
-            break; // 올바른 구간을 찾았으므로 반복 중단
-        }
-        // 끝까지 못찾았다면 마지막-1 인덱스를 사용하게 됨
-        keyframeIndex = channel.iStartKeyframeOffset + k;
-    }
+
+    uint keyframeIndex = FindKeyframeIndex(channel, fTrackPosition);
     
     GPUKeyFrame key1 = g_AllKeyframes[keyframeIndex];
     GPUKeyFrame key2 = g_AllKeyframes[keyframeIndex + 1];
 
-    // 9. 두 키프레임 사이의 보간 비율 계산
     float blendFactor = 0.f;
     float segmentDuration = key2.fTrackPosition - key1.fTrackPosition;
     
     if (segmentDuration > 0.0f)
-    {
-        // 선형 보간
         blendFactor = (g_TrackPosition - key1.fTrackPosition) / segmentDuration;
-    }
 
-    // ... SRT 보간 코드 ... => 의심.
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
-    
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
-    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
+    float4 interpRotation = CustomSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;
     result.rotation = interpRotation;
@@ -248,7 +225,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         
         // 변화량 가산 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;
-        float4 finalRotation = mulQuaternion(ribbonSRT.rotation, actionSRT.rotation);
+        float4 finalRotation = MulQuaternion(ribbonSRT.rotation, actionSRT.rotation);
         float4 finalTranslation = ribbonSRT.translation +
                                  (actionSRT.translation - float4(0, 0, 0, 1)); // delta 적용
         result_matrix = ComposeMatrixFromSRT(finalScale, finalRotation, finalTranslation);

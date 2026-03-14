@@ -746,12 +746,8 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 void CModel::FetchLocalMatrices_FromComputeFly(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(pComputeShaderCom);
-	// 상수 버퍼 업데이트
 	Update_FlyAnimConstantBuffer(gpuBlendInfo, strAnimationName, fTrackPosition);
-	// Compute Shader에 리소스 바인딩
 	Bind_FlyAnimationResource(pComputeShaderCom);
-
-	// Compute Shader 실행 (Dispatch)
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
@@ -845,16 +841,13 @@ void CModel::HandleAnimationChange(const _string& strAnimationName)
 
 void CModel::Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorphComputeShaderCom, _float fTimeDelta, _bool isFacial)
 {
-	// 2. Facial Animation Weight 계산
 	if (m_eType != MODELTYPE::CHARACTER || !isFacial) 
 		return;
 	if (nullptr == m_Buffers[BUFFER_MORPH_WEIGHT] || nullptr == m_SRVs[SRV_MORPH_WEIGHT])
 		return;
 	
-	// [CPU] Shape Key 가중치 갱신
 	pAnimation->Update_MorphWeights(fTimeDelta, m_ShapeKeyWeights);
 
-	// [CPU + GPU] 가중치 버퍼 업로드
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	if (SUCCEEDED(m_pContext->Map(m_Buffers[BUFFER_MORPH_WEIGHT], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource)))
 	{
@@ -862,7 +855,6 @@ void CModel::Update_MorphAnimation(CAnimation* pAnimation, CComputeShader* pMorp
 		m_pContext->Unmap(m_Buffers[BUFFER_MORPH_WEIGHT], 0);
 	}
 
-	// [GPU] Morph 적용 (대상 Mesh만)
 	for (auto& pMesh : m_Meshes)
 	{
 		if (false == pMesh->HasMorphTargets())

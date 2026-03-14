@@ -114,7 +114,7 @@ matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
     );
 }
 
-// 애니메이션의 현재 진행도를 이용하여 SRT를 반환
+// 애니메이션의 현재 진행도를 이용하여 두 키프레임 사이의 SRT를 반환
 SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     SRTKeyFrame result;
@@ -146,7 +146,6 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
 
     if (channel.iNumKeyframes <= 1)
     {
-        // 첫 번째 키프레임의 변환을 그대로 사용
         GPUKeyFrame staticKey = g_AllKeyframes[channel.iStartKeyframeOffset];
         result.scale = staticKey.vScale;
         result.rotation = staticKey.vRotation;
@@ -154,7 +153,6 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
         return result;
     }
     
-    // 6. Ribbon Animation의 경우 키프레임이 2개이면 항상 단위 SRT 반환
     if (isRibbon && channel.iNumKeyframes == 2)
     {
         return result;
@@ -173,7 +171,6 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
     GPUKeyFrame key1 = g_AllKeyframes[keyframeIndex];
     GPUKeyFrame key2 = g_AllKeyframes[keyframeIndex + 1];
 
-    // 9. 두 키프레임 사이의 보간 비율 계산
     float blendFactor = 0.f;
     float segmentDuration = key2.fTrackPosition - key1.fTrackPosition;
     
@@ -182,8 +179,6 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
 
     float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
     float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
-    
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
     float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
    
     result.scale = interpScale;

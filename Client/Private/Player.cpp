@@ -154,7 +154,7 @@ void CPlayer::Render()
     
 #ifdef _DEBUG
 	//m_pRigidbodyCom->Render();
-	m_pGrappleRigidbodyCom->Render();
+	//m_pGrappleRigidbodyCom->Render();
 #endif // _DEBUG
 
 }
@@ -356,14 +356,6 @@ void CPlayer::Handle_Input()
 		//Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
-	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
-	{
-		_float2 vPos = { 500.f, -200.f };
-		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
-		//m_Characters[m_iCurrentCharacterIdx]->Remove_Condition_FromPlayer(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
-		//m_Characters[m_iCurrentCharacterIdx]->Throw_AttachTarget();
-
-	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
 	{
@@ -375,6 +367,11 @@ void CPlayer::Handle_Input()
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 #endif // _DEBUG
+	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
+	{
+		_float2 vPos = { 500.f, -200.f };
+		m_pGameSystem->HUD_FadeOut();
+	}
 
 	
 
@@ -761,12 +758,6 @@ void CPlayer::Use_Spring(_float fDestination, _float fDuration)
 
 void CPlayer::Sorting_Target()
 {
-    /*sort(m_TargetCandidates.begin(), m_TargetCandidates.end(), [this](const TARGET_INFO& pSrc, const TARGET_INFO& pDst)->_bool {
-        _float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pSrc.pTransform->Get_State(STATE::POSITION)));
-        _float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pDst.pTransform->Get_State(STATE::POSITION)));
-        return fSrcDistance < fDstDistance;
-        });*/
-
 	sort(m_TargetCandidates.begin(), m_TargetCandidates.end(), [this](const TARGET_INFO& pSrc, const TARGET_INFO& pDst)->_bool {
 		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION) - pSrc.pTransform->Get_State(STATE::POSITION)));
 		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION) - pDst.pTransform->Get_State(STATE::POSITION)));
@@ -891,10 +882,6 @@ void CPlayer::Sorting_GrappleTarget()
 		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
 		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
 
-		/*_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
-			- pSrcTransform->Get_State(STATE::POSITION)));
-		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos())
-			- pDstTransform->Get_State(STATE::POSITION)));*/
 		_float fSrcDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
 			- pSrcTransform->Get_State(STATE::POSITION)));
 		_float fDstDistance = XMVectorGetX(XMVector3Length(m_pTransformCom->Get_State(STATE::POSITION)
@@ -1091,15 +1078,7 @@ void CPlayer::Calc_LockOnPos()
 
 	_matrix matTarget = m_LockOnTargetInfo.pTransform->Get_WorldMatrix();
 	_matrix matSocket = XMLoadFloat4x4(m_LockOnTargetInfo.pSocketMatrix);
-
-	//_vector vSocektPos, vSocketRot, vSocketScale;
-	//XMMatrixDecompose(&vSocektPos, &vSocketRot, &vSocketScale, matSocket);
-	//
-	//// Scale 1.f로 고정
-	//matSocket = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vSocketRot, vSocektPos);
-
 	_matrix matCombined = matSocket * matTarget;
-
 	XMStoreFloat3(&m_vLockOnPos, matCombined.r[3]); // Position 저장.
 	
 	
@@ -1265,9 +1244,9 @@ void CPlayer::UpdatePlayerStatusIndex()
 		m_pPlayerStatus->Set_CurrentCharIndex(m_iCurrentCharacterIdx);
 }
 
+// 변경 요청을 받았다면 교체
 void CPlayer::ApplySwitchRequest(_float fTimeDelta)
 {
-	// 변경이 있다면, 이 프레임 끝에서 처리
 	if (m_SwitchRequest.isSwitching)
 	{
 		m_SwitchRequest.isSwitching = false;
@@ -1283,8 +1262,6 @@ void CPlayer::PreUpdate_Characters(_float fTimeDelta)
 	CHARACTERTYPE eExtra = GetExtraCharacterForUpdate();
 	if (eExtra != CHARACTERTYPE::NONE)
 		m_Characters[eExtra]->Priority_Update(fTimeDelta);
-
-
 }
 
 void CPlayer::PreUpdate_PlayerStatus(_float fTimeDelta)

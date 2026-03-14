@@ -350,22 +350,17 @@ _bool CAnimation::Update_MorphWeights(_float fTimeDelta, vector<float>& modelWei
 
 	if (modelWeights.empty()) return false;
 
-	// 모든 가중치 0으로 초기화
 	fill(modelWeights.begin(), modelWeights.end(), 0.0f);
 
-	// MorphMeshChannel[i] -> m_MorphKeyIndices[i] = 들어있는 값(modelWeights의 인덱스)
 	for (size_t i = 0; i < m_MorphMeshChannels.size(); ++i)
 	{
 		_int iTargetIndex = m_MorphKeyIndicies[i];
 
-		// 매핑된 대상이 없다면? 스킵합니다.
 		if (iTargetIndex == -1) continue;
 		if (iTargetIndex >= modelWeights.size()) continue;
 
-		// 현재 시간 가중치 계산
 		_float fWeight = m_MorphMeshChannels[i]->Get_CurrentWeight(m_fCurrentTrackPosition, &m_CurrentMorphCurveIndicies[i]);
 
-		// 매핑된 타겟인덱스에 가중치 부여.
 		modelWeights[iTargetIndex] = fWeight;
 	}
 
