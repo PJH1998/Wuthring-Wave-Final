@@ -220,7 +220,7 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	else
 	{
 		m_GpuBlendInfo.IsBlendEnabled = true;
-		const _float fBlendStep = fTimeDelta * BLEND_INTERP_SPEED; // 보간 1스텝 크기
+		const _float fBlendStep = fTimeDelta * BLEND_INTERP_SPEED;
 		Update_AxisBlend(
 			m_GpuBlendInfo.fBlendParamLR,
 			m_States[INPUT_L],

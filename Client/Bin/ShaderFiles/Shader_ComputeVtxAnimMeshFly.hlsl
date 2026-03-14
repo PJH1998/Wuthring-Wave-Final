@@ -77,8 +77,16 @@ cbuffer AnimationInfoCB : register(b0)
     uint g_WeightClipDU;
 }
 
+float4 InverseQuaternion(float4 q)
+{
+    float lenSq = dot(q, q);
+    if (lenSq < 1e-6f)
+        return float4(0.f, 0.f, 0.f, 1.f);
 
-float4 mulQuaternion(float4 q1, float4 q2)
+    return normalize(float4(-q.x, -q.y, -q.z, q.w));
+}
+
+float4 MulQuaternion(float4 q1, float4 q2)
 {
     float4 result;
     result.w = q1.w * q2.w - dot(q1.xyz, q2.xyz);
@@ -87,7 +95,7 @@ float4 mulQuaternion(float4 q1, float4 q2)
 }
 
 // 쿼터니언 slerp 직접 구현
-float4 customSlerp(float4 q1, float4 q2, float t)
+float4 CustomSlerp(float4 q1, float4 q2, float t)
 {
    // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
@@ -151,25 +159,23 @@ matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
     return m;
 }
 
+SRTKeyFrame MakeIdentitySRT()
+{
+    SRTKeyFrame srt;
+    srt.scale = float4(1.f, 1.f, 1.f, 1.f);
+    srt.rotation = float4(0.f, 0.f, 0.f, 1.f);
+    srt.translation = float4(0.f, 0.f, 0.f, 1.f);
+    return srt;
+}
+
 SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
-    SRTKeyFrame result;
-    
-    // 1. 현재 애니메이션 정보 가져오기
+    SRTKeyFrame result = MakeIdentitySRT();
     AnimInfo anim = g_AllAnimInfos[animIndex];
-    
-    // 2. 단위 SRT 설정. 
-    result.scale = float4(1.f, 1.f, 1.f, 1.f);
-    result.rotation = float4(0.f, 0.f, 0.f, 1.f); // 단위 쿼터니언 (w = 1)
-    result.translation = float4(0.f, 0.f, 0.f, 1.f);
-    
-    // 2. 현재 뼈에 해당하는 채널 찾기
+
     int channelIndex = -1;
-    for (uint i = 0; i < anim.iNumChannels; i++)
+    for (uint i = 0; i < anim.iNumChannels; ++i)
     {
-        // globalChannel Index인 이유 => g_ChannelInfos는 모든 애니메이션의 채널 정보를 담고 있기 때문.
-        // 현재 채널인덱스를 이용해서 애니메이션 배열에서 
-        // 본인덱스를 순회해서 스레드가 처리해야하는 본인덱스인지 찾는다.
         uint globalChannelIdx = anim.iStartChannelIndexOffset + i;
         if (g_ChannelInfos[globalChannelIdx].iBoneIndex == boneIndex)
         {
@@ -177,76 +183,49 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
             break;
         }
     }
-    
-    // 3. 애니메이션에서 이 뼈에 해당하는 채널이 없으면, 단위 행렬을 설정하고 종료
+
     if (channelIndex == -1)
-    {
         return result;
-    }
-    
-    // 4. 가지고 있는 채널 인덱스로 채널 정보 가져오기.
+
     GPUChannelInfo channel = g_ChannelInfos[channelIndex];
 
-    // 5. 예외케이스 => 키프레임이 1개 이하면 보간할 필요가 없음 (정적인 뼈 이므로)
-    // => 따로 보간 작업을 하지 않고 변환 행렬을 만들어서 boneIndex 위치에 바로 저장.
     if (channel.iNumKeyframes <= 1)
     {
-        // 첫 번째 키프레임의 변환을 그대로 사용
         GPUKeyFrame staticKey = g_AllKeyframes[channel.iStartKeyframeOffset];
         result.scale = staticKey.vScale;
         result.rotation = staticKey.vRotation;
         result.translation = staticKey.vTranslation;
         return result;
     }
-    
-    // 6. Ribbon Animation의 경우 키프레임이 2개이면 항상 단위 SRT 반환
-    if (isRibbon == true && channel.iNumKeyframes == 2)
-    {
+
+    if (isRibbon && channel.iNumKeyframes == 2)
         return result;
-    }
-    
-    // 7. 보간할 두 개의 키프레임을 찾을 인덱스를 채널의 시작 오프셋으로 초기화.
+
     uint keyframeIndex = channel.iStartKeyframeOffset;
-    
-    
-    // 8. 채널의 모든 키프레임을 순회하면서 다음 키프레임의 시간이 현재 재생 기간 보다 크면 
-    // 해당 키프레임과 그 다음 키프레임 사이를 보간하면됨.
     for (uint k = 0; k < channel.iNumKeyframes - 1; ++k)
     {
-        // 다음 키프레임의 시간이 현재 재생 시간보다 크면, 현재 k와 k + 1 사이에서 보간하면 됨
-        if (g_AllKeyframes[channel.iStartKeyframeOffset + k + 1].fTrackPosition > fTrackPosition)
+        uint nextIndex = channel.iStartKeyframeOffset + k + 1;
+        if (g_AllKeyframes[nextIndex].fTrackPosition > fTrackPosition)
         {
             keyframeIndex = channel.iStartKeyframeOffset + k;
-            break; // 올바른 구간을 찾았으므로 반복 중단
+            break;
         }
-        // 끝까지 못찾았다면 마지막-1 인덱스를 사용하게 됨
         keyframeIndex = channel.iStartKeyframeOffset + k;
     }
-    
+
     GPUKeyFrame key1 = g_AllKeyframes[keyframeIndex];
     GPUKeyFrame key2 = g_AllKeyframes[keyframeIndex + 1];
 
-    // 9. 두 키프레임 사이의 보간 비율 계산
-    float blendFactor = 0.f;
+    float blendFactor = 0.0f;
     float segmentDuration = key2.fTrackPosition - key1.fTrackPosition;
-    
     if (segmentDuration > 0.0f)
     {
-        // 선형 보간
-        blendFactor = (g_TrackPosition - key1.fTrackPosition) / segmentDuration;
+        blendFactor = (fTrackPosition - key1.fTrackPosition) / segmentDuration;
     }
 
-    // ... SRT 보간 코드 ... => 의심.
-    float4 interpScale = lerp(key1.vScale, key2.vScale, blendFactor);
-    float4 interpTranslation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
-    
-    // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 customSlerp 사용
-    float4 interpRotation = customSlerp(key1.vRotation, key2.vRotation, blendFactor);
-   
-    result.scale = interpScale;
-    result.rotation = interpRotation;
-    result.translation = interpTranslation;
-    
+    result.scale = lerp(key1.vScale, key2.vScale, blendFactor);
+    result.rotation = CustomSlerp(key1.vRotation, key2.vRotation, blendFactor);
+    result.translation = lerp(key1.vTranslation, key2.vTranslation, blendFactor);
     return result;
 }
 
@@ -257,7 +236,7 @@ SRTKeyFrame Blend1D_SRT(uint clipA_idx, uint clipB_idx, float t, uint boneIndex,
 
     SRTKeyFrame result;
     result.scale = lerp(srtA.scale, srtB.scale, t);
-    result.rotation = customSlerp(srtA.rotation, srtB.rotation, t);
+    result.rotation = CustomSlerp(srtA.rotation, srtB.rotation, t);
     result.translation = lerp(srtA.translation, srtB.translation, t);
     return result;
 }
@@ -281,11 +260,11 @@ SRTKeyFrame Calculate_Delta(SRTKeyFrame targetSRT, SRTKeyFrame weightSRT)
     
     float4 invWeightRot = float4(-weightSRT.rotation.x, -weightSRT.rotation.y, -weightSRT.rotation.z, weightSRT.rotation.w);
     if (dot(invWeightRot, invWeightRot) < 1e-6f) 
-        invWeightRot = float4(0, 0, 0, 1); // Identity Quaternion
+        invWeightRot = float4(0, 0, 0, 1); 
     else
         invWeightRot = normalize(invWeightRot);
     
-    delta.rotation = mulQuaternion(targetSRT.rotation, invWeightRot);
+    delta.rotation = MulQuaternion(targetSRT.rotation, invWeightRot);
     
     delta.translation = targetSRT.translation - weightSRT.translation;
     return delta;
@@ -295,69 +274,105 @@ SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
 {
     SRTKeyFrame result;
     result.scale = baseSRT.scale * deltaSRT.scale;
-    result.rotation = mulQuaternion(deltaSRT.rotation, baseSRT.rotation);
+    result.rotation = MulQuaternion(deltaSRT.rotation, baseSRT.rotation);
     result.translation = baseSRT.translation + deltaSRT.translation;
     return result;
+}
+
+SRTKeyFrame GetDirectionalTargetSRT(
+    uint boneIndex,
+    float blendParam,
+    uint midClip,
+    uint negativeClip,
+    uint positiveClip,
+    float trackPos)
+{
+    SRTKeyFrame target = CalculateSRT(boneIndex, midClip, false, trackPos);
+
+    if (blendParam > 0.0f)
+    {
+        target = Blend1D_SRT(midClip, positiveClip, saturate(blendParam), boneIndex, trackPos);
+    }
+    else if (blendParam < 0.0f)
+    {
+        target = Blend1D_SRT(midClip, negativeClip, saturate(-blendParam), boneIndex, trackPos);
+    }
+
+    return target;
+}
+
+SRTKeyFrame ApplyDirectionalAdditive(
+    SRTKeyFrame baseSRT,
+    uint boneIndex,
+    float blendParam,
+    uint weightClip,
+    uint midClip,
+    uint negativeClip,
+    uint positiveClip,
+    float trackPos)
+{
+    SRTKeyFrame weightSRT = CalculateSRT(boneIndex, weightClip, false, trackPos);
+    SRTKeyFrame targetSRT = GetDirectionalTargetSRT(
+        boneIndex,
+        blendParam,
+        midClip,
+        negativeClip,
+        positiveClip,
+        trackPos
+    );
+
+    SRTKeyFrame deltaSRT = Calculate_Delta(targetSRT, weightSRT);
+    return Apply_Additive(baseSRT, deltaSRT);
 }
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     uint boneIndex = dispatchThreadID.x;
-    
+
     SRTKeyFrame finalSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
-    
+
     if (g_IsBlendEnabled)
     {
-        SRTKeyFrame weightLR_SRT = CalculateSRT(boneIndex, g_WeightClipLR, false, g_TrackPosition);
-        SRTKeyFrame targetLR_SRT = weightLR_SRT;
-        
-        float lr_t = g_BlendParamLR;
-        if (lr_t > 0.0f)
-        {
-            targetLR_SRT = Blend1D_SRT(g_ClipIndexMidLR, g_ClipIndexR, saturate(lr_t), boneIndex, g_TrackPosition);
-        }
-        else if (lr_t < 0.0f)
-        {
-            targetLR_SRT = Blend1D_SRT(g_ClipIndexMidLR, g_ClipIndexL, saturate(-lr_t), boneIndex, g_TrackPosition);
-        }
-        
-        SRTKeyFrame deltaLR = Calculate_Delta(targetLR_SRT, weightLR_SRT);
-        finalSRT = Apply_Additive(finalSRT, deltaLR);
+        finalSRT = ApplyDirectionalAdditive(
+            finalSRT,
+            boneIndex,
+            g_BlendParamLR,
+            g_WeightClipLR,
+            g_ClipIndexMidLR,
+            g_ClipIndexL,
+            g_ClipIndexR,
+            g_TrackPosition
+        );
 
-        SRTKeyFrame weightDU_SRT = CalculateSRT(boneIndex, g_WeightClipDU, false, g_TrackPosition);
-        SRTKeyFrame targetDU_SRT = weightDU_SRT;
-        
-        float du_t = g_fBlendParamDU;
-        if (du_t > 0.0f)
-        {
-            targetDU_SRT = Blend1D_SRT(g_ClipIndexMidDU, g_ClipIndexU, saturate(du_t), boneIndex, g_TrackPosition);
-        }
-        else if (du_t < 0.0f)
-        {
-            targetDU_SRT = Blend1D_SRT(g_ClipIndexMidDU, g_ClipIndexD, saturate(-du_t), boneIndex, g_TrackPosition);
-        }
-
-        SRTKeyFrame deltaUD = Calculate_Delta(targetDU_SRT, weightDU_SRT);
-        finalSRT = Apply_Additive(finalSRT, deltaUD);
+        finalSRT = ApplyDirectionalAdditive(
+            finalSRT,
+            boneIndex,
+            g_fBlendParamDU,
+            g_WeightClipDU,
+            g_ClipIndexMidDU,
+            g_ClipIndexD,
+            g_ClipIndexU,
+            g_TrackPosition
+        );
     }
-    
+
     matrix result_matrix;
-    if (1 == g_RibAnimUsed)
+    if (g_RibAnimUsed == 1)
     {
         SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        
+
         float4 finalScale = ribbonSRT.scale * finalSRT.scale;
-        float4 finalRotation = mulQuaternion(ribbonSRT.rotation, finalSRT.rotation);
-        float4 finalTranslation = ribbonSRT.translation +
-                                 (finalSRT.translation - float4(0, 0, 0, 1));
+        float4 finalRotation = MulQuaternion(ribbonSRT.rotation, finalSRT.rotation);
+        float4 finalTranslation = ribbonSRT.translation + (finalSRT.translation - float4(0, 0, 0, 1));
+
         result_matrix = ComposeMatrixFromSRT(finalScale, finalRotation, finalTranslation);
     }
     else
     {
         result_matrix = ComposeMatrixFromSRT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
     }
-    
+
     g_OutLocalMatrices[boneIndex] = result_matrix;
 }
 
