@@ -10,8 +10,8 @@
 
 namespace
 {
-	constexpr float LOCKON_FORWARD_WEIGHT = 0.3f;
-	constexpr float LOCKON_RIGHT_WEIGHT = 0.7f;
+	constexpr _float LOCKON_FORWARD_WEIGHT = 0.3f;
+	constexpr _float LOCKON_RIGHT_WEIGHT = 0.7f;
 }
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -3,6 +3,11 @@
 #include "Rover.h"
 #include "StateMachine.h"
 
+namespace
+{
+	constexpr _float BLEND_INTERP_SPEED = 1.0f;
+}
+
 HRESULT CRoverAirFly::Initialize(CCharacter* pCharacter)
 {
     if (FAILED(CAirState::Initialize(pCharacter)))
@@ -283,21 +288,20 @@ void CRoverAirFly::Update_FlyAnimations(_float fTimeDelta)
 	else
 	{
 		m_GpuBlendInfo.IsBlendEnabled = true;
-		const _float fBlendInterpSpeed = 1.0f;
-		const _float fInterpStep = fTimeDelta * fBlendInterpSpeed;
+		const _float fBlendStep = fTimeDelta * BLEND_INTERP_SPEED;
 
 		Update_AxisBlend(
 			m_GpuBlendInfo.fBlendParamLR,
 			m_States[INPUT_L],
 			m_States[INPUT_R],
-			fInterpStep
+			fBlendStep
 		);
 
 		Update_AxisBlend(
 			m_GpuBlendInfo.fBlendParamDU,
 			m_States[INPUT_D],
 			m_States[INPUT_ACCEL] && m_States[INPUT_U],
-			fInterpStep
+			fBlendStep
 		);
 
 		m_GpuBlendInfo.fBlendParamLR = Clamp(m_GpuBlendInfo.fBlendParamLR, -1.f, 1.f);
