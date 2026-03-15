@@ -61,22 +61,11 @@ void CAugustaRopeDrag::OnUpdate(_float fTimeDelta)
 {
 	CInteractionState::OnUpdate(fTimeDelta);
 
-	// 0. 키입력 체크
 	Handle_Input();
-
-	// 1. 애니메이션 갱신
 	Update_RopeAnimation(fTimeDelta);
-
-	// 2. 물리 체크
 	Check_Physics(fTimeDelta);
-
-	// 3. 전환 체크
 	Check_StateTransition(fTimeDelta);
-
-	// 상태 리셋;
 	State_Reset();
-
-	//m_pAugusta->Rotate_GrappleTarget(); // 회전.
 }
 
 void CAugustaRopeDrag::OnExit()
@@ -86,7 +75,6 @@ void CAugustaRopeDrag::OnExit()
 	m_eRopeDir = ROPEDIR::END;
 	m_eRopeStep = ROPESTEP::STEP_NONE;
 	m_pAugusta->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
-
 	m_pAugusta->Rope_Active(false);
 }
 

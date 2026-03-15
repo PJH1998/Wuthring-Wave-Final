@@ -164,7 +164,7 @@ matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 
 
 
-SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, float fTrackPosition, bool isRibbon)
 {
     SRTKeyFrame result = MakeIdentitySRT();
     AnimInfo anim = g_AllAnimInfos[animIndex];
@@ -213,7 +213,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     uint boneIndex = dispatchThreadID.x;
     
       // 1. Action Animation의 SRT 가져오기
-    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, g_TrackPosition, false);
    
     matrix result_matrix;
     
@@ -221,7 +221,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     if (1 == g_RibAnimUsed)
     {
         // 2. Ribbon Animation의 SRT 가져오기
-        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, g_TrackPosition, true);
         
         // 변화량 가산 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;

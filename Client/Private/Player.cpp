@@ -77,13 +77,11 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
-    //m_iCurrentCharacterIdx = GALBRENA; // 갈브레나로 테스트
+    m_iCurrentCharacterIdx = ROVER; 
 
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
 	Safe_AddRef(m_pPlayerStatus);
 
-	// 6. Ability 참조 제공
 	for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
 	{
 		if (nullptr != m_Characters[i])
@@ -91,17 +89,14 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 	}
 
 
-	// 7. 기본 상태 FLIGHT
 	m_eUtilityType = UI_TAB_UTILITY::FLIGHT;
 	
-	// 8. 기본 상태 모두 적용하기.
 	for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
 	{
 		if (nullptr != m_Characters[i])
 			m_Characters[i]->Sync_UtilityType_FromPlayer(m_eUtilityType);
 	}
 
-	// 9. 타이머 지정.
 	m_fChangeCoolTime = 3.f;
 
 	
@@ -169,7 +164,6 @@ void CPlayer::Render_Shadow()
 #pragma endregion
 
 #pragma region UI Interface
-// UI Transfer Current Ability Pointer
 CAbility* CPlayer::Get_AbilityCom(CHARACTERTYPE eCharacterType)
 {
 	if (NONE == eCharacterType)
@@ -191,7 +185,6 @@ _bool CPlayer::IsQTEPossible(CHARACTERTYPE eCharacterType)
 	return fHarmony >= pAbility->Get_MaxHarmony();
 }
 
-// 이전 캐릭터에 대한 QTE 실행.
 void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 {
 	if (NONE == eCharacterType)
@@ -201,28 +194,20 @@ void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
 	if (nullptr == pAbility)
 		return;
 
-	// 해당 캐릭터의 Harmony Gauge 초기화
 	pAbility->Set_HarmonyGauge(0.f);
 
-	// 캐릭터 상태변경.
 	m_iHarmonyCharacterIdx = m_iPrevCharacterIdx;
 
-	// CallBack 제어
 	m_Characters[m_iHarmonyCharacterIdx]->Set_HarmonyEndCallback([this, eCharacterType]() {
 		this->On_HarmonyEnd(eCharacterType);
 		});
 
-	// 이전 캐릭터한테 QTE 정보 알림. => 별개의 Transform으로 움직여야함.
-	// Collider도 제어되면안됨.
 	m_Characters[m_iHarmonyCharacterIdx]->Activate(true);
 	m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(true);
 	m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(false);
 
-	//  UI에 캐릭 변경 불가능 상태를 줘야함
 	m_IsQTE = true;
 	m_pPlayerStatus->Bind_QTE(m_IsQTE);
-
-
 }
 _vector CPlayer::Get_LookVector()
 {
@@ -251,7 +236,6 @@ const _float4x4* CPlayer::Get_PlayerMatrixPtr()
 
 void CPlayer::Handle_Input()
 {
-	// Scan 키 설정. => T키로 변경 예정.
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::T), KEYSTATE::UP) &&
 		UI_TAB_UTILITY::SENSOR == m_eUtilityType) //
 	{
@@ -263,8 +247,8 @@ void CPlayer::Handle_Input()
 		m_pGameInstance->Spawn_PoolingObject_ForStatic(TEXT("Pooling_GameObject_Scan"), WorldPosMatrix, nullptr);
 	}
 
-	if (!m_IsQTE && // QTE 도중이면 플레이어 변경 불가능.
-		!m_IsEventLock) // ANIMSTOP 도중이면 플레이어 변경 불가능.
+	if (!m_IsQTE && 
+		!m_IsEventLock)
 	{
 		for (const auto& val : m_SwitchKeys)
 		{
@@ -276,7 +260,6 @@ void CPlayer::Handle_Input()
 			return;
 		}
 
-		// Tab을 뗐을 때: UI를 끄고, 선택된 결과를 받아와서 플레이어 상태를 갱신한다.
 		if (m_pGameInstance->Get_DIKeyState(DIK_TAB) == KEYSTATE::DOWN)
 			m_pGameSystem->Show_TabUtilityUI(ENUM_CLASS(m_eUtilityType));
 
@@ -284,11 +267,10 @@ void CPlayer::Handle_Input()
 		{
 			_uint iSelectedUtility = m_pGameSystem->HideNGet_TabUtilityUI();
 
-			if (iSelectedUtility != ENUM_CLASS(UI_TAB_UTILITY::NOTHING)) // NOTHING은 예시
+			if (iSelectedUtility != ENUM_CLASS(UI_TAB_UTILITY::NOTHING))
 			{
 				m_eUtilityType = static_cast<UI_TAB_UTILITY>(iSelectedUtility);
 
-				// 변경 즉시 현재 모든 캐릭터에게도 적용
 				for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
 				{
 					if (nullptr != m_Characters[i])
@@ -766,18 +748,14 @@ void CPlayer::Sorting_Target()
 
     if (0 < m_TargetCandidates.size())
     {
-        //m_pTargetTransform = m_TargetTransforms[0];
 		m_TargetInfo = m_TargetCandidates[0];
 		m_TargetInfo.IsActive = true;
 
-		// 몬스터가 탐지되었고, 전투 
-		// 이 진행 중이라면.
 		if (m_pGameSystem->IsModinaryBattle())
 			m_IsBattle = true;
     }
 	else
 	{
-		// 몬스터가 탐지되어 있지 않은데 전투 상태라면?
 		if (m_IsBattle)
 		{
 			m_pGameSystem->Engage_Battle(false);
@@ -791,28 +769,22 @@ void CPlayer::Sorting_Target()
 void CPlayer::Toggle_LockOn()
 {
 
-	// 1. 락온 키 입력 (상태 전환)
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
 	{
 		m_IsLockOn = !m_IsLockOn;
 
 		if (m_IsLockOn)
 		{
-			// 현재 타겟을 고정 락온 타겟으로 설정.
-			//m_pLockOnTargetTransform = m_pTargetTransform;
 			m_LockOnTargetInfo = m_TargetInfo;
 		}
 		else
 		{
-			//m_pLockOnTargetTransform = nullptr;
 			m_LockOnTargetInfo.Reset();
 		}
 	}
 
-	// 2. 매프레임 검증
 	if (m_IsLockOn)
 	{
-		// TargetTransform이 없거나.. LockOnTargetTransform이 현재 검색된 Transform 중에 없다면?
 		if (nullptr == m_TargetInfo.pTransform || !Is_TargetValid(m_LockOnTargetInfo.pTransform))
 		{
 			m_IsLockOn = false;
@@ -820,32 +792,26 @@ void CPlayer::Toggle_LockOn()
 		}
 	}
 
-	// 3. 캐릭터와 카메라에 최종 타겟 정보 전송.
 	CTransform* pFinalTarget = nullptr;
 	CCharacter* pCurrentCharacter = (m_iCurrentCharacterIdx != NONE) ?
 		m_Characters[m_iCurrentCharacterIdx] : nullptr;
 
 
-	// 4. 락온 해제.
 	if (nullptr != m_Characters[m_iCurrentCharacterIdx])
 	{
 		if (m_Characters[m_iCurrentCharacterIdx]->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE)))
 		{
-			// 락온을 해제해라.
 			m_IsLockOn = false;
 			m_LockOnTargetInfo.pTransform = nullptr;
 		}
 	}
 
-	// 5. 락온상태라면?
 	if (m_IsLockOn)
 	{
-		// 하드 락온
 		pFinalTarget = m_LockOnTargetInfo.pTransform;
 		if (pCurrentCharacter)
 			pCurrentCharacter->Set_LockOn(pFinalTarget, m_IsLockOn);
 
-		// LockOn UI 설정.
 		Calc_LockOnPos();
 		_float3 vPos = {};
 		XMStoreFloat3(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
@@ -856,7 +822,6 @@ void CPlayer::Toggle_LockOn()
 	else
 	{
 		m_pGameSystem->Detach_LockOnUI();
-		// 소프트 락온.
 		pFinalTarget = m_TargetInfo.pTransform;
 		if (pCurrentCharacter)
 			pCurrentCharacter->Set_AutoLockOn(pFinalTarget, m_IsLockOn); // Character의 Set_AutoLockOn 호출
@@ -864,10 +829,8 @@ void CPlayer::Toggle_LockOn()
 	}
 
 
-	// 6. 카메라 업데이트.
 	m_pSpringCamera->Lock_On(pFinalTarget, m_TargetInfo.pSocketMatrix, m_IsLockOn);
 
-	// 7. Target 정보 초기화.
 	m_TargetInfo.Reset();
 }
 
@@ -875,9 +838,6 @@ void CPlayer::Toggle_LockOn()
 
 void CPlayer::Sorting_GrappleTarget()
 {
-	// 거리순으로 정렬해서 넣어줍니다.
-
-
 	sort(m_GrappleCandidates.begin(), m_GrappleCandidates.end(), [this](const GRAPPLE_INFO& src, const GRAPPLE_INFO& dst)->_bool {
 		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
 		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
@@ -900,15 +860,14 @@ void CPlayer::Sorting_GrappleTarget()
 
 void CPlayer::Toggle_Grapple()
 {
-	// 1. 현재 T에 들어가 있는 키가 Grapple 이라면?
 	if (m_eUtilityType == UI_TAB_UTILITY::GRAPPLE)
 		m_Characters[m_iCurrentCharacterIdx]->Bind_GrappleTarget(
 			m_TargetGrappleInfo
 		);
 }
+
 void CPlayer::Sorting_ThrowTarget()
 {
-	// 거리순으로 정렬해서 넣어줍니다.
 	sort(m_ThrowCandidates.begin(), m_ThrowCandidates.end(), [this](const THROW_INFO& src, const THROW_INFO& dst)->_bool {
 		CTransform* pSrcTransform = static_cast<CTransform*>(src.pTransform);
 		CTransform* pDstTransform = static_cast<CTransform*>(dst.pTransform);
@@ -944,13 +903,9 @@ void CPlayer::Process_CollideEnemy(const CALLBACK_CLIENT* pcallDesc)
 	{
 
 		lock_guard<mutex> lock(m_Mutex);
-		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
 		
-		// Vector 컨테이너에 넣어줄 거면 
 		m_TargetCandidates.push_back({ pTargetTransform, pcallDesc->pSocketMatrix });
-		//m_TargetTransforms.push_back(pTargetTransform);
 
-		//m_pTargetTransform = nullptr;
 		m_TargetInfo.Reset();
 	}
 }
@@ -1203,13 +1158,12 @@ void CPlayer::UpdateRigidbodies(_float fTimeDelta)
 
 void CPlayer::Update_Targeting(_float fTimeDelta)
 {
-	// 3. Rigidbody Update => Camera 
-	Sorting_GrappleTarget(); // Grapple Target Sorting;
+	Sorting_GrappleTarget();
 	Toggle_Grapple();
 	Sorting_ThrowTarget();
 	Toggle_Throw();
-	Sorting_Target(); // 4. Target Sorting
-	Toggle_LockOn(); // 5. Lock On
+	Sorting_Target();
+	Toggle_LockOn();
 
 	m_GrappleCandidates.clear();
 	m_TargetCandidates.clear();
@@ -1417,12 +1371,10 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 		OnCollider_GrappleDuring(iLayer, pDesc, Manifold);
 	});
 
-	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
 	m_fColliderRadius = 0.4f;
 	m_fColliderHeight = 0.5f;
 	
-	// Collider를 Player가 소유하고 Character들은 AddRef로 참조
 	CCollider::COLLIDER_DESC ColliderDesc{};
 	ColliderDesc.vPos = pDesc->vPosition;
 	ColliderDesc.vOffset = m_vColliderOffSet;
@@ -1435,13 +1387,10 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 		CRASH("Collider");
 
 
-	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = 700.f;
 	m_CallBack.pCondition = &m_iCondition;
 	m_pColliderCom->Set_Desc(&m_CallBack);
-
-	//m_pColliderCom->Set_Desc(m_pTransformCom);
 
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);

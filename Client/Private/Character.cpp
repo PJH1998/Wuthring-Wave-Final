@@ -12,6 +12,9 @@ namespace
 {
 	constexpr _float LOCKON_FORWARD_WEIGHT = 0.3f;
 	constexpr _float LOCKON_RIGHT_WEIGHT = 0.7f;
+	constexpr _float ROPE_HEIGHT_WEIGHT = 2.f;
+	constexpr _float CLIMB_HEIGHT_WEIGHT = 2.f;
+	constexpr _float CLIMB_ABOVE_WEIGHT = 1.5f;
 }
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -224,8 +227,7 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 	_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
 	vLook = XMVector3Normalize(vLook);
 
-	// 가슴 높이에서 전방 Radius로 레이 발사
-	_float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
+	_float fOffsetY = m_fColliderHeight * CLIMB_HEIGHT_WEIGHT + m_fColliderRadius;
 	_vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
 	_vector vEnd = vStart + vLook * (m_fColliderRadius + 0.1f); // Collider Radius 고려.
 
@@ -250,7 +252,7 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 
 	// 머리위쪽에서 정면으로 Ray 발사.
-	_float fYOffset = m_fColliderHeight + m_fColliderRadius * 1.5f;
+	_float fYOffset = m_fColliderHeight + m_fColliderRadius * CLIMB_ABOVE_WEIGHT;
 	_vector vStart = vPos + XMVectorSet(0.f, fYOffset, 0.f, 0.f);
 	_vector vEnd = vStart + vLook * (m_fColliderRadius + fEndRayOffset);
 
@@ -739,31 +741,28 @@ _float CCharacter::Get_GrappleDistance()
 	return fDistance;
 }
 
-// 로프 방향 연산.
 ROPEDIR CCharacter::Calculate_RopeDirection()
 {
 	if (nullptr == m_GrappleInfo.pTransform)
 		return ROPEDIR::END;
 
-	// 1. 방향 판별할 Y
-	_float fTotalHeight = m_fColliderRadius * 2.f + m_fColliderHeight;
+	_float fTotalHeight = m_fColliderRadius * ROPE_HEIGHT_WEIGHT + m_fColliderHeight;
 	
 	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
 
-	// 2. 높이값 추출
 	_float fTargetY = XMVectorGetY(vTargetPos);
 	_float fMyY = XMVectorGetY(vMyPos);
 
-	_float fFeetLevel = fMyY; // Transform이 발에 있으므로?
+	_float fFeetLevel = fMyY;
 	_float fEyeLevel = fMyY + fTotalHeight;
 
 	if (fTargetY > fEyeLevel)
-		return ROPEDIR::U; // 위 (눈보다 위)
+		return ROPEDIR::U;
 	else if (fTargetY < fFeetLevel)
-		return ROPEDIR::D; // 아래 (발보다 아래)
+		return ROPEDIR::D;
 	else
-		return ROPEDIR::F; // 정면 (눈과 발 사이)
+		return ROPEDIR::F;
 
 	return ROPEDIR::END;
 }

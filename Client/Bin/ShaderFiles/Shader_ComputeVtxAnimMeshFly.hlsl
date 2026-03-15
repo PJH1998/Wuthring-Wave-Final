@@ -94,29 +94,24 @@ float4 MulQuaternion(float4 q1, float4 q2)
     return normalize(result);
 }
 
-// 쿼터니언 slerp 직접 구현
 float4 CustomSlerp(float4 q1, float4 q2, float t)
 {
-   // 1. 입력 쿼터니언을 정규화해서 안정성 확보
     q1 = normalize(q1);
     q2 = normalize(q2);
 
     float cos_theta = dot(q1, q2);
 
-    // 짧은 경로 회전 보장
     if (cos_theta < 0.0f)
     {
         q2 = -q2;
         cos_theta = -cos_theta;
     }
     
-    // 두 쿼터니언이 거의 같으면, lerp로 대체 (0으로 나누기 방지)
     if (cos_theta > 0.9995f)
     {
         return normalize(lerp(q1, q2, t));
     }
 
-    // acos 입력값 보호 (필수)
     cos_theta = clamp(cos_theta, -1.0f, 1.0f);
     
     float theta = acos(cos_theta);
@@ -125,11 +120,9 @@ float4 CustomSlerp(float4 q1, float4 q2, float t)
     float w1 = sin((1.0f - t) * theta) / sin_theta;
     float w2 = sin(t * theta) / sin_theta;
 
-    // 3. 최종 결과도 정규화해서 오차 누적 방지
     return normalize(q1 * w1 + q2 * w2);
 }
 
-// 헬퍼 함수: SQT(Scale, Quaternion, Translation)로부터 변환 행렬을 생성합니다.
 // 이거 문젠가?
 matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 {
@@ -168,7 +161,7 @@ SRTKeyFrame MakeIdentitySRT()
     return srt;
 }
 
-SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, float fTrackPosition, bool isRibbon)
 {
     SRTKeyFrame result = MakeIdentitySRT();
     AnimInfo anim = g_AllAnimInfos[animIndex];
@@ -231,8 +224,8 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
 
 SRTKeyFrame Blend1D_SRT(uint clipA_idx, uint clipB_idx, float t, uint boneIndex, float trackPos)
 {
-    SRTKeyFrame srtA = CalculateSRT(boneIndex, clipA_idx, false, trackPos);
-    SRTKeyFrame srtB = CalculateSRT(boneIndex, clipB_idx, false, trackPos);
+    SRTKeyFrame srtA = CalculateSRT(boneIndex, clipA_idx, trackPos, false);
+    SRTKeyFrame srtB = CalculateSRT(boneIndex, clipB_idx, trackPos, false);
 
     SRTKeyFrame result;
     result.scale = lerp(srtA.scale, srtB.scale, t);
@@ -285,23 +278,23 @@ SRTKeyFrame GetDirectionalTargetSRT(
     uint midClip,
     uint negativeClip,
     uint positiveClip,
-    float trackPos)
+    float fTrackPosition)
 {
-    SRTKeyFrame target = CalculateSRT(boneIndex, midClip, false, trackPos);
+    SRTKeyFrame target = CalculateSRT(boneIndex, midClip, fTrackPosition, false);
 
     if (blendParam > 0.0f)
     {
-        target = Blend1D_SRT(midClip, positiveClip, saturate(blendParam), boneIndex, trackPos);
+        target = Blend1D_SRT(midClip, positiveClip, saturate(blendParam), boneIndex, fTrackPosition);
     }
     else if (blendParam < 0.0f)
     {
-        target = Blend1D_SRT(midClip, negativeClip, saturate(-blendParam), boneIndex, trackPos);
+        target = Blend1D_SRT(midClip, negativeClip, saturate(-blendParam), boneIndex, fTrackPosition);
     }
 
     return target;
 }
 
-SRTKeyFrame ApplyDirectionalAdditive(
+SRTKeyFrame ApplyDirectionalBlendToPose(
     SRTKeyFrame baseSRT,
     uint boneIndex,
     float blendParam,
@@ -311,7 +304,7 @@ SRTKeyFrame ApplyDirectionalAdditive(
     uint positiveClip,
     float trackPos)
 {
-    SRTKeyFrame weightSRT = CalculateSRT(boneIndex, weightClip, false, trackPos);
+    SRTKeyFrame weightSRT = CalculateSRT(boneIndex, weightClip, trackPos, false);
     SRTKeyFrame targetSRT = GetDirectionalTargetSRT(
         boneIndex,
         blendParam,
@@ -330,12 +323,15 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     uint boneIndex = dispatchThreadID.x;
 
-    SRTKeyFrame finalSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    SRTKeyFrame basePoseSRT = CalculateSRT(boneIndex, g_AnimIndex, g_TrackPosition, false);
+
+    SRTKeyFrame lrBlendedPoseSRT = basePoseSRT;
+    SRTKeyFrame duBlendedPoseSRT = lrBlendedPoseSRT;
 
     if (g_IsBlendEnabled)
     {
-        finalSRT = ApplyDirectionalAdditive(
-            finalSRT,
+        lrBlendedPoseSRT = ApplyDirectionalBlendToPose(
+            basePoseSRT,
             boneIndex,
             g_BlendParamLR,
             g_WeightClipLR,
@@ -345,8 +341,8 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
             g_TrackPosition
         );
 
-        finalSRT = ApplyDirectionalAdditive(
-            finalSRT,
+        duBlendedPoseSRT = ApplyDirectionalBlendToPose(
+            lrBlendedPoseSRT,
             boneIndex,
             g_fBlendParamDU,
             g_WeightClipDU,
@@ -355,24 +351,42 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
             g_ClipIndexU,
             g_TrackPosition
         );
+
     }
 
-    matrix result_matrix;
+    SRTKeyFrame outputPoseSRT = basePoseSRT;
+    if (g_IsBlendEnabled)
+    {
+        outputPoseSRT = duBlendedPoseSRT;
+    }
+
+    matrix_rm outputLocalMatrix;
+
     if (g_RibAnimUsed == 1)
     {
-        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        SRTKeyFrame ribbonPoseSRT =
+            CalculateSRT(boneIndex, g_RibbonAnimIndex, g_TrackPosition, true);
 
-        float4 finalScale = ribbonSRT.scale * finalSRT.scale;
-        float4 finalRotation = MulQuaternion(ribbonSRT.rotation, finalSRT.rotation);
-        float4 finalTranslation = ribbonSRT.translation + (finalSRT.translation - float4(0, 0, 0, 1));
+        float4 combinedScale = ribbonPoseSRT.scale * outputPoseSRT.scale;
+        float4 combinedRotation = MulQuaternion(ribbonPoseSRT.rotation, outputPoseSRT.rotation);
+        float4 combinedTranslation = ribbonPoseSRT.translation +
+                                     (outputPoseSRT.translation - float4(0.f, 0.f, 0.f, 1.f));
 
-        result_matrix = ComposeMatrixFromSRT(finalScale, finalRotation, finalTranslation);
+        outputLocalMatrix = ComposeMatrixFromSRT(
+            combinedScale,
+            combinedRotation,
+            combinedTranslation
+        );
     }
     else
     {
-        result_matrix = ComposeMatrixFromSRT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
+        outputLocalMatrix = ComposeMatrixFromSRT(
+            outputPoseSRT.scale,
+            outputPoseSRT.rotation,
+            outputPoseSRT.translation
+        );
     }
 
-    g_OutLocalMatrices[boneIndex] = result_matrix;
+    g_OutLocalMatrices[boneIndex] = outputLocalMatrix;
 }
 

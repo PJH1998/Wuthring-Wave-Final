@@ -115,7 +115,7 @@ matrix_rm ComposeMatrixFromSRT(float4 s, float4 q, float4 t)
 }
 
 // 애니메이션의 현재 진행도를 이용하여 두 키프레임 사이의 SRT를 반환
-SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
+SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, float fTrackPosition, bool isRibbon)
 {
     SRTKeyFrame result;
     
@@ -193,12 +193,12 @@ SRTKeyFrame CalculateSRT(uint boneIndex, uint animIndex, bool isRibbon, float fT
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     uint boneIndex = dispatchThreadID.x;
-    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    SRTKeyFrame actionSRT = CalculateSRT(boneIndex, g_AnimIndex, g_TrackPosition, false);
 
     matrix result_matrix;
     if (g_IsRibAnimUsed)
     {
-        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        SRTKeyFrame ribbonSRT = CalculateSRT(boneIndex, g_RibbonAnimIndex, g_TrackPosition, true);
         float4 finalScale = ribbonSRT.scale * actionSRT.scale;
         float4 finalRotation = mulQuaternion(ribbonSRT.rotation, actionSRT.rotation);
         float4 finalTranslation = ribbonSRT.translation + actionSRT.translation;
