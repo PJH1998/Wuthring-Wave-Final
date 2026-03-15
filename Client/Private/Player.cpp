@@ -493,10 +493,6 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
-	
-	// 추후 다른 어택 판정이 들어오면 그거에 맞는 판정을생성합니다.
-
-	// 충돌하면? => Condition 추가 및 데이터 전달 받기.
 	if (COLLISIONLAYER::SLIDE == eLayer)
 	{
 		if (pClientDesc.IsStart)
@@ -509,9 +505,6 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 		}
 		else
 			m_Characters[m_iCurrentCharacterIdx]->Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::LANDSLIDE));
-		
-		//IsStart가 True면 시작지점(SlideData 있음) false면 끝 지점(SlideData 없음)
-		
 	}
 	else if (COLLISIONLAYER::GRAB == eLayer)
 	{
@@ -525,7 +518,6 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
 	{
 		CCharacter::PARRY_DESC ParryDesc{};
-		// 2. Parry 판정
 		ParryDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		ParryDesc.fAttack = pClientDesc.fAttack;
 		ParryDesc.iLayer = iLayer;
@@ -534,7 +526,6 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	else
 	{
 		CCharacter::HIT_DESC HitDesc{};
-		// 3. Hit 판정.
 		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		HitDesc.fAttack = pClientDesc.fAttack;
 		HitDesc.iLayer = iLayer;

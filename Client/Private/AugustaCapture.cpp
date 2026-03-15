@@ -20,26 +20,12 @@ HRESULT CAugustaCapture::Initialize(CCharacter* pCharacter)
 void CAugustaCapture::OnEnter(void* pArg)
 {
 	CCaptureState::OnEnter(pArg);
-
-	// 1. 복사본 context 받아오기.
 	const auto context = m_pAugusta->TakeStateContext();
-
-	// 2. 복사본에서 필요한 값 읽기
 	EAugustaCaptureType eCaptureType = context.m_eCaptureType;
-
-	// 3. 값에 따른 상태 변경.
 	m_iCurrentAnimIdx = static_cast<_uint>(context.m_eCaptureType);
-
-	// 4. 현재 상태 초기화
 	State_Reset();
-
-	// 5. 중력 켰다.
 	m_pAugusta->Set_Gravity(false);
-
-	// 6. 타이머 속도 변경
 	m_pAugusta->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
-
-	// 7. Capture 스테이트 변경.
 	m_eCaptureStep = CAPTURESTEP::STEP_START;
 
 

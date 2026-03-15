@@ -4,6 +4,12 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
+namespace
+{
+	constexpr _float GRAPPLE_START_SPEED = 0.2f;
+	constexpr _float GRAPPLE_LOOP_SPEED = 2.f;
+}
+
 // 이건 이동 Rope 로만 사용하자.
 HRESULT CAugustaRopeHook::Initialize(CCharacter* pCharacter)
 {
@@ -87,14 +93,12 @@ void CAugustaRopeHook::Handle_Input()
 void CAugustaRopeHook::Update_RopeAnimation(_float fTimeDelta)
 {
 	CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
-	EAugustaRopeHookType eRopeType = static_cast<EAugustaRopeHookType>(m_iCurrentAnimIdx);
 
-	// 이 경우에만 이동?
 	if (m_eRopeStep == ROPESTEP::STEP_START || m_eRopeStep == ROPESTEP::STEP_START2)
-		m_pAugusta->Move_Grapple(fTimeDelta, 0.2f); // 이동.
+		m_pAugusta->Move_Grapple(fTimeDelta, GRAPPLE_START_SPEED);
 
 	if (m_eRopeStep == ROPESTEP::STEP_LOOP)
-		m_pAugusta->Move_Grapple(fTimeDelta, 2.f); // 이동.
+		m_pAugusta->Move_Grapple(fTimeDelta, GRAPPLE_LOOP_SPEED);
 	
 }
 

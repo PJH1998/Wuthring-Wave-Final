@@ -128,16 +128,14 @@ void CAugustaRopeDrag::Check_StateTransition(_float fTimeDelta)
 	
 	if (m_eRopeStep == ROPESTEP::STEP_LOOP) 
 	{
-		// 탈출이 가능한 경우?
 		if (IsEscapePossible)
 		{
-			// Drag 상태.
 			if (m_States[DRAG])
 			{
-				m_pAugusta->Execute_RopeDragTrigger(); // 연결된 객체의 Trigger 호출.
+				m_pAugusta->Execute_RopeDragTrigger();
 				m_eRopeStep = ROPESTEP::STEP_END;
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeDragType::DRAG_END);
-				m_pAugusta->Rope_Active(false); // Rope Active 종료.
+				m_pAugusta->Rope_Active(false);
 				return;
 			}
 

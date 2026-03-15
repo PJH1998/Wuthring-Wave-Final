@@ -1110,7 +1110,7 @@ _vector CCharacter::Calculate_LockOn_Move_Direction(ACTORDIR eDir)
 	}
 }
 
-void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
+void CCharacter::Move_LockOn_Direction(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
 {
     if (!m_IsLockOn)
         return;

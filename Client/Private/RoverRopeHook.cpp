@@ -4,6 +4,13 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
+
+namespace
+{
+	constexpr _float GRAPPLE_START_SPEED = 0.2f;
+	constexpr _float GRAPPLE_LOOP_SPEED = 2.f;
+}
+
 // 이건 이동 Rope 로만 사용하자.
 HRESULT CRoverRopeHook::Initialize(CCharacter* pCharacter)
 {
@@ -99,10 +106,10 @@ void CRoverRopeHook::Update_RopeAnimation(_float fTimeDelta)
 
 	// 이 경우에만 이동?
 	if (m_eRopeStep == ROPESTEP::STEP_START || m_eRopeStep == ROPESTEP::STEP_START2)
-		m_pRover->Move_Grapple(fTimeDelta, 0.2f); // 이동.
+		m_pRover->Move_Grapple(fTimeDelta, GRAPPLE_START_SPEED); // 이동.
 
 	if (m_eRopeStep == ROPESTEP::STEP_LOOP)
-		m_pRover->Move_Grapple(fTimeDelta, 2.f); // 이동.
+		m_pRover->Move_Grapple(fTimeDelta, GRAPPLE_LOOP_SPEED); // 이동.
 	
 }
 
