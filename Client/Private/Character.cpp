@@ -144,13 +144,10 @@ _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 
-	// 1. 캡슐의 실제 바닥 위치를 계산합니다. (중심 - 절반 높이)
 	_vector vCapsuleBottom = vCurrentPos;
 
-	// 2. fStartYOffset(0.2f) 만큼 바닥에서 띄운 위치에서 Ray를 시작합니다.
 	_vector vFootPos = vCapsuleBottom + XMVectorSet(0.f, fStartYOffset, 0.f, 0.f);
 
-	// 3. 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤 (이후 로직은 동일)
 	_vector vPositions[5] = {
 		vFootPos + vLook * (m_fColliderRadius - 0.05f),  // 앞
 		vFootPos + vRight * (m_fColliderRadius - 0.05f), // 왼쪽
@@ -695,7 +692,6 @@ void CCharacter::Bind_GrappleTarget(const GRAPPLE_INFO& grapInfo)
 	m_GrappleInfo = grapInfo;
 }
 
-// Is_MoveGrapple이 True 인 경우에만 호출한다.
 void CCharacter::Rotate_GrappleTarget()
 {
 	if (nullptr == m_GrappleInfo.pTransform)
@@ -748,14 +744,13 @@ ROPEDIR CCharacter::Calculate_RopeDirection()
 
 	_float fTotalHeight = m_fColliderRadius * ROPE_HEIGHT_WEIGHT + m_fColliderHeight;
 	
-	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vChracterPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vTargetPos = m_GrappleInfo.pTransform->Get_State(STATE::POSITION);
 
 	_float fTargetY = XMVectorGetY(vTargetPos);
-	_float fMyY = XMVectorGetY(vMyPos);
+	_float fFeetLevel = XMVectorGetY(vChracterPos);
 
-	_float fFeetLevel = fMyY;
-	_float fEyeLevel = fMyY + fTotalHeight;
+	_float fEyeLevel = fFeetLevel + fTotalHeight;
 
 	if (fTargetY > fEyeLevel)
 		return ROPEDIR::U;

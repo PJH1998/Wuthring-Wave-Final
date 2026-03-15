@@ -89,8 +89,7 @@ void CAugustaGroundRun::Handle_Input()
 		(m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::FLIGHT);
 
 	m_States[ROPE_HOOK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
-		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)
-		&& (m_pAugusta->Is_GrappleHook());
+		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE) && (m_pAugusta->Is_GrappleHook());
 
 	m_States[ROPE_DRAG] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T))
 		&& (m_pAugusta->Get_UtilityType() == UI_TAB_UTILITY::GRAPPLE)

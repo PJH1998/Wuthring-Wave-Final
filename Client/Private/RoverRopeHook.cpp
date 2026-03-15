@@ -21,11 +21,8 @@ void CRoverRopeHook::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
 
-	// 1. 애니메이션 결정을 위한 방향 설정.
 	m_eRopeDir = m_pRover->Calculate_RopeDirection();
-
-	// 2. 초기 단계 설정.
-	/*m_eRopeStep = ROPESTEP::STEP_START;
+	m_eRopeStep = ROPESTEP::STEP_START;
 
 	switch (m_eRopeDir)
 	{
@@ -38,34 +35,9 @@ void CRoverRopeHook::OnEnter(void* pArg)
 	case ROPEDIR::D:
 		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START01_F);
 		break;
-	}*/
-
-	m_eRopeStep = ROPESTEP::STEP_START2;
-
-	switch (m_eRopeDir)
-	{
-	case ROPEDIR::U:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_U);
-		break;
-	case ROPEDIR::F:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_F);
-		break;
-	case ROPEDIR::D:
-		m_iCurrentAnimIdx = ENUM_CLASS(ERoverRopeHookType::FIXHOOK_START02_D);
-		break;
 	}
-
-	// 4. 상태 리셋.
 	State_Reset();
-
-	// 5. Description을 이용하여 시작 초기 작업을 정의합니다.
-	//Enter_Rope();
-
-	// 6. 나중에 감지된 위치에 있는 방향으로 회전합니다. 
-	// 추후에는 => Look이 y도 돌아가야함.
 	m_pRover->Rotate_GrappleTarget();
-
-	// 6. 중력 끄기
 	m_pRover->Set_Gravity(false);
 	m_pRover->Rope_Active(true);
 	m_pRover->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp01");

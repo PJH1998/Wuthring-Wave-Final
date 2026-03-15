@@ -4,7 +4,6 @@
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
 
-// 이건 이동 Rope 로만 사용하자.
 HRESULT CAugustaRopeDrag::Initialize(CCharacter* pCharacter)
 {
 	if (FAILED(CInteractionState::Initialize(pCharacter)))
@@ -21,10 +20,7 @@ void CAugustaRopeDrag::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
 
-	// 1. 애니메이션 결정을 위한 방향 설정.
 	m_eRopeDir = m_pAugusta->Calculate_RopeDirection();
-
-	// 2. 초기 단계 설정.
 	m_eRopeStep = ROPESTEP::STEP_START;
 
 	switch (m_eRopeDir)
@@ -40,19 +36,10 @@ void CAugustaRopeDrag::OnEnter(void* pArg)
 		break;
 	}
 
-	// 4. 상태 리셋.
 	State_Reset();
-
-	// 5. 나중에 감지된 위치에 있는 방향으로 회전합니다. 
 	m_pAugusta->Rotate_GrappleTarget();
-
-	// 6. 중력 끄기
 	m_pAugusta->Set_Gravity(false);
-
-	// 7. 현재 상태 부여. =>
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
-
-	// 8. Rope Efeect 생성
 	m_pAugusta->Rope_Active(true);
 	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp02");
 }
@@ -60,7 +47,6 @@ void CAugustaRopeDrag::OnEnter(void* pArg)
 void CAugustaRopeDrag::OnUpdate(_float fTimeDelta)
 {
 	CInteractionState::OnUpdate(fTimeDelta);
-
 	Handle_Input();
 	Update_RopeAnimation(fTimeDelta);
 	Check_Physics(fTimeDelta);

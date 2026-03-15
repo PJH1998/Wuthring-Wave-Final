@@ -23,18 +23,18 @@ void CAugustaRopeHook::OnEnter(void* pArg)
 
 	m_eRopeDir = m_pAugusta->Calculate_RopeDirection();
 
-	m_eRopeStep = ROPESTEP::STEP_START2;
+	m_eRopeStep = ROPESTEP::STEP_START;
 
 	switch (m_eRopeDir)
 	{
 	case ROPEDIR::U:
-		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_START02_U);
+		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_START01_U);
 		break;
 	case ROPEDIR::F:
-		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_START02_F);
+		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_START01_F);
 		break;
 	case ROPEDIR::D:
-		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_START02_D);
+		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRopeHookType::FIXHOOK_START01_D);
 		break;
 	}
 
@@ -50,22 +50,11 @@ void CAugustaRopeHook::OnUpdate(_float fTimeDelta)
 {
 	CInteractionState::OnUpdate(fTimeDelta);
 
-	// 0. 키입력 체크
 	Handle_Input();
-
-	// 1. 애니메이션 갱신
 	Update_RopeAnimation(fTimeDelta);
-
-	// 2. 물리 체크
 	Check_Physics(fTimeDelta);
-
-	// 3. 전환 체크
 	Check_StateTransition(fTimeDelta);
-
-	// 상태 리셋;
 	State_Reset();
-
-	//m_pAugusta->Rotate_GrappleTarget(); // 회전.
 }
 
 void CAugustaRopeHook::OnExit()
