@@ -77,7 +77,7 @@ void CRoverHit::OnExit()
 void CRoverHit::Enter_Hit()
 {
 	// 0. Hit 정보 가져오기.
-	const CCharacter::HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
+	const HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
 
 	// 1. 현재 레이어
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);

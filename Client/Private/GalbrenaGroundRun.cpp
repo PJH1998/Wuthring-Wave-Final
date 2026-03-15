@@ -151,7 +151,7 @@ void CGalbrenaGroundRun::Update_RunAnimation(_float fTimeDelta)
     if (m_pGalbrena->Is_LockOn())
     {
         // WASD 입력에 따른 8방향 이동
-        m_pGalbrena->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
+        m_pGalbrena->Move_LockOn_Direction(m_eDir, fTimeDelta, m_fSpeed);
     }
     else 
         m_pGalbrena->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);

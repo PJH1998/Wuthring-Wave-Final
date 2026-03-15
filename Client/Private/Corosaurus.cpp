@@ -439,7 +439,7 @@ void CCorosaurus::Sound_Active(const _wstring& wStrObjectTag)
 		}
 		else if (wstrPartTag == TEXT("4"))
 		{
-			m_pCoroRock->Play_SFX(TEXT("SFX_Enemy_Shijilong_Battle_test_4 (SFX)"), 0.35f, 0.f, 20.f);
+			//m_pCoroRock->Play_SFX(TEXT("SFX_Enemy_Shijilong_Battle_test_4 (SFX)"), 0.35f, 0.f, 20.f);
 			//m_pGameInstance->Play_Sound(TEXT("SFX_Enemy_Shijilong_Battle_test_4 (SFX)"), ENUM_CLASS(CHANNEL::ENEMY_ACTION), 0.5f, m_pTransformCom, 0.f, 7.f);
 		}
 		else if (wstrPartTag == TEXT("5"))

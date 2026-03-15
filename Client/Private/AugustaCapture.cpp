@@ -12,7 +12,6 @@ HRESULT CAugustaCapture::Initialize(CCharacter* pCharacter)
 	m_pAugusta = dynamic_cast<CAugusta*>(pCharacter);
 	ASSERT_CRASH(m_pAugusta);
 
-	// 1. 애니메이션 설정
 	Setup_Animations();
     return S_OK;
 }
@@ -34,20 +33,10 @@ void CAugustaCapture::OnEnter(void* pArg)
 void CAugustaCapture::OnUpdate(_float fTimeDelta)
 {
 	CCaptureState::OnUpdate(fTimeDelta);
-
-	// 0. 키입력 감지.
 	Handle_Input();
-
-	// 1. 애니메이션 갱신.
 	Update_CaptureAnimation(fTimeDelta); // 애니메이션 갱신 (및 이동/회전).
-
-	// 2. 물리 체크.
 	Check_Physics(fTimeDelta);
-
-	// 3. 전환 제어
 	Check_StateTransition(fTimeDelta);
-
-	// 4. 현재  상태 초기화
 	State_Reset();
 }
 

@@ -416,9 +416,9 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
 }
 
 // Hit 판정.
-void CGalbrena::Hit_Judge(void* pArg)
+void CGalbrena::Hit_Judge(const HIT_DESC& HitDesc)
 {
-	if (nullptr == pArg || m_IsHit || m_IsQTE)
+	if (m_IsHit || m_IsQTE)
 		return;
 
 	_uint iFlag = {};
@@ -440,12 +440,7 @@ void CGalbrena::Hit_Judge(void* pArg)
 	if (EStateCategory::HIT == eCategory)
 		return;
 
-	// 2. 즉시 중복 방지 플래그 세팅
-	//m_PendingConditions[HIT] = true;
-
-	// 3. 데이터 저장.
-	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	m_PendingHitDesc = *pDesc;
+	m_PendingHitDesc = HitDesc;
 
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
 	m_fDodgeableHitTimer = m_fDodgeableDuration;
@@ -460,18 +455,13 @@ void CGalbrena::Hit_Judge(void* pArg)
 	else
 		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.3f, 0.1f);
 
-	
-	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc)); => Pro
-
-
 }
 
-void CGalbrena::Grab_Judge(void* pArg)
+void CGalbrena::Grab_Judge(const CAPTURE_DESC& CaptureDesc)
 {
-	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
+	if (m_IsHit || m_PendingConditions[QTE])
 		return;
 
-	// 1. Grab이 안통하는 상태일때. => Dodge, Grabe, Invincible
 	_uint iFlag = {};
 	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
 	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::GRABED);
@@ -480,14 +470,11 @@ void CGalbrena::Grab_Judge(void* pArg)
 	if (Check_AnyCondition(iFlag))
 		return;
 
-	// 2. Capture 데이터 캐스팅.
-	m_PendingCaptureDesc = *static_cast<CAPTURE_DESC*>(pArg);
+	DELAYED_ACTION action{};
+	action.type = DELAYED_ACTION::TYPE::GRAB;
+	action.captureDesc = CaptureDesc;
 
-	// 데미지 처리.
-	m_pAbillityCom->Add_Hp(m_PendingCaptureDesc.fAttack * -1.f);
-
-	// 3. 콜백 함수 내에서는 Jolt에 대한 변경작업을 진행하면 안된다. => Priority Update로 진행 넘기기.
-	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
+	m_DelayedActions.push(action);
 }
 
 void CGalbrena::Resolve_PerfectDodge()
@@ -819,7 +806,10 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 
 			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
 			m_PendingConditions[HIT] = true;
-			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
+			DELAYED_ACTION action{};
+			action.type = DELAYED_ACTION::TYPE::HIT;
+			action.hitDesc = m_PendingHitDesc;
+			m_DelayedActions.push(action);
 		}
 	}
 
@@ -841,7 +831,6 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
 
-		void* pData = eAction.pData;
 		switch (eAction.type)
 		{
 		case DELAYED_ACTION::TYPE::HIT:
@@ -849,12 +838,13 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 			//m_IsHit = true;
 			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-			m_pAbillityCom->Add_Hp(-10.f);
 			break;
 		}
 		case DELAYED_ACTION::TYPE::GRAB:
 		{
 			ActiveCaptureState();
+			m_PendingCaptureDesc = eAction.captureDesc;
+			m_pAbillityCom->Add_Hp(eAction.captureDesc.fAttack * -1.f);
 			GetStateContextForWrite().m_eCaptureType = EGalbrenaCaptureType::BEHIT_FLY_START;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EGalbrenaCaptureState::CAPTURE));
 			break;

@@ -159,7 +159,7 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
     // 1. 회전 및 이동.
     if (m_States[LOCKON])
     {
-        m_pAugusta->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
+        m_pAugusta->Move_LockOn_Direction(m_eDir, fTimeDelta, m_fSpeed);
     }
     else 
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);

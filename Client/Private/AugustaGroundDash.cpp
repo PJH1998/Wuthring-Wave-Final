@@ -116,14 +116,9 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 		// 맞은 방향에 따라서 애니메이션 선택. => 후방에서 맞으면 MOVE_LIMIT_F
 		// 맞은 방향에 따라서 애니메이션 선택. => 전방에서 맞으면 MOVE_LIMIT_B
 
-		const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+		const HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
 		if (nullptr == pDesc)
 			return;
-
-		//if (pDesc->IsBack)
-		//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
-		//else 
-		//	m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_B;
 
 		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
 		

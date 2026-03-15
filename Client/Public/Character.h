@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Actor.h"
+#include "CharacterTypes.h"
 NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
@@ -10,35 +11,6 @@ public:
 		HIT = 0,
 		EVENT_END
 	};
-
-
-public:
-	typedef struct tagHitDesc {
-		_uint iLayer;
-		_float fAttack;
-		CTransform* pTransform = { nullptr };
-		_bool IsBack = { false };
-	}HIT_DESC;
-
-	typedef struct tagParryDesc {
-		_uint iLayer;
-		_float fAttack;
-		CTransform* pTransform = { nullptr };
-	}PARRY_DESC;
-
-	typedef struct tagCaptureDesc {
-		_uint iLayer;
-		_float fAttack;
-		CTransform* pTransform = { nullptr };
-		const _float4x4* pSocketMatrix = { nullptr };
-	}CAPTURE_DESC;
-
-	typedef struct tagQTEDesc {
-
-		CTransform* pTargetTransform = { nullptr };
-		CHARACTER_EVENT eEvent = { CHARACTER_EVENT::END };
-	}QTE_DESC;
-
 
 
 public:
@@ -126,9 +98,9 @@ public:
 	const _float Calculate_RootMotionScale();
 
 	// 상태 판단.
-	virtual void Hit_Judge(void* pArg = nullptr) {};
-	virtual void Parry_Judge(void* pArg = nullptr) {};
-	virtual void Grab_Judge(void* pArg = nullptr) {};
+	virtual void Hit_Judge(const HIT_DESC& HitDesc) {};
+	virtual void Parry_Judge(const PARRY_DESC& ParryDesc) {};
+	virtual void Grab_Judge(const CAPTURE_DESC& CaptureDesc) {};
 	virtual void Resolve_PerfectDodge() {};
 
 	// Wall
@@ -340,7 +312,7 @@ public:
 	_vector Calculate_LockOn_Move_Direction(ACTORDIR eDir);
 
 
-	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
+	void Move_LockOn_Direction(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
 	void Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed);

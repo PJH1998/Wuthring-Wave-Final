@@ -55,7 +55,7 @@ HRESULT CCoroProduction::Initialize_Clone(void* pArg)
 	playDesc.isFacial = false;
 
 	ROOTMOTION_DESC rootMotionDesc{};
-	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.fRate = 1.f;
 	rootMotionDesc.isEnable = true;
 	rootMotionDesc.isRotate = true;
 	rootMotionDesc.isTranslate = true;
@@ -288,7 +288,7 @@ void CCoroProduction::Action2()
 	playDesc.isFacial = false;
 
 	ROOTMOTION_DESC rootMotionDesc{};
-	rootMotionDesc.fRate = 0.1f;
+	rootMotionDesc.fRate = 1.f;
 	rootMotionDesc.isEnable = true;
 	rootMotionDesc.isRotate = true;
 	rootMotionDesc.isTranslate = true;

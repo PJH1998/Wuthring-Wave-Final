@@ -105,7 +105,7 @@ void CGalbrenaGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
-		const CCharacter::HIT_DESC* pDesc = m_pGalbrena->GetPendingHitDesc();
+		const HIT_DESC* pDesc = m_pGalbrena->GetPendingHitDesc();
 		if (nullptr == pDesc)
 			return;
 

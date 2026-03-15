@@ -109,7 +109,7 @@ void CGalbrenaGroundHeavyAttack::OnExit()
 _bool CGalbrenaGroundHeavyAttack::Hit_Judge()
 {
 	_bool IsHit = false;
-	const CCharacter::HIT_DESC* pDesc = m_pGalbrena->GetPendingHitDesc();
+	const HIT_DESC* pDesc = m_pGalbrena->GetPendingHitDesc();
 
 	if (nullptr == pDesc)
 		return false;

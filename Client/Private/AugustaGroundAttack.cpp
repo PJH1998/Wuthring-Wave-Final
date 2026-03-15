@@ -83,7 +83,7 @@ _bool CAugustaGroundAttack::Hit_Judge()
 		return false;
 
 	_bool IsHit = false;
-	const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+	const HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
 
 	if (nullptr == pDesc)
 		return false;

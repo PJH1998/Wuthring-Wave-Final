@@ -171,8 +171,8 @@ public:
 	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
-	virtual void Hit_Judge(void* pArg = nullptr) override;
-	virtual void Grab_Judge(void* pArg = nullptr) override;
+	virtual void Hit_Judge(const HIT_DESC& HitDesc) override;
+	virtual void Grab_Judge(const CAPTURE_DESC& CaptureDesc) override;
 	virtual void Resolve_PerfectDodge() override;
 	void Sync_Position();
 

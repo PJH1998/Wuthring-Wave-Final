@@ -1380,6 +1380,9 @@
     <ClInclude Include="..\Public\Client_UIVariantStruct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\CharacterTypes.h">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

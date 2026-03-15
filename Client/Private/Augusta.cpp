@@ -492,9 +492,9 @@ void CAugusta::Part_ShaderPathChange(_uint iPartType, _uint iShaderPath)
 
 
 // Hit 판정. => QTE 상태면 안맞음.
-void CAugusta::Hit_Judge(void* pArg)
+void CAugusta::Hit_Judge(const HIT_DESC& HitDesc)
 {
-	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
+	if (m_IsHit || m_PendingConditions[QTE])
 		return;
 
 	_uint iFlag = {};
@@ -514,25 +514,14 @@ void CAugusta::Hit_Judge(void* pArg)
 
 	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
 
-	// 1. 맞는데 또맞지 않기
 	if (EStateCategory::HIT == eCategory)
 		return;
 
-	// 2. 즉시 중복 방지 플래그 세팅
-	// m_PendingConditions[HIT] = true;
-
-
-	// 3. 피격 정보 데이터 저장.
-	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
-	m_PendingHitDesc = *pDesc;
+	m_PendingHitDesc = HitDesc;
 
 	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
 	m_fDodgeableHitTimer = m_fDodgeableDuration;
-
 	
-	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시.
-	// => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
 	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) 
 		&& eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 
@@ -547,23 +536,12 @@ void CAugusta::Hit_Judge(void* pArg)
 }
 
 
-// 패링 판단.
-void CAugusta::Parry_Judge(void* pArg)
-{
 
-	if (m_PendingConditions[HIT] || m_PendingConditions[QTE] || m_PendingConditions[PARRY])
+void CAugusta::Grab_Judge(const CAPTURE_DESC& CaptureDesc)
+{
+	if (m_IsHit || m_PendingConditions[QTE])
 		return;
 
-	// 1. 패링 시 ? Layer 변경? => 잠시 무적
-	CCharacter::PARRY_DESC* pDesc = static_cast<PARRY_DESC*>(pArg);
-}
-
-void CAugusta::Grab_Judge(void* pArg)
-{
-	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
-		return;
-
-	// 1. Grab이 안통하는 상태일때. => Dodge, Grabe, Invincible
 	_uint iFlag = {};
 	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
 	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::GRABED);
@@ -572,35 +550,27 @@ void CAugusta::Grab_Judge(void* pArg)
 	if (Check_AnyCondition(iFlag))
 		return;
 
-	// 2. Capture 데이터 캐스팅.
-	m_PendingCaptureDesc = *static_cast<CAPTURE_DESC*>(pArg);
+	DELAYED_ACTION action{};
+	action.type = DELAYED_ACTION::TYPE::GRAB;
+	action.captureDesc = CaptureDesc;
 
-	// 데미지 처리.
-	m_pAbillityCom->Add_Hp(m_PendingCaptureDesc.fAttack * -1.f);
-	
-	// 3. 콜백 함수 내에서는 Jolt에 대한 변경작업을 진행하면 안된다. => Priority Update로 진행 넘기기.
-	m_DelayedActions.push({ DELAYED_ACTION::TYPE::GRAB, &m_PendingCaptureDesc });
+	m_DelayedActions.push(action);
 }
 
 void CAugusta::Resolve_PerfectDodge()
 {
-	// 1. 회피 가능 상태인지 확인.
 	if (!Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
 		return;
 
-	// 2. 조건 플래그 제거.
 	Remove_Flag(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
-
-	// 3. (데미지 무효화)
 	while (!m_DelayedActions.empty())
 		m_DelayedActions.pop();
 
-	m_PendingHitDesc = {}; // 펜딩된 정보 초기화
-	m_PendingConditions[HIT] = false; // 맞고 있다는 사실 취소
+	m_PendingHitDesc = {}; 
+	m_PendingConditions[HIT] = false;
 
-	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.02f); // Time Lack
+	m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.02f);
 
-	// 퍼펙트 닷지가 성공했을 경우에만.
 	CAMERA_SHAKE Desc{};
 	Desc.fDuration = 0.15f;
 	Desc.fFrequency = 20.f;
@@ -879,21 +849,21 @@ void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Man
 // 지연 처리 작업
 void CAugusta::Process_DelayedActions(_float fTimeDelta)
 {
+
 	_uint iDodgeableFlag = ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
 
-	// 0. 회피 가능창 활성화 되어 있다면?
 	if (Check_AnyCondition(iDodgeableFlag))
 	{
 		m_fDodgeableHitTimer -= fTimeDelta;
 		if (m_fDodgeableHitTimer <= 0.f)
 		{
 			Remove_Flag(iDodgeableFlag); // 회피 가능 상태 제거
-
-			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
-			
-			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
 			m_PendingConditions[HIT] = true;
-			m_DelayedActions.push({ DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc });
+
+			DELAYED_ACTION action{};
+			action.type = DELAYED_ACTION::TYPE::HIT;
+			action.hitDesc = m_PendingHitDesc;
+			m_DelayedActions.push(action);
 		}
 	}
 
@@ -914,7 +884,6 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
 
-		void* pData = eAction.pData;
 		switch (eAction.type)
 		{
 			// 여기서 깎으면 된다. => Skill 도중엔 Dodge가 안되니까?
@@ -922,12 +891,14 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 			{
 				//m_IsHit = true;
 				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
-				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				m_pAbillityCom->Add_Hp(-eAction.hitDesc.fAttack);
 				break;
 			}
 			case DELAYED_ACTION::TYPE::GRAB:
 			{
 				ActiveCaptureState();
+				m_PendingCaptureDesc = eAction.captureDesc;
+				m_pAbillityCom->Add_Hp(eAction.captureDesc.fAttack * -1.f);
 				GetStateContextForWrite().m_eCaptureType = EAugustaCaptureType::BEHIT_FLY_START;
 				m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EAugustaCaptureState::CAPTURE));
 				break;

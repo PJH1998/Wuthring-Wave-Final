@@ -491,7 +491,6 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(iLayer);
 
-	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
 	if (COLLISIONLAYER::SLIDE == eLayer)
 	{
@@ -508,30 +507,21 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	}
 	else if (COLLISIONLAYER::GRAB == eLayer)
 	{
-		CCharacter::CAPTURE_DESC GrabDesc{};
+		CAPTURE_DESC GrabDesc{};
 		GrabDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		GrabDesc.fAttack = pClientDesc.fAttack;
 		GrabDesc.iLayer = iLayer;
 		GrabDesc.pSocketMatrix = pClientDesc.pSocketMatrix;
-		m_Characters[m_iCurrentCharacterIdx]->Grab_Judge(&GrabDesc);
-	}
-	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
-	{
-		CCharacter::PARRY_DESC ParryDesc{};
-		ParryDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
-		ParryDesc.fAttack = pClientDesc.fAttack;
-		ParryDesc.iLayer = iLayer;
-		m_Characters[m_iCurrentCharacterIdx]->Parry_Judge(&ParryDesc);
+		m_Characters[m_iCurrentCharacterIdx]->Grab_Judge(GrabDesc);
 	}
 	else
 	{
-		CCharacter::HIT_DESC HitDesc{};
+		HIT_DESC HitDesc{};
 		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 		HitDesc.fAttack = pClientDesc.fAttack;
 		HitDesc.iLayer = iLayer;
 		HitDesc.IsBack = IsHitBack(HitDesc.pTransform);
-
-		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&HitDesc);
+		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(HitDesc);
 	}
 }
 

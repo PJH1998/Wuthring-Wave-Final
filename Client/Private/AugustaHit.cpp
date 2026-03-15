@@ -80,7 +80,7 @@ void CAugustaHit::OnExit()
 void CAugustaHit::Enter_Hit()
 {
 	// 0. Hit 정보 가져오기.
-	const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+	const HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
 
 	// 1. 현재 레이어
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);

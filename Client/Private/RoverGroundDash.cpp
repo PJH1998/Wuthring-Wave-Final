@@ -104,7 +104,7 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 	// 1. 우선순위
 	if (m_States[DODGE])
 	{
-		const CCharacter::HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
+		const HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
 		if (nullptr == pDesc)
 			return;
 

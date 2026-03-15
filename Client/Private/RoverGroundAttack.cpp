@@ -87,7 +87,7 @@ void CRoverGroundAttack::OnExit()
 _bool CRoverGroundAttack::Hit_Judge()
 {
 	_bool IsHit = false;
-	const CCharacter::HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
+	const HIT_DESC* pDesc = m_pRover->GetPendingHitDesc();
 
 	if (nullptr == pDesc)
 		return false;

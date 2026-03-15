@@ -149,7 +149,7 @@ void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
     ERoverRunType eRunType = static_cast<ERoverRunType>(m_iCurrentAnimIdx);
     // 1. 회전 및 이동.
     if (m_pRover->Is_LockOn())
-        m_pRover->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
+        m_pRover->Move_LockOn_Direction(m_eDir, fTimeDelta, m_fSpeed);
     else 
         m_pRover->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
 
