@@ -43,7 +43,7 @@ void CAugustaRopeHook::OnEnter(void* pArg)
 	m_pAugusta->Rotate_GrappleTarget();
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->Rope_Active(true);
-	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp01");
+	m_pAugusta->Spawn_RopeEffect(TEXT("Rope"), "WeaponProp01");
 }
 
 void CAugustaRopeHook::OnUpdate(_float fTimeDelta)

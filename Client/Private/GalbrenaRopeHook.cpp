@@ -47,7 +47,7 @@ void CGalbrenaRopeHook::OnEnter(void* pArg)
 	m_pGalbrena->Set_Gravity(false);
 	m_pGalbrena->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_HOOK));
 	m_pGalbrena->Rope_Active(true);
-	m_pGalbrena->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp01");
+	m_pGalbrena->Spawn_RopeEffect(TEXT("Rope"), "WeaponProp01");
 }
 
 void CGalbrenaRopeHook::OnUpdate(_float fTimeDelta)

@@ -195,7 +195,7 @@ public:
 	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 	virtual void OnEvent(CHARACTER_EVENT eEvent, void* pArg = nullptr) {};
 
-	void Spwan_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName);
+	void Spawn_RopeEffect(const _wstring& wStrEffectTag, const _string& strBoneName);
 	void Spawn_LeviatanAnchorEffect(const _wstring& wStrEffectTag);
 	
 	void Execute_Telport(_vector vPos);

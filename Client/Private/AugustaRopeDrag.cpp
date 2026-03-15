@@ -41,7 +41,7 @@ void CAugustaRopeDrag::OnEnter(void* pArg)
 	m_pAugusta->Set_Gravity(false);
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::ROPE_DRAG));
 	m_pAugusta->Rope_Active(true);
-	m_pAugusta->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp02");
+	m_pAugusta->Spawn_RopeEffect(TEXT("Rope"), "WeaponProp02");
 }
 
 void CAugustaRopeDrag::OnUpdate(_float fTimeDelta)

@@ -40,7 +40,7 @@ void CRoverRopeHook::OnEnter(void* pArg)
 	m_pRover->Rotate_GrappleTarget();
 	m_pRover->Set_Gravity(false);
 	m_pRover->Rope_Active(true);
-	m_pRover->Spwan_RopeEffect(TEXT("Rope"), "WeaponProp01");
+	m_pRover->Spawn_RopeEffect(TEXT("Rope"), "WeaponProp01");
 }
 
 void CRoverRopeHook::OnUpdate(_float fTimeDelta)
