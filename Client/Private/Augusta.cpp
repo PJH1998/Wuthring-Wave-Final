@@ -553,7 +553,6 @@ void CAugusta::Grab_Judge(const CAPTURE_DESC& CaptureDesc)
 	DELAYED_ACTION action{};
 	action.type = DELAYED_ACTION::TYPE::GRAB;
 	action.captureDesc = CaptureDesc;
-
 	m_DelayedActions.push(action);
 }
 
@@ -884,28 +883,18 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
 
-		switch (eAction.type)
+		if (eAction.type == DELAYED_ACTION::TYPE::GRAB)
 		{
-			// 여기서 깎으면 된다. => Skill 도중엔 Dodge가 안되니까?
-			case DELAYED_ACTION::TYPE::HIT:
-			{
-				//m_IsHit = true;
-				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
-				m_pAbillityCom->Add_Hp(-eAction.hitDesc.fAttack);
-				break;
-			}
-			case DELAYED_ACTION::TYPE::GRAB:
-			{
-				ActiveCaptureState();
-				m_PendingCaptureDesc = eAction.captureDesc;
-				m_pAbillityCom->Add_Hp(eAction.captureDesc.fAttack * -1.f);
-				GetStateContextForWrite().m_eCaptureType = EAugustaCaptureType::BEHIT_FLY_START;
-				m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EAugustaCaptureState::CAPTURE));
-				break;
-			}
-			
-		default:
-			break;
+			ActiveCaptureState();
+			m_PendingCaptureDesc = eAction.captureDesc;
+			m_pAbillityCom->Add_Hp(eAction.captureDesc.fAttack * -1.f);
+			GetStateContextForWrite().m_eCaptureType = EAugustaCaptureType::BEHIT_FLY_START;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EAugustaCaptureState::CAPTURE));
+		}
+		else if (eAction.type == DELAYED_ACTION::TYPE::HIT)
+		{
+			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
+			m_pAbillityCom->Add_Hp(-eAction.hitDesc.fAttack);
 		}
 
 		m_DelayedActions.pop();

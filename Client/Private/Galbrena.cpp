@@ -830,28 +830,18 @@ void CGalbrena::Process_DelayedActions(_float fTimeDelta)
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
-
-		switch (eAction.type)
-		{
-		case DELAYED_ACTION::TYPE::HIT:
-		{
-			//m_IsHit = true;
-			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
-			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-			break;
-		}
-		case DELAYED_ACTION::TYPE::GRAB:
+		if (eAction.type == DELAYED_ACTION::TYPE::GRAB)
 		{
 			ActiveCaptureState();
 			m_PendingCaptureDesc = eAction.captureDesc;
 			m_pAbillityCom->Add_Hp(eAction.captureDesc.fAttack * -1.f);
 			GetStateContextForWrite().m_eCaptureType = EGalbrenaCaptureType::BEHIT_FLY_START;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(EGalbrenaCaptureState::CAPTURE));
-			break;
 		}
-
-		default:
-			break;
+		else if (eAction.type == DELAYED_ACTION::TYPE::HIT)
+		{
+			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
+			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
 		}
 
 		m_DelayedActions.pop();

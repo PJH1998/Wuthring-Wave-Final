@@ -776,10 +776,6 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 		if (m_fDodgeableHitTimer <= 0.f)
 		{
 			Remove_Flag(iDodgeableFlag); // 회피 가능 상태 제거
-
-			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
-
-			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
 			m_PendingConditions[HIT] = true;
 			DELAYED_ACTION action{};
 			action.type = DELAYED_ACTION::TYPE::HIT;
@@ -803,28 +799,18 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
-
-		switch (eAction.type)
-		{
-		case DELAYED_ACTION::TYPE::HIT:
-		{
-			//m_IsHit = true;
-			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
-			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-			break;
-		}
-		case DELAYED_ACTION::TYPE::GRAB:
+		if (eAction.type == DELAYED_ACTION::TYPE::GRAB)
 		{
 			ActiveCaptureState();
 			m_PendingCaptureDesc = eAction.captureDesc;
 			m_pAbillityCom->Add_Hp(eAction.captureDesc.fAttack * -1.f);
 			GetStateContextForWrite().m_eCaptureType = ERoverCaptureType::BEHIT_FLY_START;
 			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::CAPTURED), ENUM_CLASS(ERoverCaptureState::CAPTURE));
-			break;
 		}
-
-		default:
-			break;
+		else if (eAction.type == DELAYED_ACTION::TYPE::HIT)
+		{
+			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
+			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
 		}
 
 		m_DelayedActions.pop();
