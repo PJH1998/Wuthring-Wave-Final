@@ -50,18 +50,7 @@ void Skinning(matrix_rm localMatrix, int iGlobalBoneIndex, bool isVaild)
             else
             {
                 row_major float4x4 parentMatrix = sharedMatrix[iParentIndex];
-                
-                //if (iBoneIndex == 1)
-                //{
-                //    float3 vRight = parentMatrix._11_12_13;
-                //    float3 vUp = parentMatrix._21_22_23;
-                //    float3 vLook = parentMatrix._31_32_33;
-                //    
-                //    parentMatrix._11_12_13 = normalize(vRight);
-                //    parentMatrix._21_22_23 = normalize(vUp);
-                //    parentMatrix._31_32_33 = normalize(vLook);
-                //}
-                
+               
                 sharedMatrix[iBoneIndex] = mul(localMatrix, parentMatrix);
             }
         }
