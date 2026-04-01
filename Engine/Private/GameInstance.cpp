@@ -470,7 +470,7 @@ void CGameInstance::Wait_Thread_End()
 #pragma endregion
 
 #pragma region OctoTree
-void CGameInstance::SetUp_OctoTree(_float3 vCenter, _float3 vExtent)
+void CGameInstance::SetUp_OctoTree(const _float3& vCenter, const _float3& vExtent)
 {
 	m_pOctoTree->SetUp_OctoTree(vCenter, vExtent);
 }
@@ -557,7 +557,7 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 //{
 //    return m_pRenderer->Add_Render_StaticObject(Container);
 //}
-HRESULT CGameInstance::Add_Render_StaticObject(vector<class CStaticObject*>* Container)
+HRESULT CGameInstance::Add_Render_StaticObject(vector<class CStaticObject*>(&Container)[4])
 {
 	return m_pRenderer->Add_Render_StaticObject(Container);
 }

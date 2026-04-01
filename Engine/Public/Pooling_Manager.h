@@ -50,29 +50,28 @@ private:
 	vector<thread>					m_Threads;
 	// Render Thread
 	vector<thread>					m_RenderThreads;
-
 	// Hardware Supported CPU Core
-	_uint								m_iNumThread = {};
+	_uint									m_iNumThread = {};
 	// CPU Works 
-	queue<function<void()>>	m_Works;
+	queue<function<void()>>		m_Works;
+	// Thread Wait (CPU)
+	condition_variable					m_CV;
+	// 남아있는 Work Count
+	atomic<_int>						m_iRemainWork = {};
 	// Render Works
-	queue<function<void()>>	m_RenderWorks;
+	queue<function<void()>>		m_RenderWorks;
 	// Mutex (Data)
 	mutex								m_Mutex;
 	// Mutex (Render)
 	mutex								m_RenderMutex;
 
-	// Thread Wait (CPU)
-	condition_variable				m_CV;
 	// Thread Wait (GPU)
 	condition_variable				m_RenderCV;
 
 	// Thread All Stop
-	_bool								m_isAllStop = { false };
+	_bool									m_isAllStop = { false };
 	// 진행중인 Work Count
-	atomic<_int>					m_iLiveWork = {};
-	// 남아있는 Work Count
-	atomic<_int>					m_iRemainWork = {};
+	atomic<_int>						m_iLiveWork = {};
 
 private:
 	void									Work_Thread();

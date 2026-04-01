@@ -20,7 +20,7 @@ public:
 	//HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject, _uint iNumLODIndex);
-	HRESULT				Add_Render_StaticObject(vector<class CStaticObject*>* Container);
+	HRESULT				Add_Render_StaticObject(vector<class CStaticObject*>(&Container)[4]);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void				Render();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
@@ -61,14 +61,14 @@ private:
 	condition_variable							m_CV;
 
 	// Culling
-	list<class CGameObject*>					m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
-	//vector<class CStaticObject*>				m_StaticObjects[2];
-	vector<class CStaticObject*>				m_StaticObjects[2][4];
+	mutex											m_RegisterRenderObjectMutex;
+	vector<class CStaticObject*>			m_StaticObjects[2][4];
 	atomic<_uint>								m_iDoubleBufferIndex = {};
 	atomic<_uint>								m_iCullStack = {};
 	atomic<_bool>								m_isCompleteFrustumCull = { false };
-	_uint										m_iNumPreRenderObject = {};
-	list<class CGameObject*>					m_ShadowMapObjects;
+	list<class CGameObject*>				m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	_uint											m_iNumPreRenderObject = {};
+	list<class CGameObject*>				m_ShadowMapObjects;
 
 	class CShader*							m_pShader = { nullptr };
 	class CVIBuffer_Rect*					m_pVIBuffer = { nullptr };
@@ -81,9 +81,6 @@ private:
 	_uint									m_iLUT_Index = {};
 	_float									m_fLutLerpIntensity = {};
 	_bool									m_IsDynamicLUT = {};
-
-
-	recursive_mutex							m_RecursiveMutex;
 
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};

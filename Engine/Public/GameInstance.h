@@ -113,7 +113,7 @@ public:
 #pragma endregion
 
 #pragma region OctoTree
-	void			SetUp_OctoTree(_float3 vCenter, _float3 vExtent);
+	void			SetUp_OctoTree(const _float3& vCenter, const _float3& vExtent);
 	void			Add_To_OctoTree(class CStaticObject* pObject, const BoundingBox* pBox);
 
 #pragma endregion
@@ -143,7 +143,7 @@ public:
 	HRESULT						Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 	HRESULT						Add_Render_StaticObject(class CStaticObject* pObject);
 	//HRESULT						Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
-	HRESULT						Add_Render_StaticObject(vector<class CStaticObject*>* Container);
+	HRESULT						Add_Render_StaticObject(vector<class CStaticObject*>(&Container)[4]);
 	HRESULT						Add_Render_StaticObject(class CStaticObject* pRenderObject, _uint iNumLODIndex);
 	HRESULT						Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void						Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);

@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include "Base.h"
 
-#define MAX_LOD 100
+#define MAX_OBJECT_PER_LOD 1000
+#define LOOSE_CELL_SCALE 1.2f
 
 NS_BEGIN(Engine)
 
@@ -34,8 +35,8 @@ private:
 	virtual ~CCubeCell() = default;
 
 public:
-	HRESULT		Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth);
-	void			Update(const _fvector& vCamPos, vector<class CStaticObject*>* Container = nullptr);
+	HRESULT		Initialize(const _float3& vCenter, const _float3& vExtent, _uint iDepth);
+	void			Update(const _fvector& vCamPos, vector<class CStaticObject*>(&Container)[4]);
 
 	void			Add_Object(class CStaticObject* pObject, const _float* pMinMax);
 
@@ -43,14 +44,15 @@ private:
 	class CGameInstance*			m_pGameInstance = { nullptr };
 	BoundingBox*						m_pBoundingBox = { nullptr };
 	vector<CCubeCell*>				m_ChildCells;
-	vector<class CStaticObject*>	m_Objects;
+	_float									m_MinMax[ENUM_CLASS(MINMAX::END)] = {};
 	_uint									m_iDepth = {};
+
+	vector<class CStaticObject*>	m_Objects;
+	mutex									m_Mutex;
 	_uint									m_iLODIndex = {};
 
 	_float3								m_Corners[ENUM_CLASS(CORNER::END)] = {};
-	_float									m_MinMax[ENUM_CLASS(MINMAX::END)] = {};
 
-	recursive_mutex					m_Mutex;
 
 private:
 	void									Compute_MinMax();
@@ -59,7 +61,7 @@ private:
 	_uint									Compute_Object_LOD(class CStaticObject* pObject, const _fvector& vCamPos);
 
 public:
-	static CCubeCell* Create(_float3 vCenter, _float3 vExtent, _uint iDepth);
+	static CCubeCell* Create(const _float3& vCenter, const _float3& vExtent, _uint iDepth);
 	virtual void Free() override;
 };
 

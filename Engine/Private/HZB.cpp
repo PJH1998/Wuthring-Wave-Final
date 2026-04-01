@@ -83,7 +83,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	//m_pContext->Unmap(m_pBoxPointsBuffer, 0);
 	m_pContext->UpdateSubresource(m_pBoxPointsBuffer, 0, nullptr, m_pBoxInfos, 0, 0);
 
-	ZeroMemory(m_pBoxInfos, sizeof(BOXINFO) * 3000);
+	ZeroMemory(m_pBoxInfos, sizeof(BOXINFO) * MAX_OBJECT);
 
 	// Dispatch
 	OC_DESC OCDesc = {};

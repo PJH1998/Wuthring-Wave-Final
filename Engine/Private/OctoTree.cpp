@@ -10,7 +10,7 @@ COctoTree::COctoTree()
 	Safe_AddRef(m_pGameInstance);
 }
 
-void COctoTree::SetUp_OctoTree(_float3 vCenter, _float3 vExtent)
+void COctoTree::SetUp_OctoTree(const _float3& vCenter, const _float3& vExtent)
 {
 	Safe_Release(m_pRootCell);
 	m_pRootCell = CCubeCell::Create(vCenter, vExtent, 0);
@@ -23,12 +23,9 @@ void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
 
 	_float fMinMax[ENUM_CLASS(CCubeCell::MINMAX::END)] = {};
 
-	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MIN_X)] = pBox->Center.x - pBox->Extents.x * 0.5f;
-	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MAX_X)] = pBox->Center.x + pBox->Extents.x * 0.5f;
-	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MIN_Y)] = pBox->Center.y - pBox->Extents.y * 0.5f;
-	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MAX_Y)] = pBox->Center.y + pBox->Extents.y * 0.5f;
-	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MIN_Z)] = pBox->Center.z - pBox->Extents.z * 0.5f;
-	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MAX_Z)] = pBox->Center.z + pBox->Extents.z * 0.5f;
+	for (_int i = 0; i < ENUM_CLASS(CCubeCell::MINMAX::END); ++i)
+		fMinMax[i] = *(reinterpret_cast<const _float*>(&(pBox->Center.x)) + i / 2) + 
+							pow(-1.f, i + 1) * (*(reinterpret_cast<const _float*>(&(pBox->Extents.x)) + i / 2) * 0.5f);
 
 	m_pRootCell->Add_Object(pObject, fMinMax);
 }
@@ -43,10 +40,13 @@ void COctoTree::Update()
 	if (nullptr == m_pRootCell)
 		return;
 
-	m_iLODCnt.store(0, memory_order_release);
+	vector<CStaticObject*> Container[4];
+	Container[0].reserve(MAX_OBJECT_PER_LOD);
+	Container[1].reserve(MAX_OBJECT_PER_LOD);
+	Container[2].reserve(MAX_OBJECT_PER_LOD);
+	Container[3].reserve(MAX_OBJECT_PER_LOD);
 
-	//if(true == m_pGameInstance->IsWorkFinish())
-	m_pRootCell->Update(XMLoadFloat4(m_pGameInstance->Get_CamPos()));
+	m_pRootCell->Update(XMLoadFloat4(m_pGameInstance->Get_CamPos()), Container);
 }
 
 COctoTree* COctoTree::Create()

@@ -12,16 +12,16 @@ CCubeCell::CCubeCell()
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
+HRESULT CCubeCell::Initialize(const _float3& vCenter, const _float3& vExtent, _uint iDepth)
 {
-	_float3 Extent = vExtent;
+	_float3 vLooseExtent = vExtent;
 	if (0 < iDepth)
 	{
-		XMStoreFloat3(&Extent, XMLoadFloat3(&Extent) * 1.2f);
-		m_pBoundingBox = new BoundingBox(vCenter, Extent);
+		XMStoreFloat3(&vLooseExtent, XMLoadFloat3(&vLooseExtent) * LOOSE_CELL_SCALE);
+		m_pBoundingBox = new BoundingBox(vCenter, vLooseExtent);
 	}
 	else
-		m_pBoundingBox = new BoundingBox(vCenter, Extent);
+		m_pBoundingBox = new BoundingBox(vCenter, vLooseExtent);
 
 	ASSERT_CRASH(m_pBoundingBox);
 
@@ -31,15 +31,12 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	Compute_MinMax();
 
 	if (MAX_DEPTH == iDepth)
-	{
-		//cout << "Extent : " << Extent.x << endl;
 		return S_OK;
-	}
 
 	for (_uint i = 0; i < ENUM_CLASS(CORNER::END); ++i)
 	{
 		_float3 vOffset = {};
-		//vOffset.x = (i & 1) ? 0.5f : -0.5f;
+
 		if (i % 4 == 0 || i % 4 == 3)
 			vOffset.x = -0.5f;
 		else
@@ -49,15 +46,15 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 		vOffset.z = (i & 4) ? -0.5f : 0.5f;
 
 		_float3 vChildCenter = _float3(
-			vCenter.x + vOffset.x * Extent.x,
-			vCenter.y + vOffset.y * Extent.y,
-			vCenter.z + vOffset.z * Extent.z
+			vCenter.x + vOffset.x * vLooseExtent.x,
+			vCenter.y + vOffset.y * vLooseExtent.y,
+			vCenter.z + vOffset.z * vLooseExtent.z
 		);
 
 		_float3 vChildExtent = _float3(
-			Extent.x * 0.5f,
-			Extent.y * 0.5f,
-			Extent.z * 0.5f
+			vLooseExtent.x * 0.5f,
+			vLooseExtent.y * 0.5f,
+			vLooseExtent.z * 0.5f
 		);
 
 		CCubeCell* pCubeCell = CCubeCell::Create(vChildCenter, vChildExtent, m_iDepth + 1);
@@ -68,37 +65,23 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
     return S_OK;
 }
 
-void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Container)
+void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>(&Container)[4])
 {
 	// Frustrum, BoundingBox Intersect Check
 	if (true == m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
 	{
 		// LOD SetUp
 		// Low Depth (Cell 단위)
-		//if(m_iDepth >= 3)
-		Compute_Cell_LOD(vCamPos);
-
 		for (auto& pObject : m_Objects)
 		{
 			if (nullptr == pObject)
 				continue;
 			if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
 			{
-				//if (m_iDepth <= 3)
-				m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
-				//pObject->Set_LOD(0);
-				m_iLODIndex = pObject->IsMaxLOD(m_iLODIndex);
-				pObject->Set_LOD(m_iLODIndex);
-
-				// Root는 각 객체 Push
-				if (0 == m_iDepth)
-				{
-					if (Container)
-						Container[pObject->Get_LOD()].push_back(pObject);
-				}
-				// Leaf는 Local Container에 담은 후 병합
-				else
-					Container[pObject->Get_LOD()].push_back(pObject);
+				_int iObjectLODIndex = Compute_Object_LOD(pObject, vCamPos);
+				iObjectLODIndex = pObject->IsMaxLOD(iObjectLODIndex);
+				pObject->Set_LOD(iObjectLODIndex);
+				Container[iObjectLODIndex].push_back(pObject);
 			}
 		}
 
@@ -109,12 +92,13 @@ void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Co
 			{
 				if(0 == m_iDepth)
 				{
-					m_pGameInstance->Add_Work([=, Cell = pCell, CamPos = vCamPos]() {
+					m_pGameInstance->Add_Work([&, Cell = pCell, CamPos = vCamPos]() {
 						vector<CStaticObject*> Container[4];
-						Container[0].reserve(1000);
-						Container[1].reserve(1000);
-						Container[2].reserve(1000);
-						Container[3].reserve(1000);
+						Container[0].reserve(MAX_OBJECT_PER_LOD);
+						Container[1].reserve(MAX_OBJECT_PER_LOD);
+						Container[2].reserve(MAX_OBJECT_PER_LOD);
+						Container[3].reserve(MAX_OBJECT_PER_LOD);
+
 						Cell->Update(CamPos, Container);
 						m_pGameInstance->Add_Render_StaticObject(Container);
 						});
@@ -131,7 +115,8 @@ void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)
 	ASSERT_CRASH(pObject);
 	ASSERT_CRASH(pMinMax);
 
-	for (size_t i = 0; i < m_ChildCells.size(); ++i)
+	_int iNumChildCells = m_ChildCells.size();
+	for (_int i = 0; i < iNumChildCells; ++i)
 	{
 		if (true == m_ChildCells[i]->isIn(pMinMax))
 		{
@@ -139,9 +124,8 @@ void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)
 			return;
 		}
 	}
-
 	{
-		lock_guard<recursive_mutex> lock(m_Mutex);
+		lock_guard<mutex> lock(m_Mutex);
 		m_Objects.push_back(pObject);
 	}
 }
@@ -183,30 +167,19 @@ _bool CCubeCell::isIn(const _float* pMinMax)
 
 void CCubeCell::Compute_Cell_LOD(const _fvector& vCamPos)
 {
-	_int iLODCnt = m_iLODCnt.load(memory_order_acquire);
-	/*if (iLODCnt > MAX_LOD)
-		return;*/
-
 	_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat3(&m_pBoundingBox->Center) - vCamPos));
 	m_iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
-	m_iLODCnt.fetch_add(1, memory_order_release);
 }
 
 _uint CCubeCell::Compute_Object_LOD(CStaticObject* pObject, const _fvector& vCamPos)
 {
-	_int iLODCnt = m_iLODCnt.load(memory_order_acquire);
-	/*if (iLODCnt > MAX_LOD)
-		return m_iLODIndex;*/
-
 	_vector vCenter = XMLoadFloat3(&pObject->Get_BoundingBox()->Center);
 	_float fDistance = XMVectorGetX(XMVector3Length(vCenter - vCamPos));
-
-	m_iLODCnt.fetch_add(1, memory_order_release);
 
 	return static_cast<_uint>(fDistance / g_fLODGap);
 }
 
-CCubeCell* CCubeCell::Create(_float3 vCenter, _float3 vExtent, _uint iDepth)
+CCubeCell* CCubeCell::Create(const _float3& vCenter, const _float3& vExtent, _uint iDepth)
 {
 	CCubeCell* pInstance = new CCubeCell();
 

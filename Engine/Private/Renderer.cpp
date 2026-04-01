@@ -88,7 +88,7 @@ HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
-		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		lock_guard<mutex> lock(m_RegisterRenderObjectMutex);
 		m_StaticObjects[iWriteIndex][pRenderObject->Get_LOD()].push_back(pRenderObject);
 	}
 
@@ -99,34 +99,32 @@ HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject, _uint i
 {
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
-		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		lock_guard<mutex> lock(m_RegisterRenderObjectMutex);
 		m_StaticObjects[iWriteIndex][iNumLODIndex].push_back(pRenderObject);
 	}
 
 	return S_OK;
 }
 
-HRESULT CRenderer::Add_Render_StaticObject(vector<class CStaticObject*>* Container)
+HRESULT CRenderer::Add_Render_StaticObject(vector<class CStaticObject*>(&Container)[4])
 {
 	if (8 == m_iCullStack.load(memory_order_acquire))
 		return S_OK;
 
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
-		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		lock_guard<mutex> lock(m_RegisterRenderObjectMutex);
 		for (_uint i = 0; i < 4; ++i)
 			m_StaticObjects[iWriteIndex][i].insert(m_StaticObjects[iWriteIndex][i].end(), Container[i].begin(), Container[i].end());
 		m_iCullStack.fetch_add(1, memory_order_release);
 	}
 
 	if (8 <= m_iCullStack.load(memory_order_acquire))
-	{
-		//m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
 		m_isCompleteFrustumCull.exchange(true, memory_order_release);
-	}
 
 	return S_OK;
 }
+
 HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pRenderObject, _uint iNumLODIndex)
 {
 	return m_pRenderer->Add_Render_StaticObject(pRenderObject, iNumLODIndex);
@@ -134,7 +132,7 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pRenderObject, _ui
 HRESULT CRenderer::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	{
-		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		lock_guard<mutex> lock(m_RegisterRenderObjectMutex);
 		m_ShadowMapObjects.push_back(pRenderObject);
 	}
 
