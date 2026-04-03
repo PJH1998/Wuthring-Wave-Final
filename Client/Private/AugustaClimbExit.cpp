@@ -106,7 +106,7 @@ void CAugustaClimbExit::Update_ClimbAnimation(_float fTimeDelta)
 
 void CAugustaClimbExit::Check_Physics(_float fTimeDelta)
 {
-    m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
+    //m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 

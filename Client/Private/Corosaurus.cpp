@@ -354,15 +354,15 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("CallAnim"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("GrabRelease");
+		m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::GRABRELEASE);
 #ifdef _DEBUG
 		cout << "플레이어 애니메이션 호출!" << endl;
 #endif // _DEBUG
 
 	}
-	else if (wstrTypeTag == TEXT("GrabRelease"))
+	else if (wstrTypeTag == TEXT("GRABRELEASE"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("GrabUnbined");
+		m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::GRAB_UNBINED);
 #ifdef _DEBUG
 		cout << "플레이어 잡기 해제 호출!" << endl;
 #endif // _DEBUG

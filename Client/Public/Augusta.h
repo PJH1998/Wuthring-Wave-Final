@@ -267,6 +267,9 @@ private:
 
 #pragma region HELPER 함수 => Augusta만 사용
 private:
+	void Handle_TransitionIdle();
+	void Handle_TransitionQTE();
+
 	void Process_HitStop(const _wstring& wStrObjectTag);
 	void Process_CameraAction(const _wstring& wStrObjectTag);
 	void Process_VolumeChange(const _wstring& wStrObjectTag);

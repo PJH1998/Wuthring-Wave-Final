@@ -11,6 +11,10 @@
 #include "PlayerStatus.h"
 #include "Event_Leviatan.h"
 
+namespace
+{
+	constexpr _float EVENT_MAX_TIME = 2.5f;
+}
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -128,7 +132,7 @@ void CPlayer::Update(_float fTimeDelta)
 	Update_Targeting(fTimeDelta);
 
 #ifdef _DEBUG
-	GUI_Teleport();
+	GUI_TELEPORT();
 #endif
 }
 
@@ -288,8 +292,6 @@ void CPlayer::Handle_Input()
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 		m_Characters[m_iCurrentCharacterIdx]->Clear_CoolTime();
 
-		//m_pSpringCamera->Use_Spring(2.5f, 0.1f);
-		//m_pGameInstance->Play_Sound(TEXT("role_slide_loop (SFX)"), ENUM_CLASS(CHANNEL::PLAYER_ACTION), 0.3f);
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
@@ -322,7 +324,6 @@ void CPlayer::Handle_Input()
 		LEVI_GRAB Desc{ true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
 		m_Characters[m_iCurrentCharacterIdx]->Attach_ThrowTarget(true);
-		// Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
 
 		m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f);
 		m_pGameSystem->Stop_Action();
@@ -333,9 +334,6 @@ void CPlayer::Handle_Input()
 	{
 		_float2 vPos = { 500.f, -200.f };
 		m_pGameSystem->Play_QTE(vPos, UI_QTE_TYPE::TRIGGER_EXECUTE, UI_QTE_BTN::F);
-
-
-		//Notify_Event(CHARACTER_EVENT::TELEPORT, &vPos);
 	}
 
 
@@ -571,123 +569,113 @@ void CPlayer::Notify_EscapeGrabExecute()
 
 void CPlayer::Notify_Event(CHARACTER_EVENT eEvent, void* pArg)
 {
-	// 1. 어떤 캐릭터 였건 Rover로 변경하기.
-	if (CHARACTER_EVENT::LEVIATAN_QTE == eEvent)
+	switch (eEvent)
 	{
-		// LockOn 해제.
-		m_IsLockOn = false;
-
-		Bind_EventLock(true);
-
-		// 협주 중이였다면?
-		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
-		{
-			// => 협주 중지
-			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
-			// => 협주 인덱스를 제거하기.
-			m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
-		}
-			
-
-		m_IsQTE = false;
-
-		// 2. Rover로 변경.
-		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
-			Change_Character(CHARACTERTYPE::ROVER, 0.f);
-
-
-		// 3. 작업
-		// => Rover 위치 변경 (위치는 안변경되는거 같기도하고..)
-		// => Rover State 변경. (Leviatan 전용 QTE로)
-		// => Rover 시간 멈춤 (State Machine만)
-		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
-			CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
-		);
-		
-		// 4. Levi Cap
-		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Capture")
-			,true, false);
+	case CHARACTER_EVENT::LEVIATAN_QTE:
+		Handle_LeviatanQTE(pArg);
+		break;
+	case CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS:
+		Handle_LEVIATANQTE_SUCCESS();
+		break;
+	case CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE:
+		Handle_LEVIATANPREV_EXECUTE(pArg);
+		break;
+	case CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS:
+		Handle_LEVIATANEXECUTE_SUCCESS();
+		break;
+	case CHARACTER_EVENT::TELEPORT:
+		Handle_TELEPORT(pArg);
+		break;
+	default:
+		break;
 	}
-	else if (CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS == eEvent)
+}
+
+void CPlayer::Handle_LeviatanQTE(void* pArg)
+{
+	m_IsLockOn = false;
+	Bind_EventLock(true);
+
+	if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
 	{
-		m_IsLockOn = false;
-		if (m_iCurrentCharacterIdx == CHARACTERTYPE::ROVER)
-		{
-			Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
-
-			LEVI_GRAB Desc{ true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
-			m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
-			Bind_EventLock(false);
-			m_pGameSystem->Stop_Action();
-		}
+		m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
 	}
-	else if (CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE == eEvent) // 레비아탄 위치도 고정시켜야할 것 같은데?..
+
+	m_IsQTE = false;
+
+	if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+		Change_Character(CHARACTERTYPE::ROVER, 0.f);
+
+	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+		CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE, pArg
+	);
+	m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Capture"), true, false);
+}
+
+void CPlayer::Handle_LEVIATANQTE_SUCCESS()
+{
+	m_IsLockOn = false;
+	Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+	LEVI_GRAB Desc{ true };
+	m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Grab"), Desc);
+	m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+	Bind_EventLock(false);
+	m_pGameSystem->Stop_Action();
+}
+
+void CPlayer::Handle_LEVIATANPREV_EXECUTE(void* pArg)
+{
+	m_IsLockOn = false;
+
+	if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
 	{
-		m_IsLockOn = false;
-
-		if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
-		{
-			m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
-			m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
-		}
-		
-
-		// 1. Rover가 아니면 Rover로변경 (얘가 메인 캐릭터로)
-		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
-			Change_Character(CHARACTERTYPE::ROVER, 0.f);
-
-		// 2. Rover의 상태를 변경.
-		m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
-			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
-		);
-
-
-		// 3. Galbrena 활성화. => 보스의
-		m_iEventCharacterIdx = CHARACTERTYPE::GALBRENA;
-
-		m_Characters[m_iEventCharacterIdx]->TransitionState_FromPlayer(
-			CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
-		);
-
-		
-		m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Execute"), true, false);
-
-		// 카메라 액션 시작하면서 실행?
-		//m_Characters[m_iCurrentCharacterIdx]->Spawn_Effect(TEXT("Pooling_Excute_Prefab"));
+		m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(true);
+		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
 	}
-	else if (CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS == eEvent)
-	{
-		m_IsLockOn = false;
 
-		m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
-		m_Characters[m_iEventCharacterIdx]->Start_Anim();
-		
-		m_pGameSystem->Stop_Action();
+	if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+		Change_Character(CHARACTERTYPE::ROVER, 0.f);
 
-		// 이벤트 예약? => 1.5f 뒤에 Leviatan 죽음 이벤트를 실행하라.
-		m_Event = [this]() {
-			m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f); // 몬스터 TimeRatio 정상화.
-			LEVI_EXECUTE Desc{ true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
-			m_iEventCharacterIdx = CHARACTERTYPE::NONE; // Event 캐릭 해제.
-		}; 
+	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(
+		CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
+	);
 
-		m_fEventMaxTime = { 2.5f };
+	m_iEventCharacterIdx = CHARACTERTYPE::GALBRENA;
+	m_Characters[m_iEventCharacterIdx]->TransitionState_FromPlayer(
+		CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE, pArg
+	);
 
-		m_IsEvent = true;
-		
-	}
-	else if (CHARACTER_EVENT::TELEPORT == eEvent)
-	{
-		// TELEPORT
-		if (nullptr == pArg)
-			return;
+	m_Characters[m_iCurrentCharacterIdx]->Play_Action(TEXT("Action_Levi_Execute"), true, false);
+}
 
-		_float4 vPos = *static_cast<_float4*>(pArg);
-		m_Characters[m_iCurrentCharacterIdx]->Execute_Telport(XMLoadFloat4(&vPos));
-	}
-	
+void CPlayer::Handle_LEVIATANEXECUTE_SUCCESS()
+{
+	m_IsLockOn = false;
+
+	m_Characters[m_iCurrentCharacterIdx]->Start_Anim();
+	m_Characters[m_iEventCharacterIdx]->Start_Anim();
+
+	m_pGameSystem->Stop_Action();
+
+	m_Event = [this]() {
+		m_pGameSystem->Change_TimeRate(COLLISIONLAYER::ENEMY, 1.f);
+		LEVI_EXECUTE Desc{ true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
+		m_iEventCharacterIdx = CHARACTERTYPE::NONE;
+	};
+
+	m_fEventMaxTime = EVENT_MAX_TIME;
+	m_IsEvent = true;
+}
+
+void CPlayer::Handle_TELEPORT(void* pArg)
+{
+	if (nullptr == pArg)
+		return;
+
+	_float4 vPos = *static_cast<_float4*>(pArg);
+	m_Characters[m_iCurrentCharacterIdx]->Execute_Telport(XMLoadFloat4(&vPos));
 }
 void CPlayer::Bind_EventLock(_bool IsLock)
 {
@@ -1224,16 +1212,16 @@ void CPlayer::Save_PreviousPosition()
 
 
 #ifdef _DEBUG
-void CPlayer::GUI_Teleport()
+void CPlayer::GUI_TELEPORT()
 {
-	ImGui::Begin("Player Teleport");
+	ImGui::Begin("Player TELEPORT");
 
 	ImGui::Text("[Position]");
-	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&m_vDebugTeleportPos));
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&m_vDebugTELEPORTPos));
 
 	if (ImGui::Button("Apply"))
 	{
-		_vector vChagePos = XMVectorSetW(XMLoadFloat3(&m_vDebugTeleportPos), 1.f);
+		_vector vChagePos = XMVectorSetW(XMLoadFloat3(&m_vDebugTELEPORTPos), 1.f);
 		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
 		m_pColliderCom->Set_Position(vChagePos);
 	}

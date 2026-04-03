@@ -15,6 +15,9 @@
 #include "PlayerStatus.h"
 #include "Ability.h"
 
+static constexpr const wchar_t* SFX_TAG_LEVIATAN_PREV_EXECUTE = L"SFX|Pooling_Galbrena_Ulti_Prefab";
+static constexpr const wchar_t* TIMER_ID_MAIN = L"Timer_60";
+
 CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
 {
@@ -232,65 +235,30 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 
 	switch (eTransitionType)
 	{
-		case CHARACTER_TRANSITIONTYPE::IDLE:
-		{
-			// 애니메이션 변경할 값.
-			GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
-			break;
-		}
-		case CHARACTER_TRANSITIONTYPE::QTE:
-		{
-			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-
-			// 내 앞에서 생성. (안 곂치게)
-			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
-			
-			vPos += vLook * 1.f;
-			vPos += XMVectorSet(0.f, 2.f, 0.f, 0.f); // 약간 띄우기.
-			m_pColliderCom->Set_Position(vPos);
-			m_pColliderCom->IsActivate(true);
-
-			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
-			// 애니메이션 변경할 값.
-			GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
-			break;
-		}
-		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE:
-		{
-			if (nullptr == pArg)
-				return;
-
-			// 1. Leiviantan QTE bool 활성화
-			m_IsLeviatanQTE = true;
-			// 2. Leviatan 고정 이펙트 설정. (플레이어 몸체에)
-			GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
-			break;
-		}
-		case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS:
-			m_IsLeviatanQTE = false;
-			Start_Anim();
-			break;
-		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
-			// 1. SFX 호출 하면서
-			//Process_SpawnSFX(TEXT("SFX|Pooling_Excute_Prefab"));
-			Process_SpawnSFX(TEXT("SFX|Pooling_Galbrena_Ulti_Prefab"));
-
-			// 2. State 변경하고 => 위치 이동.
-			GetStateContextForWrite().m_eEventType = ERoverEventType::BURST02;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
-			break;
-		default:
-			break;
-
+	case CHARACTER_TRANSITIONTYPE::IDLE:
+		Handle_TransitionIdle();
+		break;
+	case CHARACTER_TRANSITIONTYPE::QTE:
+		Handle_TransitionQTE();
+		break;
+	case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTE:
+		Handle_TransitionLeviatanQTE(pArg);
+		break;
+	case CHARACTER_TRANSITIONTYPE::LEVIATAN_QTESUCCESS:
+		Handle_TransitionLEVIATANQTE_SUCCESS();
+		break;
+	case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
+		Handle_TransitionLEVIATANPREV_EXECUTE(pArg);
+		break;
+	default:
+		break;
 	}
 
-	// 상태 변수 초기화
 	m_IsQTE = false;
 	m_StateContext.Clear();
 }
+
+
 
 
 
@@ -866,6 +834,45 @@ void CRover::Activate(_bool IsActivate)
 #pragma endregion
 
 
+void CRover::Handle_TransitionIdle()
+{
+	GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+}
+
+void CRover::Handle_TransitionQTE()
+{
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+	vPos += vLook * 1.f;
+	vPos += XMVectorSet(0.f, 2.f, 0.f, 0.f);
+	m_pColliderCom->Set_Position(vPos);
+	m_pColliderCom->IsActivate(true);
+
+	m_pGameInstance->Change_TimeRate(TIMER_ID_MAIN, 0.5f, 0.5f);
+	GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
+}
+
+void CRover::Handle_TransitionLeviatanQTE(void* pArg)
+{
+	m_IsLeviatanQTE = true;
+	GetStateContextForWrite().m_eEventType = ERoverEventType::BEHIT_FLY_FALL;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+}
+
+void CRover::Handle_TransitionLEVIATANQTE_SUCCESS()
+{
+	m_IsLeviatanQTE = false;
+	Start_Anim();
+}
+
+void CRover::Handle_TransitionLEVIATANPREV_EXECUTE(void* pArg)
+{
+	Process_SpawnSFX(SFX_TAG_LEVIATAN_PREV_EXECUTE);
+	GetStateContextForWrite().m_eEventType = ERoverEventType::BURST02;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(ERoverInteractionState::EVENT), pArg);
+}
 
 void CRover::Update_Physics(_float fTimeDelta)
 {

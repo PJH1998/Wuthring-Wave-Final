@@ -460,10 +460,10 @@ void CUI_QTE::Update_FinishEvent(_float fTimeDelta)
 	{
 		//std::cout << "[UI_QTE::Update_FinishEvent] QTE Success Triggered!" << std::endl;
 		if (m_eQTEType == UI_QTE_TYPE::FILLGUAGE)
-			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTESuccess");
+			m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::LEVIATANQTE_SUCCESS);
 		else if (m_eQTEType == UI_QTE_TYPE::TRIGGER_EXECUTE)
 		{
-			//m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess");
+			//m_pGameSystem->Bind_Condition_ToPlayer("LEVIATANEXECUTE_SUCCESS");
 			//LEVI_EXECUTE Desc{ true };
 			//m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Levi_Execute"), Desc);
 			LEVI_EXECUTE Desc{ true };

@@ -159,7 +159,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 			{
 				m_pGameInstance->OnFade(FADE::FADE_OUT, 3.f, [this]() {
 					_float4 vPos = _float4(1.2f, -3.7f, -708.8f, 1.f);
-					m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+					m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::TELEPORT, &vPos);
 					m_pGameSystem->Lock_Input_ToPlayer(false);
 					m_pGameInstance->OnFade(FADE::FADE_IN, 1.5f, [this]() {
 						});

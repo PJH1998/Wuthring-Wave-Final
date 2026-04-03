@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "Player_Define.h"
 #include "GalbrenaState_Enum.h"
 
@@ -249,6 +250,11 @@ private:
 
 
 private:
+	void Handle_TransitionIdle();
+	void Handle_TransitionQTE();
+	void Handle_TransitionLEVIATANPREV_EXECUTE(void* pArg);
+	void Handle_TransitionLEVIATANEXECUTE_SUCCESS();
+
 	void Bind_TargetToVolumes();
 	void Update_TargetDistance();
 	void Update_Physics(_float fTimeDelta);

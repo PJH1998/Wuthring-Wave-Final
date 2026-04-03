@@ -227,6 +227,12 @@ private:
 	_bool m_PendingConditions[CONDITION_END] = {};
 
 private:
+	void Handle_TransitionIdle();
+	void Handle_TransitionQTE();
+	void Handle_TransitionLeviatanQTE(void* pArg);
+	void Handle_TransitionLEVIATANQTE_SUCCESS();
+	void Handle_TransitionLEVIATANPREV_EXECUTE(void* pArg);
+
 	void Update_Physics(_float fTimeDelta);
 	void Update_Camera(_float fTimeDelta);
 	void Update_TargetDistance(_float fTimeDelta);

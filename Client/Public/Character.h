@@ -2,6 +2,7 @@
 
 #include "Actor.h"
 #include "CharacterTypes.h"
+#include "Client_CharacterEnum.h"
 NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
@@ -145,7 +146,7 @@ public:
 	void Set_Event(_bool IsEvent) { m_IsEvent = IsEvent; }
 	_bool IsEvent() { return m_IsEvent; }
 
-	void Bind_Condition_ToPlayer(const _string& strCondition, void* pArg = nullptr);
+	void Bind_Condition_ToPlayer(PLAYER_CONDITION eCondition, void* pArg = nullptr);
 
 
 	_bool IsVisible() { return m_IsVisible; }

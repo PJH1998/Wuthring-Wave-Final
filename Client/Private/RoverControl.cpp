@@ -42,22 +42,11 @@ void CRoverControl::OnUpdate(_float fTimeDelta)
 {
 	CInteractionState::OnUpdate(fTimeDelta);
 
-	// 0. 키입력 체크
 	Handle_Input();
-
-	// 1. 애니메이션 갱신
 	Update_ControlAnimation(fTimeDelta);
-
-	// 2. 물리 체크
 	Check_Physics(fTimeDelta);
-
-	// 3. 전환 체크
 	Check_StateTransition(fTimeDelta);
-
-	// 상태 리셋;
 	State_Reset();
-
-	//m_pRover->Rotate_GrappleTarget(); // 회전.
 }
 
 void CRoverControl::OnExit()

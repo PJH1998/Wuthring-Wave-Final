@@ -591,34 +591,44 @@ _bool CGameSystem::IsFix()
 #pragma endregion
 
 #pragma region GRAB_INTERACT
-void CGameSystem::Bind_Condition_ToPlayer(const _string& strTransition, void* pArg)
+void CGameSystem::Bind_Condition_ToPlayer(PLAYER_CONDITION eCondition, void* pArg)
 {
 	if (nullptr == m_pPlayer)
 		return;
 
-	
-	if (strTransition == "LeviatanGrab")
+	switch (eCondition)
 	{
+	case PLAYER_CONDITION::LEVIATAN_GRAB:
 		m_pPlayer->Bind_EventLock(true);
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE, pArg);
-	}
-	else if (strTransition == "LeviatanQTEStart")
+		break;
+	case PLAYER_CONDITION::LEVIATANQTE_START:
 	{
 		_float2 vPos = { 500.f, -200.f };
 		Play_QTE(vPos, UI_QTE_TYPE::FILLGUAGE, UI_QTE_BTN::F);
 	}
-	else if (strTransition == "LeviatanQTESuccess")
+		break;
+	case PLAYER_CONDITION::LEVIATANQTE_SUCCESS:
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_QTE_SUCCESS);
-	else if (strTransition == "LeviatanPrevExecute")
+		break;
+	case PLAYER_CONDITION::LEVIATANPREV_EXECUTE:
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_PREV_EXECUTE, pArg);
-	else if (strTransition == "LeviatanExecuteSuccess") // 갈브레나 호출.
+		break;
+	case PLAYER_CONDITION::LEVIATANEXECUTE_SUCCESS:
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::LEVIATAN_EXECUTE_SUCCESS);
-	else if (strTransition == "GrabRelease")
+		break;
+	case PLAYER_CONDITION::GRABRELEASE:
 		m_pPlayer->Notify_EscapeGrabReady();
-	else if (strTransition == "GrabUnbined")
-		m_pPlayer->Notify_EscapeGrabExecute(); // 여기서 뼈 해제하라.
-	else if (strTransition == "Teleport")
+		break;
+	case PLAYER_CONDITION::GRAB_UNBINED:
+		m_pPlayer->Notify_EscapeGrabExecute();
+		break;
+	case PLAYER_CONDITION::TELEPORT:
 		m_pPlayer->Notify_Event(CHARACTER_EVENT::TELEPORT, pArg);
+		break;
+	default:
+		break;
+	}
 }
 
 void CGameSystem::Lock_Input_ToPlayer(_bool IsLock)

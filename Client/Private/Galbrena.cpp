@@ -12,6 +12,8 @@
 #include "PlayerStatus.h"
 #include "Ability.h"
 
+static constexpr const wchar_t* TIMER_ID_MAIN = L"Timer_60";
+
 CGalbrena::CGalbrena(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
 {
@@ -239,48 +241,29 @@ void CGalbrena::Render_Shadow()
 // 캐릭터 전환시 Idle로 상태 전환..
 void CGalbrena::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
-	// 현재 애니메이션 제거.
 	m_pStateMachineCom->Exit_State();
 
 	switch (eTransitionType)
 	{
-		case CHARACTER_TRANSITIONTYPE::IDLE:
-		{
-			// 애니메이션 변경할 값.
-			GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
-			break;
-		}
-		case CHARACTER_TRANSITIONTYPE::QTE:
-		{
-			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
-			
-			// 애니메이션 변경할 값.
-			GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
-			break;
-		}
-		case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
-		{
-			// 1. State 변경하고 => 위치 이동.
-			Set_Event(true);
-			Activate(true);
-			GetStateContextForWrite().m_eEventType = EGalbrenaEventType::ATTACK07;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::EVENT), pArg);
-			break;
-		}
-		case CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS:
-		{
-
-			break;
-		}
+	case CHARACTER_TRANSITIONTYPE::IDLE:
+		Handle_TransitionIdle();
+		break;
+	case CHARACTER_TRANSITIONTYPE::QTE:
+		Handle_TransitionQTE();
+		break;
+	case CHARACTER_TRANSITIONTYPE::LEVIATAN_PREV_EXECUTE:
+		Handle_TransitionLEVIATANPREV_EXECUTE(pArg);
+		break;
+	case CHARACTER_TRANSITIONTYPE::LEVIATAN_EXECUTE_SUCCESS:
+		Handle_TransitionLEVIATANEXECUTE_SUCCESS();
+		break;
+	default:
+		break;
 	}
 
-	// 상태 변수 초기화
 	m_IsQTE = false;
 	m_StateContext.Clear();
 }
-
 
 
 	// AnimName이 같은걸로 매핑되어있음.
@@ -899,6 +882,32 @@ void CGalbrena::Activate(_bool IsActivate)
 #pragma endregion
 
 
+void CGalbrena::Handle_TransitionIdle()
+{
+	GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND2;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+}
+
+void CGalbrena::Handle_TransitionQTE()
+{
+	m_pGameInstance->Change_TimeRate(TIMER_ID_MAIN, 0.5f, 0.5f);
+	GetStateContextForWrite().m_eQTEType = EGalbrenaQTEType::SKILL_QTE;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::QTE));
+}
+
+void CGalbrena::Handle_TransitionLEVIATANPREV_EXECUTE(void* pArg)
+{
+	Set_Event(true);
+	Activate(true);
+	GetStateContextForWrite().m_eEventType = EGalbrenaEventType::ATTACK07;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::INTREACTION), ENUM_CLASS(EGalbrenaInteractionState::EVENT), pArg);
+}
+
+void CGalbrena::Handle_TransitionLEVIATANEXECUTE_SUCCESS()
+{
+}
+
+
 // 매 프레임 볼륨 타겟 매트릭스 전달.
 void CGalbrena::Bind_TargetToVolumes()
 {
@@ -1404,7 +1413,8 @@ void CGalbrena::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(3.f, 3.f, 1.f); // (x, z, y)임 x, z 크게 y작게 
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 250.f;
+	//TriggerDesc.fAttackDmg = 250.f;
+	TriggerDesc.fAttackDmg = 3000.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::FUSI;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);

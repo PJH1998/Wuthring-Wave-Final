@@ -159,7 +159,7 @@ void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
 void CRoverGroundRun::Check_Physics(_float fTimeDelta)
 {
     // Wall인지?
-    m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
+    //m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
 
 	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
 	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);

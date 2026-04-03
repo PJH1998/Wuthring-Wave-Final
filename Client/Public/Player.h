@@ -244,6 +244,12 @@ private:
 	void Bind_SwitchVFX(CHARACTERTYPE eType);
 	void PlaySwitchSFX();
 
+	void Handle_LeviatanQTE(void* pArg);
+	void Handle_LEVIATANQTE_SUCCESS();
+	void Handle_LEVIATANPREV_EXECUTE(void* pArg);
+	void Handle_LEVIATANEXECUTE_SUCCESS();
+	void Handle_TELEPORT(void* pArg);
+
 	void UpdateCharacters(_float fTimeDelta);
 	void UpdateRigidbodies(_float fTimeDelta);
 	void Update_Targeting(_float fTimeDelta);
@@ -260,8 +266,8 @@ private:
 	void Save_PreviousPosition();
 
 #ifdef _DEBUG
-	_float3		m_vDebugTeleportPos = {};
-	void			GUI_Teleport();
+	_float3		m_vDebugTELEPORTPos = {};
+	void			GUI_TELEPORT();
 #endif
 
 private:
