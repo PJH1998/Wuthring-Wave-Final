@@ -80,9 +80,9 @@ void CUI_Text::Render()
 	ID3D11ShaderResourceView* pFontSRV = m_pGameInstance->Get_AtlasSRV(m_tTextDesc.strFontTag);
 
 //#ifdef KSTA_UI_ATLAS_DEBUG
-	ImGui::Begin("Font Atlas Debug (UI_Text)");
-	ImGui::Image(pFontSRV, ImVec2(1024, 1024));
-	ImGui::End();
+	//ImGui::Begin("Font Atlas Debug (UI_Text)");
+	//ImGui::Image(pFontSRV, ImVec2(1024, 1024));
+	//ImGui::End();
 //#endif // KSTA_UI_ATLAS_DEBUG
 
 

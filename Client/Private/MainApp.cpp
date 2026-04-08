@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "MainApp.h"
 #include "GameSystem.h"
+#include "BoneReadbackProfiler.h"
 
 #include "Event_Level.h"
 
@@ -155,8 +156,26 @@ void CMainApp::Post_Update()
 
 void CMainApp::Update(_float fTimeDelta)
 {
+	// 프레임 타이밍 시작
+	BoneReadbackProfiler::BeginFrame();
+
 	m_pGameInstance->Update_Engine(fTimeDelta);
 	m_pGameSystem->Update_TimeLack(fTimeDelta);
+
+	// 프로파일러용 핫키 처리 (예: F7 = 녹화 토글, F8 = 더블 버퍼링 토글)
+	if (m_pGameInstance->Get_DIKeyState(DIK_F7) == KEYSTATE::DOWN)
+	{
+		if (false == BoneReadbackProfiler::IsRecording())
+			BoneReadbackProfiler::BeginRecordingSession();
+		else
+			BoneReadbackProfiler::EndRecordingSessionAndExportCsv(nullptr);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_F8) == KEYSTATE::DOWN)
+	{
+		const _bool cur = BoneReadbackProfiler::GetUseDoubleBuffering();
+		BoneReadbackProfiler::SetUseDoubleBuffering(!cur);
+	}
 
 	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
@@ -166,6 +185,8 @@ void CMainApp::Update(_float fTimeDelta)
 	sprintf_s(szFrame, MAX_PATH, "Frame : %d", m_iFrame);
 	ImGui::Text(szFrame);
 	ImGui::End();
+
+	BoneReadbackProfiler::DrawImGui();
 
 	m_fTimeAcc += fTimeDelta;
 	++m_iCnt;
@@ -184,6 +205,9 @@ void CMainApp::Render()
 	m_pGameInstance->Render_Begin(&vClearColor);
 	m_pGameInstance->Draw();
 	m_pGameInstance->Render_End();
+
+	// 프레임 타이밍 종료
+	BoneReadbackProfiler::EndFrame();
 }
 
 void CMainApp::SetUp_CollisionLayer()

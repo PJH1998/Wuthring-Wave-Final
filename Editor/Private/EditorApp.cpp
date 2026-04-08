@@ -1,6 +1,7 @@
 ﻿#include "EditorPch.h"
 #include "EditorApp.h"
 
+#include "BoneReadbackProfiler.h"
 #include "Event_Level.h"
 
 #include "Level_Edit.h"
@@ -118,6 +119,8 @@ void CEditorApp::Post_Update()
 
 void CEditorApp::Update(_float fTimeDelta)
 {
+	BoneReadbackProfiler::BeginFrame();
+
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
 	ImGui::Begin("Level");
@@ -172,6 +175,8 @@ void CEditorApp::Update(_float fTimeDelta)
 	ImGui::Text(szFrame);
 	ImGui::End();
 
+	BoneReadbackProfiler::DrawImGui();
+
 	m_fTimeAcc += fTimeDelta;
 	++m_iCnt;
 	if (m_fTimeAcc > 1.f)
@@ -189,6 +194,8 @@ void CEditorApp::Render()
 	m_pGameInstance->Render_Begin(&vClearColor);
 	m_pGameInstance->Draw();
 	m_pGameInstance->Render_End();
+
+	BoneReadbackProfiler::EndFrame();
 }
 
 void CEditorApp::SetUp_CollisionLayer()

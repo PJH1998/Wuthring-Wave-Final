@@ -1,0 +1,24 @@
+---
+description: Planning rules for Morph Target updates in Model/Mesh code
+globs: Engine/**
+alwaysApply: false
+---
+
+# Morph Target Planning Rules
+
+- **Update 대상 제한**  
+  - Model에서 Morph 시스템을 건드릴 때는, 항상 "Morph Target(ShapeKey)이 있는 메쉬만 갱신"하는 방향으로 설계한다.
+  - 메쉬 단위로 `HasMorphTargets()` 같은 헬퍼를 두고, 이 값이 true인 경우에만 Compute/버퍼 생성/바인딩을 수행하는 것을 기본 원칙으로 삼는다.
+
+- **Model 레벨 루프 설계**  
+  - `CModel::Update_MorphAnimation` 등에서 `m_Meshes`를 순회할 때는, 무조건 전부 돌리지 말고 `if (!pMesh->HasMorphTargets()) continue;` 같은 필터를 먼저 거는 것을 우선적으로 고려한다.
+  - Morph 가중치 버퍼(`BUFFER_MORPH_WEIGHT` / `SRV_MORPH_WEIGHT`)는 여전히 Model이 소유하지만, 실제 Dispatch 호출은 "Morph 타겟 보유 Mesh"만 수행한다.
+
+- **버퍼 초기화 정책**  
+  - `Ready_Mesh_MorphBuffers` / `Ready_SharedBuffers_ForMorph` 같은 초기화 루틴은, Morph 타겟이 없는 메쉬에 대해서는 되도록 호출하지 않거나, 호출되더라도 조용히 패스(S_OK)하는 쪽으로 계획한다.
+  - "Morph가 전혀 없는 캐릭터/메시"도 안전하게 초기화·애니메이션이 돌아가도록 설계한다.
+
+- **방어적 프로그래밍**  
+  - `CMesh::Compute_Morph` 내부에서는 `MODELTYPE::CHARACTER`, `m_IsSharedReady`, `m_IsInstanceReady` 뿐 아니라, `m_ShapeKeys.empty()` / `m_iNumAnimMeshes == 0` 체크도 추가하는 것을 기본 전략으로 삼는다.
+  - Morph 관련 변경을 계획할 때는, 항상 "Morph 없는 메시에서 문제가 생기지 않는가?"를 체크리스트에 포함한다.
+

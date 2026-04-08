@@ -10,6 +10,7 @@
 #include "Channel.h"
 #include "ComputeShader.h"
 #include "Model_Streaming.h"
+#include "BoneReadbackProfiler.h"
 
 const string CModel::kRibPrefix = "Rib_";
 
@@ -1012,10 +1013,16 @@ void CModel::Bind_FlyAnimationResource(CComputeShader* pComputeShaderCom)
 
 void CModel::Readback_BoneMatrices()
 {
+	LARGE_INTEGER t0{}, t1{};
+	QueryPerformanceCounter(&t0);
+
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	// 쓰기 인덱스와 읽기 인덱스 계산 0번 Write, 1번 Read
 	_uint iWriteIdx = BUFFER_STAGING_0 + m_iCurStagingFlip;
-	_uint iReadIdx = BUFFER_STAGING_0 + ((m_iCurStagingFlip + 1) % 2);
+	const _bool bUseDoubleBuffering = BoneReadbackProfiler::GetUseDoubleBuffering();
+	_uint iReadIdx = bUseDoubleBuffering
+		? BUFFER_STAGING_0 + ((m_iCurStagingFlip + 1) % 2)
+		: iWriteIdx;
 
 	// GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
 	m_pContext->CopyResource(m_Buffers[iWriteIdx], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
@@ -1040,6 +1047,17 @@ void CModel::Readback_BoneMatrices()
 
 	// 다음 프레임을 위한 인덱스 교체
 	m_iCurStagingFlip = (m_iCurStagingFlip + 1) % 2;
+
+	QueryPerformanceCounter(&t1);
+
+	LARGE_INTEGER freq{};
+	QueryPerformanceFrequency(&freq);
+	if (freq.QuadPart != 0)
+	{
+		const double ms = static_cast<double>(t1.QuadPart - t0.QuadPart) * 1000.0
+			/ static_cast<double>(freq.QuadPart);
+		BoneReadbackProfiler::AddReadbackMs(ms);
+	}
 }
 
 _uint CModel::GetSafeIndex(const _string& strAnimName)
