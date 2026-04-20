@@ -1,4 +1,4 @@
-﻿#include "ClientPch.h"
+#include "ClientPch.h"
 #include "Augusta.h"
 #include "Player.h"
 #include "SpringCamera.h"
@@ -18,6 +18,8 @@
 
 //TEst
 #include "MotionTrail.h"
+
+static constexpr const wchar_t* TIMER_ID_MAIN = L"Timer_60";
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -238,45 +240,24 @@ void CAugusta::Render_OutLine()
 
 void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType, void* pArg)
 {
-	// 현재 애니메이션 제거.
 	m_pStateMachineCom->Exit_State();
 
-	// 애니메이션 변경할 값.
 	switch (eTransitionType)
 	{
-		case CHARACTER_TRANSITIONTYPE::IDLE:
-		{
-			GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-			break;
-		}
-		
-		case CHARACTER_TRANSITIONTYPE::QTE:
-		{
-			_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-
-			// 내 앞에서 생성. (안 곂치게)
-			_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
-
-			vPos += vLook * -1.f;
-			vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f); // 약간 띄우기.
-			m_pColliderCom->Set_Position(vPos);
-			m_pColliderCom->IsActivate(true);
-
-			m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.5f, 0.5f);
-
-			GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
-			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
-			break;
-		}
+	case CHARACTER_TRANSITIONTYPE::IDLE:
+		Handle_TransitionIdle();
+		break;
+	case CHARACTER_TRANSITIONTYPE::QTE:
+		Handle_TransitionQTE();
+		break;
+	default:
+		break;
 	}
-	
-	// 상태 변수 초기화
-	m_StateContext.Clear();
 
-	// QTE 플래그 강제 리셋.
+	m_StateContext.Clear();
 	m_IsQTE = false;
 }
+
 
 // AnimName이 같은걸로 매핑되어있음.
 void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
@@ -539,7 +520,7 @@ void CAugusta::Hit_Judge(const HIT_DESC& HitDesc)
 
 void CAugusta::Grab_Judge(const CAPTURE_DESC& CaptureDesc)
 {
-	if (m_IsHit || m_PendingConditions[QTE])
+	if (m_IsHit)
 		return;
 
 	_uint iFlag = {};
@@ -1013,6 +994,25 @@ void CAugusta::Debug_BurstWeapon()
 
 #pragma endregion
 
+void CAugusta::Handle_TransitionIdle()
+{
+	GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+}
+
+void CAugusta::Handle_TransitionQTE()
+{
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vLook = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::LOOK), 0.f));
+	vPos += vLook * -1.f;
+	vPos += XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	m_pColliderCom->Set_Position(vPos);
+	m_pColliderCom->IsActivate(true);
+
+	m_pGameInstance->Change_TimeRate(TIMER_ID_MAIN, 0.5f, 0.5f);
+	GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
+	m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
+}
 
 #pragma region HELPER 함수
 void CAugusta::Process_HitStop(const _wstring& wStrObjectTag)

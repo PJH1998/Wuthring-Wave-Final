@@ -4,6 +4,8 @@
 #include "StateMachine.h"
 #include "RoverState_Enum.h"
 
+static constexpr const wchar_t* EFFECT_TAG_LEVIATAN_ANCHOR = L"Common_Bondage";
+
 HRESULT CRoverEvent::Initialize(CCharacter* pCharacter)
 {
     if (FAILED(CInteractionState::Initialize(pCharacter)))
@@ -21,20 +23,10 @@ HRESULT CRoverEvent::Initialize(CCharacter* pCharacter)
 void CRoverEvent::OnEnter(void* pArg)
 {
 	CInteractionState::OnEnter(pArg);
-
-    // 1. 복사본 context 받아오기.
     const auto context = m_pRover->TakeStateContext();
-
-    // 2. 복사본에서 필요한 값 읽기
     ERoverEventType eEventType = context.m_eEventType;
-
-    // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eEventType);
-
-    // 4. 상태 초기화
     State_Reset();
-
-	// 5. 몬스터 타겟으로 회전
 	CTransform* pBossTransform = static_cast<CTransform*>(pArg);
 
 
@@ -47,7 +39,6 @@ void CRoverEvent::OnEnter(void* pArg)
 		}
 		case ERoverEventType::BURST02:
 		{
-			// 1. BossTransform의 반대 방향으로 이동.
 			_vector vTargetPos = pBossTransform->Get_State(STATE::POSITION);
 			_vector vTargetLook = XMVectorSetY(XMVector3Normalize(pBossTransform->Get_State(STATE::LOOK)), 0.f);
 			
@@ -75,17 +66,9 @@ void CRoverEvent::OnUpdate(_float fTimeDelta)
 {
     
 	CInteractionState::OnUpdate(fTimeDelta);
-
-    // 0. 키입력 제어
     Handle_Input();
-
-    // 1. 애니메이션 제어.
     Update_EventAnimation(fTimeDelta);
-
-    // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
-   
-    // 3. 상태 초기화
     State_Reset();
 }
 
@@ -116,12 +99,7 @@ void CRoverEvent::Update_EventAnimation(_float fTimeDelta)
 void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
-	// Hit는 무조건 전환
-
 	ERoverEventType eEventType = static_cast<ERoverEventType>(m_iCurrentAnimIdx);
-
-	// Stop 된 적이 없다면? => 애니메이션 탈출 시점에 Stop
-
 
 	if (eEventType == ERoverEventType::BEHIT_FLY_FALL)
 	{
@@ -132,14 +110,11 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 				m_IsStopOnce = true;
 				m_pRover->Stop_Anim();
 				m_pRover->Set_LeviatanQTE(true);
-				m_pRover->Spawn_LeviatanAnchorEffect(TEXT("Common_Bondage"));
-				//m_pRover->Stop_Action();
-				//m_pRover->Play_Action(TEXT("Camera_Action"), true, false);
+				m_pRover->Spawn_LeviatanAnchorEffect(EFFECT_TAG_LEVIATAN_ANCHOR);
 				return;
 			}
 		}
 
-		// 1. 탈출 가능 조건이라면?
 		if (m_States[QTE_EXIT])
 		{
 			if (IsEscapePossible)
@@ -148,7 +123,6 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 				m_pRover->Start_Anim();
 				m_pRover->Set_LeviatanQTE(false);
-				//m_pRover->Stop_Action();
 				return;
 			}
 		}
@@ -159,13 +133,12 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 		// 특정 지점에서 Stop Anim
 		if (!m_IsStopOnce)
 		{
-			//if (m_fTrackPosition > 50.f)
 			if (IsEscapePossible)
 			{
 				m_IsStopOnce = true;
-				m_pRover->Stop_Anim(); // Stop Anim 하고.
-				m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f); // 몬스터 TimeRatio 0.f;
-				m_pRover->Bind_Condition_ToPlayer("LeviatanExecuteSuccess");
+				m_pRover->Stop_Anim();
+				m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 0.f);
+				m_pRover->Bind_Condition_ToPlayer(PLAYER_CONDITION::LEVIATANEXECUTE_SUCCESS);
 				return;
 			}
 		}
@@ -174,20 +147,12 @@ void CRoverEvent::Check_StateTransition(_float fTimeDelta)
 		{
 			if (IsEscapePossible)
 			{
-				//m_pRover->Change_TimeRatio_ToLayer(COLLISIONLAYER::ENEMY, 1.f); // 몬스터 TimeRatio 정상화.
 				m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDUP;
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
 				return;
 			}
 		}
 	}
-
-
-	
-
-	
-
-    
 }
 
 

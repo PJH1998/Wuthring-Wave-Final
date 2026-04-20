@@ -6,6 +6,9 @@
 namespace
 {
 	constexpr _float BLEND_INTERP_SPEED = 1.0f;
+	constexpr _float ROOTMOTION_RATE = 1.f;
+	constexpr _float BLEND_PARAM_MIN = -1.f;
+	constexpr _float BLEND_PARAM_MAX = 1.f;
 }
 
 HRESULT CAugustaAirFly::Initialize(CCharacter* pCharacter)
@@ -235,16 +238,16 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 			fBlendStep
 		);
 
-		m_GpuBlendInfo.fBlendParamLR = Clamp(m_GpuBlendInfo.fBlendParamLR, -1.f, 1.f);
-		m_GpuBlendInfo.fBlendParamDU = Clamp(m_GpuBlendInfo.fBlendParamDU, -1.f, 1.f);
+		m_GpuBlendInfo.fBlendParamLR = std::clamp(m_GpuBlendInfo.fBlendParamLR, BLEND_PARAM_MIN, BLEND_PARAM_MAX);
+		m_GpuBlendInfo.fBlendParamDU = std::clamp(m_GpuBlendInfo.fBlendParamDU, BLEND_PARAM_MIN, BLEND_PARAM_MAX);
 		SetUp_FlyBlendClips();
 	}
 #pragma endregion
 
-	m_IsAnimationEnd = CCharacterState::Play_AnimationFly(
+	CCharacterState::Play_AnimationFly(
 		m_pAugusta,
 		fTimeDelta,
-		1.f,
+		ROOTMOTION_RATE,
 		m_GpuBlendInfo
 	);
 

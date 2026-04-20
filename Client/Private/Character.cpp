@@ -345,12 +345,12 @@ void CCharacter::Debug_ImGui()
 
 #endif // _DEBUG
 
-void CCharacter::Bind_Condition_ToPlayer(const _string& strCondition, void* pArg)
+void CCharacter::Bind_Condition_ToPlayer(PLAYER_CONDITION eCondition, void* pArg)
 {
 	if (nullptr == m_pGameSystem)
 		return;
 
-	m_pGameSystem->Bind_Condition_ToPlayer(strCondition, pArg);
+	m_pGameSystem->Bind_Condition_ToPlayer(eCondition, pArg);
 }
 
 #pragma region STATE

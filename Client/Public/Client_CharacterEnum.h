@@ -1,4 +1,5 @@
-﻿#pragma once
+#pragma once
+
 namespace Client
 {
 	enum class CHARACTER_EVENT : unsigned int {
@@ -35,6 +36,19 @@ namespace Client
 	};
 
 	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, LEVIATAN_QTE, LEVIATAN_QTESUCCESS, LEVIATAN_PREV_EXECUTE, LEVIATAN_EXECUTE_SUCCESS, END }; // Character 전환시
+
+	enum class PLAYER_CONDITION : unsigned int {
+		LEVIATAN_GRAB = 0,
+		LEVIATANQTE_START,
+		LEVIATANQTE_SUCCESS,
+		LEVIATANPREV_EXECUTE,
+		LEVIATANEXECUTE_SUCCESS,
+		GRABRELEASE,
+		GRAB_UNBINED,
+		TELEPORT,
+		END
+	};
+
 	enum class CHARACTER_CONDITION : unsigned int {
 		HIT = 1 << 0,
 		DODGE = 1 << 1, // Dodge 상태면 Hit 안되게.

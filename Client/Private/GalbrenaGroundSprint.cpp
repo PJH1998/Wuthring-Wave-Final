@@ -162,7 +162,7 @@ void CGalbrenaGroundSprint::Update_RunAnimation(_float fTimeDelta)
 void CGalbrenaGroundSprint::Check_Physics(_float fTimeDelta)
 {
 	
-    m_States[WALL] = m_pGalbrena->Check_ClimbableWall(&m_vWallNormal); // Wall인지?
+    //m_States[WALL] = m_pGalbrena->Check_ClimbableWall(&m_vWallNormal); // Wall인지?
     // Land Check
 
 	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.

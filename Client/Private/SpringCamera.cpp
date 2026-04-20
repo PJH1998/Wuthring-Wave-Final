@@ -384,7 +384,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 		// Fov Lerp
 		m_fFovy = m_fPreFovy + (XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy) - m_fPreFovy) * fRatio;
 	}
-	// None Lerp (Teleport)
+	// None Lerp (TELEPORT)
 	else
 	{
 		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);

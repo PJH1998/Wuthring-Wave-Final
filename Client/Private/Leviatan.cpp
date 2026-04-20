@@ -758,7 +758,7 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 		XMStoreFloat3(&vInitPosition, vInitPos);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_LeviAnchor"), XMMatrixTranslation(vInitPosition.x, vInitPosition.y, vInitPosition.z), &Anchor);
 	}
-	else if (wstrTypeTag == TEXT("Teleport"))
+	else if (wstrTypeTag == TEXT("TELEPORT"))
 	{
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 		if (wstrAnimTag == TEXT("Front"))
@@ -779,11 +779,11 @@ void CLeviatan::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wstrTypeTag == TEXT("Grab"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanGrab", m_pTransformCom);
+		m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::LEVIATAN_GRAB, m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("QTE"))
 	{
-		m_pGameSystem->Bind_Condition_ToPlayer("LeviatanQTEStart", m_pTransformCom);
+		m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::LEVIATANQTE_START, m_pTransformCom);
 	}
 	else if (wstrTypeTag == TEXT("Reset"))
 	{
@@ -1463,7 +1463,7 @@ void CLeviatan::Ready_Events()
 			// 1. 자신의 위치를 중점에 고정 필요. => 그래야 정확한 카메라 앵글 잡기가 편함.
 
 
-			m_pGameSystem->Bind_Condition_ToPlayer("LeviatanPrevExecute", m_pTransformCom);
+			m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::LEVIATANPREV_EXECUTE, m_pTransformCom);
 			m_isBattle = false;
 			m_strSequenceAnim = "Paralysis_Start";
 			//Event1();
@@ -1478,7 +1478,7 @@ void CLeviatan::Ready_Events()
 			m_pExecuteCom->IsActivate(false);
 			m_isBattle = false;
 
-			//m_pGameSystem->Bind_Condition_ToPlayer("LeviatanExecuteSuccess", m_pTransformCom); // 무력화 이후에 => 연출 추가.
+			//m_pGameSystem->Bind_Condition_ToPlayer("LEVIATANEXECUTE_SUCCESS", m_pTransformCom); // 무력화 이후에 => 연출 추가.
 			if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 			{
 				
@@ -1543,7 +1543,7 @@ void CLeviatan::Reset_Condition(_float fTimeDelta)
 						m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_ONE);
 						m_pGameSystem->Change_Leviathan_Phaze(1);
 						_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
-						m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+						m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::TELEPORT, &vPos);
 						if (m_pGameInstance->Get_CurrentLevel() == ENUM_CLASS(LEVEL::HEAVEN))
 						{
 							m_pGameSystem->HUD_FadeIn();
@@ -1897,7 +1897,7 @@ void CLeviatan::Event1()
 	//레비아탄 채력 데이터 변경 함수
 	m_pGameSystem->Levi_Phase_Change();
 	_float4 vPos = _float4(0.f, 0.f, -32.f, 1.f);
-	m_pGameSystem->Bind_Condition_ToPlayer("Teleport", &vPos);
+	m_pGameSystem->Bind_Condition_ToPlayer(PLAYER_CONDITION::TELEPORT, &vPos);
 	//떠오를 때 노티파이로 이거 실행
 	//위에 Engage_Battle(false, BOSSBGM::HEAVEN_ONE); 지우기
 	//m_pGameSystem->Change_BattleBGM(BOSSBGM::HEAVEN_CHANGE);
