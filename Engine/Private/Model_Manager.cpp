@@ -4,6 +4,8 @@
 #include"Model_Streaming.h"
 #include"StaticObject.h"
 
+#define INVALID_OFFSET UINT_MAX
+
 CModel_Manager::CModel_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:m_pDevice(pDevice), m_pContext(pContext),m_pGameInstance(CGameInstance::GetInstance())
 {
@@ -104,7 +106,7 @@ void CModel_Manager::Update(_float fTimeDelta)
 				_uint VertexSize = Data.LoadData[i].VertexData.size() * sizeof(VTXMESH);
 				_uint VertexOffset = m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
 
-				if (VertexOffset == -1)
+				if (VertexOffset == INVALID_OFFSET)
 					CRASH("Failed");
 
 				D3D11_BOX PoolBox{};
@@ -122,7 +124,7 @@ void CModel_Manager::Update(_float fTimeDelta)
 				_uint IndexSize = Data.LoadData[i].IndexData.size() * sizeof(_uint);
 				_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
-				if (IndexOffSet == -1)
+				if (IndexOffSet == INVALID_OFFSET)
 					CRASH("Failed");
 
 				PoolBox.left = IndexOffSet;
@@ -375,7 +377,7 @@ void CModel_Manager::LoadLastLOD()
 			_uint VertexSize = static_cast<_uint>(Data.LoadData[i].VertexData.size()) * sizeof(VTXMESH);
 			_uint VertexOffset = m_pBufferPool[Data.iLODIndex]->Allocate_Vertex(VertexSize);
 
-			if (VertexOffset == -1)
+			if (VertexOffset == INVALID_OFFSET)
 				CRASH("Failed");
 			
 			D3D11_MAPPED_SUBRESOURCE StagingDesc{};
@@ -393,7 +395,7 @@ void CModel_Manager::LoadLastLOD()
 			_uint IndexSize = static_cast<_uint>(Data.LoadData[i].IndexData.size()) * sizeof(_uint);
 			_uint IndexOffSet = m_pBufferPool[Data.iLODIndex]->Allocate_Index(IndexSize);
 
-			if (IndexOffSet == -1)
+			if (IndexOffSet == INVALID_OFFSET)
 				CRASH("Failed");
 
 			PoolBox.left = IndexOffSet;
