@@ -191,6 +191,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	//m_pModel_Manager->Update(fTimeDelta);
 
 	m_pSFX_Hub->Update_SFX(fTimeDelta);
+	m_pFade->Priority_Update(fTimeDelta);
 	m_pFade->Update(fTimeDelta);
 
 	m_pSound_Manager->Update(fTimeDelta);

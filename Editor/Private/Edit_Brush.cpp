@@ -344,53 +344,51 @@ void CEdit_Brush::Foliage()
     {
 		if (Check_Duplicate() == false)
 		{
-			MSG_BOX("Diffrent Model Selected");
+			MSG_BOX("Different Model Selected");
 			return;
 		}
 
-        vector<_float4> Points;
-        _float4 vMousePos = {};
+		m_TempPoints.clear();
+		m_TransformMatrices.clear();
 
-		if (m_pGameInstance->Get_Points(m_fRange, Points, &vMousePos) == true)
+		if (m_pGameInstance->Get_Points(m_fRange, m_TempPoints, &m_vMousePos) == true)
 		{
-			vector<_float4x4> TransformMatrices = Generate_WorldMatrices(Points);
+			Generate_WorldMatrices(m_TransformMatrices, m_TempPoints);
 
-			if (TransformMatrices.empty() == true)
+			if (m_TransformMatrices.empty() == true)
 			{
 				MSG_BOX("TransformMatrices Create Failed");
 				return;
 			}
 
-			Generate_Instance(TransformMatrices, vMousePos);
+			Generate_Instance(m_TransformMatrices, m_vMousePos);
 		}
     }
 }
 	
 _bool CEdit_Brush::Check_Duplicate()
 {		
-	if (m_SaveInstanceObjects[m_iCurSaveIndex].empty() == false)
-	{	
-		_string szSavedModel = m_SaveInstanceObjects[m_iCurSaveIndex][0]->GetName();
-		szSavedModel.pop_back();
-		_string szCurModel = WStringToString(m_szModelName);
-		szCurModel.pop_back();
-		if (szSavedModel != szCurModel)
-		{
-			MSG_BOX("Diffrent Model");
-			return false;
-		}
-	}	
+	if (m_SaveInstanceObjects[m_iCurSaveIndex].empty())
+		return true;
+	_string szSavedModel = m_SaveInstanceObjects[m_iCurSaveIndex][0]->GetName();
+	szSavedModel.pop_back();
+	_string szCurModel = WStringToString(m_szModelName);
+	szCurModel.pop_back();
+	if (szSavedModel != szCurModel)
+	{
+		MSG_BOX("Diffrent Model");
+		return false;
+	}
 		
 	return true;
 }		
 
-vector<_float4x4> CEdit_Brush::Generate_WorldMatrices(const vector<_float4>& Points)
+void CEdit_Brush::Generate_WorldMatrices(vector<_float4x4>& TransformMatrices, const vector<_float4>& Points)
 {
-	vector<_float4x4> TempVec;
-	if (m_iNumInstance == 0 || Points.size() <= 1)
+	if (m_iNumInstance == 0 || Points.empty() == true)
 	{
 		MSG_BOX("Check Settings");
-		return TempVec;
+		return;
 	}
 
 	size_t iRandSize = Points.size() - 1;
@@ -403,10 +401,10 @@ vector<_float4x4> CEdit_Brush::Generate_WorldMatrices(const vector<_float4>& Poi
 		iRandNum = GetVaildRandomIndex(Points, 0, iRandSize);
 		fRotation = m_pGameInstance->Rand(m_vMinRotation, m_vMaxRotation);
 		InstanceMatrix = Composite_WorldMatrix(Points[iRandNum], fRotation);
-		TempVec.push_back(InstanceMatrix);
+		TransformMatrices.push_back(InstanceMatrix);
 	}
 
-	return TempVec;
+	return;
 }
 
 _bool CEdit_Brush::Generate_Instance(vector<_float4x4>& TransformMatrices, _float4 vMousePos)

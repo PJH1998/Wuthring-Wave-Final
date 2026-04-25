@@ -7,9 +7,9 @@ class CFade final : public CBase
 {
 private:
 	typedef struct tagFadeDesc {
-		FADE eFade = {};
-		_float fDuration = {};
-		function<void()> Func = { nullptr };
+		FADE					eFade = {};
+		_float					fDuration = {};
+		function<void()>	Func = { nullptr };
 	}FADE_DESC;
 
 private:
@@ -20,8 +20,12 @@ public:
 	void							OnFade(FADE eFade, _float fDuration, function<void()> func);
 
 public:
-	HRESULT						Initialize(_uint iWinSizeX, _uint iWinSizeY);
+	void							Initialize(_uint iWinSizeX, _uint iWinSizeY);
+
+	void							Priority_Update(_float fTimeDelta);
 	void							Update(_float fTimeDelta);
+
+public:
 	void							Render();
 
 private:
@@ -29,19 +33,15 @@ private:
 	class CVIBuffer_Rect*		m_pVIBuffer = { nullptr };
 
 	ID3D11Device*				m_pDevice = { nullptr };
-	ID3D11DeviceContext*	m_pContext = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
 
-	_float4x4						m_WorldMatrix = {};
-	_float4x4						m_ViewMatrix{}, m_ProjMatrix{};
+	_float4x4						m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 
 	FADE							m_eFade = { FADE::FADE_OUT };
-
 	_float							m_fTimeAcc = {};
-	_float							m_fDuration = {};
+	_float							m_fDuration = { FLT_MIN };
 	function<void()>			m_Func;
-
 	_bool							m_isFade = { false };
-
 	queue<FADE_DESC>		m_Fades;
 
 private:

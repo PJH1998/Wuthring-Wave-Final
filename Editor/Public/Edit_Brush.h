@@ -29,12 +29,12 @@ private:
 	void Bind_Resources();
 	void Ready_Components();
 	void Foliage();
-	_bool IsSelected(_tchar* szModelname)
+	_bool IsSelected(const _tchar* szModelname) const
 	{
-		return wcslen(szModelname) == 0;
+		return szModelname != nullptr && wcslen(szModelname) != 0;
 	}
 	_bool Check_Duplicate();
-	vector<_float4x4> Generate_WorldMatrices(const vector<_float4>& Points);
+	void Generate_WorldMatrices(vector<_float4x4>& TransformMatrices, const vector<_float4>& Points);
 	_bool Generate_Instance(vector<_float4x4>& TransformMatrices,_float4 vMousePos);
 
 	_uint GetVaildRandomIndex(const vector<_float4>& Points, _uint iMin, _uint iMax);
@@ -44,10 +44,12 @@ private:
 	CShader* m_pShaderCom = { nullptr };
 	CVIBuffer_Point* m_pVIBufferCom = { nullptr };
 	map<_uint, vector<class CEdit_MapObject_Instance*>> m_SaveInstanceObjects;
+	vector<_float4x4> m_TransformMatrices;
+	vector<_float4> m_TempPoints;
+	_float4 m_vMousePos = {};
 
 	_float m_fRange = {};
 	_uint m_iNumInstance = {};
-	_float3 m_vMousePos = {};
 	_float4* m_pPoints = { nullptr };
 	_tchar m_szModelName[MAX_PATH] = {};
 
